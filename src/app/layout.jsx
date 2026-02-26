@@ -1,4 +1,6 @@
 import { Inter } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
 import Script from 'next/script';
 
@@ -23,11 +25,11 @@ export const metadata = {
     description: 'AI voice agents that answer missed calls, capture leads, and send them to you instantly. 14-day free trial for service businesses.',
     images: [
       {
-        url: '/og-image.svg',
+        url: '/og-image.png',
         width: 1200,
         height: 630,
         alt: 'Conduit AI — AI-Powered Lead Recovery for Service Businesses',
-        type: 'image/svg+xml',
+        type: 'image/png',
       },
     ],
   },
@@ -35,7 +37,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Conduit AI — Never Miss Another Lead',
     description: 'AI voice agents that answer missed calls, capture leads, and send them to you instantly. 14-day free trial.',
-    images: ['/og-image.svg'],
+    images: ['/og-image.png'],
   },
   robots: {
     index: true,
@@ -162,7 +164,11 @@ export default function RootLayout({ children }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        {children}
+        <Analytics />
+        <SpeedInsights />
+      </body>
     </html>
   );
 }
