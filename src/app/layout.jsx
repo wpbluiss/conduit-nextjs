@@ -1,19 +1,16 @@
-import { Inter } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
 import Script from 'next/script';
 
-const inter = Inter({ subsets: ['latin'] });
-
 export const metadata = {
   metadataBase: new URL('https://conduitai.io'),
   title: {
-    default: 'Conduit AI — Never Miss Another Lead | 14-Day Free Trial',
+    default: 'Conduit AI — The Only AI Voice Platform Built for Everyone',
     template: '%s | Conduit AI',
   },
-  description: 'Stop losing customers to missed calls. Conduit AI answers, qualifies, and delivers leads 24/7 with AI voice agents for service businesses. HVAC, plumbing, salons, roofing & more.',
-  keywords: ['AI receptionist', 'missed call recovery', 'AI voice agent', 'lead capture', 'service business', 'HVAC leads', 'plumber leads', 'salon booking', 'after hours answering'],
+  description: 'Your AI receptionist answers calls, captures leads, and books appointments — in any language, for any industry, 24/7. Personal plans from $19.99/mo. 14-day free trial.',
+  keywords: ['AI receptionist', 'AI voice agent', 'missed call recovery', 'lead capture', 'AI answering service', 'service business', 'HVAC leads', 'salon booking', 'multi-language AI', 'virtual receptionist'],
   authors: [{ name: 'Conduit AI LLC' }],
   creator: 'Conduit AI LLC',
   openGraph: {
@@ -21,22 +18,22 @@ export const metadata = {
     locale: 'en_US',
     url: 'https://conduitai.io',
     siteName: 'Conduit AI',
-    title: 'Conduit AI — Never Miss Another Lead',
-    description: 'AI voice agents that answer missed calls, capture leads, and send them to you instantly. 14-day free trial for service businesses.',
+    title: 'Conduit AI — The Only AI Voice Platform Built for Everyone',
+    description: 'AI voice agents that answer calls, capture leads, and book appointments in any language, 24/7. Plans from $19.99/mo. 14-day free trial.',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Conduit AI — AI-Powered Lead Recovery for Service Businesses',
+        alt: 'Conduit AI — The Only AI Voice Platform Built for Everyone',
         type: 'image/png',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Conduit AI — Never Miss Another Lead',
-    description: 'AI voice agents that answer missed calls, capture leads, and send them to you instantly. 14-day free trial.',
+    title: 'Conduit AI — The Only AI Voice Platform Built for Everyone',
+    description: 'AI voice agents that answer calls, capture leads, and book appointments in any language, 24/7. Plans from $19.99/mo.',
     images: ['/og-image.png'],
   },
   robots: {
@@ -62,16 +59,22 @@ const jsonLd = {
       '@type': 'SoftwareApplication',
       name: 'Conduit AI',
       applicationCategory: 'BusinessApplication',
-      operatingSystem: 'Web',
-      description: 'AI-powered voice agent that answers missed calls, captures lead information, and delivers real-time notifications to service businesses.',
+      operatingSystem: 'Web, iOS, Android',
+      description: 'The only AI voice platform built for everyone. AI receptionist that answers calls, captures leads, and books appointments in any language, 24/7.',
       url: 'https://conduitai.io',
       offers: [
+        {
+          '@type': 'Offer',
+          name: 'Personal Plan',
+          price: '19.99',
+          priceCurrency: 'USD',
+          description: 'For individuals who never want to miss a call. AI answers missed or all calls with custom greeting and multi-language support.',
+        },
         {
           '@type': 'Offer',
           name: 'Beauty & Wellness Plan',
           price: '199',
           priceCurrency: 'USD',
-          priceValidUntil: '2027-12-31',
           description: 'For salons, barbershops, spas, and med spas. Up to 50 leads/mo included.',
         },
         {
@@ -79,17 +82,9 @@ const jsonLd = {
           name: 'Home Services Plan',
           price: '349',
           priceCurrency: 'USD',
-          priceValidUntil: '2027-12-31',
           description: 'For HVAC, plumbing, electrical, roofing, and contractors. Up to 75 leads/mo included.',
         },
       ],
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: '4.9',
-        ratingCount: '12',
-        bestRating: '5',
-        worstRating: '1',
-      },
     },
     {
       '@type': 'Organization',
@@ -98,16 +93,11 @@ const jsonLd = {
       logo: 'https://conduitai.io/logo.png',
       contactPoint: {
         '@type': 'ContactPoint',
-        telephone: '+1-561-446-4520',
+        telephone: '+1-561-730-3316',
         contactType: 'sales',
         email: 'luis@conduitai.io',
         areaServed: 'US',
-        availableLanguage: ['English', 'Spanish'],
-      },
-      address: {
-        '@type': 'PostalAddress',
-        addressRegion: 'FL',
-        addressCountry: 'US',
+        availableLanguage: ['English', 'Spanish', 'French', 'Portuguese'],
       },
       sameAs: [
         'https://www.linkedin.com/company/conduitai',
@@ -119,34 +109,34 @@ const jsonLd = {
       mainEntity: [
         {
           '@type': 'Question',
-          name: 'How long does Conduit AI setup take?',
+          name: 'How does the AI voice agent work?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Most businesses are live within 24-48 hours. You sign up, we configure your voice agent with your business info and custom scripts, integrate with your phone number, test everything, and go live. No hardware or phone number changes needed.',
+            text: 'When a call comes in that you can\'t answer, Conduit AI picks up with a natural, human-like voice. It greets the caller, asks the right questions, captures their information, and sends you the lead details instantly.',
           },
         },
         {
           '@type': 'Question',
-          name: 'Does Conduit AI replace my receptionist?',
+          name: 'What languages does Conduit AI support?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'No. Conduit works alongside your existing team. We catch everything they can\'t — after-hours, overflow when lines are busy, lunch breaks, weekends, and holidays.',
+            text: 'Our AI supports multiple languages including English, Spanish, French, Portuguese, and more. You choose the language during setup.',
           },
         },
         {
           '@type': 'Question',
-          name: 'What happens after the 14-day trial?',
+          name: 'Is there a contract or commitment?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Your subscription continues at the plan rate. If it\'s not for you, cancel before day 14 — no questions, no contracts, no fees.',
+            text: 'No contracts, no commitments. All plans include a 14-day free trial. Cancel anytime.',
           },
         },
         {
           '@type': 'Question',
-          name: 'Does the AI voice agent actually sound natural?',
+          name: 'How fast is setup?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Callers often don\'t realize they\'re not talking to a person. Call our demo line yourself: (561) 730-3316.',
+            text: 'Most customers are live within 15 minutes. Sign up, configure your AI agent, forward your number, and you\'re capturing leads.',
           },
         },
       ],
@@ -158,13 +148,16 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Sora:wght@100..800&display=swap" rel="stylesheet" />
         <Script
           id="json-ld"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={inter.className}>
+      <body style={{ margin: 0, padding: 0, background: '#0a0a0a' }}>
         {children}
         <Analytics />
         <SpeedInsights />
