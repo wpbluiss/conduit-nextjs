@@ -288,9 +288,9 @@ const PRICING = [
     name: "Personal",
     desc: "For individuals who never want to miss a call again.",
     prices: {
-      weekly:  { display: "$5.99", period: "/wk", effective: "$25.96/mo effective", link: "https://buy.stripe.com/00w14gf4Jes47SWfEge3e08" },
-      monthly: { display: "$19.99", period: "/mo", effective: "", link: "https://buy.stripe.com/eVq5kw8Gl5Vyc9ceAce3e09" },
-      yearly:  { display: "$199", period: "/yr", effective: "$16.58/mo — save $41", link: "https://buy.stripe.com/3cIcMYbSx1Fic9ccs4e3e0a" },
+      weekly:  { display: "$5.99", period: "/wk", effective: "$25.96/mo effective", plan: "personal", interval: "weekly" },
+      monthly: { display: "$19.99", period: "/mo", effective: "", plan: "personal", interval: "monthly" },
+      yearly:  { display: "$199", period: "/yr", effective: "$16.58/mo — save $41", plan: "personal", interval: "yearly" },
     },
     features: [
       "AI answers missed or all calls",
@@ -307,9 +307,9 @@ const PRICING = [
     name: "Beauty & Wellness",
     desc: "For salons, barbershops, spas, and med spas.",
     prices: {
-      weekly:  { display: "$59", period: "/wk", effective: "$255.67/mo effective", link: "https://buy.stripe.com/aFafZa2hX3Nq3CG4ZCe3e0b" },
-      monthly: { display: "$199", period: "/mo", effective: "", link: "https://buy.stripe.com/aFa5kwbSx97Kc9c9fSe3e0c" },
-      yearly:  { display: "$1,990", period: "/yr", effective: "$165.83/mo — save $398", link: "https://buy.stripe.com/fZueV6e0F83Gddgcs4e3e0d" },
+      weekly:  { display: "$59", period: "/wk", effective: "$255.67/mo effective", plan: "beauty", interval: "weekly" },
+      monthly: { display: "$199", period: "/mo", effective: "", plan: "beauty", interval: "monthly" },
+      yearly:  { display: "$1,990", period: "/yr", effective: "$165.83/mo — save $398", plan: "beauty", interval: "yearly" },
     },
     features: [
       "Everything in Personal",
@@ -327,9 +327,9 @@ const PRICING = [
     name: "Home Services",
     desc: "For HVAC, plumbing, roofing, electrical, and contractors.",
     prices: {
-      weekly:  { display: "$99", period: "/wk", effective: "$429/mo effective", link: "https://buy.stripe.com/cNieV62hX83G7SWdw8e3e0e" },
-      monthly: { display: "$349", period: "/mo", effective: "", link: "https://buy.stripe.com/fZu5kw3m10Be6OS8bOe3e0f" },
-      yearly:  { display: "$3,490", period: "/yr", effective: "$290.83/mo — save $698", link: "https://buy.stripe.com/28E8wI09P2Jmgps1Nqe3e0g" },
+      weekly:  { display: "$99", period: "/wk", effective: "$429/mo effective", plan: "home_services", interval: "weekly" },
+      monthly: { display: "$349", period: "/mo", effective: "", plan: "home_services", interval: "monthly" },
+      yearly:  { display: "$3,490", period: "/yr", effective: "$290.83/mo — save $698", plan: "home_services", interval: "yearly" },
     },
     features: [
       "Everything in Beauty & Wellness",
@@ -796,7 +796,25 @@ export default function Home() {
                   </ul>
                   
                   <a
-                    href={priceData ? priceData.link : "mailto:luis@conduitai.io"}
+                    href="#"
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      if (!priceData?.plan) { window.location.href = "mailto:luis@conduitai.io"; return; }
+                      const btn = e.target; btn.textContent = "Loading..."; btn.style.opacity = 0.7;
+                      try {
+                        const res = await fetch("https://conduit-backend-production.up.railway.app/api/v1/stripe/create-checkout", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ plan: priceData.plan, interval: priceData.interval }),
+                        });
+                        const data = await res.json();
+                        if (data.url) window.location.href = data.url;
+                        else { btn.textContent = "Error"; setTimeout(() => { btn.textContent = plan.cta; btn.style.opacity = 1; }, 2000); }
+                      } catch (err) {
+                        console.error(err);
+                        btn.textContent = plan.cta; btn.style.opacity = 1;
+                      }
+                    }}
                     style={plan.popular ? styles.btnPrimary : styles.btnSecondary}
                   >
                     {plan.cta}
