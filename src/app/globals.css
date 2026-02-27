@@ -32,30 +32,12 @@ a:hover {
   50% { box-shadow: 0 0 0 12px rgba(0,212,255,0); }
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #0a0a0a; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
-/* Selection */
 ::selection {
   background: #00d4ff;
   color: #0a0a0a;
-}
-
-/* Mobile nav */
-@media (max-width: 768px) {
-  nav > div > div:nth-child(2) {
-    display: none !important;
-  }
-  nav button {
-    display: block !important;
-  }
-}
-
-@media (min-width: 769px) {
-  nav button {
-    display: none !important;
-  }
 }
