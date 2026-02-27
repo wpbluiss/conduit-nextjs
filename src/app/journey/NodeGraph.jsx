@@ -11,45 +11,68 @@ const CATEGORIES = {
 
 const NODES = [
   // Foundation
-  { id: "founding", label: "Conduit AI Founded", date: "Dec 2025", cat: "milestone", detail: "Luis Garcia, 21, starts building an AI-powered lead recovery platform while working full-time at a fire alarm company. No funding, no co-founder, just execution.", x: 0.12, y: 0.15 },
-  { id: "stack", label: "Tech Stack Built", date: "Dec 2025", cat: "product", detail: "FastAPI backend, React frontend, Supabase for auth & data, Vapi.ai for voice AI, Twilio for telephony, Stripe for payments. Entire platform built solo.", x: 0.28, y: 0.1 },
-  { id: "first_agent", label: "First AI Agent Live", date: "Jan 2026", cat: "product", detail: "Demo agent configured and live at (561) 730-3316. Natural voice conversations that capture caller details, qualify leads, and send instant notifications.", x: 0.42, y: 0.18 },
+  { id: "founding", label: "Conduit AI Founded", date: "Dec 2025", cat: "milestone", detail: "Luis Garcia, 21, starts building an AI-powered lead recovery platform while working full-time at a fire alarm company. No funding, no co-founder, just execution.", x: 0.12, y: 0.08 },
+  { id: "stack", label: "Tech Stack Built", date: "Dec 2025", cat: "product", detail: "FastAPI backend, React frontend, Supabase for auth & data, Vapi.ai for voice AI, Twilio for telephony, Stripe for payments. Entire platform built solo.", x: 0.28, y: 0.06 },
+  { id: "first_agent", label: "First AI Agent Live", date: "Jan 2026", cat: "product", detail: "Demo agent configured and live at (561) 730-3316. Natural voice conversations that capture caller details, qualify leads, and send instant notifications.", x: 0.42, y: 0.1 },
   
   // Early Growth
-  { id: "first_client", label: "First Client: The G Room", date: "Jan 2026", cat: "revenue", detail: "Christian from The G Room barbershop becomes first client. Also sets up 20% referral commission structure. Proof of concept validated.", x: 0.15, y: 0.35 },
-  { id: "multi_vertical", label: "Multi-Vertical Strategy", date: "Jan 2026", cat: "marketing", detail: "Expanded from contractor-focused to beauty/wellness, medical/dental, and roofing markets. Built specialized AI assistants for each vertical.", x: 0.32, y: 0.32 },
-  { id: "cold_outreach", label: "Cold Outreach System", date: "Jan 2026", cat: "marketing", detail: "Apollo.io + Instantly.ai campaigns tracking hundreds of prospects. Breakthrough conversations by repositioning as 'lead recovery' instead of 'AI technology'.", x: 0.48, y: 0.28 },
-  { id: "website_v1", label: "Website V1 Launch", date: "Jan 2026", cat: "launch", detail: "First website live on tiiny.host. Basic landing page with pricing and demo. Established conduitai.io domain.", x: 0.58, y: 0.12 },
+  { id: "first_client", label: "First Client: The G Room", date: "Jan 2026", cat: "revenue", detail: "Christian from The G Room barbershop becomes first client. Also sets up 20% referral commission structure. Proof of concept validated.", x: 0.15, y: 0.22 },
+  { id: "multi_vertical", label: "Multi-Vertical Strategy", date: "Jan 2026", cat: "marketing", detail: "Expanded from contractor-focused to beauty/wellness, medical/dental, and roofing markets. Built specialized AI assistants for each vertical.", x: 0.32, y: 0.2 },
+  { id: "cold_outreach", label: "Cold Outreach System", date: "Jan 2026", cat: "marketing", detail: "Apollo.io + Instantly.ai campaigns tracking hundreds of prospects. Breakthrough conversations by repositioning as 'lead recovery' instead of 'AI technology'.", x: 0.48, y: 0.18 },
+  { id: "website_v1", label: "Website V1 Launch", date: "Jan 2026", cat: "launch", detail: "First website live on tiiny.host. Basic landing page with pricing and demo. Established conduitai.io domain.", x: 0.58, y: 0.07 },
 
   // February Buildout
-  { id: "vercel_migration", label: "Vercel Migration", date: "Feb 2026", cat: "infrastructure", detail: "Migrated from tiiny.host to Vercel + Next.js for better performance, SEO, and deployment pipeline. One-command pushes via GitHub.", x: 0.65, y: 0.28 },
-  { id: "seo_content", label: "SEO Blog Engine", date: "Feb 2026", cat: "marketing", detail: "5 SEO-optimized blog posts published. Topics: missed call costs, HVAC revenue loss, salon booking automation, AI vs answering services, phone statistics.", x: 0.52, y: 0.42 },
-  { id: "affiliate", label: "Affiliate Program", date: "Feb 2026", cat: "revenue", detail: "20% recurring commission affiliate program launched. Partners earn on every referral, every month, forever.", x: 0.35, y: 0.48 },
-  { id: "directory_blitz", label: "Directory Submissions", date: "Feb 2026", cat: "marketing", detail: "Submitted to BetaList, SaaSHub, G2, PeerPush, Product Hunt, and 10+ directories. Building backlinks and discovery channels.", x: 0.68, y: 0.42 },
-  { id: "google_ads", label: "Google Ads Campaign", date: "Feb 2026", cat: "marketing", detail: "$500 Google Ads credit activated. Targeting 'AI receptionist', 'missed call recovery', 'answering service alternative' keywords.", x: 0.78, y: 0.18 },
-  { id: "business_infra", label: "Business Infrastructure", date: "Feb 2026", cat: "infrastructure", detail: "Wells Fargo business account, Google Search Console verified, email forwarding for luis@conduitai.io, Stripe payments configured.", x: 0.22, y: 0.52 },
+  { id: "vercel_migration", label: "Vercel Migration", date: "Feb 2026", cat: "infrastructure", detail: "Migrated from tiiny.host to Vercel + Next.js for better performance, SEO, and deployment pipeline. One-command pushes via GitHub.", x: 0.65, y: 0.18 },
+  { id: "seo_content", label: "SEO Blog Engine", date: "Feb 2026", cat: "marketing", detail: "5 SEO-optimized blog posts published. Topics: missed call costs, HVAC revenue loss, salon booking automation, AI vs answering services, phone statistics.", x: 0.52, y: 0.3 },
+  { id: "affiliate", label: "Affiliate Program", date: "Feb 2026", cat: "revenue", detail: "20% recurring commission affiliate program launched. Partners earn on every referral, every month, forever.", x: 0.35, y: 0.33 },
+  { id: "directory_blitz", label: "Directory Submissions", date: "Feb 2026", cat: "marketing", detail: "Submitted to BetaList, SaaSHub, G2, PeerPush, Product Hunt, and 10+ directories. Building backlinks and discovery channels.", x: 0.68, y: 0.3 },
+  { id: "google_ads", label: "Google Ads Campaign", date: "Feb 2026", cat: "marketing", detail: "$500 Google Ads credit activated. Targeting 'AI receptionist', 'missed call recovery', 'answering service alternative' keywords.", x: 0.78, y: 0.1 },
+  { id: "business_infra", label: "Business Infrastructure", date: "Feb 2026", cat: "infrastructure", detail: "Wells Fargo business account, Google Search Console verified, email forwarding for luis@conduitai.io, Stripe payments configured.", x: 0.22, y: 0.35 },
 
   // Launch Week
-  { id: "product_hunt", label: "Product Hunt Launch", date: "Feb 24", cat: "launch", detail: "Conduit AI launched on Product Hunt. First major public debut of the platform to the startup community.", x: 0.82, y: 0.35 },
-  { id: "first_signup", label: "First Signup!", date: "Feb 25", cat: "milestone", detail: "First organic signup received the day after Product Hunt launch. The funnel works — traffic → landing page → trial signup.", x: 0.88, y: 0.48 },
-  { id: "heygen", label: "HeyGen Avatar Setup", date: "Feb 2026", cat: "marketing", detail: "AI avatar created for talking-head video content. Combined with CapCut editing for TikTok/Instagram distribution.", x: 0.75, y: 0.52 },
-  { id: "mark_thomas", label: "Mark Thomas DM", date: "Feb 2026", cat: "milestone", detail: "Mark Thomas, influencer with 4.5M followers, DM'd about Conduit AI. Warm lead for potential partnership/promotion.", x: 0.6, y: 0.55 },
-  { id: "vinny", label: "Vinny Amendola Lead", date: "Feb 2026", cat: "revenue", detail: "Senior exec at Orangetheory Fitness (500+ employees, fleet of studios) reached out about lead generation services. Enterprise opportunity.", x: 0.45, y: 0.6 },
+  { id: "product_hunt", label: "Product Hunt Launch", date: "Feb 24", cat: "launch", detail: "Conduit AI launched on Product Hunt. First major public debut of the platform to the startup community.", x: 0.82, y: 0.22 },
+  { id: "first_signup", label: "First Signup!", date: "Feb 25", cat: "milestone", detail: "First organic signup received the day after Product Hunt launch. The funnel works — traffic → landing page → trial signup.", x: 0.88, y: 0.33 },
+  { id: "heygen", label: "HeyGen Avatar Setup", date: "Feb 2026", cat: "marketing", detail: "AI avatar created for talking-head video content. Combined with CapCut editing for TikTok/Instagram distribution.", x: 0.75, y: 0.38 },
+  { id: "mark_thomas", label: "Mark Thomas DM", date: "Feb 2026", cat: "milestone", detail: "Mark Thomas, influencer with 4.5M followers, DM'd about Conduit AI. Warm lead for potential partnership/promotion.", x: 0.6, y: 0.4 },
+  { id: "vinny", label: "Vinny Amendola Lead", date: "Feb 2026", cat: "revenue", detail: "Senior exec at Orangetheory Fitness (500+ employees, fleet of studios) reached out about lead generation services. Enterprise opportunity.", x: 0.45, y: 0.42 },
 
-  // Tonight's Rebuild
-  { id: "website_v2", label: "Website V2 Rebuild", date: "Feb 26", cat: "launch", detail: "Complete website rebuild: animated particle hero, 4-tier pricing, 29 industries, comparison table, ROI calculator, FAQ. Premium dark theme.", x: 0.88, y: 0.62 },
-  { id: "portal_fix", label: "Portal Overhaul", date: "Feb 26", cat: "product", detail: "Fixed broken emoji rendering, added all 29 industries, updated to no-setup-fee pricing model, 3 plans including Personal at $19.99/mo.", x: 0.72, y: 0.65 },
-  { id: "personal_plan", label: "Personal Plan: $19.99/mo", date: "Feb 26", cat: "product", detail: "New tier for individuals who want an AI assistant for their personal phone. Expands TAM from service businesses to literally anyone with a phone.", x: 0.55, y: 0.72 },
-  { id: "multilang", label: "Multi-Language Support", date: "Feb 26", cat: "product", detail: "English, Spanish, French, Portuguese and more. Users choose their language. Full customization — a viral selling point nobody else offers at this price.", x: 0.38, y: 0.7 },
+  // Feb 26 Rebuild
+  { id: "website_v2", label: "Website V2 Rebuild", date: "Feb 26", cat: "launch", detail: "Complete website rebuild: animated particle hero, 4-tier pricing with weekly/monthly/yearly toggle, 29 industries, comparison table, ROI calculator, FAQ. Premium dark theme.", x: 0.88, y: 0.46 },
+  { id: "portal_fix", label: "Portal Overhaul", date: "Feb 26", cat: "product", detail: "Fixed broken emoji rendering, added all 29 industries, updated to no-setup-fee pricing model, 3 plans including Personal at $19.99/mo.", x: 0.72, y: 0.48 },
+  { id: "personal_plan", label: "Personal Plan: $19.99/mo", date: "Feb 26", cat: "product", detail: "New tier for individuals who want an AI assistant for their personal phone. Expands TAM from service businesses to literally anyone with a phone.", x: 0.55, y: 0.52 },
+  { id: "multilang", label: "Multi-Language Support", date: "Feb 26", cat: "product", detail: "English, Spanish, French, Portuguese and more. Users choose their language. Full customization — a viral selling point nobody else offers at this price.", x: 0.38, y: 0.5 },
+  { id: "content_strategy", label: "Cinematic Content Strategy", date: "Feb 26", cat: "marketing", detail: "12 Netflix-quality video scripts written. Seedance 2.0, Kling AI, HeyGen, ElevenLabs pipeline. Shot-by-shot execution sheets for 'The Midnight Call' flagship commercial.", x: 0.25, y: 0.48 },
+
+  // Feb 26-27 Feature Build (NEW)
+  { id: "features_8", label: "8 Features Shipped", date: "Feb 26-27", cat: "milestone", detail: "Biggest single-day feature ship in company history. Built, deployed, and verified 8 production features in one session: sentiment analysis, lead scoring, call recording, live transfer, auto follow-up SMS, review requests, FAQ training, and team/multi-location.", x: 0.12, y: 0.62 },
+  { id: "sentiment", label: "Sentiment Analysis", date: "Feb 27", cat: "product", detail: "Real-time transcript analysis. Scores 0.0-1.0, mood detection (neutral/positive/urgent/frustrated), auto-flagging negative calls. First test: 1.0 score, urgent mood.", x: 0.28, y: 0.58 },
+  { id: "lead_scoring", label: "Lead Scoring: A/B/C/D", date: "Feb 27", cat: "product", detail: "Automatic 0-100 scoring with letter grades and labels (Hot Lead, Warm Lead, Cold Lead). First live call scored 100/A/Hot Lead. The feature that justifies $350/mo.", x: 0.42, y: 0.62 },
+  { id: "call_recording", label: "Call Recording Storage", date: "Feb 27", cat: "product", detail: "Vapi recording URLs auto-saved. Every call has a playable recording for the portal dashboard. Proof of value that reduces churn.", x: 0.3, y: 0.7 },
+  { id: "auto_followup", label: "Auto Follow-Up SMS", date: "Feb 27", cat: "product", detail: "Twilio-powered automatic SMS after calls. Configurable delay and templates. Turns every missed call into a text conversation.", x: 0.15, y: 0.75 },
+  { id: "review_requests", label: "Auto Review Requests", date: "Feb 27", cat: "product", detail: "Post-call SMS asking satisfied callers for Google reviews. Configurable delay (default 2hrs), custom templates. Reputation on autopilot.", x: 0.45, y: 0.73 },
+  { id: "live_transfer", label: "Live Call Transfer", date: "Feb 27", cat: "product", detail: "High-value or emergency calls warm-transferred to owner's cell with full context. Configurable triggers: emergency, high_value, request_human.", x: 0.58, y: 0.65 },
+  { id: "team_multi", label: "Team & Multi-Location", date: "Feb 27", cat: "product", detail: "Role-based access (admin/manager/viewer), invite system, multi-location support with per-location Vapi assistants. Enterprise-ready.", x: 0.7, y: 0.6 },
+  { id: "faq_training", label: "FAQ Training", date: "Feb 27", cat: "product", detail: "Clients upload custom FAQ (JSON) to train their AI with business-specific knowledge. Hours, pricing, policies — answered without human intervention.", x: 0.55, y: 0.76 },
+  
+  // Feb 27 Infrastructure
+  { id: "db_migration", label: "Database Migration", date: "Feb 27", cat: "infrastructure", detail: "16 new columns, 2 new tables (team_members, locations), 4 performance indexes. All executed on production Supabase without downtime.", x: 0.82, y: 0.58 },
+  { id: "deployment_fixes", label: "3 Critical Bug Fixes", date: "Feb 27", cat: "infrastructure", detail: "Supabase SDK import crash → rewrote 600+ lines. booksy_button KeyError → missing template param. client_id NULL lookup → removed filter. All fixed same night.", x: 0.88, y: 0.7 },
+  { id: "api_18", label: "18 API Endpoints Live", date: "Feb 27", cat: "infrastructure", detail: "Sentiment, lead scoring, recording, transfer config, follow-up config, review config, FAQ CRUD, team management, location management — all production-ready on Railway.", x: 0.75, y: 0.72 },
+  
+  // Feb 27 Stripe Fix
+  { id: "stripe_trial_fix", label: "Stripe 14-Day Trial Fix", date: "Feb 27", cat: "product", detail: "Discovered Payment Links bypassed trial. Rebuilt checkout to route through backend with trial_period_days=14. All 9 plan/interval combos verified. $0 due today.", x: 0.38, y: 0.82 },
+  { id: "self_serve", label: "Self-Serve Signup Live", date: "Feb 27", cat: "milestone", detail: "Full customer flow working: conduitai.io → Start Free Trial → onboarding (name, business, industry, phone) → Stripe checkout with 14-day trial → dashboard. No manual intervention needed.", x: 0.55, y: 0.88 },
+  { id: "login_nav", label: "Login Added to Nav", date: "Feb 27", cat: "product", detail: "Log In link added to desktop and mobile navigation. Returning customers can now access their dashboard from the main site.", x: 0.22, y: 0.85 },
 
   // Future
-  { id: "app", label: "Mobile App", date: "Mar 2026", cat: "launch", detail: "React Native app for iOS & Android. Push notifications replace SMS. Self-serve agent configuration. This weekend's build.", x: 0.2, y: 0.75 },
-  { id: "zapier", label: "Zapier + 5,000 Integrations", date: "Mar 2026", cat: "product", detail: "ServiceTitan, Housecall Pro, Jobber, Booksy, Google Calendar, HubSpot, Salesforce — leads flow directly into existing tools.", x: 0.4, y: 0.85 },
-  { id: "target_10k", label: "$10K Revenue Target", date: "Mar 31", cat: "milestone", detail: "Goal: $10K total revenue by March 31. Path: 2-3 founding members ($999), 3-5 monthly plans, 1 enterprise deal.", x: 0.65, y: 0.82 },
-  { id: "first_100", label: "First 100 Clients", date: "2026", cat: "milestone", detail: "Milestone #1 on the roadmap. At average $250/mo MRR per client = $25K MRR. This is when Conduit AI becomes a real business.", x: 0.82, y: 0.78 },
+  { id: "app", label: "Mobile App", date: "Mar 2026", cat: "launch", detail: "React Native app for iOS & Android. Push notifications replace SMS. Self-serve agent configuration.", x: 0.72, y: 0.85 },
+  { id: "zapier", label: "Zapier + 5,000 Integrations", date: "Mar 2026", cat: "product", detail: "ServiceTitan, Housecall Pro, Jobber, Booksy, Google Calendar, HubSpot, Salesforce — leads flow directly into existing tools.", x: 0.85, y: 0.82 },
+  { id: "target_10k", label: "$10K Revenue Target", date: "Mar 31", cat: "milestone", detail: "Goal: $10K total revenue by March 31. Path: 2-3 founding members ($999), 3-5 monthly plans, 1 enterprise deal.", x: 0.88, y: 0.92 },
+  { id: "first_100", label: "First 100 Clients", date: "2026", cat: "milestone", detail: "Milestone #1 on the roadmap. At average $250/mo MRR per client = $25K MRR. This is when Conduit AI becomes a real business.", x: 0.72, y: 0.95 },
 ];
 
 const EDGES = [
+  // Foundation
   ["founding", "stack"], ["stack", "first_agent"], ["first_agent", "website_v1"],
   ["founding", "first_client"], ["first_client", "multi_vertical"], ["multi_vertical", "cold_outreach"],
   ["cold_outreach", "seo_content"], ["website_v1", "vercel_migration"],
@@ -59,13 +82,37 @@ const EDGES = [
   ["directory_blitz", "product_hunt"], ["product_hunt", "first_signup"],
   ["multi_vertical", "heygen"], ["product_hunt", "mark_thomas"],
   ["cold_outreach", "vinny"],
+  
+  // Feb 26 rebuild
   ["first_signup", "website_v2"], ["website_v2", "portal_fix"],
   ["portal_fix", "personal_plan"], ["personal_plan", "multilang"],
-  ["website_v2", "app"], ["multilang", "zapier"],
+  ["heygen", "content_strategy"], ["content_strategy", "multilang"],
+  ["heygen", "portal_fix"],
+  
+  // Feb 26-27 features
+  ["website_v2", "features_8"],
+  ["features_8", "sentiment"], ["features_8", "lead_scoring"],
+  ["sentiment", "call_recording"], ["lead_scoring", "call_recording"],
+  ["call_recording", "auto_followup"], ["call_recording", "review_requests"],
+  ["lead_scoring", "live_transfer"], ["live_transfer", "team_multi"],
+  ["review_requests", "faq_training"],
+  
+  // Infrastructure
+  ["features_8", "db_migration"], ["db_migration", "deployment_fixes"],
+  ["deployment_fixes", "api_18"], ["api_18", "team_multi"],
+  
+  // Stripe & self-serve
+  ["portal_fix", "stripe_trial_fix"], ["stripe_trial_fix", "self_serve"],
+  ["self_serve", "login_nav"],
+  ["multilang", "stripe_trial_fix"],
+  
+  // Future connections
+  ["self_serve", "app"], ["team_multi", "zapier"],
+  ["app", "zapier"],
   ["zapier", "target_10k"], ["vinny", "target_10k"],
   ["target_10k", "first_100"], ["app", "first_100"],
-  ["heygen", "portal_fix"],
   ["mark_thomas", "target_10k"],
+  ["api_18", "app"],
 ];
 
 function getNodePos(node, w, h) {
@@ -83,7 +130,7 @@ export default function NodeGraph() {
   useEffect(() => {
     const resize = () => {
       const w = Math.min(window.innerWidth - 40, 1400);
-      const h = Math.max(window.innerHeight - 200, 600);
+      const h = Math.max(window.innerHeight - 200, 700);
       setDims({ w, h });
     };
     resize();
@@ -251,9 +298,10 @@ export default function NodeGraph() {
       }}>
         {[
           { label: "Total Milestones", value: NODES.length },
-          { label: "Days Since Founding", value: Math.floor((new Date("2026-02-26") - new Date("2025-12-01")) / 86400000) },
-          { label: "Lines of Code Written", value: "15,000+" },
-          { label: "Platforms Submitted", value: "12+" },
+          { label: "Days Since Founding", value: Math.floor((new Date() - new Date("2025-12-01")) / 86400000) },
+          { label: "Features Shipped", value: "8 today" },
+          { label: "API Endpoints", value: "34 live" },
+          { label: "Lines of Code", value: "20,000+" },
         ].map((stat, i) => (
           <div key={i}>
             <div style={{ fontFamily: "'Sora', sans-serif", fontSize: 24, fontWeight: 700, background: "linear-gradient(135deg, #00d4ff, #fff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{stat.value}</div>
