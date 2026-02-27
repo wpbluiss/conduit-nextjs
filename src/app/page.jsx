@@ -281,11 +281,17 @@ const COMPARISON = [
   { feature: "No Setup Fee", conduit: "✓", rosie: "✓", goodcall: "✓", smithai: "✗" },
 ];
 
+const BILLING_INTERVALS = ["weekly", "monthly", "yearly"];
+
 const PRICING = [
   {
     name: "Personal",
-    price: 19.99,
     desc: "For individuals who never want to miss a call again.",
+    prices: {
+      weekly:  { display: "$5.99", period: "/wk", effective: "$25.96/mo effective", link: "https://buy.stripe.com/00w14gf4Jes47SWfEge3e08" },
+      monthly: { display: "$19.99", period: "/mo", effective: "", link: "https://buy.stripe.com/eVq5kw8Gl5Vyc9ceAce3e09" },
+      yearly:  { display: "$199", period: "/yr", effective: "$16.58/mo — save $41", link: "https://buy.stripe.com/3cIcMYbSx1Fic9ccs4e3e0a" },
+    },
     features: [
       "AI answers missed or all calls",
       "Custom greeting & personality",
@@ -299,8 +305,12 @@ const PRICING = [
   },
   {
     name: "Beauty & Wellness",
-    price: 199,
     desc: "For salons, barbershops, spas, and med spas.",
+    prices: {
+      weekly:  { display: "$59", period: "/wk", effective: "$255.67/mo effective", link: "https://buy.stripe.com/aFafZa2hX3Nq3CG4ZCe3e0b" },
+      monthly: { display: "$199", period: "/mo", effective: "", link: "https://buy.stripe.com/aFa5kwbSx97Kc9c9fSe3e0c" },
+      yearly:  { display: "$1,990", period: "/yr", effective: "$165.83/mo — save $398", link: "https://buy.stripe.com/fZueV6e0F83Gddgcs4e3e0d" },
+    },
     features: [
       "Everything in Personal",
       "Up to 50 leads/mo included",
@@ -315,8 +325,12 @@ const PRICING = [
   },
   {
     name: "Home Services",
-    price: 349,
     desc: "For HVAC, plumbing, roofing, electrical, and contractors.",
+    prices: {
+      weekly:  { display: "$99", period: "/wk", effective: "$429/mo effective", link: "https://buy.stripe.com/cNieV62hX83G7SWdw8e3e0e" },
+      monthly: { display: "$349", period: "/mo", effective: "", link: "https://buy.stripe.com/fZu5kw3m10Be6OS8bOe3e0f" },
+      yearly:  { display: "$3,490", period: "/yr", effective: "$290.83/mo — save $698", link: "https://buy.stripe.com/28E8wI09P2Jmgps1Nqe3e0g" },
+    },
     features: [
       "Everything in Beauty & Wellness",
       "Up to 75 leads/mo included",
@@ -331,8 +345,8 @@ const PRICING = [
   },
   {
     name: "Enterprise",
-    price: null,
     desc: "For multi-location businesses and franchises.",
+    prices: null,
     features: [
       "Everything in Home Services",
       "Unlimited leads",
@@ -471,6 +485,7 @@ function FAQItem({ q, a }) {
 // ─── MAIN PAGE ───
 export default function Home() {
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [billingInterval, setBillingInterval] = useState("monthly");
 
   return (
     <div style={styles.page}>
@@ -710,52 +725,85 @@ export default function Home() {
         <div style={styles.section}>
           <div style={styles.sectionLabel}>PRICING</div>
           <h2 style={styles.sectionH2}>Simple, transparent pricing. No setup fees.</h2>
-          <p style={{ ...styles.heroSub, maxWidth: 500, margin: "0 auto 48px" }}>
+          <p style={{ ...styles.heroSub, maxWidth: 500, margin: "0 auto 0" }}>
             Every plan includes a 14-day free trial. Cancel anytime.
           </p>
-          <div style={styles.pricingGrid}>
-            {PRICING.map((plan, i) => (
-              <div
-                key={i}
+
+          {/* Billing Toggle */}
+          <div style={styles.toggleWrap}>
+            {BILLING_INTERVALS.map((interval) => (
+              <button
+                key={interval}
+                onClick={() => setBillingInterval(interval)}
                 style={{
-                  ...styles.pricingCard,
-                  ...(plan.popular ? styles.pricingPopular : {}),
+                  ...styles.toggleBtn,
+                  ...(billingInterval === interval ? styles.toggleBtnActive : {}),
                 }}
               >
-                {plan.popular && <div style={styles.popularBadge}>Most Popular</div>}
-                <h3 style={styles.pricingName}>{plan.name}</h3>
-                <p style={styles.pricingDesc}>{plan.desc}</p>
-                <div style={styles.pricingPrice}>
-                  {plan.price !== null ? (
-                    <>
-                      <span style={styles.pricingDollar}>$</span>
-                      <span style={styles.pricingAmount}>{plan.price}</span>
-                      <span style={styles.pricingPeriod}>/mo</span>
-                    </>
-                  ) : (
-                    <span style={styles.pricingAmount}>Custom</span>
-                  )}
-                </div>
-                {plan.price !== null && (
-                  <div style={{ fontSize: 13, color: "#00d4ff", marginBottom: 24 }}>
-                    First 14 days free — $0 today
-                  </div>
+                {interval.charAt(0).toUpperCase() + interval.slice(1)}
+                {interval === "yearly" && (
+                  <span style={styles.saveBadge}>Save 17%</span>
                 )}
-                <ul style={styles.pricingFeatures}>
-                  {plan.features.map((f, j) => (
-                    <li key={j} style={styles.pricingFeature}>
-                      <span style={{ color: "#00d4ff" }}>✓</span> {f}
-                    </li>
-                  ))}
-                </ul>
-                <a
-                  href={plan.price !== null ? "https://app.conduitai.io" : "mailto:luis@conduitai.io"}
-                  style={plan.popular ? styles.btnPrimary : styles.btnSecondary}
-                >
-                  {plan.cta}
-                </a>
-              </div>
+              </button>
             ))}
+          </div>
+
+          <div style={styles.pricingGrid}>
+            {PRICING.map((plan, i) => {
+              const priceData = plan.prices ? plan.prices[billingInterval] : null;
+              return (
+                <div
+                  key={i}
+                  style={{
+                    ...styles.pricingCard,
+                    ...(plan.popular ? styles.pricingPopular : {}),
+                  }}
+                >
+                  {plan.popular && <div style={styles.popularBadge}>Most Popular</div>}
+                  <h3 style={styles.pricingName}>{plan.name}</h3>
+                  <p style={styles.pricingDesc}>{plan.desc}</p>
+                  <div style={styles.pricingPrice}>
+                    {priceData ? (
+                      <>
+                        <span style={styles.pricingAmount}>{priceData.display}</span>
+                        <span style={styles.pricingPeriod}>{priceData.period}</span>
+                      </>
+                    ) : (
+                      <span style={styles.pricingAmount}>Custom</span>
+                    )}
+                  </div>
+                  {priceData && priceData.effective && (
+                    <div style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", marginBottom: 4 }}>
+                      {priceData.effective}
+                    </div>
+                  )}
+                  {priceData && (
+                    <div style={{ fontSize: 13, color: "#00d4ff", marginBottom: 24 }}>
+                      First 14 days free — $0 today
+                    </div>
+                  )}
+                  {!priceData && (
+                    <div style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", marginBottom: 24 }}>
+                      Let’s build your plan
+                    </div>
+                  )}
+                  <ul style={styles.pricingFeatures}>
+                    {plan.features.map((f, j) => (
+                      <li key={j} style={styles.pricingFeature}>
+                        <span style={{ color: "#00d4ff" }}>✓</span> {f}
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  <a
+                    href={priceData ? priceData.link : "mailto:luis@conduitai.io"}
+                    style={plan.popular ? styles.btnPrimary : styles.btnSecondary}
+                  >
+                    {plan.cta}
+                  </a>
+                </div>
+              );
+            })}
           </div>
         </div>
       </Section>
@@ -1434,6 +1482,48 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: 8,
+  },
+  toggleWrap: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 0,
+    margin: "32px auto 48px",
+    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: 100,
+    padding: 4,
+    width: "fit-content",
+  },
+  toggleBtn: {
+    padding: "10px 24px",
+    border: "none",
+    background: "transparent",
+    color: "rgba(255,255,255,0.45)",
+    fontFamily: "'DM Sans', sans-serif",
+    fontSize: 14,
+    fontWeight: 500,
+    cursor: "pointer",
+    borderRadius: 100,
+    transition: "all 0.3s ease",
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+  },
+  toggleBtnActive: {
+    background: "linear-gradient(135deg, #00d4ff, #0066ff)",
+    color: "#fff",
+    fontWeight: 600,
+    boxShadow: "0 2px 12px rgba(0,212,255,0.3)",
+  },
+  saveBadge: {
+    background: "rgba(0,255,136,0.15)",
+    border: "1px solid rgba(0,255,136,0.3)",
+    color: "#00ff88",
+    fontSize: 11,
+    fontWeight: 700,
+    padding: "2px 8px",
+    borderRadius: 100,
   },
 
   // FAQ
