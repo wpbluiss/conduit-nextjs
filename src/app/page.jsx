@@ -502,7 +502,7 @@ export default function Home() {
             <a href="#features" style={styles.navLink}>Features</a>
             <a href="#pricing" style={styles.navLink}>Pricing</a>
             <a href="#demo" style={styles.navLink}>Demo</a>
-            <a href="https://app.conduitai.io" style={styles.navCta}>Start Free Trial</a>
+            <a href="https://app.conduitai.io/login" style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, textDecoration: "none", marginRight: 16, fontWeight: 500 }}>Log In</a><a href="https://app.conduitai.io" style={styles.navCta}>Start Free Trial</a>
           </div>
           <button
             style={styles.mobileToggle}
@@ -517,7 +517,7 @@ export default function Home() {
             <a href="#features" style={styles.mobileLink} onClick={() => setMobileMenu(false)}>Features</a>
             <a href="#pricing" style={styles.mobileLink} onClick={() => setMobileMenu(false)}>Pricing</a>
             <a href="#demo" style={styles.mobileLink} onClick={() => setMobileMenu(false)}>Demo</a>
-            <a href="https://app.conduitai.io" style={styles.mobileCta}>Start Free Trial →</a>
+            <a href="https://app.conduitai.io/login" style={{ display: "block", padding: "10px 0", color: "rgba(255,255,255,0.7)", fontSize: 15, textDecoration: "none", fontWeight: 500 }}>Log In</a><a href="https://app.conduitai.io" style={styles.mobileCta}>Start Free Trial →</a>
           </div>
         )}
       </nav>
