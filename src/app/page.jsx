@@ -1314,7 +1314,7 @@ const styles = {
   },
   roiGrid: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
     gap: 32,
     marginBottom: 40,
   },
@@ -1336,7 +1336,7 @@ const styles = {
   },
   roiResults: {
     display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
+    gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
     gap: 20,
     paddingTop: 32,
     borderTop: "1px solid rgba(255,255,255,0.06)",
@@ -1477,7 +1477,7 @@ const styles = {
     margin: "0 auto",
     padding: "64px 24px 40px",
     display: "grid",
-    gridTemplateColumns: "2fr 1fr 1fr 1fr",
+    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
     gap: 40,
   },
   footerCol: {
