@@ -805,7 +805,7 @@ export default function Home() {
                         const res = await fetch("https://conduit-backend-production.up.railway.app/api/v1/stripe/create-checkout", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ plan: priceData.plan, interval: priceData.interval }),
+                          body: JSON.stringify({ plan: priceData.plan, interval: priceData.interval, trial_period_days: 14 }),
                         });
                         const data = await res.json();
                         if (data.url) window.location.href = data.url;
