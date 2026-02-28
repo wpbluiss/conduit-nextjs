@@ -49,6 +49,12 @@ export default function sitemap() {
       priority: 0.7,
     })),
     {
+      url: `${baseUrl}/affiliate`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
       url: `${baseUrl}/privacy`,
       lastModified: new Date(),
       changeFrequency: 'yearly',

@@ -887,6 +887,7 @@ export default function Home() {
           <div style={styles.footerCol}>
             <h4 style={styles.footerH4}>Company</h4>
             <a href="/blog" style={styles.footerLink}>Blog</a>
+            <a href="/affiliate" style={styles.footerLink}>Affiliate Program</a>
             <a href="mailto:luis@conduitai.io" style={styles.footerLink}>Contact</a>
             <a href="#founding" style={styles.footerLink}>Founding 10</a>
           </div>
