@@ -277,7 +277,7 @@ const COMPARISON = [
   { feature: "Sentiment Analysis", conduit: "✓", rosie: "✗", goodcall: "✗", smithai: "✗" },
   { feature: "Lead Scoring", conduit: "✓", rosie: "✗", goodcall: "✗", smithai: "✗" },
   { feature: "Live Call Transfer", conduit: "✓", rosie: "✗", goodcall: "✗", smithai: "✓" },
-  { feature: "Mobile App", conduit: "✓", rosie: "✗", goodcall: "✗", smithai: "✗" },
+  { feature: "Mobile App", conduit: "Coming Soon", rosie: "✗", goodcall: "✗", smithai: "✗" },
   { feature: "No Setup Fee", conduit: "✓", rosie: "✓", goodcall: "✓", smithai: "✗" },
 ];
 
@@ -590,7 +590,7 @@ export default function Home() {
                 ))}
               </div>
               <div style={styles.foundingSpotsLabel}>10 of 10 spots available</div>
-              <a href="https://app.conduitai.io" style={styles.btnPrimary}>
+              <a href="https://buy.stripe.com/14A00cbSx83G6OS2Rue3e0h" style={styles.btnPrimary}>
                 Claim Your Spot →
               </a>
             </div>
