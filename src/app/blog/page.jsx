@@ -7,6 +7,9 @@ const posts = [
   { slug: "phone-statistics-small-business", title: "10 Phone Statistics Every Small Business Owner Needs to Know", excerpt: "The data is clear: your phone is your most important sales tool.", date: "February 8, 2026", readTime: "6 min read" },
   { slug: "ai-receptionist-vs-answering-service", title: "AI Receptionist vs. Answering Service: Which Is Right for You?", excerpt: "Compare costs, quality, and ROI between traditional answering services and AI-powered alternatives.", date: "February 15, 2026", readTime: "6 min read" },
   { slug: "why-service-businesses-miss-calls", title: "Why Service Businesses Miss 62% of Calls (And How to Fix It)", excerpt: "Every missed call is a missed opportunity. Here's why it happens and what you can do about it today.", date: "February 18, 2026", readTime: "7 min read" },
+  { slug: "ai-receptionist-vs-voicemail", title: "AI Receptionist vs. Voicemail: Why 80% of Callers Hang Up", excerpt: "80% of callers sent to voicemail never leave a message. Here's what happens to those leads — and the voicemail alternative that captures them.", date: "February 28, 2026", readTime: "6 min read" },
+  { slug: "solo-contractor-ai-receptionist", title: "The Solo Contractor's Secret Weapon: How One-Person Businesses Answer Every Call", excerpt: "Solo contractors lose 40-60% of incoming calls while on job sites. Here's how one-person operations answer every call without hiring.", date: "February 28, 2026", readTime: "7 min read" },
+  { slug: "call-forwarding-setup-ai-receptionist", title: "How to Set Up Call Forwarding for Your AI Receptionist in 2 Minutes", excerpt: "Step-by-step guide to setting up call forwarding on iPhone, Android, and business phone systems so your AI receptionist catches every missed call.", date: "February 28, 2026", readTime: "5 min read" },
 ];
 
 export default function BlogPage() {
