@@ -1,5 +1,6 @@
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import AffiliateLinker from '@/components/AffiliateLinker';
 import './globals.css';
 import Script from 'next/script';
 
@@ -159,6 +160,7 @@ export default function RootLayout({ children }) {
       </head>
       <body style={{ margin: 0, padding: 0, background: '#0a0a0a' }}>
         {children}
+        <AffiliateLinker />
         <Analytics />
         <SpeedInsights />
       </body>

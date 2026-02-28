@@ -802,10 +802,12 @@ export default function Home() {
                       if (!priceData?.plan) { window.location.href = "mailto:luis@conduitai.io"; return; }
                       const btn = e.target; btn.textContent = "Loading..."; btn.style.opacity = 0.7;
                       try {
+                        const affMatch = document.cookie.match(/(?:^|; )affiliate_ref=([^;]*)/);
+                        const affiliateRef = affMatch ? decodeURIComponent(affMatch[1]) : undefined;
                         const res = await fetch("https://conduit-backend-production.up.railway.app/api/v1/stripe/create-checkout", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ plan: priceData.plan, interval: priceData.interval, trial_period_days: 14 }),
+                          body: JSON.stringify({ plan: priceData.plan, interval: priceData.interval, trial_period_days: 14, ...(affiliateRef && { affiliate_ref: affiliateRef }) }),
                         });
                         const data = await res.json();
                         if (data.url) window.location.href = data.url;
