@@ -542,6 +542,11 @@ export default function Home() {
             appointments, and sends you every detail — in any language, for
             any industry, 24/7.
           </p>
+          <div style={{textAlign: 'center'}}>
+            <a href="https://peerpush.net/p/conduit-ai" target="_blank" rel="noopener" style={{display: 'inline-block', marginTop: '16px', marginBottom: '8px'}}>
+              <img src="https://peerpush.net/p/conduit-ai/badge.png" alt="Conduit AI - Trending on PeerPush" style={{width: '200px', height: 'auto', opacity: 0.9}} />
+            </a>
+          </div>
           <div style={styles.ctaGroup}>
             <a href="https://app.conduitai.io" style={styles.btnPrimary}>
               Start 14-Day Free Trial →
