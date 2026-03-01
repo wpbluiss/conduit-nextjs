@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
+import { track } from '@vercel/analytics';
 
 function FadeInOnScroll({ children, delay = 0 }) {
   const ref = useRef(null);
@@ -49,6 +50,7 @@ export default function Demo() {
             <a
               href="tel:+15617303316"
               className="inline-block text-4xl md:text-5xl font-black text-gradient mb-6 hover:scale-105 transition-transform"
+              onClick={() => track('cta_click', { button: 'call_demo', page: 'demo' })}
             >
               (561) 730-3316
             </a>

@@ -1,3 +1,5 @@
+import TrackClick from '../../components/TrackClick';
+
 export const metadata = {
   title: "Blog — Conduit AI | Insights for Service Businesses",
   description: "Tips, strategies, and data to help service businesses capture more leads, answer every call, and grow revenue with AI voice agents.",
@@ -154,7 +156,9 @@ export default function BlogPage() {
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "64px 24px", textAlign: "center", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <h2 style={{ fontFamily: "'Sora', sans-serif", fontSize: 28, fontWeight: 700, marginBottom: 12 }}>Never miss a lead again.</h2>
         <p style={{ fontSize: 15, color: "rgba(255,255,255,0.5)", marginBottom: 28 }}>Start your 14-day free trial today. No setup fee. No contracts.</p>
-        <a style={{ display: "inline-block", padding: "14px 32px", borderRadius: 12, background: "linear-gradient(135deg, #00d4ff, #0066ff)", color: "#fff", fontSize: 15, fontWeight: 600, textDecoration: "none" }} href="https://app.conduitai.io">Start Free Trial →</a>
+        <TrackClick event="cta_click" properties={{ button: 'start_free_trial', page: 'blog_listing_alt' }}>
+          <a style={{ display: "inline-block", padding: "14px 32px", borderRadius: 12, background: "linear-gradient(135deg, #00d4ff, #0066ff)", color: "#fff", fontSize: 15, fontWeight: 600, textDecoration: "none" }} href="https://app.conduitai.io">Start Free Trial →</a>
+        </TrackClick>
       </div>
 
       <footer style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "32px 24px" }}>

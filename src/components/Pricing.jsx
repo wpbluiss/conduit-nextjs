@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
+import { track } from '@vercel/analytics';
 
 function FadeInOnScroll({ children, delay = 0 }) {
   const ref = useRef(null);
@@ -111,6 +112,7 @@ export default function Pricing() {
                 <a
                   href="https://app.conduitai.io"
                   className={plan.popular ? 'btn-primary text-center justify-center' : 'btn-secondary text-center justify-center'}
+                  onClick={() => track('cta_click', { button: 'start_free_trial', page: 'pricing', plan: plan.name })}
                 >
                   Start Free Trial
                 </a>

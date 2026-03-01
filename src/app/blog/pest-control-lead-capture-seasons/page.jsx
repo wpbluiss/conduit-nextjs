@@ -1,3 +1,5 @@
+import TrackClick from '../../../components/TrackClick';
+
 export const metadata = {
   title: "Pest Control Lead Capture: How to Handle Seasonal Call Surges Without Missing a Single Lead | Conduit AI Blog",
   description: "Pest control companies face 300-500% call surges in spring and summer. Learn how AI voice agents capture every lead during your busiest seasons.",
@@ -26,7 +28,7 @@ export default function BlogPost() {
           <a href="/#pricing" style={ { color: "rgba(255,255,255,0.5)", textDecoration: "none" } }>Pricing</a>
           <a href="/blog" style={ { color: "#00d4ff", textDecoration: "none" } }>Blog</a>
           <a href="https://app.conduitai.io/login" style={ { color: "rgba(255,255,255,0.7)", textDecoration: "none" } }>Log In</a>
-          <a href="https://app.conduitai.io" style={ { background: "linear-gradient(135deg, #00d4ff, #0066ff)", color: "#fff", padding: "8px 20px", borderRadius: 8, textDecoration: "none", fontWeight: 600 } }>Start Free Trial</a>
+          <TrackClick event="cta_click" properties={{ button: "start_free_trial", page: "blog_post" }}><a href="https://app.conduitai.io" style={ { background: "linear-gradient(135deg, #00d4ff, #0066ff)", color: "#fff", padding: "8px 20px", borderRadius: 8, textDecoration: "none", fontWeight: 600 } }>Start Free Trial</a></TrackClick>
         </div>
       </nav>
 
@@ -96,7 +98,7 @@ export default function BlogPost() {
         <div style={ { background: "linear-gradient(135deg, rgba(0,212,255,0.08), rgba(0,102,255,0.08))", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 16, padding: "40px 32px", textAlign: "center" } }>
           <h3 style={ { fontSize: 24, fontWeight: 700, color: "#fff", marginBottom: 12, fontFamily: "'Sora', sans-serif" } }>Stop Losing Customers to Missed Calls</h3>
           <p style={ { color: "rgba(255,255,255,0.5)", marginBottom: 24, fontSize: 15 } }>Conduit AI answers every call with a human-sounding AI voice agent, captures lead details, and sends them to you instantly. 14-day free trial.</p>
-          <a href="https://app.conduitai.io" style={ { display: "inline-block", background: "linear-gradient(135deg, #00d4ff, #0066ff)", color: "#fff", padding: "14px 32px", borderRadius: 8, textDecoration: "none", fontWeight: 700, fontSize: 16 } }>Start Your Free Trial →</a>
+          <TrackClick event="cta_click" properties={{ button: "try_conduit_free", page: "blog_post" }}><a href="https://app.conduitai.io" style={ { display: "inline-block", background: "linear-gradient(135deg, #00d4ff, #0066ff)", color: "#fff", padding: "14px 32px", borderRadius: 8, textDecoration: "none", fontWeight: 700, fontSize: 16 } }>Start Your Free Trial →</a></TrackClick>
           <p style={ { marginTop: 16, fontSize: 13, color: "rgba(255,255,255,0.35)" } }>Or try the AI live: <a href="tel:+15617303316" style={ { color: "#00d4ff" } }>(561) 730-3316</a></p>
         </div>
       </div>

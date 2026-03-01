@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { track } from '@vercel/analytics';
 
 function AnimatedCounter({ end, suffix = '', prefix = '' }) {
   const [count, setCount] = useState(0);
@@ -74,11 +75,11 @@ export default function Hero() {
 
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-[fadeInUp_0.6s_ease-out_0.3s_both]">
-          <a href="https://app.conduitai.io" className="btn-primary text-lg !py-4 !px-8">
+          <a href="https://app.conduitai.io" className="btn-primary text-lg !py-4 !px-8" onClick={() => track('cta_click', { button: 'start_free_trial', page: 'hero' })}>
             Start Free Trial
             <span>→</span>
           </a>
-          <a href="#demo" className="btn-secondary text-lg !py-4 !px-8">
+          <a href="#demo" className="btn-secondary text-lg !py-4 !px-8" onClick={() => track('cta_click', { button: 'hear_ai_live', page: 'hero' })}>
             🎧 Hear the AI live
           </a>
         </div>

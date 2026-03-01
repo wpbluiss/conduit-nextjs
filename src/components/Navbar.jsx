@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { track } from '@vercel/analytics';
 import Link from 'next/link';
 import Logo from './Logo';
 
@@ -41,7 +42,7 @@ export default function Navbar() {
           {links.map((link) => (
             <a key={link.href} href={link.href} className="text-sm text-brand-text-muted hover:text-brand-text transition-colors">{link.label}</a>
           ))}
-          <a href="https://app.conduitai.io" className="btn-primary text-sm !py-2.5 !px-5">
+          <a href="https://app.conduitai.io" className="btn-primary text-sm !py-2.5 !px-5" onClick={() => track('cta_click', { button: 'start_free_trial', page: 'navbar' })}>
             Start Free Trial <span className="ml-1">→</span>
           </a>
         </div>
@@ -59,7 +60,7 @@ export default function Navbar() {
             {links.map((link) => (
               <a key={link.href} href={link.href} onClick={() => setMobileOpen(false)} className="text-brand-text-muted hover:text-brand-text py-2 transition-colors">{link.label}</a>
             ))}
-            <a href="https://app.conduitai.io" className="btn-primary text-center mt-2" onClick={() => setMobileOpen(false)}>Start Free Trial →</a>
+            <a href="https://app.conduitai.io" className="btn-primary text-center mt-2" onClick={() => { track('cta_click', { button: 'start_free_trial', page: 'navbar' }); setMobileOpen(false); }}>Start Free Trial →</a>
           </div>
         </div>
       )}

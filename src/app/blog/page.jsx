@@ -1,4 +1,5 @@
 "use client";
+import { track } from '@vercel/analytics';
 import Link from "next/link";
 
 const posts = [
@@ -46,7 +47,7 @@ export default function BlogPage() {
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "64px 24px", textAlign: "center", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <h2 style={{ fontFamily: "'Sora', sans-serif", fontSize: 28, fontWeight: 700, marginBottom: 12 }}>Never miss a lead again.</h2>
         <p style={{ fontSize: 15, color: "rgba(255,255,255,0.5)", marginBottom: 28 }}>Start your 14-day free trial today. No setup fee. No contracts.</p>
-        <Link href="https://app.conduitai.io" style={{ display: "inline-block", padding: "14px 32px", borderRadius: 12, background: "linear-gradient(135deg, #00d4ff, #0066ff)", color: "#fff", fontSize: 15, fontWeight: 600, textDecoration: "none" }}>Start Free Trial →</Link>
+        <Link href="https://app.conduitai.io" style={{ display: "inline-block", padding: "14px 32px", borderRadius: 12, background: "linear-gradient(135deg, #00d4ff, #0066ff)", color: "#fff", fontSize: 15, fontWeight: 600, textDecoration: "none" }} onClick={() => track('cta_click', { button: 'start_free_trial', page: 'blog_listing' })}>Start Free Trial →</Link>
       </div>
       <footer style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "32px 24px" }}>
         <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", flexWrap: "wrap", gap: 24, justifyContent: "center", marginBottom: 16 }}>

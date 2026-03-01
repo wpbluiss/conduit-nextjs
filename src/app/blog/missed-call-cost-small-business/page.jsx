@@ -1,3 +1,5 @@
+import TrackClick from '../../../components/TrackClick';
+
 export const metadata = {
   title: 'How Much Do Missed Calls Actually Cost Your Business? (The Math Will Shock You)',
   description: 'Service businesses lose $2K–$10K per month to missed calls. We break down the real numbers for plumbers, HVAC companies, salons, and contractors — and how to fix it.',
@@ -164,12 +166,14 @@ export default function BlogPost() {
               Call our demo line right now: <a href="tel:+15617303316" className="text-[var(--cyan)] font-semibold hover:underline">(561) 730-3316</a>.
               No signup needed. You&apos;ll talk to the same AI agent your customers would. Takes 30 seconds.
             </p>
-            <a
-              href="https://app.conduitai.io/login"
-              className="inline-block mt-4 px-6 py-3 rounded-full bg-[var(--cyan)] text-[var(--bg)] font-semibold hover:brightness-110 transition-all"
-            >
-              Start Your Free 14-Day Trial →
-            </a>
+            <TrackClick event="cta_click" properties={{ button: 'try_conduit_free', page: 'blog_post' }}>
+              <a
+                href="https://app.conduitai.io/login"
+                className="inline-block mt-4 px-6 py-3 rounded-full bg-[var(--cyan)] text-[var(--bg)] font-semibold hover:brightness-110 transition-all"
+              >
+                Start Your Free 14-Day Trial →
+              </a>
+            </TrackClick>
           </div>
 
         </div>

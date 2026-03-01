@@ -1,3 +1,5 @@
+import TrackClick from '../../../components/TrackClick';
+
 export const metadata = {
   title: "Bilingual AI Answering Service: Capture Spanish-Speaking Leads | Conduit AI",
   description: "40M+ Spanish speakers in the US need service businesses too. If your phone can't handle Spanish calls, you're losing an entire market segment.",
@@ -51,7 +53,7 @@ export default function BlogPost() {
         <div className="bg-[var(--cyan)]/10 border border-[var(--cyan)]/20 rounded-xl p-6 mt-12">
           <p className="text-[var(--text)] font-semibold mb-2">Want to hear what it sounds like?</p>
           <p>Call our demo line right now: <a href="tel:+15617303316" className="text-[var(--cyan)] font-semibold hover:underline">(561) 730-3316</a>. No signup needed. Takes 30 seconds.</p>
-          <a href="https://app.conduitai.io" className="inline-block mt-4 px-6 py-3 rounded-full bg-[var(--cyan)] text-[var(--bg)] font-semibold hover:brightness-110 transition-all">Start Your Free 14-Day Trial →</a>
+          <TrackClick event="cta_click" properties={{ button: "try_conduit_free", page: "blog_post" }}><a href="https://app.conduitai.io" className="inline-block mt-4 px-6 py-3 rounded-full bg-[var(--cyan)] text-[var(--bg)] font-semibold hover:brightness-110 transition-all">Start Your Free 14-Day Trial →</a></TrackClick>
         </div>
       </article>
     </main>

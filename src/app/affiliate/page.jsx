@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { track } from '@vercel/analytics';
 
 export default function AffiliatePage() {
   const [form, setForm] = useState({ name: "", email: "", plan: "" });
@@ -30,7 +31,7 @@ export default function AffiliatePage() {
             <a href="/#pricing" style={s.navLink}>Pricing</a>
             <a href="/blog" style={s.navLink}>Blog</a>
             <a href="https://app.conduitai.io/login" style={s.navLink}>Log In</a>
-            <a href="https://app.conduitai.io" style={s.navCta}>Start Free Trial</a>
+            <a href="https://app.conduitai.io" style={s.navCta} onClick={() => track('cta_click', { button: 'start_free_trial', page: 'affiliate' })}>Start Free Trial</a>
           </div>
         </div>
       </nav>
@@ -45,7 +46,7 @@ export default function AffiliatePage() {
           <p style={s.heroSub}>
             Join our affiliate program and earn 20% recurring commission on every business you refer — for as long as they stay a customer. No cap, no limits.
           </p>
-          <a href="#apply" style={s.btnPrimary}>Apply Now →</a>
+          <a href="#apply" style={s.btnPrimary} onClick={() => track('cta_click', { button: 'apply_now', page: 'affiliate' })}>Apply Now →</a>
         </div>
       </section>
 
@@ -168,7 +169,7 @@ export default function AffiliatePage() {
                     style={{ ...s.input, resize: "vertical", minHeight: 100 }}
                   />
                 </div>
-                <button type="submit" style={s.submitBtn}>Submit Application →</button>
+                <button type="submit" style={s.submitBtn} onClick={() => track('cta_click', { button: 'submit_application', page: 'affiliate' })}>Submit Application →</button>
               </form>
             )}
           </div>
@@ -223,7 +224,7 @@ export default function AffiliatePage() {
           <p style={{ ...s.sectionSub, maxWidth: 500, margin: "0 auto 32px" }}>
             It takes 2 minutes to apply. There's zero cost to join. And every referral earns you money month after month.
           </p>
-          <a href="#apply" style={s.btnPrimary}>Apply Now →</a>
+          <a href="#apply" style={s.btnPrimary} onClick={() => track('cta_click', { button: 'apply_now', page: 'affiliate' })}>Apply Now →</a>
         </div>
       </section>
 

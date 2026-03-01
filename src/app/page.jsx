@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { track } from '@vercel/analytics';
 
 // ─── PARTICLE CANVAS ───
 function ParticleCanvas() {
@@ -502,7 +503,7 @@ export default function Home() {
             <a href="#features" style={styles.navLink}>Features</a>
             <a href="#pricing" style={styles.navLink}>Pricing</a>
             <a href="#demo" style={styles.navLink}>Demo</a>
-            <a href="https://app.conduitai.io/login" style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, textDecoration: "none", marginRight: 16, fontWeight: 500 }}>Log In</a><a href="https://app.conduitai.io" style={styles.navCta}>Start Free Trial</a>
+            <a href="https://app.conduitai.io/login" style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, textDecoration: "none", marginRight: 16, fontWeight: 500 }}>Log In</a><a href="https://app.conduitai.io" style={styles.navCta} onClick={() => track('cta_click', { button: 'start_free_trial', page: 'homepage' })}>Start Free Trial</a>
           </div>
           <button
             style={styles.mobileToggle}
@@ -517,7 +518,7 @@ export default function Home() {
             <a href="#features" style={styles.mobileLink} onClick={() => setMobileMenu(false)}>Features</a>
             <a href="#pricing" style={styles.mobileLink} onClick={() => setMobileMenu(false)}>Pricing</a>
             <a href="#demo" style={styles.mobileLink} onClick={() => setMobileMenu(false)}>Demo</a>
-            <a href="https://app.conduitai.io/login" style={{ display: "block", padding: "10px 0", color: "rgba(255,255,255,0.7)", fontSize: 15, textDecoration: "none", fontWeight: 500 }}>Log In</a><a href="https://app.conduitai.io" style={styles.mobileCta}>Start Free Trial →</a>
+            <a href="https://app.conduitai.io/login" style={{ display: "block", padding: "10px 0", color: "rgba(255,255,255,0.7)", fontSize: 15, textDecoration: "none", fontWeight: 500 }}>Log In</a><a href="https://app.conduitai.io" style={styles.mobileCta} onClick={() => track('cta_click', { button: 'start_free_trial', page: 'homepage' })}>Start Free Trial →</a>
           </div>
         )}
       </nav>
@@ -548,10 +549,10 @@ export default function Home() {
             </a>
           </div>
           <div style={styles.ctaGroup}>
-            <a href="https://app.conduitai.io" style={styles.btnPrimary}>
+            <a href="https://app.conduitai.io" style={styles.btnPrimary} onClick={() => track('cta_click', { button: 'start_free_trial', page: 'homepage' })}>
               Start 14-Day Free Trial →
             </a>
-            <a href="tel:5617303316" style={styles.btnSecondary}>
+            <a href="tel:5617303316" style={styles.btnSecondary} onClick={() => track('cta_click', { button: 'hear_ai_live', page: 'homepage' })}>
               🎧 Hear the AI Live
             </a>
           </div>
@@ -595,7 +596,7 @@ export default function Home() {
                 ))}
               </div>
               <div style={styles.foundingSpotsLabel}>10 of 10 spots available</div>
-              <a href="https://buy.stripe.com/14A00cbSx83G6OS2Rue3e0h" style={styles.btnPrimary}>
+              <a href="https://buy.stripe.com/14A00cbSx83G6OS2Rue3e0h" style={styles.btnPrimary} onClick={() => track('cta_click', { button: 'claim_founding_spot', page: 'homepage' })}>
                 Claim Your Spot →
               </a>
             </div>
@@ -676,7 +677,7 @@ export default function Home() {
               <div style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginBottom: 4 }}>
                 Tap to call our AI agent
               </div>
-              <a href="tel:5617303316" style={styles.demoNumber}>
+              <a href="tel:5617303316" style={styles.demoNumber} onClick={() => track('cta_click', { button: 'call_demo', page: 'homepage' })}>
                 (561) 730-3316
               </a>
             </div>
@@ -804,6 +805,7 @@ export default function Home() {
                     href="#"
                     onClick={async (e) => {
                       e.preventDefault();
+                      track('cta_click', { button: 'start_checkout', page: 'pricing', plan: plan.name });
                       if (!priceData?.plan) { window.location.href = "mailto:luis@conduitai.io"; return; }
                       const btn = e.target; btn.textContent = "Loading..."; btn.style.opacity = 0.7;
                       try {
@@ -857,10 +859,10 @@ export default function Home() {
             Join hundreds of businesses already using Conduit AI to capture every lead, 24/7.
           </p>
           <div style={styles.ctaGroup}>
-            <a href="https://app.conduitai.io" style={styles.btnPrimary}>
+            <a href="https://app.conduitai.io" style={styles.btnPrimary} onClick={() => track('cta_click', { button: 'start_free_trial', page: 'homepage_final_cta' })}>
               Start 14-Day Free Trial →
             </a>
-            <a href="tel:5617303316" style={styles.btnSecondary}>
+            <a href="tel:5617303316" style={styles.btnSecondary} onClick={() => track('cta_click', { button: 'hear_ai_live', page: 'homepage_final_cta' })}>
               🎧 Hear the AI Live
             </a>
           </div>
