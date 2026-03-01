@@ -1,0 +1,10 @@
+#!/bin/bash
+echo "Pinging Google with sitemap..."
+curl -s "https://www.google.com/ping?sitemap=https://www.conduitai.io/sitemap.xml"
+echo ""
+echo ""
+echo "Pinging Bing with sitemap..."
+curl -s "https://www.bing.com/ping?sitemap=https://www.conduitai.io/sitemap.xml"
+echo ""
+echo ""
+echo "Done! Both search engines have been notified."
