@@ -2,6 +2,9 @@
 import Link from "next/link";
 
 const posts = [
+  { slug: "hvac-missed-calls-revenue", title: "How HVAC Companies Lose $50,000+ Per Year From Missed Calls (And How to Fix It)", excerpt: "HVAC businesses miss 40-62% of calls during peak season. Here's the real revenue math — and how AI answering captures every lead.", date: "March 1, 2026", readTime: "8 min read" },
+  { slug: "why-callers-wont-leave-voicemail-plumbers", title: "Why 85% of Callers Won't Leave a Voicemail: What Every Plumber Needs to Know", excerpt: "85% of callers who reach voicemail hang up without leaving a message. Here's what that costs plumbers — and how to fix it.", date: "March 1, 2026", readTime: "7 min read" },
+  { slug: "barber-shop-marketing-ai-2026", title: "Barber Shop Marketing in 2026: How AI is Helping Barbershops Never Miss a Client Again", excerpt: "You can't answer the phone mid-fade. Here's how AI voice agents are helping barbershops capture every booking and grow their clientele.", date: "March 1, 2026", readTime: "8 min read" },
   { slug: "missed-call-cost-small-business", title: "How HVAC Companies Lose $120K/Year to Missed Calls", excerpt: "The math behind missed calls in the HVAC industry — and how one company recovered 40% of lost leads.", date: "February 12, 2026", readTime: "5 min read" },
   { slug: "salon-booking-automation", title: "Salon Booking Automation: Stop Losing Clients to Voicemail", excerpt: "Your clients won't wait on hold. Here's how smart salons capture every booking request automatically.", date: "February 10, 2026", readTime: "4 min read" },
   { slug: "phone-statistics-small-business", title: "10 Phone Statistics Every Small Business Owner Needs to Know", excerpt: "The data is clear: your phone is your most important sales tool.", date: "February 8, 2026", readTime: "6 min read" },
