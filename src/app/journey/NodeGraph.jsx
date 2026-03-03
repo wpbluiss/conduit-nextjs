@@ -1,313 +1,711 @@
+"use client";
 import { useState, useRef, useEffect, useCallback } from "react";
+import {
+  forceSimulation,
+  forceLink,
+  forceManyBody,
+  forceCenter,
+  forceCollide,
+} from "d3-force";
 
+/* ═══════════════════════════════════════════════════════════════════
+   CATEGORIES
+   ═══════════════════════════════════════════════════════════════════ */
 const CATEGORIES = {
-  launch: { color: "#00d4ff", label: "Launch" },
-  product: { color: "#0066ff", label: "Product" },
-  marketing: { color: "#ff6b35", label: "Marketing" },
-  revenue: { color: "#00ff88", label: "Revenue" },
-  milestone: { color: "#ffd700", label: "Milestone" },
-  infrastructure: { color: "#a855f7", label: "Infrastructure" },
+  core:      { color: "#0EA5E9", label: "Core Product" },
+  infra:     { color: "#06B6D4", label: "Infrastructure" },
+  business:  { color: "#10B981", label: "Revenue & Business" },
+  marketing: { color: "#8B5CF6", label: "Content & Marketing" },
+  clients:   { color: "#F59E0B", label: "Clients & Partnerships" },
 };
 
-const NODES = [
-  // Foundation
-  { id: "founding", label: "Conduit AI Founded", date: "Dec 2025", cat: "milestone", detail: "Luis Garcia, 21, starts building an AI-powered lead recovery platform while working full-time at a fire alarm company. No funding, no co-founder, just execution.", x: 0.12, y: 0.08 },
-  { id: "stack", label: "Tech Stack Built", date: "Dec 2025", cat: "product", detail: "FastAPI backend, React frontend, Supabase for auth & data, Vapi.ai for voice AI, Twilio for telephony, Stripe for payments. Entire platform built solo.", x: 0.28, y: 0.06 },
-  { id: "first_agent", label: "First AI Agent Live", date: "Jan 2026", cat: "product", detail: "Demo agent configured and live at (561) 730-3316. Natural voice conversations that capture caller details, qualify leads, and send instant notifications.", x: 0.42, y: 0.1 },
-  
-  // Early Growth
-  { id: "first_client", label: "First Client: The G Room", date: "Jan 2026", cat: "revenue", detail: "Christian from The G Room barbershop becomes first client. Also sets up 20% referral commission structure. Proof of concept validated.", x: 0.15, y: 0.22 },
-  { id: "multi_vertical", label: "Multi-Vertical Strategy", date: "Jan 2026", cat: "marketing", detail: "Expanded from contractor-focused to beauty/wellness, medical/dental, and roofing markets. Built specialized AI assistants for each vertical.", x: 0.32, y: 0.2 },
-  { id: "cold_outreach", label: "Cold Outreach System", date: "Jan 2026", cat: "marketing", detail: "Apollo.io + Instantly.ai campaigns tracking hundreds of prospects. Breakthrough conversations by repositioning as 'lead recovery' instead of 'AI technology'.", x: 0.48, y: 0.18 },
-  { id: "website_v1", label: "Website V1 Launch", date: "Jan 2026", cat: "launch", detail: "First website live on tiiny.host. Basic landing page with pricing and demo. Established conduitai.io domain.", x: 0.58, y: 0.07 },
+/* ═══════════════════════════════════════════════════════════════════
+   NODE DATA — every milestone in the Conduit AI journey
+   size: 3 = center, 2 = major, 1 = standard
+   ═══════════════════════════════════════════════════════════════════ */
+const NODE_DATA = [
+  // CENTER
+  { id: "conduit", label: "Conduit AI", date: "January 2026", detail: "AI-powered voice agent platform for service businesses. The origin of everything.", cat: "core", size: 3 },
 
-  // February Buildout
-  { id: "vercel_migration", label: "Vercel Migration", date: "Feb 2026", cat: "infrastructure", detail: "Migrated from tiiny.host to Vercel + Next.js for better performance, SEO, and deployment pipeline. One-command pushes via GitHub.", x: 0.65, y: 0.18 },
-  { id: "seo_content", label: "SEO Blog Engine", date: "Feb 2026", cat: "marketing", detail: "5 SEO-optimized blog posts published. Topics: missed call costs, HVAC revenue loss, salon booking automation, AI vs answering services, phone statistics.", x: 0.52, y: 0.3 },
-  { id: "affiliate", label: "Affiliate Program", date: "Feb 2026", cat: "revenue", detail: "20% recurring commission affiliate program launched. Partners earn on every referral, every month, forever.", x: 0.35, y: 0.33 },
-  { id: "directory_blitz", label: "Directory Submissions", date: "Feb 2026", cat: "marketing", detail: "Submitted to BetaList, SaaSHub, G2, PeerPush, Product Hunt, and 10+ directories. Building backlinks and discovery channels.", x: 0.68, y: 0.3 },
-  { id: "google_ads", label: "Google Ads Campaign", date: "Feb 2026", cat: "marketing", detail: "$500 Google Ads credit activated. Targeting 'AI receptionist', 'missed call recovery', 'answering service alternative' keywords.", x: 0.78, y: 0.1 },
-  { id: "business_infra", label: "Business Infrastructure", date: "Feb 2026", cat: "infrastructure", detail: "Wells Fargo business account, Google Search Console verified, email forwarding for luis@conduitai.io, Stripe payments configured.", x: 0.22, y: 0.35 },
+  // CORE FOUNDATION
+  { id: "founded", label: "Conduit AI Founded", date: "January 2026", detail: "The beginning — building an AI-powered lead recovery platform from scratch.", cat: "core", size: 2 },
+  { id: "platform", label: "Platform Built", date: "January 2026", detail: "Full SaaS platform: Vapi + Twilio + Stripe + Supabase. Entire stack built solo.", cat: "core", size: 2 },
+  { id: "website", label: "Website Launch", date: "February 2026", detail: "conduitai.io live on Vercel with Next.js. Premium dark theme, animations, and SEO.", cat: "core", size: 2 },
+  { id: "portal", label: "Client Portal", date: "February 2026", detail: "app.conduitai.io — React + Vite client dashboard hosted on Railway.", cat: "core", size: 2 },
 
-  // Launch Week
-  { id: "product_hunt", label: "Product Hunt Launch", date: "Feb 24", cat: "launch", detail: "Conduit AI launched on Product Hunt. First major public debut of the platform to the startup community.", x: 0.82, y: 0.22 },
-  { id: "first_signup", label: "First Signup!", date: "Feb 25", cat: "milestone", detail: "First organic signup received the day after Product Hunt launch. The funnel works — traffic → landing page → trial signup.", x: 0.88, y: 0.33 },
-  { id: "heygen", label: "HeyGen Avatar Setup", date: "Feb 2026", cat: "marketing", detail: "AI avatar created for talking-head video content. Combined with CapCut editing for TikTok/Instagram distribution.", x: 0.75, y: 0.38 },
-  { id: "mark_thomas", label: "Mark Thomas DM", date: "Feb 2026", cat: "milestone", detail: "Mark Thomas, influencer with 4.5M followers, DM'd about Conduit AI. Warm lead for potential partnership/promotion.", x: 0.6, y: 0.4 },
-  { id: "vinny", label: "Vinny Amendola Lead", date: "Feb 2026", cat: "revenue", detail: "Senior exec at Orangetheory Fitness (500+ employees, fleet of studios) reached out about lead generation services. Enterprise opportunity.", x: 0.45, y: 0.42 },
+  // PRODUCT
+  { id: "voice_agent", label: "AI Voice Agent", date: "January 2026", detail: "Vapi-powered AI agent that answers calls 24/7 with natural conversation.", cat: "core", size: 2 },
+  { id: "lead_capture", label: "Lead Capture System", date: "January 2026", detail: "Real-time email notifications with caller details and call summaries.", cat: "core", size: 1 },
+  { id: "onboarding", label: "Smart Onboarding", date: "February 2026", detail: "6-step guided walkthrough for new clients to configure their AI agent.", cat: "core", size: 1 },
+  { id: "affiliate_system", label: "Affiliate System", date: "February 2026", detail: "20% recurring commission with referral tracking and automatic payouts.", cat: "core", size: 1 },
+  { id: "pricing", label: "4 Pricing Tiers", date: "February 2026", detail: "Solo $39, Business $199, Professional $299, and Enterprise custom pricing.", cat: "core", size: 1 },
+  { id: "free_trial", label: "14-Day Free Trial", date: "February 2026", detail: "No credit card required. Full access to the platform for 14 days.", cat: "core", size: 1 },
 
-  // Feb 26 Rebuild
-  { id: "website_v2", label: "Website V2 Rebuild", date: "Feb 26", cat: "launch", detail: "Complete website rebuild: animated particle hero, 4-tier pricing with weekly/monthly/yearly toggle, 29 industries, comparison table, ROI calculator, FAQ. Premium dark theme.", x: 0.88, y: 0.46 },
-  { id: "portal_fix", label: "Portal Overhaul", date: "Feb 26", cat: "product", detail: "Fixed broken emoji rendering, added all 29 industries, updated to no-setup-fee pricing model, 3 plans including Personal at $19.99/mo.", x: 0.72, y: 0.48 },
-  { id: "personal_plan", label: "Personal Plan: $19.99/mo", date: "Feb 26", cat: "product", detail: "New tier for individuals who want an AI assistant for their personal phone. Expands TAM from service businesses to literally anyone with a phone.", x: 0.55, y: 0.52 },
-  { id: "multilang", label: "Multi-Language Support", date: "Feb 26", cat: "product", detail: "English, Spanish, French, Portuguese and more. Users choose their language. Full customization — a viral selling point nobody else offers at this price.", x: 0.38, y: 0.5 },
-  { id: "content_strategy", label: "Cinematic Content Strategy", date: "Feb 26", cat: "marketing", detail: "12 Netflix-quality video scripts written. Seedance 2.0, Kling AI, HeyGen, ElevenLabs pipeline. Shot-by-shot execution sheets for 'The Midnight Call' flagship commercial.", x: 0.25, y: 0.48 },
+  // MOBILE APP
+  { id: "mobile_app", label: "Mobile App Built", date: "March 2026", detail: "18 screens built with Expo / React Native. Full client management on mobile.", cat: "core", size: 2 },
+  { id: "premium_design", label: "Premium Design", date: "March 2026", detail: "Glassmorphism UI, particle effects, and haptic feedback throughout the app.", cat: "core", size: 1 },
+  { id: "ai_customization", label: "AI Agent Customization", date: "March 2026", detail: "Voice, personality, greeting, and FAQ builder — all configurable from mobile.", cat: "core", size: 1 },
+  { id: "call_playback", label: "Call Playback", date: "March 2026", detail: "Audio player with waveform visualization and synced call transcript.", cat: "core", size: 1 },
+  { id: "sms_conversations", label: "SMS Conversations", date: "March 2026", detail: "Two-way messaging with leads directly from the app.", cat: "core", size: 1 },
+  { id: "payment_capture", label: "Payment Capture", date: "March 2026", detail: "Stripe deposits, no-show fees, and payment tracking built in.", cat: "core", size: 1 },
+  { id: "appointment_booking", label: "Appointment Booking", date: "March 2026", detail: "Calendar with AI-booked appointments synced to your schedule.", cat: "core", size: 1 },
+  { id: "revenue_dashboard", label: "Revenue Dashboard", date: "March 2026", detail: "Gamification, streaks, and milestones to track business growth.", cat: "core", size: 1 },
+  { id: "reviews_reputation", label: "Reviews & Reputation", date: "March 2026", detail: "Auto-review requests with sentiment tracking and reputation monitoring.", cat: "core", size: 1 },
+  { id: "multi_location", label: "Multi-Location", date: "March 2026", detail: "Multiple business locations and agents, all managed from one account.", cat: "core", size: 1 },
+  { id: "push_notifications", label: "Push Notifications", date: "March 2026", detail: "Real-time lead alerts sent straight to your phone.", cat: "core", size: 1 },
 
-  // Feb 26-27 Feature Build (NEW)
-  { id: "features_8", label: "8 Features Shipped", date: "Feb 26-27", cat: "milestone", detail: "Biggest single-day feature ship in company history. Built, deployed, and verified 8 production features in one session: sentiment analysis, lead scoring, call recording, live transfer, auto follow-up SMS, review requests, FAQ training, and team/multi-location.", x: 0.12, y: 0.62 },
-  { id: "sentiment", label: "Sentiment Analysis", date: "Feb 27", cat: "product", detail: "Real-time transcript analysis. Scores 0.0-1.0, mood detection (neutral/positive/urgent/frustrated), auto-flagging negative calls. First test: 1.0 score, urgent mood.", x: 0.28, y: 0.58 },
-  { id: "lead_scoring", label: "Lead Scoring: A/B/C/D", date: "Feb 27", cat: "product", detail: "Automatic 0-100 scoring with letter grades and labels (Hot Lead, Warm Lead, Cold Lead). First live call scored 100/A/Hot Lead. The feature that justifies $350/mo.", x: 0.42, y: 0.62 },
-  { id: "call_recording", label: "Call Recording Storage", date: "Feb 27", cat: "product", detail: "Vapi recording URLs auto-saved. Every call has a playable recording for the portal dashboard. Proof of value that reduces churn.", x: 0.3, y: 0.7 },
-  { id: "auto_followup", label: "Auto Follow-Up SMS", date: "Feb 27", cat: "product", detail: "Twilio-powered automatic SMS after calls. Configurable delay and templates. Turns every missed call into a text conversation.", x: 0.15, y: 0.75 },
-  { id: "review_requests", label: "Auto Review Requests", date: "Feb 27", cat: "product", detail: "Post-call SMS asking satisfied callers for Google reviews. Configurable delay (default 2hrs), custom templates. Reputation on autopilot.", x: 0.45, y: 0.73 },
-  { id: "live_transfer", label: "Live Call Transfer", date: "Feb 27", cat: "product", detail: "High-value or emergency calls warm-transferred to owner's cell with full context. Configurable triggers: emergency, high_value, request_human.", x: 0.58, y: 0.65 },
-  { id: "team_multi", label: "Team & Multi-Location", date: "Feb 27", cat: "product", detail: "Role-based access (admin/manager/viewer), invite system, multi-location support with per-location Vapi assistants. Enterprise-ready.", x: 0.7, y: 0.6 },
-  { id: "faq_training", label: "FAQ Training", date: "Feb 27", cat: "product", detail: "Clients upload custom FAQ (JSON) to train their AI with business-specific knowledge. Hours, pricing, policies — answered without human intervention.", x: 0.55, y: 0.76 },
-  
-  // Feb 27 Infrastructure
-  { id: "db_migration", label: "Database Migration", date: "Feb 27", cat: "infrastructure", detail: "16 new columns, 2 new tables (team_members, locations), 4 performance indexes. All executed on production Supabase without downtime.", x: 0.82, y: 0.58 },
-  { id: "deployment_fixes", label: "3 Critical Bug Fixes", date: "Feb 27", cat: "infrastructure", detail: "Supabase SDK import crash → rewrote 600+ lines. booksy_button KeyError → missing template param. client_id NULL lookup → removed filter. All fixed same night.", x: 0.88, y: 0.7 },
-  { id: "api_18", label: "18 API Endpoints Live", date: "Feb 27", cat: "infrastructure", detail: "Sentiment, lead scoring, recording, transfer config, follow-up config, review config, FAQ CRUD, team management, location management — all production-ready on Railway.", x: 0.75, y: 0.72 },
-  
-  // Feb 27 Stripe Fix
-  { id: "stripe_trial_fix", label: "Stripe 14-Day Trial Fix", date: "Feb 27", cat: "product", detail: "Discovered Payment Links bypassed trial. Rebuilt checkout to route through backend with trial_period_days=14. All 9 plan/interval combos verified. $0 due today.", x: 0.38, y: 0.82 },
-  { id: "self_serve", label: "Self-Serve Signup Live", date: "Feb 27", cat: "milestone", detail: "Full customer flow working: conduitai.io → Start Free Trial → onboarding (name, business, industry, phone) → Stripe checkout with 14-day trial → dashboard. No manual intervention needed.", x: 0.55, y: 0.88 },
-  { id: "login_nav", label: "Login Added to Nav", date: "Feb 27", cat: "product", detail: "Log In link added to desktop and mobile navigation. Returning customers can now access their dashboard from the main site.", x: 0.22, y: 0.85 },
+  // MARKETING & CONTENT
+  { id: "blog_posts", label: "33+ SEO Blog Posts", date: "February 2026", detail: "All indexed in Google. Driving organic traffic to conduitai.io.", cat: "marketing", size: 2 },
+  { id: "ai_commercial", label: "AI Commercial Pipeline", date: "February 2026", detail: "Kling 3.0, ElevenLabs, and CapCut for cinematic AI-generated commercials.", cat: "marketing", size: 1 },
+  { id: "product_hunt", label: "Product Hunt Launch", date: "Feb 24, 2026", detail: "Official launch on Product Hunt. First major public debut of the platform.", cat: "marketing", size: 2 },
+  { id: "first_signup", label: "First Signup", date: "Feb 25, 2026", detail: "First organic signup the day after Product Hunt launch. The funnel works.", cat: "marketing", size: 2 },
+  { id: "platform_distribution", label: "5 Platform Distribution", date: "February 2026", detail: "TikTok, Instagram, YouTube, LinkedIn, and X — content distributed everywhere.", cat: "marketing", size: 1 },
+  { id: "peerpush", label: "PeerPush Trending", date: "February 2026", detail: "Trending badge earned on PeerPush platform.", cat: "marketing", size: 1 },
 
-  // Future
-  { id: "app", label: "Mobile App", date: "Mar 2026", cat: "launch", detail: "React Native app for iOS & Android. Push notifications replace SMS. Self-serve agent configuration.", x: 0.72, y: 0.85 },
-  { id: "zapier", label: "Zapier + 5,000 Integrations", date: "Mar 2026", cat: "product", detail: "ServiceTitan, Housecall Pro, Jobber, Booksy, Google Calendar, HubSpot, Salesforce — leads flow directly into existing tools.", x: 0.85, y: 0.82 },
-  { id: "target_10k", label: "$10K Revenue Target", date: "Mar 31", cat: "milestone", detail: "Goal: $10K total revenue by March 31. Path: 2-3 founding members ($999), 3-5 monthly plans, 1 enterprise deal.", x: 0.88, y: 0.92 },
-  { id: "first_100", label: "First 100 Clients", date: "2026", cat: "milestone", detail: "Milestone #1 on the roadmap. At average $250/mo MRR per client = $25K MRR. This is when Conduit AI becomes a real business.", x: 0.72, y: 0.95 },
+  // CLIENTS & PARTNERSHIPS
+  { id: "first_client", label: "First Client: The G Room", date: "January 2026", detail: "Christian's barbershop in South Florida. Proof of concept validated.", cat: "clients", size: 2 },
+  { id: "affiliate_chris", label: "Affiliate: CHRIS20", date: "February 2026", detail: "First affiliate partner — 20% recurring commission.", cat: "clients", size: 1 },
+  { id: "affiliate_bobby", label: "Affiliate: BOBBY20", date: "February 2026", detail: "Bobby Burcham — contractor network affiliate partner.", cat: "clients", size: 1 },
+
+  // REVENUE & BUSINESS
+  { id: "prospect_pipeline", label: "997 Prospect Pipeline", date: "February 2026", detail: "4 Instantly.ai email campaigns targeting service businesses.", cat: "business", size: 1 },
+  { id: "demo_line", label: "Demo Line Live", date: "January 2026", detail: "(561) 730-3316 — call to hear the AI agent in action.", cat: "business", size: 1 },
+
+  // INFRASTRUCTURE
+  { id: "supabase", label: "Supabase", date: "January 2026", detail: "Auth, database, and real-time subscriptions.", cat: "infra", size: 1 },
+  { id: "railway", label: "Railway", date: "January 2026", detail: "Backend hosting with automatic deployments.", cat: "infra", size: 1 },
+  { id: "vercel_infra", label: "Vercel", date: "January 2026", detail: "Website hosting with edge network and instant deploys.", cat: "infra", size: 1 },
+  { id: "stripe_infra", label: "Stripe", date: "January 2026", detail: "Payments, billing, and subscription management.", cat: "infra", size: 1 },
+  { id: "twilio_infra", label: "Twilio", date: "January 2026", detail: "Telephony, SMS, and voice infrastructure.", cat: "infra", size: 1 },
+  { id: "vapi_infra", label: "Vapi.ai", date: "January 2026", detail: "AI voice engine powering all agent conversations.", cat: "infra", size: 1 },
+  { id: "zapier_infra", label: "Zapier", date: "February 2026", detail: "Calendar integrations and workflow automation.", cat: "infra", size: 1 },
+  { id: "gsc", label: "Google Search Console", date: "February 2026", detail: "30+ pages indexed and monitored for search performance.", cat: "infra", size: 1 },
 ];
 
-const EDGES = [
-  // Foundation
-  ["founding", "stack"], ["stack", "first_agent"], ["first_agent", "website_v1"],
-  ["founding", "first_client"], ["first_client", "multi_vertical"], ["multi_vertical", "cold_outreach"],
-  ["cold_outreach", "seo_content"], ["website_v1", "vercel_migration"],
-  ["first_client", "affiliate"], ["first_client", "business_infra"],
-  ["vercel_migration", "directory_blitz"], ["vercel_migration", "google_ads"],
-  ["seo_content", "directory_blitz"],
-  ["directory_blitz", "product_hunt"], ["product_hunt", "first_signup"],
-  ["multi_vertical", "heygen"], ["product_hunt", "mark_thomas"],
-  ["cold_outreach", "vinny"],
-  
-  // Feb 26 rebuild
-  ["first_signup", "website_v2"], ["website_v2", "portal_fix"],
-  ["portal_fix", "personal_plan"], ["personal_plan", "multilang"],
-  ["heygen", "content_strategy"], ["content_strategy", "multilang"],
-  ["heygen", "portal_fix"],
-  
-  // Feb 26-27 features
-  ["website_v2", "features_8"],
-  ["features_8", "sentiment"], ["features_8", "lead_scoring"],
-  ["sentiment", "call_recording"], ["lead_scoring", "call_recording"],
-  ["call_recording", "auto_followup"], ["call_recording", "review_requests"],
-  ["lead_scoring", "live_transfer"], ["live_transfer", "team_multi"],
-  ["review_requests", "faq_training"],
-  
-  // Infrastructure
-  ["features_8", "db_migration"], ["db_migration", "deployment_fixes"],
-  ["deployment_fixes", "api_18"], ["api_18", "team_multi"],
-  
-  // Stripe & self-serve
-  ["portal_fix", "stripe_trial_fix"], ["stripe_trial_fix", "self_serve"],
-  ["self_serve", "login_nav"],
-  ["multilang", "stripe_trial_fix"],
-  
-  // Future connections
-  ["self_serve", "app"], ["team_multi", "zapier"],
-  ["app", "zapier"],
-  ["zapier", "target_10k"], ["vinny", "target_10k"],
-  ["target_10k", "first_100"], ["app", "first_100"],
-  ["mark_thomas", "target_10k"],
-  ["api_18", "app"],
+/* ═══════════════════════════════════════════════════════════════════
+   LINK DATA — connections between nodes
+   ═══════════════════════════════════════════════════════════════════ */
+const LINK_DATA = [
+  // Center → core foundation
+  { source: "conduit", target: "founded" },
+  { source: "conduit", target: "platform" },
+  { source: "conduit", target: "website" },
+  { source: "conduit", target: "portal" },
+
+  // Platform → product features
+  { source: "platform", target: "voice_agent" },
+  { source: "platform", target: "lead_capture" },
+  { source: "platform", target: "onboarding" },
+  { source: "platform", target: "affiliate_system" },
+  { source: "platform", target: "pricing" },
+  { source: "onboarding", target: "free_trial" },
+  { source: "pricing", target: "free_trial" },
+
+  // Portal → mobile app
+  { source: "portal", target: "mobile_app" },
+
+  // Mobile app chains
+  { source: "mobile_app", target: "premium_design" },
+  { source: "premium_design", target: "ai_customization" },
+  { source: "mobile_app", target: "call_playback" },
+  { source: "call_playback", target: "sms_conversations" },
+  { source: "mobile_app", target: "payment_capture" },
+  { source: "payment_capture", target: "appointment_booking" },
+  { source: "mobile_app", target: "revenue_dashboard" },
+  { source: "revenue_dashboard", target: "reviews_reputation" },
+  { source: "mobile_app", target: "multi_location" },
+  { source: "multi_location", target: "push_notifications" },
+  { source: "sms_conversations", target: "push_notifications" },
+  { source: "reviews_reputation", target: "push_notifications" },
+
+  // Product → infrastructure
+  { source: "voice_agent", target: "vapi_infra" },
+  { source: "voice_agent", target: "twilio_infra" },
+  { source: "lead_capture", target: "supabase" },
+  { source: "sms_conversations", target: "twilio_infra" },
+  { source: "payment_capture", target: "stripe_infra" },
+  { source: "website", target: "vercel_infra" },
+  { source: "portal", target: "railway" },
+  { source: "portal", target: "supabase" },
+  { source: "pricing", target: "stripe_infra" },
+  { source: "appointment_booking", target: "zapier_infra" },
+
+  // Marketing
+  { source: "conduit", target: "blog_posts" },
+  { source: "conduit", target: "product_hunt" },
+  { source: "conduit", target: "ai_commercial" },
+  { source: "product_hunt", target: "first_signup" },
+  { source: "first_signup", target: "peerpush" },
+  { source: "blog_posts", target: "platform_distribution" },
+  { source: "blog_posts", target: "gsc" },
+  { source: "ai_commercial", target: "platform_distribution" },
+
+  // Clients & business
+  { source: "conduit", target: "first_client" },
+  { source: "conduit", target: "demo_line" },
+  { source: "conduit", target: "prospect_pipeline" },
+  { source: "first_client", target: "affiliate_chris" },
+  { source: "first_client", target: "affiliate_bobby" },
+  { source: "affiliate_system", target: "affiliate_chris" },
+  { source: "affiliate_system", target: "affiliate_bobby" },
+  { source: "demo_line", target: "twilio_infra" },
+  { source: "demo_line", target: "vapi_infra" },
+
+  // Platform → infrastructure
+  { source: "platform", target: "supabase" },
+  { source: "platform", target: "stripe_infra" },
+  { source: "platform", target: "twilio_infra" },
+  { source: "platform", target: "vapi_infra" },
 ];
 
-function getNodePos(node, w, h) {
-  return { x: node.x * w, y: node.y * h };
+/* ═══════════════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════════════ */
+function getRadius(node) {
+  if (node.id === "conduit") return 40;
+  if (node.size === 2) return 24;
+  return 17;
 }
 
+function splitLabel(label, maxChars) {
+  if (label.length <= maxChars) return [label];
+  const words = label.split(" ");
+  const lines = [];
+  let cur = "";
+  for (const w of words) {
+    if (cur && (cur + " " + w).length > maxChars) { lines.push(cur); cur = w; }
+    else cur = cur ? cur + " " + w : w;
+  }
+  if (cur) lines.push(cur);
+  return lines;
+}
+
+const CAT_ANGLES = { core: 0, infra: Math.PI * 0.4, business: Math.PI * 0.8, marketing: Math.PI * 1.2, clients: Math.PI * 1.6 };
+
+/* ═══════════════════════════════════════════════════════════════════
+   COMPONENT
+   ═══════════════════════════════════════════════════════════════════ */
 export default function NodeGraph() {
-  const svgRef = useRef(null);
-  const [dims, setDims] = useState({ w: 1400, h: 900 });
+  /* ── state ── */
+  const [dims, setDims] = useState({ w: 1200, h: 800 });
+  const [camera, _setCamera] = useState({ x: 0, y: 0, scale: 0.85 });
   const [selected, setSelected] = useState(null);
   const [hovered, setHovered] = useState(null);
-  const [filter, setFilter] = useState(null);
-  const [animate, setAnimate] = useState(false);
+  const [, setTick] = useState(0); // force re-renders from simulation
 
-  useEffect(() => {
-    const resize = () => {
-      const w = Math.min(window.innerWidth - 40, 1400);
-      const h = Math.max(window.innerHeight - 200, 700);
-      setDims({ w, h });
-    };
-    resize();
-    window.addEventListener("resize", resize);
-    setTimeout(() => setAnimate(true), 100);
-    return () => window.removeEventListener("resize", resize);
+  /* ── refs ── */
+  const svgRef = useRef(null);
+  const canvasRef = useRef(null);
+  const nodesRef = useRef([]);
+  const linksRef = useRef([]);
+  const simRef = useRef(null);
+  const cameraRef = useRef(camera);
+  const dimsRef = useRef(dims);
+  const rafRef = useRef(null);
+
+  // drag / pan / pinch state
+  const dragNodeRef = useRef(null);
+  const isPanRef = useRef(false);
+  const lastPtrRef = useRef({ x: 0, y: 0 });
+  const pointersRef = useRef(new Map());
+  const pinchDistRef = useRef(0);
+  const velRef = useRef([]);
+
+  const setCamera = useCallback((fn) => {
+    _setCamera(prev => {
+      const next = typeof fn === "function" ? fn(prev) : fn;
+      cameraRef.current = next;
+      return next;
+    });
   }, []);
 
-  const { w, h } = dims;
-  const nodeMap = {};
-  NODES.forEach(n => { nodeMap[n.id] = n; });
+  /* ── coordinate conversion: screen → simulation ── */
+  const screenToSim = useCallback((clientX, clientY) => {
+    const rect = svgRef.current.getBoundingClientRect();
+    const cam = cameraRef.current;
+    const d = dimsRef.current;
+    return {
+      x: (clientX - rect.left - cam.x - d.w / 2) / cam.scale,
+      y: (clientY - rect.top - cam.y - d.h / 2) / cam.scale,
+    };
+  }, []);
 
-  const filteredNodes = filter ? NODES.filter(n => n.cat === filter) : NODES;
-  const filteredIds = new Set(filteredNodes.map(n => n.id));
-  const filteredEdges = EDGES.filter(([a, b]) => filteredIds.has(a) && filteredIds.has(b));
-
-  const selectedNode = selected ? nodeMap[selected] : null;
-  const connectedToHover = new Set();
-  if (hovered) {
-    EDGES.forEach(([a, b]) => {
-      if (a === hovered) connectedToHover.add(b);
-      if (b === hovered) connectedToHover.add(a);
+  /* ════════════════════════════════════════════════════════════════
+     FORCE SIMULATION SETUP
+     ════════════════════════════════════════════════════════════════ */
+  useEffect(() => {
+    const nodes = NODE_DATA.map((d, i) => {
+      const copy = { ...d };
+      if (copy.id === "conduit") {
+        copy.fx = 0;
+        copy.fy = 0;
+      } else {
+        const base = CAT_ANGLES[copy.cat] || 0;
+        const spread = (Math.random() - 0.5) * 1.0;
+        const angle = base + spread;
+        const r = (copy.size === 2 ? 160 : 260) + Math.random() * 120;
+        copy.x = Math.cos(angle) * r;
+        copy.y = Math.sin(angle) * r;
+      }
+      return copy;
     });
+
+    const links = LINK_DATA.map(l => ({ ...l }));
+
+    nodesRef.current = nodes;
+    linksRef.current = links;
+
+    const sim = forceSimulation(nodes)
+      .force("link", forceLink(links).id(d => d.id).distance(110).strength(0.4))
+      .force("charge", forceManyBody().strength(-350))
+      .force("center", forceCenter(0, 0).strength(0.04))
+      .force("collision", forceCollide().radius(d => getRadius(d) + 14))
+      .alphaDecay(0.015)
+      .velocityDecay(0.35);
+
+    simRef.current = sim;
+
+    let needsRender = false;
+    sim.on("tick", () => { needsRender = true; });
+
+    function loop() {
+      if (needsRender) { needsRender = false; setTick(t => t + 1); }
+      rafRef.current = requestAnimationFrame(loop);
+    }
+    rafRef.current = requestAnimationFrame(loop);
+
+    return () => { sim.stop(); cancelAnimationFrame(rafRef.current); };
+  }, []);
+
+  /* ════════════════════════════════════════════════════════════════
+     RESIZE
+     ════════════════════════════════════════════════════════════════ */
+  useEffect(() => {
+    const onResize = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      setDims({ w, h });
+      dimsRef.current = { w, h };
+      if (canvasRef.current) { canvasRef.current.width = w; canvasRef.current.height = h; }
+    };
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  /* ════════════════════════════════════════════════════════════════
+     PARTICLE BACKGROUND (canvas)
+     ════════════════════════════════════════════════════════════════ */
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = Array.from({ length: 90 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.4 + 0.4,
+      speed: Math.random() * 0.25 + 0.05,
+      opacity: Math.random() * 0.25 + 0.05,
+      phase: Math.random() * Math.PI * 2,
+    }));
+
+    let id;
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const t = Date.now() * 0.001;
+      for (const p of particles) {
+        p.y -= p.speed;
+        if (p.y < -5) { p.y = canvas.height + 5; p.x = Math.random() * canvas.width; }
+        const a = p.opacity * (0.5 + 0.5 * Math.sin(t * 0.8 + p.phase));
+        ctx.fillStyle = `rgba(14,165,233,${a})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      id = requestAnimationFrame(animate);
+    }
+    id = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  /* ════════════════════════════════════════════════════════════════
+     POINTER / DRAG / PAN / ZOOM HANDLERS
+     ════════════════════════════════════════════════════════════════ */
+
+  const handleNodePointerDown = useCallback((e, nodeId) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const node = nodesRef.current.find(n => n.id === nodeId);
+    if (!node || !simRef.current) return;
+    dragNodeRef.current = nodeId;
+    node.fx = node.x;
+    node.fy = node.y;
+    simRef.current.alphaTarget(0.3).restart();
+    velRef.current = [];
+    svgRef.current?.setPointerCapture?.(e.pointerId);
+  }, []);
+
+  const handleBgPointerDown = useCallback((e) => {
+    if (dragNodeRef.current) return;
+    // if it's a second pointer → ignore for panning, pinch handled via pointersRef
+    if (pointersRef.current.size >= 1 && !pointersRef.current.has(e.pointerId)) {
+      pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      return;
+    }
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    isPanRef.current = true;
+    lastPtrRef.current = { x: e.clientX, y: e.clientY };
+  }, []);
+
+  const handlePointerMove = useCallback((e) => {
+    // update pointer map
+    if (pointersRef.current.has(e.pointerId)) {
+      pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    }
+
+    // PINCH ZOOM (2 pointers)
+    if (pointersRef.current.size === 2) {
+      const pts = Array.from(pointersRef.current.values());
+      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      if (pinchDistRef.current > 0) {
+        const factor = dist / pinchDistRef.current;
+        setCamera(prev => ({
+          ...prev,
+          scale: Math.max(0.15, Math.min(4, prev.scale * factor)),
+        }));
+      }
+      pinchDistRef.current = dist;
+      return;
+    }
+
+    // NODE DRAG
+    if (dragNodeRef.current) {
+      const node = nodesRef.current.find(n => n.id === dragNodeRef.current);
+      if (!node) return;
+      const sim = screenToSim(e.clientX, e.clientY);
+      // velocity tracking for throw
+      velRef.current.push({ x: sim.x - (node.fx || 0), y: sim.y - (node.fy || 0), t: Date.now() });
+      if (velRef.current.length > 5) velRef.current.shift();
+      node.fx = sim.x;
+      node.fy = sim.y;
+      return;
+    }
+
+    // PAN
+    if (isPanRef.current) {
+      const dx = e.clientX - lastPtrRef.current.x;
+      const dy = e.clientY - lastPtrRef.current.y;
+      lastPtrRef.current = { x: e.clientX, y: e.clientY };
+      setCamera(prev => ({ ...prev, x: prev.x + dx, y: prev.y + dy }));
+    }
+  }, [screenToSim, setCamera]);
+
+  const handlePointerUp = useCallback((e) => {
+    pointersRef.current.delete(e.pointerId);
+    pinchDistRef.current = 0;
+
+    // release dragged node with momentum
+    if (dragNodeRef.current) {
+      const node = nodesRef.current.find(n => n.id === dragNodeRef.current);
+      if (node) {
+        // compute throw velocity from recent samples
+        const samples = velRef.current;
+        if (samples.length >= 2) {
+          const last = samples[samples.length - 1];
+          const prev = samples[Math.max(0, samples.length - 3)];
+          const dt = (last.t - prev.t) || 1;
+          node.vx = (last.x + prev.x) / 2 * (1000 / dt) * 0.04;
+          node.vy = (last.y + prev.y) / 2 * (1000 / dt) * 0.04;
+        }
+        node.fx = null;
+        node.fy = null;
+        // keep center node fixed
+        if (node.id === "conduit") { node.fx = 0; node.fy = 0; }
+      }
+      dragNodeRef.current = null;
+      simRef.current?.alphaTarget(0);
+    }
+    isPanRef.current = false;
+  }, []);
+
+  const handleWheel = useCallback((e) => {
+    e.preventDefault();
+    const rect = svgRef.current.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const factor = e.deltaY > 0 ? 0.92 : 1.08;
+
+    setCamera(prev => {
+      const newScale = Math.max(0.15, Math.min(4, prev.scale * factor));
+      const ratio = newScale / prev.scale;
+      const dx = mx - prev.x - dimsRef.current.w / 2;
+      const dy = my - prev.y - dimsRef.current.h / 2;
+      return { x: prev.x - dx * (ratio - 1), y: prev.y - dy * (ratio - 1), scale: newScale };
+    });
+  }, [setCamera]);
+
+  // attach wheel with { passive: false } to allow preventDefault
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    svg.addEventListener("wheel", handleWheel, { passive: false });
+    return () => svg.removeEventListener("wheel", handleWheel);
+  }, [handleWheel]);
+
+  const handleNodeClick = useCallback((nodeId) => {
+    if (dragNodeRef.current) return;
+    setSelected(prev => prev === nodeId ? null : nodeId);
+  }, []);
+
+  /* ════════════════════════════════════════════════════════════════
+     COMPUTED VALUES
+     ════════════════════════════════════════════════════════════════ */
+  const connectedNodes = new Set();
+  if (hovered) {
+    connectedNodes.add(hovered);
+    for (const link of linksRef.current) {
+      const sId = typeof link.source === "object" ? link.source.id : link.source;
+      const tId = typeof link.target === "object" ? link.target.id : link.target;
+      if (sId === hovered) connectedNodes.add(tId);
+      if (tId === hovered) connectedNodes.add(sId);
+    }
   }
 
+  const selectedNode = selected ? nodesRef.current.find(n => n.id === selected) : null;
+  const { w, h } = dims;
+
+  /* ════════════════════════════════════════════════════════════════
+     RENDER
+     ════════════════════════════════════════════════════════════════ */
   return (
-    <div style={{ background: "#0a0a0a", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", color: "#fff", position: "relative", overflow: "hidden" }}>
-      {/* Grid background */}
-      <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(0,212,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.02) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
+    <div style={{ background: "#030712", minHeight: "100vh", overflow: "hidden", position: "relative", fontFamily: "'DM Sans', sans-serif", color: "#fff" }}>
+
+      {/* Keyframe animations */}
+      <style>{`
+        @keyframes dashMove { to { stroke-dashoffset: -33; } }
+        @keyframes centerPulse {
+          0%, 100% { r: 45; stroke-opacity: 0.3; }
+          50% { r: 58; stroke-opacity: 0.06; }
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateX(-50%) translateY(24px); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+      `}</style>
+
+      {/* Particle canvas */}
+      <canvas ref={canvasRef} style={{ position: "fixed", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0 }} />
 
       {/* Header */}
-      <div style={{ position: "relative", zIndex: 10, padding: "32px 32px 0" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-              <span style={{ fontSize: 22 }}>⚡</span>
-              <span style={{ fontFamily: "'Sora', sans-serif", fontWeight: 700, fontSize: 22 }}>Conduit</span>
-              <span style={{ fontFamily: "'Sora', sans-serif", fontWeight: 700, fontSize: 22, background: "linear-gradient(135deg, #00d4ff, #0066ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>AI</span>
-              <span style={{ fontSize: 14, color: "rgba(255,255,255,0.3)", marginLeft: 8 }}>Journey Map</span>
-            </div>
-            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)" }}>Every milestone from founding to the future. Click any node to explore.</p>
-          </div>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            <button onClick={() => setFilter(null)} style={{ padding: "6px 14px", borderRadius: 100, fontSize: 11, fontWeight: 600, border: "1px solid", cursor: "pointer", background: !filter ? "rgba(255,255,255,0.1)" : "transparent", borderColor: !filter ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.06)", color: !filter ? "#fff" : "rgba(255,255,255,0.4)" }}>All</button>
-            {Object.entries(CATEGORIES).map(([key, { color, label }]) => (
-              <button key={key} onClick={() => setFilter(filter === key ? null : key)} style={{
-                padding: "6px 14px", borderRadius: 100, fontSize: 11, fontWeight: 600, cursor: "pointer",
-                background: filter === key ? `${color}15` : "transparent",
-                border: `1px solid ${filter === key ? `${color}50` : "rgba(255,255,255,0.06)"}`,
-                color: filter === key ? color : "rgba(255,255,255,0.4)",
-              }}>{label}</button>
-            ))}
-          </div>
+      <div style={{ position: "relative", zIndex: 20, padding: "28px 28px 0", animation: "fadeIn 1s ease" }}>
+        <h1 style={{ fontFamily: "'Sora', sans-serif", fontSize: 32, fontWeight: 700, margin: 0, letterSpacing: "-0.02em" }}>
+          The Journey
+        </h1>
+        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", marginTop: 6 }}>
+          Every node represents a milestone. Drag them around.
+        </p>
+
+        {/* Category legend */}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 16 }}>
+          {Object.entries(CATEGORIES).map(([key, { color, label }]) => (
+            <span key={key} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "rgba(255,255,255,0.5)" }}>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: color, boxShadow: `0 0 6px ${color}60` }} />
+              {label}
+            </span>
+          ))}
         </div>
       </div>
 
       {/* SVG Graph */}
-      <div style={{ position: "relative", zIndex: 5, padding: "16px" }}>
-        <svg ref={svgRef} width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ display: "block" }}>
-          <defs>
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="4" result="blur" />
-              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-            </filter>
-            {Object.entries(CATEGORIES).map(([key, { color }]) => (
-              <radialGradient key={key} id={`grad-${key}`} cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor={color} stopOpacity="0.3" />
-                <stop offset="100%" stopColor={color} stopOpacity="0" />
-              </radialGradient>
-            ))}
-          </defs>
+      <svg
+        ref={svgRef}
+        width={w}
+        height={h}
+        style={{ display: "block", position: "relative", zIndex: 10, touchAction: "none", cursor: isPanRef.current ? "grabbing" : "grab" }}
+        onPointerDown={handleBgPointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+      >
+        <defs>
+          {/* Glow filter */}
+          <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="12" />
+          </filter>
+        </defs>
 
-          {/* Edges */}
-          {filteredEdges.map(([a, b], i) => {
-            const p1 = getNodePos(nodeMap[a], w, h);
-            const p2 = getNodePos(nodeMap[b], w, h);
-            const isHoverConnected = hovered && (a === hovered || b === hovered);
-            const midX = (p1.x + p2.x) / 2;
-            const midY = (p1.y + p2.y) / 2 - 20;
-            return (
-              <path key={i}
-                d={`M ${p1.x} ${p1.y} Q ${midX} ${midY} ${p2.x} ${p2.y}`}
-                fill="none"
-                stroke={isHoverConnected ? "rgba(0,212,255,0.4)" : "rgba(255,255,255,0.06)"}
-                strokeWidth={isHoverConnected ? 2 : 1}
-                style={{
-                  opacity: animate ? 1 : 0,
-                  transition: `opacity 0.8s ease ${i * 0.03}s, stroke 0.3s`,
-                }}
-              />
-            );
-          })}
+        <g transform={`translate(${camera.x + w / 2}, ${camera.y + h / 2}) scale(${camera.scale})`}>
 
-          {/* Nodes */}
-          {filteredNodes.map((node, i) => {
-            const pos = getNodePos(node, w, h);
-            const cat = CATEGORIES[node.cat];
-            const isSelected = selected === node.id;
-            const isHovered = hovered === node.id;
-            const isConnected = connectedToHover.has(node.id);
-            const dimmed = hovered && !isHovered && !isConnected;
-            const r = isSelected ? 18 : isHovered ? 16 : 12;
+          {/* ── LINKS ── */}
+          {linksRef.current.map((link, i) => {
+            const src = typeof link.source === "object" ? link.source : null;
+            const tgt = typeof link.target === "object" ? link.target : null;
+            if (!src || !tgt) return null;
+            const isHighlighted = hovered && (src.id === hovered || tgt.id === hovered);
+            const dimmed = hovered && !isHighlighted;
+            const color = CATEGORIES[src.cat]?.color || "#fff";
 
             return (
-              <g key={node.id}
-                style={{
-                  cursor: "pointer",
-                  opacity: animate ? (dimmed ? 0.25 : 1) : 0,
-                  transition: `opacity 0.6s ease ${i * 0.04}s, transform 0.3s`,
-                }}
-                onClick={() => setSelected(isSelected ? null : node.id)}
-                onMouseEnter={() => setHovered(node.id)}
-                onMouseLeave={() => setHovered(null)}
-              >
-                {/* Glow */}
-                <circle cx={pos.x} cy={pos.y} r={r * 2.5} fill={`url(#grad-${node.cat})`} style={{ opacity: isHovered || isSelected ? 1 : 0, transition: "opacity 0.3s" }} />
-                {/* Ring */}
-                <circle cx={pos.x} cy={pos.y} r={r + 3} fill="none" stroke={cat.color} strokeWidth={1} strokeOpacity={isSelected ? 0.5 : 0} style={{ transition: "all 0.3s" }} />
-                {/* Node */}
-                <circle cx={pos.x} cy={pos.y} r={r} fill={cat.color} fillOpacity={isSelected ? 0.9 : 0.7} filter={isHovered ? "url(#glow)" : ""} style={{ transition: "all 0.3s" }} />
-                {/* Inner dot */}
-                <circle cx={pos.x} cy={pos.y} r={3} fill="#fff" fillOpacity={0.8} />
-                {/* Label */}
-                <text x={pos.x} y={pos.y + r + 16} textAnchor="middle" fill={isHovered || isSelected ? "#fff" : "rgba(255,255,255,0.55)"} fontSize={11} fontWeight={600} fontFamily="'DM Sans', sans-serif" style={{ transition: "fill 0.3s", pointerEvents: "none" }}>
-                  {node.label}
-                </text>
-                <text x={pos.x} y={pos.y + r + 30} textAnchor="middle" fill="rgba(255,255,255,0.25)" fontSize={10} fontFamily="'DM Sans', sans-serif" style={{ pointerEvents: "none" }}>
-                  {node.date}
-                </text>
+              <g key={`link-${i}`} style={{ opacity: dimmed ? 0.08 : 1, transition: "opacity 0.3s" }}>
+                {/* base line */}
+                <line
+                  x1={src.x} y1={src.y} x2={tgt.x} y2={tgt.y}
+                  stroke={isHighlighted ? color : "rgba(255,255,255,0.06)"}
+                  strokeWidth={isHighlighted ? 1.5 : 0.8}
+                  style={{ transition: "stroke 0.3s, stroke-width 0.3s" }}
+                />
+                {/* animated pulse */}
+                <line
+                  x1={src.x} y1={src.y} x2={tgt.x} y2={tgt.y}
+                  stroke={color}
+                  strokeWidth={1}
+                  strokeOpacity={isHighlighted ? 0.4 : 0.1}
+                  strokeDasharray="3 30"
+                  style={{ animation: `dashMove ${2.5 + (i % 7) * 0.4}s linear infinite`, transition: "stroke-opacity 0.3s" }}
+                />
               </g>
             );
           })}
-        </svg>
-      </div>
 
-      {/* Detail Panel */}
-      {selectedNode && (
-        <div style={{
-          position: "fixed", bottom: 32, left: "50%", transform: "translateX(-50%)",
-          maxWidth: 520, width: "calc(100% - 48px)", padding: "24px 28px",
-          borderRadius: 16, background: "rgba(10,10,10,0.95)", border: `1px solid ${CATEGORIES[selectedNode.cat].color}30`,
-          backdropFilter: "blur(20px)", zIndex: 50,
-          animation: "slideUp 0.3s ease",
-        }}>
-          <style>{`@keyframes slideUp { from { opacity:0; transform: translateX(-50%) translateY(20px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }`}</style>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: 12 }}>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: CATEGORIES[selectedNode.cat].color }} />
-                <span style={{ fontSize: 11, color: CATEGORIES[selectedNode.cat].color, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 }}>{CATEGORIES[selectedNode.cat].label}</span>
-                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>{selectedNode.date}</span>
+          {/* ── NODES ── */}
+          {nodesRef.current.map((node) => {
+            const r = getRadius(node);
+            const cat = CATEGORIES[node.cat];
+            const isCenter = node.id === "conduit";
+            const isHov = hovered === node.id;
+            const isSel = selected === node.id;
+            const isConn = connectedNodes.has(node.id);
+            const dimmed = hovered && !isHov && !isConn;
+            const active = isHov || isSel;
+            const lines = splitLabel(node.label, isCenter ? 20 : 15);
+
+            return (
+              <g
+                key={node.id}
+                transform={`translate(${node.x || 0},${node.y || 0})`}
+                style={{ cursor: "grab", opacity: dimmed ? 0.15 : 1, transition: "opacity 0.3s" }}
+                onPointerDown={(e) => handleNodePointerDown(e, node.id)}
+                onPointerEnter={() => setHovered(node.id)}
+                onPointerLeave={() => setHovered(null)}
+                onClick={() => handleNodeClick(node.id)}
+              >
+                {/* Outer soft glow */}
+                <circle r={r * 2.5} fill={cat.color} opacity={active ? 0.12 : 0.03} filter="url(#softGlow)" />
+
+                {/* Center node pulsing ring */}
+                {isCenter && (
+                  <>
+                    <circle r={45} fill="none" stroke={cat.color} strokeWidth={1.5} strokeOpacity={0.3}>
+                      <animate attributeName="r" values="42;56;42" dur="3s" repeatCount="indefinite" />
+                      <animate attributeName="stroke-opacity" values="0.3;0.06;0.3" dur="3s" repeatCount="indefinite" />
+                    </circle>
+                    <circle r={55} fill="none" stroke={cat.color} strokeWidth={1} strokeOpacity={0.1}>
+                      <animate attributeName="r" values="50;68;50" dur="4s" repeatCount="indefinite" />
+                      <animate attributeName="stroke-opacity" values="0.1;0.02;0.1" dur="4s" repeatCount="indefinite" />
+                    </circle>
+                  </>
+                )}
+
+                {/* Glass body */}
+                <circle
+                  r={r}
+                  fill="rgba(3,7,18,0.85)"
+                  stroke={active ? `${cat.color}80` : "rgba(255,255,255,0.08)"}
+                  strokeWidth={active ? 2 : 1}
+                  filter={active ? "url(#glow)" : undefined}
+                  style={{ transition: "stroke 0.25s, stroke-width 0.25s" }}
+                />
+
+                {/* Color ring */}
+                <circle
+                  r={r - 2}
+                  fill="none"
+                  stroke={cat.color}
+                  strokeWidth={active ? 1.5 : 0.8}
+                  strokeOpacity={active ? 0.7 : 0.25}
+                  style={{ transition: "stroke-opacity 0.25s, stroke-width 0.25s" }}
+                />
+
+                {/* Inner color wash */}
+                <circle r={r * 0.55} fill={cat.color} opacity={0.08} />
+
+                {/* Center dot */}
+                <circle r={isCenter ? 6 : 3} fill={cat.color} opacity={0.9} />
+
+                {/* Label lines */}
+                {lines.map((line, li) => (
+                  <text
+                    key={li}
+                    x={0}
+                    y={r + 14 + li * 13}
+                    textAnchor="middle"
+                    fill={active ? "#fff" : "rgba(255,255,255,0.55)"}
+                    fontSize={isCenter ? 12 : 10}
+                    fontWeight={600}
+                    fontFamily="'DM Sans', sans-serif"
+                    style={{ pointerEvents: "none", transition: "fill 0.25s" }}
+                  >
+                    {line}
+                  </text>
+                ))}
+              </g>
+            );
+          })}
+        </g>
+      </svg>
+
+      {/* Detail panel */}
+      {selectedNode && (() => {
+        const cat = CATEGORIES[selectedNode.cat];
+        return (
+          <div style={{
+            position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)",
+            maxWidth: 500, width: "calc(100% - 40px)", padding: "22px 26px", borderRadius: 16,
+            background: "rgba(3,7,18,0.92)", border: `1px solid ${cat.color}30`,
+            backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", zIndex: 50,
+            animation: "slideUp 0.3s ease",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: 10 }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: cat.color, boxShadow: `0 0 8px ${cat.color}80`, display: "inline-block" }} />
+                  <span style={{ fontSize: 11, color: cat.color, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 }}>{cat.label}</span>
+                  <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>{selectedNode.date}</span>
+                </div>
+                <h3 style={{ fontFamily: "'Sora', sans-serif", fontSize: 18, fontWeight: 700, margin: 0 }}>{selectedNode.label}</h3>
               </div>
-              <h3 style={{ fontFamily: "'Sora', sans-serif", fontSize: 18, fontWeight: 700 }}>{selectedNode.label}</h3>
+              <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: 20, padding: 4, lineHeight: 1 }}>
+                &times;
+              </button>
             </div>
-            <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: 18, padding: 4 }}>✕</button>
+            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.55)", lineHeight: 1.7, margin: 0 }}>
+              {selectedNode.detail}
+            </p>
           </div>
-          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.55)", lineHeight: 1.7 }}>{selectedNode.detail}</p>
-        </div>
-      )}
+        );
+      })()}
 
-      {/* Stats Bar */}
+      {/* Mobile hint */}
       <div style={{
-        position: "relative", zIndex: 10, padding: "0 32px 32px",
-        display: "flex", gap: 32, flexWrap: "wrap",
+        position: "fixed", bottom: selectedNode ? 140 : 20, left: "50%", transform: "translateX(-50%)",
+        fontSize: 11, color: "rgba(255,255,255,0.2)", zIndex: 15, pointerEvents: "none",
+        transition: "bottom 0.3s",
       }}>
-        {[
-          { label: "Total Milestones", value: NODES.length },
-          { label: "Days Since Founding", value: Math.floor((new Date() - new Date("2025-12-01")) / 86400000) },
-          { label: "Features Shipped", value: "8 today" },
-          { label: "API Endpoints", value: "34 live" },
-          { label: "Lines of Code", value: "20,000+" },
-        ].map((stat, i) => (
-          <div key={i}>
-            <div style={{ fontFamily: "'Sora', sans-serif", fontSize: 24, fontWeight: 700, background: "linear-gradient(135deg, #00d4ff, #fff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{stat.value}</div>
-            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.3)" }}>{stat.label}</div>
-          </div>
-        ))}
+        Scroll to zoom &middot; Drag to pan &middot; Grab nodes to move
       </div>
     </div>
   );
