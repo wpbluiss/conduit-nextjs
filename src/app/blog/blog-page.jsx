@@ -9,6 +9,41 @@ export const metadata = {
 
 const posts = [
   {
+    slug: "solo-operator-ai-receptionist-2026",
+    title: "Why Every Solo Operator Needs an AI Receptionist in 2026",
+    description: "Freelancers, real estate agents, and solo contractors can't answer every call. Learn how an AI receptionist captures every lead for just $39/mo.",
+    date: "March 2, 2026",
+    readTime: "8 min read",
+  },
+  {
+    slug: "ai-voice-agents-replacing-answering-services",
+    title: "How AI Voice Agents Are Replacing Traditional Answering Services",
+    description: "Traditional answering services cost $200-500/mo with limited hours and human error. AI voice agents offer 24/7 coverage at a fraction of the cost.",
+    date: "March 2, 2026",
+    readTime: "9 min read",
+  },
+  {
+    slug: "hidden-cost-missed-calls-service-businesses",
+    title: "The Hidden Cost of Missed Calls: How Service Businesses Lose $100K+ Per Year",
+    description: "The average missed call costs service businesses $200-500 in lost revenue. At 5 missed calls per week, that's $100K+ per year. See the data and the fix.",
+    date: "March 2, 2026",
+    readTime: "9 min read",
+  },
+  {
+    slug: "ai-call-handling-salons-barbershops-guide",
+    title: "AI Call Handling for Salons and Barbershops: A Complete Guide",
+    description: "A complete guide to AI call handling for salons and barbershops. Automate booking, handle walk-in questions, and support multilingual callers.",
+    date: "March 2, 2026",
+    readTime: "10 min read",
+  },
+  {
+    slug: "setup-ai-phone-agent-10-minutes",
+    title: "How to Set Up Your AI Phone Agent in Under 10 Minutes",
+    description: "A step-by-step guide to setting up your AI phone agent with Conduit AI. From signup to live calls in under 10 minutes. No technical skills required.",
+    date: "March 2, 2026",
+    readTime: "7 min read",
+  },
+  {
     slug: "roofing-leads-after-storm-season",
     title: "Storm Season Is Coming: How Roofers Lose $50K+ in Leads Every Hurricane Season",
     description: "Storm events spike roofing call volume 10x overnight. Most go unanswered. Here's how smart roofing companies capture every emergency lead automatically.",
