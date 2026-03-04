@@ -31,11 +31,8 @@ export default function Navbar() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <Logo size={32} />
-          <span className="font-[var(--font-heading)] font-bold text-lg tracking-tight">
-            Conduit <span className="text-gradient">AI</span>
-          </span>
+        <Link href="/" className="flex items-center group">
+          <Logo size={32} variant="full" />
         </Link>
 
         <div className="hidden md:flex items-center gap-8">

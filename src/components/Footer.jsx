@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
           {/* Logo + tagline */}
           <div className="flex items-center gap-3">
-            <Logo size={28} />
+            <Logo size={28} variant="full" />
             <span className="text-sm text-[var(--muted)]">
               Never miss a lead again.
             </span>

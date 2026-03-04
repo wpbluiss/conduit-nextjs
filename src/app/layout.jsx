@@ -91,7 +91,7 @@ const jsonLd = {
       '@type': 'Organization',
       name: 'Conduit AI LLC',
       url: 'https://conduitai.io',
-      logo: 'https://conduitai.io/logo.png',
+      logo: 'https://conduitai.io/logo.svg',
       contactPoint: {
         '@type': 'ContactPoint',
         telephone: '+1-561-730-3316',

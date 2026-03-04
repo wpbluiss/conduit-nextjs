@@ -22,9 +22,7 @@ export default function AffiliatePage() {
       <nav style={s.nav}>
         <div style={s.navInner}>
           <a href="/" style={s.logo}>
-            <span style={{ fontSize: 20 }}>⚡</span>
-            <span style={s.logoText}>Conduit</span>
-            <span style={s.logoAi}>AI</span>
+            <img src="/logo.svg" alt="Conduit AI" style={{ height: 28 }} />
           </a>
           <div style={s.navLinks}>
             <a href="/#features" style={s.navLink}>Features</a>
@@ -232,9 +230,7 @@ export default function AffiliatePage() {
       <footer style={s.footer}>
         <div style={s.footerInner}>
           <a href="/" style={s.footerLogo}>
-            <span style={{ fontSize: 18 }}>⚡</span>
-            <span style={s.logoText}>Conduit</span>
-            <span style={s.logoAi}>AI</span>
+            <img src="/logo.svg" alt="Conduit AI" style={{ height: 24 }} />
           </a>
           <div style={s.footerLinks}>
             <a href="/#pricing" style={s.footerLink}>Pricing</a>

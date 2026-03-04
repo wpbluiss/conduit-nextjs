@@ -494,9 +494,7 @@ export default function Home() {
       <nav style={styles.nav}>
         <div style={styles.navInner}>
           <a href="#" style={styles.logo}>
-            <span style={styles.logoIcon}>⚡</span>
-            <span style={styles.logoText}>Conduit</span>
-            <span style={styles.logoAi}>AI</span>
+            <img src="/logo.svg" alt="Conduit AI" style={{ height: 28 }} />
           </a>
           <div style={styles.navLinks}>
             <a href="#how-it-works" style={styles.navLink}>How it Works</a>
@@ -874,9 +872,7 @@ export default function Home() {
         <div style={styles.footerInner}>
           <div style={styles.footerCol}>
             <div style={styles.logo}>
-              <span style={styles.logoIcon}>⚡</span>
-              <span style={styles.logoText}>Conduit</span>
-              <span style={styles.logoAi}>AI</span>
+              <img src="/logo.svg" alt="Conduit AI" style={{ height: 24 }} />
             </div>
             <p style={styles.footerDesc}>
               The only AI voice platform built for everyone.
