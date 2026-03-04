@@ -3,9 +3,16 @@ export default function sitemap() {
 
   const blogSlugs = [
     'after-hours-call-answering-small-business',
+    'after-hours-lead-capture-guide',
+    'ai-call-handling-salons-barbershops-guide',
     'ai-lead-scoring-service-businesses',
     'ai-receptionist-vs-voicemail',
+    'ai-voice-agents-replacing-answering-services',
+    'ai-voice-agents-replacing-answering-services-2026',
+    'ai-vs-human-receptionist-cost',
     'answering-service-vs-ai-receptionist-cost',
+    'barber-shop-marketing-ai-2026',
+    'barbershop-ai-receptionist',
     'bilingual-answering-service-spanish',
     'call-forwarding-setup-ai-receptionist',
     'dental-office-missed-calls-patients',
@@ -15,7 +22,10 @@ export default function sitemap() {
     'first-response-wins-lead-response-time',
     'google-reviews-automated-after-service',
     'google-reviews-automation-service-business',
+    'hidden-cost-missed-calls-service-businesses',
     'how-plumbers-lose-revenue-missed-calls',
+    'hvac-missed-calls-revenue',
+    'hvac-missed-calls-true-cost',
     'hvac-summer-call-volume',
     'lead-scoring-service-business',
     'med-spa-client-booking-ai',
@@ -26,7 +36,10 @@ export default function sitemap() {
     'roofing-leads-after-storm-season',
     'salon-no-show-rate-fix',
     'sentiment-analysis-customer-calls',
+    'setup-ai-phone-agent-10-minutes',
     'solo-contractor-ai-receptionist',
+    'solo-operator-ai-receptionist-2026',
+    'why-callers-wont-leave-voicemail-plumbers',
   ];
 
   return [

@@ -48,6 +48,10 @@ export const metadata = {
       'max-snippet': -1,
     },
   },
+  icons: {
+    icon: '/icon.svg',
+    apple: '/icon.svg',
+  },
   alternates: {
     canonical: 'https://conduitai.io',
   },

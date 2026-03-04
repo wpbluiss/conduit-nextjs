@@ -3,6 +3,11 @@ import { track } from '@vercel/analytics';
 import Link from "next/link";
 
 const posts = [
+  { slug: "ai-voice-agents-replacing-answering-services-2026", title: "How AI Voice Agents Are Replacing Traditional Answering Services in 2026", excerpt: "Traditional answering services can't keep up. Learn why AI voice agents offer better accuracy, 24/7 availability, and 60% lower costs for businesses.", date: "March 3, 2026", readTime: "9 min read" },
+  { slug: "hvac-missed-calls-true-cost", title: "The True Cost of Missed Calls for HVAC Companies (And How to Fix It)", excerpt: "HVAC companies miss 40-62% of calls during peak season. Here's the real dollar cost per missed call — and how AI lead capture solves it.", date: "March 3, 2026", readTime: "8 min read" },
+  { slug: "barbershop-ai-receptionist", title: "Why Every Barbershop Needs an AI Receptionist", excerpt: "You can't answer the phone mid-fade. Learn how AI receptionists help barbershops capture every booking, answer pricing questions, and grow their client base.", date: "March 3, 2026", readTime: "7 min read" },
+  { slug: "ai-vs-human-receptionist-cost", title: "AI vs Human Receptionists: A Cost Comparison for Small Businesses", excerpt: "Full-time receptionist: $40K+/yr. Answering service: $500/mo. AI receptionist: $20-100/mo. Here's the complete cost breakdown for small businesses.", date: "March 3, 2026", readTime: "8 min read" },
+  { slug: "after-hours-lead-capture-guide", title: "How to Capture More Leads After Hours Without Hiring Night Staff", excerpt: "35-50% of calls happen outside business hours. 80% of those callers won't leave a voicemail. Here's how to capture every after-hours lead automatically.", date: "March 3, 2026", readTime: "8 min read" },
   { slug: "solo-operator-ai-receptionist-2026", title: "Why Every Solo Operator Needs an AI Receptionist in 2026", excerpt: "Freelancers, real estate agents, and solo contractors can't answer every call. Learn how an AI receptionist captures every lead for just $39/mo.", date: "March 2, 2026", readTime: "8 min read" },
   { slug: "ai-voice-agents-replacing-answering-services", title: "How AI Voice Agents Are Replacing Traditional Answering Services", excerpt: "Traditional answering services cost $200-500/mo with limited hours and human error. AI voice agents offer 24/7 coverage at a fraction of the cost.", date: "March 2, 2026", readTime: "9 min read" },
   { slug: "hidden-cost-missed-calls-service-businesses", title: "The Hidden Cost of Missed Calls: How Service Businesses Lose $100K+ Per Year", excerpt: "The average missed call costs service businesses $200-500 in lost revenue. At 5 missed calls per week, that's $100K+ per year. See the data and the fix.", date: "March 2, 2026", readTime: "9 min read" },
@@ -27,7 +32,7 @@ export default function BlogPage() {
       <nav style={{ position: "sticky", top: 0, zIndex: 100, background: "rgba(10,10,10,0.85)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
         <div style={{ maxWidth: 900, margin: "0 auto", padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", color: "#fff" }}>
-            <span style={{ fontSize: 20 }}>⚡</span>
+            <img src="/icon.svg" alt="Conduit AI" width={28} height={28} style={{ borderRadius: 8 }} />
             <span style={{ fontFamily: "'Sora', sans-serif", fontWeight: 700, fontSize: 18 }}>Conduit</span>
             <span style={{ fontFamily: "'Sora', sans-serif", fontWeight: 700, fontSize: 18, background: "linear-gradient(135deg, #00d4ff, #0066ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>AI</span>
           </Link>

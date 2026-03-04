@@ -19,7 +19,7 @@ export default function BlogPost() {
       {/* Nav */}
       <nav style={ { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 40px", borderBottom: "1px solid rgba(255,255,255,0.06)", maxWidth: 1200, margin: "0 auto" } }>
         <a href="/" style={ { display: "flex", alignItems: "center", gap: 10, fontSize: 22, fontWeight: 700, textDecoration: "none", color: "#fff" } }>
-          <span>⚡</span>
+          <img src="/icon.svg" alt="Conduit AI" width={28} height={28} style={{ borderRadius: 8 }} />
           <span>Conduit</span>
           <span style={ { background: "linear-gradient(135deg, #00d4ff, #0066ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" } }>AI</span>
         </a>
