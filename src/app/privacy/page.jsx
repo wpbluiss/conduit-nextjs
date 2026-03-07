@@ -46,7 +46,7 @@ export default function PrivacyPage() {
         <P>We use the information we collect to: provide, operate, and maintain our AI lead recovery service; process transactions and send related information; send you notifications about captured leads; respond to your comments, questions, and requests; monitor and analyze usage trends to improve our service; detect, prevent, and address technical issues and fraud; and communicate with you about products, services, and events.</P>
 
         <H2>4. Sharing Your Information</H2>
-        <P>We do not sell your personal information. We may share information with: service providers who assist in operating our platform (Twilio for telephony, Stripe for payments, Supabase for data storage); law enforcement if required by law; and business partners with your consent.</P>
+        <P>We do not sell your personal information. We may share information with: service providers including Vapi AI (vapi.ai) for AI voice processing, OpenAI (openai.com) for language responses, Twilio (twilio.com) for telephony, Stripe (stripe.com) for payments, and Supabase (supabase.com) for data storage; law enforcement if required by law; and business partners with your consent.</P>
 
         <H2>5. Data Security</H2>
         <P>We implement industry-standard security measures to protect your information. All data is encrypted in transit and at rest. However, no method of electronic transmission or storage is 100% secure.</P>
