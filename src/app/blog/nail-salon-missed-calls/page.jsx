@@ -1,184 +1,185 @@
-import TrackClick from '../../../components/TrackClick';
+import TrackClick from "../../../components/TrackClick";
 
 export const metadata = {
-  title: 'How Nail Salons Lose $2,000/Month to Missed Calls (And How to Stop It) | Conduit AI',
-  description: 'Nail salons miss 40% of booking calls while doing nails. See exactly how much revenue that costs and how an AI receptionist fixes it for $39/month.',
-  keywords: 'nail salon missed calls, nail salon phone system, AI receptionist nail salon, nail salon booking automation, nail salon appointment calls',
+  title: "How Nail Salons Lose $2,000 Per Month to Missed Calls | Conduit AI",
+  description: "Nail salons miss 40 percent of booking calls while doing nails. See how much revenue that costs and how an AI receptionist fixes it for $39 per month.",
+  keywords: "nail salon missed calls, nail salon phone system, AI receptionist nail salon, nail salon booking automation, nail salon appointment calls",
   openGraph: {
-    title: 'How Nail Salons Lose $2,000/Month to Missed Calls (And How to Stop It)',
-    description: 'Nail salons miss 40% of booking calls while doing nails. See exactly how much revenue that costs and how an AI receptionist fixes it for $39/month.',
-    url: 'https://conduitai.io/blog/nail-salons/nail-salon-missed-calls',
-    siteName: 'Conduit AI',
-    type: 'article',
-    publishedTime: '2026-03-09T00:00:00Z',
+    title: "How Nail Salons Lose $2,000 Per Month to Missed Calls | Conduit AI",
+    description: "Nail salons miss 40 percent of booking calls while doing nails. See how much revenue that costs and how an AI receptionist fixes it for $39 per month.",
+    url: "https://conduitai.io/blog/nail-salon-missed-calls",
+    siteName: "Conduit AI",
+    type: "article",
   },
 };
 
 export default function NailSalonMissedCalls() {
   return (
-    <div style={{ backgroundColor: '#0a0a0a', minHeight: '100vh', color: '#e5e5e5', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ backgroundColor: "#0a0a0a", minHeight: "100vh", color: "#ffffff", fontFamily: "'Inter', sans-serif" }}>
 
-      {/* Nav */}
-      <nav style={{ borderBottom: '1px solid #1f1f1f', padding: '0 24px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, backgroundColor: '#0a0a0a', zIndex: 50 }}>
-        <a href="/" style={{ fontSize: '18px', fontWeight: '700', color: '#ffffff', textDecoration: 'none', letterSpacing: '-0.5px' }}>
-          Conduit <span style={{ color: '#7c3aed' }}>AI</span>
+      {/* NAV */}
+      <nav style={{ borderBottom: "1px solid #1a1a1a", padding: "0 24px", height: "64px", display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: "1200px", margin: "0 auto" }}>
+        <a href="/" style={{ textDecoration: "none" }}>
+          <span style={{ fontSize: "20px", fontWeight: "700", color: "#ffffff" }}>Conduit</span>
+          <span style={{ fontSize: "20px", fontWeight: "700", color: "#7c3aed" }}>AI</span>
         </a>
-        <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-          <a href="/blog" style={{ color: '#a3a3a3', textDecoration: 'none', fontSize: '14px' }}>Blog</a>
-          <a href="/#pricing" style={{ color: '#a3a3a3', textDecoration: 'none', fontSize: '14px' }}>Pricing</a>
-          <TrackClick eventName="nav_cta_click" properties={{ page: 'nail-salon-missed-calls' }}>
-            <a href="https://app.conduitai.io" style={{ backgroundColor: '#7c3aed', color: '#ffffff', padding: '8px 16px', borderRadius: '6px', textDecoration: 'none', fontSize: '14px', fontWeight: '600' }}>
-              Get Started
-            </a>
+        <div style={{ display: "flex", gap: "32px", alignItems: "center" }}>
+          <a href="/blog" style={{ color: "#a1a1aa", textDecoration: "none", fontSize: "14px" }}>Blog</a>
+          <a href="/#pricing" style={{ color: "#a1a1aa", textDecoration: "none", fontSize: "14px" }}>Pricing</a>
+          <TrackClick eventName="nav_cta_click" properties={{ page: "nail-salon-missed-calls" }}>
+            <a href="https://app.conduitai.io" style={{ backgroundColor: "#7c3aed", color: "#ffffff", padding: "8px 20px", borderRadius: "8px", textDecoration: "none", fontSize: "14px", fontWeight: "600" }}>Get Started</a>
           </TrackClick>
         </div>
       </nav>
 
-      {/* Hero */}
-      <div style={{ maxWidth: '760px', margin: '0 auto', padding: '64px 24px 48px' }}>
-        <div style={{ marginBottom: '16px' }}>
-          <span style={{ backgroundColor: '#3b0764', color: '#c084fc', fontSize: '12px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', padding: '4px 12px', borderRadius: '20px' }}>
-            Nail Salons
-          </span>
+      {/* HERO */}
+      <section style={{ maxWidth: "800px", margin: "0 auto", padding: "80px 24px 48px" }}>
+        <div style={{ display: "inline-block", backgroundColor: "#1a0a2e", border: "1px solid #7c3aed", borderRadius: "6px", padding: "4px 12px", marginBottom: "24px" }}>
+          <span style={{ color: "#a78bfa", fontSize: "12px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase" }}>Nail Salons</span>
         </div>
-        <h1 style={{ fontSize: 'clamp(28px, 5vw, 42px)', fontWeight: '800', lineHeight: '1.2', color: '#ffffff', marginBottom: '20px', letterSpacing: '-0.5px' }}>
-          How Nail Salons Lose $2,000/Month to Missed Calls (And How to Stop It)
+        <h1 style={{ fontSize: "clamp(32px, 5vw, 52px)", fontWeight: "800", lineHeight: "1.15", margin: "0 0 24px", letterSpacing: "-0.02em" }}>
+          How Nail Salons Lose{" "}
+          <span style={{ color: "#7c3aed" }}>$2,000 Per Month</span>{" "}
+          to Missed Calls
         </h1>
-        <p style={{ fontSize: '18px', color: '#a3a3a3', lineHeight: '1.7', marginBottom: '24px' }}>
-          Your technicians are mid-fill, both hands occupied, client talking — and your phone rings. Nobody picks up. That caller books somewhere else. Multiply that by every day of the week, and you're watching thousands of dollars walk out the door before they ever walked in.
+        <p style={{ fontSize: "20px", color: "#a1a1aa", lineHeight: "1.6", margin: "0 0 32px" }}>
+          Your hands are full — literally. While you are perfecting a set of acrylics, your phone rings, nobody picks up, and a new client books somewhere else. It happens dozens of times a month, and the math is brutal.
         </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#6b7280', fontSize: '13px', borderTop: '1px solid #1f1f1f', paddingTop: '20px' }}>
-          <span>Conduit AI Team</span>
-          <span>·</span>
-          <span>March 9, 2026</span>
-          <span>·</span>
-          <span>6 min read</span>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div style={{ maxWidth: '760px', margin: '0 auto', padding: '0 24px 80px' }}>
-
-        {/* Section 1 */}
-        <section style={{ marginBottom: '56px' }}>
-          <h2 style={{ fontSize: '26px', fontWeight: '700', color: '#ffffff', marginBottom: '16px', letterSpacing: '-0.3px' }}>
-            The 40% Problem Nobody Talks About
-          </h2>
-          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: '1.8', marginBottom: '16px' }}>
-            Industry data from salon software providers consistently shows that nail salons miss between <strong style={{ color: '#e5e5e5' }}>35–45% of inbound phone calls</strong> during business hours. The reason is obvious once you think about it: nail techs work with both hands constantly occupied. You can't put down a nail file mid-set, strip off a glove, and grab the phone — not without ruining a client's fresh acrylics and burning the appointment's goodwill.
-          </p>
-          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: '1.8', marginBottom: '16px' }}>
-            But here's the part that stings: <strong style={{ color: '#e5e5e5' }}>the people who call are the highest-intent leads you'll ever get.</strong> They already found you. They already decided they want to book. They just need someone to pick up.
-          </p>
-          <div style={{ backgroundColor: '#111111', border: '1px solid #1f1f1f', borderLeft: '4px solid #7c3aed', borderRadius: '8px', padding: '24px', margin: '24px 0' }}>
-            <p style={{ fontSize: '15px', color: '#d4d4d4', lineHeight: '1.7', margin: 0 }}>
-              <strong style={{ color: '#c084fc' }}>Real talk:</strong> A caller who gets voicemail doesn't leave a message and wait patiently. They open Google, find the next nail salon nearby, and book there. You don't get a second chance at a missed call.
-            </p>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px", paddingTop: "16px", borderTop: "1px solid #1a1a1a" }}>
+          <div style={{ width: "36px", height: "36px", borderRadius: "50%", backgroundColor: "#1a0a2e", border: "1px solid #7c3aed", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ fontSize: "16px" }}>🤖</span>
           </div>
-          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: '1.8' }}>
-            Most salon owners know this is a problem. Very few have done anything about it — because until recently, the only fix was hiring a dedicated front-desk receptionist, which runs $2,500–$3,500/month in South Florida alone.
-          </p>
-        </section>
+          <div>
+            <p style={{ margin: 0, fontSize: "14px", fontWeight: "600", color: "#ffffff" }}>Conduit AI</p>
+            <p style={{ margin: 0, fontSize: "13px", color: "#71717a" }}>March 9, 2026 &middot; 6 min read</p>
+          </div>
+        </div>
+      </section>
 
-        {/* Section 2 — Math */}
-        <section style={{ marginBottom: '56px' }}>
-          <h2 style={{ fontSize: '26px', fontWeight: '700', color: '#ffffff', marginBottom: '16px', letterSpacing: '-0.3px' }}>
-            The Math: What Missed Calls Actually Cost You
+      {/* ARTICLE BODY */}
+      <article style={{ maxWidth: "800px", margin: "0 auto", padding: "0 24px 80px" }}>
+
+        {/* SECTION 1 */}
+        <section style={{ marginBottom: "64px" }}>
+          <h2 style={{ fontSize: "28px", fontWeight: "700", marginBottom: "16px", letterSpacing: "-0.01em" }}>
+            The Nail Salon Phone Problem Nobody Talks About
           </h2>
-          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: '1.8', marginBottom: '24px' }}>
-            Let's run the numbers for a typical mid-size nail salon. These aren't inflated — they're conservative.
+          <p style={{ fontSize: "17px", color: "#a1a1aa", lineHeight: "1.8", marginBottom: "20px" }}>
+            Nail salons operate in one of the most hands-on service environments that exists. Technicians cannot stop mid-service to answer a call. Front desk staff — if they even exist — are checking in clients, processing payments, and managing walk-ins all at once. The phone gets ignored.
+          </p>
+          <p style={{ fontSize: "17px", color: "#a1a1aa", lineHeight: "1.8", marginBottom: "20px" }}>
+            Industry data from call-tracking platforms consistently shows that small beauty salons miss between 35 and 45 percent of inbound calls during business hours. That is not an edge case. That is standard operating reality for a busy nail salon.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+          {/* STAT CARD */}
+          <div style={{ backgroundColor: "#111111", border: "1px solid #1a1a1a", borderLeft: "4px solid #7c3aed", borderRadius: "12px", padding: "28px 32px", margin: "32px 0", display: "flex", flexWrap: "wrap", gap: "32px", justifyContent: "space-between" }}>
             {[
-              { label: 'Inbound calls per day', value: '15–20' },
-              { label: 'Missed (40%)', value: '6–8 calls' },
-              { label: 'Avg. appointment value', value: '$65' },
-              { label: 'Missed revenue/day', value: '~$455' },
-              { label: 'Missed revenue/month', value: '~$13,650' },
-              { label: 'Conservative capture rate', value: '15% recovered' },
-            ].map((stat) => (
-              <div key={stat.label} style={{ backgroundColor: '#111111', border: '1px solid #1f1f1f', borderRadius: '10px', padding: '20px', textAlign: 'center' }}>
-                <div style={{ fontSize: '24px', fontWeight: '800', color: '#c084fc', marginBottom: '6px' }}>{stat.value}</div>
-                <div style={{ fontSize: '12px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{stat.label}</div>
+              { stat: "40%", label: "of nail salon calls go unanswered" },
+              { stat: "73%", label: "of callers hang up and never call back" },
+              { stat: "$50", label: "average lifetime value of one new client visit" },
+            ].map((item) => (
+              <div key={item.label} style={{ textAlign: "center", flex: "1", minWidth: "140px" }}>
+                <p style={{ fontSize: "42px", fontWeight: "800", color: "#7c3aed", margin: "0 0 8px" }}>{item.stat}</p>
+                <p style={{ fontSize: "14px", color: "#71717a", margin: 0, lineHeight: "1.4" }}>{item.label}</p>
               </div>
             ))}
           </div>
 
-          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: '1.8', marginBottom: '16px' }}>
-            Even if you only recover <strong style={{ color: '#e5e5e5' }}>15% of those missed calls</strong> — people who would've hung up and booked somewhere else — that's roughly <strong style={{ color: '#e5e5e5' }}>$2,000/month in recaptured revenue.</strong> At 25% recovery, you're looking at $3,400/month.
-          </p>
-          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: '1.8' }}>
-            These numbers don't include repeat clients. Nail clients return every 2–4 weeks. One captured new client isn't a $65 booking — it's potentially <strong style={{ color: '#e5e5e5' }}>$780–$1,560 per year.</strong> The missed call problem compounds over time.
+          <p style={{ fontSize: "17px", color: "#a1a1aa", lineHeight: "1.8" }}>
+            When nearly three out of four callers who hit voicemail simply move on, every unanswered ring is a permanent lost opportunity — not just a delayed one.
           </p>
         </section>
 
-        {/* Section 3 — Why existing "solutions" fail */}
-        <section style={{ marginBottom: '56px' }}>
-          <h2 style={{ fontSize: '26px', fontWeight: '700', color: '#ffffff', marginBottom: '16px', letterSpacing: '-0.3px' }}>
-            Why Voicemail and Online Booking Don't Solve It
+        {/* SECTION 2 */}
+        <section style={{ marginBottom: "64px" }}>
+          <h2 style={{ fontSize: "28px", fontWeight: "700", marginBottom: "16px", letterSpacing: "-0.01em" }}>
+            The $2,000 Revenue Leak: Running the Real Numbers
           </h2>
-          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: '1.8', marginBottom: '16px' }}>
-            The two most common "fixes" salon owners try are leaving a voicemail greeting and setting up an online booking widget. Both help at the margins. Neither solves the problem.
+          <p style={{ fontSize: "17px", color: "#a1a1aa", lineHeight: "1.8", marginBottom: "28px" }}>
+            This is not a dramatic headline. The math is straightforward, and it applies to the average busy nail salon.
           </p>
 
-          <div style={{ marginBottom: '24px' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#ffffff', marginBottom: '10px' }}>Voicemail</h3>
-            <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: '1.8' }}>
-              Voicemail message rates have dropped below 20% for business calls, according to RingCentral. The vast majority of callers — especially under 40 — will simply hang up. Those who do leave a message expect a callback within minutes, not hours. By the time you finish a set and listen to messages, they've already booked elsewhere.
-            </p>
+          <div style={{ backgroundColor: "#111111", border: "1px solid #1a1a1a", borderRadius: "12px", overflow: "hidden", marginBottom: "32px" }}>
+            <div style={{ padding: "20px 24px", borderBottom: "1px solid #1a1a1a", backgroundColor: "#0d0d0d" }}>
+              <p style={{ margin: 0, fontSize: "13px", fontWeight: "700", color: "#7c3aed", textTransform: "uppercase", letterSpacing: "0.06em" }}>Monthly Revenue Leak Calculator</p>
+            </div>
+            {[
+              { label: "Inbound booking calls per day", value: "15 calls" },
+              { label: "Calls missed (40% rate)", value: "6 calls/day" },
+              { label: "Missed calls per month", value: "~180 calls" },
+              { label: "Callers who never rebook (73%)", value: "~131 lost leads" },
+              { label: "Typical new client booking value", value: "$55" },
+              { label: "Revenue lost per month", value: "$2,054" },
+            ].map((row, i) => (
+              <div key={row.label} style={{ padding: "16px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: i < 5 ? "1px solid #1a1a1a" : "none", backgroundColor: row.label === "Revenue lost per month" ? "#1a0a2e" : "transparent" }}>
+                <span style={{ fontSize: "15px", color: "#a1a1aa" }}>{row.label}</span>
+                <span style={{ fontSize: "15px", fontWeight: "700", color: row.label === "Revenue lost per month" ? "#a78bfa" : "#ffffff" }}>{row.value}</span>
+              </div>
+            ))}
           </div>
 
-          <div style={{ marginBottom: '24px' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#ffffff', marginBottom: '10px' }}>Online Booking Widgets</h3>
-            <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: '1.8' }}>
-              Online booking is great — for the clients who find your website and prefer booking digitally. But a significant portion of your callers are older clients, walk-in inquiries, or people who have a specific question before booking ("Do you do nail art? How long for a full set?"). These clients call because they want to talk to someone. A booking widget doesn't answer questions.
-            </p>
-          </div>
-
-          <div style={{ backgroundColor: '#111111', border: '1px solid #1f1f1f', borderLeft: '4px solid #7c3aed', borderRadius: '8px', padding: '24px', margin: '24px 0' }}>
-            <p style={{ fontSize: '15px', color: '#d4d4d4', lineHeight: '1.7', margin: 0 }}>
-              <strong style={{ color: '#c084fc' }}>The real fix:</strong> Someone — or something — needs to answer the phone, answer basic questions, and capture the booking intent in real time. That's what an AI receptionist does.
-            </p>
-          </div>
+          <p style={{ fontSize: "17px", color: "#a1a1aa", lineHeight: "1.8" }}>
+            Over twelve months, that single leak costs a nail salon over $24,000 in revenue that was already walking through the door — clients who wanted to book, picked up the phone, and got nothing. They did not cancel on you. You just were not there.
+          </p>
         </section>
 
-        {/* Section 4 — How AI receptionist works */}
-        <section style={{ marginBottom: '56px' }}>
-          <h2 style={{ fontSize: '26px', fontWeight: '700', color: '#ffffff', marginBottom: '16px', letterSpacing: '-0.3px' }}>
-            How an AI Receptionist Works for a Nail Salon
+        {/* SECTION 3 */}
+        <section style={{ marginBottom: "64px" }}>
+          <h2 style={{ fontSize: "28px", fontWeight: "700", marginBottom: "16px", letterSpacing: "-0.01em" }}>
+            Why Traditional Solutions Do Not Work for Nail Salons
           </h2>
-          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: '1.8', marginBottom: '16px' }}>
-            Conduit AI's voice agent answers calls instantly — in under two seconds — whenever you or your staff can't pick up. It sounds natural, responds to questions conversationally, and captures what matters: the caller's name, number, service they want, and preferred time.
+          <p style={{ fontSize: "17px", color: "#a1a1aa", lineHeight: "1.8", marginBottom: "28px" }}>
+            Salon owners have tried everything. None of it solves the core problem cleanly.
           </p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "32px" }}>
             {[
               {
-                step: '01',
-                title: 'Call comes in, you\'re busy',
-                desc: 'Your tech is mid-set. Instead of ringing to voicemail, Conduit AI picks up on the second ring.',
+                title: "Hiring a Receptionist",
+                problem: "Costs $2,500 to $3,500 per month in wages. Needs training, sick days, benefits. Still cannot answer two calls simultaneously. The cure costs more than the disease.",
               },
               {
-                step: '02',
-                title: 'AI greets the caller naturally',
-                desc: '"Hi, thanks for calling [Salon Name]! We\'re with a client right now — I can help you get booked or answer any questions. What are you looking for today?"',
+                title: "Voicemail",
+                problem: "Only 20 percent of callers leave a voicemail at a business. The other 80 percent hang up. Of those who do leave a message, callbacks often come too late and the client has already booked elsewhere.",
               },
               {
-                step: '03',
-                title: 'Handles common questions',
-                desc: 'Services offered, pricing ranges, availability, parking, whether you do gel vs. acrylic — whatever you configure it to know.',
+                title: "Online Booking Apps",
+                problem: "Great for digital-first clients. But a large segment of nail salon customers — especially older and first-time clients — still prefer to call. An app does not help when the phone rings and no one answers.",
               },
               {
-                step: '04',
-                title: 'Captures the booking info',
-                desc: 'Name, callback number, service requested, preferred time. You get a summary text or email the moment the call ends.',
-              },
-              {
-                step: '05',
-                title: 'You confirm in seconds',
-                desc: 'When your set is done, you\'ve got a clean lead waiting — not a missed call with no trace.',
+                title: "Call Forwarding to Your Personal Phone",
+                problem: "Unsustainable. You did not open a business to be on-call 24 hours a day. Boundaries disappear, burnout follows, and you still miss calls when you are with a client.",
               },
             ].map((item) => (
-              <div key={item.step} style={{ display: 'flex', gap: '16px', backgroundColor: '#111111', border: '1px solid #1f1f1f', borderRadius: '10px', padding: '20px' }}>
-                <div style={{ fontSize: '13px', fontWeight: '800', color: '#7c3aed', minWidth: '28
+              <div key={item.title} style={{ backgroundColor: "#111111", border: "1px solid #1a1a1a", borderRadius: "12px", padding: "24px" }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
+                  <div style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "#2d1b1b", border: "1px solid #7f1d1d", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "2px" }}>
+                    <span style={{ fontSize: "12px", color: "#f87171" }}>✕</span>
+                  </div>
+                  <div>
+                    <p style={{ margin: "0 0 8px", fontSize: "16px", fontWeight: "700", color: "#ffffff" }}>{item.title}</p>
+                    <p style={{ margin: 0, fontSize: "15px", color: "#71717a", lineHeight: "1.6" }}>{item.problem}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* SECTION 4 */}
+        <section style={{ marginBottom: "64px" }}>
+          <h2 style={{ fontSize: "28px", fontWeight: "700", marginBottom: "16px", letterSpacing: "-0.01em" }}>
+            How an AI Receptionist Plugs the Leak for $39/Month
+          </h2>
+          <p style={{ fontSize: "17px", color: "#a1a1aa", lineHeight: "1.8", marginBottom: "28px" }}>
+            Conduit AI answers every call your team cannot get to — instantly, in a natural conversational voice, around the clock. No hold music. No voicemail box. A real answer, every time.
+          </p>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", marginBottom: "32px" }}>
+            {[
+              { icon: "📞", title: "Answers in under 2 seconds", body: "No ringing into the void. Your AI agent picks up immediately and greets the caller by your salon name." },
+              { icon: "📅", title: "Collects booking details", body: "Asks for name, service, preferred date, and contact info — then texts or emails you a clean summary." },
+              { icon: "🌙", title: "Works after hours", body: "Clients call at 10pm when they remember they need their nails done Friday. Your AI is ready." },
+              { icon: "💬", title: "Handles FAQs automatically", body: "Prices, hours, parking, service menu — your AI answers common questions so you never have to repeat yourself." },
+            ].map((card) => (
+              <div key={card.title} style={{ backgroundColor: "#111111", border
