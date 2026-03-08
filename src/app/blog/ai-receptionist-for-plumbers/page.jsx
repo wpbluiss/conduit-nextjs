@@ -19,6 +19,7 @@ export const metadata = {
     ],
     locale: 'en_US',
     type: 'article',
+    publishedTime: '2026-03-09T00:00:00Z',
   },
 };
 
@@ -27,18 +28,15 @@ export default function AIReceptionistForPlumbers() {
     <div style={{ backgroundColor: '#0a0a0a', minHeight: '100vh', color: '#f5f5f5', fontFamily: "'Inter', sans-serif" }}>
 
       {/* NAV */}
-      <nav style={{ borderBottom: '1px solid #1f1f1f', padding: '0 24px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, backgroundColor: '#0a0a0a', zIndex: 50 }}>
-        <a href="/" style={{ fontWeight: 700, fontSize: '18px', color: '#f5f5f5', textDecoration: 'none', letterSpacing: '-0.3px' }}>
-          Conduit <span style={{ color: '#7c3aed' }}>AI</span>
+      <nav style={{ borderBottom: '1px solid #1f1f1f', padding: '0 24px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#0a0a0a', position: 'sticky', top: 0, zIndex: 50 }}>
+        <a href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontWeight: 700, fontSize: '18px', color: '#f5f5f5', letterSpacing: '-0.3px' }}>Conduit AI</span>
         </a>
-        <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-          <a href="/blog" style={{ color: '#a3a3a3', textDecoration: 'none', fontSize: '14px' }}>Blog</a>
-          <a href="/#pricing" style={{ color: '#a3a3a3', textDecoration: 'none', fontSize: '14px' }}>Pricing</a>
-          <TrackClick eventName="nav_cta_click" properties={{ page: 'ai-receptionist-for-plumbers' }}>
-            <a
-              href="https://app.conduitai.io"
-              style={{ backgroundColor: '#7c3aed', color: '#fff', padding: '8px 18px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}
-            >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          <a href="/blog" style={{ color: '#999', fontSize: '14px', textDecoration: 'none' }}>Blog</a>
+          <a href="/#pricing" style={{ color: '#999', fontSize: '14px', textDecoration: 'none' }}>Pricing</a>
+          <TrackClick eventName="nav_cta_click" properties={{ page: 'ai-receptionist-for-plumbers', location: 'nav' }}>
+            <a href="https://app.conduitai.io" style={{ backgroundColor: '#7c3aed', color: '#fff', padding: '8px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
               Get Started
             </a>
           </TrackClick>
@@ -46,172 +44,158 @@ export default function AIReceptionistForPlumbers() {
       </nav>
 
       {/* HERO */}
-      <header style={{ maxWidth: '760px', margin: '0 auto', padding: '72px 24px 48px' }}>
+      <section style={{ maxWidth: '760px', margin: '0 auto', padding: '72px 24px 48px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-          <span style={{ backgroundColor: '#1a0a2e', color: '#a78bfa', fontSize: '11px', fontWeight: 700, letterSpacing: '1.2px', textTransform: 'uppercase', padding: '4px 12px', borderRadius: '999px', border: '1px solid #3b1f6e' }}>
+          <span style={{ backgroundColor: '#1a1a2e', color: '#818cf8', fontSize: '12px', fontWeight: 700, letterSpacing: '1.2px', textTransform: 'uppercase', padding: '4px 12px', borderRadius: '999px', border: '1px solid #2e2e5e' }}>
             Plumbers
           </span>
-          <span style={{ color: '#525252', fontSize: '13px' }}>March 9, 2026</span>
+          <span style={{ color: '#555', fontSize: '13px' }}>March 9, 2026</span>
         </div>
-        <h1 style={{ fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 800, lineHeight: 1.15, letterSpacing: '-0.8px', marginBottom: '20px', color: '#f5f5f5' }}>
+
+        <h1 style={{ fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 800, lineHeight: 1.15, color: '#f5f5f5', letterSpacing: '-0.8px', marginBottom: '20px' }}>
           AI Receptionist for Plumbers: Never Miss an Emergency Call Again
         </h1>
-        <p style={{ fontSize: '18px', color: '#a3a3a3', lineHeight: 1.7, marginBottom: '32px' }}>
-          You're elbow-deep under a sink when your phone rings. You let it go to voicemail. That caller — a homeowner with water gushing across their kitchen floor — hangs up and dials the next plumber in Google Maps. You just lost a $400 job in 30 seconds. Multiply that by a week and you're looking at real money walking out the door. An AI receptionist stops the bleeding.
+
+        <p style={{ fontSize: '18px', color: '#a3a3a3', lineHeight: 1.7, marginBottom: '16px' }}>
+          You're 20 feet under a crawl space fixing a burst pipe when your phone rings. You can't answer. The homeowner hangs up, Googles the next plumber, and books them instead. That job was worth $400. It's gone in 30 seconds — and it happens multiple times a day.
         </p>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <TrackClick eventName="hero_demo_click" properties={{ page: 'ai-receptionist-for-plumbers' }}>
-            <a
-              href="tel:+15617303316"
-              style={{ backgroundColor: '#7c3aed', color: '#fff', padding: '13px 26px', borderRadius: '10px', fontWeight: 700, fontSize: '15px', textDecoration: 'none', display: 'inline-block' }}
-            >
-              Call Our Demo Line: (561) 730-3316
-            </a>
-          </TrackClick>
-          <TrackClick eventName="hero_start_click" properties={{ page: 'ai-receptionist-for-plumbers' }}>
-            <a
-              href="https://app.conduitai.io"
-              style={{ backgroundColor: '#1a1a1a', color: '#f5f5f5', padding: '13px 26px', borderRadius: '10px', fontWeight: 700, fontSize: '15px', textDecoration: 'none', display: 'inline-block', border: '1px solid #2a2a2a' }}
-            >
-              Start Free →
-            </a>
-          </TrackClick>
-        </div>
-      </header>
+        <p style={{ fontSize: '18px', color: '#a3a3a3', lineHeight: 1.7 }}>
+          A Conduit AI receptionist answers every call the moment it comes in, qualifies the emergency, collects the caller's info, and texts you a summary — so you never lose a lead to voicemail again.
+        </p>
+      </section>
 
       {/* DIVIDER */}
       <div style={{ maxWidth: '760px', margin: '0 auto', padding: '0 24px' }}>
-        <hr style={{ border: 'none', borderTop: '1px solid #1f1f1f', marginBottom: '56px' }} />
+        <hr style={{ border: 'none', borderTop: '1px solid #1f1f1f', marginBottom: '48px' }} />
       </div>
 
-      {/* ARTICLE BODY */}
-      <article style={{ maxWidth: '760px', margin: '0 auto', padding: '0 24px 80px' }}>
+      {/* SECTION 1 — THE COST OF MISSED CALLS */}
+      <section style={{ maxWidth: '760px', margin: '0 auto', padding: '0 24px 56px' }}>
+        <h2 style={{ fontSize: '26px', fontWeight: 700, color: '#f5f5f5', marginBottom: '16px', letterSpacing: '-0.4px' }}>
+          How Much Are Missed Calls Actually Costing You?
+        </h2>
+        <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8, marginBottom: '20px' }}>
+          Most plumbers miss 3–6 calls per day while on the job. At an average ticket value of $250–$600 for a service call, that adds up faster than a water bill after a slab leak.
+        </p>
 
-        {/* SECTION 1 */}
-        <section style={{ marginBottom: '56px' }}>
-          <h2 style={{ fontSize: '26px', fontWeight: 700, letterSpacing: '-0.4px', marginBottom: '16px', color: '#f5f5f5' }}>
-            How Much Are Missed Calls Actually Costing You?
-          </h2>
-          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8, marginBottom: '16px' }}>
-            Most plumbers don't track missed calls because the pain is invisible. The job just… doesn't happen. But the numbers are sobering when you lay them out.
-          </p>
-          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8, marginBottom: '24px' }}>
-            According to data from plumbing industry associations, the average residential plumbing call is worth $285–$450 in revenue. Emergency calls — burst pipes, sewage backups, water heater failures — routinely run $600–$1,200. A solo plumber working 5 days a week misses an average of 7–12 calls per week while on job sites, in crawl spaces, or simply driving between stops.
-          </p>
-
-          {/* STAT BOX */}
-          <div style={{ backgroundColor: '#111111', border: '1px solid #1f1f1f', borderRadius: '12px', padding: '28px', marginBottom: '24px' }}>
-            <p style={{ fontSize: '13px', fontWeight: 700, color: '#7c3aed', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '20px' }}>By the Numbers</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '24px' }}>
-              {[
-                { stat: '7–12', label: 'calls missed per week, avg solo plumber' },
-                { stat: '$350', label: 'average value per residential call' },
-                { stat: '$3,150+', label: 'potential revenue lost every month' },
-                { stat: '62%', label: 'of callers won\'t leave a voicemail' },
-              ].map((item) => (
-                <div key={item.label}>
-                  <p style={{ fontSize: '32px', fontWeight: 800, color: '#a78bfa', marginBottom: '4px', letterSpacing: '-1px' }}>{item.stat}</p>
-                  <p style={{ fontSize: '13px', color: '#737373', lineHeight: 1.5 }}>{item.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8 }}>
-            That 62% figure is the brutal part. Most customers calling about a plumbing emergency have water running somewhere right now. They are not leaving a voicemail and waiting two hours for a callback. They're hanging up and calling the next result in Google Maps — likely your competitor.
-          </p>
-        </section>
-
-        {/* SECTION 2 */}
-        <section style={{ marginBottom: '56px' }}>
-          <h2 style={{ fontSize: '26px', fontWeight: 700, letterSpacing: '-0.4px', marginBottom: '16px', color: '#f5f5f5' }}>
-            What an AI Receptionist Does on Every Single Call
-          </h2>
-          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8, marginBottom: '24px' }}>
-            Think of it as a professional dispatcher who never sleeps, never puts anyone on hold, and costs less than a single missed service call per month. Here's exactly what happens when a customer dials your number and you can't pick up:
-          </p>
-
-          {[
-            {
-              step: '01',
-              title: 'Answers in under 2 rings',
-              body: 'The AI picks up instantly with a greeting you customize — your business name, your tone. The caller never hits voicemail.',
-            },
-            {
-              step: '02',
-              title: 'Qualifies the job in real time',
-              body: 'It asks the right questions: What\'s the issue? How urgent? What\'s your address? Is water actively running? This context lets you prioritize your callback list the moment you\'re free.',
-            },
-            {
-              step: '03',
-              title: 'Captures full contact details',
-              body: 'Name, phone number, address, and problem type — all logged automatically. No more deciphering half-written voicemail messages.',
-            },
-            {
-              step: '04',
-              title: 'Texts you instantly',
-              body: 'The second the call ends, you get an SMS summary: "Emergency leak — Maria Santos — 1242 Palm Ct — water under kitchen sink actively running." You call back the hottest leads first.',
-            },
-            {
-              step: '05',
-              title: 'Books appointments (optional)',
-              body: 'If it\'s not an emergency, the AI can book a service window directly into your calendar so you\'re not playing phone tag all afternoon.',
-            },
-          ].map((item) => (
-            <div
-              key={item.step}
-              style={{ display: 'flex', gap: '20px', marginBottom: '28px', alignItems: 'flex-start' }}
-            >
-              <div style={{ minWidth: '44px', height: '44px', backgroundColor: '#1a0a2e', border: '1px solid #3b1f6e', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ color: '#a78bfa', fontSize: '12px', fontWeight: 800 }}>{item.step}</span>
-              </div>
-              <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#f5f5f5', marginBottom: '6px' }}>{item.title}</h3>
-                <p style={{ fontSize: '15px', color: '#a3a3a3', lineHeight: 1.7 }}>{item.body}</p>
-              </div>
-            </div>
-          ))}
-        </section>
-
-        {/* SECTION 3 */}
-        <section style={{ marginBottom: '56px' }}>
-          <h2 style={{ fontSize: '26px', fontWeight: 700, letterSpacing: '-0.4px', marginBottom: '16px', color: '#f5f5f5' }}>
-            Why Plumbers Specifically Need This More Than Most
-          </h2>
-          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8, marginBottom: '16px' }}>
-            Every trade has missed-call problems. But plumbing has three factors that make it especially brutal:
-          </p>
-
-          <div style={{ display: 'grid', gap: '16px', marginBottom: '24px' }}>
+        <div style={{ backgroundColor: '#111', border: '1px solid #1f1f1f', borderRadius: '12px', padding: '28px', marginBottom: '28px' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#818cf8', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px' }}>
+            The Real Numbers
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px' }}>
             {[
-              {
-                icon: '🚨',
-                title: 'Emergencies can\'t wait',
-                body: 'A burst pipe, a sewer backup, or a failed water heater is not a "call me back when you\'re free" situation. Customers in crisis move to whoever answers. Your window to capture that lead is 90 seconds.',
-              },
-              {
-                icon: '🔧',
-                title: 'You work with your hands all day',
-                body: 'Unlike a desk-based business, you physically cannot answer your phone while pressure-testing a line, working in a crawl space, or driving a work van. Your hands-free periods are limited.',
-              },
-              {
-                icon: '📍',
-                title: 'Local search competition is fierce',
-                body: 'Google Maps shows 3–5 plumbers to anyone who searches "emergency plumber near me." Whoever answers first wins. An AI receptionist means you\'re always the business that answers.',
-              },
-            ].map((card) => (
-              <div
-                key={card.title}
-                style={{ backgroundColor: '#111111', border: '1px solid #1f1f1f', borderRadius: '12px', padding: '24px', display: 'flex', gap: '16px', alignItems: 'flex-start' }}
-              >
-                <span style={{ fontSize: '22px', flexShrink: 0 }}>{card.icon}</span>
-                <div>
-                  <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#f5f5f5', marginBottom: '8px' }}>{card.title}</h3>
-                  <p style={{ fontSize: '15px', color: '#a3a3a3', lineHeight: 1.7 }}>{card.body}</p>
-                </div>
+              { stat: '62%', label: 'of callers won\'t leave a voicemail' },
+              { stat: '3–6×', label: 'calls missed per day on job sites' },
+              { stat: '$3,200+', label: 'avg. monthly revenue lost to missed calls' },
+              { stat: '85%', label: 'of customers who can\'t reach you call a competitor' },
+            ].map(({ stat, label }) => (
+              <div key={stat} style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '32px', fontWeight: 800, color: '#7c3aed', letterSpacing: '-1px', marginBottom: '6px' }}>{stat}</div>
+                <div style={{ fontSize: '13px', color: '#666', lineHeight: 1.5 }}>{label}</div>
               </div>
             ))}
           </div>
+        </div>
 
-          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8 }}>
-            The
+        <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8 }}>
+          The math is brutal. If you miss just 2 calls per day at an average of $350 per job, you're leaving over <strong style={{ color: '#f5f5f5' }}>$50,000 per year</strong> on the table — revenue that a competitor with an answering service is happily collecting.
+        </p>
+      </section>
+
+      {/* SECTION 2 — HOW IT WORKS FOR PLUMBERS */}
+      <section style={{ maxWidth: '760px', margin: '0 auto', padding: '0 24px 56px' }}>
+        <h2 style={{ fontSize: '26px', fontWeight: 700, color: '#f5f5f5', marginBottom: '16px', letterSpacing: '-0.4px' }}>
+          How Conduit AI Works for Plumbing Businesses
+        </h2>
+        <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8, marginBottom: '28px' }}>
+          Conduit AI isn't a call center or a clunky phone tree. It's a smart voice agent that answers your business line in under 2 rings, sounds professional, and handles the full intake conversation — just like a real receptionist would.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '28px' }}>
+          {[
+            {
+              icon: '📞',
+              title: 'Answers every call, 24/7',
+              desc: 'Whether it\'s 2 AM for a burst pipe or Saturday afternoon for a slow drain, Conduit AI picks up immediately. No rings to voicemail. No missed opportunities.',
+            },
+            {
+              icon: '🚨',
+              title: 'Triages emergency vs. routine',
+              desc: 'The AI asks the right questions to determine urgency — burst pipe, no hot water, sewage backup — and flags true emergencies in your text alert so you can decide whether to call back mid-job.',
+            },
+            {
+              icon: '📋',
+              title: 'Captures full lead details',
+              desc: 'Name, address, phone number, problem description, and preferred appointment time — all collected and sent to you as a text summary before the caller even hangs up.',
+            },
+            {
+              icon: '📲',
+              title: 'Texts you instantly',
+              desc: 'You get a concise SMS with everything you need. Reply to the text to call them back, or let Conduit AI book the appointment if you\'ve enabled scheduling.',
+            },
+            {
+              icon: '🗓️',
+              title: 'Books appointments automatically',
+              desc: 'Connect your calendar and Conduit AI can schedule service windows on the spot — no phone tag, no back-and-forth, no lost jobs.',
+            },
+          ].map(({ icon, title, desc }) => (
+            <div key={title} style={{ display: 'flex', gap: '16px', backgroundColor: '#111', border: '1px solid #1f1f1f', borderRadius: '12px', padding: '20px' }}>
+              <div style={{ fontSize: '24px', flexShrink: 0, marginTop: '2px' }}>{icon}</div>
+              <div>
+                <div style={{ fontWeight: 700, color: '#f5f5f5', marginBottom: '6px', fontSize: '15px' }}>{title}</div>
+                <div style={{ fontSize: '14px', color: '#777', lineHeight: 1.7 }}>{desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* SECTION 3 — COMMON PLUMBER SCENARIOS */}
+      <section style={{ maxWidth: '760px', margin: '0 auto', padding: '0 24px 56px' }}>
+        <h2 style={{ fontSize: '26px', fontWeight: 700, color: '#f5f5f5', marginBottom: '16px', letterSpacing: '-0.4px' }}>
+          Real Scenarios Where Conduit AI Saves the Job
+        </h2>
+        <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8, marginBottom: '28px' }}>
+          These aren't hypotheticals. These are the calls that plumbers miss every single day — and the revenue that walks out the door with them.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {[
+            {
+              scenario: 'The 6 AM Burst Pipe',
+              without: 'Call goes to voicemail. Panicked homeowner calls two more plumbers. The one who answers gets a $900 emergency job.',
+              with: 'Conduit AI answers immediately, confirms the emergency, collects the address, and texts you. You finish draining the current job and call back within 20 minutes. You get the work.',
+            },
+            {
+              scenario: 'Saturday Afternoon Water Heater Failure',
+              without: 'You\'re at a youth soccer game with your kids. Phone rings, you ignore it. $1,200 water heater replacement goes to someone who was sitting by the phone.',
+              with: 'Conduit AI handles intake. You get a text. You glance at it during halftime, see it\'s not a code-red emergency, and schedule it for Monday morning. Job saved, weekend intact.',
+            },
+            {
+              scenario: 'New Customer During a Multi-Hour Job',
+              without: 'You\'re knee-deep in a repiping project. New customer calling for the first time can\'t reach you, assumes you\'re too busy or unprofessional, and never calls back.',
+              with: 'Conduit AI answers professionally, books a quote appointment for the following day, and sends the new customer a confirmation text. First impression: flawless.',
+            },
+          ].map(({ scenario, without, with: withConduit }) => (
+            <div key={scenario} style={{ backgroundColor: '#111', border: '1px solid #1f1f1f', borderRadius: '12px', overflow: 'hidden' }}>
+              <div style={{ backgroundColor: '#16101e', padding: '14px 20px', borderBottom: '1px solid #1f1f1f' }}>
+                <span style={{ fontWeight: 700, color: '#c4b5fd', fontSize: '15px' }}>{scenario}</span>
+              </div>
+              <div style={{ padding: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div>
+                  <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: '#ef4444', textTransform: 'uppercase', marginBottom: '8px' }}>Without Conduit AI</div>
+                  <p style={{ fontSize: '13px', color: '#777', lineHeight: 1.7, margin: 0 }}>{without}</p>
+                </div>
+                <div>
+                  <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: '#22c55e', textTransform: 'uppercase', marginBottom: '8px' }}>With Conduit AI</div>
+                  <p style={{ fontSize: '13px', color: '#a3a3a3', lineHeight: 1.7, margin: 0 }}>{withConduit}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* SECTION 4 — PRICING & ROI */}
+      <section style={{ maxWidth: '760px', margin: '0 auto', padding: '0 24px 56px' }}>
+        <h2 style={{ fontSize: '26px', fontWeight
