@@ -1,7 +1,7 @@
 import TrackClick from '../../../components/TrackClick';
 
 export const metadata = {
-  title: 'How to Get More Google Reviews for Your Service Business (On Autopilot) | Conduit AI',
+  title: 'How to Get More Google Reviews for Your Service Business (On Autopilot)',
   description: 'Businesses with 50+ Google reviews get 3x more calls. Learn how to automatically request reviews after every job without awkward asks.',
   keywords: 'get more google reviews service business, automated review requests, google reviews plumber, google reviews HVAC, review automation small business',
   openGraph: {
@@ -11,14 +11,6 @@ export const metadata = {
     siteName: 'Conduit AI',
     type: 'article',
     publishedTime: '2026-03-09T00:00:00Z',
-    images: [
-      {
-        url: 'https://conduitai.io/og/how-to-get-more-google-reviews-service-business.png',
-        width: 1200,
-        height: 630,
-        alt: 'How to Get More Google Reviews for Your Service Business',
-      },
-    ],
   },
 };
 
@@ -29,13 +21,13 @@ export default function HowToGetMoreGoogleReviews() {
       {/* NAV */}
       <nav style={{ borderBottom: '1px solid #1f1f1f', padding: '0 24px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, backgroundColor: '#0a0a0a', zIndex: 50 }}>
         <a href="/" style={{ textDecoration: 'none' }}>
-          <span style={{ fontWeight: 700, fontSize: '18px', color: '#f5f5f5', letterSpacing: '-0.3px' }}>Conduit AI</span>
+          <span style={{ fontWeight: 700, fontSize: '18px', color: '#ffffff', letterSpacing: '-0.5px' }}>Conduit<span style={{ color: '#7c3aed' }}>AI</span></span>
         </a>
         <div style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
-          <a href="/blog" style={{ color: '#999', fontSize: '14px', textDecoration: 'none' }}>Blog</a>
-          <a href="/#pricing" style={{ color: '#999', fontSize: '14px', textDecoration: 'none' }}>Pricing</a>
+          <a href="/blog" style={{ color: '#a3a3a3', textDecoration: 'none', fontSize: '14px', fontWeight: 500 }}>Blog</a>
+          <a href="/#pricing" style={{ color: '#a3a3a3', textDecoration: 'none', fontSize: '14px', fontWeight: 500 }}>Pricing</a>
           <TrackClick eventName="nav_cta_click" properties={{ page: 'blog_google_reviews' }}>
-            <a href="https://app.conduitai.io" style={{ backgroundColor: '#7c3aed', color: '#fff', padding: '8px 18px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
+            <a href="https://app.conduitai.io" style={{ backgroundColor: '#7c3aed', color: '#ffffff', padding: '8px 18px', borderRadius: '8px', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>
               Get Started
             </a>
           </TrackClick>
@@ -43,132 +35,140 @@ export default function HowToGetMoreGoogleReviews() {
       </nav>
 
       {/* HERO */}
-      <header style={{ maxWidth: '720px', margin: '0 auto', padding: '72px 24px 48px' }}>
+      <section style={{ maxWidth: '740px', margin: '0 auto', padding: '64px 24px 40px' }}>
         <div style={{ marginBottom: '16px' }}>
-          <span style={{ backgroundColor: '#1a0a2e', color: '#a78bfa', fontSize: '12px', fontWeight: 700, letterSpacing: '1.2px', textTransform: 'uppercase', padding: '4px 12px', borderRadius: '999px', border: '1px solid #3b1d6e' }}>
+          <span style={{ backgroundColor: '#1e1030', color: '#a78bfa', fontSize: '12px', fontWeight: 700, padding: '4px 12px', borderRadius: '999px', textTransform: 'uppercase', letterSpacing: '1px' }}>
             Reputation
           </span>
         </div>
-        <h1 style={{ fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 800, lineHeight: 1.15, letterSpacing: '-0.8px', marginBottom: '20px', color: '#f5f5f5' }}>
+        <h1 style={{ fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 800, lineHeight: 1.15, letterSpacing: '-1px', color: '#ffffff', marginBottom: '20px' }}>
           How to Get More Google Reviews for Your Service Business (On Autopilot)
         </h1>
-        <p style={{ fontSize: '18px', color: '#aaa', lineHeight: 1.7, marginBottom: '28px' }}>
-          Businesses with 50+ Google reviews receive 3× more inbound calls than those with fewer than 10. The problem isn't that your customers don't want to leave reviews — it's that nobody asks them at the right moment. Here's how to fix that without ever saying an awkward word.
+        <p style={{ fontSize: '18px', color: '#a3a3a3', lineHeight: 1.7, marginBottom: '24px' }}>
+          Businesses with 50+ Google reviews receive 3× more inbound calls than competitors with fewer than 10. Yet most service businesses collect reviews by accident — hoping a happy customer remembers to post one. Here's how to build a system that asks every time, automatically, without a single awkward conversation.
         </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#666', fontSize: '13px' }}>
-          <span>Conduit AI Team</span>
-          <span>·</span>
-          <time dateTime="2026-03-09">March 9, 2026</time>
-          <span>·</span>
-          <span>6 min read</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderTop: '1px solid #1f1f1f', paddingTop: '20px' }}>
+          <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#1f1f1f', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '14px', color: '#a78bfa' }}>J</div>
+          <div>
+            <p style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: '#e5e5e5' }}>JARVIS — Conduit AI</p>
+            <p style={{ margin: 0, fontSize: '13px', color: '#737373' }}>March 9, 2026 · 7 min read</p>
+          </div>
         </div>
-      </header>
+      </section>
 
       {/* DIVIDER */}
-      <div style={{ maxWidth: '720px', margin: '0 auto', padding: '0 24px' }}>
+      <div style={{ maxWidth: '740px', margin: '0 auto', padding: '0 24px' }}>
         <hr style={{ border: 'none', borderTop: '1px solid #1f1f1f', marginBottom: '48px' }} />
       </div>
 
-      {/* BODY */}
-      <main style={{ maxWidth: '720px', margin: '0 auto', padding: '0 24px 96px' }}>
+      {/* CONTENT */}
+      <article style={{ maxWidth: '740px', margin: '0 auto', padding: '0 24px 80px' }}>
 
         {/* SECTION 1 */}
         <section style={{ marginBottom: '56px' }}>
-          <h2 style={{ fontSize: '26px', fontWeight: 700, letterSpacing: '-0.4px', marginBottom: '16px', color: '#f5f5f5' }}>
-            Why Google Reviews Are the Most Valuable Marketing Asset You're Ignoring
+          <h2 style={{ fontSize: '26px', fontWeight: 700, color: '#ffffff', marginBottom: '16px', letterSpacing: '-0.5px' }}>
+            Why Google Reviews Are Your Most Valuable Marketing Asset
           </h2>
-          <p style={{ fontSize: '16px', color: '#bbb', lineHeight: 1.8, marginBottom: '16px' }}>
-            When someone in your city searches "HVAC repair near me" or "plumber open now," Google's local pack dominates the top of the page — and review count plus star rating are two of the biggest ranking signals. BrightLocal's 2025 Local Consumer Review Survey found that <strong style={{ color: '#f5f5f5' }}>98% of consumers read online reviews for local businesses</strong>, and 87% won't consider a business rated below 4 stars.
+          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8, marginBottom: '16px' }}>
+            Before a potential customer calls you, they Google you. According to BrightLocal's 2025 Local Consumer Review Survey, <strong style={{ color: '#e5e5e5' }}>98% of consumers read online reviews for local businesses</strong>, and 87% say Google is the platform they trust most. Your star rating and review count are the first impression you make — before your website, before your social media, before anything else.
           </p>
-          <p style={{ fontSize: '16px', color: '#bbb', lineHeight: 1.8, marginBottom: '16px' }}>
-            The math is straightforward: more reviews → higher local ranking → more calls → more revenue. Yet the average service business owner collects fewer than 12 reviews per year, mostly by accident.
+          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8, marginBottom: '16px' }}>
+            The math is unforgiving. A plumbing company with 4.8 stars and 80 reviews will win the click over a competitor with 4.9 stars and 6 reviews almost every single time. Volume signals legitimacy. Consumers assume that 80 happy customers can't all be wrong — and Google's local search algorithm agrees, using review count as a direct ranking factor in the Local Pack.
           </p>
-          <p style={{ fontSize: '16px', color: '#bbb', lineHeight: 1.8 }}>
-            The gap between you and your top competitor isn't the quality of your work — it's the consistency of asking. Businesses that systematically request reviews after every job grow their review count <strong style={{ color: '#f5f5f5' }}>4–7× faster</strong> than those that rely on organic, unprompted feedback.
+          <div style={{ backgroundColor: '#111111', border: '1px solid #1f1f1f', borderLeft: '4px solid #7c3aed', borderRadius: '8px', padding: '20px 24px', margin: '24px 0' }}>
+            <p style={{ margin: 0, fontSize: '15px', color: '#d4d4d4', lineHeight: 1.7 }}>
+              <strong style={{ color: '#a78bfa' }}>Stat:</strong> Businesses that cross the 50-review threshold see an average 3× increase in phone calls from Google Maps compared to businesses below 10 reviews, per a 2024 Whitespark study of 1,200 service businesses.
+            </p>
+          </div>
+          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8 }}>
+            For HVAC companies, plumbers, electricians, salons, and barbershops — businesses that live and die by local foot traffic and inbound calls — Google reviews are not optional. They are the difference between a full calendar and an empty one.
           </p>
         </section>
 
-        {/* CALLOUT BOX 1 */}
-        <div style={{ backgroundColor: '#111', border: '1px solid #1f1f1f', borderLeft: '4px solid #7c3aed', borderRadius: '10px', padding: '24px 28px', marginBottom: '56px' }}>
-          <p style={{ fontSize: '15px', color: '#ccc', lineHeight: 1.7, margin: 0 }}>
-            <strong style={{ color: '#a78bfa' }}>Quick stat:</strong> A single Google review has a measurable impact on click-through rate from the local pack. Going from 0 to 1 review increases CTR by an average of <strong style={{ color: '#f5f5f5' }}>65%</strong>. Going from 10 to 50 reviews increases it by another <strong style={{ color: '#f5f5f5' }}>120%</strong>. (Whitespark, 2025)
-          </p>
-        </div>
-
         {/* SECTION 2 */}
         <section style={{ marginBottom: '56px' }}>
-          <h2 style={{ fontSize: '26px', fontWeight: 700, letterSpacing: '-0.4px', marginBottom: '16px', color: '#f5f5f5' }}>
-            The 3 Moments That Determine Whether a Customer Leaves a Review
+          <h2 style={{ fontSize: '26px', fontWeight: 700, color: '#ffffff', marginBottom: '16px', letterSpacing: '-0.5px' }}>
+            Why Most Service Businesses Fail at Collecting Reviews (And It's Not Their Fault)
           </h2>
-          <p style={{ fontSize: '16px', color: '#bbb', lineHeight: 1.8, marginBottom: '24px' }}>
-            Timing is everything. Research from Harvard Business School shows that review requests sent within <strong style={{ color: '#f5f5f5' }}>1 hour of a completed service</strong> convert at nearly double the rate of requests sent 24 hours later. There are three windows where customers are most likely to follow through:
+          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8, marginBottom: '16px' }}>
+            The most common advice you'll hear is "just ask your customers." Simple in theory. Brutally inconsistent in practice. Here's why the manual approach breaks down for service businesses:
           </p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
-            {[
-              {
-                number: '01',
-                title: 'Right after job completion',
-                body: 'The customer just watched you solve their problem. Relief and gratitude are at their peak. A technician or stylist saying "I'd really appreciate a quick Google review — it helps the business a lot" in person converts at roughly 30–40%.'
-              },
-              {
-                number: '02',
-                title: 'The follow-up text (under 60 minutes)',
-                body: 'An automated SMS with a direct link to your Google review page removes all friction. No searching, no logging in, no hunting. Conversion rates for well-timed SMS review requests average 15–25%, far outperforming email.'
-              },
-              {
-                number: '03',
-                title: 'The next-day reminder (one time only)',
-                body: 'If the first text goes unanswered, a single follow-up the next morning recovers another 8–12% of potential reviews. Do not send more than one reminder — it creates resentment and can result in a negative review from an otherwise happy customer.'
-              }
-            ].map((item) => (
-              <div key={item.number} style={{ display: 'flex', gap: '20px', backgroundColor: '#111', border: '1px solid #1f1f1f', borderRadius: '10px', padding: '24px' }}>
-                <div style={{ flexShrink: 0, width: '40px', height: '40px', borderRadius: '8px', backgroundColor: '#1a0a2e', border: '1px solid #3b1d6e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 800, color: '#a78bfa' }}>
-                  {item.number}
-                </div>
-                <div>
-                  <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#f5f5f5', marginBottom: '8px', marginTop: 0 }}>{item.title}</h3>
-                  <p style={{ fontSize: '15px', color: '#bbb', lineHeight: 1.7, margin: 0 }}>{item.body}</p>
-                </div>
-              </div>
-            ))}
+          <h3 style={{ fontSize: '19px', fontWeight: 700, color: '#e5e5e5', marginBottom: '10px', marginTop: '28px' }}>1. The moment passes too fast</h3>
+          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8, marginBottom: '16px' }}>
+            The best time to ask for a review is immediately after service — when the customer is still warm, grateful, and standing right in front of you. But you're wrapping up the job, collecting payment, packing tools, and moving to the next call. By the time you think about it, the moment is gone and the customer is halfway home.
+          </p>
+
+          <h3 style={{ fontSize: '19px', fontWeight: 700, color: '#e5e5e5', marginBottom: '10px', marginTop: '28px' }}>2. It feels uncomfortable</h3>
+          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8, marginBottom: '16px' }}>
+            Asking face-to-face feels like begging. Most technicians, stylists, and solo operators would rather skip it than risk an awkward interaction at the end of an otherwise great appointment. So they don't ask — or they ask apologetically in a way that makes customers feel obligated rather than inspired.
+          </p>
+
+          <h3 style={{ fontSize: '19px', fontWeight: 700, color: '#e5e5e5', marginBottom: '10px', marginTop: '28px' }}>3. Memory is unreliable</h3>
+          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8, marginBottom: '16px' }}>
+            Even when a business owner fully intends to follow up with a review request, the chaos of running a service business gets in the way. Texts don't get sent. Emails pile up. A customer who would have happily posted a 5-star review gets nothing because the follow-up never happened.
+          </p>
+
+          <div style={{ backgroundColor: '#111111', border: '1px solid #1f1f1f', borderLeft: '4px solid #7c3aed', borderRadius: '8px', padding: '20px 24px', margin: '24px 0' }}>
+            <p style={{ margin: 0, fontSize: '15px', color: '#d4d4d4', lineHeight: 1.7 }}>
+              <strong style={{ color: '#a78bfa' }}>Reality check:</strong> 70% of customers say they would leave a review if asked — but only 19% ever receive a request. The gap isn't motivation, it's follow-through.
+            </p>
           </div>
+
+          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8 }}>
+            The solution isn't trying harder. It's removing humans from the equation entirely.
+          </p>
         </section>
 
         {/* SECTION 3 */}
         <section style={{ marginBottom: '56px' }}>
-          <h2 style={{ fontSize: '26px', fontWeight: 700, letterSpacing: '-0.4px', marginBottom: '16px', color: '#f5f5f5' }}>
-            What to Actually Say (Scripts That Work)
+          <h2 style={{ fontSize: '26px', fontWeight: 700, color: '#ffffff', marginBottom: '16px', letterSpacing: '-0.5px' }}>
+            The Automated Review Request System: Step by Step
           </h2>
-          <p style={{ fontSize: '16px', color: '#bbb', lineHeight: 1.8, marginBottom: '24px' }}>
-            Generic requests get ignored. Specific, personal messages get results. Here are battle-tested templates for service businesses — adapt them to match your voice.
+          <p style={{ fontSize: '16px', color: '#a3a3a3', lineHeight: 1.8, marginBottom: '24px' }}>
+            An automated review request system triggers the moment a job is marked complete — no human memory required. Here's the exact flow that works for service businesses:
           </p>
 
-          {/* SMS Template */}
-          <div style={{ backgroundColor: '#0d0d0d', border: '1px solid #222', borderRadius: '10px', padding: '28px', marginBottom: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-              <span style={{ backgroundColor: '#052e16', color: '#4ade80', fontSize: '11px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', padding: '3px 10px', borderRadius: '999px', border: '1px solid #166534' }}>SMS · Within 1 Hour</span>
+          {/* Step cards */}
+          {[
+            {
+              step: '01',
+              title: 'Trigger on job completion',
+              body: 'Connect your scheduling or CRM tool (Jobber, ServiceTitan, Square, or even a simple spreadsheet) to an automation platform like Zapier or Make. When a job status changes to "complete" or a payment is collected, the automation fires. This is the critical handoff — from human to machine.',
+            },
+            {
+              step: '02',
+              title: 'Send a personalized SMS within 30 minutes',
+              body: 'Text beats email for local service businesses. Open rates for SMS hover around 98% vs. 21% for email. Send a short, warm message with the customer's first name: "Hey [Name], thanks for letting us take care of you today! If you have 60 seconds, a quick Google review means the world to a small business like ours: [direct link]." No guilt. No pressure. Just genuine.',
+            },
+            {
+              step: '03',
+              title: 'Use a direct review link — never your homepage',
+              body: 'Every extra click you add cuts your conversion rate in half. Generate your Google review shortlink from your Google Business Profile dashboard (it looks like g.page/r/[yourID]/review). Paste that exact link into your SMS. The customer lands directly on the star-rating screen with zero friction.',
+            },
+            {
+              step: '04',
+              title: 'Follow up once via email at 48 hours',
+              body: 'If the customer didn't click the SMS link (trackable with a URL shortener), send one follow-up email. Keep it brief. Subject line: "Quick favor, [Name]?" Body: 2–3 sentences maximum. One link. This single follow-up typically captures 20–35% of reviews that the SMS missed.',
+            },
+            {
+              step: '05',
+              title: 'Stop at two touches',
+              body: 'Two touchpoints — one SMS, one email — is the sweet spot. A third message crosses into harassment territory and risks annoying a happy customer into a neutral or negative experience. If they haven't responded after two attempts, let it go and focus on the next job.',
+            },
+          ].map(({ step, title, body }) => (
+            <div key={step} style={{ display: 'flex', gap: '20px', marginBottom: '28px' }}>
+              <div style={{ flexShrink: 0, width: '40px', height: '40px', borderRadius: '8px', backgroundColor: '#1e1030', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '13px', color: '#a78bfa', letterSpacing: '0.5px' }}>
+                {step}
+              </div>
+              <div>
+                <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#e5e5e5', marginBottom: '8px', marginTop: '8px' }}>{title}</h3>
+                <p style={{ fontSize: '15px', color: '#a3a3a3', lineHeight: 1.8, margin: 0 }}>{body}</p>
+              </div>
             </div>
-            <p style={{ fontSize: '15px', color: '#e5e5e5', lineHeight: 1.8, fontFamily: 'monospace', backgroundColor: '#111', padding: '16px 20px', borderRadius: '8px', margin: '0 0 12px' }}>
-              "Hey [First Name], thanks for trusting us today! If we took good care of you, a quick Google review goes a long way for a small business like ours. Takes 30 seconds: [YOUR LINK]. — [Your Name] at [Business Name]"
-            </p>
-            <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>Keep it under 160 characters if possible. First name personalization alone increases open rate by 22%.</p>
-          </div>
+          ))}
+        </section>
 
-          {/* In-Person Template */}
-          <div style={{ backgroundColor: '#0d0d0d', border: '1px solid #222', borderRadius: '10px', padding: '28px', marginBottom: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-              <span style={{ backgroundColor: '#0c1a3a', color: '#60a5fa', fontSize: '11px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', padding: '3px 10px', borderRadius: '999px', border: '1px solid #1e3a8a' }}>In-Person · At Job Completion</span>
-            </div>
-            <p style={{ fontSize: '15px', color: '#e5e5e5', lineHeight: 1.8, fontFamily: 'monospace', backgroundColor: '#111', padding: '16px 20px', borderRadius: '8px', margin: '0 0 12px' }}>
-              "Everything look good? Awesome. Hey — if you wouldn't mind leaving us a Google review, it genuinely makes a big difference for us. I'll send you a link right now so it's easy to find."
-            </p>
-            <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>Then immediately send the SMS while the customer is still there. That warm handoff jumps conversion to 45%+.</p>
-          </div>
-
-          {/* Follow-Up Template */}
-          <div style={{ backgroundColor: '#0d0d0d', border: '1px solid #222', borderRadius: '10px', padding: '28px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-              <span style={{ backgroundColor: '#1a0a0a', color: '#f97316', fontSize: '11px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', padding: '3px 10px', borderRadius: '999px', border: '1px solid #7c2d12' }}>SMS · Next Day (Once Only)</span>
-            </div>
-            <p style={{ fontSize: '15px', color: '#e5e5e5',
+        {/* SECTION 4 */}
+        <section style={{ marginBottom: '56px' }}>
+          <h2 style={{
