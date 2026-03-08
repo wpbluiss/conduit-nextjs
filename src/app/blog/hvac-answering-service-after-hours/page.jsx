@@ -1,4 +1,4 @@
-import TrackClick from "../../../components/TrackClick";
+import TrackClick from '../../../components/TrackClick';
 
 export const metadata = {
   title: "HVAC After-Hours Answering Service: Capture Every Emergency Call | Conduit AI",
@@ -6,194 +6,118 @@ export const metadata = {
   keywords: "HVAC answering service after hours, HVAC emergency calls, after hours HVAC service, HVAC on call system, HVAC lead capture nights weekends",
   openGraph: {
     title: "HVAC After-Hours Answering Service: Capture Every Emergency Call",
-    description: "HVAC emergencies happen at 2am on weekends. Learn how AI-powered after-hours answering captures every lead and routes emergencies to your on-call tech.",
-    url: "https://conduitai.io/blog/hvac-answering-service-after-hours",
-    siteName: "Conduit AI",
+    description: "HVAC emergencies happen at 2am on weekends. AI after-hours answering captures every lead and routes real emergencies immediately.",
     type: "article",
+    publishedTime: "2026-03-09T00:00:00Z",
+    authors: ["Luis Garcia"],
   },
 };
 
-export default function HvacAfterHoursAnsweringService() {
+export default function BlogPost() {
   return (
-    <div style={{ backgroundColor: "#0a0a0a", minHeight: "100vh", fontFamily: "'Inter', sans-serif", color: "#f5f5f5" }}>
-
-      {/* NAV */}
-      <nav style={{ borderBottom: "1px solid #1f1f1f", padding: "0 24px", height: "60px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, backgroundColor: "#0a0a0a", zIndex: 50 }}>
-        <a href="/" style={{ fontWeight: 700, fontSize: "18px", color: "#f5f5f5", textDecoration: "none", letterSpacing: "-0.3px" }}>Conduit AI</a>
-        <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
-          <a href="/blog" style={{ color: "#a3a3a3", textDecoration: "none", fontSize: "14px" }}>Blog</a>
-          <TrackClick eventName="nav_cta_click" properties={{ page: "hvac-answering-service-after-hours" }}>
-            <a href="https://app.conduitai.io" style={{ backgroundColor: "#7c3aed", color: "#fff", padding: "8px 16px", borderRadius: "8px", textDecoration: "none", fontSize: "14px", fontWeight: 600 }}>Get Started</a>
+    <div style={{ background: "#0a0a0a", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", color: "#e0e0e0" }}>
+      <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 40px", borderBottom: "1px solid rgba(255,255,255,0.06)", maxWidth: 1200, margin: "0 auto" }}>
+        <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 22, fontWeight: 700, textDecoration: "none", color: "#fff" }}>
+          <img src="/icon.svg" alt="Conduit AI" width={28} height={28} style={{ borderRadius: 8 }} />
+          <span>Conduit</span>
+          <span style={{ background: "linear-gradient(135deg, #00d4ff, #0066ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>AI</span>
+        </a>
+        <div style={{ display: "flex", gap: 24, fontSize: 14 }}>
+          <a href="/#features" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>Features</a>
+          <a href="/#pricing" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>Pricing</a>
+          <a href="/blog" style={{ color: "#00d4ff", textDecoration: "none" }}>Blog</a>
+          <a href="https://app.conduitai.io/login" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>Log In</a>
+          <TrackClick event="cta_click" properties={{ button: "start_free_trial", page: "blog_hvac" }}>
+            <a href="https://app.conduitai.io" style={{ background: "linear-gradient(135deg, #00d4ff, #0066ff)", color: "#fff", padding: "8px 20px", borderRadius: 8, textDecoration: "none", fontWeight: 600 }}>Start Free Trial</a>
           </TrackClick>
         </div>
       </nav>
 
-      {/* HERO */}
-      <header style={{ maxWidth: "760px", margin: "0 auto", padding: "64px 24px 48px" }}>
-        <div style={{ display: "inline-block", backgroundColor: "#1c1030", border: "1px solid #7c3aed", borderRadius: "6px", padding: "4px 12px", fontSize: "12px", fontWeight: 700, color: "#a78bfa", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "24px" }}>
-          HVAC
-        </div>
-        <h1 style={{ fontSize: "clamp(28px, 5vw, 44px)", fontWeight: 800, lineHeight: 1.15, letterSpacing: "-0.5px", marginBottom: "20px", color: "#f5f5f5" }}>
+      <div style={{ maxWidth: 800, margin: "60px auto 40px", padding: "0 24px", textAlign: "center" }}>
+        <span style={{ display: "inline-block", background: "rgba(0,212,255,0.1)", color: "#00d4ff", padding: "4px 14px", borderRadius: 12, fontSize: 12, fontWeight: 600, marginBottom: 16 }}>HVAC</span>
+        <h1 style={{ fontSize: 38, fontWeight: 800, lineHeight: 1.2, color: "#fff", marginBottom: 20 }}>
           HVAC After-Hours Answering Service: Capture Every Emergency Call
         </h1>
-        <p style={{ fontSize: "18px", color: "#a3a3a3", lineHeight: 1.7, marginBottom: "32px" }}>
-          A furnace dies at midnight in January. An AC unit fails at 11pm in July. These are not inconveniences — they are emergencies that your customers will solve with whoever picks up the phone first. If that is not you, it is your competitor.
+        <p style={{ fontSize: 18, color: "rgba(255,255,255,0.6)", lineHeight: 1.7, marginBottom: 32 }}>
+          It is 2am in July and someone's AC just died. They need help now. If your phone goes to voicemail, they call the next HVAC company on Google. That emergency job — worth $800 to $3,000 — belongs to your competitor.
         </p>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "#6b7280", fontSize: "13px" }}>
-          <span>Conduit AI Team</span>
-          <span>·</span>
-          <time dateTime="2026-03-09T00:00:00Z">March 9, 2026</time>
-          <span>·</span>
-          <span>7 min read</span>
-        </div>
-      </header>
-
-      {/* DIVIDER */}
-      <div style={{ maxWidth: "760px", margin: "0 auto 48px", padding: "0 24px" }}>
-        <div style={{ height: "1px", backgroundColor: "#1f1f1f" }} />
+        <TrackClick event="cta_click" properties={{ button: "hear_it_live", page: "blog_hvac" }}>
+          <a href="tel:+15617303316" style={{ display: "inline-block", background: "linear-gradient(135deg, #00d4ff, #0066ff)", color: "#fff", padding: "14px 32px", borderRadius: 10, textDecoration: "none", fontWeight: 700, fontSize: 16 }}>
+            Hear It Live — Call (561) 730-3316
+          </a>
+        </TrackClick>
       </div>
 
-      {/* CONTENT */}
-      <main style={{ maxWidth: "760px", margin: "0 auto", padding: "0 24px 80px" }}>
+      <div style={{ maxWidth: 800, margin: "0 auto", padding: "0 24px 80px" }}>
 
-        {/* SECTION 1 */}
-        <section style={{ marginBottom: "56px" }}>
-          <h2 style={{ fontSize: "26px", fontWeight: 700, color: "#f5f5f5", marginBottom: "16px", letterSpacing: "-0.3px" }}>
-            The Real Cost of a Missed HVAC Call
-          </h2>
-          <p style={{ fontSize: "16px", color: "#a3a3a3", lineHeight: 1.8, marginBottom: "16px" }}>
-            Most HVAC business owners think about missed calls in terms of the single job. That is the wrong frame. When a homeowner calls you at 10pm and gets voicemail, they do not wait until morning. They dial the next number on Google. They book with whoever answers. And in a service business built on repeat customers and referrals, that lost caller may represent thousands of dollars in lifetime value.
+        <div style={{ background: "rgba(255,140,0,0.08)", border: "1px solid rgba(255,140,0,0.25)", borderRadius: 16, padding: 28, marginBottom: 40 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: "#ff8c00", marginBottom: 12 }}>HVAC Emergency Calls Are Your Highest-Value Leads</h2>
+          <p style={{ lineHeight: 1.8, color: "rgba(255,255,255,0.7)" }}>
+            Emergency HVAC calls — no cooling in summer, no heat in winter — command a premium. Customers in these situations are not price shopping. They will pay your rate to get someone out fast. These calls are also the ones most likely to happen at night and on weekends, exactly when your phone is least likely to be answered.
           </p>
-          <p style={{ fontSize: "16px", color: "#a3a3a3", lineHeight: 1.8, marginBottom: "24px" }}>
-            The numbers are stark. According to industry research:
-          </p>
+        </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px", marginBottom: "24px" }}>
-            {[
-              { stat: "85%", label: "of callers will not call back if they reach voicemail" },
-              { stat: "$300+", label: "average revenue per HVAC service call" },
-              { stat: "62%", label: "of HVAC emergency calls happen outside business hours" },
-              { stat: "3x", label: "higher close rate when calls are answered live" },
-            ].map(({ stat, label }) => (
-              <div key={stat} style={{ backgroundColor: "#111111", border: "1px solid #1f1f1f", borderRadius: "12px", padding: "24px", textAlign: "center" }}>
-                <div style={{ fontSize: "32px", fontWeight: 800, color: "#a78bfa", marginBottom: "8px" }}>{stat}</div>
-                <div style={{ fontSize: "13px", color: "#6b7280", lineHeight: 1.5 }}>{label}</div>
+        <h2 style={{ fontSize: 26, fontWeight: 700, color: "#fff", marginBottom: 16 }}>When HVAC Calls Actually Come In</h2>
+        <p style={{ lineHeight: 1.8, color: "rgba(255,255,255,0.7)", marginBottom: 20 }}>
+          Industry data shows that 43 percent of HVAC emergency calls come in outside normal business hours — evenings, nights, and weekends. Another 31 percent come in during peak summer and winter days when your techs are already slammed on other jobs and nobody is available to answer the office phone.
+        </p>
+        <p style={{ lineHeight: 1.8, color: "rgba(255,255,255,0.7)", marginBottom: 40 }}>
+          That means nearly three out of every four HVAC emergency calls come in at exactly the wrong time for a small operation to pick up. Every one of those missed calls is a high-value job you are handing to your competition.
+        </p>
+
+        <h2 style={{ fontSize: 26, fontWeight: 700, color: "#fff", marginBottom: 24 }}>What an AI After-Hours System Does for HVAC</h2>
+        <div style={{ marginBottom: 48 }}>
+          {[
+            { icon: "🌡️", title: "Emergency vs. Non-Emergency Triage", desc: "Immediately identifies whether the call is a true emergency — no cooling above 90 degrees, no heat below freezing, elderly or infant in the home — versus a routine service request that can wait until morning. Routes each appropriately." },
+            { icon: "📞", title: "Instant On-Call Routing", desc: "For true emergencies, the AI can immediately transfer the call or send an urgent text to your on-call tech. For everything else, it captures the lead and schedules a morning callback automatically." },
+            { icon: "📋", title: "Complete Lead Capture", desc: "Gets the system type, age, symptoms, address, and preferred callback window. By the time you call back, you already know whether you need parts in the truck before you leave the shop." },
+            { icon: "💰", title: "Flat-Rate Predictable Cost", desc: "Traditional live answering services charge per minute plus holiday and after-hours surcharges. Your AI costs the same $39 per month whether it answers 10 calls or 1,000 — nights, weekends, and holidays included." },
+            { icon: "📊", title: "Every Call Logged and Transcribed", desc: "You wake up to a complete log of every call that came in overnight — full transcript, caller info, issue description, and your AI's assessment of urgency. No surprises, no missed leads." },
+          ].map((item, i) => (
+            <div key={i} style={{ display: "flex", gap: 16, marginBottom: 16, padding: 20, background: "rgba(255,255,255,0.03)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)" }}>
+              <div style={{ width: 44, height: 44, borderRadius: 10, background: "rgba(0,212,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>{item.icon}</div>
+              <div>
+                <div style={{ fontWeight: 700, color: "#fff", marginBottom: 4 }}>{item.title}</div>
+                <div style={{ color: "rgba(255,255,255,0.6)", lineHeight: 1.6, fontSize: 15 }}>{item.desc}</div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
+        </div>
 
-          <p style={{ fontSize: "16px", color: "#a3a3a3", lineHeight: 1.8 }}>
-            If your HVAC business runs five calls per day and you are missing even two after-hours calls per week, you are leaving $30,000 or more on the table every year — before factoring in maintenance agreements and repeat business.
+        <h2 style={{ fontSize: 26, fontWeight: 700, color: "#fff", marginBottom: 16 }}>The Revenue Math for HVAC After-Hours</h2>
+        <div style={{ background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 16, padding: 28, marginBottom: 40 }}>
+          {[
+            ["After-hours calls per month", "25 to 40"],
+            ["Previously missed (no answer)", "60 to 80%"],
+            ["Average emergency job value", "$800 to $1,800"],
+            ["Jobs recovered monthly (est.)", "4 to 8"],
+            ["Additional revenue per month", "$3,200 to $14,400"],
+            ["Cost of Conduit AI", "$39/mo"],
+          ].map(([label, val], i) => (
+            <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderBottom: i < 5 ? "1px solid rgba(255,255,255,0.06)" : "none" }}>
+              <span style={{ color: "rgba(255,255,255,0.6)" }}>{label}</span>
+              <span style={{ color: "#00d4ff", fontWeight: 700 }}>{val}</span>
+            </div>
+          ))}
+        </div>
+
+        <h2 style={{ fontSize: 26, fontWeight: 700, color: "#fff", marginBottom: 16 }}>Setup Takes Under 10 Minutes</h2>
+        <p style={{ lineHeight: 1.8, color: "rgba(255,255,255,0.7)", marginBottom: 40 }}>
+          You connect your existing business number, tell the AI your service area, the systems you work on, your emergency criteria, and your on-call tech's number. That is it. From that point on, every call that comes in after hours — or any time you cannot answer — is handled, captured, and sent to you as a notification before the customer even hangs up.
+        </p>
+
+        <div style={{ background: "linear-gradient(135deg, rgba(0,212,255,0.08), rgba(0,102,255,0.08))", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 20, padding: 40, textAlign: "center" }}>
+          <h2 style={{ fontSize: 28, fontWeight: 800, color: "#fff", marginBottom: 12 }}>Stop Missing After-Hours HVAC Calls</h2>
+          <p style={{ color: "rgba(255,255,255,0.6)", marginBottom: 28 }}>
+            14-day free trial. No credit card. Works with your existing number.
           </p>
-        </section>
-
-        {/* SECTION 2 */}
-        <section style={{ marginBottom: "56px" }}>
-          <h2 style={{ fontSize: "26px", fontWeight: 700, color: "#f5f5f5", marginBottom: "16px", letterSpacing: "-0.3px" }}>
-            Why Traditional Answering Services Fall Short
-          </h2>
-          <p style={{ fontSize: "16px", color: "#a3a3a3", lineHeight: 1.8, marginBottom: "16px" }}>
-            HVAC companies have tried to solve this problem for decades with traditional human answering services. The model is familiar: a third-party call center picks up after hours, takes a message, and either emails it to you or tries to page your on-call tech. It works — until it does not.
-          </p>
-          <p style={{ fontSize: "16px", color: "#a3a3a3", lineHeight: 1.8, marginBottom: "24px" }}>
-            Here is what breaks down with legacy answering services:
-          </p>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
-            {[
-              {
-                title: "Generic scripts, no HVAC knowledge",
-                desc: "Operators reading from a generic template cannot distinguish a true no-heat emergency from a routine tune-up request. Everything gets the same flat response.",
-              },
-              {
-                title: "Slow relay, hot leads go cold",
-                desc: "A message emailed at 11pm may not reach your on-call tech until midnight. By then the homeowner has already booked with someone else.",
-              },
-              {
-                title: "No intelligent triage",
-                desc: "Human operators cannot dynamically prioritize calls based on urgency, customer history, or the type of system involved. Every call is treated the same.",
-              },
-              {
-                title: "High cost per month",
-                desc: "Traditional live answering services charge $150 to $400 per month for limited minutes, plus overage fees. That eats margin before you have even dispatched a tech.",
-              },
-              {
-                title: "No data or transcripts",
-                desc: "You get a handwritten message or a short email summary. There is no recording, no transcript, and no CRM integration to track leads over time.",
-              },
-            ].map(({ title, desc }) => (
-              <div key={title} style={{ backgroundColor: "#111111", border: "1px solid #1f1f1f", borderRadius: "12px", padding: "20px 24px", display: "flex", gap: "16px", alignItems: "flex-start" }}>
-                <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#7c3aed", marginTop: "7px", flexShrink: 0 }} />
-                <div>
-                  <div style={{ fontWeight: 700, color: "#f5f5f5", marginBottom: "6px", fontSize: "15px" }}>{title}</div>
-                  <div style={{ color: "#6b7280", fontSize: "14px", lineHeight: 1.6 }}>{desc}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <p style={{ fontSize: "16px", color: "#a3a3a3", lineHeight: 1.8 }}>
-            The result is that HVAC companies end up paying for coverage that feels incomplete — and still worrying every night that an emergency call slipped through the cracks.
-          </p>
-        </section>
-
-        {/* SECTION 3 */}
-        <section style={{ marginBottom: "56px" }}>
-          <h2 style={{ fontSize: "26px", fontWeight: 700, color: "#f5f5f5", marginBottom: "16px", letterSpacing: "-0.3px" }}>
-            How an AI Voice Agent Handles HVAC After-Hours Calls
-          </h2>
-          <p style={{ fontSize: "16px", color: "#a3a3a3", lineHeight: 1.8, marginBottom: "24px" }}>
-            An AI voice receptionist like Conduit AI answers every call in under two seconds, 24 hours a day, 365 days a year. There is no hold music, no voicemail, no offshore operator who does not know what a heat exchanger is. Here is how the flow works for an HVAC company:
-          </p>
-
-          <div style={{ position: "relative", paddingLeft: "32px", marginBottom: "32px" }}>
-            <div style={{ position: "absolute", left: "10px", top: 0, bottom: 0, width: "2px", backgroundColor: "#1f1f1f" }} />
-            {[
-              {
-                step: "01",
-                title: "Call answered immediately",
-                desc: "The AI greets callers with your company name and a natural, professional voice. No caller is ever sent to voicemail unless you specifically want them to be.",
-              },
-              {
-                step: "02",
-                title: "Urgency is identified",
-                desc: "The AI asks structured qualifying questions: Is the system completely down? Is there a gas smell? How many people are in the home? This separates true emergencies from non-urgent maintenance requests.",
-              },
-              {
-                step: "03",
-                title: "Emergency routing triggers",
-                desc: "For emergencies, the AI immediately texts or calls your on-call technician with a full summary of the situation — address, system type, problem description, and caller contact info.",
-              },
-              {
-                step: "04",
-                title: "Non-emergency scheduling",
-                desc: "For routine calls, the AI collects all necessary information and books the appointment directly into your calendar, or queues it for your office team to confirm in the morning.",
-              },
-              {
-                step: "05",
-                title: "Full transcript delivered",
-                desc: "Every call ends with a complete transcript and summary sent to your email or CRM. Nothing is lost. Every lead is captured and logged.",
-              },
-            ].map(({ step, title, desc }) => (
-              <div key={step} style={{ position: "relative", marginBottom: "28px", paddingLeft: "16px" }}>
-                <div style={{ position: "absolute", left: "-26px", top: "2px", width: "18px", height: "18px", borderRadius: "50%", backgroundColor: "#7c3aed", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "9px", fontWeight: 800, color: "#fff" }}>{step}</div>
-                <div style={{ fontWeight: 700, color: "#f5f5f5", marginBottom: "6px", fontSize: "15px" }}>{title}</div>
-                <div style={{ color: "#6b7280", fontSize: "14px", lineHeight: 1.7 }}>{desc}</div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ backgroundColor: "#0f0a1e", border: "1px solid #7c3aed", borderRadius: "12px", padding: "24px 28px" }}>
-            <div style={{ fontWeight: 700, color: "#a78bfa", marginBottom: "10px", fontSize: "14px", textTransform: "uppercase", letterSpacing: "0.06em" }}>Real Example</div>
-            <p style={{ fontSize: "15px", color: "#d1d5db", lineHeight: 1.7, margin: 0 }}>
-              A homeowner calls at 1:47am because their furnace stopped working with outdoor temperatures dropping to 28 degrees Fahrenheit. Conduit AI answers, identifies the situation as a no-heat emergency, collects the address and system details, texts the on-call tech within 60 seconds, and sends the business owner a full transcript before 2am. The tech is on-site by 3am. The competitor who ranks below you on Google never even got a call.
-            </p>
-          </div>
-        </section>
-
-        {/* SECTION 4 */}
-        <section style={{ marginBottom: "56px" }}>
-          <h2 style={{ fontSize: "26px", fontWeight: 700, color: "#f5f5f5", marginBottom: "16px", letterSpacing: "-0.3px" }}>
-            HVAC Seasonality and the After-Hours Spike
-          </h2>
-          <p style={{ fontSize: "16px", color: "#a3a3a3", lineHeight: 1
+          <TrackClick event="cta_click" properties={{ button: "start_free_trial", page: "blog_hvac" }}>
+            <a href="https://app.conduitai.io" style={{ display: "inline-block", background: "linear-gradient(135deg, #00d4ff, #0066ff)", color: "#fff", padding: "16px 36px", borderRadius: 12, textDecoration: "none", fontWeight: 700, fontSize: 18 }}>
+              Start Free at app.conduitai.io
+            </a>
+          </TrackClick>
+        </div>
+      </div>
+    </div>
+  );
+}
