@@ -278,7 +278,7 @@ const COMPARISON = [
   { feature: "Sentiment Analysis", conduit: "✓", rosie: "✗", goodcall: "✗", smithai: "✗" },
   { feature: "Lead Scoring", conduit: "✓", rosie: "✗", goodcall: "✗", smithai: "✗" },
   { feature: "Live Call Transfer", conduit: "✓", rosie: "✗", goodcall: "✗", smithai: "✓" },
-  { feature: "Mobile App", conduit: "Coming Soon", rosie: "✗", goodcall: "✗", smithai: "✗" },
+  { feature: "Mobile App", conduit: "✓", rosie: "✗", goodcall: "✗", smithai: "✗" },
   { feature: "No Setup Fee", conduit: "✓", rosie: "✓", goodcall: "✓", smithai: "✗" },
 ];
 
@@ -301,7 +301,7 @@ const PRICING = [
       "Basic analytics dashboard",
       "1 phone number included",
     ],
-    cta: "Start Free Trial",
+    cta: "Get Started Free",
     popular: false,
   },
   {
@@ -321,7 +321,7 @@ const PRICING = [
       "24/7 call capture",
       "Analytics dashboard",
     ],
-    cta: "Start Free Trial",
+    cta: "Get Started Free",
     popular: false,
   },
   {
@@ -341,7 +341,7 @@ const PRICING = [
       "Revenue recovery tracking",
       "Priority support",
     ],
-    cta: "Start Free Trial",
+    cta: "Get Started Free",
     popular: true,
   },
   {
@@ -501,7 +501,7 @@ export default function Home() {
             <a href="#features" style={styles.navLink}>Features</a>
             <a href="#pricing" style={styles.navLink}>Pricing</a>
             <a href="#demo" style={styles.navLink}>Demo</a>
-            <a href="https://app.conduitai.io/login" style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, textDecoration: "none", marginRight: 16, fontWeight: 500 }}>Log In</a><a href="https://app.conduitai.io" style={styles.navCta} onClick={() => track('cta_click', { button: 'start_free_trial', page: 'homepage' })}>Start Free Trial</a>
+            <a href="https://app.conduitai.io/login" style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, textDecoration: "none", marginRight: 16, fontWeight: 500 }}>Log In</a><a href="https://app.conduitai.io" style={styles.navCta} onClick={() => track('cta_click', { button: 'start_free_trial', page: 'homepage' })}>Get Started Free</a>
           </div>
           <button
             style={styles.mobileToggle}
@@ -516,7 +516,7 @@ export default function Home() {
             <a href="#features" style={styles.mobileLink} onClick={() => setMobileMenu(false)}>Features</a>
             <a href="#pricing" style={styles.mobileLink} onClick={() => setMobileMenu(false)}>Pricing</a>
             <a href="#demo" style={styles.mobileLink} onClick={() => setMobileMenu(false)}>Demo</a>
-            <a href="https://app.conduitai.io/login" style={{ display: "block", padding: "10px 0", color: "rgba(255,255,255,0.7)", fontSize: 15, textDecoration: "none", fontWeight: 500 }}>Log In</a><a href="https://app.conduitai.io" style={styles.mobileCta} onClick={() => track('cta_click', { button: 'start_free_trial', page: 'homepage' })}>Start Free Trial →</a>
+            <a href="https://app.conduitai.io/login" style={{ display: "block", padding: "10px 0", color: "rgba(255,255,255,0.7)", fontSize: 15, textDecoration: "none", fontWeight: 500 }}>Log In</a><a href="https://app.conduitai.io" style={styles.mobileCta} onClick={() => track('cta_click', { button: 'start_free_trial', page: 'homepage' })}>Get Started Free →</a>
           </div>
         )}
       </nav>
@@ -548,7 +548,7 @@ export default function Home() {
           </div>
           <div style={styles.ctaGroup}>
             <a href="https://app.conduitai.io" style={styles.btnPrimary} onClick={() => track('cta_click', { button: 'start_free_trial', page: 'homepage' })}>
-              Start 14-Day Free Trial →
+              Get Started Free — We Set You Up →
             </a>
             <a href="tel:5617303316" style={styles.btnSecondary} onClick={() => track('cta_click', { button: 'hear_ai_live', page: 'homepage' })}>
               🎧 Hear the AI Live
@@ -648,7 +648,7 @@ export default function Home() {
           <div style={styles.featuresGrid}>
             {FEATURES.map((f, i) => (
               <div key={i} style={styles.featureCard}>
-                {f.soon && <div style={styles.soonBadge}>Coming Soon</div>}
+                {f.soon && <div style={styles.soonBadge}>✓</div>}
                 <div style={styles.featureIcon}>{f.icon}</div>
                 <h3 style={styles.featureTitle}>{f.title}</h3>
                 <p style={styles.featureDesc}>{f.desc}</p>
@@ -854,11 +854,11 @@ export default function Home() {
             <span style={styles.heroGradient}>Start recovering revenue.</span>
           </h2>
           <p style={{ ...styles.heroSub, maxWidth: 500, margin: "0 auto 40px" }}>
-            Join hundreds of businesses already using Conduit AI to capture every lead, 24/7.
+            Join businesses already using Conduit AI to capture every lead, 24/7.
           </p>
           <div style={styles.ctaGroup}>
             <a href="https://app.conduitai.io" style={styles.btnPrimary} onClick={() => track('cta_click', { button: 'start_free_trial', page: 'homepage_final_cta' })}>
-              Start 14-Day Free Trial →
+              Get Started Free — We Set You Up →
             </a>
             <a href="tel:5617303316" style={styles.btnSecondary} onClick={() => track('cta_click', { button: 'hear_ai_live', page: 'homepage_final_cta' })}>
               🎧 Hear the AI Live
