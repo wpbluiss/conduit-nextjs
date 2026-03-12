@@ -602,6 +602,47 @@ export default function Home() {
         </div>
       </Section>
 
+      
+      {/* ── Social Proof & Founder Story ── */}
+      <section style={{ padding: "80px 24px", maxWidth: 1100, margin: "0 auto" }}>
+        <div style={{ padding: "40px", borderRadius: 20, background: "rgba(0,212,255,0.03)", border: "1px solid rgba(0,212,255,0.12)", marginBottom: 40 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
+            <div style={{ width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg, #00d4ff, #0066ff)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 800, color: "#fff" }}>LG</div>
+            <div>
+              <div style={{ fontFamily: "'Sora', sans-serif", fontSize: 18, fontWeight: 700 }}>Luis Garcia</div>
+              <div style={{ fontSize: 13, color: "rgba(255,255,255,0.4)" }}>Founder & CEO, Conduit AI</div>
+            </div>
+          </div>
+          <p style={{ fontSize: 15, color: "rgba(255,255,255,0.65)", lineHeight: 1.8, marginBottom: 16 }}>{"I\u2019m 21 years old. I work full-time as a fire alarm technician in South Florida. And I built every piece of Conduit AI myself \u2014 the voice engine, the web portal, the mobile app, the backend \u2014 all from scratch, with no CS degree and no funding."}</p>
+          <p style={{ fontSize: 15, color: "rgba(255,255,255,0.65)", lineHeight: 1.8, marginBottom: 16 }}>{"I started this because I watched service businesses lose thousands of dollars every month to missed calls. A plumber under a sink can\u2019t answer the phone. A barber mid-fade can\u2019t pick up. A dentist with a patient in the chair can\u2019t pause to grab a call. Every one of those missed calls is a customer who calls someone else."}</p>
+          <p style={{ fontSize: 15, color: "rgba(255,255,255,0.65)", lineHeight: 1.8, marginBottom: 0 }}>{"Every client gets set up personally by me. Not a support ticket. Not a chatbot. Me. I configure your AI agent, customize it to your business, and make sure it sounds exactly right before a single call comes through. That\u2019s the Conduit AI difference."}</p>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20, marginBottom: 40 }}>
+          <div style={{ padding: "24px 28px", borderRadius: 16, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <div style={{ fontSize: 20, marginBottom: 12 }}>{"\ud83d\udcac"}</div>
+            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.6)", lineHeight: 1.7, fontStyle: "italic", marginBottom: 12 }}>{"\u201cSo you\u2019re telling me an AI supercomputer answers my phone? That\u2019s actually really cool.\u201d"}</p>
+            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.35)" }}>{"\u2014 Salon owner, Delray Beach FL"}</div>
+          </div>
+          <div style={{ padding: "24px 28px", borderRadius: 16, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <div style={{ fontSize: 20, marginBottom: 12 }}>{"\ud83d\udcac"}</div>
+            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.6)", lineHeight: 1.7, fontStyle: "italic", marginBottom: 12 }}>{"\u201cDoor to door for a voice agent is honestly a smart wedge because you can demo it in 10 seconds and the value is super concrete.\u201d"}</p>
+            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.35)" }}>{"\u2014 Top 1% commenter, r/SaaS (25,000+ views)"}</div>
+          </div>
+          <div style={{ padding: "24px 28px", borderRadius: 16, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <div style={{ fontSize: 20, marginBottom: 12 }}>{"\ud83d\udcac"}</div>
+            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.6)", lineHeight: 1.7, fontStyle: "italic", marginBottom: 12 }}>{"\u201cThe call this number right now demo is brilliant. Forces them to experience the product instead of browsing a landing page.\u201d"}</p>
+            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.35)" }}>{"\u2014 Top 1% commenter, r/SaaS"}</div>
+          </div>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 16, justifyContent: "center" }}>
+          {["Featured on Product Hunt", "25,000+ views on r/SaaS", "Personally set up by the founder", "Built in South Florida", "Powered by Vapi AI + Twilio"].map((t) => (
+            <div key={t} style={{ padding: "10px 20px", borderRadius: 100, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", fontSize: 13, color: "rgba(255,255,255,0.5)", display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ color: "#00d4ff" }}>{"\u2726"}</span> {t}
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ─── HOW IT WORKS ─── */}
       <Section id="how-it-works">
         <div style={styles.section}>
