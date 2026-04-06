@@ -24,6 +24,10 @@ export const metadata: Metadata = {
   title: "Conduit AI -- Your Company Runs Itself",
   description:
     "Conduit deploys autonomous AI employees across every department. Engineering, sales, support, finance, HR, legal, marketing, ops, and product -- all running 24/7.",
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
   openGraph: {
     title: "Conduit AI -- Your Company Runs Itself",
     description:

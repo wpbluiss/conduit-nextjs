@@ -70,7 +70,6 @@ export default function FounderStory() {
           </div>
         </motion.div>
       </div>
-      <div className="h-16 bg-gradient-to-b from-transparent to-bg mt-12" />
     </section>
   );
 }

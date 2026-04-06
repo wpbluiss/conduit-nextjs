@@ -100,8 +100,6 @@ export default function DepartmentGrid() {
           {DEPARTMENTS.map((d, i) => <Card key={d.name} dept={d} index={i} />)}
         </div>
       </div>
-      {/* Morph bridge to next section */}
-      <div className="h-24 bg-gradient-to-b from-transparent to-bg relative z-10 mt-16" />
     </section>
   );
 }

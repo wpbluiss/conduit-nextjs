@@ -1,15 +1,10 @@
+import { ConduitLogoFull } from "./ConduitLogo";
+
 export default function Footer() {
   return (
     <footer className="relative border-t border-border px-6 py-12">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex items-center gap-2">
-          <span className="font-[family-name:var(--font-display)] font-bold text-sm tracking-tight">
-            Conduit
-          </span>
-          <span className="font-[family-name:var(--font-display)] font-light text-sm tracking-tight text-text2">
-            AI
-          </span>
-        </div>
+        <ConduitLogoFull iconSize={28} />
 
         <div className="flex items-center gap-4 font-[family-name:var(--font-mono)] text-xs text-text3">
           <div className="flex items-center gap-1.5">

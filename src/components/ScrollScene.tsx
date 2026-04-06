@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo, useEffect, useCallback } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -275,6 +275,28 @@ function Building() {
   );
 }
 
+/* ───── Throttle rendering when tab hidden ────────────────────────────── */
+function FrameThrottle() {
+  const { invalidate, clock } = useThree();
+  const visible = useRef(true);
+
+  useEffect(() => {
+    const onVis = () => {
+      visible.current = document.visibilityState === "visible";
+      if (visible.current) invalidate();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [invalidate]);
+
+  useFrame(() => {
+    if (!visible.current) clock.stop();
+    else if (!clock.running) clock.start();
+  });
+
+  return null;
+}
+
 /* ───────────────────────── Exported canvas ───────────────────────────── */
 export default function ScrollScene() {
   return (
@@ -289,9 +311,10 @@ export default function ScrollScene() {
       <directionalLight position={[5, 8, 5]} intensity={0.3} />
       <directionalLight position={[-3, 4, -2]} intensity={0.15} color="#ff6b35" />
       <fog attach="fog" args={["#050508", 8, 20]} />
+      <FrameThrottle />
       <CameraRig />
       <Building />
-      <Particles count={500} />
+      <Particles count={200} />
     </Canvas>
   );
 }

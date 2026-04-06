@@ -2,24 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
-function ConduitLogo() {
-  return (
-    <a href="#" className="flex items-center gap-2.5 group">
-      {/* Logo mark — stylised lightning bolt in gradient box */}
-      <div className="relative w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-orange via-warm to-purple opacity-90 group-hover:opacity-100 transition-opacity" />
-        <svg viewBox="0 0 32 32" fill="none" className="relative w-full h-full">
-          <path d="M18 4L8 18h7l-1 10 10-14h-7l1-10z" fill="white" fillOpacity="0.95"/>
-        </svg>
-      </div>
-      <div className="flex items-baseline gap-1">
-        <span className="font-[family-name:var(--font-display)] font-bold text-[1.1rem] tracking-[-0.03em] text-white">Conduit</span>
-        <span className="font-[family-name:var(--font-display)] font-light text-[1.1rem] tracking-[-0.03em] text-text2">AI</span>
-      </div>
-    </a>
-  );
-}
+import { ConduitLogoFull } from "./ConduitLogo";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -43,7 +26,9 @@ export default function Navbar() {
             : "bg-transparent border-b border-transparent backdrop-blur-sm"
         }`}
       >
-        <ConduitLogo />
+        <a href="#">
+          <ConduitLogoFull />
+        </a>
 
         <div className="hidden md:flex items-center gap-8">
           <a href="#departments" className="text-text2 text-sm font-medium hover:text-text transition-colors">Departments</a>
