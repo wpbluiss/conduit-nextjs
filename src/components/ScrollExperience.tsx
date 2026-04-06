@@ -14,11 +14,11 @@ const ScrollScene = dynamic(() => import("./ScrollScene"), { ssr: false });
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* ══════════════ HOLOGRAPHIC AI PROFILE — full screen, cinematic ══════════════ */
+/* ══════════════ HOLOGRAPHIC AI PROFILE — photorealistic portrait ═════════════ */
 function HolographicProfile({ visible }: { visible: boolean }) {
   return (
     <div
-      className="gpu-layer flex items-center justify-center gap-8 w-full max-w-5xl mx-auto px-6"
+      className="gpu-layer flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 w-full max-w-5xl mx-auto px-6"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "scale(1) translateZ(0)" : "scale(0.92) translateZ(0)",
@@ -26,116 +26,117 @@ function HolographicProfile({ visible }: { visible: boolean }) {
         pointerEvents: visible ? "auto" : "none",
       }}
     >
-      {/* ─── Left: large blueprint portrait ─── */}
-      <div className="relative flex-shrink-0 hidden md:block">
-        <div className="relative w-[260px] h-[340px]">
-          {/* Holo glow behind */}
-          <div className="absolute -inset-4 rounded-2xl bg-orange/[0.04] blur-2xl" />
+      {/* ─── Left: photorealistic holographic portrait ─── */}
+      <div className="relative flex-shrink-0">
+        <div className="relative w-[320px] h-[420px] md:w-[360px] md:h-[480px]">
+          {/* Outer ambient glow */}
+          <div className="absolute -inset-12 rounded-3xl bg-orange/[0.1] blur-3xl" />
+          <div className="absolute -inset-10 rounded-3xl bg-blue/[0.05] blur-2xl" />
 
-          {/* Border */}
+          {/* Pulsing border ring */}
           <div
-            className="absolute -inset-[1px] rounded-2xl"
+            className="absolute -inset-[2px] rounded-2xl"
             style={{
               background: visible
-                ? "linear-gradient(135deg, #ff6b35 0%, #3b82f6 40%, #a855f7 70%, #ff6b35 100%)"
+                ? "linear-gradient(135deg, #ff6b35 0%, #3b82f6 35%, #a855f7 65%, #ff6b35 100%)"
                 : "transparent",
               backgroundSize: "300% 300%",
               animation: visible ? "holoShift 4s ease infinite" : "none",
-              opacity: 0.5,
+              opacity: 0.85,
             }}
           />
 
-          <div className="relative w-full h-full rounded-2xl bg-[#08080ef0] overflow-hidden">
-            {/* Scan line */}
-            <div
-              className="absolute left-0 right-0 h-[2px] z-10 bg-gradient-to-r from-transparent via-orange/70 to-transparent"
-              style={{ animation: visible ? "holoScan 3s ease-in-out infinite" : "none" }}
+          <div className="relative w-full h-full rounded-2xl overflow-hidden bg-[#060610]" style={{ boxShadow: "0 0 40px 8px rgba(255,107,53,0.12), 0 0 80px 20px rgba(255,107,53,0.06)" }}>
+            {/* Real portrait photo */}
+            <img
+              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=85&auto=format&fit=crop&crop=face&facepad=2.5"
+              alt="AI Agent ENG-014"
+              className="absolute inset-0 w-full h-full object-cover object-top"
+              style={{
+                filter: "saturate(0.35) contrast(1.15) brightness(0.7)",
+                mixBlendMode: "luminosity",
+              }}
+              loading="eager"
             />
 
-            {/* Blueprint SVG portrait — LARGE */}
-            <svg viewBox="0 0 260 340" fill="none" className="w-full h-full">
-              {/* Background grid */}
-              {[0, 34, 68, 102, 136, 170, 204, 238, 272, 306, 340].map(y => (
-                <line key={`h${y}`} x1="0" y1={y} x2="260" y2={y} stroke="#ff6b35" strokeWidth="0.3" opacity="0.08" />
-              ))}
-              {[0, 32.5, 65, 97.5, 130, 162.5, 195, 227.5, 260].map(x => (
-                <line key={`v${x}`} x1={x} y1="0" x2={x} y2="340" stroke="#ff6b35" strokeWidth="0.3" opacity="0.08" />
-              ))}
+            {/* Holographic color tint overlay */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background: "linear-gradient(160deg, rgba(255,107,53,0.15) 0%, rgba(59,130,246,0.12) 50%, rgba(168,85,247,0.1) 100%)",
+                mixBlendMode: "color",
+              }}
+            />
 
-              {/* Head — geometric oval with double stroke */}
-              <ellipse cx="130" cy="95" rx="48" ry="58" fill="none" stroke="#ff6b35" strokeWidth="1.5" opacity="0.6" />
-              <ellipse cx="130" cy="95" rx="48" ry="58" fill="#ff6b35" opacity="0.02" />
-              <ellipse cx="130" cy="95" rx="42" ry="52" fill="none" stroke="#ff6b35" strokeWidth="0.5" opacity="0.2" strokeDasharray="4 4" />
+            {/* Additive glow layer — warm highlights */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background: "radial-gradient(ellipse at 50% 30%, rgba(255,107,53,0.12) 0%, transparent 60%)",
+              }}
+            />
 
-              {/* Visor / eye band */}
-              <rect x="96" y="82" width="68" height="10" rx="3" fill="#ff6b35" opacity="0.35" />
-              <rect x="96" y="82" width="68" height="10" rx="3" fill="none" stroke="#ff6b35" strokeWidth="0.8" opacity="0.7" />
-              {/* Eye dots */}
-              <circle cx="116" cy="87" r="3" fill="#ff6b35" opacity="0.8" />
-              <circle cx="144" cy="87" r="3" fill="#3b82f6" opacity="0.8" />
+            {/* Scan line sweep */}
+            <div
+              className="absolute left-0 right-0 h-[3px] z-20"
+              style={{
+                background: "linear-gradient(90deg, transparent 0%, rgba(255,107,53,0.5) 20%, rgba(59,130,246,0.6) 50%, rgba(255,107,53,0.5) 80%, transparent 100%)",
+                boxShadow: "0 0 20px 4px rgba(255,107,53,0.15)",
+                animation: visible ? "holoScan 3s ease-in-out infinite" : "none",
+              }}
+            />
 
-              {/* Neural network nodes on skull */}
-              <circle cx="105" cy="68" r="2.5" fill="#3b82f6" opacity="0.5" />
-              <circle cx="155" cy="68" r="2.5" fill="#3b82f6" opacity="0.5" />
-              <circle cx="130" cy="48" r="3" fill="#a855f7" opacity="0.5" />
-              <circle cx="115" cy="55" r="1.5" fill="#ff6b35" opacity="0.3" />
-              <circle cx="145" cy="55" r="1.5" fill="#ff6b35" opacity="0.3" />
-              {/* Neural connections */}
-              <line x1="105" y1="68" x2="130" y2="48" stroke="#3b82f6" strokeWidth="0.6" opacity="0.3" />
-              <line x1="155" y1="68" x2="130" y2="48" stroke="#3b82f6" strokeWidth="0.6" opacity="0.3" />
-              <line x1="105" y1="68" x2="115" y2="55" stroke="#ff6b35" strokeWidth="0.4" opacity="0.2" />
-              <line x1="155" y1="68" x2="145" y2="55" stroke="#ff6b35" strokeWidth="0.4" opacity="0.2" />
-              <line x1="115" y1="55" x2="130" y2="48" stroke="#a855f7" strokeWidth="0.4" opacity="0.2" />
-              <line x1="145" y1="55" x2="130" y2="48" stroke="#a855f7" strokeWidth="0.4" opacity="0.2" />
+            {/* Secondary slower scan */}
+            <div
+              className="absolute left-0 right-0 h-[1px] z-20 opacity-50"
+              style={{
+                background: "linear-gradient(90deg, transparent, rgba(59,130,246,0.4), transparent)",
+                animation: visible ? "holoScan 5s ease-in-out infinite reverse" : "none",
+              }}
+            />
 
-              {/* Mouth area — data readout */}
-              <rect x="115" y="108" width="30" height="3" rx="1.5" fill="#a855f7" opacity="0.3" />
+            {/* Horizontal interference lines */}
+            <div
+              className="absolute inset-0 z-10 pointer-events-none"
+              style={{
+                backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.015) 3px, rgba(255,255,255,0.015) 4px)",
+              }}
+            />
 
-              {/* Neck */}
-              <rect x="118" y="148" width="24" height="18" fill="none" stroke="#ff6b35" strokeWidth="0.8" opacity="0.3" />
+            {/* Vignette */}
+            <div className="absolute inset-0 z-10" style={{ boxShadow: "inset 0 0 80px 20px rgba(5,5,8,0.8)" }} />
 
-              {/* Shoulders + torso */}
-              <path d="M50 200 L118 166 L142 166 L210 200 L210 340 L50 340 Z" fill="none" stroke="#ff6b35" strokeWidth="1.2" opacity="0.4" />
-              <path d="M50 200 L118 166 L142 166 L210 200 L210 340 L50 340 Z" fill="#ff6b35" opacity="0.015" />
-
-              {/* Torso circuit patterns */}
-              <line x1="130" y1="185" x2="130" y2="280" stroke="#3b82f6" strokeWidth="0.6" opacity="0.2" />
-              <line x1="85" y1="220" x2="175" y2="220" stroke="#a855f7" strokeWidth="0.5" opacity="0.15" />
-              <line x1="85" y1="250" x2="175" y2="250" stroke="#3b82f6" strokeWidth="0.4" opacity="0.12" />
-              <line x1="85" y1="280" x2="175" y2="280" stroke="#a855f7" strokeWidth="0.4" opacity="0.1" />
-
-              {/* Core reactor */}
-              <circle cx="130" cy="220" r="10" fill="none" stroke="#ff6b35" strokeWidth="0.8" opacity="0.4" />
-              <circle cx="130" cy="220" r="5" fill="none" stroke="#ff6b35" strokeWidth="0.5" opacity="0.5" />
-              <circle cx="130" cy="220" r="2" fill="#ff6b35" opacity="0.6" />
-
-              {/* Shoulder nodes */}
-              <circle cx="75" cy="205" r="4" fill="none" stroke="#3b82f6" strokeWidth="0.8" opacity="0.3" />
-              <circle cx="185" cy="205" r="4" fill="none" stroke="#3b82f6" strokeWidth="0.8" opacity="0.3" />
-
-              {/* Data readout strips at bottom */}
-              <rect x="60" y="300" width="50" height="2" fill="#ff6b35" opacity="0.2" />
-              <rect x="60" y="306" width="35" height="2" fill="#3b82f6" opacity="0.15" />
-              <rect x="60" y="312" width="42" height="2" fill="#a855f7" opacity="0.12" />
-              <rect x="150" y="300" width="50" height="2" fill="#ff6b35" opacity="0.2" />
-              <rect x="155" y="306" width="35" height="2" fill="#3b82f6" opacity="0.15" />
-              <rect x="152" y="312" width="42" height="2" fill="#a855f7" opacity="0.12" />
-            </svg>
-
-            {/* Glow overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-orange/[0.05] via-transparent to-blue/[0.02]" />
+            {/* Bottom fade to data */}
+            <div className="absolute bottom-0 left-0 right-0 h-24 z-10 bg-gradient-to-t from-[#060610] via-[#060610cc] to-transparent" />
 
             {/* Corner targeting brackets */}
-            <div className="absolute top-2 left-2 w-5 h-5 border-t-2 border-l-2 border-orange/40" />
-            <div className="absolute top-2 right-2 w-5 h-5 border-t-2 border-r-2 border-orange/40" />
-            <div className="absolute bottom-2 left-2 w-5 h-5 border-b-2 border-l-2 border-orange/40" />
-            <div className="absolute bottom-2 right-2 w-5 h-5 border-b-2 border-r-2 border-orange/40" />
+            <div className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-orange/50 z-20" />
+            <div className="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-orange/50 z-20" />
+            <div className="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-blue/40 z-20" />
+            <div className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-blue/40 z-20" />
 
-            {/* Flicker */}
+            {/* Glitch / flicker */}
             <div
-              className="absolute inset-0 bg-white/[0.008] pointer-events-none"
-              style={{ animation: visible ? "holoFlicker 0.15s steps(2) infinite" : "none" }}
+              className="absolute inset-0 z-20 pointer-events-none"
+              style={{ animation: visible ? "holoFlicker 0.1s steps(3) infinite" : "none" }}
             />
+
+            {/* Classification label at top */}
+            <div className="absolute top-4 left-0 right-0 z-20 flex justify-center">
+              <div className="px-3 py-1 rounded bg-black/40 backdrop-blur-sm border border-orange/20">
+                <span className="font-[family-name:var(--font-mono)] text-[9px] text-orange tracking-[0.2em]">
+                  BIOMETRIC SCAN -- ACTIVE
+                </span>
+              </div>
+            </div>
+
+            {/* Bottom ID overlay */}
+            <div className="absolute bottom-4 left-4 right-4 z-20">
+              <div className="font-[family-name:var(--font-mono)] text-[9px] text-text3 flex justify-between">
+                <span>ID: ENG-014-A3F8</span>
+                <span>CLEARANCE: ALPHA</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

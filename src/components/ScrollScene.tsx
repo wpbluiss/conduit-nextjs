@@ -302,14 +302,14 @@ export default function ScrollScene() {
   return (
     <Canvas
       camera={{ position: [0, 1, 7], fov: 45 }}
-      dpr={[1, 1.5]}
+      dpr={[1, 2]}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       style={{ background: "transparent" }}
       resize={{ debounce: 100 }}
     >
-      <ambientLight intensity={0.25} />
-      <directionalLight position={[5, 8, 5]} intensity={0.3} />
-      <directionalLight position={[-3, 4, -2]} intensity={0.15} color="#ff6b35" />
+      <ambientLight intensity={0.35} />
+      <directionalLight position={[5, 8, 5]} intensity={0.4} />
+      <directionalLight position={[-3, 4, -2]} intensity={0.2} color="#ff6b35" />
       <fog attach="fog" args={["#050508", 8, 20]} />
       <FrameThrottle />
       <CameraRig />
