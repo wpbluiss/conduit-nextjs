@@ -1,56 +1,43 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
 
 const TERMINAL_LINES = [
-  { type: "input", text: "$ conduit deploy --org acme-corp --env production" },
-  { type: "output", text: "Initializing Conduit runtime v4.2.1..." },
-  { type: "output", text: "Scanning organization structure... 9 departments detected" },
-  { type: "system", text: "[DEPLOY] Provisioning AI workforce..." },
-  { type: "output", text: "" },
-  { type: "agent", text: "Engineering  >> 47 agents online", color: "#00e5a0" },
-  { type: "agent", text: "Sales        >> 31 agents online", color: "#3b82f6" },
-  { type: "agent", text: "Marketing    >> 24 agents online", color: "#ff6b35" },
-  { type: "agent", text: "Support      >> 38 agents online", color: "#00c9ff" },
-  { type: "agent", text: "Finance      >> 19 agents online", color: "#a855f7" },
-  { type: "agent", text: "HR           >> 15 agents online", color: "#f59e0b" },
-  { type: "agent", text: "Legal        >> 12 agents online", color: "#ef4444" },
-  { type: "agent", text: "Operations   >> 28 agents online", color: "#10b981" },
-  { type: "agent", text: "Product      >> 22 agents online", color: "#6366f1" },
-  { type: "output", text: "" },
-  { type: "system", text: "[READY] 236 agents deployed. All departments operational." },
-  { type: "system", text: "[STATUS] Your company is now running itself." },
+  { type: "input" as const, text: "$ conduit deploy --org acme-corp --env production" },
+  { type: "output" as const, text: "Initializing Conduit runtime v4.2.1..." },
+  { type: "output" as const, text: "Scanning organization structure... 9 departments detected" },
+  { type: "system" as const, text: "[DEPLOY] Provisioning AI workforce..." },
+  { type: "output" as const, text: "" },
+  { type: "agent" as const, text: "Engineering  >> 47 agents online", color: "#ff6b35" },
+  { type: "agent" as const, text: "Sales        >> 31 agents online", color: "#3b82f6" },
+  { type: "agent" as const, text: "Marketing    >> 24 agents online", color: "#f59e0b" },
+  { type: "agent" as const, text: "Support      >> 38 agents online", color: "#00c9ff" },
+  { type: "agent" as const, text: "Finance      >> 19 agents online", color: "#a855f7" },
+  { type: "agent" as const, text: "HR           >> 15 agents online", color: "#f59e0b" },
+  { type: "agent" as const, text: "Legal        >> 12 agents online", color: "#ef4444" },
+  { type: "agent" as const, text: "Operations   >> 28 agents online", color: "#6366f1" },
+  { type: "agent" as const, text: "Product      >> 22 agents online", color: "#3b82f6" },
+  { type: "output" as const, text: "" },
+  { type: "system" as const, text: "[READY] 236 agents deployed. All departments operational." },
+  { type: "system" as const, text: "[STATUS] Your company is now running itself." },
 ];
 
 function TypingLine({
   line,
   onDone,
-  startDelay,
 }: {
   line: (typeof TERMINAL_LINES)[0];
   onDone: () => void;
-  startDelay: number;
 }) {
   const [displayed, setDisplayed] = useState("");
-  const [started, setStarted] = useState(false);
   const doneRef = useRef(false);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setStarted(true), startDelay);
-    return () => clearTimeout(timeout);
-  }, [startDelay]);
-
-  useEffect(() => {
-    if (!started) return;
     if (line.text === "") {
-      if (!doneRef.current) {
-        doneRef.current = true;
-        onDone();
-      }
+      if (!doneRef.current) { doneRef.current = true; onDone(); }
       return;
     }
-
     let i = 0;
     const speed = line.type === "input" ? 30 : 12;
     const interval = setInterval(() => {
@@ -64,20 +51,14 @@ function TypingLine({
         }
       }
     }, speed);
-
     return () => clearInterval(interval);
-  }, [started, line, onDone]);
-
-  if (!started) return null;
+  }, [line, onDone]);
 
   const colorClass =
-    line.type === "input"
-      ? "text-accent"
-      : line.type === "system"
-        ? "text-orange"
-        : line.type === "agent"
-          ? ""
-          : "text-text2";
+    line.type === "input" ? "text-orange" :
+    line.type === "system" ? "text-warm" :
+    line.type === "agent" ? "" :
+    "text-text2";
 
   return (
     <div
@@ -86,17 +67,27 @@ function TypingLine({
     >
       {displayed}
       {displayed.length < line.text.length && (
-        <span className="terminal-cursor text-accent">|</span>
+        <span className="terminal-cursor text-orange">|</span>
       )}
     </div>
   );
 }
 
 export default function Terminal() {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(triggerRef, { once: true, margin: "-100px" });
   const [currentLine, setCurrentLine] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+
+  const cardY = useTransform(scrollYProgress, [0, 0.5], [100, 0]);
+  const cardScale = useTransform(scrollYProgress, [0, 0.4], [0.92, 1]);
+  const cardRotateX = useTransform(scrollYProgress, [0, 0.4], [6, 0]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -105,12 +96,7 @@ export default function Terminal() {
   }, [currentLine]);
 
   return (
-    <section
-      id="terminal"
-      ref={ref}
-      className="relative py-32 px-6 flex flex-col items-center"
-    >
-      {/* Section header */}
+    <section id="terminal" ref={sectionRef} className="relative py-32 px-6 flex flex-col items-center">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -126,7 +112,7 @@ export default function Terminal() {
         </div>
         <h2 className="font-[family-name:var(--font-display)] text-3xl md:text-5xl font-bold tracking-tight mb-4">
           One command.{" "}
-          <span className="text-accent">Entire workforce.</span>
+          <span className="text-white">Entire workforce.</span>
         </h2>
         <p className="text-text2 max-w-xl mx-auto">
           Deploy an autonomous AI team across every department in under 60
@@ -134,42 +120,40 @@ export default function Terminal() {
         </p>
       </motion.div>
 
-      {/* Terminal window */}
+      <div ref={triggerRef} />
+
       <motion.div
-        initial={{ opacity: 0, y: 40, scale: 0.96 }}
-        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.2 }}
+        style={{
+          y: cardY,
+          scale: cardScale,
+          rotateX: cardRotateX,
+          transformPerspective: 1200,
+        }}
         className="w-full max-w-3xl"
       >
-        <div className="rounded-xl border border-border2 bg-[#08080e] shadow-[0_0_60px_rgba(0,0,0,0.5)] overflow-hidden">
+        <div className="rounded-xl border border-border2 bg-[#08080e] shadow-[0_0_80px_rgba(0,0,0,0.6),0_0_30px_rgba(255,107,53,0.05)] overflow-hidden">
           {/* Window chrome */}
           <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-[#0a0a12]">
             <div className="w-3 h-3 rounded-full bg-red/60" />
-            <div className="w-3 h-3 rounded-full bg-orange/60" />
-            <div className="w-3 h-3 rounded-full bg-accent/60" />
+            <div className="w-3 h-3 rounded-full bg-warm/60" />
+            <div className="w-3 h-3 rounded-full bg-blue/60" />
             <span className="ml-3 font-[family-name:var(--font-mono)] text-xs text-text3">
               conduit-cli -- production
             </span>
             <div className="ml-auto flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent status-dot" />
-              <span className="font-[family-name:var(--font-mono)] text-[10px] text-accent/70">
+              <span className="w-1.5 h-1.5 rounded-full bg-orange status-dot" />
+              <span className="font-[family-name:var(--font-mono)] text-[10px] text-orange/70">
                 CONNECTED
               </span>
             </div>
           </div>
 
-          {/* Terminal body */}
-          <div
-            ref={scrollRef}
-            className="p-5 h-[380px] overflow-y-auto"
-          >
+          <div ref={scrollRef} className="p-5 h-[380px] overflow-y-auto">
             {isInView &&
               TERMINAL_LINES.slice(0, currentLine + 1).map((line, i) => (
                 <TypingLine
                   key={i}
                   line={line}
-                  startDelay={0}
                   onDone={() => {
                     if (i === currentLine && currentLine < TERMINAL_LINES.length - 1) {
                       setCurrentLine((prev) => prev + 1);
@@ -178,15 +162,14 @@ export default function Terminal() {
                 />
               ))}
             {currentLine >= TERMINAL_LINES.length - 1 && isInView && (
-              <div className="mt-2 font-[family-name:var(--font-mono)] text-[13px] text-accent">
+              <div className="mt-2 font-[family-name:var(--font-mono)] text-[13px] text-orange">
                 $ <span className="terminal-cursor">|</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Glow underneath */}
-        <div className="h-20 -mt-10 bg-gradient-to-b from-accent/5 to-transparent rounded-b-3xl blur-2xl" />
+        <div className="h-20 -mt-10 bg-gradient-to-b from-orange/5 to-transparent rounded-b-3xl blur-2xl" />
       </motion.div>
     </section>
   );

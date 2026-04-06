@@ -1,5 +1,6 @@
 "use client";
 
+import SmoothScroll from "@/components/SmoothScroll";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Terminal from "@/components/Terminal";
@@ -10,7 +11,7 @@ import Footer from "@/components/Footer";
 
 export default function PageContent() {
   return (
-    <>
+    <SmoothScroll>
       <Navbar />
       <main>
         <Hero />
@@ -20,6 +21,6 @@ export default function PageContent() {
         <WaitlistCTA />
       </main>
       <Footer />
-    </>
+    </SmoothScroll>
   );
 }
