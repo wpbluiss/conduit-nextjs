@@ -163,95 +163,6 @@ function Floor({ index, dept }: { index: number; dept: typeof DEPTS[0] }) {
   );
 }
 
-/* ──────── AI Employee figure (visible in R3F when scrolled in) ─────── */
-function AIEmployee() {
-  const group = useRef<THREE.Group>(null);
-
-  useFrame(({ clock }) => {
-    if (!group.current) return;
-    const sp = scrollState.progress;
-    // visible between 30% and 55%
-    const vis = sp > 0.28 && sp < 0.58;
-    group.current.visible = vis;
-    if (vis) {
-      const t = clock.elapsedTime;
-      group.current.rotation.y = t * 0.3;
-    }
-  });
-
-  return (
-    <group ref={group} position={[0, 2.6, 0]} visible={false}>
-      {/* Stylised humanoid — head */}
-      <mesh position={[0, 0.65, 0]}>
-        <sphereGeometry args={[0.18, 32, 32]} />
-        <meshStandardMaterial color="#1a1a2e" metalness={0.8} roughness={0.2} />
-      </mesh>
-      {/* Face visor glow */}
-      <mesh position={[0, 0.65, 0.12]}>
-        <boxGeometry args={[0.25, 0.06, 0.05]} />
-        <meshBasicMaterial color="#ff6b35" transparent opacity={0.9} />
-      </mesh>
-      {/* Torso */}
-      <mesh position={[0, 0.28, 0]}>
-        <boxGeometry args={[0.32, 0.45, 0.2]} />
-        <meshStandardMaterial color="#0e0e18" metalness={0.6} roughness={0.3} />
-      </mesh>
-      {/* Shoulder pads */}
-      <mesh position={[-0.22, 0.45, 0]}>
-        <boxGeometry args={[0.1, 0.08, 0.18]} />
-        <meshStandardMaterial color="#ff6b35" metalness={0.7} roughness={0.3} emissive="#ff6b35" emissiveIntensity={0.3} />
-      </mesh>
-      <mesh position={[0.22, 0.45, 0]}>
-        <boxGeometry args={[0.1, 0.08, 0.18]} />
-        <meshStandardMaterial color="#ff6b35" metalness={0.7} roughness={0.3} emissive="#ff6b35" emissiveIntensity={0.3} />
-      </mesh>
-      {/* Chest accent line */}
-      <mesh position={[0, 0.35, 0.11]}>
-        <boxGeometry args={[0.2, 0.02, 0.01]} />
-        <meshBasicMaterial color="#3b82f6" />
-      </mesh>
-      <mesh position={[0, 0.3, 0.11]}>
-        <boxGeometry args={[0.15, 0.02, 0.01]} />
-        <meshBasicMaterial color="#a855f7" />
-      </mesh>
-      {/* Arms */}
-      <mesh position={[-0.26, 0.18, 0]}>
-        <boxGeometry args={[0.08, 0.35, 0.1]} />
-        <meshStandardMaterial color="#0e0e18" metalness={0.6} roughness={0.3} />
-      </mesh>
-      <mesh position={[0.26, 0.18, 0]}>
-        <boxGeometry args={[0.08, 0.35, 0.1]} />
-        <meshStandardMaterial color="#0e0e18" metalness={0.6} roughness={0.3} />
-      </mesh>
-      {/* Legs */}
-      <mesh position={[-0.08, -0.12, 0]}>
-        <boxGeometry args={[0.12, 0.4, 0.12]} />
-        <meshStandardMaterial color="#0a0a14" metalness={0.5} roughness={0.4} />
-      </mesh>
-      <mesh position={[0.08, -0.12, 0]}>
-        <boxGeometry args={[0.12, 0.4, 0.12]} />
-        <meshStandardMaterial color="#0a0a14" metalness={0.5} roughness={0.4} />
-      </mesh>
-      {/* Data rings orbiting */}
-      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0.35, 0]}>
-        <torusGeometry args={[0.45, 0.005, 8, 64]} />
-        <meshBasicMaterial color="#ff6b35" transparent opacity={0.6} />
-      </mesh>
-      <mesh rotation={[Math.PI / 3, Math.PI / 4, 0]} position={[0, 0.35, 0]}>
-        <torusGeometry args={[0.5, 0.004, 8, 64]} />
-        <meshBasicMaterial color="#3b82f6" transparent opacity={0.4} />
-      </mesh>
-      <mesh rotation={[Math.PI / 2.5, -Math.PI / 3, 0]} position={[0, 0.35, 0]}>
-        <torusGeometry args={[0.55, 0.003, 8, 64]} />
-        <meshBasicMaterial color="#a855f7" transparent opacity={0.3} />
-      </mesh>
-      {/* Glow light */}
-      <pointLight color="#ff6b35" intensity={1.5} distance={3} position={[0, 0.5, 0.5]} />
-      <pointLight color="#3b82f6" intensity={0.5} distance={2} position={[0, 0.5, -0.5]} />
-    </group>
-  );
-}
-
 /* ───────────────────────── Camera controller ────────────────────────── */
 function CameraRig() {
   const { camera } = useThree();
@@ -360,8 +271,6 @@ function Building() {
         <boxGeometry args={[3.5, 0.05, 2.5]} />
         <meshStandardMaterial color="#0a0a12" metalness={0.7} roughness={0.2} />
       </mesh>
-
-      <AIEmployee />
     </group>
   );
 }
