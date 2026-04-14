@@ -16,7 +16,7 @@ export default function FounderStory() {
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-orange/[0.02] rounded-full blur-[150px]" />
       </div>
       <div className="relative max-w-4xl mx-auto">
-        <motion.div style={{ opacity }} className="text-center mb-12">
+        <motion.div style={{ opacity }} viewport={{ once: true }} className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border2 bg-card/50 mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-orange" />
             <span className="font-[family-name:var(--font-mono)] text-xs text-text3 uppercase tracking-wider">Origin</span>

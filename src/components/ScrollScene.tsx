@@ -8,10 +8,44 @@ import * as THREE from "three";
 // Mutable ref object shared between GSAP (DOM) and R3F (WebGL)
 export const scrollState = { progress: 0 };
 
+/* ───────────────────────── Spatial grid for neighbor lookup ──────────── */
+// Replaces O(n^2) brute-force with grid-based spatial hashing
+const GRID_CELL_SIZE = 3.0; // slightly larger than connection threshold
+
+function hashCell(cx: number, cy: number, cz: number): number {
+  // Simple spatial hash
+  return ((cx * 92837111) ^ (cy * 689287499) ^ (cz * 283923481)) | 0;
+}
+
+function buildSpatialGrid(positions: Float32Array, count: number, cellSize: number) {
+  const grid = new Map<number, number[]>();
+  for (let i = 0; i < count; i++) {
+    const cx = Math.floor(positions[i * 3] / cellSize);
+    const cy = Math.floor(positions[i * 3 + 1] / cellSize);
+    const cz = Math.floor(positions[i * 3 + 2] / cellSize);
+    const key = hashCell(cx, cy, cz);
+    let bucket = grid.get(key);
+    if (!bucket) { bucket = []; grid.set(key, bucket); }
+    bucket.push(i);
+  }
+  return grid;
+}
+
+function* getNeighborCells(cx: number, cy: number, cz: number) {
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dz = -1; dz <= 1; dz++) {
+        yield hashCell(cx + dx, cy + dy, cz + dz);
+      }
+    }
+  }
+}
+
 /* ───────────────────────── Neural-net particles ─────────────────────── */
-function Particles({ count = 500 }: { count?: number }) {
+function Particles({ count = 120 }: { count?: number }) {
   const mesh = useRef<THREE.Points>(null);
   const lines = useRef<THREE.LineSegments>(null);
+  const frameCount = useRef(0);
 
   const data = useMemo(() => {
     const pos = new Float32Array(count * 3);
@@ -37,7 +71,7 @@ function Particles({ count = 500 }: { count?: number }) {
 
   const lineGeo = useMemo(() => {
     const g = new THREE.BufferGeometry();
-    const maxL = count * 4;
+    const maxL = count * 3; // reduced from count*4
     g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(maxL * 6), 3));
     g.setAttribute("color", new THREE.BufferAttribute(new Float32Array(maxL * 6), 3));
     g.setDrawRange(0, 0);
@@ -58,25 +92,51 @@ function Particles({ count = 500 }: { count?: number }) {
     }
     mesh.current.geometry.attributes.position.needsUpdate = true;
 
-    // Connection lines — threshold grows with scroll for denser mesh
-    if (!lines.current) return;
+    // Connection lines — only update every 3rd frame for performance
+    frameCount.current++;
+    if (!lines.current || frameCount.current % 3 !== 0) return;
+
     const lp = lineGeo.attributes.position.array as Float32Array;
     const lc = lineGeo.attributes.color.array as Float32Array;
     let li = 0;
-    const maxL = count * 4;
+    const maxL = count * 3;
     const thresh = 2.2 + sp * 1.5;
+    const threshSq = thresh * thresh; // avoid sqrt — compare squared distances
+
+    // Build spatial grid for this frame
+    const grid = buildSpatialGrid(p, count, GRID_CELL_SIZE);
+
+    // Track which pairs we have already checked to avoid duplicates
+    const visited = new Set<number>();
 
     for (let i = 0; i < count && li < maxL; i++) {
-      for (let j = i + 1; j < count && li < maxL; j++) {
-        const dx = p[i*3]-p[j*3], dy = p[i*3+1]-p[j*3+1], dz = p[i*3+2]-p[j*3+2];
-        const d = Math.sqrt(dx*dx+dy*dy+dz*dz);
-        if (d < thresh) {
-          const a = (1 - d/thresh) * 0.2;
-          lp[li*6]=p[i*3]; lp[li*6+1]=p[i*3+1]; lp[li*6+2]=p[i*3+2];
-          lp[li*6+3]=p[j*3]; lp[li*6+4]=p[j*3+1]; lp[li*6+5]=p[j*3+2];
-          lc[li*6]=a*0.9; lc[li*6+1]=a*0.5; lc[li*6+2]=a*1.2;
-          lc[li*6+3]=a*0.9; lc[li*6+4]=a*0.5; lc[li*6+5]=a*1.2;
-          li++;
+      const px = p[i * 3], py = p[i * 3 + 1], pz = p[i * 3 + 2];
+      const cx = Math.floor(px / GRID_CELL_SIZE);
+      const cy = Math.floor(py / GRID_CELL_SIZE);
+      const cz = Math.floor(pz / GRID_CELL_SIZE);
+
+      for (const cellKey of getNeighborCells(cx, cy, cz)) {
+        const bucket = grid.get(cellKey);
+        if (!bucket) continue;
+        for (let bi = 0; bi < bucket.length && li < maxL; bi++) {
+          const j = bucket[bi];
+          if (j <= i) continue; // only check each pair once
+          // Unique pair key for dedup (handles cross-cell duplicates)
+          const pairKey = i * count + j;
+          if (visited.has(pairKey)) continue;
+          visited.add(pairKey);
+
+          const dx = px - p[j * 3], dy = py - p[j * 3 + 1], dz = pz - p[j * 3 + 2];
+          const dSq = dx * dx + dy * dy + dz * dz;
+          if (dSq < threshSq) {
+            const d = Math.sqrt(dSq);
+            const a = (1 - d / thresh) * 0.2;
+            lp[li*6]=px; lp[li*6+1]=py; lp[li*6+2]=pz;
+            lp[li*6+3]=p[j*3]; lp[li*6+4]=p[j*3+1]; lp[li*6+5]=p[j*3+2];
+            lc[li*6]=a*0.9; lc[li*6+1]=a*0.5; lc[li*6+2]=a*1.2;
+            lc[li*6+3]=a*0.9; lc[li*6+4]=a*0.5; lc[li*6+5]=a*1.2;
+            li++;
+          }
         }
       }
     }
@@ -123,16 +183,7 @@ function Floor({ index, dept }: { index: number; dept: typeof DEPTS[0] }) {
   useFrame(({ clock }) => {
     if (!ref.current) return;
     ref.current.position.y = y + Math.sin(clock.elapsedTime * 0.5 + index * 0.4) * 0.03;
-    // Highlight Engineering floor (top, index=8) when zoomed in
-    const sp = scrollState.progress;
-    if (index === 8 && sp > 0.15) {
-      const glow = Math.min(1, (sp - 0.15) / 0.15);
-      ref.current.children.forEach(c => {
-        if ((c as THREE.Mesh).material && 'opacity' in ((c as THREE.Mesh).material as THREE.Material)) {
-          // intentionally left default — glow handled by point light
-        }
-      });
-    }
+    // Engineering floor glow handled by point light — no per-frame material iteration needed
   });
 
   return (
@@ -229,8 +280,6 @@ function CameraRig() {
     }
 
     camera.position.lerp(pos, 0.08);
-    const currentTarget = new THREE.Vector3();
-    camera.getWorldDirection(currentTarget);
     camera.lookAt(target);
   });
 
@@ -275,10 +324,12 @@ function Building() {
   );
 }
 
-/* ───── Throttle rendering when tab hidden ────────────────────────────── */
+/* ───── Throttle rendering when tab hidden or canvas off-screen ───────── */
 function FrameThrottle() {
   const { invalidate, clock } = useThree();
   const visible = useRef(true);
+  const inViewport = useRef(true);
+  const frameSkip = useRef(0);
 
   useEffect(() => {
     const onVis = () => {
@@ -286,12 +337,33 @@ function FrameThrottle() {
       if (visible.current) invalidate();
     };
     document.addEventListener("visibilitychange", onVis);
-    return () => document.removeEventListener("visibilitychange", onVis);
+
+    // Observe whether the canvas is in the viewport
+    const canvas = document.querySelector("canvas");
+    let observer: IntersectionObserver | null = null;
+    if (canvas) {
+      observer = new IntersectionObserver(
+        ([entry]) => { inViewport.current = entry.isIntersecting; },
+        { threshold: 0.05 }
+      );
+      observer.observe(canvas);
+    }
+
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      observer?.disconnect();
+    };
   }, [invalidate]);
 
   useFrame(() => {
-    if (!visible.current) clock.stop();
-    else if (!clock.running) clock.start();
+    if (!visible.current) { clock.stop(); return; }
+    if (!clock.running) clock.start();
+
+    // When canvas is not in viewport, throttle to ~15fps (skip every other frame)
+    if (!inViewport.current) {
+      frameSkip.current++;
+      if (frameSkip.current % 2 !== 0) return;
+    }
   });
 
   return null;
@@ -314,7 +386,7 @@ export default function ScrollScene() {
       <FrameThrottle />
       <CameraRig />
       <Building />
-      <Particles count={200} />
+      <Particles count={120} />
     </Canvas>
   );
 }

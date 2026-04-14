@@ -1,16 +1,12 @@
 "use client";
 
 import { useState, useRef, type FormEvent } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 
 export default function WaitlistCTA() {
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "loading" | "success">("idle");
   const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "center center"] });
-  const y = useTransform(scrollYProgress, [0, 1], [60, 0]);
-  const opacity = useTransform(scrollYProgress, [0, 0.4], [0, 1]);
-  const scale = useTransform(scrollYProgress, [0, 1], [0.96, 1]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -26,7 +22,12 @@ export default function WaitlistCTA() {
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-orange/[0.03] rounded-full blur-[150px]" />
       </div>
-      <motion.div style={{ y, opacity, scale }} className="relative max-w-2xl mx-auto text-center gpu-layer">
+      <motion.div
+        initial={{ y: 60, opacity: 0, scale: 0.96 }}
+        whileInView={{ y: 0, opacity: 1, scale: 1 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+        className="relative max-w-2xl mx-auto text-center gpu-layer">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border2 bg-card/50 mb-6">
           <span className="w-1.5 h-1.5 rounded-full bg-orange status-dot" />
           <span className="font-[family-name:var(--font-mono)] text-xs text-text3 uppercase tracking-wider">Early Access</span>

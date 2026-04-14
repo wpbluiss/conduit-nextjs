@@ -58,20 +58,26 @@ body {
 }
 .status-dot { animation: status-pulse 2s ease-in-out infinite; }
 
-/* GPU-accelerated layers */
+/* GPU-accelerated layers — only promote when actively animating */
 .gpu-layer {
-  will-change: transform, opacity;
   transform: translateZ(0);
   backface-visibility: hidden;
 }
+/* Only apply will-change to phase overlays and actively transitioning elements */
+.gpu-layer.active,
+.gpu-layer:hover,
+.phase-overlay.active .gpu-layer {
+  will-change: transform, opacity;
+}
 
-/* Scanlines */
+/* Scanlines — limited to central viewport area to reduce compositing cost */
 .scanlines {
   background: repeating-linear-gradient(
-    0deg, transparent, transparent 2px,
-    rgba(255, 107, 53, 0.008) 2px, rgba(255, 107, 53, 0.008) 4px
+    0deg, transparent, transparent 3px,
+    rgba(255, 107, 53, 0.006) 3px, rgba(255, 107, 53, 0.006) 6px
   );
   pointer-events: none;
+  contain: strict;
 }
 
 /* Noise grain */
@@ -88,10 +94,19 @@ body {
   display: flex; align-items: center; justify-content: center;
   pointer-events: none;
   opacity: 0;
-  will-change: transform, opacity;
+  visibility: hidden;
   transform: translateZ(0);
+  contain: layout style paint;
 }
-.phase-overlay.active { pointer-events: auto; }
+.phase-overlay.active {
+  pointer-events: auto;
+  visibility: visible;
+  will-change: transform, opacity;
+}
+/* Reset will-change after transition completes */
+.phase-overlay.done {
+  will-change: auto;
+}
 
 /* Holographic animations */
 @keyframes holoShift {

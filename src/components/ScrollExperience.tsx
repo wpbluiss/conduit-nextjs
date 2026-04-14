@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import dynamic from "next/dynamic";
@@ -374,6 +374,7 @@ export default function ScrollExperience() {
   const containerRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState(0);
+  const phaseRef = useRef(0);
 
   const updatePhase = useCallback((progress: number) => {
     scrollState.progress = progress;
@@ -386,7 +387,11 @@ export default function ScrollExperience() {
     else if (progress < 0.78) p = 5;
     else if (progress < 0.88) p = 6;
     else p = 7;
-    setPhase(p);
+    // Only trigger React re-render when phase actually changes
+    if (phaseRef.current !== p) {
+      phaseRef.current = p;
+      setPhase(p);
+    }
   }, []);
 
   useEffect(() => {
@@ -437,11 +442,12 @@ export default function ScrollExperience() {
 
           {/* PHASE 0: Hero text */}
           <div
-            className="absolute inset-0 z-20 flex flex-col items-center justify-start pt-20 sm:pt-28 px-4 sm:px-6 gpu-layer"
+            className={`absolute inset-0 z-20 flex flex-col items-center justify-start pt-20 sm:pt-28 px-4 sm:px-6 gpu-layer${phase === 0 ? " active" : ""}`}
             style={{
               opacity: phase === 0 ? 1 : 0,
+              visibility: phase === 0 ? "visible" : "hidden",
               transform: phase === 0 ? "translateY(0) translateZ(0)" : "translateY(-60px) translateZ(0)",
-              transition: "opacity 0.6s ease, transform 0.8s ease",
+              transition: "opacity 0.6s ease, transform 0.8s ease, visibility 0s linear " + (phase === 0 ? "0s" : "0.8s"),
               pointerEvents: phase === 0 ? "auto" : "none",
             }}
           >
@@ -471,11 +477,12 @@ export default function ScrollExperience() {
 
           {/* PHASE 2: Floor label */}
           <div
-            className="absolute inset-0 z-20 flex items-end justify-center pb-20 gpu-layer"
+            className={`absolute inset-0 z-20 flex items-end justify-center pb-20 gpu-layer${phase === 2 ? " active" : ""}`}
             style={{
               opacity: phase === 2 ? 1 : 0,
+              visibility: phase === 2 ? "visible" : "hidden",
               transform: phase === 2 ? "translateY(0) translateZ(0)" : "translateY(30px) translateZ(0)",
-              transition: "opacity 0.5s, transform 0.6s",
+              transition: "opacity 0.5s, transform 0.6s, visibility 0s linear " + (phase === 2 ? "0s" : "0.6s"),
               pointerEvents: "none",
             }}
           >
@@ -490,10 +497,11 @@ export default function ScrollExperience() {
 
           {/* PHASE 3: Holographic AI Profile — centered, full attention */}
           <div
-            className="absolute inset-0 z-20 flex items-center justify-center gpu-layer"
+            className={`absolute inset-0 z-20 flex items-center justify-center gpu-layer${phase === 3 ? " active" : ""}`}
             style={{
               opacity: phase === 3 ? 1 : 0,
-              transition: "opacity 0.8s ease",
+              visibility: phase === 3 ? "visible" : "hidden",
+              transition: "opacity 0.8s ease, visibility 0s linear " + (phase === 3 ? "0s" : "0.8s"),
               pointerEvents: phase === 3 ? "auto" : "none",
             }}
           >
@@ -502,10 +510,11 @@ export default function ScrollExperience() {
 
           {/* PHASE 4: Work view — centered */}
           <div
-            className="absolute inset-0 z-20 flex items-center justify-center gpu-layer"
+            className={`absolute inset-0 z-20 flex items-center justify-center gpu-layer${phase === 4 ? " active" : ""}`}
             style={{
               opacity: phase === 4 ? 1 : 0,
-              transition: "opacity 0.6s",
+              visibility: phase === 4 ? "visible" : "hidden",
+              transition: "opacity 0.6s, visibility 0s linear " + (phase === 4 ? "0s" : "0.6s"),
               pointerEvents: phase === 4 ? "auto" : "none",
             }}
           >
@@ -514,10 +523,11 @@ export default function ScrollExperience() {
 
           {/* PHASE 5: CEO Suite — centered */}
           <div
-            className="absolute inset-0 z-20 flex items-center justify-center gpu-layer"
+            className={`absolute inset-0 z-20 flex items-center justify-center gpu-layer${phase === 5 ? " active" : ""}`}
             style={{
               opacity: phase === 5 ? 1 : 0,
-              transition: "opacity 0.6s",
+              visibility: phase === 5 ? "visible" : "hidden",
+              transition: "opacity 0.6s, visibility 0s linear " + (phase === 5 ? "0s" : "0.6s"),
               pointerEvents: phase === 5 ? "auto" : "none",
             }}
           >
@@ -526,11 +536,12 @@ export default function ScrollExperience() {
 
           {/* PHASE 6: Terminal — centered */}
           <div
-            className="absolute inset-0 z-20 flex items-center justify-center px-6 gpu-layer"
+            className={`absolute inset-0 z-20 flex items-center justify-center px-6 gpu-layer${phase >= 6 ? " active" : ""}`}
             style={{
               opacity: phase >= 6 ? 1 : 0,
+              visibility: phase >= 6 ? "visible" : "hidden",
               transform: phase >= 6 ? "scale(1) translateZ(0)" : "scale(0.95) translateZ(0)",
-              transition: "opacity 0.6s, transform 0.6s",
+              transition: "opacity 0.6s, transform 0.6s, visibility 0s linear " + (phase >= 6 ? "0s" : "0.6s"),
               pointerEvents: phase >= 6 ? "auto" : "none",
             }}
           >

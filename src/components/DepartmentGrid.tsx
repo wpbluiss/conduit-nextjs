@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+// Note: useScroll/useTransform still used by DepartmentGrid header below
 
 const DEPARTMENTS = [
   { name: "Engineering", agents: 47, color: "#ff6b35", tasks: ["Code review", "CI/CD", "Bug triage", "Architecture"], load: 87 },
@@ -16,13 +17,12 @@ const DEPARTMENTS = [
 ];
 
 function Card({ dept, index }: { dept: typeof DEPARTMENTS[0]; index: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "center center"] });
-  const y = useTransform(scrollYProgress, [0, 1], [50, 0]);
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
-
   return (
-    <motion.div ref={ref} style={{ y, opacity }}
+    <motion.div
+      initial={{ y: 50, opacity: 0 }}
+      whileInView={{ y: 0, opacity: 1 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.5, delay: index * 0.05 }}
       className="group relative rounded-xl border border-border bg-card/50 p-5 hover:border-border2 hover:bg-card-hover transition-all duration-300 overflow-hidden gpu-layer">
       <div className="absolute top-0 left-0 right-0 h-[1px] opacity-40 group-hover:opacity-100 transition-opacity"
         style={{ background: `linear-gradient(90deg, transparent, ${dept.color}, transparent)` }} />
