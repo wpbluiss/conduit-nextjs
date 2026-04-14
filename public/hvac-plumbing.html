@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conduit AI for HVAC &amp; Plumbing | Never Miss an Emergency Call Again</title>
+    <meta name="description" content="AI-powered phone answering for HVAC and plumbing companies. Capture emergency calls 24/7, recover lost job estimates, and grow your revenue.">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #0a0f1e;
+            --bg-secondary: #111827;
+            --bg-card: #1a2236;
+            --bg-card-hover: #1f2a42;
+            --accent: #00d4ff;
+            --accent-dim: rgba(0, 212, 255, 0.15);
+            --accent-glow: rgba(0, 212, 255, 0.4);
+            --text-primary: #f0f4f8;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: rgba(255, 255, 255, 0.08);
+            --gradient-accent: linear-gradient(135deg, #00d4ff, #00b4d8);
+            --gradient-bg: linear-gradient(180deg, #0a0f1e 0%, #111827 100%);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Nav */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 1rem 2rem;
+            background: rgba(10, 15, 30, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .logo {
+            font-size: 1.5rem; font-weight: 700; color: var(--text-primary);
+            text-decoration: none; display: flex; align-items: center; gap: 0.5rem;
+        }
+        .logo span { color: var(--accent); }
+        .nav-badge {
+            font-size: 0.7rem; font-weight: 500; background: var(--accent-dim);
+            color: var(--accent); padding: 0.2rem 0.6rem; border-radius: 20px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+        .nav-cta {
+            background: var(--gradient-accent); color: #000; padding: 0.6rem 1.5rem;
+            border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-glow); }
+
+        /* Sections */
+        section { padding: 6rem 2rem; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .section-label {
+            font-size: 0.8rem; font-weight: 600; color: var(--accent); text-transform: uppercase;
+            letter-spacing: 2px; margin-bottom: 1rem;
+        }
+        .section-title {
+            font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 700; margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        .section-subtitle { font-size: 1.1rem; color: var(--text-secondary); max-width: 650px; }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            text-align: center; padding-top: 5rem; position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: ''; position: absolute; top: -40%; left: 50%; transform: translateX(-50%);
+            width: 800px; height: 800px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-content { position: relative; z-index: 1; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: var(--accent-dim); border: 1px solid rgba(0,212,255,0.25);
+            padding: 0.5rem 1.2rem; border-radius: 50px; font-size: 0.85rem;
+            color: var(--accent); margin-bottom: 2rem; font-weight: 500;
+        }
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; line-height: 1.1;
+            margin-bottom: 1.5rem; max-width: 800px;
+        }
+        .hero h1 .highlight {
+            background: var(--gradient-accent); -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero p {
+            font-size: 1.2rem; color: var(--text-secondary); max-width: 600px;
+            margin: 0 auto 2.5rem;
+        }
+        .hero-cta {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: var(--gradient-accent); color: #000; padding: 1rem 2.5rem;
+            border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1.1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--accent-glow); }
+        .hero-stats {
+            display: flex; justify-content: center; gap: 3rem; margin-top: 4rem;
+            flex-wrap: wrap;
+        }
+        .hero-stat { text-align: center; }
+        .hero-stat .number { font-size: 2rem; font-weight: 700; color: var(--accent); }
+        .hero-stat .label { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+        /* How It Works */
+        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-top: 3rem; }
+        .step {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 2rem; position: relative;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        .step:hover { border-color: rgba(0,212,255,0.3); transform: translateY(-4px); }
+        .step-number {
+            width: 48px; height: 48px; border-radius: 12px;
+            background: var(--accent-dim); border: 1px solid rgba(0,212,255,0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; color: var(--accent); font-size: 1.2rem; margin-bottom: 1.5rem;
+        }
+        .step h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .step p { color: var(--text-secondary); font-size: 0.95rem; }
+
+        /* ROI Calculator */
+        .roi-section { background: var(--bg-secondary); }
+        .roi-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 20px; padding: 3rem; max-width: 800px; margin: 3rem auto 0;
+        }
+        .roi-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+        .roi-field label {
+            display: block; font-size: 0.85rem; font-weight: 500;
+            color: var(--text-secondary); margin-bottom: 0.5rem;
+        }
+        .roi-field input, .roi-field select {
+            width: 100%; padding: 0.8rem 1rem; border-radius: 10px;
+            border: 1px solid var(--border); background: var(--bg-primary);
+            color: var(--text-primary); font-family: 'Outfit', sans-serif;
+            font-size: 1rem; outline: none; transition: border-color 0.3s;
+        }
+        .roi-field input:focus, .roi-field select:focus { border-color: var(--accent); }
+        .roi-results {
+            background: var(--bg-primary); border-radius: 12px; padding: 2rem;
+            border: 1px solid var(--border);
+        }
+        .roi-results h3 {
+            font-size: 1rem; font-weight: 600; color: var(--accent);
+            margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .roi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+        .roi-metric .value {
+            font-size: 2rem; font-weight: 700; color: var(--accent);
+            margin-bottom: 0.25rem;
+        }
+        .roi-metric .label { font-size: 0.85rem; color: var(--text-secondary); }
+
+        /* Features */
+        .features-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem; margin-top: 3rem;
+        }
+        .feature-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 2.5rem;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        .feature-card:hover { border-color: rgba(0,212,255,0.3); transform: translateY(-4px); }
+        .feature-icon {
+            width: 56px; height: 56px; border-radius: 14px;
+            background: var(--accent-dim); border: 1px solid rgba(0,212,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; margin-bottom: 1.5rem;
+        }
+        .feature-card h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .feature-card p { color: var(--text-secondary); font-size: 0.95rem; }
+
+        /* Pricing */
+        .pricing-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem; margin-top: 3rem; max-width: 950px; margin-left: auto; margin-right: auto;
+        }
+        .pricing-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 20px; padding: 2.5rem; position: relative;
+            transition: transform 0.3s;
+        }
+        .pricing-card.featured {
+            border-color: var(--accent);
+            box-shadow: 0 0 40px rgba(0,212,255,0.1);
+        }
+        .pricing-card.featured::before {
+            content: 'Most Popular'; position: absolute; top: -12px; left: 50%;
+            transform: translateX(-50%); background: var(--gradient-accent);
+            color: #000; padding: 0.3rem 1.2rem; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+        }
+        .pricing-card:hover { transform: translateY(-4px); }
+        .pricing-card h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .pricing-card .price {
+            font-size: 3rem; font-weight: 800; margin: 1rem 0;
+        }
+        .pricing-card .price span { font-size: 1rem; font-weight: 400; color: var(--text-muted); }
+        .pricing-card .price-note { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+        .pricing-card ul { list-style: none; margin-bottom: 2rem; }
+        .pricing-card li {
+            padding: 0.5rem 0; color: var(--text-secondary); font-size: 0.95rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .pricing-card li::before {
+            content: ''; width: 20px; height: 20px; border-radius: 50%;
+            background: var(--accent-dim); flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2300d4ff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: center;
+        }
+        .pricing-cta {
+            display: block; text-align: center; padding: 0.9rem 1.5rem;
+            border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.95rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .pricing-cta.primary {
+            background: var(--gradient-accent); color: #000;
+        }
+        .pricing-cta.secondary {
+            border: 1px solid var(--border); color: var(--text-primary);
+            background: transparent;
+        }
+        .pricing-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-glow); }
+
+        /* FAQ */
+        .faq-list { max-width: 750px; margin: 3rem auto 0; }
+        .faq-item {
+            border-bottom: 1px solid var(--border); padding: 1.5rem 0;
+        }
+        .faq-question {
+            width: 100%; background: none; border: none; color: var(--text-primary);
+            font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 600;
+            text-align: left; cursor: pointer; display: flex; align-items: center;
+            justify-content: space-between; gap: 1rem; padding: 0;
+        }
+        .faq-question::after {
+            content: '+'; font-size: 1.5rem; font-weight: 300; color: var(--accent);
+            transition: transform 0.3s; flex-shrink: 0;
+        }
+        .faq-item.active .faq-question::after { content: '\2212'; }
+        .faq-answer {
+            max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s;
+        }
+        .faq-item.active .faq-answer { max-height: 300px; padding-top: 1rem; }
+        .faq-answer p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; }
+
+        /* Final CTA */
+        .final-cta {
+            text-align: center; background: var(--bg-secondary);
+            position: relative; overflow: hidden;
+        }
+        .final-cta::before {
+            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 600px; height: 600px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%);
+        }
+        .final-cta .container { position: relative; z-index: 1; }
+        .final-cta h2 {
+            font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; margin-bottom: 1rem;
+        }
+        .final-cta p { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 2.5rem; max-width: 550px; margin-left: auto; margin-right: auto; }
+
+        /* Footer */
+        footer {
+            padding: 3rem 2rem; border-top: 1px solid var(--border);
+            text-align: center; color: var(--text-muted); font-size: 0.85rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            section { padding: 4rem 1.5rem; }
+            nav { padding: 1rem 1.5rem; }
+            .roi-inputs { grid-template-columns: 1fr; }
+            .hero-stats { gap: 2rem; }
+            .roi-card { padding: 2rem 1.5rem; }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+        }
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 2rem; }
+            .nav-badge { display: none; }
+        }
+    </style>
+
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+    <a href="#" class="logo">Conduit<span>AI</span> <span class="nav-badge">HVAC &amp; Plumbing</span></a>
+    <a href="https://app.conduitai.io/login" class="nav-cta">Get Started</a>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">Built for HVAC &amp; Plumbing Pros</div>
+        <h1>Stop Losing <span class="highlight">Emergency Calls</span> to Voicemail</h1>
+        <p>Conduit AI answers every call 24/7, books jobs, and captures emergency leads so your HVAC and plumbing business never misses revenue &mdash; even at 2 AM.</p>
+        <a href="https://app.conduitai.io/login" class="hero-cta">Start Free Trial &rarr;</a>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="number">62%</div>
+                <div class="label">of callers won't leave a voicemail</div>
+            </div>
+            <div class="hero-stat">
+                <div class="number">$1,200</div>
+                <div class="label">avg. missed job value</div>
+            </div>
+            <div class="hero-stat">
+                <div class="number">24/7</div>
+                <div class="label">emergency call coverage</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section>
+    <div class="container">
+        <div class="section-label">How It Works</div>
+        <h2 class="section-title">Up and Running in Minutes, Not Weeks</h2>
+        <p class="section-subtitle">No hardware, no complicated setup. Conduit AI starts answering calls the same day you sign up.</p>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Connect Your Phone Line</h3>
+                <p>Forward your calls to Conduit when you're busy, after hours, or 24/7. Works with any phone system &mdash; landline, VoIP, or mobile.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>AI Handles the Call</h3>
+                <p>Conduit answers like your best dispatcher &mdash; captures job details, qualifies the emergency, provides estimates, and books appointments on your calendar.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>You Get the Job</h3>
+                <p>Receive instant notifications with full call summaries, customer info, and job details. Accept, dispatch, or follow up &mdash; all from your phone.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ROI Calculator -->
+<section class="roi-section">
+    <div class="container">
+        <div class="section-label">ROI Calculator</div>
+        <h2 class="section-title">See How Much Revenue You're Leaving on the Table</h2>
+        <p class="section-subtitle">Most HVAC and plumbing companies miss 30-50% of incoming calls. Calculate your potential recovery.</p>
+        <div class="roi-card">
+            <div class="roi-inputs">
+                <div class="roi-field">
+                    <label>Missed calls per week</label>
+                    <input type="number" id="missedCalls" value="15" min="1" max="500">
+                </div>
+                <div class="roi-field">
+                    <label>Average job value ($)</label>
+                    <input type="number" id="jobValue" value="850" min="50" max="50000">
+                </div>
+                <div class="roi-field">
+                    <label>Booking rate from answered calls</label>
+                    <select id="bookingRate">
+                        <option value="0.25">25% (Conservative)</option>
+                        <option value="0.35" selected>35% (Average)</option>
+                        <option value="0.50">50% (Optimistic)</option>
+                    </select>
+                </div>
+                <div class="roi-field">
+                    <label>After-hours call percentage</label>
+                    <select id="afterHours">
+                        <option value="0.30">30%</option>
+                        <option value="0.40" selected>40%</option>
+                        <option value="0.50">50%</option>
+                    </select>
+                </div>
+            </div>
+            <div class="roi-results">
+                <h3>Your Estimated Recovery</h3>
+                <div class="roi-grid">
+                    <div class="roi-metric">
+                        <div class="value" id="monthlyRevenue">$0</div>
+                        <div class="label">Additional monthly revenue</div>
+                    </div>
+                    <div class="roi-metric">
+                        <div class="value" id="yearlyRevenue">$0</div>
+                        <div class="label">Additional yearly revenue</div>
+                    </div>
+                    <div class="roi-metric">
+                        <div class="value" id="roiMultiple">0x</div>
+                        <div class="label">Return on investment</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section>
+    <div class="container">
+        <div class="section-label">Features</div>
+        <h2 class="section-title">Built for the Trades, Not Generic Businesses</h2>
+        <p class="section-subtitle">Conduit AI understands HVAC and plumbing terminology, urgency levels, and how your business operates.</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">&#9888;&#65039;</div>
+                <h3>Emergency Call Triage</h3>
+                <p>AI distinguishes a burst pipe from a dripping faucet. True emergencies get escalated immediately with priority alerts, so you can dispatch fast when it matters most.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128337;</div>
+                <h3>After-Hours Coverage</h3>
+                <p>40% of service calls come outside business hours. Conduit captures every one &mdash; qualifying leads, providing estimates, and booking next-day appointments while you sleep.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128176;</div>
+                <h3>Job Estimate Recovery</h3>
+                <p>When past customers call back about estimates they received, Conduit picks up, answers questions, and closes the booking. No more lost follow-ups on $500-$2,000 jobs.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing -->
+<section class="roi-section">
+    <div class="container" style="text-align: center;">
+        <div class="section-label">Pricing</div>
+        <h2 class="section-title">One Captured Job Pays for Months of Service</h2>
+        <p class="section-subtitle" style="margin: 0 auto;">Simple, transparent pricing. No contracts. Cancel anytime.</p>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <h3>Starter</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">For solo operators and small crews</p>
+                <div class="price">$99<span>/mo</span></div>
+                <p class="price-note">Up to 100 calls per month</p>
+                <ul>
+                    <li>24/7 AI call answering</li>
+                    <li>Emergency call triage</li>
+                    <li>Instant job notifications</li>
+                    <li>Call summaries &amp; transcripts</li>
+                    <li>Basic calendar booking</li>
+                </ul>
+                <a href="https://app.conduitai.io/login" class="pricing-cta secondary">Get Started</a>
+            </div>
+            <div class="pricing-card featured">
+                <h3>Professional</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">For growing HVAC &amp; plumbing companies</p>
+                <div class="price">$249<span>/mo</span></div>
+                <p class="price-note">Up to 500 calls per month</p>
+                <ul>
+                    <li>Everything in Starter</li>
+                    <li>Smart job estimate follow-up</li>
+                    <li>Multi-technician dispatch</li>
+                    <li>CRM integration</li>
+                    <li>Priority support</li>
+                </ul>
+                <a href="https://app.conduitai.io/login" class="pricing-cta primary">Start Free Trial</a>
+            </div>
+            <div class="pricing-card">
+                <h3>Enterprise</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">For multi-location operations</p>
+                <div class="price">Custom</div>
+                <p class="price-note">Unlimited calls</p>
+                <ul>
+                    <li>Everything in Professional</li>
+                    <li>Custom AI training</li>
+                    <li>Multi-location routing</li>
+                    <li>API access</li>
+                    <li>Dedicated account manager</li>
+                </ul>
+                <a href="https://app.conduitai.io/login" class="pricing-cta secondary">Contact Sales</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section>
+    <div class="container">
+        <div class="section-label" style="text-align: center;">FAQ</div>
+        <h2 class="section-title" style="text-align: center;">Common Questions from HVAC &amp; Plumbing Pros</h2>
+        <div class="faq-list">
+            <div class="faq-item">
+                <button class="faq-question">Can Conduit AI tell the difference between an emergency and a routine call?</button>
+                <div class="faq-answer"><p>Yes. Conduit is trained to identify true emergencies &mdash; burst pipes, gas leaks, no heat in winter, no AC in summer &mdash; and escalate them immediately with priority alerts to your phone. Routine maintenance requests are booked normally into your calendar for the next available slot.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">Will the AI sound natural to my customers?</button>
+                <div class="faq-answer"><p>Absolutely. Conduit uses advanced conversational AI that sounds professional and friendly. It understands HVAC and plumbing terminology, can discuss common issues like water heater failures or AC compressor problems, and speaks the way your customers expect a dispatcher to speak. Most callers don't realize they're talking to AI.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">How does Conduit handle after-hours pricing and estimates?</button>
+                <div class="faq-answer"><p>You configure your pricing rules &mdash; standard rates, after-hours premiums, emergency surcharges, and service call minimums. Conduit communicates these clearly to callers, provides ballpark estimates based on the job description, and sets proper expectations before booking the appointment.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">Does it integrate with ServiceTitan, Housecall Pro, or Jobber?</button>
+                <div class="faq-answer"><p>Conduit integrates with the most popular field service management tools including ServiceTitan, Housecall Pro, Jobber, and others. New jobs and customer information are automatically synced to your existing workflow. We also support Google Calendar, Outlook, and webhook-based integrations for custom setups.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">What happens if a caller has a complex issue the AI can't handle?</button>
+                <div class="faq-answer"><p>Conduit gracefully escalates complex calls. If the AI detects it can't fully resolve a caller's needs, it collects all relevant information, assures the customer someone will call back shortly, and sends you a priority notification with the full context. You never lose the lead &mdash; you just handle the tricky ones personally.</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Final CTA -->
+<section class="final-cta">
+    <div class="container">
+        <h2>Every Missed Call Is a Missed Job</h2>
+        <p>Join hundreds of HVAC and plumbing companies using Conduit AI to capture more revenue around the clock.</p>
+        <a href="https://app.conduitai.io/login" class="hero-cta">Start Your Free Trial &rarr;</a>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <p>&copy; 2026 Conduit AI. All rights reserved.</p>
+    </div>
+</footer>
+
+<script>
+    // ROI Calculator
+    function calculateROI() {
+        const missedCalls = parseInt(document.getElementById('missedCalls').value) || 0;
+        const jobValue = parseInt(document.getElementById('jobValue').value) || 0;
+        const bookingRate = parseFloat(document.getElementById('bookingRate').value);
+        const afterHours = parseFloat(document.getElementById('afterHours').value);
+        const monthlyCallsRecovered = missedCalls * 4.33;
+        const monthlyJobsBooked = monthlyCallsRecovered * bookingRate;
+        const monthly = Math.round(monthlyJobsBooked * jobValue);
+        const yearly = monthly * 12;
+        const conduitCost = 249;
+        const roi = monthly > 0 ? (monthly / conduitCost).toFixed(0) : 0;
+        document.getElementById('monthlyRevenue').textContent = '$' + monthly.toLocaleString();
+        document.getElementById('yearlyRevenue').textContent = '$' + yearly.toLocaleString();
+        document.getElementById('roiMultiple').textContent = roi + 'x';
+    }
+    document.querySelectorAll('.roi-field input, .roi-field select').forEach(el => {
+        el.addEventListener('input', calculateROI);
+        el.addEventListener('change', calculateROI);
+    });
+    calculateROI();
+
+    // FAQ Accordion
+    document.querySelectorAll('.faq-question').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const item = btn.parentElement;
+            const isActive = item.classList.contains('active');
+            document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+            if (!isActive) item.classList.add('active');
+        });
+    });
+</script>
+
+</body>
+</html>

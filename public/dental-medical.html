@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conduit AI for Dental &amp; Medical Practices | Never Lose a Patient to a Missed Call</title>
+    <meta name="description" content="AI-powered phone answering for dental and medical practices. Retain patients, handle after-hours calls, and fill your schedule around the clock.">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #0a0f1e;
+            --bg-secondary: #111827;
+            --bg-card: #1a2236;
+            --bg-card-hover: #1f2a42;
+            --accent: #00d4ff;
+            --accent-dim: rgba(0, 212, 255, 0.15);
+            --accent-glow: rgba(0, 212, 255, 0.4);
+            --text-primary: #f0f4f8;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: rgba(255, 255, 255, 0.08);
+            --gradient-accent: linear-gradient(135deg, #00d4ff, #00b4d8);
+            --gradient-bg: linear-gradient(180deg, #0a0f1e 0%, #111827 100%);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 1rem 2rem;
+            background: rgba(10, 15, 30, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .logo {
+            font-size: 1.5rem; font-weight: 700; color: var(--text-primary);
+            text-decoration: none; display: flex; align-items: center; gap: 0.5rem;
+        }
+        .logo span { color: var(--accent); }
+        .nav-badge {
+            font-size: 0.7rem; font-weight: 500; background: var(--accent-dim);
+            color: var(--accent); padding: 0.2rem 0.6rem; border-radius: 20px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+        .nav-cta {
+            background: var(--gradient-accent); color: #000; padding: 0.6rem 1.5rem;
+            border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-glow); }
+
+        section { padding: 6rem 2rem; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .section-label {
+            font-size: 0.8rem; font-weight: 600; color: var(--accent); text-transform: uppercase;
+            letter-spacing: 2px; margin-bottom: 1rem;
+        }
+        .section-title {
+            font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 700; margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        .section-subtitle { font-size: 1.1rem; color: var(--text-secondary); max-width: 650px; }
+
+        .hero {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            text-align: center; padding-top: 5rem; position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: ''; position: absolute; top: -40%; left: 50%; transform: translateX(-50%);
+            width: 800px; height: 800px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-content { position: relative; z-index: 1; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: var(--accent-dim); border: 1px solid rgba(0,212,255,0.25);
+            padding: 0.5rem 1.2rem; border-radius: 50px; font-size: 0.85rem;
+            color: var(--accent); margin-bottom: 2rem; font-weight: 500;
+        }
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; line-height: 1.1;
+            margin-bottom: 1.5rem; max-width: 850px;
+        }
+        .hero h1 .highlight {
+            background: var(--gradient-accent); -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero p {
+            font-size: 1.2rem; color: var(--text-secondary); max-width: 620px;
+            margin: 0 auto 2.5rem;
+        }
+        .hero-cta {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: var(--gradient-accent); color: #000; padding: 1rem 2.5rem;
+            border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1.1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--accent-glow); }
+        .hero-stats {
+            display: flex; justify-content: center; gap: 3rem; margin-top: 4rem;
+            flex-wrap: wrap;
+        }
+        .hero-stat { text-align: center; }
+        .hero-stat .number { font-size: 2rem; font-weight: 700; color: var(--accent); }
+        .hero-stat .label { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-top: 3rem; }
+        .step {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 2rem; position: relative;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        .step:hover { border-color: rgba(0,212,255,0.3); transform: translateY(-4px); }
+        .step-number {
+            width: 48px; height: 48px; border-radius: 12px;
+            background: var(--accent-dim); border: 1px solid rgba(0,212,255,0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; color: var(--accent); font-size: 1.2rem; margin-bottom: 1.5rem;
+        }
+        .step h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .step p { color: var(--text-secondary); font-size: 0.95rem; }
+
+        .roi-section { background: var(--bg-secondary); }
+        .roi-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 20px; padding: 3rem; max-width: 800px; margin: 3rem auto 0;
+        }
+        .roi-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+        .roi-field label {
+            display: block; font-size: 0.85rem; font-weight: 500;
+            color: var(--text-secondary); margin-bottom: 0.5rem;
+        }
+        .roi-field input, .roi-field select {
+            width: 100%; padding: 0.8rem 1rem; border-radius: 10px;
+            border: 1px solid var(--border); background: var(--bg-primary);
+            color: var(--text-primary); font-family: 'Outfit', sans-serif;
+            font-size: 1rem; outline: none; transition: border-color 0.3s;
+        }
+        .roi-field input:focus, .roi-field select:focus { border-color: var(--accent); }
+        .roi-results {
+            background: var(--bg-primary); border-radius: 12px; padding: 2rem;
+            border: 1px solid var(--border);
+        }
+        .roi-results h3 {
+            font-size: 1rem; font-weight: 600; color: var(--accent);
+            margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .roi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+        .roi-metric .value {
+            font-size: 2rem; font-weight: 700; color: var(--accent);
+            margin-bottom: 0.25rem;
+        }
+        .roi-metric .label { font-size: 0.85rem; color: var(--text-secondary); }
+
+        .features-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem; margin-top: 3rem;
+        }
+        .feature-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 2.5rem;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        .feature-card:hover { border-color: rgba(0,212,255,0.3); transform: translateY(-4px); }
+        .feature-icon {
+            width: 56px; height: 56px; border-radius: 14px;
+            background: var(--accent-dim); border: 1px solid rgba(0,212,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; margin-bottom: 1.5rem;
+        }
+        .feature-card h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .feature-card p { color: var(--text-secondary); font-size: 0.95rem; }
+
+        .pricing-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem; margin-top: 3rem; max-width: 950px; margin-left: auto; margin-right: auto;
+        }
+        .pricing-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 20px; padding: 2.5rem; position: relative;
+            transition: transform 0.3s;
+        }
+        .pricing-card.featured {
+            border-color: var(--accent);
+            box-shadow: 0 0 40px rgba(0,212,255,0.1);
+        }
+        .pricing-card.featured::before {
+            content: 'Most Popular'; position: absolute; top: -12px; left: 50%;
+            transform: translateX(-50%); background: var(--gradient-accent);
+            color: #000; padding: 0.3rem 1.2rem; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+        }
+        .pricing-card:hover { transform: translateY(-4px); }
+        .pricing-card h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .pricing-card .price { font-size: 3rem; font-weight: 800; margin: 1rem 0; }
+        .pricing-card .price span { font-size: 1rem; font-weight: 400; color: var(--text-muted); }
+        .pricing-card .price-note { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+        .pricing-card ul { list-style: none; margin-bottom: 2rem; }
+        .pricing-card li {
+            padding: 0.5rem 0; color: var(--text-secondary); font-size: 0.95rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .pricing-card li::before {
+            content: ''; width: 20px; height: 20px; border-radius: 50%;
+            background: var(--accent-dim); flex-shrink: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2300d4ff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: center;
+        }
+        .pricing-cta {
+            display: block; text-align: center; padding: 0.9rem 1.5rem;
+            border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.95rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .pricing-cta.primary { background: var(--gradient-accent); color: #000; }
+        .pricing-cta.secondary {
+            border: 1px solid var(--border); color: var(--text-primary); background: transparent;
+        }
+        .pricing-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-glow); }
+
+        .faq-list { max-width: 750px; margin: 3rem auto 0; }
+        .faq-item { border-bottom: 1px solid var(--border); padding: 1.5rem 0; }
+        .faq-question {
+            width: 100%; background: none; border: none; color: var(--text-primary);
+            font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 600;
+            text-align: left; cursor: pointer; display: flex; align-items: center;
+            justify-content: space-between; gap: 1rem; padding: 0;
+        }
+        .faq-question::after {
+            content: '+'; font-size: 1.5rem; font-weight: 300; color: var(--accent);
+            transition: transform 0.3s; flex-shrink: 0;
+        }
+        .faq-item.active .faq-question::after { content: '\2212'; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s; }
+        .faq-item.active .faq-answer { max-height: 300px; padding-top: 1rem; }
+        .faq-answer p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; }
+
+        .final-cta {
+            text-align: center; background: var(--bg-secondary);
+            position: relative; overflow: hidden;
+        }
+        .final-cta::before {
+            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 600px; height: 600px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%);
+        }
+        .final-cta .container { position: relative; z-index: 1; }
+        .final-cta h2 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; margin-bottom: 1rem; }
+        .final-cta p { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 2.5rem; max-width: 550px; margin-left: auto; margin-right: auto; }
+
+        footer {
+            padding: 3rem 2rem; border-top: 1px solid var(--border);
+            text-align: center; color: var(--text-muted); font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            section { padding: 4rem 1.5rem; }
+            nav { padding: 1rem 1.5rem; }
+            .roi-inputs { grid-template-columns: 1fr; }
+            .hero-stats { gap: 2rem; }
+            .roi-card { padding: 2rem 1.5rem; }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+        }
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 2rem; }
+            .nav-badge { display: none; }
+        }
+    </style>
+
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+    <a href="#" class="logo">Conduit<span>AI</span> <span class="nav-badge">Dental &amp; Medical</span></a>
+    <a href="https://app.conduitai.io/login" class="nav-cta">Get Started</a>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">Built for Dental &amp; Medical Practices</div>
+        <h1>Stop Losing <span class="highlight">Patients</span> to Unanswered Phones</h1>
+        <p>Conduit AI answers every patient call, schedules appointments, handles after-hours inquiries, and ensures no patient slips away to another practice.</p>
+        <a href="https://app.conduitai.io/login" class="hero-cta">Start Free Trial &rarr;</a>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="number">35%</div>
+                <div class="label">of patient calls go unanswered</div>
+            </div>
+            <div class="hero-stat">
+                <div class="number">$1,500</div>
+                <div class="label">avg. lifetime patient value</div>
+            </div>
+            <div class="hero-stat">
+                <div class="number">24/7</div>
+                <div class="label">patient call coverage</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section>
+    <div class="container">
+        <div class="section-label">How It Works</div>
+        <h2 class="section-title">A Smarter Front Desk That Never Takes a Break</h2>
+        <p class="section-subtitle">Set up in minutes. HIPAA-conscious design. Works with your existing phone system and scheduling software.</p>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Connect Your Phone System</h3>
+                <p>Forward calls to Conduit when your front desk is busy, during lunch breaks, after hours, or 24/7. Seamless integration with any phone system &mdash; VoIP, landline, or mobile.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>AI Handles Patient Calls</h3>
+                <p>Conduit answers with your practice's name and personality. It schedules appointments, answers common questions about services and insurance, and triages after-hours concerns appropriately.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Your Schedule Fills Up</h3>
+                <p>New appointments appear in your practice management system. Urgent matters are escalated immediately. You get full call summaries and transcripts for every interaction.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ROI Calculator -->
+<section class="roi-section">
+    <div class="container">
+        <div class="section-label">ROI Calculator</div>
+        <h2 class="section-title">Every Missed Call Could Be a $3,000 Patient Lost Forever</h2>
+        <p class="section-subtitle">When a patient can't reach you, they call the next practice on Google. Calculate the cost of missed calls.</p>
+        <div class="roi-card">
+            <div class="roi-inputs">
+                <div class="roi-field">
+                    <label>Missed patient calls per week</label>
+                    <input type="number" id="missedCalls" value="12" min="1" max="500">
+                </div>
+                <div class="roi-field">
+                    <label>Average patient lifetime value ($)</label>
+                    <input type="number" id="patientValue" value="1500" min="100" max="50000">
+                </div>
+                <div class="roi-field">
+                    <label>New patient conversion rate</label>
+                    <select id="conversionRate">
+                        <option value="0.20">20% (Conservative)</option>
+                        <option value="0.30" selected>30% (Average)</option>
+                        <option value="0.45">45% (Optimistic)</option>
+                    </select>
+                </div>
+                <div class="roi-field">
+                    <label>After-hours call percentage</label>
+                    <select id="afterHours">
+                        <option value="0.25">25%</option>
+                        <option value="0.35" selected>35%</option>
+                        <option value="0.45">45%</option>
+                    </select>
+                </div>
+            </div>
+            <div class="roi-results">
+                <h3>Your Estimated Recovery</h3>
+                <div class="roi-grid">
+                    <div class="roi-metric">
+                        <div class="value" id="monthlyRevenue">$0</div>
+                        <div class="label">Monthly patient value recovered</div>
+                    </div>
+                    <div class="roi-metric">
+                        <div class="value" id="yearlyRevenue">$0</div>
+                        <div class="label">Annual patient value recovered</div>
+                    </div>
+                    <div class="roi-metric">
+                        <div class="value" id="roiMultiple">0x</div>
+                        <div class="label">Return on investment</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section>
+    <div class="container">
+        <div class="section-label">Features</div>
+        <h2 class="section-title">Purpose-Built for Healthcare Practices</h2>
+        <p class="section-subtitle">Conduit understands dental procedures, medical terminology, insurance questions, and how healthcare practices operate.</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">&#129657;</div>
+                <h3>Patient Retention Shield</h3>
+                <p>When existing patients call for a cleaning, follow-up, or new concern, Conduit books them immediately. No hold times, no voicemails, no risk of them calling another practice out of frustration.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#127769;</div>
+                <h3>After-Hours Triage</h3>
+                <p>Patients calling with toothaches at midnight or post-op concerns get intelligent triage. Conduit provides appropriate guidance, captures details for your review, and escalates true emergencies to your on-call provider.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128197;</div>
+                <h3>Intelligent Scheduling</h3>
+                <p>Conduit books the right appointment type for the right duration with the right provider. Cleanings, exams, consultations, and follow-ups are each handled correctly based on your practice's scheduling rules.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing -->
+<section class="roi-section">
+    <div class="container" style="text-align: center;">
+        <div class="section-label">Pricing</div>
+        <h2 class="section-title">One Retained Patient Pays for a Full Year</h2>
+        <p class="section-subtitle" style="margin: 0 auto;">Transparent pricing designed for healthcare practices. No contracts, cancel anytime.</p>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <h3>Solo Practice</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">For single-provider practices</p>
+                <div class="price">$149<span>/mo</span></div>
+                <p class="price-note">Up to 200 calls per month</p>
+                <ul>
+                    <li>24/7 AI call answering</li>
+                    <li>Appointment scheduling</li>
+                    <li>After-hours triage</li>
+                    <li>Call summaries &amp; transcripts</li>
+                    <li>Basic calendar integration</li>
+                </ul>
+                <a href="https://app.conduitai.io/login" class="pricing-cta secondary">Get Started</a>
+            </div>
+            <div class="pricing-card featured">
+                <h3>Group Practice</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">For multi-provider practices</p>
+                <div class="price">$349<span>/mo</span></div>
+                <p class="price-note">Up to 750 calls per month</p>
+                <ul>
+                    <li>Everything in Solo Practice</li>
+                    <li>Multi-provider scheduling</li>
+                    <li>Insurance FAQ handling</li>
+                    <li>PMS integration</li>
+                    <li>Priority support</li>
+                </ul>
+                <a href="https://app.conduitai.io/login" class="pricing-cta primary">Start Free Trial</a>
+            </div>
+            <div class="pricing-card">
+                <h3>Enterprise</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">For DSOs and multi-location groups</p>
+                <div class="price">Custom</div>
+                <p class="price-note">Unlimited calls</p>
+                <ul>
+                    <li>Everything in Group Practice</li>
+                    <li>Multi-location routing</li>
+                    <li>Custom AI training</li>
+                    <li>API access &amp; integrations</li>
+                    <li>Dedicated account manager</li>
+                </ul>
+                <a href="https://app.conduitai.io/login" class="pricing-cta secondary">Contact Sales</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section>
+    <div class="container">
+        <div class="section-label" style="text-align: center;">FAQ</div>
+        <h2 class="section-title" style="text-align: center;">Questions from Dental &amp; Medical Practices</h2>
+        <div class="faq-list">
+            <div class="faq-item">
+                <button class="faq-question">Is Conduit AI compliant with healthcare privacy requirements?</button>
+                <div class="faq-answer"><p>Conduit is designed with healthcare privacy in mind. The AI does not store protected health information (PHI) beyond what's necessary for call handling. Call data is encrypted in transit and at rest, and our platform follows industry best practices for healthcare data handling. We recommend consulting with your compliance officer to ensure our solution meets your specific regulatory requirements.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">How does the after-hours triage work? Will the AI give medical advice?</button>
+                <div class="faq-answer"><p>Conduit does not provide medical or dental advice. Instead, it follows your practice's after-hours protocols. For routine matters (scheduling, billing questions), it handles them directly. For clinical concerns, it captures the patient's symptoms and details, provides your practice's standard after-hours guidance (e.g., &ldquo;go to the ER for severe bleeding&rdquo;), and escalates to your on-call provider when criteria are met.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">Can Conduit handle insurance and billing questions?</button>
+                <div class="faq-answer"><p>Yes. You configure the insurance plans you accept, common billing information, and payment policies. When patients call asking &ldquo;Do you accept Delta Dental?&rdquo; or &ldquo;What's the cost of a cleaning?&rdquo;, Conduit provides accurate answers based on your configuration. Complex billing inquiries are flagged for your front desk to handle during business hours.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">Does it integrate with my practice management software?</button>
+                <div class="faq-answer"><p>Conduit integrates with popular practice management systems including Dentrix, Eaglesoft, Open Dental, Athenahealth, and others. Appointments booked by Conduit appear directly in your PMS, eliminating double-entry. We also support Google Calendar, Outlook, and webhook-based integrations for custom workflows.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">What happens when a patient calls with a dental or medical emergency?</button>
+                <div class="faq-answer"><p>True emergencies are handled according to your protocols. You define your escalation criteria &mdash; for example, severe pain, uncontrolled bleeding, facial swelling, or post-surgical complications. When Conduit identifies an emergency based on these criteria, it immediately escalates to your on-call provider via text, call, or both, while providing the patient with your emergency instructions.</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Final CTA -->
+<section class="final-cta">
+    <div class="container">
+        <h2>Every Missed Call Is a Patient Lost to Another Practice</h2>
+        <p>Join hundreds of dental and medical practices using Conduit AI to retain patients and fill their schedules around the clock.</p>
+        <a href="https://app.conduitai.io/login" class="hero-cta">Start Your Free Trial &rarr;</a>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <p>&copy; 2026 Conduit AI. All rights reserved.</p>
+    </div>
+</footer>
+
+<script>
+    function calculateROI() {
+        const missedCalls = parseInt(document.getElementById('missedCalls').value) || 0;
+        const patientValue = parseInt(document.getElementById('patientValue').value) || 0;
+        const conversionRate = parseFloat(document.getElementById('conversionRate').value);
+        const afterHours = parseFloat(document.getElementById('afterHours').value);
+        const monthlyCallsRecovered = missedCalls * 4.33;
+        const monthlyPatientsGained = monthlyCallsRecovered * conversionRate;
+        const monthly = Math.round(monthlyPatientsGained * patientValue);
+        const yearly = monthly * 12;
+        const conduitCost = 349;
+        const roi = monthly > 0 ? (monthly / conduitCost).toFixed(0) : 0;
+        document.getElementById('monthlyRevenue').textContent = '$' + monthly.toLocaleString();
+        document.getElementById('yearlyRevenue').textContent = '$' + yearly.toLocaleString();
+        document.getElementById('roiMultiple').textContent = roi + 'x';
+    }
+    document.querySelectorAll('.roi-field input, .roi-field select').forEach(el => {
+        el.addEventListener('input', calculateROI);
+        el.addEventListener('change', calculateROI);
+    });
+    calculateROI();
+
+    document.querySelectorAll('.faq-question').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const item = btn.parentElement;
+            const isActive = item.classList.contains('active');
+            document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+            if (!isActive) item.classList.add('active');
+        });
+    });
+</script>
+
+</body>
+</html>

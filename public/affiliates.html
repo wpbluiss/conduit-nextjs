@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affiliate Program — Conduit AI | Earn 20% Recurring Commission</title>
+    <meta name="description" content="Join the Conduit AI affiliate program. Earn 20% recurring commission for every service business you refer. No cap on earnings. Monthly payouts.">
+    <meta name="keywords" content="Conduit AI affiliate program, referral program, earn commission, AI lead recovery affiliate">
+    <link rel="canonical" href="https://conduitai.io/affiliates.html">
+    <meta property="og:title" content="Conduit AI Affiliate Program — Earn 20% Recurring Commission">
+    <meta property="og:description" content="Refer service businesses to Conduit AI and earn 20% recurring commission on every sale. No cap. Monthly payouts.">
+    <meta property="og:url" content="https://conduitai.io/affiliates.html">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #111118;
+            --bg-card-hover: #16161f;
+            --border: #1e1e2a;
+            --orange: #ff6b35;
+            --orange-glow: rgba(255, 107, 53, 0.15);
+            --orange-dim: rgba(255, 107, 53, 0.08);
+            --text-primary: #f0f0f5;
+            --text-secondary: #8a8a9a;
+            --text-muted: #5a5a6a;
+            --green: #22c55e;
+            --green-dim: rgba(34, 197, 94, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Nav */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+        }
+        .nav-inner {
+            max-width: 1200px; margin: 0 auto;
+            display: flex; justify-content: space-between; align-items: center;
+            height: 64px;
+        }
+        .nav-logo { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); text-decoration: none; }
+        .nav-logo span { color: var(--orange); }
+        .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+        .nav-links a {
+            color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--text-primary); }
+        .nav-cta {
+            background: var(--orange); color: #fff !important; padding: 0.5rem 1.2rem;
+            border-radius: 8px; font-weight: 600; font-size: 0.85rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 20px var(--orange-glow); }
+
+        /* Hero */
+        .hero {
+            padding: 10rem 2rem 5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute; top: -50%; left: 50%; transform: translateX(-50%);
+            width: 800px; height: 800px;
+            background: radial-gradient(circle, var(--orange-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: var(--orange-dim); border: 1px solid rgba(255, 107, 53, 0.2);
+            padding: 0.4rem 1rem; border-radius: 100px;
+            font-size: 0.8rem; font-weight: 600; color: var(--orange);
+            margin-bottom: 1.5rem;
+        }
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800; line-height: 1.1;
+            margin-bottom: 1.2rem;
+            background: linear-gradient(135deg, var(--text-primary) 40%, var(--orange) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            font-size: 1.15rem; color: var(--text-secondary);
+            max-width: 600px; margin: 0 auto 2.5rem;
+        }
+        .hero-cta {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: var(--orange); color: #fff; padding: 0.9rem 2rem;
+            border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--orange-glow); }
+
+        /* Stats Row */
+        .stats {
+            display: flex; justify-content: center; gap: 3rem;
+            padding: 2rem; flex-wrap: wrap;
+            max-width: 800px; margin: 0 auto 4rem;
+        }
+        .stat { text-align: center; }
+        .stat-value { font-size: 2.2rem; font-weight: 800; color: var(--orange); }
+        .stat-label { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+        /* Section styling */
+        section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
+        .section-tag {
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--orange); margin-bottom: 0.75rem;
+        }
+        .section-title {
+            font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 800;
+            margin-bottom: 1rem; line-height: 1.15;
+        }
+        .section-subtitle {
+            color: var(--text-secondary); font-size: 1.05rem; max-width: 600px; margin-bottom: 3rem;
+        }
+
+        /* How It Works */
+        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+        .step {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 2rem;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        .step:hover { border-color: rgba(255, 107, 53, 0.3); transform: translateY(-4px); }
+        .step-num {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 40px; height: 40px; border-radius: 10px;
+            background: var(--orange-dim); color: var(--orange);
+            font-weight: 800; font-size: 1rem; margin-bottom: 1.2rem;
+        }
+        .step h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .step p { color: var(--text-secondary); font-size: 0.9rem; }
+
+        /* Commission Tiers */
+        .tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .tier {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 2.5rem;
+            position: relative; overflow: hidden;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        .tier:hover { border-color: rgba(255, 107, 53, 0.3); transform: translateY(-4px); }
+        .tier.featured { border-color: var(--orange); }
+        .tier.featured::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--orange), #ff9b70);
+        }
+        .tier-label {
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.75rem;
+        }
+        .tier-rate { font-size: 2.8rem; font-weight: 800; color: var(--orange); line-height: 1; }
+        .tier-rate span { font-size: 1rem; color: var(--text-secondary); font-weight: 500; }
+        .tier-desc { color: var(--text-secondary); font-size: 0.9rem; margin: 1rem 0 1.5rem; }
+        .tier ul { list-style: none; }
+        .tier li {
+            font-size: 0.9rem; color: var(--text-secondary);
+            padding: 0.4rem 0; padding-left: 1.5rem; position: relative;
+        }
+        .tier li::before {
+            content: '✓'; position: absolute; left: 0; color: var(--green); font-weight: 700;
+        }
+
+        /* Calculator */
+        .calc-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 20px; padding: 3rem;
+            max-width: 700px; margin: 0 auto;
+        }
+        .calc-card h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 2rem; text-align: center; }
+        .slider-group { margin-bottom: 2rem; }
+        .slider-label {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        .slider-label span { font-size: 0.9rem; color: var(--text-secondary); }
+        .slider-label strong { font-size: 1.1rem; color: var(--orange); font-weight: 700; }
+        input[type="range"] {
+            width: 100%; height: 6px; -webkit-appearance: none; appearance: none;
+            background: var(--border); border-radius: 3px; outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
+            background: var(--orange); cursor: pointer;
+            box-shadow: 0 2px 10px var(--orange-glow);
+        }
+        .calc-result {
+            text-align: center; padding: 2rem;
+            background: var(--orange-dim); border-radius: 14px;
+            border: 1px solid rgba(255, 107, 53, 0.15);
+        }
+        .calc-result .label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+        .calc-result .amount { font-size: 3rem; font-weight: 800; color: var(--orange); }
+        .calc-result .period { font-size: 0.9rem; color: var(--text-secondary); }
+
+        /* FAQ */
+        .faq-list { max-width: 700px; margin: 0 auto; }
+        .faq-item {
+            border-bottom: 1px solid var(--border); padding: 1.25rem 0;
+            cursor: pointer;
+        }
+        .faq-q {
+            display: flex; justify-content: space-between; align-items: center;
+            font-weight: 600; font-size: 1rem;
+        }
+        .faq-q span { color: var(--text-muted); font-size: 1.2rem; transition: transform 0.3s; }
+        .faq-a {
+            max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s;
+            color: var(--text-secondary); font-size: 0.9rem;
+        }
+        .faq-item.open .faq-a { max-height: 300px; padding-top: 0.75rem; }
+        .faq-item.open .faq-q span { transform: rotate(45deg); }
+
+        /* CTA bottom */
+        .cta-section {
+            text-align: center; padding: 5rem 2rem;
+            background: linear-gradient(180deg, transparent, var(--orange-dim), transparent);
+        }
+        .cta-section h2 { font-size: clamp(2rem, 3.5vw, 2.8rem); font-weight: 800; margin-bottom: 1rem; }
+        .cta-section p { color: var(--text-secondary); max-width: 500px; margin: 0 auto 2rem; }
+
+        /* Form */
+        .apply-form {
+            max-width: 500px; margin: 0 auto;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 2.5rem;
+        }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label {
+            display: block; font-size: 0.85rem; font-weight: 600;
+            color: var(--text-secondary); margin-bottom: 0.4rem;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 0.75rem 1rem;
+            background: var(--bg-dark); border: 1px solid var(--border);
+            border-radius: 10px; color: var(--text-primary); font-size: 0.9rem;
+            font-family: inherit; transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--orange);
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .submit-btn {
+            width: 100%; padding: 0.9rem; border: none; border-radius: 10px;
+            background: var(--orange); color: #fff; font-size: 1rem; font-weight: 700;
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--orange-glow); }
+        .form-success {
+            display: none; text-align: center; padding: 2rem;
+        }
+        .form-success h3 { color: var(--green); margin-bottom: 0.5rem; }
+        .form-success p { color: var(--text-secondary); font-size: 0.9rem; }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border); padding: 2rem;
+            text-align: center; color: var(--text-muted); font-size: 0.8rem;
+        }
+        footer a { color: var(--text-secondary); text-decoration: none; }
+        footer a:hover { color: var(--text-primary); }
+
+        @media (max-width: 768px) {
+            .nav-links a:not(.nav-cta) { display: none; }
+            .stats { gap: 1.5rem; }
+            .hero { padding: 8rem 1.5rem 3rem; }
+            section { padding: 3rem 1.5rem; }
+            .calc-card { padding: 2rem 1.5rem; }
+            .apply-form { padding: 2rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+    <div class="nav-inner">
+        <a href="/" class="nav-logo">Conduit <span>AI</span></a>
+        <div class="nav-links">
+            <a href="/#features">Product</a>
+            <a href="/#pricing">Pricing</a>
+            <a href="/blog.html">Blog</a>
+            <a href="#apply" class="nav-cta">Apply Now →</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+    <div class="hero-badge">💰 Affiliate Program — Now Open</div>
+    <h1>Earn 20% Recurring<br>For Every Referral</h1>
+    <p>Know a service business that misses calls? Refer them to Conduit AI and earn 20% of their monthly plan — every single month they stay a customer.</p>
+    <a href="#apply" class="hero-cta">⚡ Apply to Join</a>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+    <div class="stat">
+        <div class="stat-value">20%</div>
+        <div class="stat-label">Recurring Commission</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value">$0</div>
+        <div class="stat-label">Cost to Join</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value">No Cap</div>
+        <div class="stat-label">On Earnings</div>
+    </div>
+    <div class="stat">
+        <div class="stat-value">Monthly</div>
+        <div class="stat-label">Payouts via PayPal/Zelle</div>
+    </div>
+</div>
+
+<!-- How It Works -->
+<section>
+    <div class="section-tag">How It Works</div>
+    <div class="section-title">Three steps to start earning</div>
+    <div class="section-subtitle">No technical skills required. If you know business owners, you can earn.</div>
+    <div class="steps">
+        <div class="step">
+            <div class="step-num">1</div>
+            <h3>Apply & Get Approved</h3>
+            <p>Fill out the form below. Once approved, you'll get a unique referral link and everything you need to start sharing.</p>
+        </div>
+        <div class="step">
+            <div class="step-num">2</div>
+            <h3>Share With Business Owners</h3>
+            <p>Send your link to plumbers, HVAC techs, salons, roofers — any service business that misses calls. We'll handle the demo and close.</p>
+        </div>
+        <div class="step">
+            <div class="step-num">3</div>
+            <h3>Earn Every Month</h3>
+            <p>When they sign up, you earn 20% of their monthly plan. Every month. As long as they stay a customer. No cap on earnings.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Commission Tiers -->
+<section>
+    <div class="section-tag">Earnings Potential</div>
+    <div class="section-title">What you could earn per referral</div>
+    <div class="section-subtitle">Each referral is recurring monthly income. It adds up fast.</div>
+    <div class="tiers">
+        <div class="tier">
+            <div class="tier-label">Beauty & Wellness Referral</div>
+            <div class="tier-rate">$50<span>/mo per referral</span></div>
+            <div class="tier-desc">Salon or spa signs up at $250/mo — you earn $50 every month.</div>
+            <ul>
+                <li>$600/year per referral</li>
+                <li>5 referrals = $250/mo passive</li>
+                <li>You only need to refer them once</li>
+            </ul>
+        </div>
+        <div class="tier featured">
+            <div class="tier-label">Home Services Referral</div>
+            <div class="tier-rate">$70<span>/mo per referral</span></div>
+            <div class="tier-desc">Contractor signs up at $350/mo — you earn $70 every month.</div>
+            <ul>
+                <li>$840/year per referral</li>
+                <li>5 referrals = $350/mo passive</li>
+                <li>Highest converting vertical</li>
+                <li>Emergency services = high urgency</li>
+            </ul>
+        </div>
+        <div class="tier">
+            <div class="tier-label">Enterprise / Custom Referral</div>
+            <div class="tier-rate">20%<span> of custom deal</span></div>
+            <div class="tier-desc">Multi-location or enterprise deal — 20% of whatever they pay.</div>
+            <ul>
+                <li>Custom pricing = higher payouts</li>
+                <li>Multi-location multiplier</li>
+                <li>Dedicated support for your lead</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Earnings Calculator -->
+<section>
+    <div class="section-tag">Earnings Calculator</div>
+    <div class="section-title" style="text-align:center;">See your potential income</div>
+    <div class="section-subtitle" style="text-align:center; margin-left:auto;">Drag the slider to see what just a few referrals can do.</div>
+    <div class="calc-card">
+        <div class="slider-group">
+            <div class="slider-label">
+                <span>Active referrals</span>
+                <strong id="refCount">5</strong>
+            </div>
+            <input type="range" id="refSlider" min="1" max="50" value="5">
+        </div>
+        <div class="slider-group">
+            <div class="slider-label">
+                <span>Avg plan per referral</span>
+                <strong id="planValue">$350/mo</strong>
+            </div>
+            <input type="range" id="planSlider" min="250" max="500" step="50" value="350">
+        </div>
+        <div class="calc-result">
+            <div class="label">Your estimated monthly income</div>
+            <div class="amount" id="calcAmount">$350</div>
+            <div class="period">per month · <span id="calcAnnual">$4,200</span>/year</div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section>
+    <div class="section-tag">FAQ</div>
+    <div class="section-title">Common questions</div>
+    <div class="faq-list">
+        <div class="faq-item">
+            <div class="faq-q">Who can be an affiliate? <span>+</span></div>
+            <div class="faq-a">Anyone! Marketers, consultants, accountants, web designers, real estate agents, or anyone who works with service businesses. If you know people who run businesses that rely on phone calls, this is for you.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q">How do I track my referrals? <span>+</span></div>
+            <div class="faq-a">You'll get a unique referral link and access to a simple dashboard that shows clicks, signups, and your commission balance in real-time.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q">When and how do I get paid? <span>+</span></div>
+            <div class="faq-a">Commissions are paid monthly via PayPal or Zelle, 30 days after the referred customer's payment clears. No minimum payout threshold.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q">Do I need to do the sales pitch? <span>+</span></div>
+            <div class="faq-a">Nope. Just share your link or make an introduction. We handle the demo, the pitch, the setup — everything. You just connect us with the business owner.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q">How long does the commission last? <span>+</span></div>
+            <div class="faq-a">As long as the customer stays subscribed. If they're a customer for 3 years, you earn commission for 3 years. There's no expiration.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-q">Is there a limit on how many people I can refer? <span>+</span></div>
+            <div class="faq-a">No cap whatsoever. Refer 5 or refer 500 — you earn on every single one.</div>
+        </div>
+    </div>
+</section>
+
+<!-- Apply CTA -->
+<div class="cta-section" id="apply">
+    <h2>Ready to start earning?</h2>
+    <p>Apply in 60 seconds. We review applications within 24 hours and get you set up the same day.</p>
+    <div class="apply-form" id="applyForm">
+        <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" id="affName" placeholder="Your name" required>
+        </div>
+        <div class="form-group">
+            <label>Email *</label>
+            <input type="email" id="affEmail" placeholder="you@email.com" required>
+        </div>
+        <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" id="affPhone" placeholder="(555) 000-0000">
+        </div>
+        <div class="form-group">
+            <label>How will you promote Conduit AI?</label>
+            <select id="affMethod">
+                <option value="">Select one</option>
+                <option value="network">Personal / professional network</option>
+                <option value="social">Social media</option>
+                <option value="blog">Blog / content marketing</option>
+                <option value="email">Email list</option>
+                <option value="ads">Paid advertising</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Tell us about yourself (optional)</label>
+            <textarea id="affNote" placeholder="What industry are you in? How many business owners do you know?"></textarea>
+        </div>
+        <button class="submit-btn" onclick="submitForm()">🚀 Submit Application</button>
+    </div>
+    <div class="form-success" id="formSuccess">
+        <h3>✅ Application Received!</h3>
+        <p>We'll review your application and get back to you within 24 hours with your unique referral link and everything you need to start earning.</p>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer>
+    <p style="margin-bottom:0.5rem;">
+        <a href="/">Home</a> · <a href="/#pricing">Pricing</a> · <a href="/blog.html">Blog</a> · <a href="mailto:luis@conduitai.io">Contact</a>
+    </p>
+    <p>© 2026 Conduit AI LLC. All rights reserved.</p>
+</footer>
+
+<script>
+    // Calculator
+    const refSlider = document.getElementById('refSlider');
+    const planSlider = document.getElementById('planSlider');
+    function updateCalc() {
+        const refs = parseInt(refSlider.value);
+        const plan = parseInt(planSlider.value);
+        const monthly = Math.round(refs * plan * 0.20);
+        const annual = monthly * 12;
+        document.getElementById('refCount').textContent = refs;
+        document.getElementById('planValue').textContent = `$${plan}/mo`;
+        document.getElementById('calcAmount').textContent = `$${monthly.toLocaleString()}`;
+        document.getElementById('calcAnnual').textContent = `$${annual.toLocaleString()}`;
+    }
+    refSlider.addEventListener('input', updateCalc);
+    planSlider.addEventListener('input', updateCalc);
+    updateCalc();
+
+    // FAQ
+    document.querySelectorAll('.faq-item').forEach(item => {
+        item.querySelector('.faq-q').addEventListener('click', () => {
+            item.classList.toggle('open');
+        });
+    });
+
+    // Form
+    function submitForm() {
+        const name = document.getElementById('affName').value.trim();
+        const email = document.getElementById('affEmail').value.trim();
+        if (!name || !email) { alert('Please fill in your name and email.'); return; }
+
+        // Send to your email via formsubmit or your backend
+        const formData = {
+            name, email,
+            phone: document.getElementById('affPhone').value,
+            method: document.getElementById('affMethod').value,
+            note: document.getElementById('affNote').value,
+            _subject: 'New Affiliate Application: ' + name
+        };
+
+        // Simple mailto fallback — replace with your form endpoint
+        const mailtoLink = `mailto:luis@conduitai.io?subject=${encodeURIComponent('Affiliate Application: ' + name)}&body=${encodeURIComponent(
+            `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nMethod: ${formData.method}\nNote: ${formData.note}`
+        )}`;
+        window.open(mailtoLink, '_blank');
+
+        document.getElementById('applyForm').style.display = 'none';
+        document.getElementById('formSuccess').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
