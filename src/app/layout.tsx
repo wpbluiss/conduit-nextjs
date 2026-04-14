@@ -21,15 +21,15 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Conduit AI -- Your Company Runs Itself",
+  title: "Conduit AI — Your Company Runs Itself",
   description:
-    "Conduit deploys autonomous AI employees across every department. Engineering, sales, support, finance, HR, legal, marketing, ops, and product -- all running 24/7.",
+    "Conduit deploys autonomous AI employees across every department. Engineering, sales, support, finance, HR, legal, marketing, ops, and product — all running 24/7.",
   icons: {
     icon: "/favicon.svg",
     apple: "/favicon.svg",
   },
   openGraph: {
-    title: "Conduit AI -- Your Company Runs Itself",
+    title: "Conduit AI — Your Company Runs Itself",
     description:
       "Autonomous AI employees for every department. Your company runs itself.",
     url: "https://conduitai.io",

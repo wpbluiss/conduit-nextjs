@@ -31,9 +31,10 @@ export default function Navbar() {
         </a>
 
         <div className="hidden md:flex items-center gap-8">
-          <a href="#departments" className="text-text2 text-sm font-medium hover:text-text transition-colors">Departments</a>
-          <a href="#founder" className="text-text2 text-sm font-medium hover:text-text transition-colors">Story</a>
-          <a href="#waitlist-section" className="relative px-5 py-2 rounded-full font-semibold text-sm bg-white text-black hover:bg-white/90 hover:-translate-y-0.5 transition-all">
+          <a href="#departments" onClick={(e) => { e.preventDefault(); document.getElementById("departments")?.scrollIntoView({ behavior: "smooth" }); }} className="text-text2 text-sm font-medium hover:text-text transition-colors">Departments</a>
+          <a href="#founder" onClick={(e) => { e.preventDefault(); document.getElementById("founder")?.scrollIntoView({ behavior: "smooth" }); }} className="text-text2 text-sm font-medium hover:text-text transition-colors">Story</a>
+          <a href="/blog.html" className="text-text2 text-sm font-medium hover:text-text transition-colors">Blog</a>
+          <a href="#waitlist-section" onClick={(e) => { e.preventDefault(); document.getElementById("waitlist-section")?.scrollIntoView({ behavior: "smooth" }); }} className="relative px-5 py-2 rounded-full font-semibold text-sm bg-white text-black hover:bg-white/90 hover:-translate-y-0.5 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all duration-300">
             Join Waitlist
           </a>
         </div>
@@ -49,9 +50,10 @@ export default function Navbar() {
         {mobileOpen && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
             className="fixed top-[60px] left-0 right-0 z-[999] bg-bg/95 backdrop-blur-xl border-b border-border2 p-6 flex flex-col gap-4 md:hidden">
-            <a href="#departments" onClick={() => setMobileOpen(false)} className="text-text2 font-medium py-2 border-b border-border">Departments</a>
-            <a href="#founder" onClick={() => setMobileOpen(false)} className="text-text2 font-medium py-2 border-b border-border">Story</a>
-            <a href="#waitlist-section" onClick={() => setMobileOpen(false)} className="px-5 py-2.5 rounded-full font-semibold text-center bg-white text-black">Join Waitlist</a>
+            <a href="#departments" onClick={(e) => { e.preventDefault(); setMobileOpen(false); setTimeout(() => document.getElementById("departments")?.scrollIntoView({ behavior: "smooth" }), 100); }} className="text-text2 font-medium py-2 border-b border-border">Departments</a>
+            <a href="#founder" onClick={(e) => { e.preventDefault(); setMobileOpen(false); setTimeout(() => document.getElementById("founder")?.scrollIntoView({ behavior: "smooth" }), 100); }} className="text-text2 font-medium py-2 border-b border-border">Story</a>
+            <a href="/blog.html" onClick={() => setMobileOpen(false)} className="text-text2 font-medium py-2 border-b border-border">Blog</a>
+            <a href="#waitlist-section" onClick={(e) => { e.preventDefault(); setMobileOpen(false); setTimeout(() => document.getElementById("waitlist-section")?.scrollIntoView({ behavior: "smooth" }), 100); }} className="px-5 py-2.5 rounded-full font-semibold text-center bg-white text-black">Join Waitlist</a>
           </motion.div>
         )}
       </AnimatePresence>

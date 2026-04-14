@@ -28,7 +28,7 @@ function HolographicProfile({ visible }: { visible: boolean }) {
     >
       {/* ─── Left: photorealistic holographic portrait ─── */}
       <div className="relative flex-shrink-0">
-        <div className="relative w-[320px] h-[420px] md:w-[360px] md:h-[480px]">
+        <div className="relative w-[260px] h-[340px] sm:w-[320px] sm:h-[420px] md:w-[360px] md:h-[480px]">
           {/* Outer ambient glow */}
           <div className="absolute -inset-12 rounded-3xl bg-orange/[0.1] blur-3xl" />
           <div className="absolute -inset-10 rounded-3xl bg-blue/[0.05] blur-2xl" />
@@ -142,7 +142,7 @@ function HolographicProfile({ visible }: { visible: boolean }) {
       </div>
 
       {/* ─── Right: data panel ─── */}
-      <div className="w-[340px] max-w-full">
+      <div className="w-[300px] sm:w-[340px] max-w-full">
         <div className="rounded-2xl border border-border2 bg-[#08080ef0] backdrop-blur-2xl overflow-hidden shadow-[0_0_60px_rgba(255,107,53,0.06)]">
           {/* Header */}
           <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between">
@@ -267,8 +267,8 @@ function CEOSuite({ visible }: { visible: boolean }) {
         pointerEvents: visible ? "auto" : "none",
       }}
     >
-      <div className="w-[520px] max-w-[92vw] rounded-2xl border border-border2 bg-[#0a0a14f0] backdrop-blur-2xl overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.4)]">
-        <div className="px-5 py-3 border-b border-border flex items-center justify-between">
+      <div className="w-[440px] sm:w-[520px] max-w-[94vw] rounded-2xl border border-border2 bg-[#0a0a14f0] backdrop-blur-2xl overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.4)]">
+        <div className="px-4 sm:px-5 py-3 border-b border-border flex items-center justify-between">
           <div>
             <div className="font-[family-name:var(--font-display)] text-sm font-bold">Command Center</div>
             <div className="font-[family-name:var(--font-mono)] text-[10px] text-text3">CEO SUITE -- ALL DEPARTMENTS</div>
@@ -278,23 +278,23 @@ function CEOSuite({ visible }: { visible: boolean }) {
             <span className="font-[family-name:var(--font-mono)] text-[10px] text-orange">LIVE</span>
           </div>
         </div>
-        <div className="p-4 grid grid-cols-3 gap-2">
+        <div className="p-3 sm:p-4 grid grid-cols-3 gap-1.5 sm:gap-2">
           {[
-            { name: "ENG", count: 47, color: "#ff6b35" },
-            { name: "SALES", count: 31, color: "#3b82f6" },
-            { name: "MKT", count: 24, color: "#f59e0b" },
-            { name: "SUP", count: 38, color: "#00c9ff" },
-            { name: "FIN", count: 19, color: "#a855f7" },
-            { name: "HR", count: 15, color: "#f59e0b" },
-            { name: "LEGAL", count: 12, color: "#ef4444" },
-            { name: "OPS", count: 28, color: "#6366f1" },
-            { name: "PROD", count: 22, color: "#3b82f6" },
+            { name: "ENG", count: 47, color: "#ff6b35", load: 87 },
+            { name: "SALES", count: 31, color: "#3b82f6", load: 92 },
+            { name: "MKT", count: 24, color: "#f59e0b", load: 78 },
+            { name: "SUP", count: 38, color: "#00c9ff", load: 95 },
+            { name: "FIN", count: 19, color: "#a855f7", load: 63 },
+            { name: "HR", count: 15, color: "#f59e0b", load: 54 },
+            { name: "LEGAL", count: 12, color: "#ef4444", load: 71 },
+            { name: "OPS", count: 28, color: "#6366f1", load: 83 },
+            { name: "PROD", count: 22, color: "#3b82f6", load: 76 },
           ].map(d => (
             <div key={d.name} className="rounded-lg border border-border bg-bg2/60 p-2.5 text-center">
               <div className="font-[family-name:var(--font-mono)] text-[10px] text-text3 mb-1">{d.name}</div>
               <div className="font-[family-name:var(--font-display)] text-lg font-bold" style={{ color: d.color }}>{d.count}</div>
               <div className="mt-1.5 h-0.5 rounded-full bg-border2 overflow-hidden">
-                <div className="h-full rounded-full" style={{ width: `${60 + Math.random() * 35}%`, backgroundColor: d.color }} />
+                <div className="h-full rounded-full" style={{ width: `${d.load}%`, backgroundColor: d.color }} />
               </div>
             </div>
           ))}
@@ -306,6 +306,66 @@ function CEOSuite({ visible }: { visible: boolean }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/* ────────────── Features / Social Proof ────────────────────────────── */
+function FeaturesSection() {
+  const FEATURES = [
+    { icon: "⚡", title: "Instant Deployment", desc: "Go from zero to a full AI workforce in under 60 seconds. No setup, no training, no onboarding." },
+    { icon: "🔒", title: "Enterprise Security", desc: "SOC 2 compliant infrastructure. End-to-end encryption. Your data never leaves your environment." },
+    { icon: "🔄", title: "24/7 Operations", desc: "Your AI employees never sleep, never take breaks, and never miss a deadline. 99.97% uptime guaranteed." },
+    { icon: "📊", title: "Real-Time Analytics", desc: "Monitor every department, every agent, every task from a single command center dashboard." },
+    { icon: "🧠", title: "Self-Improving", desc: "Agents learn from every interaction. Performance improves continuously without manual intervention." },
+    { icon: "🔌", title: "Seamless Integration", desc: "Works with your existing tools — Slack, GitHub, Salesforce, HubSpot, and 200+ more integrations." },
+  ];
+
+  return (
+    <section className="relative py-20 px-6">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/3 left-0 w-[500px] h-[500px] bg-blue/[0.015] rounded-full blur-[150px]" />
+        <div className="absolute bottom-1/4 right-0 w-[400px] h-[400px] bg-orange/[0.015] rounded-full blur-[150px]" />
+      </div>
+      <div className="relative max-w-6xl mx-auto">
+        <div className="text-center mb-14">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border2 bg-card/50 mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange" />
+            <span className="font-[family-name:var(--font-mono)] text-xs text-text3 uppercase tracking-wider">Capabilities</span>
+          </div>
+          <h2 className="font-[family-name:var(--font-display)] text-3xl md:text-5xl font-bold tracking-tight mb-4">
+            Everything your team needs. <span className="text-orange">Automated.</span>
+          </h2>
+          <p className="text-text2 max-w-xl mx-auto">Built for companies that want to operate at scale without scaling headcount.</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {FEATURES.map((f) => (
+            <div key={f.title} className="group relative rounded-xl border border-border bg-card/30 p-6 hover:border-border2 hover:bg-card/60 transition-all duration-300 overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-[1px] opacity-0 group-hover:opacity-60 transition-opacity bg-gradient-to-r from-transparent via-orange to-transparent" />
+              <div className="text-2xl mb-3">{f.icon}</div>
+              <h3 className="font-[family-name:var(--font-display)] font-semibold text-sm mb-2">{f.title}</h3>
+              <p className="text-text3 text-sm leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Social proof bar */}
+        <div className="mt-16 rounded-xl border border-border bg-card/30 backdrop-blur-sm p-6 md:p-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+            {[
+              { value: "236", label: "AI Agents Deployed", color: "text-orange" },
+              { value: "99.97%", label: "Uptime SLA", color: "text-blue" },
+              { value: "<1.2s", label: "Avg Response Time", color: "text-purple" },
+              { value: "0", label: "Human Intervention Required", color: "text-warm" },
+            ].map((s) => (
+              <div key={s.label} className="text-center">
+                <div className={`font-[family-name:var(--font-display)] text-2xl md:text-3xl font-bold tabular-nums ${s.color}`}>{s.value}</div>
+                <div className="font-[family-name:var(--font-mono)] text-[10px] text-text3 tracking-wider mt-1 uppercase">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -377,7 +437,7 @@ export default function ScrollExperience() {
 
           {/* PHASE 0: Hero text */}
           <div
-            className="absolute inset-0 z-20 flex flex-col items-center justify-start pt-28 px-6 gpu-layer"
+            className="absolute inset-0 z-20 flex flex-col items-center justify-start pt-20 sm:pt-28 px-4 sm:px-6 gpu-layer"
             style={{
               opacity: phase === 0 ? 1 : 0,
               transform: phase === 0 ? "translateY(0) translateZ(0)" : "translateY(-60px) translateZ(0)",
@@ -389,19 +449,21 @@ export default function ScrollExperience() {
               <span className="w-2 h-2 rounded-full bg-orange status-dot" />
               <span className="font-[family-name:var(--font-mono)] text-xs text-text2">SYSTEM ONLINE -- 236 AGENTS ACTIVE</span>
             </div>
-            <h1 className="font-[family-name:var(--font-display)] text-[clamp(2.5rem,8vw,7rem)] font-extrabold leading-[0.95] tracking-[-0.04em] mb-6 max-w-5xl text-center">
+            <h1 className="font-[family-name:var(--font-display)] text-[clamp(2.2rem,7vw,7rem)] font-extrabold leading-[0.95] tracking-[-0.04em] mb-4 sm:mb-6 max-w-5xl text-center">
               <span className="block">Your company</span>
               <span className="block text-white">runs itself</span>
             </h1>
-            <p className="text-text2 text-lg md:text-xl max-w-2xl mb-8 leading-relaxed text-center">
+            <p className="text-text2 text-base sm:text-lg md:text-xl max-w-2xl mb-6 sm:mb-8 leading-relaxed text-center px-2">
               Conduit deploys autonomous AI employees across every department.
               Engineering, sales, support, finance, legal, HR, marketing, ops, and product -- all running 24/7.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <a href="#waitlist-section" className="px-8 py-3.5 rounded-full font-semibold bg-white text-black hover:bg-white/90 transition-all">Request Access</a>
-              <a href="#" className="px-8 py-3.5 rounded-full font-semibold border border-border2 text-text2 hover:text-text transition-all">Watch Deploy</a>
+              <a href="#waitlist-section" onClick={(e) => { e.preventDefault(); document.getElementById("waitlist-section")?.scrollIntoView({ behavior: "smooth" }); }} className="px-8 py-3.5 rounded-full font-semibold bg-white text-black hover:bg-white/90 hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] hover:-translate-y-0.5 transition-all duration-300">Request Access</a>
+              <button onClick={() => { const el = document.getElementById("departments-section"); if (el) el.scrollIntoView({ behavior: "smooth" }); }} className="px-8 py-3.5 rounded-full font-semibold border border-border2 text-text2 hover:text-text hover:border-orange/30 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group">
+                <span className="flex items-center gap-2">Watch Deploy <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 group-hover:translate-y-0.5 transition-transform"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></span>
+              </button>
             </div>
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+            <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 hidden sm:flex">
               <span className="text-text3 text-xs font-[family-name:var(--font-mono)] tracking-widest uppercase">Scroll</span>
               <div className="w-[1px] h-8 bg-gradient-to-b from-orange/50 to-transparent" />
             </div>
@@ -480,20 +542,33 @@ export default function ScrollExperience() {
       {/* ─── Flowing sections after pinned experience ─── */}
       {/* Morph bridge: gradient fade from pinned section */}
       <div className="relative z-10 -mt-1">
-        <div className="h-40 bg-gradient-to-b from-bg via-bg to-bg2" />
+        <div className="h-32 bg-gradient-to-b from-bg via-bg to-transparent" />
       </div>
 
       <div id="departments-section">
         <DepartmentGrid />
       </div>
 
-      {/* Morph bridge */}
-      <div className="h-24 bg-gradient-to-b from-bg to-bg2 relative z-10" />
+      {/* Morph bridge with subtle divider */}
+      <div className="relative z-10 py-4">
+        <div className="h-20 bg-gradient-to-b from-transparent via-bg2/50 to-transparent" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-48 h-[1px] bg-gradient-to-r from-transparent via-border2 to-transparent" />
+      </div>
 
       <FounderStory />
 
-      {/* Morph bridge */}
-      <div className="h-20 bg-gradient-to-b from-bg to-bg relative z-10" />
+      {/* Features / social proof section */}
+      <div className="relative z-10 py-4">
+        <div className="h-16 bg-gradient-to-b from-transparent via-bg2/50 to-transparent" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-48 h-[1px] bg-gradient-to-r from-transparent via-border2 to-transparent" />
+      </div>
+
+      <FeaturesSection />
+
+      {/* Morph bridge to waitlist */}
+      <div className="relative z-10 py-4">
+        <div className="h-16 bg-gradient-to-b from-transparent via-bg2/30 to-transparent" />
+      </div>
 
       <div id="waitlist-section">
         <WaitlistCTA />
