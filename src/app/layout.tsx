@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Fraunces } from "next/font/google";
 import "./globals.css";
 
@@ -16,6 +16,13 @@ const fraunces = Fraunces({
   axes: ["opsz"],
   display: "swap",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#0A0908",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://conduitai.io"),

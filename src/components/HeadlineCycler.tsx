@@ -23,7 +23,7 @@ export default function HeadlineCycler() {
   }, []);
 
   return (
-    <h1 className="serif text-[56px] md:text-[96px] leading-[1.02] text-[#F5F1EA] text-center tracking-[-0.025em]">
+    <h1 className="serif text-[44px] md:text-[96px] leading-[1.02] text-[#F5F1EA] text-center tracking-[-0.025em]">
       Your{" "}
       <span className="relative inline-block align-baseline">
         <span

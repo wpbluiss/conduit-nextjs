@@ -64,7 +64,7 @@ export default function ConstellationSVG() {
       role="img"
       aria-label="Constellation of 9 AI departments"
     >
-      <g stroke="#FF6B35" strokeOpacity="0.3" strokeWidth="1">
+      <g stroke="#A855F7" strokeOpacity="0.3" strokeWidth="1">
         {EDGES.map(([a, b], i) => {
           const A = nodeById(a);
           const B = nodeById(b);
@@ -87,7 +87,7 @@ export default function ConstellationSVG() {
             cx={n.x}
             cy={n.y}
             r="6"
-            fill="#FF6B35"
+            fill="#A855F7"
             className="node-pulse"
             style={{ animationDelay: `${i * 0.4}s` }}
           />

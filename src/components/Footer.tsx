@@ -2,8 +2,8 @@ import Logo from "./Logo";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-[#1F1C19] bg-[#0A0908] py-16">
-      <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-10">
+    <footer className="border-t border-[#1F1C19] bg-[#0A0908] py-12 md:py-16">
+      <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8 md:gap-10">
         <div>
           <div className="flex items-center gap-2.5 mb-4">
             <Logo size={32} />

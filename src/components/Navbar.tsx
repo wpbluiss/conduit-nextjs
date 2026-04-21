@@ -54,7 +54,7 @@ export default function Navbar() {
 
           <button
             onClick={() => setOpen(!open)}
-            className="md:hidden flex flex-col gap-[5px] p-2 -mr-2"
+            className="md:hidden flex flex-col gap-[5px] items-center justify-center min-w-[44px] min-h-[44px] -mr-2"
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
           >

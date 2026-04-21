@@ -28,11 +28,14 @@ const MILESTONES = [
 
 export default function Story() {
   return (
-    <section id="story" className="py-32 px-6 border-t border-[#1F1C19]">
-      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 lg:gap-24">
+    <section id="story" className="py-20 md:py-32 px-6 border-t border-[#1F1C19]">
+      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 md:gap-16 lg:gap-24">
         <div>
-          <p className="eyebrow mb-6">Built in public</p>
-          <h2 className="serif text-[40px] md:text-[56px] text-[#F5F1EA] mb-10">
+          <p className="eyebrow mb-6 inline-flex items-center">
+            <span className="eyebrow-dot" style={{ color: "#34D399" }} aria-hidden="true" />
+            Built in public
+          </p>
+          <h2 className="serif text-[36px] md:text-[56px] text-[#F5F1EA] mb-10">
             21. No CS degree. Just shipping.
           </h2>
           <div className="space-y-6 text-[17px] text-[#8C8884] leading-[1.75]">
@@ -56,11 +59,11 @@ export default function Story() {
         </div>
 
         <div className="relative pl-8">
-          <span className="absolute left-0 top-2 bottom-2 w-px bg-[#1F1C19]" />
+          <span className="absolute left-0 top-2 bottom-2 w-px bg-[#34D399]/40" />
           <ol className="space-y-10">
             {MILESTONES.map((m) => (
               <li key={m.date + m.title} className="relative">
-                <span className="absolute -left-[33px] top-[6px] w-[8px] h-[8px] bg-[#8C8884]" />
+                <span className="absolute -left-[34px] top-[6px] w-[10px] h-[10px] rounded-full bg-[#34D399] shadow-[0_0_10px_rgba(52,211,153,0.6)]" />
                 <p className="eyebrow text-[#8C8884] mb-2">{m.date}</p>
                 <h3 className="text-[18px] font-medium text-[#F5F1EA] mb-1.5">
                   {m.title}

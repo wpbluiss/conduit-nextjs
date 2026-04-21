@@ -1,11 +1,14 @@
 export default function CaseStudy() {
   return (
-    <section className="py-32 px-6 border-t border-[#1F1C19]">
+    <section className="py-20 md:py-32 px-6 border-t border-[#1F1C19]">
       <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-start mb-16">
+        <div className="grid md:grid-cols-2 gap-10 md:gap-12 lg:gap-20 items-start mb-12 md:mb-16">
           <div>
-            <p className="eyebrow mb-4">Case study</p>
-            <h2 className="serif text-[40px] md:text-[56px] text-[#F5F1EA] mb-10">
+            <p className="eyebrow mb-4 inline-flex items-center">
+              <span className="eyebrow-dot" style={{ color: "#34D399" }} aria-hidden="true" />
+              Case study
+            </p>
+            <h2 className="serif text-[36px] md:text-[56px] text-[#F5F1EA] mb-8 md:mb-10">
               Lunaro: an insurance CRM, built in days.
             </h2>
             <div className="space-y-6 text-[17px] text-[#8C8884] leading-[1.75]">
@@ -61,13 +64,13 @@ export default function CaseStudy() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border-t border-l border-[#1F1C19]">
           {[
-            { stat: "11", label: "NEW TABLES", caption: "deployed in one sprint" },
-            { stat: "32", label: "AI EMPLOYEES", caption: "insurance-trained" },
-            { stat: "0/0/0/0", label: "AUTO-QA FINDINGS", caption: "clean on ship" },
-            { stat: "990", label: "COMPLIANCE CHUNKS", caption: "CMS-cited" },
+            { stat: "11", label: "NEW TABLES", caption: "deployed in one sprint", color: "#22D3EE" },
+            { stat: "32", label: "AI EMPLOYEES", caption: "insurance-trained", color: "#FF6B35" },
+            { stat: "0/0/0/0", label: "AUTO-QA FINDINGS", caption: "clean on ship", color: "#34D399" },
+            { stat: "990", label: "COMPLIANCE CHUNKS", caption: "CMS-cited", color: "#A855F7" },
           ].map((s) => (
-            <div key={s.label} className="border-r border-b border-[#1F1C19] p-6">
-              <p className="serif text-[32px] text-[#F5F1EA] leading-none">
+            <div key={s.label} className="border-r border-b border-[#1F1C19] p-5 md:p-6">
+              <p className="serif text-[28px] md:text-[32px] leading-none" style={{ color: s.color }}>
                 {s.stat}
               </p>
               <p className="mt-3 eyebrow text-[#8C8884]">{s.label}</p>
