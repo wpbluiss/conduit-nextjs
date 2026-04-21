@@ -1,56 +1,57 @@
 import type { Metadata } from "next";
-import { Sora, DM_Sans, Space_Mono } from "next/font/google";
+import { Inter, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 
-const sora = Sora({
-  variable: "--font-display",
+const inter = Inter({
+  variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600"],
+  display: "swap",
 });
 
-const dmSans = DM_Sans({
-  variable: "--font-body",
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-serif",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const spaceMono = Space_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Conduit AI — Your Company Runs Itself",
+  metadataBase: new URL("https://conduitai.io"),
+  title: "Conduit AI — Virtual Business Operating System",
   description:
-    "Conduit deploys autonomous AI employees across every department. Engineering, sales, support, finance, HR, legal, marketing, ops, and product — all running 24/7.",
+    "Deploy 32 autonomous AI employees across 9 departments. Voice, sales, support, ops, finance, marketing — all running 24/7. One platform. Zero payroll.",
   icons: {
     icon: "/favicon.svg",
     apple: "/favicon.svg",
   },
   openGraph: {
-    title: "Conduit AI — Your Company Runs Itself",
+    title: "Conduit AI — Virtual Business Operating System",
     description:
-      "Autonomous AI employees for every department. Your company runs itself.",
+      "Deploy 32 autonomous AI employees across 9 departments. Voice, sales, support, ops, finance, marketing — all running 24/7. One platform. Zero payroll.",
     url: "https://conduitai.io",
+    siteName: "Conduit AI",
     type: "website",
+    images: [{ url: "/logo.svg", width: 1200, height: 1200, alt: "Conduit AI" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Conduit AI — Virtual Business Operating System",
+    description:
+      "Deploy 32 autonomous AI employees across 9 departments. 24/7. One platform. Zero payroll.",
+    images: ["/logo.svg"],
   },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="en"
-      className={`${sora.variable} ${dmSans.variable} ${spaceMono.variable}`}
+      className={`${inter.variable} ${instrumentSerif.variable}`}
     >
-      <body className="min-h-screen bg-bg text-text antialiased">
-        {children}
-        <div className="noise-overlay" />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
