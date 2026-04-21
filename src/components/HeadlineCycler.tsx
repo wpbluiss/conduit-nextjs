@@ -23,13 +23,13 @@ export default function HeadlineCycler() {
   }, []);
 
   return (
-    <h1 className="serif text-[48px] md:text-[80px] leading-[1.05] text-[#F5F1EA] text-center">
+    <h1 className="serif text-[56px] md:text-[96px] leading-[1.02] text-[#F5F1EA] text-center tracking-[-0.025em]">
       Your{" "}
       <span className="relative inline-block align-baseline">
         <span
           key={i}
-          className="inline-block word-in text-[#FFB347]"
-          style={{ minWidth: "4ch" }}
+          className="inline-block word-in italic text-[#F5F1EA]"
+          style={{ minWidth: "4ch", fontWeight: 400 }}
         >
           {WORDS[i]}
         </span>

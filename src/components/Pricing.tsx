@@ -58,7 +58,7 @@ function Check() {
     <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" className="mt-[5px] flex-shrink-0">
       <path
         d="M3 7l3 3 5-6"
-        stroke="#D97706"
+        stroke="#FF6B35"
         strokeWidth="1.5"
         fill="none"
         strokeLinecap="square"
@@ -84,16 +84,16 @@ export default function Pricing() {
               key={t.name}
               className={`relative p-10 bg-[#0A0908] flex flex-col ${
                 t.popular
-                  ? "border border-[#D97706] md:-mt-4 md:mb-[-1rem]"
+                  ? "border border-[#FF6B35] md:-mt-4 md:mb-[-1rem]"
                   : "border border-[#1F1C19]"
               }`}
             >
               {t.popular && (
-                <span className="absolute -top-3 left-10 bg-[#D97706] text-[#0A0908] text-[10px] uppercase tracking-[1.8px] px-3 py-1 font-medium">
+                <span className="absolute -top-3 left-10 bg-[#FF6B35] text-[#0A0908] text-[10px] uppercase tracking-[1.8px] px-3 py-1 font-medium">
                   Most popular
                 </span>
               )}
-              <p className="eyebrow text-[#D97706] mb-5">{t.name}</p>
+              <p className="eyebrow text-[#8C8884] mb-5">{t.name}</p>
               <div className="flex items-baseline gap-1 mb-2">
                 <span className="serif text-[56px] text-[#F5F1EA] leading-none">
                   {t.price}

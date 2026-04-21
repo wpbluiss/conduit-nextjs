@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-10">
         <div>
           <div className="flex items-center gap-2.5 mb-4">
-            <Logo size={24} />
+            <Logo size={32} />
             <span className="text-[15px] tracking-tight">
               Conduit <span className="text-[#8C8884]">AI</span>
             </span>
@@ -29,7 +29,7 @@ export default function Footer() {
               <li key={l.href}>
                 <a
                   href={l.href}
-                  className="text-[14px] text-[#F5F1EA] hover:text-[#FFB347] transition-colors"
+                  className="text-[14px] text-[#F5F1EA] hover:text-[#F5F1EA] transition-colors"
                 >
                   {l.label}
                 </a>
@@ -42,12 +42,12 @@ export default function Footer() {
           <p className="eyebrow mb-4">Legal</p>
           <ul className="space-y-2.5">
             <li>
-              <a href="/privacy-policy.html" className="text-[14px] text-[#F5F1EA] hover:text-[#FFB347] transition-colors">
+              <a href="/privacy-policy.html" className="text-[14px] text-[#F5F1EA] hover:text-[#F5F1EA] transition-colors">
                 Privacy
               </a>
             </li>
             <li>
-              <a href="/terms.html" className="text-[14px] text-[#F5F1EA] hover:text-[#FFB347] transition-colors">
+              <a href="/terms.html" className="text-[14px] text-[#F5F1EA] hover:text-[#F5F1EA] transition-colors">
                 Terms
               </a>
             </li>

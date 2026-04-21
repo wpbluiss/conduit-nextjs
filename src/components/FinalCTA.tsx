@@ -25,7 +25,7 @@ export default function FinalCTA() {
           Or email{" "}
           <a
             href="mailto:luis@conduitai.io"
-            className="text-[#F5F1EA] underline underline-offset-4 decoration-[#D97706]/50 hover:decoration-[#D97706]"
+            className="text-[#F5F1EA] underline underline-offset-4 decoration-[#FF6B35]/50 hover:decoration-[#FF6B35]"
           >
             luis@conduitai.io
           </a>{" "}

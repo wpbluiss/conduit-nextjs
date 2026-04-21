@@ -20,7 +20,7 @@ export default function Constellation() {
             { stat: "24/7", label: "Always on", caption: "no breaks. no payroll." },
           ].map((s) => (
             <div key={s.label} className="text-center">
-              <p className="serif text-[56px] text-[#FFB347] leading-none">{s.stat}</p>
+              <p className="serif text-[56px] text-[#F5F1EA] leading-none">{s.stat}</p>
               <p className="mt-3 eyebrow text-[#F5F1EA]">{s.label}</p>
               <p className="mt-2 text-[13px] text-[#8C8884]">{s.caption}</p>
             </div>

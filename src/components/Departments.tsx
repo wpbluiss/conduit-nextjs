@@ -77,9 +77,9 @@ export default function Departments() {
           {DEPTS.map((d) => (
             <article
               key={d.eyebrow}
-              className="group p-8 border-r border-b border-[#1F1C19] transition-colors hover:border-[#D97706] flex flex-col min-h-[260px]"
+              className="group p-8 border-r border-b border-[#1F1C19] transition-colors hover:border-[#3A332D] flex flex-col min-h-[260px]"
             >
-              <p className="eyebrow text-[#D97706] mb-5">{d.eyebrow}</p>
+              <p className="eyebrow text-[#8C8884] mb-5">{d.eyebrow}</p>
               <h3 className="serif text-[24px] text-[#F5F1EA] mb-3">{d.title}</h3>
               <p className="text-[14px] text-[#8C8884] leading-relaxed flex-1">
                 {d.body}

@@ -1,16 +1,24 @@
 import HeadlineCycler from "./HeadlineCycler";
 import HeroParticles from "./HeroParticles";
+import LayeredBuilding from "./LayeredBuilding";
 
 export default function Hero() {
   return (
     <section
       id="top"
-      className="relative min-h-screen flex items-center justify-center px-6 pt-32 pb-32 overflow-hidden"
+      className="relative min-h-screen flex items-center justify-center px-6 pt-32 pb-24 overflow-hidden"
     >
       <HeroParticles />
+      <div className="hidden md:block">
+        <LayeredBuilding />
+      </div>
 
-      <div className="relative z-10 max-w-4xl mx-auto text-center">
+      <div className="relative z-10 max-w-5xl mx-auto text-center w-full">
         <p className="eyebrow mb-8">Virtual Business Operating System</p>
+
+        <div className="md:hidden mb-10">
+          <LayeredBuilding />
+        </div>
 
         <HeadlineCycler />
 
@@ -30,7 +38,7 @@ export default function Hero() {
         </div>
 
         <div className="mt-20 flex flex-col items-center gap-2">
-          <span className="block w-px h-8 bg-gradient-to-b from-transparent to-[#D97706]" />
+          <span className="block w-px h-8 bg-[#1F1C19]" />
           <span className="eyebrow scroll-hint">↓ scroll</span>
         </div>
       </div>

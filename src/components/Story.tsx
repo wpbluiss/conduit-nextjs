@@ -56,12 +56,12 @@ export default function Story() {
         </div>
 
         <div className="relative pl-8">
-          <span className="absolute left-0 top-2 bottom-2 w-px bg-[#D97706]/50" />
+          <span className="absolute left-0 top-2 bottom-2 w-px bg-[#1F1C19]" />
           <ol className="space-y-10">
             {MILESTONES.map((m) => (
               <li key={m.date + m.title} className="relative">
-                <span className="absolute -left-[33px] top-[6px] w-[10px] h-[10px] bg-[#D97706]" />
-                <p className="eyebrow text-[#D97706] mb-2">{m.date}</p>
+                <span className="absolute -left-[33px] top-[6px] w-[8px] h-[8px] bg-[#8C8884]" />
+                <p className="eyebrow text-[#8C8884] mb-2">{m.date}</p>
                 <h3 className="text-[18px] font-medium text-[#F5F1EA] mb-1.5">
                   {m.title}
                 </h3>

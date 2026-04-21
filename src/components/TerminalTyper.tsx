@@ -5,13 +5,13 @@ import { useEffect, useRef, useState } from "react";
 type Line = { text: string; className?: string };
 
 const LINES: Line[] = [
-  { text: "$ conduit deploy --department=sales", className: "text-[#FFB347]" },
-  { text: "✓ Hunter agent online", className: "text-[#D97706]" },
-  { text: "✓ Closer agent online", className: "text-[#D97706]" },
-  { text: "✓ Quoter agent online", className: "text-[#D97706]" },
-  { text: "✓ Pipeline Manager active", className: "text-[#D97706]" },
-  { text: "✓ CRM connected", className: "text-[#D97706]" },
-  { text: "✓ 4 AI employees ready", className: "text-[#D97706]" },
+  { text: "$ conduit deploy --department=sales", className: "text-[#FFA478]" },
+  { text: "✓ Hunter agent online", className: "text-[#FF6B35]" },
+  { text: "✓ Closer agent online", className: "text-[#FF6B35]" },
+  { text: "✓ Quoter agent online", className: "text-[#FF6B35]" },
+  { text: "✓ Pipeline Manager active", className: "text-[#FF6B35]" },
+  { text: "✓ CRM connected", className: "text-[#FF6B35]" },
+  { text: "✓ 4 AI employees ready", className: "text-[#FF6B35]" },
   { text: "Sales department live. Total cost: $0.04/hour.", className: "text-[#F5F1EA]" },
 ];
 
@@ -94,7 +94,7 @@ export default function TerminalTyper() {
           return (
             <div key={`r-${i}`} className={l.className}>
               {isLast ? (
-                <span className="inline-block border-b border-[#D97706]/50 pb-[1px]">
+                <span className="inline-block border-b border-[#FF6B35]/50 pb-[1px]">
                   {l.text}
                 </span>
               ) : (
@@ -106,7 +106,7 @@ export default function TerminalTyper() {
         {!done && activeText && (
           <div className={LINES[activeIdx]?.className}>
             {activeText}
-            <span className="caret text-[#FFB347]">▊</span>
+            <span className="caret text-[#FFA478]">▊</span>
           </div>
         )}
       </div>

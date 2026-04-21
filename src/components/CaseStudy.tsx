@@ -33,13 +33,13 @@ export default function CaseStudy() {
               aria-label="Lunaro Insurance CRM dashboard"
               className="absolute inset-0 flex items-center justify-center"
             >
-              <div className="absolute inset-0 opacity-[0.08]" style={{
-                backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 28px, #D97706 28px, #D97706 29px),
-                                 repeating-linear-gradient(90deg, transparent, transparent 28px, #D97706 28px, #D97706 29px)`,
+              <div className="absolute inset-0 opacity-[0.05]" style={{
+                backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 28px, #8C8884 28px, #8C8884 29px),
+                                 repeating-linear-gradient(90deg, transparent, transparent 28px, #8C8884 28px, #8C8884 29px)`,
               }} />
               <div className="absolute top-5 left-5 right-5 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#D97706]" />
-                <span className="eyebrow text-[#D97706]">LUNARO CRM</span>
+                <span className="w-2 h-2 rounded-full bg-[#FF6B35]" />
+                <span className="eyebrow text-[#8C8884]">LUNARO CRM</span>
                 <span className="ml-auto text-[10px] text-[#8C8884]">v1.0</span>
               </div>
               <div className="relative z-10 text-center px-6">
@@ -67,10 +67,10 @@ export default function CaseStudy() {
             { stat: "990", label: "COMPLIANCE CHUNKS", caption: "CMS-cited" },
           ].map((s) => (
             <div key={s.label} className="border-r border-b border-[#1F1C19] p-6">
-              <p className="serif text-[32px] text-[#FFB347] leading-none">
+              <p className="serif text-[32px] text-[#F5F1EA] leading-none">
                 {s.stat}
               </p>
-              <p className="mt-3 eyebrow text-[#D97706]">{s.label}</p>
+              <p className="mt-3 eyebrow text-[#8C8884]">{s.label}</p>
               <p className="mt-2 text-[12px] text-[#8C8884]">{s.caption}</p>
             </div>
           ))}
