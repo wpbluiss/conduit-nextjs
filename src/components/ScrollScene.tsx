@@ -223,31 +223,31 @@ function CameraRig() {
   useFrame(() => {
     const sp = scrollState.progress;
 
-    if (sp < 0.12) {
-      // Phase 1: wide view
+    if (sp < 0.10) {
+      // Phase 0: wide view — hero
       pos.set(0, 1, 7);
       target.set(0, 0, 0);
-    } else if (sp < 0.25) {
-      // Phase 2: push into building
-      const t = (sp - 0.12) / 0.13;
+    } else if (sp < 0.18) {
+      // Phase 1: push into building
+      const t = (sp - 0.10) / 0.08;
       pos.set(
         THREE.MathUtils.lerp(0, 1.2, t),
         THREE.MathUtils.lerp(1, 3, t),
         THREE.MathUtils.lerp(7, 3.5, t)
       );
       target.set(0, THREE.MathUtils.lerp(0, 1.5, t), 0);
-    } else if (sp < 0.35) {
-      // Phase 3: zoom to Engineering floor (top)
-      const t = (sp - 0.25) / 0.1;
+    } else if (sp < 0.28) {
+      // Phase 2: zoom to Engineering floor
+      const t = (sp - 0.18) / 0.10;
       pos.set(
         THREE.MathUtils.lerp(1.2, 0.8, t),
         THREE.MathUtils.lerp(3, 3.2, t),
         THREE.MathUtils.lerp(3.5, 2, t)
       );
       target.set(0, THREE.MathUtils.lerp(1.5, 2.5, t), 0);
-    } else if (sp < 0.55) {
-      // Phase 4: orbit AI employee
-      const t = (sp - 0.35) / 0.2;
+    } else if (sp < 0.48) {
+      // Phase 3: orbit AI employee — holographic profile
+      const t = (sp - 0.28) / 0.20;
       const angle = t * Math.PI * 0.8 - 0.4;
       pos.set(
         Math.sin(angle) * 1.8,
@@ -255,9 +255,9 @@ function CameraRig() {
         Math.cos(angle) * 1.8
       );
       target.set(0, 2.6, 0);
-    } else if (sp < 0.65) {
-      // Phase 5: zoom into work (employee monitor view)
-      const t = (sp - 0.55) / 0.1;
+    } else if (sp < 0.60) {
+      // Phase 4: zoom into work view
+      const t = (sp - 0.48) / 0.12;
       pos.set(
         THREE.MathUtils.lerp(Math.sin(0.4) * 1.8, 0.3, t),
         THREE.MathUtils.lerp(3, 2.8, t),
@@ -265,8 +265,8 @@ function CameraRig() {
       );
       target.set(0, THREE.MathUtils.lerp(2.6, 2.6, t), 0);
     } else if (sp < 0.75) {
-      // Phase 6: pull back to CEO suite — wide top-down
-      const t = (sp - 0.65) / 0.1;
+      // Phase 5: pull back to CEO suite — wide top-down
+      const t = (sp - 0.60) / 0.15;
       pos.set(
         THREE.MathUtils.lerp(0.3, 0, t),
         THREE.MathUtils.lerp(2.8, 5, t),
@@ -274,7 +274,7 @@ function CameraRig() {
       );
       target.set(0, THREE.MathUtils.lerp(2.6, 0.5, t), 0);
     } else {
-      // Phase 7+: hold wide top-down, building fades
+      // Phase 6+: hold wide top-down, building fades for terminal
       pos.set(0, 5, 4);
       target.set(0, 0.5, 0);
     }
@@ -294,10 +294,12 @@ function Building() {
     groupRef.current.rotation.y = Math.PI / 6 + Math.sin(clock.elapsedTime * 0.08) * 0.04;
     // Fade building for terminal/grid phases
     const sp = scrollState.progress;
-    const fade = sp > 0.75 ? Math.max(0, 1 - (sp - 0.75) / 0.1) : 1;
-    groupRef.current.children.forEach(c => {
-      if ((c as THREE.Mesh).material) {
-        ((c as THREE.Mesh).material as THREE.MeshStandardMaterial).opacity = fade;
+    const fade = sp > 0.72 ? Math.max(0, 1 - (sp - 0.72) / 0.12) : 1;
+    groupRef.current.traverse((c) => {
+      const mesh = c as THREE.Mesh;
+      if (mesh.isMesh && mesh.material) {
+        const mat = mesh.material as THREE.MeshStandardMaterial | THREE.MeshBasicMaterial;
+        if ('opacity' in mat) mat.opacity = Math.min(fade, mat.userData.baseOpacity ?? fade);
       }
     });
   });

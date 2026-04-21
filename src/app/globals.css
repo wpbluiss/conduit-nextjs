@@ -126,3 +126,8 @@ body {
   50% { opacity: 0; }
   100% { opacity: 0.015; }
 }
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.6; transform: scaleY(1); }
+  50% { opacity: 1; transform: scaleY(1.15); }
+}

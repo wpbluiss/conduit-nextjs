@@ -379,12 +379,12 @@ export default function ScrollExperience() {
   const updatePhase = useCallback((progress: number) => {
     scrollState.progress = progress;
     let p = 0;
-    if (progress < 0.12) p = 0;
-    else if (progress < 0.25) p = 1;
-    else if (progress < 0.35) p = 2;
-    else if (progress < 0.55) p = 3;
-    else if (progress < 0.65) p = 4;
-    else if (progress < 0.78) p = 5;
+    if (progress < 0.10) p = 0;
+    else if (progress < 0.18) p = 1;
+    else if (progress < 0.28) p = 2;
+    else if (progress < 0.48) p = 3;
+    else if (progress < 0.60) p = 4;
+    else if (progress < 0.75) p = 5;
     else if (progress < 0.88) p = 6;
     else p = 7;
     // Only trigger React re-render when phase actually changes
@@ -446,8 +446,8 @@ export default function ScrollExperience() {
             style={{
               opacity: phase === 0 ? 1 : 0,
               visibility: phase === 0 ? "visible" : "hidden",
-              transform: phase === 0 ? "translateY(0) translateZ(0)" : "translateY(-60px) translateZ(0)",
-              transition: "opacity 0.6s ease, transform 0.8s ease, visibility 0s linear " + (phase === 0 ? "0s" : "0.8s"),
+              transform: phase === 0 ? "translateY(0) scale(1) translateZ(0)" : "translateY(-30px) scale(0.97) translateZ(0)",
+              transition: "opacity 0.8s ease, transform 1s cubic-bezier(0.16,1,0.3,1), visibility 0s linear " + (phase === 0 ? "0s" : "1s"),
               pointerEvents: phase === 0 ? "auto" : "none",
             }}
           >
@@ -469,9 +469,29 @@ export default function ScrollExperience() {
                 <span className="flex items-center gap-2">Watch Deploy <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 group-hover:translate-y-0.5 transition-transform"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></span>
               </button>
             </div>
-            <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 hidden sm:flex">
-              <span className="text-text3 text-xs font-[family-name:var(--font-mono)] tracking-widest uppercase">Scroll</span>
-              <div className="w-[1px] h-8 bg-gradient-to-b from-orange/50 to-transparent" />
+            <div className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 hidden sm:flex flex-col items-center gap-2">
+              <span className="text-text2 text-xs font-[family-name:var(--font-mono)] tracking-[0.2em] uppercase">Scroll to explore</span>
+              <div className="w-[1px] h-10 bg-gradient-to-b from-orange/60 via-orange/20 to-transparent" style={{ animation: "scrollPulse 2s ease-in-out infinite" }} />
+            </div>
+          </div>
+
+          {/* PHASE 1: Entering building — transition indicator */}
+          <div
+            className={`absolute inset-0 z-20 flex items-end justify-center pb-24 gpu-layer${phase === 1 ? " active" : ""}`}
+            style={{
+              opacity: phase === 1 ? 1 : 0,
+              visibility: phase === 1 ? "visible" : "hidden",
+              transform: phase === 1 ? "translateY(0) translateZ(0)" : "translateY(20px) translateZ(0)",
+              transition: "opacity 0.6s, transform 0.7s, visibility 0s linear " + (phase === 1 ? "0s" : "0.7s"),
+              pointerEvents: "none",
+            }}
+          >
+            <div className="flex flex-col items-center gap-3">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border2 bg-card/60 backdrop-blur-xl">
+                <span className="w-2 h-2 rounded-full bg-orange status-dot" />
+                <span className="font-[family-name:var(--font-mono)] text-xs text-text2 tracking-wider">ENTERING CONDUIT HQ</span>
+              </div>
+              <div className="w-[1px] h-10 bg-gradient-to-b from-orange/40 to-transparent" />
             </div>
           </div>
 
@@ -553,7 +573,7 @@ export default function ScrollExperience() {
       {/* ─── Flowing sections after pinned experience ─── */}
       {/* Morph bridge: gradient fade from pinned section */}
       <div className="relative z-10 -mt-1">
-        <div className="h-32 bg-gradient-to-b from-bg via-bg to-transparent" />
+        <div className="h-40 bg-gradient-to-b from-bg via-bg/80 to-transparent" />
       </div>
 
       <div id="departments-section">
@@ -561,24 +581,24 @@ export default function ScrollExperience() {
       </div>
 
       {/* Morph bridge with subtle divider */}
-      <div className="relative z-10 py-4">
-        <div className="h-20 bg-gradient-to-b from-transparent via-bg2/50 to-transparent" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-48 h-[1px] bg-gradient-to-r from-transparent via-border2 to-transparent" />
+      <div className="relative z-10 py-6">
+        <div className="h-28 bg-gradient-to-b from-transparent via-bg2/40 to-transparent" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-64 h-[1px] bg-gradient-to-r from-transparent via-border3 to-transparent opacity-60" />
       </div>
 
       <FounderStory />
 
       {/* Features / social proof section */}
-      <div className="relative z-10 py-4">
-        <div className="h-16 bg-gradient-to-b from-transparent via-bg2/50 to-transparent" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-48 h-[1px] bg-gradient-to-r from-transparent via-border2 to-transparent" />
+      <div className="relative z-10 py-6">
+        <div className="h-24 bg-gradient-to-b from-transparent via-bg2/40 to-transparent" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-64 h-[1px] bg-gradient-to-r from-transparent via-border3 to-transparent opacity-60" />
       </div>
 
       <FeaturesSection />
 
       {/* Morph bridge to waitlist */}
-      <div className="relative z-10 py-4">
-        <div className="h-16 bg-gradient-to-b from-transparent via-bg2/30 to-transparent" />
+      <div className="relative z-10 py-6">
+        <div className="h-24 bg-gradient-to-b from-transparent via-bg2/30 to-transparent" />
       </div>
 
       <div id="waitlist-section">
