@@ -32,12 +32,15 @@ export interface MessageRow {
   handoffTo?: EmployeeKey;
 }
 
-const SUGGESTIONS: {
+interface Suggestion {
   text: string;
   pin?: EmployeeKey;
   dept: EmployeeKey;
   hint: string;
-}[] = [
+}
+
+// Pool — Chat picks four at runtime weighted by what the tier allows.
+const SUGGESTION_POOL: Suggestion[] = [
   {
     text: "Help me grow my business",
     dept: "jarvis",
@@ -61,14 +64,55 @@ const SUGGESTIONS: {
     dept: "sales",
     hint: "Sales builds the play",
   },
+  {
+    text: "Reconcile my last month's revenue",
+    pin: "finance",
+    dept: "finance",
+    hint: "Finance's framework",
+  },
+  {
+    text: "Draft me a basic NDA for a contractor",
+    pin: "legal",
+    dept: "legal",
+    hint: "Legal first-draft",
+  },
+  {
+    text: "Write me an offer letter for a part-time bookkeeper",
+    pin: "hr",
+    dept: "hr",
+    hint: "HR will write it",
+  },
+  {
+    text: "Set up an SOP for client onboarding",
+    pin: "ops",
+    dept: "ops",
+    hint: "Operations builds it",
+  },
 ];
 
-const PIN_OPTIONS: { value: EmployeeKey | "auto"; label: string }[] = [
+function suggestionsForTier(allowed: Set<EmployeeKey>): Suggestion[] {
+  // Always include Jarvis + Marketing first; then fill with others the tier allows.
+  const base = SUGGESTION_POOL.filter(
+    (s) => s.dept === "jarvis" || s.dept === "marketing",
+  );
+  const extras = SUGGESTION_POOL.filter(
+    (s) => s.dept !== "jarvis" && s.dept !== "marketing" && allowed.has(s.dept),
+  );
+  // Stable, predictable order: base then extras in pool order. Take 4.
+  return [...base, ...extras].slice(0, 4);
+}
+
+const ALL_PIN_OPTIONS: { value: EmployeeKey | "auto"; label: string }[] = [
   { value: "auto", label: "Jarvis (auto-route)" },
   { value: "jarvis", label: "Jarvis only" },
   { value: "marketing", label: "Marketing" },
   { value: "sales", label: "Sales" },
   { value: "engineering", label: "Engineering" },
+  { value: "finance", label: "Finance" },
+  { value: "compliance", label: "Compliance" },
+  { value: "hr", label: "HR" },
+  { value: "ops", label: "Operations" },
+  { value: "legal", label: "Legal" },
 ];
 
 export function Chat({
@@ -77,13 +121,20 @@ export function Chat({
   firstName,
   internalAccount = false,
   voice = { enabled: false, autoPlay: true, ttsAllowed: false },
+  allowedEmployees,
 }: {
   conversationId: string | null;
   initialMessages: MessageRow[];
   firstName: string;
   internalAccount?: boolean;
   voice?: VoicePrefs;
+  allowedEmployees: EmployeeKey[];
 }) {
+  const allowedSet = new Set(allowedEmployees);
+  const pinOptions = ALL_PIN_OPTIONS.filter(
+    (o) => o.value === "auto" || allowedSet.has(o.value),
+  );
+  const suggestions = suggestionsForTier(allowedSet);
   const router = useRouter();
   const [conversationId, setConversationId] = useState<string | null>(
     initialId,
@@ -428,7 +479,7 @@ export function Chat({
   );
 
   const pinLabel =
-    PIN_OPTIONS.find((o) => o.value === pin)?.label ?? "Jarvis (auto-route)";
+    pinOptions.find((o) => o.value === pin)?.label ?? "Jarvis (auto-route)";
   const pinAvatarEmp: EmployeeKey = pin === "auto" ? "jarvis" : pin;
 
   return (
@@ -439,7 +490,11 @@ export function Chat({
       >
         <div className="mx-auto max-w-3xl space-y-6">
           {messages.length === 0 && (
-            <EmptyState firstName={firstName} onSend={send} />
+            <EmptyState
+              firstName={firstName}
+              onSend={send}
+              suggestions={suggestions}
+            />
           )}
 
           {messages.map((m, i) => (
@@ -481,7 +536,7 @@ export function Chat({
                   className="absolute bottom-full left-0 mb-2 w-56 conduit-card overflow-hidden text-left z-10"
                   onMouseLeave={() => setPinOpen(false)}
                 >
-                  {PIN_OPTIONS.map((o) => (
+                  {pinOptions.map((o) => (
                     <button
                       key={o.value}
                       type="button"
@@ -617,9 +672,11 @@ export function Chat({
 function EmptyState({
   firstName,
   onSend,
+  suggestions,
 }: {
   firstName: string;
   onSend: (text: string, pin?: EmployeeKey) => void;
+  suggestions: Suggestion[];
 }) {
   return (
     <div className="hero-fade-in pt-8 md:pt-16">
@@ -631,11 +688,11 @@ function EmptyState({
         What are we building today?
       </h1>
       <p className="mt-4 text-sm text-[var(--color-text-muted)] max-w-xl">
-        Talk to Jarvis. He routes to Marketing, Sales, or Engineering — or
-        handles it himself.
+        Talk to Jarvis. He routes the right employee — or handles it
+        himself.
       </p>
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {SUGGESTIONS.map((s) => (
+        {suggestions.map((s) => (
           <button
             key={s.text}
             onClick={() => onSend(s.text, s.pin)}

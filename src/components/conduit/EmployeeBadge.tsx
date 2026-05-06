@@ -1,28 +1,15 @@
 import type { EmployeeKey } from "@/lib/ai/provider";
+import { EMPLOYEES } from "@/lib/conduit/employees";
 
-export const DEPT_COLOR: Record<EmployeeKey, string> = {
-  jarvis: "var(--color-dept-jarvis)",
-  marketing: "var(--color-dept-marketing)",
-  sales: "var(--color-dept-sales)",
-  engineering: "var(--color-dept-engineering)",
-};
+// Re-exported as Records for compatibility with existing call sites that
+// indexed by EmployeeKey directly.
+export const DEPT_COLOR: Record<EmployeeKey, string> = Object.fromEntries(
+  Object.entries(EMPLOYEES).map(([id, c]) => [id, c.color]),
+) as Record<EmployeeKey, string>;
 
-export const DEPT_COLOR_SOFT: Record<EmployeeKey, string> = {
-  jarvis: "var(--color-dept-jarvis-soft)",
-  marketing: "var(--color-dept-marketing-soft)",
-  sales: "var(--color-dept-sales-soft)",
-  engineering: "var(--color-dept-engineering-soft)",
-};
-
-const META: Record<
-  EmployeeKey,
-  { initial: string; label: string; role: string }
-> = {
-  jarvis: { initial: "J", label: "Jarvis", role: "Chief of Staff" },
-  marketing: { initial: "M", label: "Marketing", role: "Department" },
-  sales: { initial: "S", label: "Sales", role: "Department" },
-  engineering: { initial: "E", label: "Engineering", role: "Department" },
-};
+export const DEPT_COLOR_SOFT: Record<EmployeeKey, string> = Object.fromEntries(
+  Object.entries(EMPLOYEES).map(([id, c]) => [id, c.colorSoft]),
+) as Record<EmployeeKey, string>;
 
 export function EmployeeAvatar({
   employee,
@@ -33,16 +20,16 @@ export function EmployeeAvatar({
   size?: number;
   active?: boolean;
 }) {
-  const m = META[employee];
+  const m = EMPLOYEES[employee];
   return (
     <span
       aria-hidden
       style={{
         width: size,
         height: size,
-        background: DEPT_COLOR_SOFT[employee],
-        ["--dept" as string]: DEPT_COLOR[employee],
-        boxShadow: `inset 0 0 0 1.5px ${DEPT_COLOR[employee]}`,
+        background: m.colorSoft,
+        ["--dept" as string]: m.color,
+        boxShadow: `inset 0 0 0 1.5px ${m.color}`,
       }}
       className={`relative inline-flex items-center justify-center rounded-full text-[11px] font-medium text-[var(--color-text)] ${
         active ? "employee-pulse" : ""
@@ -60,16 +47,16 @@ export function EmployeeBadge({
   employee: EmployeeKey;
   withRole?: boolean;
 }) {
-  const m = META[employee];
+  const m = EMPLOYEES[employee];
   return (
     <div className="inline-flex items-center gap-2 relative">
       <EmployeeAvatar employee={employee} size={26} />
       <span className="leading-tight">
         <span
           className="block text-[12px] font-medium tracking-tight"
-          style={{ color: DEPT_COLOR[employee] }}
+          style={{ color: m.color }}
         >
-          {m.label}
+          {m.name}
         </span>
         {withRole && (
           <span className="block text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
@@ -82,9 +69,9 @@ export function EmployeeBadge({
 }
 
 export function employeeLabel(employee: EmployeeKey): string {
-  return META[employee].label;
+  return EMPLOYEES[employee].name;
 }
 
 export function employeeRole(employee: EmployeeKey): string {
-  return META[employee].role;
+  return EMPLOYEES[employee].role;
 }

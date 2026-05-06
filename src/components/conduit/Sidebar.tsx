@@ -7,6 +7,7 @@ import {
   Plus,
   MessageSquare,
   FileText,
+  Lock,
   Settings,
   LogOut,
   Menu,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
+import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 
 interface ConvoSummary {
   id: string;
@@ -26,18 +28,20 @@ interface TeamActivity {
   last_active_at: string | null;
 }
 
-const TEAM: EmployeeKey[] = ["jarvis", "marketing", "sales", "engineering"];
+const TEAM: EmployeeKey[] = EMPLOYEE_ORDER as EmployeeKey[];
 
 export function Sidebar({
   userEmail,
   accountName,
   conversations,
   team,
+  allowedEmployees,
 }: {
   userEmail: string;
   accountName: string;
   conversations: ConvoSummary[];
   team: TeamActivity[];
+  allowedEmployees: EmployeeKey[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -167,32 +171,55 @@ export function Sidebar({
           <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
             Team status
           </div>
-          <ul className="space-y-1.5">
+          <ul className="grid grid-cols-2 gap-x-3 gap-y-1">
             {TEAM.map((emp, slot) => {
               const isStreaming = streamingEmployee === emp;
+              const allowed = allowedEmployees.includes(emp);
               return (
-                <li key={emp} className="flex items-center gap-2 text-xs">
+                <li
+                  key={emp}
+                  className={`flex items-center gap-2 text-xs ${
+                    allowed ? "" : "opacity-50"
+                  }`}
+                  title={
+                    allowed
+                      ? undefined
+                      : "Available on a higher plan"
+                  }
+                >
                   <span
                     aria-hidden
-                    data-slot={slot}
+                    data-slot={slot % 4}
                     style={{ ["--dept" as string]: DEPT_COLOR[emp] }}
                     className={`team-dot ${
-                      isStreaming ? "streaming" : "ambient"
+                      !allowed
+                        ? ""
+                        : isStreaming
+                          ? "streaming"
+                          : "ambient"
                     }`}
                   />
-                  <span className="text-[var(--color-text)]">
+                  <span className="text-[var(--color-text)] truncate">
                     {employeeLabel(emp)}
                   </span>
-                  <span
-                    className="ml-auto w-1.5 h-1.5 rounded-full"
-                    style={{
-                      background: isStreaming
-                        ? DEPT_COLOR[emp]
-                        : "var(--color-text-muted)",
-                      opacity: isStreaming ? 1 : 0.4,
-                    }}
-                    aria-label={isStreaming ? "Active" : "Online"}
-                  />
+                  {!allowed ? (
+                    <Lock
+                      size={10}
+                      aria-label="Locked"
+                      className="ml-auto text-[var(--color-text-muted)]"
+                    />
+                  ) : (
+                    <span
+                      className="ml-auto w-1.5 h-1.5 rounded-full"
+                      style={{
+                        background: isStreaming
+                          ? DEPT_COLOR[emp]
+                          : "var(--color-text-muted)",
+                        opacity: isStreaming ? 1 : 0.4,
+                      }}
+                      aria-label={isStreaming ? "Active" : "Online"}
+                    />
+                  )}
                 </li>
               );
             })}

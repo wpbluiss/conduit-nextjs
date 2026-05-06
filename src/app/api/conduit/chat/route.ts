@@ -116,6 +116,20 @@ export async function POST(request: NextRequest) {
     account_name: account.name,
     business_type: businessType,
     business_description: businessDescription,
+    allowed_employees: account.internal_account
+      ? [
+          "jarvis",
+          "marketing",
+          "sales",
+          "engineering",
+          "finance",
+          "compliance",
+          "hr",
+          "ops",
+          "legal",
+        ]
+      : tierById(account.tier_id).allowedEmployees,
+    tier_id: account.tier_id,
   };
 
   const employeeOverride = body.employee_override;

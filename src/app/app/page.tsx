@@ -2,6 +2,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getOrCreateAccount, userDisplayName } from "@/lib/conduit/account";
 import { Chat, type MessageRow } from "@/components/conduit/Chat";
 import type { EmployeeKey } from "@/lib/ai/provider";
+import { tierById } from "@/lib/billing/tiers";
+import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +81,11 @@ export default async function ChatPage({ searchParams }: PageProps) {
   const ttsAllowed = Boolean(
     account.internal_account || account.tier_id !== "free",
   );
+  const allowedEmployees = (
+    account.internal_account
+      ? (EMPLOYEE_ORDER as EmployeeKey[])
+      : (tierById(account.tier_id).allowedEmployees as EmployeeKey[])
+  ) as EmployeeKey[];
 
   return (
     <Chat
@@ -91,6 +98,7 @@ export default async function ChatPage({ searchParams }: PageProps) {
         autoPlay: Boolean(account.voice_auto_play),
         ttsAllowed,
       }}
+      allowedEmployees={allowedEmployees}
     />
   );
 }

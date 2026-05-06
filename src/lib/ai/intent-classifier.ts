@@ -61,6 +61,28 @@ function heuristicIntent(
   if (m.length < 24) return "routing";
   if (employee === "engineering") return "code";
   if (employee === "marketing") return "creative";
+  // R6 employees
+  if (employee === "finance") return "reasoning";
+  if (employee === "compliance") return "reasoning";
+  if (employee === "legal") return "reasoning";
+  if (employee === "ops") return "routing";
+  if (employee === "hr") {
+    // HR creative when user is asking for written content
+    const writingKeywords = [
+      "job description",
+      "job posting",
+      "handbook",
+      "offer letter",
+      "rubric",
+      "interview guide",
+      "write",
+      "draft",
+      "post",
+      "listing",
+    ];
+    if (writingKeywords.some((k) => m.includes(k))) return "creative";
+    return "routing";
+  }
   return null;
 }
 
