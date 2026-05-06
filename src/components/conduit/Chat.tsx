@@ -11,6 +11,7 @@ import {
   EmployeeBadge,
   employeeLabel,
 } from "./EmployeeBadge";
+import { PaywallModal, type PaywallPayload } from "./PaywallModal";
 
 export interface MessageRow {
   id?: string;
@@ -66,10 +67,12 @@ export function Chat({
   conversationId: initialId,
   initialMessages,
   firstName,
+  internalAccount = false,
 }: {
   conversationId: string | null;
   initialMessages: MessageRow[];
   firstName: string;
+  internalAccount?: boolean;
 }) {
   const router = useRouter();
   const [conversationId, setConversationId] = useState<string | null>(
@@ -82,7 +85,7 @@ export function Chat({
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [drawerArtifactId, setDrawerArtifactId] = useState<string | null>(null);
-  const [limitMessage, setLimitMessage] = useState<string | null>(null);
+  const [paywall, setPaywall] = useState<PaywallPayload | null>(null);
   const [streamingEmployee, setStreamingEmployee] =
     useState<EmployeeKey | null>(null);
 
@@ -120,7 +123,6 @@ export function Chat({
       const trimmed = text.trim();
       if (!trimmed || loading) return;
       setLoading(true);
-      setLimitMessage(null);
       setInput("");
 
       const finalPin = employeePin ?? (pin === "auto" ? undefined : pin);
@@ -277,9 +279,26 @@ export function Chat({
               type: data.type as string,
             },
           );
-        } else if (event === "limit_reached") {
-          setLimitMessage((data.message as string) || "Token limit reached.");
-          finishCurrent(currentEmployee);
+        } else if (event === "paywall_required") {
+          // Suppress for internal accounts (defensive — server already gates).
+          if (!internalAccount) {
+            setPaywall({
+              reason: data.reason as PaywallPayload["reason"],
+              message: (data.message as string) || "Upgrade required.",
+              employee: data.employee as string | undefined,
+              intent: data.intent as string | undefined,
+              tier_id: data.tier_id as PaywallPayload["tier_id"],
+              tokens_used: data.tokens_used as number | undefined,
+              tokens_allowance: data.tokens_allowance as number | undefined,
+            });
+          }
+          // For cap_reached / employee_locked, no message will follow — finish.
+          if (
+            data.reason === "cap_reached" ||
+            data.reason === "employee_locked"
+          ) {
+            finishCurrent(currentEmployee);
+          }
         } else if (event === "done") {
           const cid = data.conversation_id as string;
           if (cid && cid !== conversationId) {
@@ -353,11 +372,6 @@ export function Chat({
 
       <div className="px-4 md:px-8 py-3 md:py-4 bg-[var(--color-surface)]">
         <div className="mx-auto max-w-3xl">
-          {limitMessage && (
-            <div className="mb-3 conduit-card px-4 py-3 text-sm text-[var(--color-amber)] border-[var(--color-amber)]/40">
-              {limitMessage}
-            </div>
-          )}
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -446,6 +460,13 @@ export function Chat({
         <ArtifactDrawer
           artifactId={drawerArtifactId}
           onClose={() => setDrawerArtifactId(null)}
+        />
+      )}
+
+      {paywall && (
+        <PaywallModal
+          payload={paywall}
+          onClose={() => setPaywall(null)}
         />
       )}
     </>

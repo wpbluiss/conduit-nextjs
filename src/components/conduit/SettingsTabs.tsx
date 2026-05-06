@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowRight, Check, ExternalLink } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
+import { ORDERED_TIERS, TOPUPS, tierById, type TierId } from "@/lib/billing/tiers";
 
 interface UsageData {
   totals: { input: number; output: number; cost: number };
@@ -21,6 +23,11 @@ interface AccountData {
   business_description: string;
   creator_mode?: boolean;
   creator_mode_version?: number;
+  tier_id?: string;
+  subscription_status?: string;
+  bonus_tokens?: number;
+  internal_account?: boolean;
+  has_stripe_customer?: boolean;
 }
 
 export function SettingsTabs({
@@ -73,7 +80,7 @@ export function SettingsTabs({
       )}
       {tab === "business" && <BusinessTab account={account} />}
       {tab === "usage" && <UsageTab usage={usage} />}
-      {tab === "billing" && <BillingTab />}
+      {tab === "billing" && <BillingTab account={account} usage={usage} />}
     </div>
   );
 }
@@ -406,17 +413,328 @@ function Donut({
   );
 }
 
-function BillingTab() {
-  return (
-    <div className="conduit-card px-6 py-10 text-center">
-      <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
-        Coming soon
+function BillingTab({
+  account,
+  usage,
+}: {
+  account: AccountData;
+  usage: UsageData;
+}) {
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const tier = tierById(account.tier_id ?? "free");
+  const internal = Boolean(account.internal_account);
+
+  if (internal) {
+    return (
+      <div className="space-y-6 text-sm">
+        <div className="conduit-card p-6">
+          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
+            Internal Account · Conduit Team
+          </div>
+          <div className="serif text-2xl">No charge, full access</div>
+          <p className="mt-2 text-[var(--color-text-muted)]">
+            You&apos;re on the internal team account. All tiers, all
+            employees, no token cap. Subscription UI is hidden.
+          </p>
+        </div>
+        <UsageSummary usage={usage} cap={tier.monthlyTokenAllowance} bonus={0} />
       </div>
-      <p className="serif text-2xl mt-2">Billing &amp; subscriptions</p>
-      <p className="mt-3 text-sm text-[var(--color-text-muted)]">
-        Pay for tokens, add credit, manage your plan. Shipping in the next
-        update.
+    );
+  }
+
+  const upgrade = async (tierId: TierId) => {
+    setBusy(tierId);
+    setError(null);
+    try {
+      const res = await fetch("/api/conduit/billing/checkout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          tier_id: tierId,
+          return_url: window.location.href,
+        }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(
+          j.error === "billing_not_configured"
+            ? "Billing isn't live yet."
+            : j.error === "tier_price_not_configured"
+              ? "Pricing not connected. Try again shortly."
+              : "Couldn't start checkout.",
+        );
+        setBusy(null);
+        return;
+      }
+      window.location.href = j.url;
+    } catch {
+      setError("Couldn't start checkout.");
+      setBusy(null);
+    }
+  };
+
+  const buyTopup = async (topupId: string) => {
+    setBusy(topupId);
+    setError(null);
+    try {
+      const res = await fetch("/api/conduit/billing/checkout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          topup_id: topupId,
+          return_url: window.location.href,
+        }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(
+          j.error === "billing_not_configured"
+            ? "Top-ups aren't live yet."
+            : "Couldn't start checkout.",
+        );
+        setBusy(null);
+        return;
+      }
+      window.location.href = j.url;
+    } catch {
+      setError("Couldn't start checkout.");
+      setBusy(null);
+    }
+  };
+
+  const openPortal = async () => {
+    setBusy("portal");
+    setError(null);
+    try {
+      const res = await fetch("/api/conduit/billing/portal", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ return_url: window.location.href }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(
+          j.error === "no_customer"
+            ? "Subscribe first to access the billing portal."
+            : "Couldn't open portal.",
+        );
+        setBusy(null);
+        return;
+      }
+      window.location.href = j.url;
+    } catch {
+      setError("Couldn't open portal.");
+      setBusy(null);
+    }
+  };
+
+  const allowance = tier.monthlyTokenAllowance + (account.bonus_tokens ?? 0);
+
+  return (
+    <div className="space-y-6 text-sm">
+      {/* Current plan */}
+      <div className="conduit-card p-6 flex items-center justify-between gap-4">
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+            Current plan ·{" "}
+            {(account.subscription_status ?? "inactive").replace(
+              "_",
+              " ",
+            )}
+          </div>
+          <div className="serif text-2xl mt-1">{tier.name}</div>
+          <div className="text-[var(--color-text-muted)] text-xs mt-1">
+            {tier.monthlyPriceCents > 0
+              ? `$${tier.monthlyPriceCents / 100} / month`
+              : "Free forever"}{" "}
+            · {tier.monthlyTokenAllowance.toLocaleString()} tokens / month
+            {account.bonus_tokens && account.bonus_tokens > 0
+              ? ` · +${account.bonus_tokens.toLocaleString()} bonus`
+              : ""}
+          </div>
+        </div>
+        {account.has_stripe_customer && (
+          <button
+            onClick={openPortal}
+            disabled={busy !== null}
+            className="btn-secondary !text-xs disabled:opacity-50"
+          >
+            {busy === "portal" ? "Opening…" : "Manage in Stripe"}
+            <ExternalLink size={12} />
+          </button>
+        )}
+      </div>
+
+      <UsageSummary
+        usage={usage}
+        cap={tier.monthlyTokenAllowance}
+        bonus={account.bonus_tokens ?? 0}
+      />
+
+      {error && (
+        <p className="text-sm text-[var(--color-pink)]">{error}</p>
+      )}
+
+      {/* Tier comparison */}
+      <div>
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+          Plans
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {ORDERED_TIERS.map((t) => {
+            const isCurrent = t.id === tier.id;
+            const isUpgrade =
+              !isCurrent &&
+              ORDERED_TIERS.findIndex((x) => x.id === t.id) >
+                ORDERED_TIERS.findIndex((x) => x.id === tier.id);
+            return (
+              <div
+                key={t.id}
+                className={`conduit-card p-5 ${
+                  isCurrent
+                    ? "border-[var(--color-accent)]"
+                    : ""
+                }`}
+              >
+                <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                  {isCurrent ? "Current" : t.name}
+                </div>
+                <div className="serif text-2xl mt-1">{t.name}</div>
+                <div className="mt-1">
+                  <span className="text-2xl font-medium">
+                    ${t.monthlyPriceCents / 100}
+                  </span>
+                  <span className="text-xs text-[var(--color-text-muted)]">
+                    {" "}/mo
+                  </span>
+                </div>
+                <ul className="mt-3 space-y-1.5 text-xs text-[var(--color-text-muted)]">
+                  <li className="flex items-start gap-1.5">
+                    <Check
+                      size={12}
+                      className="mt-0.5 shrink-0 text-[var(--color-accent)]"
+                    />
+                    {(t.monthlyTokenAllowance / 1000).toLocaleString()}k
+                    tokens / month
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <Check
+                      size={12}
+                      className="mt-0.5 shrink-0 text-[var(--color-accent)]"
+                    />
+                    {t.modelCeiling === "haiku"
+                      ? "Fast routing model"
+                      : t.modelCeiling === "sonnet"
+                        ? "Adaptive routing (Sonnet on reasoning)"
+                        : "Premium routing (Opus on reasoning + code)"}
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <Check
+                      size={12}
+                      className="mt-0.5 shrink-0 text-[var(--color-accent)]"
+                    />
+                    {t.allowedEmployees.length} employees
+                  </li>
+                  {t.features.multiUser && (
+                    <li className="flex items-start gap-1.5">
+                      <Check
+                        size={12}
+                        className="mt-0.5 shrink-0 text-[var(--color-accent)]"
+                      />
+                      Multi-user (when shipped)
+                    </li>
+                  )}
+                </ul>
+                {isUpgrade && t.id !== "free" && (
+                  <button
+                    onClick={() => upgrade(t.id as TierId)}
+                    disabled={busy !== null}
+                    className="mt-4 btn-primary w-full justify-center !text-xs !py-2 disabled:opacity-50"
+                  >
+                    {busy === t.id ? "Opening…" : `Upgrade to ${t.name}`}
+                    <ArrowRight size={12} />
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Top-ups */}
+      <div>
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+          Buy more tokens
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {TOPUPS.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => buyTopup(t.id)}
+              disabled={busy !== null}
+              className="conduit-card p-4 text-left hover:border-[var(--color-accent)] transition-colors disabled:opacity-50"
+            >
+              <div className="serif text-xl">${t.amountCents / 100}</div>
+              <div className="mt-1 text-sm">
+                {(t.tokensGranted / 1000).toLocaleString()}k tokens
+              </div>
+              <span className="mt-3 inline-flex items-center gap-1 text-xs text-[var(--color-accent)]">
+                {busy === t.id ? "Opening…" : "Buy"}
+                <ArrowRight size={11} />
+              </span>
+            </button>
+          ))}
+        </div>
+        <p className="mt-2 text-[10px] text-[var(--color-text-muted)]">
+          Bonus tokens stack on top of your monthly allowance and roll over
+          until used.
+        </p>
+      </div>
+
+      <p className="text-[10px] text-[var(--color-text-muted)]">
+        Allowance: {allowance.toLocaleString()} this cycle.
       </p>
+    </div>
+  );
+}
+
+function UsageSummary({
+  usage,
+  cap,
+  bonus,
+}: {
+  usage: UsageData;
+  cap: number;
+  bonus: number;
+}) {
+  const used = usage.cap.used;
+  const total = cap + bonus;
+  const pct = Math.min(100, Math.round((used / Math.max(1, total)) * 100));
+  return (
+    <div className="conduit-card p-5">
+      <div className="flex items-baseline justify-between gap-3 mb-2">
+        <span className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+          Tokens this cycle
+        </span>
+        <span className="text-sm">
+          {used.toLocaleString()} / {total.toLocaleString()}
+        </span>
+      </div>
+      <div className="h-2 rounded-full bg-[var(--color-border)] overflow-hidden">
+        <div
+          className="h-2 rounded-full transition-all"
+          style={{
+            width: `${pct}%`,
+            background:
+              pct >= 100
+                ? "var(--color-pink)"
+                : pct >= 80
+                  ? "var(--color-amber)"
+                  : "var(--color-accent)",
+          }}
+        />
+      </div>
     </div>
   );
 }

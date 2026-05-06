@@ -373,3 +373,118 @@ keeps the 0.10× cached-read and 1.25× cache-write multipliers.
 - New employees — R6
 - Cross-provider routing (OpenAI / Perplexity / Groq) — stubbed; R5+
 - Multi-step planner / executor / reviewer — R3+ (next-next; not this PR)
+
+---
+
+## Round 4 — Stripe billing, tiers, paywall (2026-05-06)
+
+Branch: `feat/conduit-r4-billing` → merged to `main`.
+
+### Schema (migration `005_billing.sql`)
+
+- `conduit_pricing_tiers` — Free / Pro / Enterprise rows with model_ceiling,
+  monthly_token_allowance, allowed_employees, features, stripe_price_id slot.
+- `conduit_accounts` gets `tier_id`, `stripe_customer_id`,
+  `stripe_subscription_id`, `subscription_status`, `bonus_tokens`,
+  `internal_account`. Owner row updated to `tier_id='enterprise'`,
+  `internal_account=true`, `subscription_status='active'` so creator_mode v2
+  routing keeps working without paywall noise.
+- `conduit_stripe_events` — webhook idempotency log (RLS-on, service-role only).
+- `conduit_token_topups` — pending/succeeded/failed rows keyed by
+  payment_intent_id, owner-readable via RLS.
+
+### Stripe wiring (build complete, runtime gated on env)
+
+- `lib/billing/tiers.ts` — source-of-truth tier config. Top-up options
+  (`$10→500k`, `$25→1.5M`, `$50→3.5M`). `modelExceedsCeiling` and
+  `ceilingDowngrade` helpers.
+- `lib/billing/stripe.ts` — lazy-init Stripe client via
+  `STRIPE_SECRET_KEY`. Returns `BILLING_NOT_CONFIGURED` if missing so
+  unrelated paths don't crash. Stripe SDK v22.1.1.
+- `POST /api/conduit/billing/checkout` — creates Stripe Customer (with
+  `account_id` metadata) on first call, opens Checkout in
+  `subscription` or `payment` mode based on body. Returns `{ url }`.
+  Returns 503 if Stripe not configured.
+- `POST /api/conduit/billing/portal` — Billing Portal session for
+  account.stripe_customer_id. 503 if unconfigured, 400 if no customer yet.
+- `POST /api/conduit/billing/webhook` — verifies signature against
+  `STRIPE_WEBHOOK_SECRET`, dedupes via `conduit_stripe_events` table,
+  uses service-role client to bypass RLS. Handles
+  `checkout.session.completed` (subscription tier flip OR top-up grant
+  with bonus_tokens increment), `customer.subscription.updated` (status
+  + tier sync), `customer.subscription.deleted` (downgrade to free),
+  `invoice.payment_failed` (mark past_due), `invoice.paid` (no-op).
+
+### Tier enforcement
+
+- `provider.ts` `modelForEmployee()` now takes `tierCeiling` +
+  `internalAccount`. Internal accounts bypass the ceiling. Otherwise the
+  chosen model is clamped down to Haiku/Sonnet/Opus per tier ceiling.
+- Chat route emits `paywall_required` SSE event:
+  - `cap_reached` (tokens_used ≥ allowance + bonus) — blocks the turn,
+    Chat opens PaywallModal pre-pinned to the top-ups view.
+  - `employee_locked` — Free user pinning Sales/Engineering. Blocks.
+  - `model_locked` — Free user with reasoning/code intent. Emits warning
+    but proceeds on the downgraded Haiku so the user still gets an answer.
+- `internal_account=true` skips all three checks. Luis sees nothing.
+
+### UI
+
+- `components/conduit/PaywallModal.tsx` — Pro / Enterprise upgrade cards
+  side-by-side, "Or top up tokens" toggle reveals the three top-up
+  options, error states for `billing_not_configured` /
+  `tier_price_not_configured`. Suppressed entirely for internal accounts
+  via the `internalAccount` prop on `<Chat>`.
+- `components/conduit/SettingsTabs.tsx` Billing tab fully rebuilt:
+  - Internal-account view: "No charge, full access" pill + usage summary,
+    no upgrade UI.
+  - Standard view: current plan card with "Manage in Stripe" button when
+    the account has a stripe_customer_id, usage progress bar (amber 80%,
+    pink 100%), 3-tier comparison cards with Upgrade buttons, top-up
+    grid with Buy buttons.
+- `components/conduit/UpgradeNudge.tsx` — dismissible banner above /app
+  shown only to Free, non-internal accounts. Persists dismissal in
+  localStorage under `conduit_upgrade_nudge_dismissed`.
+
+### Pricing
+
+| Tier | Monthly | Tokens | Model ceiling | Employees |
+|---|---|---|---|---|
+| Free | $0 | 50k | Haiku | Jarvis + Marketing |
+| Pro | $29 | 1M | Sonnet | + Sales + Engineering |
+| Enterprise | $199 | 5M | Opus | + Finance/HR/Ops/Legal/Compliance (when shipped) |
+
+Top-ups: $10→500k, $25→1.5M, $50→3.5M (one-time, stack on monthly).
+
+### Verification
+
+- `npm run build` clean (Next.js 16.2.2, Turbopack)
+- Local: `/` 200, `/auth/sign-in` 200, `/app` 307→sign-in,
+  `POST /api/conduit/billing/checkout` 401 unauth,
+  `POST /api/conduit/billing/webhook` 503 (webhook secret not configured
+  locally, expected).
+- Migration 005 applied. Luis: `tier_id=enterprise`,
+  `internal_account=true`, `subscription_status=active`.
+- Live Stripe flow (test card 4242…) deferred — requires Luis to:
+  1. Create Pro + Enterprise products in Stripe (test mode), copy
+     price_ids.
+  2. Create Top-up $10 / $25 / $50 one-time products, copy price_ids.
+  3. Add `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`,
+     `STRIPE_WEBHOOK_SECRET`, plus `STRIPE_PRICE_PRO_MONTHLY` /
+     `STRIPE_PRICE_ENTERPRISE_MONTHLY` / `STRIPE_PRICE_TOPUP_10` /
+     `..._25` / `..._50` to Vercel (production + preview).
+  4. Configure a Stripe webhook endpoint pointing to
+     `https://www.conduitai.io/api/conduit/billing/webhook` listening
+     for `checkout.session.completed`,
+     `customer.subscription.{updated,deleted}`, `invoice.{paid,payment_failed}`.
+  5. Test the 4242 card flow end-to-end in production.
+
+The code path is wired and gated — the moment those env vars land, the
+Free → Checkout → Pro flow flips on without further code changes.
+
+### What's NOT in this round
+
+- Voice mode (R5)
+- Twilio phone numbers (R5)
+- Real Engineering / Sales execution (R6)
+- Multi-user accounts (R7)

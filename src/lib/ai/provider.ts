@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { IntentClass } from "./intent-classifier";
+import type { ModelCeiling } from "@/lib/billing/tiers";
 
 export type ProviderName = "anthropic" | "openai" | "together" | "groq";
 
@@ -20,6 +21,8 @@ export interface CompletionRequest {
     creatorMode?: boolean;
     creatorModeVersion?: number;
     intent?: IntentClass;
+    tierCeiling?: ModelCeiling;
+    internalAccount?: boolean;
   };
 }
 
@@ -70,33 +73,62 @@ export function modelForEmployee(
     creatorMode?: boolean;
     creatorModeVersion?: number;
     intent?: IntentClass;
+    tierCeiling?: ModelCeiling;
+    internalAccount?: boolean;
   } = {},
 ): string {
   const intent = opts.intent ?? "routing";
 
+  // Helper: clamp a chosen model to the account's tier ceiling.
+  // Internal accounts bypass the ceiling entirely.
+  const clamp = (model: string): string => {
+    if (opts.internalAccount) return model;
+    const ceiling = opts.tierCeiling ?? "opus";
+    if (ceiling === "opus") return model;
+    if (ceiling === "sonnet" && model === OPUS) return SONNET;
+    if (ceiling === "haiku" && (model === OPUS || model === SONNET))
+      return HAIKU;
+    return model;
+  };
+
   if (opts.creatorMode) {
     if ((opts.creatorModeVersion ?? 1) >= 2) {
       // v2: Opus-default adaptive
-      if (intent === "reasoning" || intent === "code") return OPUS;
-      return SONNET;
+      if (intent === "reasoning" || intent === "code") return clamp(OPUS);
+      return clamp(SONNET);
     }
     // v1: everything Haiku
     return HAIKU;
   }
 
   // Engineering: Sonnet baseline (no Haiku) until R6.
-  if (employee === "engineering") return SONNET;
+  if (employee === "engineering") return clamp(SONNET);
 
   switch (intent) {
     case "reasoning":
     case "code":
-      return SONNET;
+      return clamp(SONNET);
     case "creative":
     case "routing":
     case "factual":
     default:
-      return HAIKU;
+      return clamp(HAIKU);
   }
+}
+
+/**
+ * Returns the ideal model for this turn ignoring the tier ceiling. Useful for
+ * detecting when a downgrade happened so the UI can prompt an upgrade.
+ */
+export function idealModelForEmployee(
+  employee: EmployeeKey | undefined,
+  opts: {
+    creatorMode?: boolean;
+    creatorModeVersion?: number;
+    intent?: IntentClass;
+  } = {},
+): string {
+  return modelForEmployee(employee, { ...opts, tierCeiling: "opus" });
 }
 
 const DEFAULT_MAX_TOKENS: Record<EmployeeKey, number> = {
@@ -158,6 +190,8 @@ export async function complete(
     creatorMode: req.metadata?.creatorMode,
     creatorModeVersion: req.metadata?.creatorModeVersion,
     intent: req.metadata?.intent,
+    tierCeiling: req.metadata?.tierCeiling,
+    internalAccount: req.metadata?.internalAccount,
   });
   if (provider !== "anthropic") {
     throw new Error("PROVIDER_NOT_IMPLEMENTED");
@@ -192,6 +226,8 @@ export async function* streamComplete(
     creatorMode: req.metadata?.creatorMode,
     creatorModeVersion: req.metadata?.creatorModeVersion,
     intent: req.metadata?.intent,
+    tierCeiling: req.metadata?.tierCeiling,
+    internalAccount: req.metadata?.internalAccount,
   });
   if (provider !== "anthropic") {
     throw new Error("PROVIDER_NOT_IMPLEMENTED");

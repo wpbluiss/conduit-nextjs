@@ -17,6 +17,7 @@ import type { AccountContext } from "@/lib/ai/employees/jarvis";
 import { parseHandoff, parseArtifacts } from "@/lib/ai/parse";
 import { estimateCostCents } from "@/lib/ai/pricing";
 import { classifyIntent, type IntentClass } from "@/lib/ai/intent-classifier";
+import { tierById } from "@/lib/billing/tiers";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -127,7 +128,13 @@ export async function POST(request: NextRequest) {
   const finalConvId = conversationId;
   const creatorMode = account.creator_mode;
   const creatorModeVersion = account.creator_mode_version ?? 1;
-  const tokenCap = account.monthly_token_cap;
+  const internalAccount = Boolean(account.internal_account);
+  const tier = tierById(account.tier_id);
+  // Effective allowance = tier monthly + bonus (top-ups). Internal accounts
+  // get the legacy R3 monthly_token_cap as a hard floor (5M for Luis).
+  const effectiveAllowance = internalAccount
+    ? Math.max(tier.monthlyTokenAllowance, account.monthly_token_cap)
+    : tier.monthlyTokenAllowance + (account.bonus_tokens ?? 0);
   let tokensUsedThisCycle = account.monthly_tokens_used;
 
   // Conduit Adaptive — classify the user's intent once per turn.
@@ -146,13 +153,31 @@ export async function POST(request: NextRequest) {
         employee: EmployeeKey,
         extraSystem?: string,
       ): Promise<{ ok: boolean }> => {
+        // Tier gate: employee allowed for this account?
+        if (
+          !internalAccount &&
+          !tier.allowedEmployees.includes(employee)
+        ) {
+          send("paywall_required", {
+            reason: "employee_locked",
+            employee,
+            tier_id: tier.id,
+            message: `${employee.charAt(0).toUpperCase() + employee.slice(1)} is a Pro feature. Upgrade to unlock the full team.`,
+          });
+          return { ok: false };
+        }
+
         // Pre-flight token cap check
-        if (tokensUsedThisCycle >= tokenCap) {
-          send("limit_reached", {
-            message:
-              "Your team has reached this month's token limit. Top up to keep working.",
+        if (
+          !internalAccount &&
+          tokensUsedThisCycle >= effectiveAllowance
+        ) {
+          send("paywall_required", {
+            reason: "cap_reached",
+            tier_id: tier.id,
             tokens_used: tokensUsedThisCycle,
-            tokens_cap: tokenCap,
+            tokens_allowance: effectiveAllowance,
+            message: `You've used all ${effectiveAllowance.toLocaleString()} tokens this month. Upgrade for more, or top up to keep working.`,
           });
           return { ok: false };
         }
@@ -192,6 +217,24 @@ export async function POST(request: NextRequest) {
               ? "code"
               : intent;
 
+        // Soft model-lock signal: if the ideal model exceeds tier ceiling
+        // (e.g. Free user asks a reasoning question), emit paywall_required
+        // ONCE but continue with the downgraded model so the user still gets
+        // an answer.
+        if (
+          !internalAccount &&
+          (turnIntent === "reasoning" || turnIntent === "code") &&
+          tier.modelCeiling === "haiku"
+        ) {
+          send("paywall_required", {
+            reason: "model_locked",
+            tier_id: tier.id,
+            intent: turnIntent,
+            message:
+              "Strategic reasoning is a Pro feature. Upgrade to unlock adaptive routing — or keep going on the lighter model.",
+          });
+        }
+
         try {
           for await (const chunk of streamComplete({
             messages,
@@ -202,6 +245,8 @@ export async function POST(request: NextRequest) {
               creatorMode,
               creatorModeVersion,
               intent: turnIntent,
+              tierCeiling: tier.modelCeiling,
+              internalAccount,
             },
             maxTokens: maxTokensFor(employee),
           })) {

@@ -82,6 +82,7 @@ export default async function ChatPage({ searchParams }: PageProps) {
       conversationId={conversationId}
       initialMessages={messages}
       firstName={firstName}
+      internalAccount={Boolean(account.internal_account)}
     />
   );
 }
