@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import PlatformTeaser from "@/components/PlatformTeaser";
 import LiveAgentGrid from "@/components/LiveAgentGrid";
 import Constellation from "@/components/Constellation";
 import Departments from "@/components/Departments";
@@ -15,6 +16,7 @@ export default function Home() {
     <main>
       <Navbar />
       <Hero />
+      <PlatformTeaser />
       <LiveAgentGrid />
       <Constellation />
       <Departments />

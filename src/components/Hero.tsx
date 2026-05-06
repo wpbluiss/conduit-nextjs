@@ -29,8 +29,8 @@ export default function Hero() {
         </p>
 
         <div className="mt-10 md:mt-12 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4">
-          <a href="#cta" className="btn-primary justify-center">
-            Request Access <span aria-hidden="true">→</span>
+          <a href="/auth/sign-up" className="btn-primary justify-center">
+            Talk to Conduit <span aria-hidden="true">→</span>
           </a>
           <a href="#terminal" className="btn-secondary justify-center">
             See it in action
