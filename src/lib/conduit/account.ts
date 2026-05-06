@@ -7,6 +7,7 @@ export interface ConduitAccount {
   business_type: string | null;
   business_description: string | null;
   creator_mode: boolean;
+  creator_mode_version: number;
   monthly_token_cap: number;
   monthly_tokens_used: number;
   billing_cycle_start: string;

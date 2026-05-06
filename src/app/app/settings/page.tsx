@@ -93,6 +93,8 @@ export default async function SettingsPage() {
             name: account.name,
             business_type: account.business_type ?? "",
             business_description: account.business_description ?? "",
+            creator_mode: account.creator_mode,
+            creator_mode_version: account.creator_mode_version,
           }}
           usage={{
             totals,

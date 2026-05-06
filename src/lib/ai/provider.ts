@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import type { IntentClass } from "./intent-classifier";
 
 export type ProviderName = "anthropic" | "openai" | "together" | "groq";
 
@@ -17,6 +18,8 @@ export interface CompletionRequest {
     employee?: EmployeeKey;
     accountId?: string;
     creatorMode?: boolean;
+    creatorModeVersion?: number;
+    intent?: IntentClass;
   };
 }
 
@@ -41,21 +44,56 @@ export interface StreamChunk {
   provider?: ProviderName;
 }
 
+const OPUS = "claude-opus-4-7";
 const SONNET = "claude-sonnet-4-20250514";
 const HAIKU = "claude-haiku-4-5-20251001";
 
-// R2: most employees on Haiku. Engineering keeps Sonnet for when it executes for real in R6.
+/**
+ * Conduit Adaptive — pick the model per request.
+ *
+ * Standard tier (Free / Pro): intent-based within Haiku/Sonnet.
+ *   - reasoning + code → Sonnet
+ *   - creative + routing + factual → Haiku
+ *
+ * Creator mode v1 (legacy): everything forced to Haiku.
+ *
+ * Creator mode v2 (Luis daily): Opus default with adaptive Sonnet fallback.
+ *   - reasoning + code → Opus 4.7
+ *   - creative + routing + factual → Sonnet 4
+ *
+ * Engineering keeps Sonnet on standard tier even on routing intent — it's the
+ * fallback for the round before Engineering executes for real.
+ */
 export function modelForEmployee(
   employee: EmployeeKey | undefined,
-  opts: { creatorMode?: boolean } = {},
+  opts: {
+    creatorMode?: boolean;
+    creatorModeVersion?: number;
+    intent?: IntentClass;
+  } = {},
 ): string {
-  if (opts.creatorMode) return HAIKU;
-  switch (employee) {
-    case "engineering":
+  const intent = opts.intent ?? "routing";
+
+  if (opts.creatorMode) {
+    if ((opts.creatorModeVersion ?? 1) >= 2) {
+      // v2: Opus-default adaptive
+      if (intent === "reasoning" || intent === "code") return OPUS;
       return SONNET;
-    case "jarvis":
-    case "marketing":
-    case "sales":
+    }
+    // v1: everything Haiku
+    return HAIKU;
+  }
+
+  // Engineering: Sonnet baseline (no Haiku) until R6.
+  if (employee === "engineering") return SONNET;
+
+  switch (intent) {
+    case "reasoning":
+    case "code":
+      return SONNET;
+    case "creative":
+    case "routing":
+    case "factual":
     default:
       return HAIKU;
   }
@@ -70,6 +108,15 @@ const DEFAULT_MAX_TOKENS: Record<EmployeeKey, number> = {
 
 export function maxTokensFor(employee: EmployeeKey | undefined): number {
   return employee ? DEFAULT_MAX_TOKENS[employee] : 1024;
+}
+
+// Pricing table for cost estimator includes Opus 4.7.
+// (Opus 4.7: $15 input / $75 output per MTok.)
+export function pricingForModel(model: string): { input: number; output: number } | null {
+  if (model === OPUS) return { input: 15, output: 75 };
+  if (model === SONNET) return { input: 3, output: 15 };
+  if (model === HAIKU) return { input: 1, output: 5 };
+  return null;
 }
 
 export function defaultProvider(): ProviderName {
@@ -109,6 +156,8 @@ export async function complete(
   const provider = defaultProvider();
   const model = modelForEmployee(req.metadata?.employee, {
     creatorMode: req.metadata?.creatorMode,
+    creatorModeVersion: req.metadata?.creatorModeVersion,
+    intent: req.metadata?.intent,
   });
   if (provider !== "anthropic") {
     throw new Error("PROVIDER_NOT_IMPLEMENTED");
@@ -141,6 +190,8 @@ export async function* streamComplete(
   const provider = defaultProvider();
   const model = modelForEmployee(req.metadata?.employee, {
     creatorMode: req.metadata?.creatorMode,
+    creatorModeVersion: req.metadata?.creatorModeVersion,
+    intent: req.metadata?.intent,
   });
   if (provider !== "anthropic") {
     throw new Error("PROVIDER_NOT_IMPLEMENTED");

@@ -77,6 +77,8 @@ export async function POST(request: NextRequest) {
           employee: "jarvis",
           accountId: account.id,
           creatorMode: account.creator_mode,
+          creatorModeVersion: account.creator_mode_version ?? 1,
+          intent: "routing",
         },
         maxTokens: 400,
       });
