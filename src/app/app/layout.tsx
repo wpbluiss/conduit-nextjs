@@ -68,7 +68,9 @@ export default async function AppLayout({
         conversations={convos ?? []}
         team={team}
       />
-      <main className="flex-1 flex flex-col min-w-0">{children}</main>
+      <main className="conduit-canvas flex-1 flex flex-col min-w-0">
+        {children}
+      </main>
       {!onboarded && <OnboardingModal defaultName={userName} />}
     </div>
   );

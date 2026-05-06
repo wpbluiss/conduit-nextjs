@@ -83,6 +83,26 @@ export function Chat({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [drawerArtifactId, setDrawerArtifactId] = useState<string | null>(null);
   const [limitMessage, setLimitMessage] = useState<string | null>(null);
+  const [streamingEmployee, setStreamingEmployee] =
+    useState<EmployeeKey | null>(null);
+
+  // Broadcast streaming employee to the Sidebar (and any other listener).
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("conduit:stream", {
+        detail: { employee: streamingEmployee },
+      }),
+    );
+  }, [streamingEmployee]);
+
+  useEffect(() => {
+    return () => {
+      // On unmount, clear streaming so sidebar resets.
+      window.dispatchEvent(
+        new CustomEvent("conduit:stream", { detail: { employee: null } }),
+      );
+    };
+  }, []);
 
   useEffect(() => {
     setMessages(initialMessages);
@@ -105,6 +125,7 @@ export function Chat({
 
       const finalPin = employeePin ?? (pin === "auto" ? undefined : pin);
       const placeholderEmp: EmployeeKey = finalPin ?? "jarvis";
+      setStreamingEmployee(placeholderEmp);
 
       setMessages((prev) => [
         ...prev,
@@ -128,6 +149,7 @@ export function Chat({
       });
 
       if (!resp.ok || !resp.body) {
+        setStreamingEmployee(null);
         if (resp.status === 409) {
           router.refresh();
           return;
@@ -226,6 +248,7 @@ export function Chat({
         if (event === "token") {
           const employee = (data.employee as EmployeeKey) || currentEmployee;
           currentEmployee = employee;
+          setStreamingEmployee(employee);
           ensurePendingFor(employee);
           appendTo(employee, (data.delta as string) || "");
         } else if (event === "handoff") {
@@ -240,6 +263,7 @@ export function Chat({
             },
           ]);
           currentEmployee = to;
+          setStreamingEmployee(to);
           ensurePendingFor(to);
         } else if (event === "message_end") {
           const employee = (data.employee as EmployeeKey) || currentEmployee;
@@ -295,6 +319,7 @@ export function Chat({
         }
       }
 
+      setStreamingEmployee(null);
       setLoading(false);
       router.refresh();
     },
@@ -400,9 +425,20 @@ export function Chat({
               <Send size={16} />
             </button>
           </form>
-          <p className="mt-2 text-center text-[11px] text-[var(--color-text-muted)]">
-            Shift+Enter for newline
-          </p>
+          <div className="mt-2 h-4 text-center text-[11px]">
+            {streamingEmployee ? (
+              <span
+                className="presence-line"
+                style={{ color: DEPT_COLOR[streamingEmployee] }}
+              >
+                {employeeLabel(streamingEmployee)} is thinking…
+              </span>
+            ) : (
+              <span className="text-[var(--color-text-muted)]">
+                Shift+Enter for newline
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -424,12 +460,13 @@ function EmptyState({
   onSend: (text: string, pin?: EmployeeKey) => void;
 }) {
   return (
-    <div className="pt-8 md:pt-16">
-      <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)] mb-3">
-        Welcome back, {firstName}
+    <div className="hero-fade-in pt-8 md:pt-16">
+      <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)] mb-3 flex items-center">
+        <span aria-hidden className="live-dot" />
+        Your team is online · {firstName}
       </p>
       <h1 className="serif text-3xl md:text-5xl text-[var(--color-text)] leading-[1.05]">
-        What&apos;s the team working on today?
+        What are we building today?
       </h1>
       <p className="mt-4 text-sm text-[var(--color-text-muted)] max-w-xl">
         Talk to Jarvis. He routes to Marketing, Sales, or Engineering — or

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Plus,
   MessageSquare,
@@ -46,9 +46,24 @@ export function Sidebar({
   const [open, setOpen] = useState(false);
 
   const close = () => setOpen(false);
-  const lastActiveMap = new Map(
-    team.map((t) => [t.employee, t.last_active_at]),
-  );
+
+  // Streaming employee: pulsed strong + steady while a Chat is streaming.
+  // Chat dispatches `conduit:stream` CustomEvents; this listens.
+  const [streamingEmployee, setStreamingEmployee] =
+    useState<EmployeeKey | null>(null);
+  useEffect(() => {
+    const onStream = (e: Event) => {
+      const detail = (e as CustomEvent<{ employee: EmployeeKey | null }>)
+        .detail;
+      setStreamingEmployee(detail?.employee ?? null);
+    };
+    window.addEventListener("conduit:stream", onStream as EventListener);
+    return () =>
+      window.removeEventListener("conduit:stream", onStream as EventListener);
+  }, []);
+
+  // `team` prop reserved for future per-convo dominant-employee coloring.
+  void team;
 
   return (
     <>
@@ -126,12 +141,19 @@ export function Sidebar({
                 key={c.id}
                 href={`/app?c=${c.id}`}
                 onClick={close}
-                className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+                className={`relative flex items-center gap-2 pl-3 pr-3 py-2 text-sm rounded-lg transition-colors duration-100 ${
                   active
                     ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
-                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-elevated)]"
+                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
                 }`}
               >
+                {active && (
+                  <span
+                    aria-hidden
+                    className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full"
+                    style={{ background: "var(--color-accent)" }}
+                  />
+                )}
                 <MessageSquare size={14} className="shrink-0" />
                 <span className="truncate">
                   {c.title || "Untitled chat"}
@@ -146,23 +168,31 @@ export function Sidebar({
             Team status
           </div>
           <ul className="space-y-1.5">
-            {TEAM.map((emp) => {
-              const lastActiveAt = lastActiveMap.get(emp);
-              const ts = lastActiveAt ? Date.parse(lastActiveAt) : NaN;
-              const active = !isNaN(ts) && Date.now() - ts < 60_000;
+            {TEAM.map((emp, slot) => {
+              const isStreaming = streamingEmployee === emp;
               return (
                 <li key={emp} className="flex items-center gap-2 text-xs">
                   <span
                     aria-hidden
+                    data-slot={slot}
                     style={{ ["--dept" as string]: DEPT_COLOR[emp] }}
-                    className={`team-dot ${active ? "active" : ""}`}
+                    className={`team-dot ${
+                      isStreaming ? "streaming" : "ambient"
+                    }`}
                   />
                   <span className="text-[var(--color-text)]">
                     {employeeLabel(emp)}
                   </span>
-                  <span className="ml-auto text-[10px] text-[var(--color-text-muted)] uppercase tracking-[0.15em]">
-                    {active ? "Active" : "Online"}
-                  </span>
+                  <span
+                    className="ml-auto w-1.5 h-1.5 rounded-full"
+                    style={{
+                      background: isStreaming
+                        ? DEPT_COLOR[emp]
+                        : "var(--color-text-muted)",
+                      opacity: isStreaming ? 1 : 0.4,
+                    }}
+                    aria-label={isStreaming ? "Active" : "Online"}
+                  />
                 </li>
               );
             })}
@@ -173,10 +203,10 @@ export function Sidebar({
           <Link
             href="/app/artifacts"
             onClick={close}
-            className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+            className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors duration-100 ${
               pathname.startsWith("/app/artifacts")
                 ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
-                : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
             }`}
           >
             <FileText size={14} /> Artifacts
@@ -184,10 +214,10 @@ export function Sidebar({
           <Link
             href="/app/settings"
             onClick={close}
-            className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+            className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors duration-100 ${
               pathname.startsWith("/app/settings")
                 ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
-                : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
             }`}
           >
             <Settings size={14} /> Settings
@@ -195,7 +225,7 @@ export function Sidebar({
           <form action="/auth/sign-out" method="post">
             <button
               type="submit"
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] rounded-lg"
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] rounded-lg transition-colors duration-100"
             >
               <LogOut size={14} /> Sign out
             </button>

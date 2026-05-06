@@ -221,3 +221,63 @@ R3 ships Stripe billing wired to `monthly_token_cap` + a top-up flow.
 R4 voice, R5 phone numbers, R6 real Engineering/Sales execution, R7
 multi-user accounts, R8 integrations (MCP per business), R9 Expo mobile,
 R10 Projects/Design/Customize tabs.
+
+---
+
+## Round 2.5 — Life pass (2026-05-06, post-R2)
+
+Branch: `feat/conduit-r25-life-pass` → merged to `main`.
+
+Two buckets only: kill the chat ring + add ambient warmth/presence.
+
+### What changed
+
+**Chat ring: removed.** The faint outer-glow ring tracing the chat panel
+came from three places, all stripped:
+
+- `.conduit-pill-input:focus-within` had a 4px `box-shadow: 0 0 0 4px rgba(255,138,61,0.08)` outer halo. Now: border-color change only on focus, no shadow.
+- `.conduit-suggestion:hover` had a 1px outer ring + 24px blurred glow. Now: subtle background tint + border color + 1px translate, no shadow.
+- `EmployeeAvatar` had Tailwind `ring-1` on top of an inset `box-shadow` overlay (double ring). Collapsed to a single inset shadow on the avatar itself; removed the absolute-positioned overlay span.
+
+Files: `src/app/globals.css` (3 rule blocks), `src/components/conduit/EmployeeBadge.tsx` (avatar).
+
+**Ambient warmth.**
+
+- `.conduit-canvas` adds a radial gradient at top-left, 5% accent mixed into the surface, fading to plain surface by 60%. Applied only to `<main>` — sidebar stays cold. (`src/app/app/layout.tsx`)
+- `.live-dot` keyframe animation: pulsing green dot used as the prefix on "Your team is online" eyebrow.
+- `.hero-fade-in`: 320ms fade + 6px-rise on first paint of the empty state.
+- `.presence-line`: 2.4s ease-in-out fade loop for "Marketing is thinking…" line under the input while streaming.
+
+**Team Status panel — alive.**
+
+- "Online" / "Active" labels replaced with a single small dot on the right of each row (gray = idle, dept-color = streaming).
+- Default state: each dot runs an `ambientPulse` keyframe, cycling — Jarvis (delay 0s), Marketing (3s), Sales (6s), Engineering (9s), looping every 12s. So one dot is always pulsing.
+- Streaming override: when an employee is currently responding (Chat dispatches `conduit:stream` CustomEvent, Sidebar listens), that dot switches to `teamDotStreaming` — stronger, steady, 1.1s cycle — until done.
+
+**Empty state.**
+
+- Eyebrow now reads "🟢 Your team is online · {firstName}" (live-dot before).
+- Hero shifted to "What are we building today?" to match strategy doc.
+- Suggestion cards: hover swaps to a 6% mix of the department color over surface (no outer ring/glow), lifts 1px.
+
+**Bubbles.**
+
+- User bubble: `border-radius: 22px 22px 22px 6px` — rounded-3xl on the right edge, small corner bottom-left for speech-bubble feel.
+- Assistant bubble: mirrored — `22px 22px 6px 22px`, small corner bottom-right.
+
+**Hover affordances.**
+
+- Conversation rows in sidebar: 100ms transition, hover bg = 8% accent over transparent. Active conversation gets a 2px accent left-edge bar (positioned absolute, top 1.5/bottom 1.5, rounded-full).
+- Bottom nav (Artifacts, Settings, Sign out): same hover bg.
+
+### Verification
+
+- `npm run build` clean.
+- Local dev: `/` 200, `/auth/sign-in` 200, `/app` 307→sign-in.
+
+### What's NOT in this round
+
+- No new features
+- No 3D / parallax / loud animations
+- No new design libraries
+- No schema or API changes
