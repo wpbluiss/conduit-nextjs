@@ -47,8 +47,14 @@ export default function Navbar() {
                 {l.label}
               </a>
             ))}
-            <a href="#cta" className="btn-primary text-[14px]">
-              Request Access
+            <a
+              href="/auth/sign-in"
+              className="text-[14px] text-[#8C8884] hover:text-[#F5F1EA] transition-colors"
+            >
+              Sign in
+            </a>
+            <a href="/auth/sign-up" className="btn-primary text-[14px]">
+              Talk to Conduit
             </a>
           </div>
 
@@ -94,11 +100,18 @@ export default function Navbar() {
             </a>
           ))}
           <a
-            href="#cta"
+            href="/auth/sign-in"
+            onClick={() => setOpen(false)}
+            className="text-[20px] text-[#8C8884]"
+          >
+            Sign in
+          </a>
+          <a
+            href="/auth/sign-up"
             onClick={() => setOpen(false)}
             className="btn-primary mt-4 justify-center"
           >
-            Request Access →
+            Talk to Conduit →
           </a>
         </div>
       </div>
