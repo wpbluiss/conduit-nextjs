@@ -18,6 +18,10 @@ export interface ConduitAccount {
   subscription_status: string;
   bonus_tokens: number;
   internal_account: boolean;
+  // R5 voice prefs
+  voice_enabled: boolean;
+  voice_speed: number;
+  voice_auto_play: boolean;
   created_at: string;
   updated_at: string;
 }

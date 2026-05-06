@@ -76,6 +76,9 @@ export default async function ChatPage({ searchParams }: PageProps) {
   }
 
   const firstName = userDisplayName(user).split(" ")[0];
+  const ttsAllowed = Boolean(
+    account.internal_account || account.tier_id !== "free",
+  );
 
   return (
     <Chat
@@ -83,6 +86,11 @@ export default async function ChatPage({ searchParams }: PageProps) {
       initialMessages={messages}
       firstName={firstName}
       internalAccount={Boolean(account.internal_account)}
+      voice={{
+        enabled: Boolean(account.voice_enabled),
+        autoPlay: Boolean(account.voice_auto_play),
+        ttsAllowed,
+      }}
     />
   );
 }
