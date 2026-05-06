@@ -488,3 +488,117 @@ Free → Checkout → Pro flow flips on without further code changes.
 - Twilio phone numbers (R5)
 - Real Engineering / Sales execution (R6)
 - Multi-user accounts (R7)
+
+---
+
+## Round 5 — Voice mode (push-to-talk v1) (2026-05-06)
+
+Branch: `feat/conduit-r5-voice` → merged to `main`. Push-to-talk only — true full-duplex deferred to R5.5/R6.
+
+### Schema (migration `006_voice.sql`)
+
+- `conduit_accounts` gets `voice_enabled` (default false), `voice_speed`
+  (numeric 3,2, default 1.00, clamped 0.50–2.00), `voice_auto_play`
+  (default true).
+- `conduit_employee_voices` table — per-account override
+  `(account_id, employee) → elevenlabs_voice_id`. RLS-on, owner-scoped.
+
+### Voice config (`src/lib/voice/`)
+
+- `defaults.ts` — `DEFAULT_EMPLOYEE_VOICES` map of stock ElevenLabs IDs
+  (Brian / Sarah / Adam / Josh for Jarvis / Marketing / Sales /
+  Engineering, plus reserved IDs for the future five). `VOICE_NAMES`
+  lookup. `previewLineFor(employee)`.
+- `tts.ts` — `streamTTS({text, voiceId, speed})` calling ElevenLabs Turbo
+  v2.5 with `optimize_streaming_latency=2`, mp3_44100_128 output. Throws
+  `VOICE_NOT_CONFIGURED` if `ELEVENLABS_API_KEY` unset. `fetchVoices()`
+  with 1h memory cache.
+- `pricing.ts` — `voiceCostCentsForChars(chars)` (~$0.33 / 10k chars).
+
+### API routes
+
+- `POST /api/conduit/voice/tts` — auth + tier gate. 403 `voice_locked`
+  for Free unless `internal_account`. Streams ElevenLabs response back
+  as `audio/mpeg`. Logs `conduit_usage_events` with
+  `metadata.voice = { provider, characters, voice_id }` and
+  `estimated_cost_cents`.
+- `GET /api/conduit/voice/voices` — returns ElevenLabs voice list (or
+  the static fallback if `ELEVENLABS_API_KEY` missing). Reports
+  `configured` flag so UI can show a banner.
+- `POST /api/conduit/voice/preview` — `{voice_id, employee}`. 24h
+  in-memory cache keyed by `voice_id:employee` so re-clicking preview
+  doesn't re-bill. 403 for Free unless internal.
+- `GET / POST /api/conduit/voice/prefs` — read/save voice toggles +
+  speed + per-employee voice overrides (upserts `conduit_employee_voices`).
+
+### Browser STT (`src/hooks/useSpeechRecognition.ts`)
+
+Wraps Web Speech API (`SpeechRecognition` / `webkitSpeechRecognition`).
+Fields: `supported`, `listening`, `transcript`, `error`, `start`,
+`stop`, `reset`. Falls back gracefully — disabled mic button with tooltip
+when unsupported (Safari iOS partial, Firefox no support).
+
+### Chat UI
+
+- New mic button between the input textarea and the circular send
+  button. Click toggles listening. While listening: button switches to
+  filled accent state with `employee-pulse` animation, placeholder reads
+  "Listening…", transcript fills the input live. Click again → stop +
+  auto-submit.
+- After each assistant message ends (`message_end` SSE event) AND
+  `voice.enabled` AND `voice.autoPlay` AND `voice.ttsAllowed`: chat
+  fetches `/api/conduit/voice/tts` with the visible content + employee,
+  pipes audio through a single `<audio>` element. Speaking indicator
+  next to employee badge: 3-bar wave animation in dept color, click
+  to stop. Replay button (`▶ Listen`) on past messages while voice
+  is allowed.
+- New CSS keyframes `wave1/wave2/wave3` in `globals.css`.
+
+### Settings → Voice tab
+
+New tab between "Business" and "Usage". Free tier sees a Pro-feature
+gate with "voice input still works in chat" copy. Pro+ sees:
+
+- Master toggle: enable voice mode.
+- Auto-play toggle.
+- Playback speed slider (0.5×–2.0×, saves on pointerup).
+- Four employee cards (dept-colored left accent) with a voice dropdown
+  + Preview button + "Reset to default" link. Default voice always
+  pinned at top of the dropdown. Voice list fetched from
+  `/api/conduit/voice/voices` on mount.
+- Banner when `ELEVENLABS_API_KEY` missing — settings still save,
+  previews disabled.
+
+### Tier gating recap
+
+| Path | Free | Pro / Enterprise / internal |
+|---|---|---|
+| Voice input (browser STT) | ✅ | ✅ |
+| Audio output (TTS) | ❌ 403 voice_locked | ✅ |
+| Voice tab in Settings | locked overlay | full |
+| `internal_account=true` | bypasses everything | bypasses everything |
+
+### Cost tracking
+
+`conduit_usage_events` rows for voice carry
+`provider='elevenlabs'`, `model='eleven_turbo_v2_5'`,
+`metadata.voice.characters`, and an `estimated_cost_cents` derived from
+the char count. Settings → Usage donut already surfaces "by employee"
+spend; voice events flow through the same aggregation.
+
+### Verification
+
+- `npm run build` clean.
+- Local: `/` 200, `/app` 307, voice routes 503 / 401 as expected without
+  `ELEVENLABS_API_KEY` set locally.
+- Live audio test deferred — requires `ELEVENLABS_API_KEY` on Vercel.
+  Fallback path verified: voice routes return 503
+  `voice_not_configured`, voice list returns the static defaults so
+  Settings UI doesn't break.
+
+### What's NOT in this round
+
+- Full-duplex (interrupt / cut-in / VAD) — R5.5 / R6
+- Whisper-based STT — R5.5 / R6
+- Twilio phone numbers — R6
+- Voice in mobile app — R9

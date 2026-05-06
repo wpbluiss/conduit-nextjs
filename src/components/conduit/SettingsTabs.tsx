@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check, ExternalLink } from "lucide-react";
+import { ArrowRight, Check, ExternalLink, Lock, Play } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
 import { ORDERED_TIERS, TOPUPS, tierById, type TierId } from "@/lib/billing/tiers";
+import { DEFAULT_EMPLOYEE_VOICES, VOICE_NAMES } from "@/lib/voice/defaults";
 
 interface UsageData {
   totals: { input: number; output: number; cost: number };
@@ -41,17 +42,18 @@ export function SettingsTabs({
   account: AccountData;
   usage: UsageData;
 }) {
-  const [tab, setTab] = useState<"profile" | "business" | "usage" | "billing">(
-    "profile",
-  );
+  const [tab, setTab] = useState<
+    "profile" | "business" | "voice" | "usage" | "billing"
+  >("profile");
 
   return (
     <div>
-      <div className="flex gap-1 border-b border-[var(--color-border)] mb-6">
+      <div className="flex gap-1 border-b border-[var(--color-border)] mb-6 overflow-x-auto">
         {(
           [
             ["profile", "Profile"],
             ["business", "Business"],
+            ["voice", "Voice"],
             ["usage", "Usage"],
             ["billing", "Billing"],
           ] as const
@@ -79,8 +81,304 @@ export function SettingsTabs({
         />
       )}
       {tab === "business" && <BusinessTab account={account} />}
+      {tab === "voice" && (
+        <VoiceTab
+          ttsAllowed={Boolean(
+            account.internal_account || (account.tier_id ?? "free") !== "free",
+          )}
+        />
+      )}
       {tab === "usage" && <UsageTab usage={usage} />}
       {tab === "billing" && <BillingTab account={account} usage={usage} />}
+    </div>
+  );
+}
+
+interface VoicePrefsResp {
+  voice_enabled: boolean;
+  voice_auto_play: boolean;
+  voice_speed: number;
+  employee_voices: Record<string, string>;
+}
+
+interface ElevenLabsVoice {
+  voice_id: string;
+  name: string;
+}
+
+const VOICE_EMPLOYEES: EmployeeKey[] = [
+  "jarvis",
+  "marketing",
+  "sales",
+  "engineering",
+];
+
+function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
+  const [prefs, setPrefs] = useState<VoicePrefsResp | null>(null);
+  const [voices, setVoices] = useState<ElevenLabsVoice[]>([]);
+  const [voiceConfigured, setVoiceConfigured] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [previewing, setPreviewing] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const [pRes, vRes] = await Promise.all([
+        fetch("/api/conduit/voice/prefs"),
+        fetch("/api/conduit/voice/voices"),
+      ]);
+      if (pRes.ok) setPrefs(await pRes.json());
+      if (vRes.ok) {
+        const j = await vRes.json();
+        setVoices(j.voices ?? []);
+        setVoiceConfigured(Boolean(j.configured));
+      }
+    })();
+  }, []);
+
+  if (!ttsAllowed) {
+    return (
+      <div className="space-y-4">
+        <div className="conduit-card p-6 text-center relative">
+          <div className="flex items-center justify-center gap-2 text-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
+            <Lock size={12} /> Pro feature
+          </div>
+          <p className="serif text-2xl">Voice mode is a Pro perk</p>
+          <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+            Free accounts can still use voice <em>input</em> in chat. Upgrade
+            to hear your team talk back.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!prefs) {
+    return (
+      <p className="text-sm text-[var(--color-text-muted)]">Loading…</p>
+    );
+  }
+
+  const setPref = (patch: Partial<VoicePrefsResp>) =>
+    setPrefs({ ...prefs, ...patch });
+
+  const save = async (patch: Partial<VoicePrefsResp>) => {
+    const next = { ...prefs, ...patch };
+    setPrefs(next);
+    setSaving(true);
+    setError(null);
+    const r = await fetch("/api/conduit/voice/prefs", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(patch),
+    });
+    setSaving(false);
+    if (!r.ok) setError("Couldn't save preferences.");
+  };
+
+  const setEmployeeVoice = async (employee: EmployeeKey, voiceId: string) => {
+    setPref({
+      employee_voices: { ...prefs.employee_voices, [employee]: voiceId },
+    });
+    await save({ employee_voices: { [employee]: voiceId } });
+  };
+
+  const preview = async (employee: EmployeeKey, voiceId: string) => {
+    if (!voiceConfigured) return;
+    setPreviewing(`${employee}:${voiceId}`);
+    setError(null);
+    try {
+      const r = await fetch("/api/conduit/voice/preview", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ voice_id: voiceId, employee }),
+      });
+      if (!r.ok) {
+        setError("Preview failed.");
+        setPreviewing(null);
+        return;
+      }
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      if (!audioRef.current) audioRef.current = new Audio();
+      const a = audioRef.current;
+      a.src = url;
+      a.onended = () => {
+        setPreviewing(null);
+        URL.revokeObjectURL(url);
+      };
+      await a.play();
+    } catch {
+      setError("Preview failed.");
+      setPreviewing(null);
+    }
+  };
+
+  return (
+    <div className="space-y-6 text-sm">
+      {!voiceConfigured && (
+        <div className="conduit-card p-4 text-xs text-[var(--color-amber)] border-[var(--color-amber)]/40">
+          Voice provider not connected yet. Settings save, previews are
+          disabled until upstream keys land.
+        </div>
+      )}
+
+      <div className="conduit-card p-5 space-y-4">
+        <ToggleRow
+          label="Enable voice mode"
+          desc="Show the mic button and play audio replies."
+          value={prefs.voice_enabled}
+          onChange={(v) => save({ voice_enabled: v })}
+        />
+        <ToggleRow
+          label="Auto-play AI responses"
+          desc="Speak each reply as soon as it finishes."
+          value={prefs.voice_auto_play}
+          onChange={(v) => save({ voice_auto_play: v })}
+        />
+        <div>
+          <div className="flex items-baseline justify-between mb-1">
+            <span>Playback speed</span>
+            <span className="text-xs text-[var(--color-text-muted)]">
+              {prefs.voice_speed.toFixed(2)}×
+            </span>
+          </div>
+          <input
+            type="range"
+            min={0.5}
+            max={2.0}
+            step={0.05}
+            value={prefs.voice_speed}
+            onChange={(e) =>
+              setPref({ voice_speed: parseFloat(e.target.value) })
+            }
+            onPointerUp={() => save({ voice_speed: prefs.voice_speed })}
+            className="w-full accent-[var(--color-accent)]"
+          />
+        </div>
+      </div>
+
+      <div>
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+          Voices
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {VOICE_EMPLOYEES.map((emp) => {
+            const current =
+              prefs.employee_voices[emp] ?? DEFAULT_EMPLOYEE_VOICES[emp];
+            const isPreviewing = previewing === `${emp}:${current}`;
+            return (
+              <div
+                key={emp}
+                className="conduit-card border-l-[3px] p-4 space-y-2"
+                style={{
+                  borderLeftColor: DEPT_COLOR[emp],
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <span
+                    className="text-[12px] font-medium"
+                    style={{ color: DEPT_COLOR[emp] }}
+                  >
+                    {employeeLabel(emp)}
+                  </span>
+                  <button
+                    onClick={() => preview(emp, current)}
+                    disabled={!voiceConfigured || isPreviewing}
+                    className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-40"
+                  >
+                    {isPreviewing ? (
+                      "Playing…"
+                    ) : (
+                      <>
+                        <Play size={10} /> Preview
+                      </>
+                    )}
+                  </button>
+                </div>
+                <select
+                  value={current}
+                  onChange={(e) => setEmployeeVoice(emp, e.target.value)}
+                  className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
+                >
+                  {/* Always offer the default first */}
+                  <option value={DEFAULT_EMPLOYEE_VOICES[emp]}>
+                    {VOICE_NAMES[DEFAULT_EMPLOYEE_VOICES[emp]] ??
+                      DEFAULT_EMPLOYEE_VOICES[emp]}{" "}
+                    (default)
+                  </option>
+                  {voices
+                    .filter(
+                      (v) => v.voice_id !== DEFAULT_EMPLOYEE_VOICES[emp],
+                    )
+                    .map((v) => (
+                      <option key={v.voice_id} value={v.voice_id}>
+                        {v.name}
+                      </option>
+                    ))}
+                </select>
+                {current !== DEFAULT_EMPLOYEE_VOICES[emp] && (
+                  <button
+                    onClick={() =>
+                      setEmployeeVoice(emp, DEFAULT_EMPLOYEE_VOICES[emp])
+                    }
+                    className="text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-text)] underline"
+                  >
+                    Reset to default
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {saving && (
+        <p className="text-xs text-[var(--color-text-muted)]">Saving…</p>
+      )}
+      {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
+    </div>
+  );
+}
+
+function ToggleRow({
+  label,
+  desc,
+  value,
+  onChange,
+}: {
+  label: string;
+  desc?: string;
+  value: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-4">
+      <div>
+        <div>{label}</div>
+        {desc && (
+          <div className="text-xs text-[var(--color-text-muted)] mt-0.5">
+            {desc}
+          </div>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={() => onChange(!value)}
+        aria-pressed={value}
+        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+          value
+            ? "bg-[var(--color-accent)]"
+            : "bg-[var(--color-border)]"
+        }`}
+      >
+        <span
+          className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+            value ? "translate-x-5" : "translate-x-0.5"
+          }`}
+        />
+      </button>
     </div>
   );
 }

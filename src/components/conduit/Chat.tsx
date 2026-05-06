@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, FileText, Send } from "lucide-react";
+import { ArrowRight, FileText, Mic, MicOff, Send, Square } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
   DEPT_COLOR,
@@ -12,6 +12,14 @@ import {
   employeeLabel,
 } from "./EmployeeBadge";
 import { PaywallModal, type PaywallPayload } from "./PaywallModal";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+
+export interface VoicePrefs {
+  enabled: boolean;
+  autoPlay: boolean;
+  // Tier permits TTS output? (Free → false unless internal)
+  ttsAllowed: boolean;
+}
 
 export interface MessageRow {
   id?: string;
@@ -68,11 +76,13 @@ export function Chat({
   initialMessages,
   firstName,
   internalAccount = false,
+  voice = { enabled: false, autoPlay: true, ttsAllowed: false },
 }: {
   conversationId: string | null;
   initialMessages: MessageRow[];
   firstName: string;
   internalAccount?: boolean;
+  voice?: VoicePrefs;
 }) {
   const router = useRouter();
   const [conversationId, setConversationId] = useState<string | null>(
@@ -88,6 +98,61 @@ export function Chat({
   const [paywall, setPaywall] = useState<PaywallPayload | null>(null);
   const [streamingEmployee, setStreamingEmployee] =
     useState<EmployeeKey | null>(null);
+
+  // Voice input (browser STT)
+  const speech = useSpeechRecognition();
+  const lastTranscriptRef = useRef("");
+  useEffect(() => {
+    if (!speech.listening) return;
+    // Replace input with the live transcript while listening.
+    setInput(speech.transcript);
+    lastTranscriptRef.current = speech.transcript;
+  }, [speech.transcript, speech.listening]);
+
+  // Voice output (TTS)
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [playingMessageIdx, setPlayingMessageIdx] = useState<number | null>(
+    null,
+  );
+  const stopAudio = useCallback(() => {
+    const a = audioRef.current;
+    if (a) {
+      a.pause();
+      a.src = "";
+    }
+    setPlayingMessageIdx(null);
+  }, []);
+  const playTTS = useCallback(
+    async (text: string, employee: EmployeeKey, idx: number) => {
+      if (!voice.ttsAllowed || !text.trim()) return;
+      try {
+        const r = await fetch("/api/conduit/voice/tts", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ text, employee }),
+        });
+        if (!r.ok) return;
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        if (!audioRef.current) {
+          audioRef.current = new Audio();
+        }
+        const a = audioRef.current;
+        a.src = url;
+        a.onended = () => {
+          setPlayingMessageIdx(null);
+          URL.revokeObjectURL(url);
+        };
+        setPlayingMessageIdx(idx);
+        await a.play().catch(() => {
+          setPlayingMessageIdx(null);
+        });
+      } catch {
+        // Silently swallow — voice is best-effort.
+      }
+    },
+    [voice.ttsAllowed],
+  );
 
   // Broadcast streaming employee to the Sidebar (and any other listener).
   useEffect(() => {
@@ -270,6 +335,23 @@ export function Chat({
         } else if (event === "message_end") {
           const employee = (data.employee as EmployeeKey) || currentEmployee;
           finishCurrent(employee);
+          // Auto-play the just-finished message if voice is on
+          if (voice.enabled && voice.autoPlay && voice.ttsAllowed) {
+            // Capture state via closure-safe ref pattern: read from latest setMessages
+            setMessages((prev) => {
+              for (let i = prev.length - 1; i >= 0; i--) {
+                const m = prev[i];
+                if (m.role === "assistant" && m.employee === employee) {
+                  const text = m.content;
+                  if (text && text.length > 1) {
+                    void playTTS(text, employee, i);
+                  }
+                  break;
+                }
+              }
+              return prev;
+            });
+          }
         } else if (event === "artifact") {
           recordArtifact(
             (data.employee as EmployeeKey) || currentEmployee,
@@ -365,6 +447,13 @@ export function Chat({
               key={m.id ?? i}
               message={m}
               onOpenArtifact={(id) => setDrawerArtifactId(id)}
+              playing={playingMessageIdx === i}
+              onStopAudio={stopAudio}
+              onReplayAudio={
+                voice.ttsAllowed && m.role === "assistant" && m.employee
+                  ? () => playTTS(m.content, m.employee as EmployeeKey, i)
+                  : undefined
+              }
             />
           ))}
         </div>
@@ -423,13 +512,65 @@ export function Chat({
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
+                  if (speech.listening) speech.stop();
                   send(input);
                 }
               }}
               rows={1}
-              placeholder="Talk to your team…"
+              placeholder={
+                speech.listening ? "Listening…" : "Talk to your team…"
+              }
               className="flex-1 resize-none bg-transparent outline-none px-2 py-2 text-[15px] max-h-32 leading-snug"
             />
+            <button
+              type="button"
+              onClick={() => {
+                if (!speech.supported) return;
+                if (speech.listening) {
+                  speech.stop();
+                  // Auto-submit if there's a transcript
+                  const t = lastTranscriptRef.current.trim();
+                  if (t) {
+                    setTimeout(() => send(t), 0);
+                  }
+                } else {
+                  speech.start();
+                }
+              }}
+              disabled={!speech.supported}
+              aria-label={
+                !speech.supported
+                  ? "Voice input not supported in this browser"
+                  : speech.listening
+                    ? "Stop listening"
+                    : "Start voice input"
+              }
+              title={
+                !speech.supported
+                  ? "Voice input not supported in this browser. Try Chrome."
+                  : speech.listening
+                    ? "Stop and send"
+                    : "Hold or click to talk"
+              }
+              className={`shrink-0 w-10 h-10 rounded-full inline-flex items-center justify-center transition-colors ${
+                speech.listening
+                  ? "bg-[var(--color-accent)] text-[#0A0908] employee-pulse"
+                  : speech.supported
+                    ? "border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-accent)]"
+                    : "border border-[var(--color-border)] text-[var(--color-text-muted)] opacity-40 cursor-not-allowed"
+              }`}
+              style={{
+                ["--dept" as string]: "var(--color-accent)",
+              }}
+            >
+              {speech.listening ? (
+                <Mic size={16} />
+              ) : speech.supported ? (
+                <Mic size={16} />
+              ) : (
+                <MicOff size={16} />
+              )}
+            </button>
             <button
               type="submit"
               disabled={loading || !input.trim()}
@@ -526,9 +667,15 @@ function EmptyState({
 function MessageBubble({
   message,
   onOpenArtifact,
+  playing = false,
+  onStopAudio,
+  onReplayAudio,
 }: {
   message: MessageRow;
   onOpenArtifact: (id: string) => void;
+  playing?: boolean;
+  onStopAudio?: () => void;
+  onReplayAudio?: () => void;
 }) {
   if (message.role === "user") {
     return (
@@ -595,6 +742,51 @@ function MessageBubble({
                 ? `${employeeLabel(employee)} is thinking…`
                 : "writing…"}
             </span>
+          )}
+          {playing && (
+            <button
+              onClick={onStopAudio}
+              className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em]"
+              style={{ color: DEPT_COLOR[employee] }}
+              aria-label="Stop audio"
+            >
+              <span className="inline-flex items-end gap-[2px] h-3">
+                <span
+                  className="w-[2px] rounded-sm"
+                  style={{
+                    background: DEPT_COLOR[employee],
+                    height: "8px",
+                    animation: "wave1 1s ease-in-out infinite",
+                  }}
+                />
+                <span
+                  className="w-[2px] rounded-sm"
+                  style={{
+                    background: DEPT_COLOR[employee],
+                    height: "12px",
+                    animation: "wave2 1s ease-in-out infinite",
+                  }}
+                />
+                <span
+                  className="w-[2px] rounded-sm"
+                  style={{
+                    background: DEPT_COLOR[employee],
+                    height: "6px",
+                    animation: "wave3 1s ease-in-out infinite",
+                  }}
+                />
+              </span>
+              Speaking
+            </button>
+          )}
+          {!playing && !message.pending && onReplayAudio && (
+            <button
+              onClick={onReplayAudio}
+              className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+              aria-label="Replay audio"
+            >
+              ▶ Listen
+            </button>
           )}
         </div>
         <div className="conduit-bubble-assistant px-4 py-3 text-[var(--color-text)] whitespace-pre-wrap leading-relaxed">
