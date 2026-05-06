@@ -602,3 +602,113 @@ spend; voice events flow through the same aggregation.
 - Whisper-based STT — R5.5 / R6
 - Twilio phone numbers — R6
 - Voice in mobile app — R9
+
+---
+
+## Round 6 — Full team: Finance, Compliance, HR, Operations, Legal (2026-05-06)
+
+Branch: `feat/conduit-r6-full-team` → merged to `main`. STRATEGY.md
+calls for 9 employees across 9 departments. R1 launched 4. R6 ships
+the missing 5.
+
+### Central employee config
+
+`src/lib/conduit/employees.ts` is now the single source of truth — id,
+name, role, color, soft color, initial, tagline, canExecute, voice
+category. UI components (EmployeeBadge, Sidebar, SettingsTabs Voice
+panel), Jarvis routing prompt, intent classifier, tier allowlist, and
+voice defaults all read from here.
+
+### Five new employees (system prompts in `src/lib/ai/employees/`)
+
+| Employee | Color | Default intent | Can produce artifacts |
+|---|---|---|---|
+| Finance | warm gold #EAB308 | reasoning | no (R7+) |
+| Compliance | violet #A855F7 | reasoning | no (R7+) |
+| HR | rose #EC4899 | creative on writing keywords, else routing | yes (job descs, handbooks, offer letters) |
+| Operations | teal #14B8A6 | routing | yes (SOPs, checklists, process docs) |
+| Legal | navy #3B82F6 | reasoning | yes (NDAs, contracts, with attorney-review disclaimer baked in) |
+
+Compliance carries an explicit PHI-handling disclaimer ("PHI processing
+is gated until you sign a BAA"). Legal mandates the attorney-review
+disclaimer — non-negotiable, baked into both the prompt and the
+artifact body.
+
+### Jarvis routing update
+
+System prompt's routing decision tree now lists all 8 routable
+employees + Jarvis self-handle. Jarvis also receives
+`allowed_employees` + `tier_id` in the system context — when a tier
+locks an employee, Jarvis self-handles instead of emitting a HANDOFF,
+with one warm "[Employee] would normally take this — they're available
+on a higher plan" sentence. No paywall-shame.
+
+### Intent classifier short-circuits
+
+- Marketing → creative (existing)
+- Engineering → code (existing)
+- Finance / Compliance / Legal → reasoning (new)
+- HR → creative when message hits writing keywords (job description,
+  handbook, offer letter, rubric, interview guide, write/draft/post/
+  listing), else routing (new)
+- Ops → routing (new)
+
+### Provider model selection
+
+- `EmployeeKey` widened to all 9.
+- `modelForEmployee()` on standard tier:
+  - Engineering → Sonnet baseline (R7 unlocks real exec)
+  - Legal + Compliance → Sonnet baseline (accuracy non-negotiable)
+  - Others → intent-driven (Sonnet for reasoning/code, Haiku for
+    creative/routing/factual)
+- Per-employee max_tokens defaults: Finance/Compliance 1200, HR 3000,
+  Ops 2000, Legal 3000.
+
+### Sidebar Team Status
+
+Now renders all 9 in a 2-column grid. Ambient pulse cycles through 4
+slots (delay 0/3/6/9s); employees in slots 5-9 share the cycle via
+modulo. Tier-locked employees render at 50% opacity with a Lock icon
+and "Available on a higher plan" tooltip. internal_account = all 9
+fully active.
+
+### Empty-state suggestions
+
+`SUGGESTION_POOL` carries 8 entries; `suggestionsForTier` shows the 4
+best for the account's allowed employees, always prioritising Jarvis +
+Marketing. Free sees Jarvis + Marketing + 2 fallbacks (still Marketing-
+focused). Pro adds Sales/Engineering. Enterprise adds Finance / Legal /
+HR / Ops options.
+
+### Pin selector dropdown
+
+Filtered to allowed employees per tier. Dropdown only shows what the
+tier permits.
+
+### Tier enforcement (defense in depth)
+
+- Migration `007_tier_employees_v2.sql`: refreshed
+  `conduit_pricing_tiers.allowed_employees` arrays — Free 2, Pro 4,
+  Enterprise 9.
+- `lib/billing/tiers.ts` Enterprise allowedEmployees synced to all 9.
+- Chat route still emits `paywall_required reason='employee_locked'`
+  when a non-internal account tries to talk to a locked employee
+  (existing R4 logic, unchanged).
+- `/api/conduit/voice/tts` route now checks tier allowlist after the
+  Free-tier gate so a Pro user can't synthesize Finance audio.
+
+### Verification
+
+- `npm run build` ✅ clean (16 routes, Next.js 16.2.2 Turbopack).
+- Migration 007 applied; tier rows confirmed: Free [jarvis, marketing],
+  Pro [jarvis, marketing, sales, engineering], Enterprise [all 9].
+- Local: routes return correct codes (`/app` 307, chat 401 unauth).
+- Live multi-employee routing test reserved for Luis after deploy.
+
+### What's NOT in this round
+
+- Real Engineering execution (Claude Code subprocess) — **R7**
+- Real Sales execution (lead lists, outreach automation) — R7+
+- Multi-user accounts — R8
+- Twilio phone numbers — R8
+- Real Finance reconciliation, real Legal e-sign workflows — R9+

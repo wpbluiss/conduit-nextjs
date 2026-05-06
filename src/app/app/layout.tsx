@@ -4,6 +4,9 @@ import { getOrCreateAccount } from "@/lib/conduit/account";
 import { Sidebar } from "@/components/conduit/Sidebar";
 import { OnboardingModal } from "@/components/conduit/OnboardingModal";
 import { UpgradeNudge } from "@/components/conduit/UpgradeNudge";
+import { tierById } from "@/lib/billing/tiers";
+import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
+import type { EmployeeKey } from "@/lib/ai/provider";
 
 export const dynamic = "force-dynamic";
 
@@ -49,12 +52,16 @@ export default async function AppLayout({
     const e = m.employee as string | null;
     if (e && !lastActiveMap[e]) lastActiveMap[e] = m.created_at as string;
   }
-  const team = (["jarvis", "marketing", "sales", "engineering"] as const).map(
-    (emp) => ({
-      employee: emp,
-      last_active_at: lastActiveMap[emp] ?? null,
-    }),
-  );
+  const team = (EMPLOYEE_ORDER as EmployeeKey[]).map((emp) => ({
+    employee: emp,
+    last_active_at: lastActiveMap[emp] ?? null,
+  }));
+
+  const allowedEmployees = (
+    account.internal_account
+      ? (EMPLOYEE_ORDER as EmployeeKey[])
+      : (tierById(account.tier_id).allowedEmployees as EmployeeKey[])
+  ) as EmployeeKey[];
 
   const userName =
     (user.user_metadata?.full_name as string | undefined) ||
@@ -68,6 +75,7 @@ export default async function AppLayout({
         accountName={account.name}
         conversations={convos ?? []}
         team={team}
+        allowedEmployees={allowedEmployees}
       />
       <main className="conduit-canvas flex-1 flex flex-col min-w-0">
         <UpgradeNudge

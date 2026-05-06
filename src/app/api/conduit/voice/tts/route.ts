@@ -5,6 +5,7 @@ import { isVoiceConfigured, streamTTS } from "@/lib/voice/tts";
 import { defaultVoiceFor } from "@/lib/voice/defaults";
 import { voiceCostCentsForChars } from "@/lib/voice/pricing";
 import type { EmployeeKey } from "@/lib/ai/provider";
+import { tierById } from "@/lib/billing/tiers";
 
 export const runtime = "nodejs";
 
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
 
   const account = await getOrCreateAccount(supabase, user);
 
-  // Tier gate
+  // Tier gate — TTS gated for Free
   if (
     !account.internal_account &&
     FREE_TIER_GATED.includes(account.tier_id)
@@ -55,6 +56,17 @@ export async function POST(request: NextRequest) {
       },
       { status: 403 },
     );
+  }
+
+  // Defense-in-depth: don't speak for an employee the account can't access.
+  if (!account.internal_account) {
+    const tier = tierById(account.tier_id);
+    if (!tier.allowedEmployees.includes(employee)) {
+      return NextResponse.json(
+        { error: "employee_locked", employee },
+        { status: 403 },
+      );
+    }
   }
 
   // Resolve voice

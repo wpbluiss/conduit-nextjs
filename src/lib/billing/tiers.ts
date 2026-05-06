@@ -48,7 +48,17 @@ export const TIERS: Record<TierId, TierConfig> = {
     monthlyPriceCents: 19_900,
     monthlyTokenAllowance: 5_000_000,
     modelCeiling: "opus",
-    allowedEmployees: ["jarvis", "marketing", "sales", "engineering"],
+    allowedEmployees: [
+      "jarvis",
+      "marketing",
+      "sales",
+      "engineering",
+      "finance",
+      "compliance",
+      "hr",
+      "ops",
+      "legal",
+    ],
     features: {
       creatorMode: true,
       priorityRouting: true,

@@ -4,7 +4,16 @@ import type { ModelCeiling } from "@/lib/billing/tiers";
 
 export type ProviderName = "anthropic" | "openai" | "together" | "groq";
 
-export type EmployeeKey = "jarvis" | "marketing" | "sales" | "engineering";
+export type EmployeeKey =
+  | "jarvis"
+  | "marketing"
+  | "sales"
+  | "engineering"
+  | "finance"
+  | "compliance"
+  | "hr"
+  | "ops"
+  | "legal";
 
 export interface ChatMessage {
   role: "user" | "assistant" | "system";
@@ -101,8 +110,13 @@ export function modelForEmployee(
     return HAIKU;
   }
 
-  // Engineering: Sonnet baseline (no Haiku) until R6.
+  // Engineering: Sonnet baseline (no Haiku) until R7 real execution.
   if (employee === "engineering") return clamp(SONNET);
+
+  // Legal + Compliance: Sonnet baseline — accuracy on these is non-negotiable
+  // even on routine "what is HIPAA" questions.
+  if (employee === "legal" || employee === "compliance")
+    return clamp(SONNET);
 
   switch (intent) {
     case "reasoning":
@@ -136,6 +150,11 @@ const DEFAULT_MAX_TOKENS: Record<EmployeeKey, number> = {
   marketing: 4000,
   sales: 600,
   engineering: 1200,
+  finance: 1200,
+  compliance: 1200,
+  hr: 3000,
+  ops: 2000,
+  legal: 3000,
 };
 
 export function maxTokensFor(employee: EmployeeKey | undefined): number {
