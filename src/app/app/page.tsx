@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getOrCreateAccount } from "@/lib/conduit/account";
+import { getOrCreateAccount, userDisplayName } from "@/lib/conduit/account";
 import { Chat, type MessageRow } from "@/components/conduit/Chat";
 import type { EmployeeKey } from "@/lib/ai/provider";
 
@@ -75,7 +75,13 @@ export default async function ChatPage({ searchParams }: PageProps) {
     }
   }
 
+  const firstName = userDisplayName(user).split(" ")[0];
+
   return (
-    <Chat conversationId={conversationId} initialMessages={messages} />
+    <Chat
+      conversationId={conversationId}
+      initialMessages={messages}
+      firstName={firstName}
+    />
   );
 }

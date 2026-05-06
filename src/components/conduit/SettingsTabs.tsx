@@ -2,11 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import type { EmployeeKey } from "@/lib/ai/provider";
+import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
 
 interface UsageData {
   totals: { input: number; output: number; cost: number };
   byEmployee: Record<string, { input: number; output: number; cost: number }>;
   byDay: Record<string, number>;
+  today: { input: number; output: number; cost: number };
+  thisWeek: { input: number; output: number; cost: number };
+  cap: { used: number; limit: number };
 }
 
 interface AccountData {
@@ -33,7 +38,7 @@ export function SettingsTabs({
 
   return (
     <div>
-      <div className="flex gap-1 hairline border-l-0 border-r-0 border-t-0 mb-6">
+      <div className="flex gap-1 border-b border-[var(--color-border)] mb-6">
         {(
           [
             ["profile", "Profile"],
@@ -126,7 +131,7 @@ function BusinessTab({ account }: { account: AccountData }) {
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full bg-[var(--color-surface-elevated)] hairline px-4 py-3 outline-none focus:border-[var(--color-accent)]"
+          className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)]"
         />
       </div>
       <div>
@@ -136,7 +141,7 @@ function BusinessTab({ account }: { account: AccountData }) {
         <input
           value={businessType}
           onChange={(e) => setBusinessType(e.target.value)}
-          className="w-full bg-[var(--color-surface-elevated)] hairline px-4 py-3 outline-none focus:border-[var(--color-accent)]"
+          className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)]"
         />
       </div>
       <div>
@@ -147,7 +152,7 @@ function BusinessTab({ account }: { account: AccountData }) {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={4}
-          className="w-full bg-[var(--color-surface-elevated)] hairline px-4 py-3 outline-none focus:border-[var(--color-accent)] resize-none"
+          className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)] resize-none"
         />
       </div>
       {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
@@ -165,75 +170,196 @@ function BusinessTab({ account }: { account: AccountData }) {
 
 function UsageTab({ usage }: { usage: UsageData }) {
   const days = Object.keys(usage.byDay).sort();
-  const max = Math.max(1, ...Object.values(usage.byDay));
+  const last14 = days.slice(-14);
+  const fillByDay = last14.map((d) => ({ d, v: usage.byDay[d] }));
+  const max = Math.max(1, ...fillByDay.map((x) => x.v));
+  const empNames: EmployeeKey[] = ["jarvis", "marketing", "sales", "engineering"];
+  const empValues = empNames.map((emp) => ({
+    emp,
+    val: (usage.byEmployee[emp]?.input ?? 0) + (usage.byEmployee[emp]?.output ?? 0),
+  }));
+  const empTotal = Math.max(1, empValues.reduce((s, x) => s + x.val, 0));
+
+  const capPct = Math.min(
+    100,
+    Math.round((usage.cap.used / Math.max(1, usage.cap.limit)) * 100),
+  );
 
   return (
-    <div className="space-y-6 text-sm">
-      <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2">
-          This month
+    <div className="space-y-8 text-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Stat label="Today" value={`$${(usage.today.cost / 100).toFixed(2)}`} sub={`${(usage.today.input + usage.today.output).toLocaleString()} tokens`} />
+        <Stat label="This week" value={`$${(usage.thisWeek.cost / 100).toFixed(2)}`} sub={`${(usage.thisWeek.input + usage.thisWeek.output).toLocaleString()} tokens`} />
+        <Stat label="This month" value={`$${(usage.totals.cost / 100).toFixed(2)}`} sub={`${(usage.totals.input + usage.totals.output).toLocaleString()} tokens`} />
+      </div>
+
+      <div className="conduit-card px-5 py-4">
+        <div className="flex items-baseline justify-between gap-3 mb-2">
+          <span className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+            Token cap (this cycle)
+          </span>
+          <span className="text-sm">
+            {usage.cap.used.toLocaleString()} /{" "}
+            {usage.cap.limit.toLocaleString()}
+          </span>
         </div>
-        <div className="grid grid-cols-3 gap-3">
-          <Stat
-            label="Input tokens"
-            value={usage.totals.input.toLocaleString()}
-          />
-          <Stat
-            label="Output tokens"
-            value={usage.totals.output.toLocaleString()}
-          />
-          <Stat
-            label="Estimated cost"
-            value={`$${(usage.totals.cost / 100).toFixed(2)}`}
+        <div className="h-2 rounded-full bg-[var(--color-border)] overflow-hidden">
+          <div
+            className="h-2 rounded-full"
+            style={{
+              width: `${capPct}%`,
+              background:
+                capPct >= 100
+                  ? "var(--color-pink)"
+                  : capPct >= 80
+                    ? "var(--color-amber)"
+                    : "var(--color-accent)",
+            }}
           />
         </div>
       </div>
 
       <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2">
-          Tokens by day
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+          Tokens · last 14 days
         </div>
-        {days.length === 0 ? (
+        {fillByDay.length === 0 ? (
           <p className="text-[var(--color-text-muted)]">No usage yet.</p>
         ) : (
-          <div className="flex items-end gap-1 h-32">
-            {days.map((d) => {
-              const v = usage.byDay[d];
-              const h = Math.round((v / max) * 100);
-              return (
-                <div
-                  key={d}
-                  title={`${d}: ${v.toLocaleString()} tokens`}
-                  className="flex-1 bg-[var(--color-accent)] opacity-80 hover:opacity-100"
-                  style={{ height: `${Math.max(2, h)}%` }}
-                />
-              );
-            })}
+          <div className="conduit-card p-4">
+            <div className="flex items-end gap-1 h-32">
+              {fillByDay.map(({ d, v }) => {
+                const h = Math.round((v / max) * 100);
+                return (
+                  <div
+                    key={d}
+                    title={`${d}: ${v.toLocaleString()} tokens`}
+                    className="flex-1 rounded-t-md bg-[var(--color-accent)] opacity-70 hover:opacity-100 transition-opacity"
+                    style={{ height: `${Math.max(2, h)}%` }}
+                  />
+                );
+              })}
+            </div>
+            <div className="mt-2 flex justify-between text-[10px] text-[var(--color-text-muted)]">
+              <span>{fillByDay[0]?.d}</span>
+              <span>{fillByDay[fillByDay.length - 1]?.d}</span>
+            </div>
           </div>
         )}
       </div>
 
-      <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2">
-          By employee
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="conduit-card p-5">
+          <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+            Share by employee
+          </div>
+          {empTotal === 1 ? (
+            <p className="text-[var(--color-text-muted)]">No usage yet.</p>
+          ) : (
+            <Donut data={empValues} total={empTotal} />
+          )}
         </div>
-        <div className="space-y-2">
-          {Object.entries(usage.byEmployee).map(([emp, v]) => (
-            <div
-              key={emp}
-              className="flex items-center justify-between hairline px-4 py-2"
-            >
-              <span className="capitalize">{emp}</span>
-              <span className="text-[var(--color-text-muted)] text-xs">
-                {(v.input + v.output).toLocaleString()} tokens · $
-                {(v.cost / 100).toFixed(2)}
+        <div className="conduit-card p-5">
+          <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+            By employee
+          </div>
+          <div className="space-y-2">
+            {empNames.map((emp) => {
+              const v = usage.byEmployee[emp];
+              if (!v) return null;
+              return (
+                <div
+                  key={emp}
+                  className="flex items-center justify-between"
+                >
+                  <span className="flex items-center gap-2">
+                    <span
+                      aria-hidden
+                      className="inline-block w-2 h-2 rounded-full"
+                      style={{ background: DEPT_COLOR[emp] }}
+                    />
+                    {employeeLabel(emp)}
+                  </span>
+                  <span className="text-[var(--color-text-muted)] text-xs">
+                    {(v.input + v.output).toLocaleString()} · $
+                    {(v.cost / 100).toFixed(2)}
+                  </span>
+                </div>
+              );
+            })}
+            {empNames.every((e) => !usage.byEmployee[e]) && (
+              <p className="text-[var(--color-text-muted)] text-xs">
+                No usage yet.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Donut({
+  data,
+  total,
+}: {
+  data: { emp: EmployeeKey; val: number }[];
+  total: number;
+}) {
+  const r = 50;
+  const c = 2 * Math.PI * r;
+  let offset = 0;
+  const segments = data
+    .filter((d) => d.val > 0)
+    .map((d) => {
+      const frac = d.val / total;
+      const length = frac * c;
+      const seg = (
+        <circle
+          key={d.emp}
+          cx="60"
+          cy="60"
+          r={r}
+          fill="transparent"
+          stroke={`var(--color-dept-${d.emp})`}
+          strokeWidth="14"
+          strokeDasharray={`${length} ${c - length}`}
+          strokeDashoffset={-offset}
+          transform="rotate(-90 60 60)"
+        />
+      );
+      offset += length;
+      return seg;
+    });
+  return (
+    <div className="flex items-center gap-5">
+      <svg width="120" height="120" viewBox="0 0 120 120" aria-hidden>
+        <circle
+          cx="60"
+          cy="60"
+          r={r}
+          fill="transparent"
+          stroke="var(--color-border)"
+          strokeWidth="14"
+        />
+        {segments}
+      </svg>
+      <div className="text-xs space-y-1">
+        {data
+          .filter((d) => d.val > 0)
+          .map((d) => (
+            <div key={d.emp} className="flex items-center gap-2">
+              <span
+                aria-hidden
+                className="inline-block w-2 h-2 rounded-full"
+                style={{ background: DEPT_COLOR[d.emp] }}
+              />
+              <span>{employeeLabel(d.emp)}</span>
+              <span className="text-[var(--color-text-muted)]">
+                {Math.round((d.val / total) * 100)}%
               </span>
             </div>
           ))}
-          {Object.keys(usage.byEmployee).length === 0 && (
-            <p className="text-[var(--color-text-muted)]">No usage yet.</p>
-          )}
-        </div>
       </div>
     </div>
   );
@@ -241,11 +367,11 @@ function UsageTab({ usage }: { usage: UsageData }) {
 
 function BillingTab() {
   return (
-    <div className="hairline px-6 py-10 text-center">
+    <div className="conduit-card px-6 py-10 text-center">
       <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
         Coming soon
       </div>
-      <p className="serif text-2xl mt-2">Billing & subscriptions</p>
+      <p className="serif text-2xl mt-2">Billing &amp; subscriptions</p>
       <p className="mt-3 text-sm text-[var(--color-text-muted)]">
         Pay for tokens, add credit, manage your plan. Shipping in the next
         update.
@@ -254,13 +380,26 @@ function BillingTab() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({
+  label,
+  value,
+  sub,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+}) {
   return (
-    <div className="hairline px-4 py-3">
+    <div className="conduit-card px-4 py-3">
       <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
         {label}
       </div>
       <div className="serif text-2xl mt-1">{value}</div>
+      {sub && (
+        <div className="text-[11px] text-[var(--color-text-muted)] mt-0.5">
+          {sub}
+        </div>
+      )}
     </div>
   );
 }
