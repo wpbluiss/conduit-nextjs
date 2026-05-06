@@ -73,7 +73,11 @@ export async function POST(request: NextRequest) {
           },
         ],
         systemPrompt: systemPromptFor("jarvis", ctx),
-        metadata: { employee: "jarvis", accountId: account.id },
+        metadata: {
+          employee: "jarvis",
+          accountId: account.id,
+          creatorMode: account.creator_mode,
+        },
         maxTokens: 400,
       });
 
@@ -96,11 +100,25 @@ export async function POST(request: NextRequest) {
           res.model,
           res.inputTokens,
           res.outputTokens,
+          res.cacheReadTokens,
+          res.cacheCreationTokens,
         ),
+        metadata: {
+          cache_read_input_tokens: res.cacheReadTokens,
+          cache_creation_input_tokens: res.cacheCreationTokens,
+          welcome: true,
+        },
       });
+
+      await supabase
+        .from("conduit_accounts")
+        .update({
+          monthly_tokens_used:
+            account.monthly_tokens_used + res.inputTokens + res.outputTokens,
+        })
+        .eq("id", account.id);
     } catch (err) {
       console.error("welcome greet error", err);
-      // Fallback static greeting
       await supabase.from("conduit_messages").insert({
         conversation_id: convo.id,
         role: "assistant",

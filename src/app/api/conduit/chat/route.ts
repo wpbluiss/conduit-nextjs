@@ -1,10 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getOrCreateAccount, userDisplayName } from "@/lib/conduit/account";
+import {
+  getOrCreateAccount,
+  rollBillingCycleIfDue,
+  userDisplayName,
+} from "@/lib/conduit/account";
 import {
   type ChatMessage,
   type EmployeeKey,
   friendlyErrorFor,
+  maxTokensFor,
   streamComplete,
 } from "@/lib/ai/provider";
 import { systemPromptFor } from "@/lib/ai/employees";
@@ -51,13 +56,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "empty_message" }, { status: 400 });
   }
 
-  const account = await getOrCreateAccount(supabase, user);
-  if (!account.business_type || !account.business_description) {
+  const initialAccount = await getOrCreateAccount(supabase, user);
+  if (!initialAccount.business_type || !initialAccount.business_description) {
     return NextResponse.json(
       { error: "onboarding_required" },
       { status: 409 },
     );
   }
+  const account = await rollBillingCycleIfDue(supabase, initialAccount);
+  const businessType = account.business_type ?? initialAccount.business_type;
+  const businessDescription =
+    account.business_description ?? initialAccount.business_description;
 
   // Get or create conversation
   let conversationId = body.conversation_id;
@@ -73,7 +82,6 @@ export async function POST(request: NextRequest) {
     }
     conversationId = data.id as string;
   } else {
-    // Verify ownership
     const { data: convo } = await supabase
       .from("conduit_conversations")
       .select("id, account_id")
@@ -97,15 +105,15 @@ export async function POST(request: NextRequest) {
     .select("role, employee, content, created_at")
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: false })
-    .limit(11); // include the just-inserted one
+    .limit(11);
 
   const ordered = (history ?? []).slice().reverse();
 
   const ctx: AccountContext = {
     user_name: userDisplayName(user),
     account_name: account.name,
-    business_type: account.business_type,
-    business_description: account.business_description,
+    business_type: businessType,
+    business_description: businessDescription,
   };
 
   const employeeOverride = body.employee_override;
@@ -116,6 +124,9 @@ export async function POST(request: NextRequest) {
 
   const accountId = account.id;
   const finalConvId = conversationId;
+  const creatorMode = account.creator_mode;
+  const tokenCap = account.monthly_token_cap;
+  let tokensUsedThisCycle = account.monthly_tokens_used;
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -127,6 +138,17 @@ export async function POST(request: NextRequest) {
         employee: EmployeeKey,
         extraSystem?: string,
       ): Promise<{ ok: boolean }> => {
+        // Pre-flight token cap check
+        if (tokensUsedThisCycle >= tokenCap) {
+          send("limit_reached", {
+            message:
+              "Your team has reached this month's token limit. Top up to keep working.",
+            tokens_used: tokensUsedThisCycle,
+            tokens_cap: tokenCap,
+          });
+          return { ok: false };
+        }
+
         const messages: ChatMessage[] = ordered.map((m) => ({
           role:
             m.role === "system"
@@ -148,6 +170,8 @@ export async function POST(request: NextRequest) {
         let fullText = "";
         let inputTokens = 0;
         let outputTokens = 0;
+        let cacheReadTokens = 0;
+        let cacheCreationTokens = 0;
         let modelUsed = "";
         let providerUsed = "anthropic";
 
@@ -155,8 +179,8 @@ export async function POST(request: NextRequest) {
           for await (const chunk of streamComplete({
             messages,
             systemPrompt,
-            metadata: { employee, accountId },
-            maxTokens: employee === "marketing" ? 4096 : 2048,
+            metadata: { employee, accountId, creatorMode },
+            maxTokens: maxTokensFor(employee),
           })) {
             if (chunk.delta) {
               fullText += chunk.delta;
@@ -165,6 +189,8 @@ export async function POST(request: NextRequest) {
             if (chunk.done) {
               inputTokens = chunk.inputTokens ?? 0;
               outputTokens = chunk.outputTokens ?? 0;
+              cacheReadTokens = chunk.cacheReadTokens ?? 0;
+              cacheCreationTokens = chunk.cacheCreationTokens ?? 0;
               modelUsed = chunk.model ?? "";
               providerUsed = chunk.provider ?? "anthropic";
             }
@@ -175,14 +201,12 @@ export async function POST(request: NextRequest) {
           return { ok: false };
         }
 
-        // Parse handoff (Jarvis only) + artifacts
         const { visibleContent: afterHandoff, handoff } =
           employee === "jarvis"
             ? parseHandoff(fullText)
             : { visibleContent: fullText.trim(), handoff: undefined };
         const { visibleContent, artifacts } = parseArtifacts(afterHandoff);
 
-        // Persist message
         const { data: insertedMsg } = await supabase
           .from("conduit_messages")
           .insert({
@@ -195,7 +219,6 @@ export async function POST(request: NextRequest) {
           .select("id")
           .single();
 
-        // Persist artifacts
         for (const art of artifacts) {
           const { data: artRow } = await supabase
             .from("conduit_artifacts")
@@ -220,26 +243,38 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // Usage event
-        if (inputTokens || outputTokens) {
-          await supabase.from("conduit_usage_events").insert({
-            account_id: accountId,
-            employee,
-            provider: providerUsed,
-            model: modelUsed,
-            input_tokens: inputTokens,
-            output_tokens: outputTokens,
-            estimated_cost_cents: estimateCostCents(
-              providerUsed as "anthropic",
-              modelUsed,
-              inputTokens,
-              outputTokens,
-            ),
-          });
-        }
+        // Usage event — always log a row, even if a stream emits 0 tokens
+        // (better to see "0 / 0 / model" than miss the event entirely).
+        const totalChargeable = inputTokens + outputTokens;
+        await supabase.from("conduit_usage_events").insert({
+          account_id: accountId,
+          employee,
+          provider: providerUsed,
+          model: modelUsed,
+          input_tokens: inputTokens,
+          output_tokens: outputTokens,
+          estimated_cost_cents: estimateCostCents(
+            providerUsed as "anthropic",
+            modelUsed,
+            inputTokens,
+            outputTokens,
+            cacheReadTokens,
+            cacheCreationTokens,
+          ),
+          metadata: {
+            cache_read_input_tokens: cacheReadTokens,
+            cache_creation_input_tokens: cacheCreationTokens,
+            creator_mode: creatorMode,
+          },
+        });
 
-        // Push the freshly visible content into the in-memory ordered history
-        // so a follow-on employee call has it.
+        // Increment running cap counter (chargeable = input + output, cache reads not counted toward cap)
+        tokensUsedThisCycle += totalChargeable;
+        await supabase
+          .from("conduit_accounts")
+          .update({ monthly_tokens_used: tokensUsedThisCycle })
+          .eq("id", accountId);
+
         ordered.push({
           role: "assistant",
           employee,
@@ -249,7 +284,6 @@ export async function POST(request: NextRequest) {
 
         send("message_end", { employee });
 
-        // Trigger handoff
         if (handoff) {
           send("handoff", { to: handoff.to, brief: handoff.brief });
           await runEmployee(handoff.to, handoff.brief);
@@ -259,7 +293,6 @@ export async function POST(request: NextRequest) {
 
       try {
         await runEmployee(initialEmployee);
-        // Bump conversation updated_at
         await supabase
           .from("conduit_conversations")
           .update({ updated_at: new Date().toISOString() })

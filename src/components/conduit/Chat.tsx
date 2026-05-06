@@ -4,7 +4,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, FileText, Send } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
-import { EmployeeBadge, employeeLabel } from "./EmployeeBadge";
+import {
+  DEPT_COLOR,
+  DEPT_COLOR_SOFT,
+  EmployeeAvatar,
+  EmployeeBadge,
+  employeeLabel,
+} from "./EmployeeBadge";
 
 export interface MessageRow {
   id?: string;
@@ -12,41 +18,58 @@ export interface MessageRow {
   employee?: EmployeeKey | null;
   content: string;
   metadata?: Record<string, unknown> | null;
-  // Inline UI extras (client-only)
   pending?: boolean;
-  artifacts?: { id: string; title: string; type: string }[];
+  artifacts?: { id: string; title: string; type: string; preview?: string }[];
   handoffTo?: EmployeeKey;
 }
 
-const SUGGESTIONS = [
-  { text: "Help me grow my business", pin: undefined as EmployeeKey | undefined },
+const SUGGESTIONS: {
+  text: string;
+  pin?: EmployeeKey;
+  dept: EmployeeKey;
+  hint: string;
+}[] = [
+  {
+    text: "Help me grow my business",
+    dept: "jarvis",
+    hint: "Strategy with Jarvis",
+  },
   {
     text: "Write me 3 blog posts about getting my first 10 customers",
-    pin: "marketing" as EmployeeKey,
+    pin: "marketing",
+    dept: "marketing",
+    hint: "Marketing will draft them",
   },
   {
     text: "How would you build me a CRM for my business?",
-    pin: "engineering" as EmployeeKey,
+    pin: "engineering",
+    dept: "engineering",
+    hint: "Engineering's plan",
   },
   {
     text: "Draft me a cold outreach campaign",
-    pin: "sales" as EmployeeKey,
+    pin: "sales",
+    dept: "sales",
+    hint: "Sales builds the play",
   },
 ];
 
-const EMPLOYEES: EmployeeKey[] = [
-  "jarvis",
-  "marketing",
-  "sales",
-  "engineering",
+const PIN_OPTIONS: { value: EmployeeKey | "auto"; label: string }[] = [
+  { value: "auto", label: "Jarvis (auto-route)" },
+  { value: "jarvis", label: "Jarvis only" },
+  { value: "marketing", label: "Marketing" },
+  { value: "sales", label: "Sales" },
+  { value: "engineering", label: "Engineering" },
 ];
 
 export function Chat({
   conversationId: initialId,
   initialMessages,
+  firstName,
 }: {
   conversationId: string | null;
   initialMessages: MessageRow[];
+  firstName: string;
 }) {
   const router = useRouter();
   const [conversationId, setConversationId] = useState<string | null>(
@@ -55,9 +78,16 @@ export function Chat({
   const [messages, setMessages] = useState<MessageRow[]>(initialMessages);
   const [input, setInput] = useState("");
   const [pin, setPin] = useState<EmployeeKey | "auto">("auto");
+  const [pinOpen, setPinOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [drawerArtifactId, setDrawerArtifactId] = useState<string | null>(null);
+  const [limitMessage, setLimitMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMessages(initialMessages);
+    setConversationId(initialId);
+  }, [initialId, initialMessages]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -70,18 +100,25 @@ export function Chat({
       const trimmed = text.trim();
       if (!trimmed || loading) return;
       setLoading(true);
+      setLimitMessage(null);
       setInput("");
 
-      const userMsg: MessageRow = { role: "user", content: trimmed };
+      const finalPin = employeePin ?? (pin === "auto" ? undefined : pin);
+      const placeholderEmp: EmployeeKey = finalPin ?? "jarvis";
+
       setMessages((prev) => [
         ...prev,
-        userMsg,
-        { role: "assistant", employee: "jarvis", content: "", pending: true },
+        { role: "user", content: trimmed },
+        {
+          role: "assistant",
+          employee: placeholderEmp,
+          content: "",
+          pending: true,
+        },
       ]);
 
       const body: Record<string, unknown> = { message: trimmed };
       if (conversationId) body.conversation_id = conversationId;
-      const finalPin = employeePin ?? (pin === "auto" ? undefined : pin);
       if (finalPin) body.employee_override = finalPin;
 
       const resp = await fetch("/api/conduit/chat", {
@@ -112,14 +149,7 @@ export function Chat({
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
       let buf = "";
-      let currentEmployee: EmployeeKey = finalPin ?? "jarvis";
-      // Update the placeholder to the right employee
-      setMessages((prev) => {
-        const next = [...prev];
-        const last = next[next.length - 1];
-        if (last && last.pending) last.employee = currentEmployee;
-        return next;
-      });
+      let currentEmployee: EmployeeKey = placeholderEmp;
 
       const ensurePendingFor = (employee: EmployeeKey) => {
         setMessages((prev) => {
@@ -181,7 +211,6 @@ export function Chat({
       ) => {
         setMessages((prev) => {
           const next = [...prev];
-          // attach to most recent assistant message of this employee
           for (let i = next.length - 1; i >= 0; i--) {
             const m = next[i];
             if (m.role === "assistant" && m.employee === employee) {
@@ -224,6 +253,9 @@ export function Chat({
               type: data.type as string,
             },
           );
+        } else if (event === "limit_reached") {
+          setLimitMessage((data.message as string) || "Token limit reached.");
+          finishCurrent(currentEmployee);
         } else if (event === "done") {
           const cid = data.conversation_id as string;
           if (cid && cid !== conversationId) {
@@ -269,6 +301,10 @@ export function Chat({
     [conversationId, loading, pin, router],
   );
 
+  const pinLabel =
+    PIN_OPTIONS.find((o) => o.value === pin)?.label ?? "Jarvis (auto-route)";
+  const pinAvatarEmp: EmployeeKey = pin === "auto" ? "jarvis" : pin;
+
   return (
     <>
       <div
@@ -277,30 +313,7 @@ export function Chat({
       >
         <div className="mx-auto max-w-3xl space-y-6">
           {messages.length === 0 && (
-            <div className="pt-12 md:pt-20">
-              <h1 className="serif text-3xl md:text-5xl text-[var(--color-text)]">
-                What can your team do for you today?
-              </h1>
-              <p className="mt-3 text-sm text-[var(--color-text-muted)]">
-                Talk to Jarvis. He&apos;ll route to Marketing, Sales, or
-                Engineering — or handle it himself.
-              </p>
-              <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {SUGGESTIONS.map((s) => (
-                  <button
-                    key={s.text}
-                    onClick={() => send(s.text, s.pin)}
-                    className="hairline px-4 py-3 text-left text-sm text-[var(--color-text-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-text)] transition-colors flex items-start justify-between gap-3"
-                  >
-                    <span>{s.text}</span>
-                    <ArrowRight
-                      size={14}
-                      className="shrink-0 mt-1 opacity-60"
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
+            <EmptyState firstName={firstName} onSend={send} />
           )}
 
           {messages.map((m, i) => (
@@ -313,15 +326,58 @@ export function Chat({
         </div>
       </div>
 
-      <div className="hairline border-l-0 border-r-0 border-b-0 px-4 md:px-8 py-3 md:py-4 bg-[var(--color-surface)]">
+      <div className="px-4 md:px-8 py-3 md:py-4 bg-[var(--color-surface)]">
         <div className="mx-auto max-w-3xl">
+          {limitMessage && (
+            <div className="mb-3 conduit-card px-4 py-3 text-sm text-[var(--color-amber)] border-[var(--color-amber)]/40">
+              {limitMessage}
+            </div>
+          )}
           <form
             onSubmit={(e) => {
               e.preventDefault();
               send(input);
             }}
-            className="flex items-end gap-2"
+            className="conduit-pill-input flex items-center gap-2 px-2 py-2"
           >
+            <button
+              type="button"
+              onClick={() => setPinOpen((v) => !v)}
+              className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full hover:bg-[var(--color-surface-raised)] text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] shrink-0 relative"
+            >
+              <EmployeeAvatar employee={pinAvatarEmp} size={22} />
+              <span>{pinLabel}</span>
+              <span aria-hidden>▾</span>
+              {pinOpen && (
+                <div
+                  className="absolute bottom-full left-0 mb-2 w-56 conduit-card overflow-hidden text-left z-10"
+                  onMouseLeave={() => setPinOpen(false)}
+                >
+                  {PIN_OPTIONS.map((o) => (
+                    <button
+                      key={o.value}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPin(o.value);
+                        setPinOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 text-xs flex items-center gap-2 hover:bg-[var(--color-surface-raised)] ${
+                        pin === o.value
+                          ? "text-[var(--color-text)]"
+                          : "text-[var(--color-text-muted)]"
+                      }`}
+                    >
+                      <EmployeeAvatar
+                        employee={o.value === "auto" ? "jarvis" : o.value}
+                        size={18}
+                      />
+                      <span>{o.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </button>
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -333,38 +389,20 @@ export function Chat({
               }}
               rows={1}
               placeholder="Talk to your team…"
-              className="flex-1 resize-none bg-[var(--color-surface-elevated)] hairline px-4 py-3 outline-none focus:border-[var(--color-accent)] max-h-40"
+              className="flex-1 resize-none bg-transparent outline-none px-2 py-2 text-[15px] max-h-32 leading-snug"
             />
             <button
               type="submit"
               disabled={loading || !input.trim()}
               aria-label="Send"
-              className="btn-primary !px-4 !py-3 disabled:opacity-40"
+              className="conduit-circle-btn shrink-0"
             >
               <Send size={16} />
             </button>
           </form>
-          <div className="mt-2 flex items-center justify-between gap-3 text-xs text-[var(--color-text-muted)]">
-            <label className="flex items-center gap-2">
-              Talking to:
-              <select
-                value={pin}
-                onChange={(e) => setPin(e.target.value as EmployeeKey | "auto")}
-                className="bg-[var(--color-surface-elevated)] hairline px-2 py-1 text-[var(--color-text)]"
-              >
-                <option value="auto">Jarvis (auto-route)</option>
-                {EMPLOYEES.filter((e) => e !== "jarvis").map((e) => (
-                  <option key={e} value={e}>
-                    {employeeLabel(e)}
-                  </option>
-                ))}
-                <option value="jarvis">Jarvis only</option>
-              </select>
-            </label>
-            <span className="hidden sm:inline">
-              Shift+Enter for newline
-            </span>
-          </div>
+          <p className="mt-2 text-center text-[11px] text-[var(--color-text-muted)]">
+            Shift+Enter for newline
+          </p>
         </div>
       </div>
 
@@ -378,6 +416,55 @@ export function Chat({
   );
 }
 
+function EmptyState({
+  firstName,
+  onSend,
+}: {
+  firstName: string;
+  onSend: (text: string, pin?: EmployeeKey) => void;
+}) {
+  return (
+    <div className="pt-8 md:pt-16">
+      <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)] mb-3">
+        Welcome back, {firstName}
+      </p>
+      <h1 className="serif text-3xl md:text-5xl text-[var(--color-text)] leading-[1.05]">
+        What&apos;s the team working on today?
+      </h1>
+      <p className="mt-4 text-sm text-[var(--color-text-muted)] max-w-xl">
+        Talk to Jarvis. He routes to Marketing, Sales, or Engineering — or
+        handles it himself.
+      </p>
+      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {SUGGESTIONS.map((s) => (
+          <button
+            key={s.text}
+            onClick={() => onSend(s.text, s.pin)}
+            style={{
+              ["--dept" as string]: DEPT_COLOR[s.dept],
+              ["--dept-soft" as string]: DEPT_COLOR_SOFT[s.dept],
+            }}
+            className="conduit-suggestion px-4 py-4 text-left flex flex-col gap-2"
+          >
+            <div className="flex items-center gap-2">
+              <EmployeeAvatar employee={s.dept} size={22} />
+              <span
+                className="text-[10px] uppercase tracking-[0.2em]"
+                style={{ color: DEPT_COLOR[s.dept] }}
+              >
+                {s.hint}
+              </span>
+            </div>
+            <span className="text-sm text-[var(--color-text)]">
+              {s.text}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function MessageBubble({
   message,
   onOpenArtifact,
@@ -388,7 +475,7 @@ function MessageBubble({
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[85%] bg-[var(--color-surface-elevated)] hairline px-4 py-3 text-[var(--color-text)] whitespace-pre-wrap">
+        <div className="max-w-[85%] conduit-bubble-user px-4 py-3 text-[var(--color-text)] whitespace-pre-wrap">
           {message.content}
         </div>
       </div>
@@ -397,43 +484,111 @@ function MessageBubble({
 
   if (message.role === "system" && message.handoffTo) {
     return (
-      <div className="flex items-center gap-3 my-2">
-        <div className="flex-1 h-px bg-[var(--color-border)]" />
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] flex items-center gap-2">
-          <ArrowRight size={12} />
-          {employeeLabel(message.handoffTo)} taking this
+      <div
+        className="handoff-card flex items-center gap-3 my-3"
+        style={{ ["--dept" as string]: DEPT_COLOR[message.handoffTo] }}
+      >
+        <div
+          className="flex-1 h-px"
+          style={{
+            background: `linear-gradient(to right, transparent, ${DEPT_COLOR[message.handoffTo]} 50%, transparent)`,
+            opacity: 0.5,
+          }}
+        />
+        <div className="flex items-center gap-2 text-xs">
+          <EmployeeAvatar employee={message.handoffTo} size={20} />
+          <span style={{ color: DEPT_COLOR[message.handoffTo] }}>
+            {employeeLabel(message.handoffTo)} is taking this from here
+          </span>
         </div>
-        <div className="flex-1 h-px bg-[var(--color-border)]" />
+        <div
+          className="flex-1 h-px"
+          style={{
+            background: `linear-gradient(to right, transparent, ${DEPT_COLOR[message.handoffTo]} 50%, transparent)`,
+            opacity: 0.5,
+          }}
+        />
       </div>
     );
   }
 
   const employee = (message.employee as EmployeeKey) ?? "jarvis";
+  const empty = !message.content && message.pending;
+
   return (
-    <div className="space-y-2">
-      <EmployeeBadge employee={employee} />
-      <div className="text-[var(--color-text)] whitespace-pre-wrap leading-relaxed">
-        {message.content}
-        {message.pending && (
-          <span
-            aria-hidden
-            className="inline-block w-2 h-4 -mb-1 ml-1 bg-[var(--color-accent)] caret"
-          />
-        )}
+    <div
+      className="flex gap-3"
+      style={{ ["--dept" as string]: DEPT_COLOR[employee] }}
+    >
+      <div className="pt-1 shrink-0">
+        <EmployeeAvatar employee={employee} size={32} active={message.pending} />
       </div>
-      {message.artifacts?.map((a) => (
-        <button
-          key={a.id}
-          onClick={() => onOpenArtifact(a.id)}
-          className="mt-2 hairline px-3 py-2 text-sm flex items-center gap-2 text-[var(--color-text-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-text)] transition-colors"
-        >
-          <FileText size={14} />
-          <span className="font-medium text-[var(--color-text)]">
-            {a.title}
+      <div className="min-w-0 flex-1 space-y-1">
+        <div className="flex items-baseline gap-2">
+          <span
+            className="text-[12px] font-medium"
+            style={{ color: DEPT_COLOR[employee] }}
+          >
+            {employeeLabel(employee)}
           </span>
-          <span className="text-xs">— Open</span>
-        </button>
-      ))}
+          {message.pending && (
+            <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+              {empty
+                ? `${employeeLabel(employee)} is thinking…`
+                : "writing…"}
+            </span>
+          )}
+        </div>
+        <div className="conduit-bubble-assistant px-4 py-3 text-[var(--color-text)] whitespace-pre-wrap leading-relaxed">
+          {empty ? (
+            <span className="inline-flex items-center gap-1 py-1">
+              <span className="typing-dot" />
+              <span className="typing-dot" />
+              <span className="typing-dot" />
+            </span>
+          ) : (
+            <>
+              {message.content}
+              {message.pending && (
+                <span
+                  aria-hidden
+                  className="inline-block w-[2px] h-4 -mb-1 ml-1 caret"
+                  style={{ background: DEPT_COLOR[employee] }}
+                />
+              )}
+            </>
+          )}
+        </div>
+        {message.artifacts?.map((a) => (
+          <button
+            key={a.id}
+            onClick={() => onOpenArtifact(a.id)}
+            style={{
+              ["--dept" as string]: DEPT_COLOR[employee],
+            }}
+            className="mt-2 group conduit-card border-l-[3px] hover:border-l-[3px] px-4 py-3 text-left flex items-start gap-3 hover:border-[var(--dept)] transition-colors w-full max-w-md"
+          >
+            <span
+              className="mt-0.5 inline-flex items-center justify-center w-9 h-9 rounded-lg shrink-0"
+              style={{ background: DEPT_COLOR_SOFT[employee] }}
+            >
+              <FileText size={16} style={{ color: DEPT_COLOR[employee] }} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                {a.type.replace("_", " ")} · by {employeeLabel(employee)}
+              </span>
+              <span className="block text-sm text-[var(--color-text)] mt-0.5 truncate">
+                {a.title}
+              </span>
+              <span className="block text-[11px] text-[var(--color-text-muted)] mt-1 inline-flex items-center gap-1 group-hover:text-[var(--color-text)]">
+                Open in drawer
+                <ArrowRight size={11} />
+              </span>
+            </span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -465,24 +620,26 @@ function ArtifactDrawer({
   return (
     <div className="fixed inset-0 z-40 flex">
       <div onClick={onClose} className="flex-1 bg-black/60" />
-      <div className="w-full max-w-2xl bg-[var(--color-surface-elevated)] hairline border-r-0 border-t-0 border-b-0 overflow-y-auto p-6">
+      <div className="w-full max-w-2xl bg-[var(--color-surface-elevated)] border-l border-[var(--color-border)] overflow-y-auto p-6 md:p-8">
         {!data ? (
           <p className="text-sm text-[var(--color-text-muted)]">Loading…</p>
         ) : (
           <>
-            <div className="flex items-center justify-between gap-3 mb-4">
-              <div>
-                <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+            <div className="flex items-start justify-between gap-3 mb-6">
+              <div className="min-w-0">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
                   {data.type.replace("_", " ")} · by {data.produced_by}
                 </div>
-                <h2 className="serif text-2xl mt-1">{data.title}</h2>
+                <h2 className="serif text-2xl md:text-3xl mt-1 leading-tight">
+                  {data.title}
+                </h2>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 shrink-0">
                 <button
                   onClick={() =>
                     navigator.clipboard?.writeText(data.content)
                   }
-                  className="btn-secondary !px-3 !py-2 text-xs"
+                  className="btn-secondary !px-3 !py-2 !text-xs"
                 >
                   Copy
                 </button>
@@ -500,19 +657,20 @@ function ArtifactDrawer({
                     a.click();
                     URL.revokeObjectURL(url);
                   }}
-                  className="btn-secondary !px-3 !py-2 text-xs"
+                  className="btn-secondary !px-3 !py-2 !text-xs"
                 >
                   Download
                 </button>
                 <button
                   onClick={onClose}
                   className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] px-2"
+                  aria-label="Close"
                 >
                   ✕
                 </button>
               </div>
             </div>
-            <pre className="whitespace-pre-wrap font-sans text-[var(--color-text)] leading-relaxed text-sm">
+            <pre className="whitespace-pre-wrap font-sans text-[var(--color-text)] leading-relaxed text-[15px]">
               {data.content}
             </pre>
           </>

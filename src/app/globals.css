@@ -3,17 +3,32 @@
 @theme inline {
   --color-surface: #0A0908;
   --color-surface-elevated: #14110F;
+  --color-surface-raised: #1A1714;
   --color-border: #1F1C19;
+  --color-border-soft: #2A2622;
   --color-text: #F5F1EA;
   --color-text-muted: #8C8884;
-  --color-accent: #FF6B35;
-  --color-accent-hi: #FFA478;
+  --color-accent: #FF8A3D;
+  --color-accent-hi: #FFA876;
   --color-accent-deep: #D9532A;
   --color-cyan: #22D3EE;
   --color-purple: #A855F7;
   --color-green: #34D399;
   --color-pink: #F472B6;
   --color-amber: #FBBF24;
+  /* Conduit department colors — used for employee accents.
+     Jarvis = silver/platinum (chief of staff)
+     Marketing = warm orange (matches accent)
+     Sales = emerald
+     Engineering = cool blue */
+  --color-dept-jarvis: #C8C5BD;
+  --color-dept-jarvis-soft: rgba(200, 197, 189, 0.14);
+  --color-dept-marketing: #FF8A3D;
+  --color-dept-marketing-soft: rgba(255, 138, 61, 0.14);
+  --color-dept-sales: #34D399;
+  --color-dept-sales-soft: rgba(52, 211, 153, 0.14);
+  --color-dept-engineering: #60A5FA;
+  --color-dept-engineering-soft: rgba(96, 165, 250, 0.14);
   --font-serif: "Fraunces", ui-serif, Georgia, Cambria, "Times New Roman", serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -72,6 +87,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  border-radius: 14px;
 }
 .btn-primary:hover {
   background: var(--color-accent-hi);
@@ -88,6 +104,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  border-radius: 14px;
 }
 .btn-secondary:hover {
   border-color: var(--color-accent);
@@ -145,6 +162,119 @@ body {
 
 /* Hairline divider */
 .divider { height: 1px; background: var(--color-border); width: 100%; }
+
+/* === Conduit /app surface === */
+.conduit-card {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.conduit-pill-input {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+.conduit-pill-input:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 4px rgba(255, 138, 61, 0.08);
+}
+
+.conduit-bubble-user {
+  background: rgba(255, 138, 61, 0.10);
+  border: 1px solid rgba(255, 138, 61, 0.28);
+  border-radius: 16px 16px 4px 16px;
+}
+.conduit-bubble-assistant {
+  background: var(--color-surface-elevated);
+  border-left: 2px solid var(--dept, var(--color-border));
+  border-radius: 4px 16px 16px 16px;
+}
+
+.conduit-suggestion {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  transition: border-color 180ms ease, box-shadow 220ms ease, transform 180ms ease;
+}
+.conduit-suggestion:hover {
+  border-color: var(--dept, var(--color-accent));
+  box-shadow: 0 0 0 1px var(--dept, var(--color-accent)),
+    0 6px 24px -8px var(--dept-soft, rgba(255, 138, 61, 0.20));
+  transform: translateY(-1px);
+}
+
+.conduit-circle-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  color: #0A0908;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 180ms ease, transform 180ms ease;
+}
+.conduit-circle-btn:hover { background: var(--color-accent-hi); }
+.conduit-circle-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+@keyframes employeePulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--dept, transparent); }
+  50% { box-shadow: 0 0 0 6px transparent; }
+}
+.employee-pulse {
+  animation: employeePulse 1.6s ease-in-out infinite;
+}
+
+@keyframes typingDot {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-2px); }
+}
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--dept, var(--color-text-muted));
+  animation: typingDot 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 150ms; }
+.typing-dot:nth-child(3) { animation-delay: 300ms; }
+
+@keyframes handoffSlide {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.handoff-card {
+  animation: handoffSlide 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes onboardingFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.onboarding-step {
+  animation: onboardingFadeIn 240ms ease forwards;
+}
+
+/* Team-status dot in sidebar */
+.team-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--dept, var(--color-text-muted));
+  flex-shrink: 0;
+}
+.team-dot.active::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 9999px;
+  border: 1px solid var(--dept, transparent);
+  opacity: 0.6;
+  animation: nodePulse 2s ease-in-out infinite;
+}
 
 /* Live agent dot */
 @keyframes agentDot {
