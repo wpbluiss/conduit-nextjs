@@ -16,6 +16,7 @@ import { systemPromptFor } from "@/lib/ai/employees";
 import type { AccountContext } from "@/lib/ai/employees/jarvis";
 import { parseHandoff, parseArtifacts } from "@/lib/ai/parse";
 import { estimateCostCents } from "@/lib/ai/pricing";
+import { classifyIntent, type IntentClass } from "@/lib/ai/intent-classifier";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -125,8 +126,15 @@ export async function POST(request: NextRequest) {
   const accountId = account.id;
   const finalConvId = conversationId;
   const creatorMode = account.creator_mode;
+  const creatorModeVersion = account.creator_mode_version ?? 1;
   const tokenCap = account.monthly_token_cap;
   let tokensUsedThisCycle = account.monthly_tokens_used;
+
+  // Conduit Adaptive — classify the user's intent once per turn.
+  // The same intent flows through Jarvis routing → handed-off employee.
+  const intent: IntentClass = await classifyIntent(message, {
+    employee: initialEmployee,
+  });
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -175,11 +183,26 @@ export async function POST(request: NextRequest) {
         let modelUsed = "";
         let providerUsed = "anthropic";
 
+        // Per-employee intent shaping — Marketing always 'creative',
+        // Engineering always 'code'. Otherwise carry the user's classified intent.
+        const turnIntent: IntentClass =
+          employee === "marketing"
+            ? "creative"
+            : employee === "engineering"
+              ? "code"
+              : intent;
+
         try {
           for await (const chunk of streamComplete({
             messages,
             systemPrompt,
-            metadata: { employee, accountId, creatorMode },
+            metadata: {
+              employee,
+              accountId,
+              creatorMode,
+              creatorModeVersion,
+              intent: turnIntent,
+            },
             maxTokens: maxTokensFor(employee),
           })) {
             if (chunk.delta) {
@@ -265,6 +288,9 @@ export async function POST(request: NextRequest) {
             cache_read_input_tokens: cacheReadTokens,
             cache_creation_input_tokens: cacheCreationTokens,
             creator_mode: creatorMode,
+            creator_mode_version: creatorModeVersion,
+            intent: turnIntent,
+            user_intent: intent,
           },
         });
 

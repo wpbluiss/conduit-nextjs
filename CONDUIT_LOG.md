@@ -281,3 +281,95 @@ Files: `src/app/globals.css` (3 rule blocks), `src/components/conduit/EmployeeBa
 - No 3D / parallax / loud animations
 - No new design libraries
 - No schema or API changes
+
+---
+
+## Round 3 — Adaptive routing + Marketing UX fix + Creator Mode v2 (2026-05-06)
+
+Branch: `feat/conduit-r3-adaptive` → merged to `main`.
+
+### Marketing UX fix (PREFLIGHT)
+
+Bug: when Marketing produced an `[ARTIFACT]` block, the chat-visible
+message rendered as just `---` after the artifact strip. Two changes:
+
+- `src/lib/ai/employees/marketing.ts` — system prompt now requires a
+  1-2 sentence preface BEFORE the `[ARTIFACT]` block. Three example
+  prefaces in the prompt; explicit "NEVER lead with horizontal rules
+  (---) or empty content."
+- `src/lib/ai/parse.ts` — defensive fallback in `parseArtifacts`. When at
+  least one artifact is parsed and the remaining visible text is empty,
+  whitespace, just `-*_=` separator characters, or under 10 characters,
+  the visible body is replaced with "Done. Artifact ready — open below
+  or in /app/artifacts."
+
+### Conduit Adaptive — intent-based routing
+
+New file: `src/lib/ai/intent-classifier.ts`. Classifies each user message
+into one of `routing | creative | reasoning | code | factual` via a
+small Haiku call (max 8 output tokens). Cheap heuristics short-circuit
+before the API call: messages under 24 chars → routing, Engineering →
+code, Marketing → creative. In-process LRU caches the last 50
+classifications keyed by `${employee}::${first 200 chars}`.
+
+`provider.ts` `modelForEmployee()` now takes `intent` + `creatorMode` +
+`creatorModeVersion` and returns one of Opus 4.7 / Sonnet 4 / Haiku 4.5
+per the matrix:
+
+| Tier | reasoning | code | creative | routing | factual |
+|---|---|---|---|---|---|
+| Standard (Free / Pro) | Sonnet 4 | Sonnet 4 | Haiku 4.5 | Haiku 4.5 | Haiku 4.5 |
+| Creator Mode v1 (legacy) | Haiku 4.5 | Haiku 4.5 | Haiku 4.5 | Haiku 4.5 | Haiku 4.5 |
+| Creator Mode v2 (Luis daily) | **Opus 4.7** | **Opus 4.7** | Sonnet 4 | Sonnet 4 | Sonnet 4 |
+
+Engineering is forced to Sonnet on standard tier even on routing intent
+(baseline before R6 real execution).
+
+Chat route classifies the user's message once per turn, then per-employee
+intent shaping kicks in: Marketing always treated as `creative`,
+Engineering always `code`, all others carry the user's classified intent.
+Intent + chosen model are written to `conduit_usage_events.metadata`
+(`intent`, `user_intent`).
+
+### Creator Mode v2
+
+Migration `004_creator_mode_v2.sql` adds `creator_mode_version integer
+DEFAULT 1`. Owner (`luisinvestments101@gmail.com`) flipped to v2 — Opus
+4.7 default with Sonnet fallback.
+
+Settings → Profile shows a "Creator Mode v2 — premium routing" pill when
+`creator_mode = true`.
+
+### Pricing table updated
+
+`src/lib/ai/pricing.ts` adds Opus 4.7 ($15/$75 per MTok). Estimator
+keeps the 0.10× cached-read and 1.25× cache-write multipliers.
+
+### Cost impact
+
+- Owner messages: depends on intent. Routing turns from R2 (Haiku
+  $1/$5) → Sonnet ($3/$15, ~3× cost). Strategic / multi-step turns from
+  Haiku → Opus ($15/$75, ~15× input / ~15× output). This is intentional —
+  Luis dogfoods Opus quality on every strategic turn.
+- Customer (non-creator-mode) messages: identical to R2 except now
+  reasoning + code intents bump from Haiku to Sonnet — the right thing
+  for quality, ~3× cost on those turns only. Routing/creative remain on
+  Haiku, which is the bulk of conversational volume.
+- The 1-Haiku-call classification adds ~50-150 input + ~1-2 output
+  tokens per user message. ~$0.0001 per message. Functionally free.
+
+### Verification
+
+- `npm run build` clean (Next.js 16.2.2, Turbopack).
+- Migration 004 applied; Luis row confirmed `creator_mode_version=2`.
+- Local dev: `/`, `/auth/sign-in`, `/auth/sign-up` 200; `/app` 307; chat
+  401 unauth.
+- Live intent classification + cost spot-check reserved for Luis's first
+  R3 turn after deploy (couldn't simulate end-user auth here).
+
+### What's NOT in this round
+
+- Stripe billing — queued for R4
+- New employees — R6
+- Cross-provider routing (OpenAI / Perplexity / Groq) — stubbed; R5+
+- Multi-step planner / executor / reviewer — R3+ (next-next; not this PR)

@@ -80,5 +80,18 @@ export function parseArtifacts(content: string): ArtifactParseResult {
     visible = visible.replace(match[0], "");
   }
 
-  return { visibleContent: visible.trim(), artifacts };
+  let trimmedVisible = visible.trim();
+
+  // Defensive fallback: if the visible content after stripping is empty,
+  // whitespace, just horizontal-rule punctuation, or under 10 chars while we
+  // produced an artifact, replace with a sensible default. Prevents the chat
+  // from rendering a stray "---" when an employee forgets the preface.
+  if (artifacts.length > 0) {
+    const stripped = trimmedVisible.replace(/[-*_=\s]/g, "");
+    if (trimmedVisible.length < 10 || stripped.length === 0) {
+      trimmedVisible = "Done. Artifact ready — open below or in /app/artifacts.";
+    }
+  }
+
+  return { visibleContent: trimmedVisible, artifacts };
 }

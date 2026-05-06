@@ -19,6 +19,8 @@ interface AccountData {
   name: string;
   business_type: string;
   business_description: string;
+  creator_mode?: boolean;
+  creator_mode_version?: number;
 }
 
 export function SettingsTabs({
@@ -62,7 +64,12 @@ export function SettingsTabs({
       </div>
 
       {tab === "profile" && (
-        <ProfileTab email={email} fullName={fullName} />
+        <ProfileTab
+          email={email}
+          fullName={fullName}
+          creatorMode={Boolean(account.creator_mode)}
+          creatorModeVersion={account.creator_mode_version ?? 1}
+        />
       )}
       {tab === "business" && <BusinessTab account={account} />}
       {tab === "usage" && <UsageTab usage={usage} />}
@@ -71,7 +78,17 @@ export function SettingsTabs({
   );
 }
 
-function ProfileTab({ email, fullName }: { email: string; fullName: string }) {
+function ProfileTab({
+  email,
+  fullName,
+  creatorMode,
+  creatorModeVersion,
+}: {
+  email: string;
+  fullName: string;
+  creatorMode: boolean;
+  creatorModeVersion: number;
+}) {
   return (
     <div className="space-y-4 text-sm">
       <div>
@@ -86,6 +103,30 @@ function ProfileTab({ email, fullName }: { email: string; fullName: string }) {
         </div>
         <div>{email}</div>
       </div>
+      {creatorMode && (
+        <div>
+          <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
+            Mode
+          </div>
+          <span
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs"
+            style={{
+              borderColor: "var(--color-accent)",
+              color: "var(--color-accent-hi)",
+              background:
+                "color-mix(in srgb, var(--color-accent) 8%, transparent)",
+            }}
+          >
+            <span
+              aria-hidden
+              className="inline-block w-1.5 h-1.5 rounded-full"
+              style={{ background: "var(--color-accent)" }}
+            />
+            Creator Mode v{creatorModeVersion}
+            {creatorModeVersion >= 2 ? " — premium routing" : ""}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
