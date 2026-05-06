@@ -42,21 +42,13 @@ export function EmployeeAvatar({
         height: size,
         background: DEPT_COLOR_SOFT[employee],
         ["--dept" as string]: DEPT_COLOR[employee],
+        boxShadow: `inset 0 0 0 1.5px ${DEPT_COLOR[employee]}`,
       }}
-      className={`inline-flex items-center justify-center rounded-full text-[11px] font-medium text-[var(--color-text)] ring-1 ${
+      className={`relative inline-flex items-center justify-center rounded-full text-[11px] font-medium text-[var(--color-text)] ${
         active ? "employee-pulse" : ""
       }`}
     >
-      <span
-        className="absolute"
-        aria-hidden
-        style={{
-          inset: 0,
-          borderRadius: 9999,
-          boxShadow: `inset 0 0 0 1.5px ${DEPT_COLOR[employee]}`,
-        }}
-      />
-      <span className="relative">{m.initial}</span>
+      {m.initial}
     </span>
   );
 }
