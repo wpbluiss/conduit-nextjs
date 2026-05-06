@@ -95,6 +95,11 @@ export default async function SettingsPage() {
             business_description: account.business_description ?? "",
             creator_mode: account.creator_mode,
             creator_mode_version: account.creator_mode_version,
+            tier_id: account.tier_id,
+            subscription_status: account.subscription_status,
+            bonus_tokens: account.bonus_tokens,
+            internal_account: account.internal_account,
+            has_stripe_customer: Boolean(account.stripe_customer_id),
           }}
           usage={{
             totals,

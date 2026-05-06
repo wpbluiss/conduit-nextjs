@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getOrCreateAccount } from "@/lib/conduit/account";
 import { Sidebar } from "@/components/conduit/Sidebar";
 import { OnboardingModal } from "@/components/conduit/OnboardingModal";
+import { UpgradeNudge } from "@/components/conduit/UpgradeNudge";
 
 export const dynamic = "force-dynamic";
 
@@ -69,6 +70,10 @@ export default async function AppLayout({
         team={team}
       />
       <main className="conduit-canvas flex-1 flex flex-col min-w-0">
+        <UpgradeNudge
+          tierId={account.tier_id ?? "free"}
+          internalAccount={Boolean(account.internal_account)}
+        />
         {children}
       </main>
       {!onboarded && <OnboardingModal defaultName={userName} />}

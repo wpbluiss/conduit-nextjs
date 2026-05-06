@@ -79,6 +79,8 @@ export async function POST(request: NextRequest) {
           creatorMode: account.creator_mode,
           creatorModeVersion: account.creator_mode_version ?? 1,
           intent: "routing",
+          internalAccount: Boolean(account.internal_account),
+          // Onboarding always allowed even on Free tier (Jarvis is in the allowlist).
         },
         maxTokens: 400,
       });

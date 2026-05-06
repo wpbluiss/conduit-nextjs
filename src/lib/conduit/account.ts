@@ -11,6 +11,13 @@ export interface ConduitAccount {
   monthly_token_cap: number;
   monthly_tokens_used: number;
   billing_cycle_start: string;
+  // R4 billing fields
+  tier_id: string;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  subscription_status: string;
+  bonus_tokens: number;
+  internal_account: boolean;
   created_at: string;
   updated_at: string;
 }
