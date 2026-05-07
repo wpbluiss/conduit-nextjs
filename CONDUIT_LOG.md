@@ -1556,3 +1556,112 @@ Merged to main as a4edc74.
 
 Migration applied to project mvuslmfjkkuizixjpkgl.
 
+
+## Round 15 — Engineering Execution v2 (2026-05-07)
+
+Branch: feat/conduit-r15-engineering (Praxis HEAD ae8060d). Worker repo
+wpbluiss/conduit-engineering-worker on main (HEAD e748897). v1 is staged
+end-to-end; live demo requires Railway deploy + ENGINEERING_WORKER_URL +
+ENGINEERING_WORKER_SECRET on Vercel before the button does anything.
+
+### Why
+R7 ships sites from a fixed template set (landing-page, basic-crm, blog,
+lead-capture, contact-form). Anything outside the catalog hit a dead end.
+R15 swaps the template engine for a real claude CLI subprocess running in
+a sandboxed Docker container, so Engineering can ship arbitrary apps. R7
+is preserved as the "templates" tab and continues to handle every
+non-internal user (R15 is internal_account-only for v1).
+
+### New worker repo — wpbluiss/conduit-engineering-worker
+Two-stage Dockerfile (debian-slim + Node 22, claude CLI + vercel CLI
+installed globally, ca-certificates fix from R12). Express server on PORT
+with HMAC-authed POST /session. Per-session ephemeral workspace under
+/workspace/<sessionId>; `claude --print --output-format stream-json
+--verbose --dangerously-skip-permissions` runs the build. Stdout parsed
+line-by-line for token usage and tool_use events; logs persisted to
+conduit_engineering_logs which Supabase realtime forwards to the
+BuildSession overlay. Deploy step runs npm install + npm run build (if a
+package.json with build script is present), then `vercel deploy --prod`
+and parses the production URL. 30-min hard timeout. Cleanup on every
+exit path.
+
+iptables network allowlist deferred to R15.5 — Railway containers don't
+ship with NET_ADMIN; layering it in requires a service-config change we
+don't want to gate v1 on. Worker is internal-only for v1: only the Praxis
+API (HMAC-authed) talks to it, so the attack surface is small.
+
+### Migration 018_engineering
+- conduit_engineering_sessions (account_id FK, conversation_id FK,
+  prompt, build_type, status enum pending/running/deploying/complete/
+  failed/timeout, deploy_url, github_repo, total_input_tokens,
+  total_output_tokens, error_message, started_at, completed_at)
+- conduit_engineering_logs (session_id FK, ts, level enum info/stdout/
+  stderr/system, message)
+- conduit_conversations gains nullable engineering_session_id FK
+- Both new tables added to supabase_realtime publication
+
+Applied to project mvuslmfjkkuizixjpkgl.
+
+### API endpoints
+- POST /api/engineering/session — internal_account gate; non-internal
+  gets 403 with "early access" copy. Inserts the session row, HMAC-signs
+  a (sessionId, timestamp) token, posts to ENGINEERING_WORKER_URL/session.
+  On worker unreachable: marks the row failed and returns 502.
+- GET /api/engineering/sessions — list scope drives the new builds tab.
+- GET /api/engineering/session/[id] — detail + paginated logs (?limit /
+  ?before). Used by the read-only path when a finished build is reopened.
+
+### UI
+- src/components/conduit/engineering/BuildSession.tsx — full-screen
+  overlay (files | terminal | status). Subscribes to postgres_changes
+  on logs (INSERT) + sessions (UPDATE). Files panel parses WRITE/EDIT
+  system entries. Terminal renders 1000 most-recent log lines with
+  per-level colors and auto-scroll. Status panel shows step, elapsed,
+  in/out tokens, Open Preview button (enabled when deploy_url lands).
+- EngineeringBuildButton.tsx — "Start a build" button on
+  /app/team/engineering. internal_account gate; non-internal sees a
+  locked chip. Modal: build-type tile picker (landing-page / web-app /
+  api / custom) + 8-4000 char textarea. Submit -> /api/engineering/
+  session -> opens BuildSession.
+- BuildsTabs.tsx — two-tab shell on /app/builds. Tab 1 "R7 Templates"
+  preserves the existing card UI and behavior; Tab 2 "Engineering
+  Builds" lists conduit_engineering_sessions with click-to-reopen
+  BuildSession in read-only mode. Default tab favors the surface with
+  rows.
+
+### System prompt
+src/lib/ai/employees/engineering.ts — non-template fallback now ends
+with "Open Engineering and click Start a build at the top right" instead
+of the old "in a future update?" wait. Internal users see the button
+work; non-internal users see early-access copy when they click. Chat-
+triggered start_build (an LLM-emitted [START_BUILD: ...] tag handled
+post-stream alongside R10's [REMEMBER]) is intentionally deferred to
+R15.5 — wiring it requires threading internal_account through
+systemPromptFor and adding tag parsing to the highest-traffic file in
+the codebase. The workspace button is the demo target the brief calls
+out, and it's the safer v1 surface.
+
+### Deploy steps for the demo (manual, by Luis)
+1. Railway: new project from wpbluiss/conduit-engineering-worker. Env:
+   ANTHROPIC_API_KEY (bot key), VERCEL_API_TOKEN, NEXT_PUBLIC_SUPABASE_URL,
+   SUPABASE_SERVICE_ROLE_KEY, ENGINEERING_WORKER_SECRET (`openssl rand
+   -hex 32`), GITHUB_PAT (optional v1 — not used yet by deploy.ts but
+   plumbed for the audit-trail push planned in R15.5).
+2. Vercel (conduit-nextjs): set ENGINEERING_WORKER_URL to the Railway
+   URL and ENGINEERING_WORKER_SECRET to the same value as Railway.
+3. Sign in as luisinvestments101@gmail.com, open
+   /app/team/engineering -> "Start a build" -> enter prompt, click
+   Ship it -> watch overlay. Open Preview enables on complete.
+
+### Known v1 limitations
+- iptables egress allowlist deferred (Railway capability constraint).
+- No abort path — "Close session" closes the overlay; the worker keeps
+  running until claude exits or the 30-min hard timeout fires.
+- Tokens are accumulated in the worker and persisted at exit; the live
+  count visible in the overlay only updates after the worker writes,
+  so it can lag the terminal stream by a few seconds.
+- Anthropic key on the worker is the bot key (~$24 balance). At v1 demo
+  rates (~5-10k tokens per landing-page build via Sonnet 4.6) that's
+  100-200 builds before refill. R15.5 hardening will add a per-account
+  spend cap.
+
