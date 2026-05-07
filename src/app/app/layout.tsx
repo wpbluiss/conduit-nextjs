@@ -78,6 +78,11 @@ export default async function AppLayout({
         conversations={convos ?? []}
         team={team}
         allowedEmployees={allowedEmployees}
+        tierName={
+          account.internal_account
+            ? "Internal"
+            : tierById(account.tier_id).name
+        }
       />
       <main className="conduit-canvas flex-1 flex flex-col min-w-0">
         <UpgradeNudge
