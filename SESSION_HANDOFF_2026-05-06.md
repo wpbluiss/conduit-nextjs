@@ -37,16 +37,24 @@ R12 additions (Railway worker only — NOT on Vercel):
   ANTHROPIC_API_KEY (transcript summary via Haiku).
 
 ## Round queue (locked order)
-- R11: SHIPPED. Free-source lead pipeline (Overpass discovery + Reddit
-  intent + Playwright Maps enrichment). FB cut — Meta v. Bright Data.
-  Sales workspace at /app/team/sales now backed by real prospects.
-  New table: sales_leads, reddit_lead_sources, lead_intent_signals.
-  New API: POST /api/sales/refresh-leads, GET/PATCH /api/sales/leads.
-  Pre-seeded: 21 real med spa leads in WPB+Boca+Delray+Jupiter via
-  Overpass (no API key needed). Click "Run Discovery" once on the
-  deployed UI to populate intent signals + ratings — that uses the
-  Vercel-side ANTHROPIC_API_KEY which CLI pull masks as sensitive.
-- R12: Voice Room (full-duplex live conversation, WebRTC + VAD + per-employee voices + waveform UI) — THE big one
+- R11: SHIPPED to prod. Free-source lead pipeline (Overpass discovery
+  + Reddit intent + Playwright Maps enrichment). FB cut — Meta v.
+  Bright Data. Sales workspace at /app/team/sales backed by real
+  prospects. Tables: sales_leads, reddit_lead_sources,
+  lead_intent_signals. APIs: POST /api/sales/refresh-leads,
+  GET/PATCH /api/sales/leads. Pre-seeded: 21 real WPB+Boca+Delray+
+  Jupiter med spa leads via Overpass.
+- R12: SHIPPED to prod. Voice Room — full-duplex live conversation
+  via LiveKit + OpenAI Realtime (modalities=['text']) + ElevenLabs
+  streaming TTS. Per-room VoiceAgent on Railway
+  (github.com/wpbluiss/conduit-voice-worker). Vercel mints LiveKit
+  tokens at /api/voice/token, never touches Realtime/ElevenLabs.
+  Worker enforces 300s hard cap + 240s warn + 30min daily ceiling
+  (internal_account exempt). Memory writes via worker-secret-gated
+  /api/voice/memory-write so R10 invariants stay sealed. R11 sales
+  leads loaded into the Realtime instructions when employee=sales.
+  Voice IDs: Jarvis seeded (UgBBYS2sOqTuMpoF3BR0); other 8 fall
+  back to Jarvis until you pick from ElevenLabs dashboard.
 - R13: Streaming TTS bridge (R9 deferred — audio starts within 1 sec instead of 10)
 - R14: Mobile app (Expo)
 - R15: Open-ended Engineering execution via Claude Code subprocess
