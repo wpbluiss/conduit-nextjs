@@ -44,18 +44,26 @@ R12 additions (Railway worker only — NOT on Vercel):
   lead_intent_signals. APIs: POST /api/sales/refresh-leads,
   GET/PATCH /api/sales/leads. Pre-seeded: 21 real WPB+Boca+Delray+
   Jupiter med spa leads via Overpass.
-- R12: SHIPPED to prod. Voice Room — full-duplex live conversation
-  via LiveKit + OpenAI Realtime (modalities=['text']) + ElevenLabs
-  streaming TTS. Per-room VoiceAgent on Railway
-  (github.com/wpbluiss/conduit-voice-worker). Vercel mints LiveKit
-  tokens at /api/voice/token, never touches Realtime/ElevenLabs.
-  Worker enforces 300s hard cap + 240s warn + 30min daily ceiling
-  (internal_account exempt). Memory writes via worker-secret-gated
-  /api/voice/memory-write so R10 invariants stay sealed. R11 sales
-  leads loaded into the Realtime instructions when employee=sales.
-  Voice IDs: Jarvis seeded (UgBBYS2sOqTuMpoF3BR0); other 8 fall
-  back to Jarvis until you pick from ElevenLabs dashboard.
-- R13: Streaming TTS bridge (R9 deferred — audio starts within 1 sec instead of 10)
+- R12: SHIPPED + verified live. Voice Room functional end-to-end.
+  Voice ID Jarvis = UgBBYS2sOqTuMpoF3BR0 (Mark - Natural Conversations),
+  ElevenLabs upgraded to Starter (free tier returns payment_required
+  on streaming WS). Container CA-certs fixed the rtc-node TLS hop
+  to /settings/regions. Polish round added inbound-audio-energy gate
+  + 800ms interrupt cooldown on the worker so VAD jitter no longer
+  self-cancels the agent's response.
+- R13: SHIPPED to prod. Streaming TTS in text chat — audio starts
+  ~500-900ms after first sentence instead of 8-12s for full response.
+  /api/conduit/chat now multiplexes audio chunks into the SSE
+  stream as event:'audio'. Web Audio queue on the client schedules
+  PCM chunks back-to-back. Migration 015 adds
+  accounts.streaming_tts_enabled + conduit_voice_chat_sessions
+  usage log + 50k daily char cap. Settings toggle deferred — runs
+  ON by default with the existing voice_enabled + voice_auto_play
+  prefs gating it.
+- R12.5: PARTIAL. Migration 016 + /api/voice/token mode/participants
+  shipped. Worker rewrite + multi-avatar UI deferred until the
+  architecture call (Realtime fan-out cost vs tagged routing,
+  routing latency budget) is made on the live session.
 - R14: Mobile app (Expo)
 - R15: Open-ended Engineering execution via Claude Code subprocess
 

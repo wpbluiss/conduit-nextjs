@@ -1238,3 +1238,86 @@ from the same turn.
   messages — R13 (when v1 hits its ceiling)
 - Mobile (Expo) app — R14
 - Open-ended Engineering via Claude Code subprocess — R15
+
+
+## Round 11 — Free-source Lead Pipeline (2026-05-06 → -07)
+
+Merged to main: `6190fa2`. Sales workspace at `/app/team/sales` is now
+backed by real prospects sourced via OpenStreetMap Overpass (discovery,
+free HTTP, no ToS friction), Reddit JSON endpoints (intent signals
+scored 0-100 via Haiku), and Playwright + sparticuz/chromium on Vercel
+for Maps rating/review enrichment of intent-flagged leads only. FB
+groups cut entirely — Meta v. Bright Data is not the case to test.
+21 real WPB+Boca+Delray+Jupiter med-spa leads pre-seeded via Overpass.
+New tables: `sales_leads`, `reddit_lead_sources`,
+`lead_intent_signals`. New API: `POST /api/sales/refresh-leads`,
+`GET /api/sales/leads`, `PATCH /api/sales/leads`. Hard rate limits in
+each scraper module (2s Overpass / Reddit / 3s Maps; 30 req/min).
+Maps caps at 50 fetches/run, no UA rotation, no retry on bot wall.
+
+## Round 12 — Voice Room (2026-05-07)
+
+Merged to main: `b9dc053`. Full-duplex live voice via LiveKit Cloud
++ OpenAI Realtime (`modalities=['text']`, server VAD) + ElevenLabs
+streaming TTS (`eleven_turbo_v2_5`, `pcm_24000`,
+`optimize_streaming_latency=3`, `inactivity_timeout=180`). Voice
+worker is a separate repo `wpbluiss/conduit-voice-worker` deployed
+to Railway as a LiveKit Agents process; Vercel mints LiveKit tokens
+at `/api/voice/token` and never touches Realtime/ElevenLabs (cost
+isolation). New tables: `conduit_employee_default_voices`,
+`conduit_voice_sessions`, `conduit_system_config`. Hard ceilings
+enforced server-side: 300s/session, 240s warn, 30min/day per
+account (internal_account exempt). Memory writes back through
+worker-secret-gated `/api/voice/memory-write` so R10 invariant
+stays sealed. Polish round (R12 polish branch) added an inbound
+audio-energy gate + 800ms cooldown on the worker so spurious
+`user_speech_started` events from VAD jitter never cancel the
+agent's response, plus tightened VAD knobs and slowed ElevenLabs
+delivery to 0.85x. Container CA-certs added so the rtc-node
+`/settings/regions` HTTPS fetch can complete TLS handshake on
+Railway. Verified live by Luis: Jarvis voice ID
+`UgBBYS2sOqTuMpoF3BR0` (Mark - Natural Conversations) speaks,
+audio path is end-to-end functional. ElevenLabs Starter tier
+required — free tier returns `payment_required` on streaming WS.
+
+## Round 13 — Streaming TTS in Text Chat (2026-05-07)
+
+Merged to main: `5e2d568`. Audio for text chat now starts within
+~500-900ms of the first sentence completing instead of waiting
+8-12s for the full response. The chat SSE stream multiplexes audio
+chunks alongside token deltas. New shared lib `/lib/voice/streaming-tts.ts`
+ports the worker's ElevenLabs WS contract into the Vercel side
+(eleven_turbo_v2_5, pcm_24000, optimize_streaming_latency=3,
+inactivity_timeout=180); chat-tts.ts is the per-request bridge —
+prepares a config (one batched DB read for prefs + voice overrides
++ today's char usage), opens a per-employee TTS WS in
+`streamForEmployee()`, exposes `onDelta` / `finish` / `cancel`
+to the chat route. Sentence segmenter inside streaming-tts handles
+sentence-boundary detection and end-of-stream tail flush.
+Client-side `voice/streamingAudio.ts` is a tiny module-scoped Web
+Audio queue: decodes base64 PCM16, schedules each chunk after the
+previous one ends, supports `stopAll` for typing-stops-audio.
+Migration 015 adds `accounts.streaming_tts_enabled` (default true),
+`conduit_voice_chat_sessions` usage log, and a system_config row
+for the daily 50k char ceiling (internal_account bypasses).
+Settings UI toggle deferred — runs ON by default with prefs gating.
+
+## Round 12.5 (partial) — Voice Round-Table Plumbing (2026-05-07)
+
+Merged to main: `fabf31b`. Data plumbing only — migration 016
+adds `mode` enum + `participants` jsonb to `conduit_voice_sessions`,
+adds `voice_session_id` to `conduit_conversations` so a voice
+session can deeplink to its originating text chat. `/api/voice/token`
+extended to accept `mode` ('solo' | 'roundtable'), `participants`
+(string[] of employee_ids), and `conversation_id`. Validates
+participant count against tier (2 free / 4 pro / 8 enterprise /
+unlimited internal), forces Jarvis as moderator, blocks tier-locked
+participants. Resolves voice_id for ALL participants up-front and
+packs them into the LiveKit AccessToken metadata. Worker rewrite
+(N parallel Realtime sessions, Haiku routing classifier on user
+transcript, per-participant LiveKit tracks) and the multi-avatar
+UI redesign were intentionally NOT shipped — the architecture has
+real branching points (Realtime fan-out cost vs single-Realtime
+tagged routing, routing latency budget) that need a hands-on call
+with the user before code lands.
+
