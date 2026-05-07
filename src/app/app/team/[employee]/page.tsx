@@ -14,6 +14,7 @@ import {
 } from "@/lib/conduit/workspace-prompts";
 import { tierById } from "@/lib/billing/tiers";
 import { EmployeeAvatar } from "@/components/conduit/EmployeeBadge";
+import SalesWorkspace from "@/components/conduit/sales/SalesWorkspace";
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +58,11 @@ export default async function WorkspacePage({ params }: PageProps) {
     redirect(
       `/app/settings?reason=workspace_locked&employee=${employeeId}`,
     );
+  }
+
+  // R11: Sales gets its own leads-driven workspace.
+  if (employeeId === "sales") {
+    return <SalesWorkspace supabase={supabase} account={account} />;
   }
 
   const cycleStart = new Date(account.billing_cycle_start);
