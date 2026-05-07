@@ -26,27 +26,27 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://conduitai.io"),
-  title: "Conduit AI — Virtual Business Operating System",
+  title: "Conduit — Intelligence at work",
   description:
-    "Deploy 32 autonomous AI employees across 9 departments. Voice, sales, support, ops, finance, marketing — all running 24/7. One platform. Zero payroll.",
+    "Conduit builds Praxis, the operating system for autonomous AI workforces. Voice, sales, engineering, ops, finance — running 24/7.",
   icons: {
     icon: "/favicon.svg",
     apple: "/favicon.svg",
   },
   openGraph: {
-    title: "Conduit AI — Virtual Business Operating System",
+    title: "Conduit — Intelligence at work",
     description:
-      "Deploy 32 autonomous AI employees across 9 departments. Voice, sales, support, ops, finance, marketing — all running 24/7. One platform. Zero payroll.",
+      "Conduit builds Praxis, the operating system for autonomous AI workforces. Voice, sales, engineering, ops, finance — running 24/7.",
     url: "https://conduitai.io",
-    siteName: "Conduit AI",
+    siteName: "Conduit",
     type: "website",
-    images: [{ url: "/logo.svg", width: 1200, height: 1200, alt: "Conduit AI" }],
+    images: [{ url: "/logo.svg", width: 1200, height: 1200, alt: "Conduit" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Conduit AI — Virtual Business Operating System",
+    title: "Conduit — Intelligence at work",
     description:
-      "Deploy 32 autonomous AI employees across 9 departments. 24/7. One platform. Zero payroll.",
+      "Conduit builds Praxis, the operating system for autonomous AI workforces.",
     images: ["/logo.svg"],
   },
 };

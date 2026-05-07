@@ -43,11 +43,12 @@ export async function readVoiceCeilings(
  *
  *   1. per-account override (R5 conduit_employee_voices)
  *   2. global default (conduit_employee_default_voices)
- *   3. Jarvis fallback (also from default_voices)
+ *   3. Atlas fallback (employee id "jarvis" in default_voices — preserved
+ *      enum value for the Chief of Staff)
  *
- * voice_id may still be null at the end if Jarvis hasn't been configured —
- * the worker handles that by emitting a Jarvis-default-voice ElevenLabs ID
- * baked into worker env (FALLBACK_ELEVENLABS_VOICE_ID).
+ * voice_id may still be null at the end if Atlas hasn't been configured —
+ * the worker handles that by emitting a baked-in fallback ElevenLabs voice
+ * id from worker env (FALLBACK_ELEVENLABS_VOICE_ID).
  */
 export async function resolveVoiceId(
   supabase: SupabaseClient,

@@ -1,8 +1,11 @@
-// Single source of truth for the Conduit AI employee roster.
+// Single source of truth for the Praxis employee roster.
 // Color, initial, role label, voice category are all read from here. UI
-// components, the Jarvis routing prompt, the intent classifier, and the
+// components, the Atlas routing prompt, the intent classifier, and the
 // tier allowlist all reference this file so adding a future employee is a
 // one-file change.
+//
+// Note: the `'jarvis'` enum value is preserved as the Chief of Staff's
+// internal id (DB column values live there). The display name is "Atlas".
 
 import type { IntentClass } from "@/lib/ai/intent-classifier";
 
@@ -33,11 +36,11 @@ export interface EmployeeConfig {
 export const EMPLOYEES: Record<EmployeeId, EmployeeConfig> = {
   jarvis: {
     id: "jarvis",
-    name: "Jarvis",
+    name: "Atlas",
     role: "Chief of Staff",
     color: "#C8C5BD",
     colorSoft: "rgba(200, 197, 189, 0.14)",
-    initial: "J",
+    initial: "A",
     tagline: "Your right hand. Routes work, holds the bigger picture.",
     canExecute: true,
     voiceCategory: "routing",

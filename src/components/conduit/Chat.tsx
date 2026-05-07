@@ -45,7 +45,7 @@ const SUGGESTION_POOL: Suggestion[] = [
   {
     text: "Help me grow my business",
     dept: "jarvis",
-    hint: "Strategy with Jarvis",
+    hint: "Strategy with Atlas",
   },
   {
     text: "Write me 3 blog posts about getting my first 10 customers",
@@ -92,7 +92,7 @@ const SUGGESTION_POOL: Suggestion[] = [
 ];
 
 function suggestionsForTier(allowed: Set<EmployeeKey>): Suggestion[] {
-  // Always include Jarvis + Marketing first; then fill with others the tier allows.
+  // Always include Atlas + Marketing first; then fill with others the tier allows.
   const base = SUGGESTION_POOL.filter(
     (s) => s.dept === "jarvis" || s.dept === "marketing",
   );
@@ -106,9 +106,9 @@ function suggestionsForTier(allowed: Set<EmployeeKey>): Suggestion[] {
 type PinValue = EmployeeKey | "auto" | "team";
 
 const ALL_PIN_OPTIONS: { value: PinValue; label: string }[] = [
-  { value: "auto", label: "Jarvis (auto-route)" },
+  { value: "auto", label: "Atlas (auto-route)" },
   { value: "team", label: "Team round-table" },
-  { value: "jarvis", label: "Jarvis only" },
+  { value: "jarvis", label: "Atlas only" },
   { value: "marketing", label: "Marketing" },
   { value: "sales", label: "Sales" },
   { value: "engineering", label: "Engineering" },
@@ -135,7 +135,7 @@ export function Chat({
   allowedEmployees: EmployeeKey[];
 }) {
   const allowedSet = new Set(allowedEmployees);
-  // "team" requires at least 2 non-Jarvis employees on the tier.
+  // "team" requires at least 2 non-Atlas employees on the tier.
   const teamEligible =
     allowedEmployees.filter((e) => e !== "jarvis").length >= 2;
   const pinOptions = ALL_PIN_OPTIONS.filter(
@@ -526,7 +526,7 @@ export function Chat({
           };
           setMessages((prev) => {
             const next = [...prev];
-            // Attach to the most recent Jarvis assistant message.
+            // Attach to the most recent Atlas assistant message.
             for (let i = next.length - 1; i >= 0; i--) {
               const m = next[i];
               if (m.role === "assistant" && m.employee === "jarvis") {
@@ -580,12 +580,12 @@ export function Chat({
             return next;
           });
         } else if (event === "round_table_synthesis_start") {
-          // Banner + pending Jarvis bubble
+          // Banner + pending Atlas bubble
           setMessages((prev) => [
             ...prev,
             {
               role: "system",
-              content: "Synthesis from Jarvis",
+              content: "Synthesis from Atlas",
               metadata: { round_table_banner: true },
             },
             {
@@ -704,7 +704,7 @@ export function Chat({
   );
 
   const pinLabel =
-    pinOptions.find((o) => o.value === pin)?.label ?? "Jarvis (auto-route)";
+    pinOptions.find((o) => o.value === pin)?.label ?? "Atlas (auto-route)";
   const pinAvatarEmp: EmployeeKey =
     pin === "auto" || pin === "team" ? "jarvis" : (pin as EmployeeKey);
 
@@ -946,7 +946,7 @@ function EmptyState({
         What are we building today?
       </h1>
       <p className="mt-4 text-sm text-[var(--color-text-muted)] max-w-xl">
-        Talk to Jarvis. He routes the right employee — or handles it
+        Talk to Atlas. He routes the right employee — or handles it
         himself.
       </p>
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3">

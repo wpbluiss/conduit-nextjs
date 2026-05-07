@@ -30,10 +30,10 @@ export default function Navbar() {
         }`}
       >
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <a href="#top" className="flex items-center gap-2.5 group" aria-label="Conduit AI">
+          <a href="#top" className="flex items-center gap-2.5 group" aria-label="Conduit">
             <Logo size={44} />
             <span className="text-[15px] tracking-tight text-[#F5F1EA]">
-              Conduit <span className="text-[#8C8884]">AI</span>
+              Conduit
             </span>
           </a>
 

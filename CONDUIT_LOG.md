@@ -1401,3 +1401,55 @@ Deferred to next session: chat-header Voice mode trigger that
 builds participants from active conversation, and Bring-in-
 employee modal for upgrading solo to roundtable in place. Both
 need careful Chat.tsx integration.
+
+
+## Round Brand-1 — Atlas + Praxis Rename (2026-05-07)
+
+Merged to main as feat/conduit-rename-atlas-praxis. Foundational
+rename round before R14 mobile + Q3 HQ. Brand architecture locked
+across the company:
+
+- **Conduit** = parent company (marketing site stays at
+  conduitai.io)
+- **Praxis** = product family (formerly "Conduit AI")
+  - Praxis Console — web app (`/app`, formerly chat-first)
+  - Praxis Mobile — R14 (Expo, TestFlight)
+  - Praxis HQ — Q3 (3D headquarters)
+- **Atlas** = Chief of Staff (formerly Jarvis)
+
+DB enum value `jarvis` is preserved as the Chief of Staff identifier
+to avoid a migration cascade. Display name, function names, prompt
+text all reference Atlas.
+
+Code changes:
+- `EMPLOYEES.jarvis.name` = "Atlas", initial "A"
+- `jarvisSystemPrompt` → `atlasSystemPrompt` (file kept as
+  `jarvis.ts` to match the enum value)
+- `JARVIS_MEMORY_INSTRUCTIONS` → `ATLAS_MEMORY_INSTRUCTIONS`
+- `friendlyErrorFor` covers all 9 employees; fallback is "Atlas"
+- `previewLineFor("jarvis")` returns "Hi, I'm Atlas..."
+
+UI changes:
+- /app sidebar wordmark: Conduit → Praxis
+- Chat: pin labels ("Atlas (auto-route)", "Atlas only"),
+  EmptyState ("Talk to Atlas. He routes..."), suggestions
+- OnboardingModal: "Praxis · Step X of 3", "Tell Atlas...",
+  "Meet Atlas" CTA, "Briefing Atlas...", footer "Praxis · By
+  Conduit"
+- SettingsTabs: voice room copy, memory empty state
+
+Marketing surface (minimum-impact pass; R3 is the full rewrite):
+- layout.tsx metadata: "Conduit AI" → "Conduit", new tagline
+  "Intelligence at work."
+- Navbar + Footer wordmarks: drop "AI" suffix
+- Story timeline + body copy
+
+API routes:
+- Onboarding welcome conversation title: "Welcome to Conduit"
+  → "Welcome to Praxis"
+- Handoff brief header: "Brief from Atlas"
+
+Historical CONDUIT_LOG entries reference Jarvis verbatim; this is
+intentional (history is what it was). Forward-looking docs use
+Atlas.
+
