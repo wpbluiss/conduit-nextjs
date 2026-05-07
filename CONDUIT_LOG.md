@@ -712,3 +712,143 @@ tier permits.
 - Multi-user accounts — R8
 - Twilio phone numbers — R8
 - Real Finance reconciliation, real Legal e-sign workflows — R9+
+
+---
+
+## Round 7 — Real Engineering execution + brevity pass (2026-05-06)
+
+Branch: `feat/conduit-r7-engineering-execution` → merged to `main`.
+Engineering goes from "describes what it would build" to "actually
+ships working sites" via curated templates + GitHub + Vercel.
+
+### Schema (migration `008_engineering_builds.sql`)
+
+- `conduit_builds` — id, account_id, conversation_id, message_id,
+  template_id, build_name, build_slug (UNIQUE), status (pending /
+  building / live / failed / archived), github_repo_url,
+  vercel_project_id, vercel_deployment_id, live_url, config jsonb,
+  error_message, archived_at. RLS-on, owner-scoped.
+- `conduit_build_events` — append-only progress log keyed by build_id.
+  RLS-on (owners read).
+- `conduit_artifacts` type CHECK widened to include 'build'.
+
+### Build templates (5)
+
+`src/lib/builds/templates/{landing-page,basic-crm,blog,lead-capture,
+contact-form}.ts` — programmatic generators (function of customization
+config → `Record<filepath, string>`). Each ships a working Next.js
+16 + Tailwind 4 project that builds cleanly with reasonable defaults
+even when Marketing isn't in the loop. `marketing_handoff` field on
+each template flags which fields Marketing should fill before the push.
+
+Shared scaffolding (`shared.ts`): tsconfig, next.config, gitignore,
+postcss + tailwind config, base layout, base globals.css with the
+Conduit visual identity (warm orange accent, deep slate, hairline
+borders, rounded buttons).
+
+### Executor (`src/lib/builds/executor.ts`)
+
+- `executeBuild({templateId, buildName, config, onProgress})` →
+  `{ok, buildSlug, liveUrl, repoUrl, vercelProjectId, ...}`.
+- Steps emit `BuildEvent` types: plan_started, plan_done,
+  marketing_briefed, customizing, repo_created, files_pushed,
+  project_created, deploying, live, failed.
+- GitHub: creates a public repo under `CONDUIT_BUILDS_GITHUB_OWNER`
+  (default `wpbluiss`), with org-route + user-route fallback. Pushes
+  files via the Contents API, base64-encoded.
+- Vercel: creates a project linked to the GitHub repo via
+  `gitRepository` — auto-deploys on link. Polls
+  `/v6/deployments` every 4s for READY (max 5 min).
+- `isEngineeringConfigured()` → graceful no-op when
+  `VERCEL_API_TOKEN` and `GITHUB_PAT` (or `GITHUB_APP_TOKEN`) are
+  missing. Engineering falls back to the descriptive R6 path.
+
+### Chat route integration
+
+Engineering branch in `runEmployee`: when employee = engineering AND
+`isEngineeringConfigured()` AND `heuristicTemplateMatch(message)`
+returns a template id, the route runs `runBuild()` instead of the LLM:
+
+1. Inserts an intro assistant message ("On it. Building [template] for
+   [account]. ETA ~Xs.") + creates `conduit_builds` row (status =
+   building) + emits a `token` SSE event so the chat shows the intro.
+2. If the template has `marketing_handoff` fields: focused Marketing
+   `complete()` call asking ONLY for those fields as JSON. Strips
+   code fences, parses, falls back to defaults on parse failure.
+3. Calls `executeBuild()` with the merged config; pumps each
+   `BuildEvent` to the client as a `build_event` SSE event AND
+   inserts into `conduit_build_events`.
+4. Updates `conduit_builds` row with status + URLs.
+5. Inserts a final assistant message ("Done. Live at <url>. Repo at
+   <url>. Want me to add anything?") + a `conduit_artifacts` row with
+   `type='build'` carrying the live + repo URLs.
+
+When env not configured OR no template match → falls through to LLM
+(R6 descriptive path), so existing UX is preserved.
+
+### Engineering employee prompt
+
+Updated to acknowledge it can ship today via the template list. When
+the request matches a template the platform handles it — Engineering
+doesn't need to describe. When the request is custom, Engineering
+sketches in 3-5 bullets and offers the template list as alternatives.
+Provider-name discipline reinforced: never says "Vercel" or "GitHub"
+— says "Live at <url>" / "Repo at <url>".
+
+### Brevity tone pass (all 9 employees)
+
+`src/lib/ai/employees/tone.ts` exports `withTone(body)`; every
+employee's system prompt is now wrapped with the shared TONE_RULES
+block prepended. Substance unchanged. Marketing/HR/Ops/Legal carry an
+explicit note that the brevity rule applies to the chat preface only —
+artifact bodies are still long-form when the request calls for it.
+
+### UI
+
+- **`/app/builds`** — grid of build cards with status pills (Pending /
+  Building / Live / Failed / Archived), live URL, repo link, "Open
+  chat" deep-link to the source conversation. Tier-locked Free
+  accounts see a Pro-feature gate.
+- **Sidebar** — new "Builds" item with `Hammer` icon between Artifacts
+  and Settings. Shown only when account's tier permits Engineering
+  (Pro+ or internal_account).
+- **Settings → Usage** — added a "Builds · This cycle" stat tile to
+  the top grid. 4-column layout instead of 3.
+
+### API routes
+
+- `GET /api/conduit/builds` (with `?archived=1` flag) — list user's
+  builds.
+- `GET /api/conduit/builds/[id]` — single build + event log.
+- `PATCH /api/conduit/builds/[id]` body `{archived: bool}` — archive /
+  unarchive.
+
+### Required env vars
+
+Build infrastructure is gated on:
+- `VERCEL_API_TOKEN` — Vercel personal/team token (vercel.com/account/tokens).
+- `GITHUB_PAT` (or `GITHUB_APP_TOKEN`) — repo:write scope on the org
+  in `CONDUIT_BUILDS_GITHUB_OWNER`.
+- `CONDUIT_BUILDS_GITHUB_OWNER` — defaults to `wpbluiss`.
+
+Without these, `isEngineeringConfigured()` returns false. The chat
+route detects this and skips the build branch entirely; Engineering
+falls back to the descriptive path. The /app/builds page renders
+fine with an inline banner ("Build provider not connected yet").
+
+### Verification
+
+- `npm run build` clean (24 routes total, +5 new).
+- Migration 008 applied; tables + index verified in Supabase.
+- Local: `/app` 307, `/app/builds` 307, `/api/conduit/builds` 401
+  unauth — gates intact.
+- Live build flow reserved for after Luis adds the env vars.
+
+### What's NOT in this round
+
+- Real Sales execution (lead lists, automated outreach) — **R8**
+- Multi-user accounts — R9
+- Cross-conversation memory layer — R10
+- Open-ended Engineering execution via Claude Code subprocess + E2B/
+  Modal sandbox — R11
+- Voice full-duplex — R12

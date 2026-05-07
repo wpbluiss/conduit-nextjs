@@ -24,15 +24,22 @@ export default async function SettingsPage() {
   // what counts toward the cap. UI shows monthly aggregate from same window.
   const cycleStart = new Date(account.billing_cycle_start);
 
-  const { data: usage } = await supabase
-    .from("conduit_usage_events")
-    .select(
-      "employee, input_tokens, output_tokens, estimated_cost_cents, created_at",
-    )
-    .eq("account_id", account.id)
-    .gte("created_at", cycleStart.toISOString())
-    .order("created_at", { ascending: true })
-    .limit(5000);
+  const [{ data: usage }, { count: buildsThisCycle }] = await Promise.all([
+    supabase
+      .from("conduit_usage_events")
+      .select(
+        "employee, input_tokens, output_tokens, estimated_cost_cents, created_at",
+      )
+      .eq("account_id", account.id)
+      .gte("created_at", cycleStart.toISOString())
+      .order("created_at", { ascending: true })
+      .limit(5000),
+    supabase
+      .from("conduit_builds")
+      .select("id", { count: "exact", head: true })
+      .eq("account_id", account.id)
+      .gte("created_at", cycleStart.toISOString()),
+  ]);
 
   const rows: UsageRow[] = (usage ?? []) as UsageRow[];
 
@@ -111,6 +118,7 @@ export default async function SettingsPage() {
               used: account.monthly_tokens_used,
               limit: account.monthly_token_cap,
             },
+            buildsThisCycle: buildsThisCycle ?? 0,
           }}
         />
       </div>

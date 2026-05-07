@@ -7,6 +7,7 @@ import {
   Plus,
   MessageSquare,
   FileText,
+  Hammer,
   Lock,
   Settings,
   LogOut,
@@ -238,6 +239,19 @@ export function Sidebar({
           >
             <FileText size={14} /> Artifacts
           </Link>
+          {allowedEmployees.includes("engineering") && (
+            <Link
+              href="/app/builds"
+              onClick={close}
+              className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors duration-100 ${
+                pathname.startsWith("/app/builds")
+                  ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
+                  : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
+              }`}
+            >
+              <Hammer size={14} /> Builds
+            </Link>
+          )}
           <Link
             href="/app/settings"
             onClick={close}

@@ -72,7 +72,7 @@ export const EMPLOYEES: Record<EmployeeId, EmployeeConfig> = {
     colorSoft: "rgba(96, 165, 250, 0.14)",
     initial: "E",
     tagline: "Builds tools, websites, CRMs, automations.",
-    canExecute: false,
+    canExecute: true, // R7: real builds via templates + GitHub + Vercel
     voiceCategory: "code",
   },
   finance: {

@@ -15,6 +15,7 @@ interface UsageData {
   today: { input: number; output: number; cost: number };
   thisWeek: { input: number; output: number; cost: number };
   cap: { used: number; limit: number };
+  buildsThisCycle?: number;
 }
 
 interface AccountData {
@@ -533,10 +534,15 @@ function UsageTab({ usage }: { usage: UsageData }) {
 
   return (
     <div className="space-y-8 text-sm">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Stat label="Today" value={`$${(usage.today.cost / 100).toFixed(2)}`} sub={`${(usage.today.input + usage.today.output).toLocaleString()} tokens`} />
         <Stat label="This week" value={`$${(usage.thisWeek.cost / 100).toFixed(2)}`} sub={`${(usage.thisWeek.input + usage.thisWeek.output).toLocaleString()} tokens`} />
         <Stat label="This month" value={`$${(usage.totals.cost / 100).toFixed(2)}`} sub={`${(usage.totals.input + usage.totals.output).toLocaleString()} tokens`} />
+        <Stat
+          label="Builds"
+          value={String(usage.buildsThisCycle ?? 0)}
+          sub="This cycle"
+        />
       </div>
 
       <div className="conduit-card px-5 py-4">
