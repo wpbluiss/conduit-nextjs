@@ -27,13 +27,29 @@ export interface VoiceTokenResponse {
   daily_seconds_used: number;
   daily_seconds_max: number;
   internal_account: boolean;
+  // R12.5: round-table additions. When mode === 'roundtable', participants
+  // is the full set of employees in the room (always includes Jarvis).
+  mode?: "solo" | "roundtable";
+  participants?: string[];
+  conversation_id?: string | null;
+}
+
+export interface ParticipantDisplay {
+  id: string;
+  name: string;
+  initial: string;
+  color: string;
 }
 
 interface Props {
   tokenResponse: VoiceTokenResponse;
+  // Solo: name/initial/color for the single employee.
+  // Roundtable: same fields apply to the *primary* employee_id but the
+  // additional participants come through participantDisplays.
   employeeName: string;
   employeeInitial: string;
   deptColor: string;
+  participantDisplays?: ParticipantDisplay[];
   onClose: (info: { saved: boolean }) => void;
 }
 
@@ -41,6 +57,7 @@ interface TranscriptEntry {
   id: string;
   role: "user" | "agent";
   text: string;
+  speakerId?: string;
   ts: number;
 }
 
@@ -75,14 +92,36 @@ export default function VoiceRoom({
   employeeName,
   employeeInitial,
   deptColor,
+  participantDisplays,
   onClose,
 }: Props) {
+  const isRoundTable = tokenResponse.mode === "roundtable";
   const [connected, setConnected] = useState(false);
   const [muted, setMuted] = useState(false);
   const [agentPresent, setAgentPresent] = useState(false);
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [elapsedSec, setElapsedSec] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  // R12.5: which participant is currently speaking. Worker publishes this
+  // as a data event right before each turn begins.
+  const [activeSpeaker, setActiveSpeaker] = useState<string | null>(
+    isRoundTable ? null : tokenResponse.employee_id,
+  );
+
+  const displays =
+    participantDisplays && participantDisplays.length > 0
+      ? participantDisplays
+      : [
+          {
+            id: tokenResponse.employee_id,
+            name: employeeName,
+            initial: employeeInitial,
+            color: deptColor,
+          },
+        ];
+  const activeDisplay =
+    displays.find((d) => d.id === activeSpeaker) ?? displays[0];
+  const headerColor = activeDisplay?.color ?? deptColor;
 
   const roomRef = useRef<Room | null>(null);
   const userAnalyserRef = useRef<AnalyserNode | null>(null);
@@ -134,6 +173,7 @@ export default function VoiceRoom({
           type?: string;
           role?: string;
           text?: string;
+          employee?: string;
         };
         if (event.type === "transcript" && event.text) {
           setTranscript((prev) => [
@@ -144,10 +184,16 @@ export default function VoiceRoom({
                   ? crypto.randomUUID()
                   : `${Date.now()}-${Math.random()}`,
               role: event.role === "user" ? "user" : "agent",
+              speakerId:
+                event.role === "user" ? undefined : event.employee,
               text: event.text!,
               ts: Date.now(),
             },
           ]);
+        } else if (event.type === "active_speaker" && event.employee) {
+          // R12.5: worker fires this right before each turn so the UI
+          // can highlight the right avatar a beat before audio arrives.
+          setActiveSpeaker(event.employee);
         }
       } catch {
         // non-JSON data messages from the worker are ignored
@@ -220,7 +266,7 @@ export default function VoiceRoom({
     <div className="fixed inset-0 z-[60] bg-black/85 backdrop-blur-md flex flex-col text-white">
       <div className="px-4 md:px-6 py-3 flex items-center justify-between border-b border-white/10">
         <div className="text-[10px] uppercase tracking-[0.22em] text-white/60">
-          Conduit Voice · {employeeName}
+          Conduit Voice · {isRoundTable ? "Round-table" : employeeName}
         </div>
         <button
           type="button"
@@ -233,33 +279,69 @@ export default function VoiceRoom({
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center gap-6 md:gap-8 px-4">
-        <div className="relative">
-          <div
-            className="w-24 h-24 md:w-32 md:h-32 rounded-full flex items-center justify-center text-3xl md:text-4xl font-medium serif"
-            style={{ background: deptColor, color: "#0A0908" }}
-          >
-            {employeeInitial}
+        {isRoundTable ? (
+          <div className="flex flex-wrap items-center justify-center gap-3 md:gap-5 max-w-2xl">
+            {displays.map((d) => {
+              const isActive = activeSpeaker === d.id;
+              return (
+                <div key={d.id} className="relative">
+                  <div
+                    className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center text-lg md:text-xl font-medium serif transition-all ${
+                      isActive ? "" : "opacity-40"
+                    }`}
+                    style={{ background: d.color, color: "#0A0908" }}
+                    title={d.name}
+                  >
+                    {d.initial}
+                  </div>
+                  {isActive && connected && (
+                    <div
+                      className="absolute -inset-1 rounded-full animate-pulse"
+                      style={{ boxShadow: `0 0 0 3px ${d.color}66` }}
+                    />
+                  )}
+                  <div
+                    className={`mt-1 text-[10px] uppercase tracking-[0.15em] text-center transition-colors ${
+                      isActive ? "text-white/80" : "text-white/30"
+                    }`}
+                  >
+                    {d.name}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          {connected && agentPresent && (
+        ) : (
+          <div className="relative">
             <div
-              className="absolute -inset-2 rounded-full animate-pulse"
-              style={{ boxShadow: `0 0 0 4px ${deptColor}33` }}
-            />
-          )}
-        </div>
+              className="w-24 h-24 md:w-32 md:h-32 rounded-full flex items-center justify-center text-3xl md:text-4xl font-medium serif"
+              style={{ background: deptColor, color: "#0A0908" }}
+            >
+              {employeeInitial}
+            </div>
+            {connected && agentPresent && (
+              <div
+                className="absolute -inset-2 rounded-full animate-pulse"
+                style={{ boxShadow: `0 0 0 4px ${deptColor}33` }}
+              />
+            )}
+          </div>
+        )}
 
         <div className="w-full max-w-md space-y-4">
           <div>
             <div className="text-[10px] uppercase tracking-[0.18em] text-white/40 mb-1">
               You {muted && "· muted"}
             </div>
-            <Waveform analyserRef={userAnalyserRef} color={deptColor} />
+            <Waveform analyserRef={userAnalyserRef} color={headerColor} />
           </div>
           <div>
             <div className="text-[10px] uppercase tracking-[0.18em] text-white/40 mb-1">
-              {employeeName}
+              {isRoundTable
+                ? activeDisplay?.name ?? "Team"
+                : employeeName}
             </div>
-            <Waveform analyserRef={agentAnalyserRef} color={deptColor} />
+            <Waveform analyserRef={agentAnalyserRef} color={headerColor} />
           </div>
         </div>
 
@@ -280,17 +362,28 @@ export default function VoiceRoom({
       </div>
 
       <div className="px-4 max-h-32 md:max-h-40 overflow-y-auto space-y-1 text-sm">
-        {transcript.slice(-6).map((t) => (
-          <div
-            key={t.id}
-            className={t.role === "user" ? "text-white/60" : "text-white/90"}
-          >
-            <span className="text-[10px] uppercase tracking-[0.15em] text-white/40 mr-2">
-              {t.role === "user" ? "You" : employeeName}
-            </span>
-            {t.text}
-          </div>
-        ))}
+        {transcript.slice(-6).map((t) => {
+          const speaker =
+            t.role === "user"
+              ? "You"
+              : t.speakerId
+                ? displays.find((d) => d.id === t.speakerId)?.name ??
+                  employeeName
+                : isRoundTable
+                  ? activeDisplay?.name ?? employeeName
+                  : employeeName;
+          return (
+            <div
+              key={t.id}
+              className={t.role === "user" ? "text-white/60" : "text-white/90"}
+            >
+              <span className="text-[10px] uppercase tracking-[0.15em] text-white/40 mr-2">
+                {speaker}
+              </span>
+              {t.text}
+            </div>
+          );
+        })}
       </div>
 
       <div className="px-4 py-4 md:py-5 flex items-center justify-center gap-4 border-t border-white/10">
