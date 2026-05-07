@@ -201,6 +201,10 @@ export function Chat({
 
   // Voice output (TTS)
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // R13: tracks whether the current SSE turn opened a streaming audio
+  // queue. When true, message_end SHOULDN'T also fire batched playTTS —
+  // the streaming queue is already producing audio.
+  const streamingAudioActiveRef = useRef(false);
   const [playingMessageIdx, setPlayingMessageIdx] = useState<number | null>(
     null,
   );
@@ -211,6 +215,10 @@ export function Chat({
       a.src = "";
     }
     setPlayingMessageIdx(null);
+    // R13: also flush the streaming audio queue so a half-spoken
+    // response stops the moment the user starts a new turn.
+    void import("./voice/streamingAudio").then((m) => m.stopAll());
+    streamingAudioActiveRef.current = false;
   }, []);
 
   // Global ESC + window event lets any other component cancel playback.
@@ -433,6 +441,25 @@ export function Chat({
       };
 
       const handleEvent = (event: string, data: Record<string, unknown>) => {
+        if (event === "audio") {
+          // R13: PCM16 chunk piggybacking on the chat SSE stream. Decode +
+          // queue into the Web Audio scheduler so playback overlaps with
+          // remaining tokens.
+          const pcm = data.pcm as string | undefined;
+          if (pcm) {
+            void import("./voice/streamingAudio").then((m) => m.pushChunk(pcm));
+          }
+          return;
+        }
+        if (event === "audio_start") {
+          streamingAudioActiveRef.current = true;
+          return;
+        }
+        if (event === "audio_end") {
+          // Keep the flag set briefly so message_end's batched playTTS
+          // doesn't double up; the queue itself drains naturally.
+          return;
+        }
         if (event === "token") {
           const employee = (data.employee as EmployeeKey) || currentEmployee;
           currentEmployee = employee;
@@ -456,8 +483,16 @@ export function Chat({
         } else if (event === "message_end") {
           const employee = (data.employee as EmployeeKey) || currentEmployee;
           finishCurrent(employee);
-          // Auto-play the just-finished message if voice is on
-          if (voice.enabled && voice.autoPlay && voice.ttsAllowed) {
+          // Auto-play the just-finished message if voice is on AND R13's
+          // streaming TTS didn't already produce audio for this turn.
+          const streamingPlayed = streamingAudioActiveRef.current;
+          streamingAudioActiveRef.current = false;
+          if (
+            !streamingPlayed &&
+            voice.enabled &&
+            voice.autoPlay &&
+            voice.ttsAllowed
+          ) {
             // Capture state via closure-safe ref pattern: read from latest setMessages
             setMessages((prev) => {
               for (let i = prev.length - 1; i >= 0; i--) {
@@ -758,7 +793,20 @@ export function Chat({
             </button>
             <textarea
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => {
+                const next = e.target.value;
+                // R13: any user typing into the chat stops in-flight
+                // streaming audio (and batched audio) so the user's
+                // attention isn't competing with the agent's voice.
+                if (
+                  next.length > input.length &&
+                  (playingMessageIdx !== null ||
+                    streamingAudioActiveRef.current)
+                ) {
+                  stopAudio();
+                }
+                setInput(next);
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
