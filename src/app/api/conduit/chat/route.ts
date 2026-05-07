@@ -27,6 +27,13 @@ import {
 import { getTemplate } from "@/lib/builds/templates";
 import { complete } from "@/lib/ai/provider";
 import { withTimeAware } from "@/lib/ai/employees/time-aware";
+import {
+  checkRateLimit,
+  isTeamQuery,
+  roundTableBrief,
+  selectParticipants,
+  synthesisBrief,
+} from "@/lib/ai/roundtable";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -59,7 +66,7 @@ export async function POST(request: NextRequest) {
   let body: {
     conversation_id?: string;
     message?: string;
-    employee_override?: EmployeeKey;
+    employee_override?: EmployeeKey | "team";
   };
   try {
     body = await request.json();
@@ -147,9 +154,14 @@ export async function POST(request: NextRequest) {
   };
 
   const employeeOverride = body.employee_override;
+  // Team round-table: explicit pin OR heuristic detection in user message.
+  const teamRequested =
+    employeeOverride === "team" || isTeamQuery(message);
   const initialEmployee: EmployeeKey =
-    employeeOverride && VALID_EMPLOYEES.includes(employeeOverride)
-      ? employeeOverride
+    employeeOverride &&
+    employeeOverride !== "team" &&
+    VALID_EMPLOYEES.includes(employeeOverride as EmployeeKey)
+      ? (employeeOverride as EmployeeKey)
       : "jarvis";
 
   const accountId = account.id;
@@ -593,8 +605,244 @@ export async function POST(request: NextRequest) {
         return { ok: true };
       };
 
+      const runRoundTable = async (): Promise<void> => {
+        const allowedForAccount = (
+          account.internal_account
+            ? ([
+                "jarvis",
+                "marketing",
+                "sales",
+                "engineering",
+                "finance",
+                "compliance",
+                "hr",
+                "ops",
+                "legal",
+              ] as EmployeeKey[])
+            : (tier.allowedEmployees as EmployeeKey[])
+        ) as EmployeeKey[];
+
+        const participants = selectParticipants(
+          allowedForAccount,
+          internalAccount,
+          tier.id,
+        );
+
+        if (participants.length < 2) {
+          // Not enough employees for a meaningful round-table — fall through to
+          // single Jarvis response.
+          await runEmployee("jarvis");
+          return;
+        }
+
+        // Rate limit
+        const rate = checkRateLimit(accountId);
+        if (!rate.ok) {
+          send("round_table_rate_limited", {
+            message: `Slow down — let the team finish before pulling them in again. Try again in ~${rate.retryInSeconds}s.`,
+          });
+          return;
+        }
+
+        // Cap-reached short circuit (matches single-employee path)
+        if (
+          !internalAccount &&
+          tokensUsedThisCycle >= effectiveAllowance
+        ) {
+          send("paywall_required", {
+            reason: "cap_reached",
+            tier_id: tier.id,
+            tokens_used: tokensUsedThisCycle,
+            tokens_allowance: effectiveAllowance,
+            message: `You've used all ${effectiveAllowance.toLocaleString()} tokens this month. Upgrade for more, or top up to keep working.`,
+          });
+          return;
+        }
+
+        send("round_table_start", {
+          participants,
+          count: participants.length,
+        });
+
+        const userName = ctx.user_name;
+        const brief = roundTableBrief(message, userName);
+
+        const responses: { employee: EmployeeKey; content: string }[] = [];
+
+        await Promise.all(
+          participants.map(async (emp) => {
+            send("round_table_thinking", { employee: emp });
+            try {
+              const baseSystem = systemPromptFor(emp, ctx);
+              const systemPrompt = withTimeAware(baseSystem, {
+                timezone: account.timezone || "America/New_York",
+              });
+              const res = await complete({
+                messages: [{ role: "user", content: brief }],
+                systemPrompt,
+                metadata: {
+                  employee: emp,
+                  accountId,
+                  creatorMode,
+                  creatorModeVersion,
+                  intent:
+                    emp === "marketing"
+                      ? "creative"
+                      : emp === "engineering"
+                        ? "code"
+                        : emp === "finance" ||
+                            emp === "legal" ||
+                            emp === "compliance"
+                          ? "reasoning"
+                          : "routing",
+                  tierCeiling: tier.modelCeiling,
+                  internalAccount,
+                },
+                maxTokens: 350,
+              });
+              const content = res.content.trim();
+              responses.push({ employee: emp, content });
+
+              const { data: insertedMsg } = await supabase
+                .from("conduit_messages")
+                .insert({
+                  conversation_id: finalConvId,
+                  role: "assistant",
+                  employee: emp,
+                  content,
+                  metadata: { round_table: true },
+                })
+                .select("id")
+                .single();
+              void insertedMsg;
+
+              await supabase.from("conduit_usage_events").insert({
+                account_id: accountId,
+                employee: emp,
+                provider: res.provider,
+                model: res.model,
+                input_tokens: res.inputTokens,
+                output_tokens: res.outputTokens,
+                estimated_cost_cents: estimateCostCents(
+                  res.provider,
+                  res.model,
+                  res.inputTokens,
+                  res.outputTokens,
+                  res.cacheReadTokens,
+                  res.cacheCreationTokens,
+                ),
+                metadata: {
+                  round_table: true,
+                  cache_read_input_tokens: res.cacheReadTokens,
+                  cache_creation_input_tokens: res.cacheCreationTokens,
+                },
+              });
+              tokensUsedThisCycle += res.inputTokens + res.outputTokens;
+
+              // Stream each employee's full response in one chunk so the
+              // client renders separate parallel bubbles cleanly. (Token-level
+              // streaming with concurrent employees is the next round.)
+              send("round_table_response", {
+                employee: emp,
+                content,
+              });
+            } catch (err) {
+              console.error(`[round_table:${emp}]`, err);
+              send("round_table_response", {
+                employee: emp,
+                content: friendlyErrorFor(emp),
+                errored: true,
+              });
+            }
+          }),
+        );
+
+        // Bump cap counter once at the end
+        await supabase
+          .from("conduit_accounts")
+          .update({ monthly_tokens_used: tokensUsedThisCycle })
+          .eq("id", accountId);
+
+        // Synthesis turn — Jarvis only
+        try {
+          send("round_table_synthesis_start", {});
+          const baseSystem = systemPromptFor("jarvis", ctx);
+          const systemPrompt = withTimeAware(baseSystem, {
+            timezone: account.timezone || "America/New_York",
+          });
+          const synth = await complete({
+            messages: [
+              {
+                role: "user",
+                content: synthesisBrief(message, responses),
+              },
+            ],
+            systemPrompt,
+            metadata: {
+              employee: "jarvis",
+              accountId,
+              creatorMode,
+              creatorModeVersion,
+              intent: "reasoning",
+              tierCeiling: tier.modelCeiling,
+              internalAccount,
+            },
+            maxTokens: 600,
+          });
+          const synthContent = synth.content.trim();
+          await supabase.from("conduit_messages").insert({
+            conversation_id: finalConvId,
+            role: "assistant",
+            employee: "jarvis",
+            content: synthContent,
+            metadata: { round_table_synthesis: true },
+          });
+          await supabase.from("conduit_usage_events").insert({
+            account_id: accountId,
+            employee: "jarvis",
+            provider: synth.provider,
+            model: synth.model,
+            input_tokens: synth.inputTokens,
+            output_tokens: synth.outputTokens,
+            estimated_cost_cents: estimateCostCents(
+              synth.provider,
+              synth.model,
+              synth.inputTokens,
+              synth.outputTokens,
+              synth.cacheReadTokens,
+              synth.cacheCreationTokens,
+            ),
+            metadata: {
+              round_table_synthesis: true,
+              cache_read_input_tokens: synth.cacheReadTokens,
+              cache_creation_input_tokens: synth.cacheCreationTokens,
+            },
+          });
+          tokensUsedThisCycle +=
+            synth.inputTokens + synth.outputTokens;
+          await supabase
+            .from("conduit_accounts")
+            .update({ monthly_tokens_used: tokensUsedThisCycle })
+            .eq("id", accountId);
+
+          send("round_table_synthesis", { content: synthContent });
+        } catch (err) {
+          console.error("round_table_synthesis", err);
+          send("round_table_synthesis", {
+            content: friendlyErrorFor("jarvis"),
+            errored: true,
+          });
+        }
+
+        send("round_table_end", {});
+      };
+
       try {
-        await runEmployee(initialEmployee);
+        if (teamRequested) {
+          await runRoundTable();
+        } else {
+          await runEmployee(initialEmployee);
+        }
         await supabase
           .from("conduit_conversations")
           .update({ updated_at: new Date().toISOString() })

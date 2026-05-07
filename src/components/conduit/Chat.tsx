@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, FileText, Mic, MicOff, Send, Square } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
@@ -102,8 +102,11 @@ function suggestionsForTier(allowed: Set<EmployeeKey>): Suggestion[] {
   return [...base, ...extras].slice(0, 4);
 }
 
-const ALL_PIN_OPTIONS: { value: EmployeeKey | "auto"; label: string }[] = [
+type PinValue = EmployeeKey | "auto" | "team";
+
+const ALL_PIN_OPTIONS: { value: PinValue; label: string }[] = [
   { value: "auto", label: "Jarvis (auto-route)" },
+  { value: "team", label: "Team round-table" },
   { value: "jarvis", label: "Jarvis only" },
   { value: "marketing", label: "Marketing" },
   { value: "sales", label: "Sales" },
@@ -131,8 +134,14 @@ export function Chat({
   allowedEmployees: EmployeeKey[];
 }) {
   const allowedSet = new Set(allowedEmployees);
+  // "team" requires at least 2 non-Jarvis employees on the tier.
+  const teamEligible =
+    allowedEmployees.filter((e) => e !== "jarvis").length >= 2;
   const pinOptions = ALL_PIN_OPTIONS.filter(
-    (o) => o.value === "auto" || allowedSet.has(o.value),
+    (o) =>
+      o.value === "auto" ||
+      (o.value === "team" && teamEligible) ||
+      (o.value !== "team" && allowedSet.has(o.value as EmployeeKey)),
   );
   const suggestions = suggestionsForTier(allowedSet);
   const router = useRouter();
@@ -142,7 +151,7 @@ export function Chat({
   );
   const [messages, setMessages] = useState<MessageRow[]>(initialMessages);
   const [input, setInput] = useState("");
-  const [pin, setPin] = useState<EmployeeKey | "auto">("auto");
+  const [pin, setPin] = useState<PinValue>("auto");
   const [pinOpen, setPinOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -157,7 +166,10 @@ export function Chat({
     const pinParam = searchParams.get("pin");
     const promptParam = searchParams.get("prompt");
     let touched = false;
-    if (pinParam && allowedSet.has(pinParam as EmployeeKey)) {
+    if (pinParam === "team" && teamEligible) {
+      setPin("team");
+      touched = true;
+    } else if (pinParam && allowedSet.has(pinParam as EmployeeKey)) {
       setPin(pinParam as EmployeeKey);
       touched = true;
     }
@@ -199,6 +211,20 @@ export function Chat({
     }
     setPlayingMessageIdx(null);
   }, []);
+
+  // Global ESC + window event lets any other component cancel playback.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && playingMessageIdx !== null) stopAudio();
+    };
+    const onStop = () => stopAudio();
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("conduit:stopAudio", onStop);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("conduit:stopAudio", onStop);
+    };
+  }, [playingMessageIdx, stopAudio]);
   const playTTS = useCallback(
     async (text: string, employee: EmployeeKey, idx: number) => {
       if (!voice.ttsAllowed || !text.trim()) return;
@@ -267,24 +293,41 @@ export function Chat({
       setLoading(true);
       setInput("");
 
-      const finalPin = employeePin ?? (pin === "auto" ? undefined : pin);
-      const placeholderEmp: EmployeeKey = finalPin ?? "jarvis";
+      const explicitPin: PinValue | undefined =
+        employeePin ?? (pin === "auto" ? undefined : pin);
+      const isTeam = explicitPin === "team";
+      const placeholderEmp: EmployeeKey = isTeam
+        ? "jarvis"
+        : (explicitPin as EmployeeKey | undefined) ?? "jarvis";
       setStreamingEmployee(placeholderEmp);
 
       setMessages((prev) => [
         ...prev,
         { role: "user", content: trimmed },
-        {
-          role: "assistant",
-          employee: placeholderEmp,
-          content: "",
-          pending: true,
-        },
+        // Round-table fan-out doesn't need a placeholder bubble (employees
+        // populate their own as they finish). Single-employee path keeps the
+        // existing pending placeholder.
+        ...(isTeam
+          ? ([
+              {
+                role: "system" as const,
+                content: "Team round-table — employees weighing in",
+                metadata: { round_table_banner: true },
+              },
+            ] as MessageRow[])
+          : ([
+              {
+                role: "assistant" as const,
+                employee: placeholderEmp,
+                content: "",
+                pending: true,
+              },
+            ] as MessageRow[])),
       ]);
 
       const body: Record<string, unknown> = { message: trimmed };
       if (conversationId) body.conversation_id = conversationId;
-      if (finalPin) body.employee_override = finalPin;
+      if (explicitPin) body.employee_override = explicitPin;
 
       const resp = await fetch("/api/conduit/chat", {
         method: "POST",
@@ -438,6 +481,107 @@ export function Chat({
               type: data.type as string,
             },
           );
+        } else if (event === "round_table_thinking") {
+          const emp = data.employee as EmployeeKey;
+          // Insert a placeholder pending bubble for this employee
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "assistant",
+              employee: emp,
+              content: "",
+              pending: true,
+              metadata: { round_table: true },
+            },
+          ]);
+        } else if (event === "round_table_response") {
+          const emp = data.employee as EmployeeKey;
+          const content = (data.content as string) || "";
+          // Resolve the matching pending bubble (last one for this employee)
+          setMessages((prev) => {
+            const next = [...prev];
+            for (let i = next.length - 1; i >= 0; i--) {
+              const m = next[i];
+              if (
+                m.role === "assistant" &&
+                m.pending &&
+                m.employee === emp &&
+                m.metadata &&
+                (m.metadata as Record<string, unknown>).round_table
+              ) {
+                m.pending = false;
+                m.content = content;
+                if (
+                  voice.enabled &&
+                  voice.autoPlay &&
+                  voice.ttsAllowed &&
+                  content.length > 1
+                ) {
+                  void playTTS(content, emp, i);
+                }
+                break;
+              }
+            }
+            return next;
+          });
+        } else if (event === "round_table_synthesis_start") {
+          // Banner + pending Jarvis bubble
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "system",
+              content: "Synthesis from Jarvis",
+              metadata: { round_table_banner: true },
+            },
+            {
+              role: "assistant",
+              employee: "jarvis",
+              content: "",
+              pending: true,
+              metadata: { round_table_synthesis: true },
+            },
+          ]);
+        } else if (event === "round_table_synthesis") {
+          const content = (data.content as string) || "";
+          setMessages((prev) => {
+            const next = [...prev];
+            for (let i = next.length - 1; i >= 0; i--) {
+              const m = next[i];
+              if (
+                m.role === "assistant" &&
+                m.pending &&
+                m.employee === "jarvis" &&
+                m.metadata &&
+                (m.metadata as Record<string, unknown>).round_table_synthesis
+              ) {
+                m.pending = false;
+                m.content = content;
+                if (
+                  voice.enabled &&
+                  voice.autoPlay &&
+                  voice.ttsAllowed &&
+                  content.length > 1
+                ) {
+                  void playTTS(content, "jarvis", i);
+                }
+                break;
+              }
+            }
+            return next;
+          });
+        } else if (event === "round_table_rate_limited") {
+          setMessages((prev) => {
+            const next = [...prev];
+            // Replace the round-table banner with the rate-limit notice
+            next.push({
+              role: "system",
+              content: (data.message as string) || "Round-table rate limited.",
+              metadata: { round_table_rate_limited: true },
+            });
+            return next;
+          });
+        } else if (event === "round_table_start" || event === "round_table_end") {
+          // Banners — no UI action needed beyond what runs above.
         } else if (event === "paywall_required") {
           // Suppress for internal accounts (defensive — server already gates).
           if (!internalAccount) {
@@ -506,7 +650,8 @@ export function Chat({
 
   const pinLabel =
     pinOptions.find((o) => o.value === pin)?.label ?? "Jarvis (auto-route)";
-  const pinAvatarEmp: EmployeeKey = pin === "auto" ? "jarvis" : pin;
+  const pinAvatarEmp: EmployeeKey =
+    pin === "auto" || pin === "team" ? "jarvis" : (pin as EmployeeKey);
 
   return (
     <>
@@ -578,7 +723,11 @@ export function Chat({
                       }`}
                     >
                       <EmployeeAvatar
-                        employee={o.value === "auto" ? "jarvis" : o.value}
+                        employee={
+                          o.value === "auto" || o.value === "team"
+                            ? "jarvis"
+                            : (o.value as EmployeeKey)
+                        }
                         size={18}
                       />
                       <span>{o.label}</span>
@@ -691,6 +840,21 @@ export function Chat({
           onClose={() => setPaywall(null)}
         />
       )}
+
+      {playingMessageIdx !== null && (
+        <button
+          onClick={stopAudio}
+          className="fixed bottom-24 right-6 md:bottom-6 z-30 conduit-card px-4 py-2.5 text-xs flex items-center gap-2 hover:border-[var(--color-accent)] transition-colors"
+          aria-label="Stop voice playback"
+          title="ESC to stop"
+        >
+          <span
+            className="inline-block w-2 h-2 rounded-sm"
+            style={{ background: "var(--color-accent)" }}
+          />
+          Stop voice
+        </button>
+      )}
     </>
   );
 }
@@ -747,7 +911,7 @@ function EmptyState({
   );
 }
 
-function MessageBubble({
+const MessageBubble = memo(function MessageBubble({
   message,
   onOpenArtifact,
   playing = false,
@@ -798,6 +962,22 @@ function MessageBubble({
         />
       </div>
     );
+  }
+
+  if (message.role === "system") {
+    const meta = (message.metadata ?? {}) as Record<string, unknown>;
+    if (meta.round_table_banner || meta.round_table_rate_limited) {
+      return (
+        <div className="handoff-card flex items-center gap-3 my-2">
+          <div className="flex-1 h-px bg-[var(--color-border)]" />
+          <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
+            {message.content}
+          </span>
+          <div className="flex-1 h-px bg-[var(--color-border)]" />
+        </div>
+      );
+    }
+    return null;
   }
 
   const employee = (message.employee as EmployeeKey) ?? "jarvis";
@@ -924,7 +1104,7 @@ function MessageBubble({
       </div>
     </div>
   );
-}
+});
 
 function ArtifactDrawer({
   artifactId,

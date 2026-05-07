@@ -64,8 +64,28 @@ export async function POST(request: NextRequest) {
   let upstream: Response;
   try {
     upstream = await streamTTS({ text, voiceId, speed: 1.0 });
-  } catch {
-    return NextResponse.json({ error: "tts_failed" }, { status: 502 });
+  } catch (err) {
+    const e = err as { status?: number; body?: string; message?: string };
+    console.error("voice_preview upstream error", {
+      voiceId,
+      status: e.status,
+      body: e.body?.slice(0, 200),
+      message: e.message,
+    });
+    if (e.status === 404 || e.status === 400) {
+      return NextResponse.json(
+        {
+          error: "voice_unavailable",
+          message:
+            "Preview unavailable for this voice. It still works in chat — pick a different voice or just hit send.",
+        },
+        { status: 404 },
+      );
+    }
+    return NextResponse.json(
+      { error: "tts_failed", message: "Preview unavailable. Try again." },
+      { status: 502 },
+    );
   }
 
   const buf = await upstream.arrayBuffer();
