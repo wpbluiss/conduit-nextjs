@@ -8,11 +8,11 @@ export default function Footer() {
           <div className="flex items-center gap-2.5 mb-4">
             <Logo size={32} />
             <span className="text-[15px] tracking-tight">
-              Conduit <span className="text-[#8C8884]">AI</span>
+              Conduit
             </span>
           </div>
           <p className="text-[13px] text-[#8C8884] max-w-xs leading-relaxed">
-            Virtual business operating system.
+            Intelligence at work. We build Praxis.
           </p>
         </div>
 
@@ -52,7 +52,7 @@ export default function Footer() {
               </a>
             </li>
             <li className="pt-2 text-[13px] text-[#8C8884]">
-              © 2026 Conduit AI. West Palm Beach, FL.
+              © 2026 Conduit. West Palm Beach, FL.
             </li>
           </ul>
         </div>

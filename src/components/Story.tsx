@@ -1,7 +1,7 @@
 const MILESTONES = [
   {
     date: "FEB 2026",
-    title: "Conduit AI launches",
+    title: "Conduit launches",
     detail: "Single voice agent. First signup within 24 hours.",
   },
   {
@@ -40,15 +40,15 @@ export default function Story() {
           </h2>
           <div className="space-y-6 text-[17px] text-[#8C8884] leading-[1.75]">
             <p>
-              Conduit AI is built and operated by Luis Garcia, a 21-year-old
+              Conduit is built and operated by Luis Garcia, a 21-year-old
               founder from West Palm Beach, Florida. No engineering degree. No
               funding round. Just an obsession with replacing payroll with code
               that works.
             </p>
             <p>
               In a few weeks, Conduit went from a single voice agent answering
-              missed calls to a full virtual operating system with 32 AI
-              employees deployed across 9 departments — running real businesses,
+              missed calls to Praxis — a full operating system with 32 AI
+              employees across 9 departments, running real businesses,
               generating real revenue, with zero overhead.
             </p>
             <p className="text-[#F5F1EA]">
