@@ -11,7 +11,22 @@ export const runtime = "nodejs";
 
 interface TokenBody {
   employee_id?: string;
+  // R12.5: round-table mode. When mode === 'roundtable', `participants`
+  // is the full set of employees in the room. employee_id stays as the
+  // primary/visible employee (matters for the workspace deeplink, the
+  // initial focused avatar in the UI, and the daily-cap accounting).
+  mode?: "solo" | "roundtable";
+  participants?: string[];
+  // R12.5: link a voice session back to its originating text
+  // conversation. Worker uses this when writing transcript turns back.
+  conversation_id?: string;
 }
+
+const MAX_PARTICIPANTS_BY_TIER: Record<string, number> = {
+  free: 2,
+  pro: 4,
+  enterprise: 8,
+};
 
 export async function POST(request: NextRequest) {
   const supabase = await createSupabaseServerClient();
@@ -40,6 +55,56 @@ export async function POST(request: NextRequest) {
     tier.allowedEmployees.includes(employeeId);
   if (!allowed) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
+
+  // R12.5: validate roundtable mode. Jarvis is always a participant
+  // (moderator) in v1; the route silently ensures it's in the list.
+  const requestedMode: "solo" | "roundtable" =
+    body.mode === "roundtable" ? "roundtable" : "solo";
+  let participants: string[];
+  if (requestedMode === "roundtable") {
+    const incoming = Array.isArray(body.participants) ? body.participants : [];
+    const cleaned = Array.from(
+      new Set(
+        incoming
+          .map((p) => (typeof p === "string" ? p.trim() : ""))
+          .filter((p) => p && isValidEmployee(p)),
+      ),
+    );
+    if (!cleaned.includes("jarvis")) cleaned.unshift("jarvis");
+    if (!cleaned.includes(employeeId)) cleaned.push(employeeId);
+    const tierMax = account.internal_account
+      ? Number.MAX_SAFE_INTEGER
+      : MAX_PARTICIPANTS_BY_TIER[tier.id] ?? 2;
+    if (cleaned.length > tierMax) {
+      return NextResponse.json(
+        {
+          error: "too_many_participants",
+          message: `Round-table caps at ${tierMax} employees on your plan.`,
+          tier_id: tier.id,
+          requested: cleaned.length,
+          max: tierMax,
+        },
+        { status: 403 },
+      );
+    }
+    if (!account.internal_account) {
+      const allowedSet = new Set<string>(tier.allowedEmployees);
+      const blocked = cleaned.filter((p) => !allowedSet.has(p));
+      if (blocked.length > 0) {
+        return NextResponse.json(
+          {
+            error: "participant_locked",
+            blocked,
+            tier_id: tier.id,
+          },
+          { status: 403 },
+        );
+      }
+    }
+    participants = cleaned;
+  } else {
+    participants = [employeeId];
   }
 
   const apiKey = process.env.LIVEKIT_API_KEY;
@@ -88,7 +153,25 @@ export async function POST(request: NextRequest) {
 
   const voiceConfig = await resolveVoiceId(supabase, account.id, employeeId);
 
-  const roomName = `conduit-${account.id.slice(0, 8)}-${employeeId}-${randomBytes(4).toString("hex")}`;
+  // R12.5: resolve a voice for each participant up-front so the worker
+  // doesn't pay one Supabase round-trip per participant on join.
+  const participantVoices: Record<
+    string,
+    { voice_id: string | null; voice_locale: string }
+  > = {};
+  if (requestedMode === "roundtable") {
+    const resolved = await Promise.all(
+      participants.map(async (p) => {
+        const v = await resolveVoiceId(supabase, account.id, p);
+        return [p, v] as const;
+      }),
+    );
+    for (const [p, v] of resolved) participantVoices[p] = v;
+  } else {
+    participantVoices[employeeId] = voiceConfig;
+  }
+
+  const roomName = `conduit-${account.id.slice(0, 8)}-${requestedMode === "roundtable" ? "rt" : employeeId}-${randomBytes(4).toString("hex")}`;
 
   const at = new AccessToken(apiKey, apiSecret, {
     identity: `user-${user.id}`,
@@ -101,6 +184,11 @@ export async function POST(request: NextRequest) {
       max_seconds: ceilings.maxSeconds,
       warn_seconds: ceilings.warnSeconds,
       internal_account: Boolean(account.internal_account),
+      // R12.5 additions — worker reads these on participant join.
+      mode: requestedMode,
+      participants,
+      participant_voices: participantVoices,
+      conversation_id: body.conversation_id ?? null,
     }),
   });
   at.addGrant({
@@ -124,5 +212,11 @@ export async function POST(request: NextRequest) {
     daily_seconds_used: usedSec,
     daily_seconds_max: dailyMaxSec,
     internal_account: Boolean(account.internal_account),
+    // R12.5: mode + participants echo so the client can render the
+    // multi-avatar layout without a second round-trip.
+    mode: requestedMode,
+    participants,
+    participant_voices: participantVoices,
+    conversation_id: body.conversation_id ?? null,
   });
 }
