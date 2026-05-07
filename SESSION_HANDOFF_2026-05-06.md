@@ -60,10 +60,17 @@ R12 additions (Railway worker only — NOT on Vercel):
   usage log + 50k daily char cap. Settings toggle deferred — runs
   ON by default with the existing voice_enabled + voice_auto_play
   prefs gating it.
-- R12.5: PARTIAL. Migration 016 + /api/voice/token mode/participants
-  shipped. Worker rewrite + multi-avatar UI deferred until the
-  architecture call (Realtime fan-out cost vs tagged routing,
-  routing latency budget) is made on the live session.
+- R12.5: SHIPPED (functional core). Worker rewrite (Option B —
+  single Realtime + single rotating ElevenLabs WS + Haiku router)
+  is live on Railway. Round-robin trigger phrases ('team',
+  'everyone', 'go around', etc.) fire 1-sentence-each + Jarvis
+  closer. Single LiveKit audio track; frontend tracks active
+  speaker via 'active_speaker' data events from the worker.
+  Multi-avatar VoiceRoom layout shows all participants with the
+  speaking one highlighted. Voice IDs assigned for all 9 employees
+  (see docs/voice-picks.md). DEFERRED to next session: Voice mode
+  button in /app/page.tsx chat header, and 'Bring in employee'
+  modal for upgrading a solo room to roundtable in place.
 - R14: Mobile app (Expo)
 - R15: Open-ended Engineering execution via Claude Code subprocess
 

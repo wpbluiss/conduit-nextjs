@@ -1321,3 +1321,83 @@ real branching points (Realtime fan-out cost vs single-Realtime
 tagged routing, routing latency budget) that need a hands-on call
 with the user before code lands.
 
+
+
+## Round 12 Polish — VAD + ElevenLabs Knobs (2026-05-07)
+
+Merged to main as part of bad063c. Diagnosed mid-utterance
+self-cancel (agent cuts itself off after 5-8 words). Three layered
+fixes: (1) tightened OpenAI Realtime server_vad knobs (threshold
+0.7 to 0.8, prefix_padding 600 to 700, silence_duration 500 to 600);
+(2) 800ms cooldown after each agent utterance starts that
+suppresses any user_speech_started event firing in the early
+window; (3) inbound-audio-energy gate that only honors interrupts
+when the user mic track carried RMS > 0.005 within the last 200ms.
+Both gates log "suppressed" reasons so future diagnosis can read
+the cause directly from Railway logs. ElevenLabs voice speed
+dropped from 0.9 to 0.85 for a calmer pace.
+
+## Voice ID Auto-pick (2026-05-07)
+
+Merged to main as ae6ad9e. Eight stock ElevenLabs voices selected
+for the non-Jarvis employees, applied via UPDATE on
+conduit_employee_default_voices, validated against the project
+voice library. Per-pick reasoning in docs/voice-picks.md. Sales=
+Adam (dominant tenor), Engineering=Eric (agentic tenor),
+Marketing=Jessica (warm bright), Finance=Matilda (knowledgeable
+alto), Compliance=Daniel (steady broadcaster), HR=Lily (velvety
+British), Ops=Charlie (Australian energy), Legal=George (warm
+British storyteller). All 9 rows now have non-null voice_ids.
+
+## Jarvis-name Audit (2026-05-07)
+
+Merged to main as dde0d23. 197 references inventoried across both
+repos in docs/JARVIS_REFERENCES.md, categorized (code constants
+ts/tsx, system prompts, DB seeds, UI strings, comments, docs). NO
+code changes. Includes a rename order-of-ops guide. Calls out the
+public.jarvis_* tables that belong to other projects in the same
+Supabase instance and must NOT be touched.
+
+## Round 13 Polish — Streaming TTS Toggle (2026-05-07)
+
+Merged to main as f7ac3e1. Added a Streaming audio toggle to
+/app/settings -> Voice. /api/conduit/voice/prefs GET returns
+streaming_tts_enabled; POST accepts it. Wires to
+account.streaming_tts_enabled from migration 015. Tooltip:
+"Audio plays sentence-by-sentence instead of waiting for the
+full response. Lower latency, slightly higher cost."
+
+## Round 12.5 Worker — Round-table with Haiku Routing (2026-05-07)
+
+Merged to main as b65d8c7 (frontend) and worker 94c5603.
+Architecture call: shipped Option B — single Realtime + single
+rotating ElevenLabs WS + Haiku router per turn.
+
+Worker (conduit-voice-worker):
+- src/router.ts: Haiku classifier with abortable controller,
+  isTeamTrigger() for round-robin trigger phrases.
+- src/system-prompts.ts: buildRoundTablePrompt() per-turn variant
+  with brevity coda; employeeDisplayName() for transcript labels.
+- src/openai-realtime.ts: autoCreateResponse option (default
+  true keeps solo behavior), updateInstructions() for mid-call
+  prompt swap, createResponse({ instructions }) for manual
+  triggering with per-call instructions override.
+- src/agent.ts: SessionState carries participantVoices map +
+  isRoundTable. dispatchRoundTable runs on user_transcript when
+  mode=roundtable. runSingleTurn aborts current TTS, opens fresh
+  WS with chosen employee voice, publishes active_speaker, fires
+  response.create. runRoundRobin sequences non-jarvis 1-sentence
+  turns then jarvis closer. roundRobinAborted + routerAbort flip
+  on user_speech_started for clean interrupt mid round-robin.
+
+Frontend (conduit-nextjs):
+- VoiceRoom mode === roundtable renders participant row with
+  active-speaker highlight; listens for active_speaker data
+  events; transcript labels by speaker.
+- VoiceModeButton extended with optional mode + participants +
+  conversationId + participantDisplays + label.
+
+Deferred to next session: chat-header Voice mode trigger that
+builds participants from active conversation, and Bring-in-
+employee modal for upgrading solo to roundtable in place. Both
+need careful Chat.tsx integration.
