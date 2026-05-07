@@ -24,6 +24,9 @@ export async function GET() {
     voice_enabled: account.voice_enabled,
     voice_auto_play: account.voice_auto_play,
     voice_speed: Number(account.voice_speed),
+    streaming_tts_enabled:
+      (account as typeof account & { streaming_tts_enabled?: boolean })
+        .streaming_tts_enabled !== false,
     employee_voices: Object.fromEntries(
       (voices ?? []).map((v) => [v.employee, v.elevenlabs_voice_id]),
     ),
@@ -43,6 +46,7 @@ export async function POST(request: NextRequest) {
     voice_enabled?: boolean;
     voice_auto_play?: boolean;
     voice_speed?: number;
+    streaming_tts_enabled?: boolean;
     employee_voices?: Record<string, string>;
   };
   try {
@@ -58,6 +62,8 @@ export async function POST(request: NextRequest) {
     accountUpdate.voice_enabled = body.voice_enabled;
   if (typeof body.voice_auto_play === "boolean")
     accountUpdate.voice_auto_play = body.voice_auto_play;
+  if (typeof body.streaming_tts_enabled === "boolean")
+    accountUpdate.streaming_tts_enabled = body.streaming_tts_enabled;
   if (typeof body.voice_speed === "number") {
     const s = Math.max(0.5, Math.min(2.0, body.voice_speed));
     accountUpdate.voice_speed = s;
