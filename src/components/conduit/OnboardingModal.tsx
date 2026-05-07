@@ -70,7 +70,7 @@ export function OnboardingModal({
               style={{ background: "var(--color-accent)" }}
             />
             <span className="text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
-              Conduit · Step {Math.min(step, 3)} of 3
+              Praxis · Step {Math.min(step, 3)} of 3
             </span>
           </div>
           <div className="h-[2px] bg-[var(--color-border)] relative rounded-full overflow-hidden">
@@ -91,7 +91,7 @@ export function OnboardingModal({
                 What&apos;s your business called?
               </h2>
               <p className="mt-3 text-sm md:text-base text-[var(--color-text-muted)]">
-                This is the name Jarvis and your team will use.
+                This is the name Atlas and your team will use.
               </p>
               <input
                 type="text"
@@ -168,7 +168,7 @@ export function OnboardingModal({
           {step === 3 && (
             <div className="onboarding-step">
               <h2 className="serif text-3xl md:text-5xl leading-[1.05]">
-                Tell Jarvis what you&apos;re working on.
+                Tell Atlas what you&apos;re working on.
               </h2>
               <p className="mt-3 text-sm md:text-base text-[var(--color-text-muted)]">
                 A sentence or two. Goals, problems, what success looks like.
@@ -195,7 +195,7 @@ export function OnboardingModal({
                   disabled={!description.trim() || submitting}
                   className="btn-primary disabled:opacity-40"
                 >
-                  Meet Jarvis <ArrowRight size={16} />
+                  Meet Atlas <ArrowRight size={16} />
                 </button>
               </div>
             </div>
@@ -233,7 +233,7 @@ export function OnboardingModal({
                 Setting up your team…
               </h2>
               <p className="mt-3 text-sm text-[var(--color-text-muted)]">
-                Briefing Jarvis. Bringing Marketing, Sales, and Engineering
+                Briefing Atlas. Bringing Marketing, Sales, and Engineering
                 online.
               </p>
             </div>
@@ -244,7 +244,7 @@ export function OnboardingModal({
       {/* Footer */}
       <div className="px-8 pb-6">
         <div className="max-w-2xl mx-auto text-center text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
-          Conduit · Virtual Business Operating System
+          Praxis · By Conduit
         </div>
       </div>
     </div>

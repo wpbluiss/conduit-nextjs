@@ -28,7 +28,7 @@ export interface VoiceTokenResponse {
   daily_seconds_max: number;
   internal_account: boolean;
   // R12.5: round-table additions. When mode === 'roundtable', participants
-  // is the full set of employees in the room (always includes Jarvis).
+  // is the full set of employees in the room (always includes Atlas).
   mode?: "solo" | "roundtable";
   participants?: string[];
   conversation_id?: string | null;

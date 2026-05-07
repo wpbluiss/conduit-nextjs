@@ -98,7 +98,7 @@ export function Sidebar({
               style={{ background: "var(--color-accent)" }}
             />
             <span className="serif text-xl text-[var(--color-text)]">
-              Conduit
+              Praxis
             </span>
           </Link>
           <button

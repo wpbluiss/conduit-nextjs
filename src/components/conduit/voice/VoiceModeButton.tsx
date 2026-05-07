@@ -13,7 +13,7 @@ interface Props {
   employeeInitial: string;
   deptColor: string;
   // R12.5: optional roundtable wiring. mode === 'roundtable' triggers the
-  // multi-employee flow; participants is the list (Jarvis is silently
+  // multi-employee flow; participants is the list (Atlas is silently
   // added server-side if absent); conversation_id links voice <-> text.
   mode?: "solo" | "roundtable";
   participants?: string[];

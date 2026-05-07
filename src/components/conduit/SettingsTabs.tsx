@@ -426,7 +426,7 @@ function VoiceRoomCard() {
       </div>
       <p className="serif text-2xl">Voice Room</p>
       <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-        Real-time conversational voice. Speak to Jarvis or your whole team
+        Real-time conversational voice. Speak to Atlas or your whole team
         like a Zoom call. Live interrupts, voice activity detection,
         per-employee voices, waveform UI.
       </p>
@@ -603,7 +603,7 @@ function MemoryTab() {
           />
           <p className="serif text-lg">Memory is empty.</p>
           <p className="mt-1 text-xs text-[var(--color-text-muted)]">
-            Jarvis writes here when you tell him something durable. You can
+            Atlas writes here when you tell him something durable. You can
             also add memories manually above.
           </p>
         </div>
@@ -1261,6 +1261,7 @@ function BillingTab({
           <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
             Internal Account · Conduit Team
           </div>
+          {/* Conduit (the company) intentional — internal team badge. */}
           <div className="serif text-2xl">No charge, full access</div>
           <p className="mt-2 text-[var(--color-text-muted)]">
             You&apos;re on the internal team account. All tiers, all
