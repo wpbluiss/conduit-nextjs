@@ -21,10 +21,20 @@
 ## Live env vars on conduit-nextjs Vercel
 ANTHROPIC_API_KEY, ELEVENLABS_API_KEY, VERCEL_API_TOKEN, GITHUB_PAT,
 STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_PRO_MONTHLY,
-STRIPE_PRICE_ENTERPRISE_MONTHLY, STRIPE_PRICE_TOPUP_10/25/50
+STRIPE_PRICE_ENTERPRISE_MONTHLY, STRIPE_PRICE_TOPUP_10/25/50,
+SUPABASE_SERVICE_KEY (R11 admin client falls back to this; canonical
+name is SUPABASE_SERVICE_ROLE_KEY — add as soon as convenient)
 
 ## Round queue (locked order)
-- R11: Free-source lead generation for Sales (Google Maps, public reviews, FB groups — no Apollo budget)
+- R11: SHIPPED. Free-source lead pipeline (Overpass discovery + Reddit
+  intent + Playwright Maps enrichment). FB cut — Meta v. Bright Data.
+  Sales workspace at /app/team/sales now backed by real prospects.
+  New table: sales_leads, reddit_lead_sources, lead_intent_signals.
+  New API: POST /api/sales/refresh-leads, GET/PATCH /api/sales/leads.
+  Pre-seeded: 21 real med spa leads in WPB+Boca+Delray+Jupiter via
+  Overpass (no API key needed). Click "Run Discovery" once on the
+  deployed UI to populate intent signals + ratings — that uses the
+  Vercel-side ANTHROPIC_API_KEY which CLI pull masks as sensitive.
 - R12: Voice Room (full-duplex live conversation, WebRTC + VAD + per-employee voices + waveform UI) — THE big one
 - R13: Streaming TTS bridge (R9 deferred — audio starts within 1 sec instead of 10)
 - R14: Mobile app (Expo)
