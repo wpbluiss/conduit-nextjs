@@ -5,6 +5,7 @@ import { EmployeeAvatar } from "@/components/conduit/EmployeeBadge";
 import type { ConduitAccount } from "@/lib/conduit/account";
 import { EMPLOYEES } from "@/lib/conduit/employees";
 import VoiceModeButton from "@/components/conduit/voice/VoiceModeButton";
+import EmployeeRightRail from "@/components/conduit/EmployeeRightRail";
 import LeadsTableClient from "./LeadsTableClient";
 
 interface Props {
@@ -44,7 +45,8 @@ export default async function SalesWorkspace({ supabase, account }: Props) {
   ).sort();
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 flex min-h-0 overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
       {/* Header band — matches other employee workspaces */}
       <div
         className="px-4 md:px-8 py-8 md:py-10 border-b border-[var(--color-border)]"
@@ -108,6 +110,14 @@ export default async function SalesWorkspace({ supabase, account }: Props) {
         deptColor={employee.color}
         deptColorSoft={employee.colorSoft}
       />
+      </div>
+      <div className="hidden lg:block">
+        <EmployeeRightRail
+          supabase={supabase}
+          accountId={account.id}
+          employeeId="sales"
+        />
+      </div>
     </div>
   );
 }

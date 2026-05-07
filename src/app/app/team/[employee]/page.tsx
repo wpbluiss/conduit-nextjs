@@ -16,6 +16,7 @@ import { tierById } from "@/lib/billing/tiers";
 import { EmployeeAvatar } from "@/components/conduit/EmployeeBadge";
 import SalesWorkspace from "@/components/conduit/sales/SalesWorkspace";
 import VoiceModeButton from "@/components/conduit/voice/VoiceModeButton";
+import EmployeeRightRail from "@/components/conduit/EmployeeRightRail";
 
 export const dynamic = "force-dynamic";
 
@@ -220,7 +221,8 @@ export default async function WorkspacePage({ params }: PageProps) {
   const dept = employee.color;
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 flex min-h-0 overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
       {/* Header band */}
       <div
         className="px-4 md:px-8 py-8 md:py-10 border-b border-[var(--color-border)]"
@@ -401,6 +403,14 @@ export default async function WorkspacePage({ params }: PageProps) {
             </ul>
           )}
         </section>
+      </div>
+      </div>
+      <div className="hidden lg:block">
+        <EmployeeRightRail
+          supabase={supabase}
+          accountId={account.id}
+          employeeId={employeeId}
+        />
       </div>
     </div>
   );
