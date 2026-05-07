@@ -1,4 +1,5 @@
 import { withTone } from "./tone";
+import { JARVIS_MEMORY_INSTRUCTIONS } from "@/lib/ai/memory";
 
 export interface AccountContext {
   user_name: string;
@@ -65,5 +66,7 @@ Your job:
 6. NEVER mention Claude, Anthropic, GPT, or any provider. You are Jarvis. The other employees are also AI but the user doesn't need to think about that.
 7. Keep responses tight. Founders are busy. No fluff.${tierNote}
 
-Style: Confident. Direct. Warm. Slightly British in cadence (the Jarvis from Iron Man — but professional, not cartoonish).`);
+Style: Confident. Direct. Warm. Slightly British in cadence (the Jarvis from Iron Man — but professional, not cartoonish).
+
+${JARVIS_MEMORY_INSTRUCTIONS}`);
 }

@@ -34,6 +34,12 @@ import {
   selectParticipants,
   synthesisBrief,
 } from "@/lib/ai/roundtable";
+import {
+  parseMemoryWrites,
+  renderMemoryBlock,
+  trimMemoriesForPrompt,
+  type MemoryRecord,
+} from "@/lib/ai/memory";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -131,6 +137,21 @@ export async function POST(request: NextRequest) {
     .limit(11);
 
   const ordered = (history ?? []).slice().reverse();
+
+  // R10: load memory once per turn for system-prompt injection.
+  const { data: memoryRows } = await supabase
+    .from("conduit_memory")
+    .select(
+      "id, account_id, kind, content, tags, source_conversation_id, source_message_id, written_by, created_at, updated_at, archived_at, superseded_by",
+    )
+    .eq("account_id", account.id)
+    .is("archived_at", null)
+    .order("created_at", { ascending: false })
+    .limit(60);
+  const memories = trimMemoriesForPrompt(
+    (memoryRows ?? []) as MemoryRecord[],
+  );
+  const memoryBlock = renderMemoryBlock(memories);
 
   const ctx: AccountContext = {
     user_name: userDisplayName(user),
@@ -439,9 +460,14 @@ export async function POST(request: NextRequest) {
         const withBrief = extraSystem
           ? `${baseSystem}\n\n--- Brief from Jarvis ---\n${extraSystem}`
           : baseSystem;
-        const systemPrompt = withTimeAware(withBrief, {
+        const withTime = withTimeAware(withBrief, {
           timezone: account.timezone || "America/New_York",
         });
+        // R10: prepend memory block to ALL employees' prompts (read-only for
+        // non-Jarvis; Jarvis's MEMORY INSTRUCTIONS section is already in the
+        // employee body). Memory ahead of time so the model has the context
+        // before it sees the user's turn.
+        const systemPrompt = memoryBlock + withTime;
 
         let fullText = "";
         let inputTokens = 0;
@@ -516,7 +542,17 @@ export async function POST(request: NextRequest) {
           employee === "jarvis"
             ? parseHandoff(fullText)
             : { visibleContent: fullText.trim(), handoff: undefined };
-        const { visibleContent, artifacts } = parseArtifacts(afterHandoff);
+        // R10: parse memory writes ONLY from Jarvis. Other employees can't
+        // mutate memory.
+        const { visibleContent: afterMemory, remembers, supersedes } =
+          employee === "jarvis"
+            ? parseMemoryWrites(afterHandoff)
+            : {
+                visibleContent: afterHandoff,
+                remembers: [],
+                supersedes: [],
+              };
+        const { visibleContent, artifacts } = parseArtifacts(afterMemory);
 
         const { data: insertedMsg } = await supabase
           .from("conduit_messages")
@@ -529,6 +565,100 @@ export async function POST(request: NextRequest) {
           })
           .select("id")
           .single();
+
+        // Memory writes — execute after we have the message id for source linkage.
+        for (const sup of supersedes) {
+          // Verify the old memory belongs to this account before mutating.
+          const { data: old } = await supabase
+            .from("conduit_memory")
+            .select("id, account_id")
+            .eq("id", sup.oldId)
+            .maybeSingle();
+          if (!old || old.account_id !== accountId) continue;
+
+          const { data: newRow } = await supabase
+            .from("conduit_memory")
+            .insert({
+              account_id: accountId,
+              kind: sup.kind,
+              content: sup.content,
+              tags: sup.tags,
+              source_conversation_id: finalConvId,
+              source_message_id: insertedMsg?.id ?? null,
+              written_by: "jarvis",
+            })
+            .select("id, kind, content, tags")
+            .single();
+          if (newRow) {
+            await supabase
+              .from("conduit_memory")
+              .update({
+                archived_at: new Date().toISOString(),
+                superseded_by: newRow.id,
+              })
+              .eq("id", sup.oldId);
+            send("memory_written", {
+              id: newRow.id,
+              kind: newRow.kind,
+              content: newRow.content,
+              tags: newRow.tags,
+              superseded_id: sup.oldId,
+            });
+          }
+        }
+        if (remembers.length > 0) {
+          // Cap enforcement: count current non-archived rows for this account
+          // and archive oldest if we're over the tier cap.
+          const memCap = internalAccount ? 5000 : tier.memoryCap;
+          const { count } = await supabase
+            .from("conduit_memory")
+            .select("id", { count: "exact", head: true })
+            .eq("account_id", accountId)
+            .is("archived_at", null);
+          const room = memCap - (count ?? 0);
+          const overflow = remembers.length - room;
+          if (overflow > 0) {
+            const { data: oldest } = await supabase
+              .from("conduit_memory")
+              .select("id")
+              .eq("account_id", accountId)
+              .is("archived_at", null)
+              .order("created_at", { ascending: true })
+              .limit(overflow);
+            if (oldest && oldest.length) {
+              await supabase
+                .from("conduit_memory")
+                .update({ archived_at: new Date().toISOString() })
+                .in(
+                  "id",
+                  oldest.map((r) => r.id),
+                );
+            }
+          }
+          for (const r of remembers) {
+            const { data: row } = await supabase
+              .from("conduit_memory")
+              .insert({
+                account_id: accountId,
+                kind: r.kind,
+                content: r.content,
+                tags: r.tags,
+                source_conversation_id: finalConvId,
+                source_message_id: insertedMsg?.id ?? null,
+                written_by: "jarvis",
+              })
+              .select("id, kind, content, tags")
+              .single();
+            if (row) {
+              send("memory_written", {
+                id: row.id,
+                kind: row.kind,
+                content: row.content,
+                tags: row.tags,
+              });
+            }
+          }
+        }
 
         for (const art of artifacts) {
           const { data: artRow } = await supabase
@@ -674,9 +804,11 @@ export async function POST(request: NextRequest) {
             send("round_table_thinking", { employee: emp });
             try {
               const baseSystem = systemPromptFor(emp, ctx);
-              const systemPrompt = withTimeAware(baseSystem, {
-                timezone: account.timezone || "America/New_York",
-              });
+              const systemPrompt =
+                memoryBlock +
+                withTimeAware(baseSystem, {
+                  timezone: account.timezone || "America/New_York",
+                });
               const res = await complete({
                 messages: [{ role: "user", content: brief }],
                 systemPrompt,
@@ -767,9 +899,11 @@ export async function POST(request: NextRequest) {
         try {
           send("round_table_synthesis_start", {});
           const baseSystem = systemPromptFor("jarvis", ctx);
-          const systemPrompt = withTimeAware(baseSystem, {
-            timezone: account.timezone || "America/New_York",
-          });
+          const systemPrompt =
+            memoryBlock +
+            withTimeAware(baseSystem, {
+              timezone: account.timezone || "America/New_York",
+            });
           const synth = await complete({
             messages: [
               {

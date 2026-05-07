@@ -1102,3 +1102,139 @@ with streaming TTS while text streams.
 - Voice full-duplex (R5.5 promise) — R12
 - Mobile app — R13
 - Open-ended Engineering via Claude Code subprocess — R14
+
+---
+
+## Round 10 — Cross-conversation memory layer (2026-05-06)
+
+Branch: `feat/conduit-r10-memory` → merged to `main`. Conduit stops
+forgetting. Every account gets durable structured memory shared across
+all conversations and all employees.
+
+### Schema (migration `012_conduit_memory.sql`)
+
+- `conduit_memory_kind` enum: `fact | preference | decision | goal | context`.
+- `conduit_memory` table with `(account_id, kind, content, tags[],
+  source_conversation_id, source_message_id, written_by,
+  created_at, updated_at, archived_at, superseded_by)`. RLS-on,
+  owner-scoped (`SELECT/INSERT/UPDATE/DELETE` policies).
+- Two partial indexes for active-row queries:
+  `(account_id, created_at DESC)` and `(account_id, kind)`.
+- `conduit_pricing_tiers.memory_cap` — Free 25, Pro 200, Enterprise
+  1000. `lib/billing/tiers.ts` mirrors. `internal_account` gets 5000.
+
+### Memory write protocol — tag-based
+
+Same convention as `[HANDOFF]` / `[ARTIFACT]`. Jarvis (and only Jarvis)
+emits at the end of his response:
+
+- `[REMEMBER: kind | content | tag1, tag2]`
+- `[SUPERSEDE: <old_id> | kind | content | tags]`
+
+`src/lib/ai/memory.ts` exports `parseMemoryWrites(content)` which
+returns the cleaned `visibleContent` plus the extracted writes. The
+chat route only runs the parser when `employee === 'jarvis'` — other
+employees can't mutate memory even if they emit the tags. Jarvis's
+system prompt now carries a `JARVIS_MEMORY_INSTRUCTIONS` block
+explaining when to use these (durable facts / preferences / decisions
+/ goals — not passing comments) and the format.
+
+### System prompt injection
+
+`renderMemoryBlock(memories)` produces a compact "WHAT YOU KNOW ABOUT
+THIS USER AND BUSINESS" section grouped by kind (Facts, Context,
+Preferences, Decisions, Goals). Hard caps: 40 records or 6000 chars
+(~1500 tokens), whichever hits first via
+`trimMemoriesForPrompt`. `renderMemoryBlock` returns "" when the
+account has no memory (no wasted prompt budget on empty state).
+
+The chat route loads the account's active memory rows once per turn
+(60-row select) and prepends the block to every system prompt —
+single-employee, round-table participant, and round-table synthesis
+paths. Prompt caching (R2) keeps the cost flat across multi-turn
+conversations.
+
+### Tag execution + cap enforcement
+
+After Jarvis's text streams in, the chat route:
+
+1. Parses `[SUPERSEDE]` first. For each: verifies the `old_id`
+   belongs to the account, inserts the new row, updates the old row
+   with `archived_at + superseded_by`. Atomic at the row level.
+2. Parses `[REMEMBER]`. For each: counts current active memories,
+   archives oldest rows when over the tier cap to make room, then
+   inserts the new row.
+3. Emits `memory_written` SSE for each write with `{id, kind, content,
+   tags, superseded_id?}`.
+
+Source linkage: every write captures the conversation_id +
+message_id of the Jarvis turn that produced it. The memory row
+points back to the source for "jump to this conversation" UX.
+
+### UI — Settings → Memory tab
+
+New tab between **Voice** and **Usage**. Layout:
+- Filter dropdown (All kinds / Facts / Context / Preferences /
+  Decisions / Goals) + memory count `12 / 200`.
+- Inline "+ Add memory" button reveals a manual-add form (kind picker
+  + content textarea + tags input). Manual adds carry
+  `written_by='user'`.
+- Active memories grouped by kind in `Facts (3)`, `Preferences (2)`
+  …, each row showing content, tag pills, byline, edit + archive
+  controls. Inline edit toggle replaces the row with content +
+  tags inputs and Save / Cancel buttons.
+- Archive (× icon) soft-deletes via `PATCH archived=true` so the
+  supersede chain stays intact.
+- Bottom: collapsible "Show archived (N)" — read-only view.
+
+### API routes
+
+- `GET /api/conduit/memory` (with `?archived=1` and `?kind=` filters) —
+  returns `{ memories, cap }`.
+- `POST /api/conduit/memory` — manual add (`written_by='user'`).
+  Enforces tier cap with 409 `memory_cap_reached`.
+- `PATCH /api/conduit/memory/[id]` — edit kind / content / tags /
+  archive flag.
+- `DELETE /api/conduit/memory/[id]` — soft archive.
+
+All routes account-scoped; RLS provides defense in depth.
+
+### Onboarding prefill
+
+When a new account submits the 3-step onboarding modal, the route
+fires a single Haiku `complete()` call with strict JSON output asking
+for 3-7 durable memory records extracted from the business profile.
+Strips code fences, parses, validates each record's kind + content
+length, persists (`written_by='jarvis'`). Idempotent: skips if the
+account already has memory rows.
+
+This means the very first message from a new user lands with seeded
+context like "User runs Acme Cleaning, a commercial cleaning business
+in Houston" and "User's main goal is landing 10 commercial contracts
+this quarter."
+
+### Chat client — inline memory pills
+
+Streamed `memory_written` events attach to the latest Jarvis bubble
+as a small pill: `KIND remembered · <content>`, accent-tinted
+(rounded full, low-opacity accent bg, accent-color border). Renders
+above the artifact card row so it's visible alongside any artifacts
+from the same turn.
+
+### Verification
+
+- `npm run build` clean (28 routes total — +2 memory routes).
+- Migration 012 applied; tier caps confirmed (Free 25, Pro 200,
+  Enterprise 1000); `conduit_memory` table empty + RLS active.
+- Local: routes return correct codes (`/app/settings` 307 unauth,
+  `/api/conduit/memory` 401 unauth).
+- Live cross-conversation memory test reserved for Luis after deploy.
+
+### What's NOT in this round (carried forward)
+
+- Free-source lead generation (Maps scrape, public reviews) — R11
+- Voice full-duplex — R12
+- Memory v2 with semantic search + auto-extraction from regular
+  messages — R13 (when v1 hits its ceiling)
+- Mobile (Expo) app — R14
+- Open-ended Engineering via Claude Code subprocess — R15
