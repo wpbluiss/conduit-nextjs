@@ -2,13 +2,25 @@
 
 import { useState } from "react";
 import { Mic, AlertCircle } from "lucide-react";
-import VoiceRoom, { type VoiceTokenResponse } from "./VoiceRoom";
+import VoiceRoom, {
+  type ParticipantDisplay,
+  type VoiceTokenResponse,
+} from "./VoiceRoom";
 
 interface Props {
   employeeId: string;
   employeeName: string;
   employeeInitial: string;
   deptColor: string;
+  // R12.5: optional roundtable wiring. mode === 'roundtable' triggers the
+  // multi-employee flow; participants is the list (Jarvis is silently
+  // added server-side if absent); conversation_id links voice <-> text.
+  mode?: "solo" | "roundtable";
+  participants?: string[];
+  conversationId?: string | null;
+  participantDisplays?: ParticipantDisplay[];
+  /** Override the trigger button label (e.g. "Voice mode" on chat header). */
+  label?: string;
 }
 
 export default function VoiceModeButton({
@@ -16,6 +28,11 @@ export default function VoiceModeButton({
   employeeName,
   employeeInitial,
   deptColor,
+  mode,
+  participants,
+  conversationId,
+  participantDisplays,
+  label,
 }: Props) {
   const [requesting, setRequesting] = useState(false);
   const [token, setToken] = useState<VoiceTokenResponse | null>(null);
@@ -31,10 +48,15 @@ export default function VoiceModeButton({
       const probe = await navigator.mediaDevices.getUserMedia({ audio: true });
       probe.getTracks().forEach((t) => t.stop());
 
+      const body: Record<string, unknown> = { employee_id: employeeId };
+      if (mode) body.mode = mode;
+      if (participants && participants.length > 0)
+        body.participants = participants;
+      if (conversationId) body.conversation_id = conversationId;
       const res = await fetch("/api/voice/token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ employee_id: employeeId }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
         const err = (await res.json().catch(() => ({}))) as {
@@ -82,7 +104,7 @@ export default function VoiceModeButton({
         title="Live voice conversation"
       >
         <Mic size={14} style={{ color: deptColor }} />
-        {requesting ? "Connecting…" : "Voice Mode"}
+        {requesting ? "Connecting…" : (label ?? "Voice Mode")}
       </button>
 
       {error && (
@@ -123,6 +145,7 @@ export default function VoiceModeButton({
           employeeName={employeeName}
           employeeInitial={employeeInitial}
           deptColor={deptColor}
+          participantDisplays={participantDisplays}
           onClose={({ saved }) => {
             setToken(null);
             if (saved) {
