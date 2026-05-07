@@ -1,12 +1,8 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import PlatformTeaser from "@/components/PlatformTeaser";
-import LiveAgentGrid from "@/components/LiveAgentGrid";
-import Constellation from "@/components/Constellation";
-import Departments from "@/components/Departments";
+import ProductTiles from "@/components/ProductTiles";
 import Story from "@/components/Story";
-import Terminal from "@/components/Terminal";
-import CaseStudy from "@/components/CaseStudy";
+import Vision from "@/components/Vision";
 import Pricing from "@/components/Pricing";
 import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
@@ -16,13 +12,9 @@ export default function Home() {
     <main>
       <Navbar />
       <Hero />
-      <PlatformTeaser />
-      <LiveAgentGrid />
-      <Constellation />
-      <Departments />
+      <ProductTiles />
       <Story />
-      <Terminal />
-      <CaseStudy />
+      <Vision />
       <Pricing />
       <FinalCTA />
       <Footer />

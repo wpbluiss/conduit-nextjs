@@ -15,9 +15,9 @@ export default function Navbar() {
   }, []);
 
   const links = [
-    { href: "#departments", label: "Departments" },
-    { href: "#story", label: "Story" },
-    { href: "#pricing", label: "Pricing" },
+    { href: "/#products", label: "Products" },
+    { href: "/about", label: "About" },
+    { href: "/#pricing", label: "Pricing" },
   ];
 
   return (
@@ -54,7 +54,7 @@ export default function Navbar() {
               Sign in
             </a>
             <a href="/auth/sign-up" className="btn-primary text-[14px]">
-              Talk to Conduit
+              Open Praxis
             </a>
           </div>
 
@@ -111,7 +111,7 @@ export default function Navbar() {
             onClick={() => setOpen(false)}
             className="btn-primary mt-4 justify-center"
           >
-            Talk to Conduit →
+            Open Praxis →
           </a>
         </div>
       </div>

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function FinalCTA() {
   return (
     <section
@@ -10,23 +12,29 @@ export default function FinalCTA() {
           Stop hiring. Start deploying.
         </h2>
         <p className="mt-6 md:mt-8 text-[17px] md:text-[20px] text-[#8C8884] max-w-2xl mx-auto leading-relaxed">
-          The future of work is autonomous. Conduit puts you on the right side
-          of it.
+          Praxis is live. Free to start. The Console is the door.
         </p>
-        <div className="mt-10 md:mt-12">
-          <a
-            href="mailto:luis@conduitai.io?subject=Request%20Access%20-%20Conduit%20AI"
+        <div className="mt-10 md:mt-12 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4">
+          <Link
+            href="/auth/sign-up"
             className="btn-primary text-[16px]"
             style={{ padding: "20px 44px" }}
           >
-            Request Access <span aria-hidden="true">→</span>
-          </a>
+            Open Praxis Console <span aria-hidden="true">→</span>
+          </Link>
+          <Link
+            href="/products"
+            className="btn-secondary text-[16px]"
+            style={{ padding: "20px 32px" }}
+          >
+            See the product family
+          </Link>
         </div>
         <p className="mt-8 text-[14px] text-[#8C8884]">
           Or email{" "}
           <a
             href="mailto:luis@conduitai.io"
-            className="text-[#F5F1EA] underline underline-offset-4 decoration-[#FF6B35]/50 hover:decoration-[#FF6B35]"
+            className="text-[#F5F1EA] underline underline-offset-4 decoration-[#FF8A3D]/50 hover:decoration-[#FF8A3D]"
           >
             luis@conduitai.io
           </a>{" "}

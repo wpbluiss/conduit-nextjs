@@ -9,51 +9,53 @@ type Tier = {
   checkColor: string;
 };
 
+// Mirrors the runtime tiers in src/lib/billing/tiers.ts so the marketing
+// promise matches what the Praxis Console actually sells.
 const TIERS: Tier[] = [
   {
-    name: "STARTER",
-    price: "$20",
+    name: "FREE",
+    price: "$0",
     priceSuffix: "/mo",
-    tagline: "For solopreneurs testing the water.",
+    tagline: "For founders kicking the tires.",
     features: [
-      "3 AI employees",
-      "1 department",
-      "Email + SMS channels",
-      "Standard support",
+      "Praxis Flow — fast model",
+      "Atlas + Marketing employees",
+      "50k tokens / month",
+      "Voice input in chat",
     ],
-    cta: { label: "Start Free", href: "#cta" },
-    checkColor: "#22D3EE",
+    cta: { label: "Open Praxis", href: "/auth/sign-up" },
+    checkColor: "#34D399",
   },
   {
-    name: "GROWTH",
-    price: "$249",
+    name: "PRO",
+    price: "$29",
     priceSuffix: "/mo",
-    tagline: "For businesses ready to scale without hiring.",
+    tagline: "For solo founders running a real business.",
     features: [
-      "12 AI employees",
-      "3 departments",
-      "Voice, SMS, email, chat",
-      "Compliance AI included",
-      "Priority support",
+      "Praxis Flow — adaptive routing",
+      "Atlas + Marketing + Sales + Engineering",
+      "1M tokens / month",
+      "30 voice minutes per day",
+      "Real lead pipelines (Sales) + real builds (Engineering)",
     ],
-    cta: { label: "Get Started", href: "#cta", primary: true },
+    cta: { label: "Start Pro", href: "/auth/sign-up?tier=pro", primary: true },
     popular: true,
-    checkColor: "#F472B6",
+    checkColor: "#FF8A3D",
   },
   {
     name: "ENTERPRISE",
-    price: "$599+",
+    price: "$199",
     priceSuffix: "/mo",
-    tagline: "For companies replacing entire teams.",
+    tagline: "For teams replacing whole departments.",
     features: [
-      "Unlimited AI employees",
-      "All 9 departments",
-      "Custom integrations",
-      "White-label option",
-      "Dedicated success manager",
+      "Praxis Depth — extended thinking",
+      "All 9 employees (Finance, Compliance, HR, Ops, Legal)",
+      "5M tokens / month",
+      "Unlimited voice + roundtable",
+      "Multi-user (when shipped) + priority routing",
     ],
-    cta: { label: "Talk to Founder", href: "mailto:luis@conduitai.io" },
-    checkColor: "#FF6B35",
+    cta: { label: "Talk to founder", href: "mailto:luis@conduitai.io" },
+    checkColor: "#A855F7",
   },
 ];
 
@@ -77,12 +79,16 @@ export default function Pricing() {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-14 md:mb-20 max-w-3xl mx-auto">
           <p className="eyebrow mb-4 inline-flex items-center">
-            <span className="eyebrow-dot" style={{ color: "#F472B6" }} aria-hidden="true" />
+            <span className="eyebrow-dot" style={{ color: "#FF8A3D" }} aria-hidden="true" />
             Pricing
           </p>
           <h2 className="serif text-[36px] md:text-[56px] text-[#F5F1EA]">
-            One platform. Three tiers. Zero payroll.
+            Three tiers. One workforce.
           </h2>
+          <p className="mt-5 text-[16px] md:text-[18px] text-[#8C8884] leading-relaxed">
+            Praxis Flow runs everywhere; Praxis Depth (extended thinking)
+            kicks in on Enterprise for the reasoning-heavy turns.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
@@ -91,12 +97,12 @@ export default function Pricing() {
               key={t.name}
               className={`relative p-8 md:p-10 bg-[#0A0908] flex flex-col ${
                 t.popular
-                  ? "border border-[#F472B6] md:-mt-4 md:mb-[-1rem]"
+                  ? "border border-[#FF8A3D] md:-mt-4 md:mb-[-1rem]"
                   : "border border-[#1F1C19]"
               }`}
             >
               {t.popular && (
-                <span className="absolute -top-3 left-8 md:left-10 bg-[#F472B6] text-[#0A0908] text-[10px] uppercase tracking-[1.8px] px-3 py-1 font-medium">
+                <span className="absolute -top-3 left-8 md:left-10 bg-[#FF8A3D] text-[#0A0908] text-[10px] uppercase tracking-[1.8px] px-3 py-1 font-medium">
                   Most popular
                 </span>
               )}
@@ -130,8 +136,14 @@ export default function Pricing() {
         </div>
 
         <p className="text-center mt-12 md:mt-16 text-[14px] text-[#8C8884] max-w-2xl mx-auto">
-          Or build your own stack. Per-employee add-ons from $5/mo. Credit-based
-          usage available for high-volume operations.
+          Top up tokens any time — $10 / $25 / $50 packs from the
+          <a
+            href="/app/settings/billing"
+            className="text-[#F5F1EA] hover:text-[#FF8A3D] mx-1"
+          >
+            billing settings
+          </a>
+          inside the Console.
         </p>
       </div>
     </section>
