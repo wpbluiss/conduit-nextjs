@@ -1,9 +1,18 @@
+// /app/builds — preserves R7 templates list as tab 1, adds R15 engineering
+// sessions list as tab 2. Tab state is client-side; the page itself is a
+// server component that fetches both datasets and hands them to a client
+// shell. R7 cards keep their existing visual + behavior unchanged.
+
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getOrCreateAccount } from "@/lib/conduit/account";
 import { tierById } from "@/lib/billing/tiers";
-import { ExternalLink, Hammer, Lock } from "lucide-react";
+import { Hammer, Lock } from "lucide-react";
 import { isEngineeringConfigured } from "@/lib/builds/executor";
+import BuildsTabs, {
+  type R7Build,
+  type EngSession,
+} from "@/components/conduit/engineering/BuildsTabs";
 
 export const dynamic = "force-dynamic";
 
@@ -45,17 +54,27 @@ export default async function BuildsPage() {
     );
   }
 
-  const { data: builds } = await supabase
-    .from("conduit_builds")
-    .select(
-      "id, template_id, build_name, status, live_url, github_repo_url, error_message, created_at, conversation_id",
-    )
-    .eq("account_id", account.id)
-    .is("archived_at", null)
-    .order("created_at", { ascending: false })
-    .limit(200);
-
-  const empty = !builds || builds.length === 0;
+  const [{ data: r7Rows }, { data: engRows }] = await Promise.all([
+    supabase
+      .from("conduit_builds")
+      .select(
+        "id, template_id, build_name, status, live_url, github_repo_url, error_message, created_at, conversation_id",
+      )
+      .eq("account_id", account.id)
+      .is("archived_at", null)
+      .order("created_at", { ascending: false })
+      .limit(200),
+    internal
+      ? supabase
+          .from("conduit_engineering_sessions")
+          .select(
+            "id, prompt, build_type, status, deploy_url, github_repo, total_input_tokens, total_output_tokens, error_message, started_at, completed_at, created_at",
+          )
+          .eq("account_id", account.id)
+          .order("created_at", { ascending: false })
+          .limit(100)
+      : Promise.resolve({ data: [] as EngSession[] }),
+  ]);
 
   return (
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8">
@@ -74,92 +93,12 @@ export default async function BuildsPage() {
           </div>
         )}
 
-        {empty ? (
-          <div className="conduit-card p-8 max-w-md">
-            <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
-              Nothing shipped yet
-            </div>
-            <p className="text-[var(--color-text)] mb-4">
-              Ask Engineering for a landing page, CRM, blog, lead-capture
-              page, or contact form.
-            </p>
-            <Link href="/app" className="btn-primary">
-              Go to chat →
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {(builds ?? []).map((b) => (
-              <div
-                key={b.id}
-                className="conduit-card border-l-[3px] p-5 flex flex-col gap-3"
-                style={{ borderLeftColor: "var(--color-dept-engineering)" }}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-                    {b.template_id}
-                  </span>
-                  <StatusPill status={b.status as string} />
-                </div>
-                <div className="serif text-lg leading-snug">{b.build_name}</div>
-                {b.live_url ? (
-                  <a
-                    href={b.live_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hi)] inline-flex items-center gap-1 truncate"
-                  >
-                    {b.live_url}
-                    <ExternalLink size={11} />
-                  </a>
-                ) : b.error_message ? (
-                  <p className="text-xs text-[var(--color-pink)]">
-                    {b.error_message}
-                  </p>
-                ) : (
-                  <p className="text-xs text-[var(--color-text-muted)]">
-                    Building…
-                  </p>
-                )}
-                <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted)] mt-auto pt-2">
-                  <span>{new Date(b.created_at).toLocaleString()}</span>
-                  {b.conversation_id && (
-                    <Link
-                      href={`/app?c=${b.conversation_id}`}
-                      className="hover:text-[var(--color-text)]"
-                    >
-                      Open chat →
-                    </Link>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <BuildsTabs
+          r7Builds={(r7Rows ?? []) as unknown as R7Build[]}
+          engSessions={(engRows ?? []) as unknown as EngSession[]}
+          internal={internal}
+        />
       </div>
     </div>
-  );
-}
-
-function StatusPill({ status }: { status: string }) {
-  const map: Record<string, { color: string; label: string }> = {
-    pending: { color: "var(--color-text-muted)", label: "Pending" },
-    building: { color: "var(--color-amber)", label: "Building" },
-    live: { color: "var(--color-green)", label: "Live" },
-    failed: { color: "var(--color-pink)", label: "Failed" },
-    archived: { color: "var(--color-text-muted)", label: "Archived" },
-  };
-  const m = map[status] ?? map.pending;
-  return (
-    <span
-      className="text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full"
-      style={{
-        color: m.color,
-        background: `color-mix(in srgb, ${m.color} 14%, transparent)`,
-        border: `1px solid color-mix(in srgb, ${m.color} 28%, transparent)`,
-      }}
-    >
-      {m.label}
-    </span>
   );
 }
