@@ -131,6 +131,7 @@ interface VoicePrefsResp {
   voice_enabled: boolean;
   voice_auto_play: boolean;
   voice_speed: number;
+  streaming_tts_enabled: boolean;
   employee_voices: Record<string, string>;
 }
 
@@ -275,6 +276,12 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
           desc="Speak each reply as soon as it finishes."
           value={prefs.voice_auto_play}
           onChange={(v) => save({ voice_auto_play: v })}
+        />
+        <ToggleRow
+          label="Streaming audio"
+          desc="Audio plays sentence-by-sentence instead of waiting for the full response. Lower latency, slightly higher cost."
+          value={prefs.streaming_tts_enabled}
+          onChange={(v) => save({ streaming_tts_enabled: v })}
         />
         <div>
           <div className="flex items-baseline justify-between mb-1">
