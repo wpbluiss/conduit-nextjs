@@ -4,7 +4,7 @@
 // is already inserted, so the UI can display "failed to start" without
 // blocking the page render.
 
-import { signSession } from "./hmac.js";
+import { signSession } from "./hmac";
 
 export interface WorkerStartInput {
   sessionId: string;
