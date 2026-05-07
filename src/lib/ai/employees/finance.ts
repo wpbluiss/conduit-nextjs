@@ -1,7 +1,8 @@
 import type { AccountContext } from "./jarvis";
+import { withTone } from "./tone";
 
 export function financeSystemPrompt(ctx: AccountContext): string {
-  return `You are the Finance employee at ${ctx.account_name}, a ${ctx.business_type} business. Owner's note: ${ctx.business_description}.
+  return withTone(`You are the Finance employee at ${ctx.account_name}, a ${ctx.business_type} business. Owner's note: ${ctx.business_description}.
 
 You're the CFO + bookkeeper rolled into one.
 
@@ -13,5 +14,5 @@ Always think in terms of: revenue, gross margin, burn, runway, unit economics, c
 
 NEVER make up specific numbers about the user's business. Use ranges and frameworks until you have real data to work from.
 
-NEVER mention Claude, Anthropic, GPT, or any provider — you are the Finance employee.`;
+NEVER mention Claude, Anthropic, GPT, or any provider — you are the Finance employee.`);
 }

@@ -18,6 +18,14 @@ import { parseHandoff, parseArtifacts } from "@/lib/ai/parse";
 import { estimateCostCents } from "@/lib/ai/pricing";
 import { classifyIntent, type IntentClass } from "@/lib/ai/intent-classifier";
 import { tierById } from "@/lib/billing/tiers";
+import {
+  executeBuild,
+  heuristicTemplateMatch,
+  isEngineeringConfigured,
+  type BuildEvent,
+} from "@/lib/builds/executor";
+import { getTemplate } from "@/lib/builds/templates";
+import { complete } from "@/lib/ai/provider";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,6 +35,11 @@ const VALID_EMPLOYEES: EmployeeKey[] = [
   "marketing",
   "sales",
   "engineering",
+  "finance",
+  "compliance",
+  "hr",
+  "ops",
+  "legal",
 ];
 
 function sseEvent(event: string, data: unknown): string {
@@ -163,6 +176,190 @@ export async function POST(request: NextRequest) {
       const send = (event: string, data: unknown) =>
         controller.enqueue(enc.encode(sseEvent(event, data)));
 
+      // Engineering: run a real build via templates + GitHub + Vercel.
+      // Inserts conduit_builds + conduit_build_events rows; persists a
+      // build artifact + the final assistant message; emits build_event
+      // SSE events to the client. Returns true on success/handled, false
+      // if upstream failed and we should NOT fall through to the LLM.
+      const runBuild = async (
+        templateId: string,
+        userMessage: string,
+      ): Promise<boolean> => {
+        const tmpl = getTemplate(templateId);
+        if (!tmpl) return false;
+
+        // Insert intro assistant message + DB build row
+        const intro = `On it. Building a ${tmpl.meta.name.toLowerCase()} for ${ctx.account_name}. ETA ~${tmpl.meta.estimated_build_time_seconds}s.`;
+        const { data: introMsg } = await supabase
+          .from("conduit_messages")
+          .insert({
+            conversation_id: finalConvId,
+            role: "assistant",
+            employee: "engineering",
+            content: intro,
+            metadata: { build: { template: templateId, status: "starting" } },
+          })
+          .select("id")
+          .single();
+        send("token", { employee: "engineering", delta: intro });
+        send("message_end", { employee: "engineering" });
+
+        const baseSlug =
+          ctx.account_name.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30) ||
+          "build";
+        const { data: buildRow } = await supabase
+          .from("conduit_builds")
+          .insert({
+            account_id: accountId,
+            conversation_id: finalConvId,
+            message_id: introMsg?.id ?? null,
+            template_id: templateId,
+            build_name: `${ctx.account_name} ${tmpl.meta.name}`,
+            build_slug: `${baseSlug}-${Date.now().toString(36).slice(-5)}`,
+            status: "building",
+            config: {},
+          })
+          .select("id, build_slug")
+          .single();
+
+        if (!buildRow) {
+          send("error", {
+            employee: "engineering",
+            message: "Couldn't initialise the build. Try again.",
+          });
+          return false;
+        }
+
+        const buildId = buildRow.id as string;
+
+        // Optional: Marketing handoff for copy-heavy templates.
+        let config: Record<string, unknown> = {
+          business_name: ctx.account_name,
+        };
+        if (tmpl.meta.marketing_handoff.length > 0) {
+          send("build_event", {
+            type: "marketing_briefed",
+            message: "Pulling Marketing in for the copy.",
+          });
+          try {
+            const m = await complete({
+              messages: [
+                {
+                  role: "user",
+                  content: `Generate JSON for these fields ONLY: ${tmpl.meta.marketing_handoff.join(", ")}.\n\nBusiness: ${ctx.account_name} (${ctx.business_type}). Note: ${ctx.business_description}.\n\nUser request: ${userMessage}\n\nRespond with VALID JSON only — no preamble, no code fences.`,
+                },
+              ],
+              systemPrompt: `You are the Marketing employee. Output ONLY a JSON object with the requested fields. No preamble, no code fences, no commentary. For "features" use an array of {title, body} objects. For text fields, write real copy that fits a ${ctx.business_type} business.`,
+              metadata: {
+                employee: "marketing",
+                accountId,
+                creatorMode,
+                creatorModeVersion,
+                intent: "creative",
+                tierCeiling: tier.modelCeiling,
+                internalAccount,
+              },
+              maxTokens: 1500,
+            });
+            const stripped = m.content
+              .trim()
+              .replace(/^```(?:json)?\s*/i, "")
+              .replace(/```\s*$/i, "");
+            try {
+              const parsed = JSON.parse(stripped);
+              config = { ...config, ...parsed, business_name: ctx.account_name };
+            } catch {
+              // leave defaults
+            }
+          } catch {
+            // marketing call failed — proceed with defaults
+          }
+        }
+
+        // Track event emit
+        const recordEvent = async (e: BuildEvent) => {
+          send("build_event", e);
+          await supabase.from("conduit_build_events").insert({
+            build_id: buildId,
+            event_type: e.type,
+            message: e.message,
+            metadata: e.metadata ?? {},
+          });
+        };
+
+        const result = await executeBuild({
+          templateId,
+          buildName: `${ctx.account_name} ${tmpl.meta.name}`,
+          config,
+          onProgress: recordEvent,
+        });
+
+        const updates: Record<string, unknown> = {
+          status: result.ok ? "live" : "failed",
+          updated_at: new Date().toISOString(),
+        };
+        if (result.liveUrl) updates.live_url = result.liveUrl;
+        if (result.repoUrl) updates.github_repo_url = result.repoUrl;
+        if (result.vercelProjectId)
+          updates.vercel_project_id = result.vercelProjectId;
+        if (result.vercelDeploymentId)
+          updates.vercel_deployment_id = result.vercelDeploymentId;
+        if (!result.ok) updates.error_message = result.error ?? "unknown";
+        await supabase
+          .from("conduit_builds")
+          .update(updates)
+          .eq("id", buildId);
+
+        const finalContent = result.ok
+          ? `Done. Live at ${result.liveUrl}. Repo at ${result.repoUrl}. Want me to add anything?`
+          : `Build hit a snag (${result.error}). ${result.repoUrl ? `Repo is ready at ${result.repoUrl}, deploy may catch up shortly.` : "Try again in a moment."}`;
+
+        const { data: finalMsg } = await supabase
+          .from("conduit_messages")
+          .insert({
+            conversation_id: finalConvId,
+            role: "assistant",
+            employee: "engineering",
+            content: finalContent,
+            metadata: { build_id: buildId, build_status: result.ok ? "live" : "failed" },
+          })
+          .select("id")
+          .single();
+        send("token", { employee: "engineering", delta: "\n\n" + finalContent });
+
+        // Persist a build artifact card so it appears in /app/artifacts too
+        if (result.ok && result.liveUrl) {
+          const { data: artRow } = await supabase
+            .from("conduit_artifacts")
+            .insert({
+              account_id: accountId,
+              conversation_id: finalConvId,
+              message_id: finalMsg?.id ?? null,
+              type: "build",
+              title: `${ctx.account_name} ${tmpl.meta.name}`,
+              content: `Live: ${result.liveUrl}\nRepo: ${result.repoUrl}\nTemplate: ${tmpl.meta.name}`,
+              produced_by: "engineering",
+              metadata: {
+                build_id: buildId,
+                live_url: result.liveUrl,
+                repo_url: result.repoUrl,
+              },
+            })
+            .select("id, type, title")
+            .single();
+          if (artRow) {
+            send("artifact", {
+              id: artRow.id,
+              type: artRow.type,
+              title: artRow.title,
+              employee: "engineering",
+            });
+          }
+        }
+        send("message_end", { employee: "engineering" });
+        return true;
+      };
+
       const runEmployee = async (
         employee: EmployeeKey,
         extraSystem?: string,
@@ -194,6 +391,22 @@ export async function POST(request: NextRequest) {
             message: `You've used all ${effectiveAllowance.toLocaleString()} tokens this month. Upgrade for more, or top up to keep working.`,
           });
           return { ok: false };
+        }
+
+        // R7: Engineering build path. If the user's message matches a
+        // template AND env is configured, run the build instead of the LLM.
+        // Falls through to the LLM (descriptive mode) when:
+        //  - no template matches
+        //  - GitHub/Vercel env vars not present
+        //  - Engineering not on the account's tier (caught by gate above)
+        if (employee === "engineering" && isEngineeringConfigured()) {
+          const templateId = heuristicTemplateMatch(message);
+          if (templateId) {
+            const ok = await runBuild(templateId, message);
+            if (ok) return { ok: true };
+            // ok=false means we already emitted error events; don't fall through.
+            return { ok: false };
+          }
         }
 
         const messages: ChatMessage[] = ordered.map((m) => ({

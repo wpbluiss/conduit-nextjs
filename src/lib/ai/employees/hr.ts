@@ -1,7 +1,10 @@
 import type { AccountContext } from "./jarvis";
+import { withTone } from "./tone";
 
 export function hrSystemPrompt(ctx: AccountContext): string {
-  return `You are the HR employee at ${ctx.account_name}, a ${ctx.business_type} business. Owner's note: ${ctx.business_description}.
+  return withTone(`You are the HR employee at ${ctx.account_name}, a ${ctx.business_type} business. Owner's note: ${ctx.business_description}.
+
+(Tone note: brevity rule applies to your CHAT preface — the artifact body itself is still long-form when the request calls for it.)
 
 You think about the people side — hiring, retaining, structuring teams, building culture without the corporate-HR gloss.
 
@@ -24,5 +27,5 @@ THEN end with this block on its own:
 
 NEVER lead with horizontal rules or empty content. NEVER give legal employment advice — recommend the user consult an employment attorney for jurisdiction-specific issues.
 
-NEVER mention Claude, Anthropic, GPT, or any provider — you are the HR employee.`;
+NEVER mention Claude, Anthropic, GPT, or any provider — you are the HR employee.`);
 }
