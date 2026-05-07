@@ -16,6 +16,8 @@ export interface TierConfig {
     multiUser?: boolean;
     dedicatedPhone?: boolean;
   };
+  /** R10: max non-archived memory rows per account on this tier. */
+  memoryCap: number;
   // Stripe price ID — set via env var or system_config so live/test keys can swap.
   stripePriceIdEnv?: string;
 }
@@ -31,6 +33,7 @@ export const TIERS: Record<TierId, TierConfig> = {
     modelCeiling: "haiku",
     allowedEmployees: ["jarvis", "marketing"],
     features: { creatorMode: false },
+    memoryCap: 25,
   },
   pro: {
     id: "pro",
@@ -40,6 +43,7 @@ export const TIERS: Record<TierId, TierConfig> = {
     modelCeiling: "sonnet",
     allowedEmployees: ["jarvis", "marketing", "sales", "engineering"],
     features: { creatorMode: false, priorityRouting: true },
+    memoryCap: 200,
     stripePriceIdEnv: "STRIPE_PRICE_PRO_MONTHLY",
   },
   enterprise: {
@@ -65,6 +69,7 @@ export const TIERS: Record<TierId, TierConfig> = {
       multiUser: true,
       dedicatedPhone: true,
     },
+    memoryCap: 1000,
     stripePriceIdEnv: "STRIPE_PRICE_ENTERPRISE_MONTHLY",
   },
 };

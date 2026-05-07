@@ -30,6 +30,7 @@ export interface MessageRow {
   pending?: boolean;
   artifacts?: { id: string; title: string; type: string; preview?: string }[];
   handoffTo?: EmployeeKey;
+  memories?: { id: string; kind: string; content: string; tags?: string[] }[];
 }
 
 interface Suggestion {
@@ -481,6 +482,25 @@ export function Chat({
               type: data.type as string,
             },
           );
+        } else if (event === "memory_written") {
+          const mem = {
+            id: data.id as string,
+            kind: data.kind as string,
+            content: data.content as string,
+            tags: (data.tags as string[]) ?? [],
+          };
+          setMessages((prev) => {
+            const next = [...prev];
+            // Attach to the most recent Jarvis assistant message.
+            for (let i = next.length - 1; i >= 0; i--) {
+              const m = next[i];
+              if (m.role === "assistant" && m.employee === "jarvis") {
+                m.memories = [...(m.memories ?? []), mem];
+                break;
+              }
+            }
+            return next;
+          });
         } else if (event === "round_table_thinking") {
           const emp = data.employee as EmployeeKey;
           // Insert a placeholder pending bubble for this employee
@@ -1072,6 +1092,28 @@ const MessageBubble = memo(function MessageBubble({
             </>
           )}
         </div>
+        {message.memories?.map((mem) => (
+          <div
+            key={mem.id}
+            className="mt-2 inline-flex items-center gap-2 text-[11px] hairline rounded-full pl-2 pr-3 py-1 max-w-full"
+            style={{
+              borderColor: "color-mix(in srgb, var(--color-accent) 35%, transparent)",
+              background: "color-mix(in srgb, var(--color-accent) 6%, transparent)",
+            }}
+          >
+            <span
+              aria-hidden
+              className="inline-block w-1.5 h-1.5 rounded-full"
+              style={{ background: "var(--color-accent)" }}
+            />
+            <span className="text-[var(--color-text-muted)] uppercase tracking-[0.15em] text-[10px]">
+              {mem.kind} remembered
+            </span>
+            <span className="text-[var(--color-text)] truncate max-w-[40ch]">
+              {mem.content}
+            </span>
+          </div>
+        ))}
         {message.artifacts?.map((a) => (
           <button
             key={a.id}

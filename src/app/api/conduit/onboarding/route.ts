@@ -64,6 +64,89 @@ export async function POST(request: NextRequest) {
     .select("id")
     .single();
 
+  // R10: extract durable memory records from the business description so the
+  // very first message has context. Run only if the account has no memory yet
+  // (idempotent if onboarding is re-run from Settings).
+  try {
+    const { count: existingMemoryCount } = await supabase
+      .from("conduit_memory")
+      .select("id", { count: "exact", head: true })
+      .eq("account_id", account.id)
+      .is("archived_at", null);
+    if ((existingMemoryCount ?? 0) === 0) {
+      const extraction = await complete({
+        messages: [
+          {
+            role: "user",
+            content: `Extract durable memory records from this business profile.
+
+Business name: ${name}
+Business type: ${businessType}
+Owner's note: ${businessDescription}
+
+Output ONLY valid JSON with this shape (no preamble, no code fences):
+{ "memories": [ { "kind": "fact|context|preference|decision|goal", "content": "1-2 sentence durable statement, third person", "tags": ["lowercase","tags"] } ] }
+
+Be conservative. 3-7 records max. Each should be a durable, useful long-term fact.`,
+          },
+        ],
+        systemPrompt:
+          "You extract durable memory records from a business profile. Output ONLY a JSON object — no preamble, no code fences, no commentary.",
+        metadata: {
+          employee: "jarvis",
+          accountId: account.id,
+          creatorMode: account.creator_mode,
+          creatorModeVersion: account.creator_mode_version ?? 1,
+          intent: "factual",
+          internalAccount: Boolean(account.internal_account),
+        },
+        maxTokens: 800,
+      });
+      const stripped = extraction.content
+        .trim()
+        .replace(/^```(?:json)?\s*/i, "")
+        .replace(/```\s*$/i, "");
+      let parsed: { memories?: Array<Record<string, unknown>> } = {};
+      try {
+        parsed = JSON.parse(stripped);
+      } catch {
+        /* swallow */
+      }
+      const validKinds = [
+        "fact",
+        "context",
+        "preference",
+        "decision",
+        "goal",
+      ];
+      const rows = (parsed.memories ?? [])
+        .filter((m) => {
+          const k = (m.kind as string)?.toLowerCase();
+          const c = (m.content as string)?.trim();
+          return validKinds.includes(k) && c && c.length <= 1000;
+        })
+        .slice(0, 7)
+        .map((m) => ({
+          account_id: account.id,
+          kind: (m.kind as string).toLowerCase(),
+          content: (m.content as string).trim(),
+          tags: Array.isArray(m.tags)
+            ? (m.tags as unknown[])
+                .map((t) => String(t).trim().toLowerCase())
+                .filter((t) => t && t.length < 32)
+                .slice(0, 5)
+            : [],
+          written_by: "jarvis",
+        }));
+      if (rows.length) {
+        await supabase.from("conduit_memory").insert(rows);
+      }
+    }
+  } catch (err) {
+    console.error("memory_seed_failed", err);
+    // Non-fatal — onboarding continues without seeded memory.
+  }
+
   if (convo) {
     try {
       const res = await complete({

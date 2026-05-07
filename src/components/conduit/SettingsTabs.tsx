@@ -2,7 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check, ExternalLink, Lock, Play } from "lucide-react";
+import {
+  ArrowRight,
+  Brain,
+  Check,
+  ExternalLink,
+  Lock,
+  Play,
+  Plus,
+  X,
+} from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
 import { ORDERED_TIERS, TOPUPS, tierById, type TierId } from "@/lib/billing/tiers";
@@ -64,7 +73,7 @@ export function SettingsTabs({
   usage: UsageData;
 }) {
   const [tab, setTab] = useState<
-    "profile" | "business" | "voice" | "usage" | "billing"
+    "profile" | "business" | "voice" | "memory" | "usage" | "billing"
   >("profile");
 
   return (
@@ -75,6 +84,7 @@ export function SettingsTabs({
             ["profile", "Profile"],
             ["business", "Business"],
             ["voice", "Voice"],
+            ["memory", "Memory"],
             ["usage", "Usage"],
             ["billing", "Billing"],
           ] as const
@@ -110,6 +120,7 @@ export function SettingsTabs({
           )}
         />
       )}
+      {tab === "memory" && <MemoryTab />}
       {tab === "usage" && <UsageTab usage={usage} />}
       {tab === "billing" && <BillingTab account={account} usage={usage} />}
     </div>
@@ -423,6 +434,387 @@ function VoiceRoomCard() {
             ? "Saving…"
             : "Notify me when it's ready"}
       </button>
+    </div>
+  );
+}
+
+interface MemoryRow {
+  id: string;
+  kind: "fact" | "preference" | "decision" | "goal" | "context";
+  content: string;
+  tags: string[];
+  written_by: string;
+  source_conversation_id: string | null;
+  created_at: string;
+}
+
+const MEMORY_KIND_LABELS: Record<MemoryRow["kind"], string> = {
+  fact: "Facts",
+  context: "Context",
+  preference: "Preferences",
+  decision: "Decisions",
+  goal: "Goals",
+};
+
+const MEMORY_KIND_ORDER: MemoryRow["kind"][] = [
+  "fact",
+  "context",
+  "preference",
+  "decision",
+  "goal",
+];
+
+function MemoryTab() {
+  const [memories, setMemories] = useState<MemoryRow[]>([]);
+  const [archived, setArchived] = useState<MemoryRow[]>([]);
+  const [showArchived, setShowArchived] = useState(false);
+  const [cap, setCap] = useState<number>(50);
+  const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false);
+  const [filter, setFilter] = useState<MemoryRow["kind"] | "all">("all");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDraft, setEditDraft] = useState<{ content: string; tags: string }>(
+    { content: "", tags: "" },
+  );
+  const [error, setError] = useState<string | null>(null);
+
+  const refresh = async () => {
+    setLoading(true);
+    const [active, arch] = await Promise.all([
+      fetch("/api/conduit/memory"),
+      fetch("/api/conduit/memory?archived=1"),
+    ]);
+    if (active.ok) {
+      const j = await active.json();
+      setMemories(j.memories ?? []);
+      setCap(j.cap ?? 50);
+    }
+    if (arch.ok) {
+      const j = await arch.json();
+      setArchived(
+        (j.memories ?? []).filter(
+          (m: MemoryRow & { archived_at: string | null }) =>
+            !!m.archived_at,
+        ) as MemoryRow[],
+      );
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    void refresh();
+  }, []);
+
+  const grouped = MEMORY_KIND_ORDER.map((kind) => ({
+    kind,
+    rows: memories.filter(
+      (m) => m.kind === kind && (filter === "all" || filter === kind),
+    ),
+  })).filter((g) => g.rows.length > 0);
+
+  const archive = async (id: string) => {
+    setError(null);
+    const r = await fetch(`/api/conduit/memory/${id}`, { method: "DELETE" });
+    if (!r.ok) setError("Couldn't archive that memory.");
+    void refresh();
+  };
+
+  const save = async () => {
+    if (!editingId) return;
+    setError(null);
+    const tagsArr = editDraft.tags
+      .split(",")
+      .map((t) => t.trim().toLowerCase())
+      .filter(Boolean);
+    const r = await fetch(`/api/conduit/memory/${editingId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        content: editDraft.content,
+        tags: tagsArr,
+      }),
+    });
+    if (!r.ok) {
+      setError("Couldn't save that change.");
+      return;
+    }
+    setEditingId(null);
+    void refresh();
+  };
+
+  return (
+    <div className="space-y-6 text-sm">
+      <div className="flex items-center justify-between">
+        <p className="text-[var(--color-text-muted)]">
+          What your team knows about you and your business.
+        </p>
+        <span className="text-xs text-[var(--color-text-muted)]">
+          {memories.length} / {cap}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <select
+          value={filter}
+          onChange={(e) =>
+            setFilter(e.target.value as MemoryRow["kind"] | "all")
+          }
+          className="bg-[var(--color-surface-elevated)] hairline rounded-lg px-3 py-1.5 text-xs outline-none focus:border-[var(--color-accent)]"
+        >
+          <option value="all">All kinds</option>
+          {MEMORY_KIND_ORDER.map((k) => (
+            <option key={k} value={k}>
+              {MEMORY_KIND_LABELS[k]}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={() => setAdding((v) => !v)}
+          className="inline-flex items-center gap-1 hairline rounded-lg px-3 py-1.5 text-xs hover:border-[var(--color-accent)]"
+        >
+          <Plus size={12} /> Add memory
+        </button>
+      </div>
+
+      {adding && (
+        <ManualAddMemory
+          onSaved={() => {
+            setAdding(false);
+            void refresh();
+          }}
+          onCancel={() => setAdding(false)}
+        />
+      )}
+
+      {loading ? (
+        <p className="text-[var(--color-text-muted)] text-xs">Loading…</p>
+      ) : grouped.length === 0 ? (
+        <div className="conduit-card p-6 text-center">
+          <Brain
+            size={20}
+            className="mx-auto text-[var(--color-text-muted)] mb-2"
+          />
+          <p className="serif text-lg">Memory is empty.</p>
+          <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+            Jarvis writes here when you tell him something durable. You can
+            also add memories manually above.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-5">
+          {grouped.map((g) => (
+            <div key={g.kind}>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
+                {MEMORY_KIND_LABELS[g.kind]} ({g.rows.length})
+              </div>
+              <ul className="space-y-1.5">
+                {g.rows.map((m) => (
+                  <li
+                    key={m.id}
+                    className="conduit-card px-4 py-3 flex items-start gap-3"
+                  >
+                    {editingId === m.id ? (
+                      <div className="flex-1 space-y-2">
+                        <textarea
+                          value={editDraft.content}
+                          onChange={(e) =>
+                            setEditDraft((d) => ({
+                              ...d,
+                              content: e.target.value,
+                            }))
+                          }
+                          rows={2}
+                          className="w-full bg-[var(--color-surface)] hairline rounded-lg px-3 py-2 outline-none focus:border-[var(--color-accent)] resize-none"
+                        />
+                        <input
+                          value={editDraft.tags}
+                          onChange={(e) =>
+                            setEditDraft((d) => ({ ...d, tags: e.target.value }))
+                          }
+                          placeholder="tags, comma, separated"
+                          className="w-full bg-[var(--color-surface)] hairline rounded-lg px-3 py-1.5 text-xs outline-none focus:border-[var(--color-accent)]"
+                        />
+                        <div className="flex gap-2 justify-end">
+                          <button
+                            onClick={() => setEditingId(null)}
+                            className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={save}
+                            className="btn-primary !text-xs !py-1.5 !px-3"
+                          >
+                            Save
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[var(--color-text)] leading-relaxed">
+                            {m.content}
+                          </p>
+                          {m.tags.length > 0 && (
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {m.tags.map((t) => (
+                                <span
+                                  key={t}
+                                  className="text-[10px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] hairline rounded-full px-2 py-0.5"
+                                >
+                                  {t}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          <div className="mt-1 text-[10px] text-[var(--color-text-muted)]">
+                            {m.written_by === "user"
+                              ? "added by you"
+                              : `written by ${m.written_by}`}{" "}
+                            · {new Date(m.created_at).toLocaleDateString()}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            onClick={() => {
+                              setEditingId(m.id);
+                              setEditDraft({
+                                content: m.content,
+                                tags: m.tags.join(", "),
+                              });
+                            }}
+                            className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] px-2"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => archive(m.id)}
+                            aria-label="Archive"
+                            className="text-[var(--color-text-muted)] hover:text-[var(--color-pink)]"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {archived.length > 0 && (
+        <div className="border-t border-[var(--color-border)] pt-4">
+          <button
+            onClick={() => setShowArchived((v) => !v)}
+            className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+          >
+            {showArchived ? "Hide archived" : `Show archived (${archived.length})`}
+          </button>
+          {showArchived && (
+            <ul className="mt-3 space-y-1">
+              {archived.map((m) => (
+                <li
+                  key={m.id}
+                  className="text-xs text-[var(--color-text-muted)] line-through"
+                >
+                  {MEMORY_KIND_LABELS[m.kind]} · {m.content}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
+    </div>
+  );
+}
+
+function ManualAddMemory({
+  onSaved,
+  onCancel,
+}: {
+  onSaved: () => void;
+  onCancel: () => void;
+}) {
+  const [kind, setKind] = useState<MemoryRow["kind"]>("fact");
+  const [content, setContent] = useState("");
+  const [tags, setTags] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async () => {
+    if (!content.trim()) return;
+    setSaving(true);
+    setError(null);
+    const r = await fetch("/api/conduit/memory", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        kind,
+        content,
+        tags: tags
+          .split(",")
+          .map((t) => t.trim().toLowerCase())
+          .filter(Boolean),
+      }),
+    });
+    setSaving(false);
+    if (!r.ok) {
+      const j = await r.json().catch(() => ({}));
+      setError(j.message || "Couldn't add that memory.");
+      return;
+    }
+    onSaved();
+  };
+
+  return (
+    <div className="conduit-card p-4 space-y-3">
+      <div className="flex items-center gap-2">
+        <select
+          value={kind}
+          onChange={(e) => setKind(e.target.value as MemoryRow["kind"])}
+          className="bg-[var(--color-surface)] hairline rounded-lg px-2 py-1.5 text-xs"
+        >
+          {MEMORY_KIND_ORDER.map((k) => (
+            <option key={k} value={k}>
+              {MEMORY_KIND_LABELS[k]}
+            </option>
+          ))}
+        </select>
+      </div>
+      <textarea
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        rows={2}
+        placeholder="Write the durable fact, preference, decision, goal, or context."
+        className="w-full bg-[var(--color-surface)] hairline rounded-lg px-3 py-2 outline-none focus:border-[var(--color-accent)] resize-none"
+      />
+      <input
+        value={tags}
+        onChange={(e) => setTags(e.target.value)}
+        placeholder="tags, comma, separated (optional)"
+        className="w-full bg-[var(--color-surface)] hairline rounded-lg px-3 py-1.5 text-xs outline-none focus:border-[var(--color-accent)]"
+      />
+      {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={onCancel}
+          className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={submit}
+          disabled={saving || !content.trim()}
+          className="btn-primary !text-xs !py-1.5 !px-3 disabled:opacity-50"
+        >
+          {saving ? "Saving…" : "Save memory"}
+        </button>
+      </div>
     </div>
   );
 }
