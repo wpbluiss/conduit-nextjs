@@ -26,6 +26,7 @@ import {
 } from "@/lib/builds/executor";
 import { getTemplate } from "@/lib/builds/templates";
 import { complete } from "@/lib/ai/provider";
+import { withTimeAware } from "@/lib/ai/employees/time-aware";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -423,9 +424,12 @@ export async function POST(request: NextRequest) {
         }));
 
         const baseSystem = systemPromptFor(employee, ctx);
-        const systemPrompt = extraSystem
+        const withBrief = extraSystem
           ? `${baseSystem}\n\n--- Brief from Jarvis ---\n${extraSystem}`
           : baseSystem;
+        const systemPrompt = withTimeAware(withBrief, {
+          timezone: account.timezone || "America/New_York",
+        });
 
         let fullText = "";
         let inputTokens = 0;

@@ -170,24 +170,22 @@ export function Sidebar({
 
         <div className="px-4 pt-3 pb-2 border-t border-[var(--color-border)]">
           <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
-            Team status
+            Team
           </div>
-          <ul className="grid grid-cols-2 gap-x-3 gap-y-1">
+          <ul className="space-y-0.5">
             {TEAM.map((emp, slot) => {
               const isStreaming = streamingEmployee === emp;
               const allowed = allowedEmployees.includes(emp);
-              return (
-                <li
-                  key={emp}
-                  className={`flex items-center gap-2 text-xs ${
-                    allowed ? "" : "opacity-50"
-                  }`}
-                  title={
-                    allowed
-                      ? undefined
-                      : "Available on a higher plan"
-                  }
-                >
+              const active = pathname === `/app/team/${emp}`;
+              const rowInner = (
+                <span className="relative flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-colors duration-100 hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]">
+                  {active && (
+                    <span
+                      aria-hidden
+                      className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full"
+                      style={{ background: DEPT_COLOR[emp] }}
+                    />
+                  )}
                   <span
                     aria-hidden
                     data-slot={slot % 4}
@@ -200,18 +198,18 @@ export function Sidebar({
                           : "ambient"
                     }`}
                   />
-                  <span className="text-[var(--color-text)] truncate">
+                  <span className="text-[var(--color-text)] truncate flex-1">
                     {employeeLabel(emp)}
                   </span>
                   {!allowed ? (
                     <Lock
                       size={10}
                       aria-label="Locked"
-                      className="ml-auto text-[var(--color-text-muted)]"
+                      className="text-[var(--color-text-muted)]"
                     />
                   ) : (
                     <span
-                      className="ml-auto w-1.5 h-1.5 rounded-full"
+                      className="w-1.5 h-1.5 rounded-full"
                       style={{
                         background: isStreaming
                           ? DEPT_COLOR[emp]
@@ -220,6 +218,31 @@ export function Sidebar({
                       }}
                       aria-label={isStreaming ? "Active" : "Online"}
                     />
+                  )}
+                </span>
+              );
+              return (
+                <li
+                  key={emp}
+                  className={allowed ? "" : "opacity-50"}
+                  title={allowed ? undefined : "Available on a higher plan"}
+                >
+                  {allowed ? (
+                    <Link
+                      href={`/app/team/${emp}`}
+                      onClick={close}
+                      className="block"
+                    >
+                      {rowInner}
+                    </Link>
+                  ) : (
+                    <Link
+                      href="/app/settings"
+                      onClick={close}
+                      className="block cursor-not-allowed"
+                    >
+                      {rowInner}
+                    </Link>
                   )}
                 </li>
               );

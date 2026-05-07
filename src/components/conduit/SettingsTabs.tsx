@@ -30,7 +30,27 @@ interface AccountData {
   bonus_tokens?: number;
   internal_account?: boolean;
   has_stripe_customer?: boolean;
+  timezone?: string;
 }
+
+const COMMON_TIMEZONES = [
+  "America/New_York",
+  "America/Chicago",
+  "America/Denver",
+  "America/Los_Angeles",
+  "America/Phoenix",
+  "America/Anchorage",
+  "Pacific/Honolulu",
+  "America/Toronto",
+  "America/Mexico_City",
+  "Europe/London",
+  "Europe/Paris",
+  "Europe/Berlin",
+  "Asia/Tokyo",
+  "Asia/Shanghai",
+  "Asia/Singapore",
+  "Australia/Sydney",
+];
 
 export function SettingsTabs({
   email,
@@ -79,6 +99,7 @@ export function SettingsTabs({
           fullName={fullName}
           creatorMode={Boolean(account.creator_mode)}
           creatorModeVersion={account.creator_mode_version ?? 1}
+          timezone={account.timezone ?? "America/New_York"}
         />
       )}
       {tab === "business" && <BusinessTab account={account} />}
@@ -389,12 +410,35 @@ function ProfileTab({
   fullName,
   creatorMode,
   creatorModeVersion,
+  timezone,
 }: {
   email: string;
   fullName: string;
   creatorMode: boolean;
   creatorModeVersion: number;
+  timezone: string;
 }) {
+  const [tz, setTz] = useState(timezone);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const router = useRouter();
+
+  const save = async (next: string) => {
+    setTz(next);
+    setSaving(true);
+    setSaved(false);
+    const r = await fetch("/api/conduit/account/prefs", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ timezone: next }),
+    });
+    setSaving(false);
+    if (r.ok) {
+      setSaved(true);
+      router.refresh();
+    }
+  };
+
   return (
     <div className="space-y-4 text-sm">
       <div>
@@ -408,6 +452,25 @@ function ProfileTab({
           Email
         </div>
         <div>{email}</div>
+      </div>
+      <div>
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2">
+          Timezone
+        </div>
+        <select
+          value={tz}
+          onChange={(e) => save(e.target.value)}
+          className="w-full max-w-sm bg-[var(--color-surface-elevated)] hairline px-3 py-2 outline-none focus:border-[var(--color-accent)] rounded-lg"
+        >
+          {[...new Set([tz, ...COMMON_TIMEZONES])].map((z) => (
+            <option key={z} value={z}>
+              {z}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1 text-[10px] text-[var(--color-text-muted)]">
+          {saving ? "Saving…" : saved ? "Saved" : "Used so the team knows what time of day it is for you."}
+        </p>
       </div>
       {creatorMode && (
         <div>
