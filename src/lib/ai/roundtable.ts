@@ -1,4 +1,4 @@
-// R9 round-table mode — multiple employees respond in parallel, Jarvis
+// R9 round-table mode — multiple employees respond in parallel, Atlas
 // synthesizes at the end. Heuristic + explicit Team pin both route here.
 
 import type { EmployeeKey } from "./provider";
@@ -25,8 +25,8 @@ export function isTeamQuery(message: string): boolean {
 
 /**
  * Cap on parallel employees per round-table call.
- *  - Free / Pro tiers max out at 4 (the launch four minus Jarvis = 3, fine)
- *  - Enterprise / internal: 8 (all 9 minus Jarvis)
+ *  - Free / Pro tiers max out at 4 (the launch four minus Atlas = 3, fine)
+ *  - Enterprise / internal: 8 (all 9 minus Atlas)
  */
 export function maxParallel(tierId: string, internalAccount: boolean): number {
   if (internalAccount || tierId === "enterprise") return 8;

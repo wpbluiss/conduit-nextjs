@@ -291,6 +291,16 @@ export function friendlyErrorFor(employee: EmployeeKey | undefined): string {
         ? "Sales"
         : employee === "engineering"
           ? "Engineering"
-          : "Jarvis";
+          : employee === "finance"
+            ? "Finance"
+            : employee === "compliance"
+              ? "Compliance"
+              : employee === "hr"
+                ? "HR"
+                : employee === "ops"
+                  ? "Operations"
+                  : employee === "legal"
+                    ? "Legal"
+                    : "Atlas";
   return `${name} is taking a moment, try again.`;
 }

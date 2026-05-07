@@ -1,5 +1,5 @@
 import type { EmployeeKey } from "../provider";
-import { type AccountContext, jarvisSystemPrompt } from "./jarvis";
+import { type AccountContext, atlasSystemPrompt } from "./jarvis";
 import { marketingSystemPrompt } from "./marketing";
 import { salesSystemPrompt } from "./sales";
 import { engineeringSystemPrompt } from "./engineering";
@@ -18,7 +18,7 @@ export function systemPromptFor(
 ): string {
   switch (employee) {
     case "jarvis":
-      return jarvisSystemPrompt(ctx);
+      return atlasSystemPrompt(ctx);
     case "marketing":
       return marketingSystemPrompt(ctx);
     case "sales":

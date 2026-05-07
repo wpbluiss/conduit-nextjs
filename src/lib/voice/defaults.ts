@@ -15,6 +15,9 @@ export const DEFAULT_EMPLOYEE_VOICES: Record<string, string> = {
   legal: "onwK4e9ZLuTAKqWW03F9", // Daniel
 };
 
+// Stock voice id → display name. Independent of employee identity (a voice
+// can be assigned to any employee), so this stays as ElevenLabs voice
+// labels rather than employee labels.
 export const VOICE_NAMES: Record<string, string> = {
   nPczCjzI2devNBz1zQrb: "Brian",
   EXAVITQu4vr4xnSDxMaL: "Sarah",
@@ -37,7 +40,7 @@ export function defaultVoiceFor(employee: EmployeeKey | string): string {
 
 export function previewLineFor(employee: EmployeeKey | string): string {
   const labels: Record<string, string> = {
-    jarvis: "Jarvis",
+    jarvis: "Atlas",
     marketing: "Marketing",
     sales: "Sales",
     engineering: "Engineering",

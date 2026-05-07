@@ -1,8 +1,9 @@
 // R10: cross-conversation memory layer.
 // Memory writes use the same tag-based pattern as [HANDOFF] / [ARTIFACT] —
-// Jarvis emits structured tags in his text output, the chat route parses
+// Atlas emits structured tags in his text output, the chat route parses
 // them, executes the writes, and strips them from visible content before
-// rendering.
+// rendering. Atlas (id: "jarvis") is the only writer; other employees see
+// the rendered memory block read-only.
 
 export type MemoryKind =
   | "fact"
@@ -68,7 +69,7 @@ function parseTags(raw: string | undefined): string[] {
 }
 
 /**
- * Strip and parse [REMEMBER] / [SUPERSEDE] tags from a Jarvis response.
+ * Strip and parse [REMEMBER] / [SUPERSEDE] tags from an Atlas response.
  * Returns the cleaned visible content plus the extracted writes.
  */
 export function parseMemoryWrites(content: string): ParseMemoryResult {
@@ -172,11 +173,11 @@ export function trimMemoriesForPrompt(rows: MemoryRecord[]): MemoryRecord[] {
 }
 
 /**
- * Append memory-write instructions to Jarvis's system prompt. Only Jarvis
+ * Append memory-write instructions to Atlas's system prompt. Only Atlas
  * receives this — other employees see the memory block (read-only) but no
  * instructions to write.
  */
-export const JARVIS_MEMORY_INSTRUCTIONS = `MEMORY INSTRUCTIONS (Jarvis only):
+export const ATLAS_MEMORY_INSTRUCTIONS = `MEMORY INSTRUCTIONS (Atlas only):
 You can save durable cross-conversation memory by emitting tags at the END of your response, on their own line(s):
 
 [REMEMBER: kind | content | tag1, tag2]
