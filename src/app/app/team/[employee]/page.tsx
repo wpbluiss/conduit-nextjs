@@ -17,6 +17,7 @@ import { EmployeeAvatar } from "@/components/conduit/EmployeeBadge";
 import SalesWorkspace from "@/components/conduit/sales/SalesWorkspace";
 import VoiceModeButton from "@/components/conduit/voice/VoiceModeButton";
 import EmployeeRightRail from "@/components/conduit/EmployeeRightRail";
+import EngineeringBuildButton from "@/components/conduit/engineering/EngineeringBuildButton";
 
 export const dynamic = "force-dynamic";
 
@@ -256,6 +257,12 @@ export default async function WorkspacePage({ params }: PageProps) {
               employeeInitial={employee.initial}
               deptColor={dept}
             />
+            {employeeId === "engineering" && (
+              <EngineeringBuildButton
+                internalAccount={Boolean(account.internal_account)}
+                deptColor={dept}
+              />
+            )}
             <Link
               href={`/app?pin=${employeeId}`}
               className="btn-primary !text-sm"
