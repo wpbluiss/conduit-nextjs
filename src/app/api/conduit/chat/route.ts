@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
   let tokensUsedThisCycle = account.monthly_tokens_used;
 
   // Conduit Adaptive — classify the user's intent once per turn.
-  // The same intent flows through Jarvis routing → handed-off employee.
+  // The same intent flows through Atlas routing → handed-off employee.
   const intent: IntentClass = await classifyIntent(message, {
     employee: initialEmployee,
   });
@@ -467,15 +467,15 @@ export async function POST(request: NextRequest) {
 
         const baseSystem = systemPromptFor(employee, ctx);
         const withBrief = extraSystem
-          ? `${baseSystem}\n\n--- Brief from Jarvis ---\n${extraSystem}`
+          ? `${baseSystem}\n\n--- Brief from Atlas ---\n${extraSystem}`
           : baseSystem;
         const withTime = withTimeAware(withBrief, {
           timezone: account.timezone || "America/New_York",
         });
         // R10: prepend memory block to ALL employees' prompts (read-only for
-        // non-Jarvis; Jarvis's MEMORY INSTRUCTIONS section is already in the
-        // employee body). Memory ahead of time so the model has the context
-        // before it sees the user's turn.
+        // everyone except Atlas; Atlas's MEMORY INSTRUCTIONS section is
+        // already baked into the employee body). Memory comes ahead of time
+        // so the model has context before it sees the user's turn.
         const systemPrompt = memoryBlock + withTime;
 
         let fullText = "";
@@ -590,8 +590,8 @@ export async function POST(request: NextRequest) {
           employee === "jarvis"
             ? parseHandoff(fullText)
             : { visibleContent: fullText.trim(), handoff: undefined };
-        // R10: parse memory writes ONLY from Jarvis. Other employees can't
-        // mutate memory.
+        // R10: parse memory writes ONLY from Atlas (id: "jarvis"). Other
+        // employees can't mutate memory.
         const { visibleContent: afterMemory, remembers, supersedes } =
           employee === "jarvis"
             ? parseMemoryWrites(afterHandoff)
@@ -808,7 +808,7 @@ export async function POST(request: NextRequest) {
 
         if (participants.length < 2) {
           // Not enough employees for a meaningful round-table — fall through to
-          // single Jarvis response.
+          // single Atlas response.
           await runEmployee("jarvis");
           return;
         }
@@ -943,7 +943,7 @@ export async function POST(request: NextRequest) {
           .update({ monthly_tokens_used: tokensUsedThisCycle })
           .eq("id", accountId);
 
-        // Synthesis turn — Jarvis only
+        // Synthesis turn — Atlas only
         try {
           send("round_table_synthesis_start", {});
           const baseSystem = systemPromptFor("jarvis", ctx);

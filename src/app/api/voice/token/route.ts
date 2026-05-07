@@ -57,8 +57,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  // R12.5: validate roundtable mode. Jarvis is always a participant
-  // (moderator) in v1; the route silently ensures it's in the list.
+  // R12.5: validate roundtable mode. Atlas (id: "jarvis") is always a
+  // participant (moderator) in v1; the route silently ensures it's in the
+  // list.
   const requestedMode: "solo" | "roundtable" =
     body.mode === "roundtable" ? "roundtable" : "solo";
   let participants: string[];

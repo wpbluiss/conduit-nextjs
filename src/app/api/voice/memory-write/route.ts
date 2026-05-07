@@ -2,9 +2,9 @@
 // summary at the end of a voice session. Authenticated by a shared
 // CONDUIT_WORKER_SECRET present in both Vercel and Railway env.
 //
-// Honors the R10 invariant that Jarvis is the only writer — every row
-// goes in with written_by='jarvis' regardless of which employee actually
-// hosted the voice session.
+// Honors the R10 invariant that Atlas (id: "jarvis") is the only writer —
+// every row goes in with written_by='jarvis' regardless of which employee
+// actually hosted the voice session.
 
 import { NextResponse, type NextRequest } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";

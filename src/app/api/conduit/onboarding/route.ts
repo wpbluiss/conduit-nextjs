@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 
-  // Auto-create welcome conversation with a Jarvis greeting
+  // Auto-create welcome conversation with an Atlas greeting
   const ctx: AccountContext = {
     user_name: userDisplayName(user),
     account_name: name,
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 
   const { data: convo } = await supabase
     .from("conduit_conversations")
-    .insert({ account_id: account.id, title: "Welcome to Conduit" })
+    .insert({ account_id: account.id, title: "Welcome to Praxis" })
     .select("id")
     .single();
 
@@ -166,7 +166,7 @@ Be conservative. 3-7 records max. Each should be a durable, useful long-term fac
           creatorModeVersion: account.creator_mode_version ?? 1,
           intent: "routing",
           internalAccount: Boolean(account.internal_account),
-          // Onboarding always allowed even on Free tier (Jarvis is in the allowlist).
+          // Onboarding always allowed even on Free tier (Atlas is in the allowlist).
         },
         maxTokens: 400,
       });
@@ -213,7 +213,7 @@ Be conservative. 3-7 records max. Each should be a durable, useful long-term fac
         conversation_id: convo.id,
         role: "assistant",
         employee: "jarvis",
-        content: `${ctx.user_name}! Welcome to Conduit. I just got read in on ${ctx.account_name} — a ${ctx.business_type} business. I see you're working on ${ctx.business_description}. Where do you want to start?`,
+        content: `${ctx.user_name}! Welcome to Praxis. I just got read in on ${ctx.account_name} — a ${ctx.business_type} business. I see you're working on ${ctx.business_description}. Where do you want to start?`,
         metadata: { fallback: true, reason: friendlyErrorFor("jarvis") },
       });
     }
