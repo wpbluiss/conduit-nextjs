@@ -23,7 +23,18 @@ ANTHROPIC_API_KEY, ELEVENLABS_API_KEY, VERCEL_API_TOKEN, GITHUB_PAT,
 STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_PRO_MONTHLY,
 STRIPE_PRICE_ENTERPRISE_MONTHLY, STRIPE_PRICE_TOPUP_10/25/50,
 SUPABASE_SERVICE_KEY (R11 admin client falls back to this; canonical
-name is SUPABASE_SERVICE_ROLE_KEY — add as soon as convenient)
+name is SUPABASE_SERVICE_ROLE_KEY — add as soon as convenient).
+
+R12 additions (Vercel side):
+  LIVEKIT_API_KEY, LIVEKIT_API_SECRET, LIVEKIT_URL — LiveKit Cloud creds
+  for /api/voice/token. Worker uses the same values.
+  CONDUIT_WORKER_SECRET — shared secret between Vercel and Railway worker.
+  Worker passes it in x-conduit-worker-secret to call /api/voice/memory-write.
+
+R12 additions (Railway worker only — NOT on Vercel):
+  OPENAI_API_KEY — Realtime API access, kept off Vercel to isolate cost
+  surface. Plus all of the Vercel-side R12 vars + SUPABASE_SERVICE_KEY +
+  ANTHROPIC_API_KEY (transcript summary via Haiku).
 
 ## Round queue (locked order)
 - R11: SHIPPED. Free-source lead pipeline (Overpass discovery + Reddit

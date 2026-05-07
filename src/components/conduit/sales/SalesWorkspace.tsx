@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { EmployeeAvatar } from "@/components/conduit/EmployeeBadge";
 import type { ConduitAccount } from "@/lib/conduit/account";
 import { EMPLOYEES } from "@/lib/conduit/employees";
+import VoiceModeButton from "@/components/conduit/voice/VoiceModeButton";
 import LeadsTableClient from "./LeadsTableClient";
 
 interface Props {
@@ -70,13 +71,21 @@ export default async function SalesWorkspace({ supabase, account }: Props) {
               {employee.tagline}
             </p>
           </div>
-          <Link
-            href="/app?pin=sales"
-            className="btn-primary !text-sm"
-            style={{ background: employee.color, color: "#0A0908" }}
-          >
-            Talk to Sales <ArrowRight size={14} />
-          </Link>
+          <div className="flex items-center gap-2">
+            <VoiceModeButton
+              employeeId="sales"
+              employeeName={employee.name}
+              employeeInitial={employee.initial}
+              deptColor={employee.color}
+            />
+            <Link
+              href="/app?pin=sales"
+              className="btn-primary !text-sm"
+              style={{ background: employee.color, color: "#0A0908" }}
+            >
+              Talk to Sales <ArrowRight size={14} />
+            </Link>
+          </div>
         </div>
       </div>
 
