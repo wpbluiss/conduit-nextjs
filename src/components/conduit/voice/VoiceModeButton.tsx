@@ -1,0 +1,137 @@
+"use client";
+
+import { useState } from "react";
+import { Mic, AlertCircle } from "lucide-react";
+import VoiceRoom, { type VoiceTokenResponse } from "./VoiceRoom";
+
+interface Props {
+  employeeId: string;
+  employeeName: string;
+  employeeInitial: string;
+  deptColor: string;
+}
+
+export default function VoiceModeButton({
+  employeeId,
+  employeeName,
+  employeeInitial,
+  deptColor,
+}: Props) {
+  const [requesting, setRequesting] = useState(false);
+  const [token, setToken] = useState<VoiceTokenResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [savedToast, setSavedToast] = useState(false);
+
+  async function start() {
+    setError(null);
+    setRequesting(true);
+    try {
+      // Request mic permission up front so the user-gesture window is open
+      // when LiveKit later calls setMicrophoneEnabled.
+      const probe = await navigator.mediaDevices.getUserMedia({ audio: true });
+      probe.getTracks().forEach((t) => t.stop());
+
+      const res = await fetch("/api/voice/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ employee_id: employeeId }),
+      });
+      if (!res.ok) {
+        const err = (await res.json().catch(() => ({}))) as {
+          error?: string;
+          message?: string;
+        };
+        if (res.status === 503) {
+          setError(
+            err.message ?? "Voice mode is being set up. Try again shortly.",
+          );
+        } else if (res.status === 429) {
+          setError(err.message ?? "Daily voice cap reached.");
+        } else if (res.status === 403) {
+          setError("Voice Mode requires a paid tier.");
+        } else {
+          setError(err.error ?? "Couldn't start voice mode.");
+        }
+        return;
+      }
+      const json = (await res.json()) as VoiceTokenResponse;
+      setToken(json);
+    } catch (err) {
+      const e = err as { name?: string; message?: string };
+      if (
+        e.name === "NotAllowedError" ||
+        e.name === "PermissionDeniedError" ||
+        e.name === "SecurityError"
+      ) {
+        setError("Mic permission denied — enable in browser settings.");
+      } else {
+        setError(e.message ?? "Couldn't start voice mode.");
+      }
+    } finally {
+      setRequesting(false);
+    }
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={start}
+        disabled={requesting}
+        className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md border border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-accent)] disabled:opacity-50"
+        title="Live voice conversation"
+      >
+        <Mic size={14} style={{ color: deptColor }} />
+        {requesting ? "Connecting…" : "Voice Mode"}
+      </button>
+
+      {error && (
+        <div
+          role="alert"
+          className="fixed top-4 right-4 z-[70] max-w-sm text-sm bg-red-950/90 border border-red-500/40 rounded-md px-3 py-2 text-red-100 inline-flex items-start gap-2 shadow-lg"
+        >
+          <AlertCircle size={14} className="mt-0.5 shrink-0" />
+          <div>
+            <div>{error}</div>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="text-xs underline mt-0.5 text-red-200/70"
+            >
+              dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
+      {savedToast && (
+        <div className="fixed top-4 right-4 z-[70] text-sm bg-black/80 border border-[var(--color-border)] rounded-md px-3 py-2 inline-flex items-center gap-2">
+          Conversation saved.{" "}
+          <a
+            href="/app/settings/voice-history"
+            className="underline"
+            style={{ color: deptColor }}
+          >
+            View transcript
+          </a>
+        </div>
+      )}
+
+      {token && (
+        <VoiceRoom
+          tokenResponse={token}
+          employeeName={employeeName}
+          employeeInitial={employeeInitial}
+          deptColor={deptColor}
+          onClose={({ saved }) => {
+            setToken(null);
+            if (saved) {
+              setSavedToast(true);
+              window.setTimeout(() => setSavedToast(false), 5000);
+            }
+          }}
+        />
+      )}
+    </>
+  );
+}

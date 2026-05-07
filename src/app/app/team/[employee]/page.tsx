@@ -15,6 +15,7 @@ import {
 import { tierById } from "@/lib/billing/tiers";
 import { EmployeeAvatar } from "@/components/conduit/EmployeeBadge";
 import SalesWorkspace from "@/components/conduit/sales/SalesWorkspace";
+import VoiceModeButton from "@/components/conduit/voice/VoiceModeButton";
 
 export const dynamic = "force-dynamic";
 
@@ -246,13 +247,21 @@ export default async function WorkspacePage({ params }: PageProps) {
               {employee.tagline}
             </p>
           </div>
-          <Link
-            href={`/app?pin=${employeeId}`}
-            className="btn-primary !text-sm"
-            style={{ background: dept, color: "#0A0908" }}
-          >
-            Talk to {employee.name} <ArrowRight size={14} />
-          </Link>
+          <div className="flex items-center gap-2">
+            <VoiceModeButton
+              employeeId={employeeId}
+              employeeName={employee.name}
+              employeeInitial={employee.initial}
+              deptColor={dept}
+            />
+            <Link
+              href={`/app?pin=${employeeId}`}
+              className="btn-primary !text-sm"
+              style={{ background: dept, color: "#0A0908" }}
+            >
+              Talk to {employee.name} <ArrowRight size={14} />
+            </Link>
+          </div>
         </div>
       </div>
 
