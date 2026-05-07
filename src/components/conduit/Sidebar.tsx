@@ -5,7 +5,6 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   Plus,
-  MessageSquare,
   FileText,
   Hammer,
   Lock,
@@ -22,6 +21,7 @@ interface ConvoSummary {
   id: string;
   title: string | null;
   updated_at: string;
+  dominant_employee: string | null;
 }
 
 interface TeamActivity {
@@ -141,6 +141,11 @@ export function Sidebar({
           )}
           {conversations.map((c) => {
             const active = activeId === c.id;
+            const dom = c.dominant_employee;
+            const isTeam = dom === "team";
+            const empKey = (
+              dom && (TEAM as string[]).includes(dom) ? dom : "jarvis"
+            ) as EmployeeKey;
             return (
               <Link
                 key={c.id}
@@ -156,10 +161,37 @@ export function Sidebar({
                   <span
                     aria-hidden
                     className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full"
-                    style={{ background: "var(--color-accent)" }}
+                    style={{
+                      background: isTeam
+                        ? "var(--color-accent)"
+                        : DEPT_COLOR[empKey],
+                    }}
                   />
                 )}
-                <MessageSquare size={14} className="shrink-0" />
+                {isTeam ? (
+                  <span
+                    aria-hidden
+                    className="inline-block w-3.5 h-3.5 rounded-full shrink-0"
+                    style={{
+                      background:
+                        "conic-gradient(from 90deg, var(--color-dept-marketing), var(--color-dept-sales), var(--color-dept-engineering), var(--color-dept-jarvis), var(--color-dept-marketing))",
+                      boxShadow:
+                        "inset 0 0 0 1.5px var(--color-surface-elevated)",
+                    }}
+                  />
+                ) : (
+                  <span
+                    aria-hidden
+                    className="inline-flex items-center justify-center shrink-0 w-3.5 h-3.5 rounded-full text-[8px] font-medium"
+                    style={{
+                      background: `color-mix(in srgb, ${DEPT_COLOR[empKey]} 20%, var(--color-surface-elevated))`,
+                      color: DEPT_COLOR[empKey],
+                      boxShadow: `inset 0 0 0 1px ${DEPT_COLOR[empKey]}`,
+                    }}
+                  >
+                    {empKey.charAt(0).toUpperCase()}
+                  </span>
+                )}
                 <span className="truncate">
                   {c.title || "Untitled chat"}
                 </span>

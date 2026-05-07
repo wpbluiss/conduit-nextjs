@@ -4,6 +4,7 @@ import { getOrCreateAccount } from "@/lib/conduit/account";
 import { Sidebar } from "@/components/conduit/Sidebar";
 import { OnboardingModal } from "@/components/conduit/OnboardingModal";
 import { UpgradeNudge } from "@/components/conduit/UpgradeNudge";
+import { RouteProgress } from "@/components/conduit/RouteProgress";
 import { tierById } from "@/lib/billing/tiers";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import type { EmployeeKey } from "@/lib/ai/provider";
@@ -30,7 +31,7 @@ export default async function AppLayout({
 
   const { data: convos } = await supabase
     .from("conduit_conversations")
-    .select("id, title, updated_at")
+    .select("id, title, updated_at, dominant_employee")
     .eq("account_id", account.id)
     .order("updated_at", { ascending: false })
     .limit(50);
@@ -70,6 +71,7 @@ export default async function AppLayout({
 
   return (
     <div className="h-screen flex bg-[var(--color-surface)] text-[var(--color-text)]">
+      <RouteProgress />
       <Sidebar
         userEmail={user.email ?? ""}
         accountName={account.name}

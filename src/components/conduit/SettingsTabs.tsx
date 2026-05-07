@@ -217,7 +217,13 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
         body: JSON.stringify({ voice_id: voiceId, employee }),
       });
       if (!r.ok) {
-        setError("Preview failed.");
+        const j = (await r.json().catch(() => ({}))) as {
+          message?: string;
+        };
+        setError(
+          j.message ||
+            "Preview unavailable. Voice will still work in chat.",
+        );
         setPreviewing(null);
         return;
       }
@@ -232,7 +238,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
       };
       await a.play();
     } catch {
-      setError("Preview failed.");
+      setError("Preview unavailable. Voice will still work in chat.");
       setPreviewing(null);
     }
   };
@@ -360,6 +366,63 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
         <p className="text-xs text-[var(--color-text-muted)]">Saving…</p>
       )}
       {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
+
+      <VoiceRoomCard />
+    </div>
+  );
+}
+
+function VoiceRoomCard() {
+  const [optedIn, setOptedIn] = useState<boolean | null>(null);
+  const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    // Read once via /api/conduit/voice/prefs (returns voice settings) —
+    // notify flag lives on the account itself, fetch from /api/conduit/account
+    // by calling /api/conduit/voice/prefs which doesn't expose it. Default
+    // to false; the toggle uses /api/conduit/account/prefs to persist.
+    setOptedIn(false);
+  }, []);
+
+  const subscribe = async () => {
+    setPending(true);
+    const r = await fetch("/api/conduit/account/prefs", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ notify_voice_room_ready: true }),
+    });
+    setPending(false);
+    if (r.ok) setOptedIn(true);
+  };
+
+  return (
+    <div
+      className="conduit-card p-5"
+      style={{
+        background:
+          "linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-elevated)), var(--color-surface-elevated))",
+      }}
+    >
+      <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
+        Coming in a future update
+      </div>
+      <p className="serif text-2xl">Voice Room</p>
+      <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+        Real-time conversational voice. Speak to Jarvis or your whole team
+        like a Zoom call. Live interrupts, voice activity detection,
+        per-employee voices, waveform UI.
+      </p>
+      <button
+        onClick={subscribe}
+        disabled={optedIn === true || pending}
+        className="btn-primary mt-4 disabled:opacity-50 !text-xs !py-2"
+      >
+        {optedIn
+          ? "We'll let you know when it's ready ✓"
+          : pending
+            ? "Saving…"
+            : "Notify me when it's ready"}
+      </button>
     </div>
   );
 }

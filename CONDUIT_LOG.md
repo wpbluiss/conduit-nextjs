@@ -945,3 +945,160 @@ endpoint. Time-aware prompt picks up the new value on next turn.
 - Voice full-duplex — R11
 - Open-ended Engineering via Claude Code subprocess — R12
 - Mobile (Expo) app — R13
+
+---
+
+## Round 9 — Round-table + conversation icons + voice UX cleanup (2026-05-06)
+
+Branch: `feat/conduit-r9-roundtable-polish` → merged to `main`.
+
+### Schema (migrations 010 + 011)
+
+- `010_dominant_employee.sql` — `conduit_conversations.dominant_employee`
+  text + `conduit_messages` `AFTER INSERT` trigger that recomputes the
+  dominant employee per conversation. Conversations with 3+ distinct
+  responders get `'team'` so the sidebar can render the multi-color
+  round-table badge. Backfilled — 5 existing conversations populated.
+- `011_voice_room_notify.sql` — `conduit_accounts.voice_auto_play`
+  default flipped to `false` (existing rows unaffected) +
+  `notify_voice_room_ready boolean DEFAULT false` for the Voice Room
+  teaser opt-in.
+
+### Round-table mode
+
+`src/lib/ai/roundtable.ts` carries the routing logic:
+- `isTeamQuery(message)` — heuristic: matches "everyone", "the team",
+  "every department", "round table", "weigh in", "team standup",
+  "team meeting", "each (of you|department|employee)", "intro yourselves".
+- Explicit "team" pin via the new `Team round-table` option in the
+  chat employee dropdown. (Type `PinValue = EmployeeKey | "auto" | "team"`.)
+- `selectParticipants` caps parallel: Free/Pro = 4, Enterprise/internal
+  = 8.
+- `checkRateLimit` — module-level Map, 1 round-table per minute per
+  account. Emits `round_table_rate_limited` SSE with retry hint when
+  exceeded.
+
+Chat-route flow when round-table fires:
+1. Skip the single-employee path entirely.
+2. Emit `round_table_start` with the participant list.
+3. `Promise.all` over participants — each `complete()` call uses the
+   employee's full system prompt (with R8 time-aware block) +
+   `roundTableBrief()` constraining the response to "2-3 sentences,
+   from your department's lens, no preamble." `max_tokens=350`.
+4. As each settles, insert the assistant message (with
+   `metadata.round_table=true`), log `conduit_usage_events`, increment
+   the cap counter, and emit `round_table_response` SSE so the client
+   reveals that bubble.
+5. After all done, fire one Jarvis `complete()` with `synthesisBrief()`
+   that takes the team responses and asks for a 3-5 sentence
+   action-led synthesis. Emit `round_table_synthesis_start` then
+   `round_table_synthesis`.
+6. Final `round_table_end`.
+
+UI in chat:
+- `Team round-table — employees weighing in` banner at start.
+- Each participant shows a pending bubble (typing dots in their dept
+  color) which fills in when their response arrives.
+- After all done, a `Synthesis from Jarvis` banner + Jarvis's bubble.
+- Auto-play TTS (when enabled) plays each employee's voice
+  sequentially — Marketing in Sarah, Sales in Adam, Engineering in
+  Josh, Jarvis in Brian. Per-employee voice mapping was already
+  configured in `src/lib/voice/defaults.ts`.
+- Rate-limit emits a banner instead of any responses.
+
+### Sidebar conversation icons
+
+The Recent list now reads `dominant_employee` from each conversation row.
+
+- `team` → multi-color conic-gradient dot (Marketing orange → Sales
+  emerald → Engineering blue → Jarvis silver) — visually communicates
+  "round-table happened in this convo."
+- Single employee → small dept-color circle with the employee's
+  initial.
+- Falls back to Jarvis silver if the column is null.
+- Active conversation's left-edge accent bar uses the dominant
+  employee's color (not the generic accent).
+
+The trigger keeps the column fresh on every assistant message insert,
+so the sidebar reflects reality without an N+1 query per render.
+
+### Voice preview bug fix
+
+Root cause: ElevenLabs's `voice_settings.speed` parameter is honored
+on Turbo v2.5 but rejected by some endpoints when set to the default
+1.0 (as a redundant param). The endpoint also wasn't surfacing the
+upstream status code, so any 4xx looked the same in the UI as
+"Preview failed."
+
+Fixes:
+- `src/lib/voice/tts.ts` — `voice_settings.speed` now omitted entirely
+  when it equals 1.0; passed only when the user customizes it.
+  `voice_id` URL-encoded. Added an explicit `Accept: audio/mpeg`
+  header. New `TTSUpstreamError` class carries the upstream status +
+  body so the route can branch.
+- `src/app/api/conduit/voice/preview/route.ts` now distinguishes
+  `voice_unavailable` (404 on a specific voice) from `tts_failed`
+  (everything else) and returns a user-facing message.
+- `src/components/conduit/SettingsTabs.tsx` `preview()` handler reads
+  the response message and shows it instead of the generic "Preview
+  failed."
+
+In-memory `previewCache` is keyed by `voice_id:employee` — no
+deployment-stale entries (the cache is per-process and gets fresh
+on every cold start).
+
+### Voice settings UX cleanup
+
+- Default `voice_auto_play=false` for new accounts (migration 011).
+- Voice Room "Coming soon" card at the bottom of `/app/settings` →
+  Voice tab. Notify-me button writes
+  `notify_voice_room_ready=true` via `/api/conduit/account/prefs`
+  (which now also accepts that field alongside timezone).
+- Floating "Stop voice" button bottom-right when audio is playing.
+  ESC key listener + `conduit:stopAudio` window event let any
+  component cancel playback.
+
+### Performance pass
+
+- New `RouteProgress` component — 2px accent strip at top of `/app`,
+  wipes left-to-right on every pathname change, fades out at ~480ms.
+  Gives instant visual feedback on nav clicks even when the underlying
+  fetch is fast. Mounted once in the app layout.
+- `MessageBubble` wrapped in `React.memo` so streaming token
+  appends don't force every prior message to re-render. (The streaming
+  bubble's content is the only changing reference; `React.memo` skips
+  the rest.)
+- Existing Next.js `<Link>` prefetch (default behavior in 16) covers
+  the workspace nav rows. Verified on the workspace page imports.
+
+Note: the brief asked for SWR/React-Query workspace stat preloading
+and broader memo audits. Those are valid follow-ups but introduce
+new dependencies / state-management patterns; deferred to R9.5 along
+with streaming TTS while text streams.
+
+### What's NOT in this round (deferred)
+
+- Streaming TTS while text streams — current behavior still synthesizes
+  after a message completes. The architectural change (MediaSource
+  pipeline) is meaningful enough to warrant its own round.
+- Workspace stats prefetching to a client cache — defer until we add a
+  cache library (SWR or React Query) intentionally.
+
+### Verification
+
+- `npm run build` clean (26 routes total — same as R8; no new public
+  routes added since the round-table runs through the existing
+  `/api/conduit/chat`).
+- Migrations 010 + 011 applied; 5 existing conversations
+  backfilled with `dominant_employee`.
+- Local: routes return correct codes (`/app` 307 unauth, chat 401
+  unauth on team pin).
+- Live round-table reserved for Luis after deploy.
+
+### What's NOT in this round (carried forward)
+
+- Cross-conversation memory layer — R10
+- Free-source lead generation (Maps scrape, public reviews) — R11
+- Voice full-duplex (R5.5 promise) — R12
+- Mobile app — R13
+- Open-ended Engineering via Claude Code subprocess — R14

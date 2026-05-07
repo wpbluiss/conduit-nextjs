@@ -15,25 +15,40 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  let body: { timezone?: string };
+  let body: {
+    timezone?: string;
+    notify_voice_room_ready?: boolean;
+  };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "bad_request" }, { status: 400 });
   }
 
-  const tz = body.timezone?.trim();
-  if (!tz || !TZ_RE.test(tz)) {
-    return NextResponse.json(
-      { error: "invalid_timezone" },
-      { status: 400 },
-    );
+  const update: Record<string, unknown> = {};
+  if (body.timezone !== undefined) {
+    const tz = body.timezone.trim();
+    if (!tz || !TZ_RE.test(tz)) {
+      return NextResponse.json(
+        { error: "invalid_timezone" },
+        { status: 400 },
+      );
+    }
+    update.timezone = tz;
   }
+  if (typeof body.notify_voice_room_ready === "boolean") {
+    update.notify_voice_room_ready = body.notify_voice_room_ready;
+  }
+
+  if (Object.keys(update).length === 0) {
+    return NextResponse.json({ error: "no_op" }, { status: 400 });
+  }
+  update.updated_at = new Date().toISOString();
 
   const account = await getOrCreateAccount(supabase, user);
   const { error } = await supabase
     .from("conduit_accounts")
-    .update({ timezone: tz, updated_at: new Date().toISOString() })
+    .update(update)
     .eq("id", account.id);
   if (error) {
     return NextResponse.json({ error: "db_error" }, { status: 500 });
