@@ -40,6 +40,11 @@ import {
   trimMemoriesForPrompt,
   type MemoryRecord,
 } from "@/lib/ai/memory";
+import {
+  prepareChatTts,
+  streamForEmployee,
+  type ChatTtsConfig,
+} from "@/lib/voice/chat-tts";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -203,6 +208,10 @@ export async function POST(request: NextRequest) {
   const intent: IntentClass = await classifyIntent(message, {
     employee: initialEmployee,
   });
+
+  // R13: prepare per-account streaming TTS config once per request.
+  // Cheap (one batched DB read) and a no-op when voice is off / capped.
+  const ttsCfg: ChatTtsConfig = await prepareChatTts(supabase, account);
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -477,6 +486,19 @@ export async function POST(request: NextRequest) {
         let modelUsed = "";
         let providerUsed = "anthropic";
 
+        // R13: open a streaming TTS bridge for this employee turn. Returns
+        // null if voice is off / over cap / upstream not configured. Audio
+        // chunks fire as SSE `audio` events as soon as ElevenLabs starts
+        // emitting (typically ~500-900ms after the first sentence completes).
+        const ttsTurn = await streamForEmployee({
+          cfg: ttsCfg,
+          employee,
+          sendAudio: (b64) => send("audio", { employee, pcm: b64 }),
+        });
+        if (ttsTurn) {
+          send("audio_start", { employee });
+        }
+
         // Per-employee intent shaping — Marketing always 'creative',
         // Engineering always 'code'. Otherwise carry the user's classified intent.
         const turnIntent: IntentClass =
@@ -522,6 +544,7 @@ export async function POST(request: NextRequest) {
             if (chunk.delta) {
               fullText += chunk.delta;
               send("token", { employee, delta: chunk.delta });
+              ttsTurn?.onDelta(chunk.delta);
             }
             if (chunk.done) {
               inputTokens = chunk.inputTokens ?? 0;
@@ -534,8 +557,33 @@ export async function POST(request: NextRequest) {
           }
         } catch (err) {
           console.error(`[${employee}] stream error`, err);
+          ttsTurn?.cancel();
           send("error", { employee, message: friendlyErrorFor(employee) });
           return { ok: false };
+        }
+
+        // R13: flush remaining text + close the TTS WS, then log usage.
+        // finish() awaits a 250ms drain so the last audio chunk gets out
+        // before the SSE stream closes.
+        if (ttsTurn) {
+          try {
+            const ttsResult = await ttsTurn.finish();
+            send("audio_end", {
+              employee,
+              chars: ttsResult.chars,
+              first_audio_ms: ttsResult.first_audio_ms,
+            });
+            await supabase.from("conduit_voice_chat_sessions").insert({
+              account_id: accountId,
+              conversation_id: finalConvId,
+              employee,
+              voice_id: ttsResult.voice_id,
+              characters_streamed: ttsResult.chars,
+              first_audio_latency_ms: ttsResult.first_audio_ms,
+            });
+          } catch (err) {
+            console.error(`[chat-tts] ${employee} finish failed:`, err);
+          }
         }
 
         const { visibleContent: afterHandoff, handoff } =
