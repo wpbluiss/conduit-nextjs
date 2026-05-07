@@ -5,6 +5,7 @@ import { systemPromptFor } from "@/lib/ai/employees";
 import type { AccountContext } from "@/lib/ai/employees/jarvis";
 import { complete, friendlyErrorFor } from "@/lib/ai/provider";
 import { estimateCostCents } from "@/lib/ai/pricing";
+import { withTimeAware } from "@/lib/ai/employees/time-aware";
 
 export const runtime = "nodejs";
 
@@ -72,7 +73,9 @@ export async function POST(request: NextRequest) {
             content: `[System note: this is the user's first interaction. Greet them by name (${ctx.user_name}), reference ${ctx.account_name} (a ${ctx.business_type} business), and acknowledge they're working on: ${ctx.business_description}. Ask where they want to start. Keep it tight — 2-4 sentences. No handoff yet.]`,
           },
         ],
-        systemPrompt: systemPromptFor("jarvis", ctx),
+        systemPrompt: withTimeAware(systemPromptFor("jarvis", ctx), {
+          timezone: account.timezone || "America/New_York",
+        }),
         metadata: {
           employee: "jarvis",
           accountId: account.id,

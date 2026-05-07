@@ -107,6 +107,7 @@ export default async function SettingsPage() {
             bonus_tokens: account.bonus_tokens,
             internal_account: account.internal_account,
             has_stripe_customer: Boolean(account.stripe_customer_id),
+            timezone: account.timezone,
           }}
           usage={{
             totals,

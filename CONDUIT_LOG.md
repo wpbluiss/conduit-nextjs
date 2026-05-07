@@ -852,3 +852,96 @@ fine with an inline banner ("Build provider not connected yet").
 - Open-ended Engineering execution via Claude Code subprocess + E2B/
   Modal sandbox — R11
 - Voice full-duplex — R12
+
+---
+
+## Round 8 — Department workspaces + time-aware system prompts (2026-05-06)
+
+Branch: `feat/conduit-r8-department-workspaces` → merged to `main`.
+Every employee becomes a destination. The platform stops being "a chat
+with employees" and starts being "the HQ where my team works."
+
+### Schema (migration `009_account_timezone.sql`)
+
+`conduit_accounts.timezone` text default `America/New_York`. Backfilled.
+
+### Time-aware system prompts
+
+`src/lib/ai/employees/time-aware.ts` — `withTimeAware(systemBody, {timezone})`
+prepends a CURRENT TIME block to every employee prompt: full local time
++ part-of-day (morning / afternoon / evening / night). Threaded through
+the chat route's per-turn prompt build and the onboarding welcome path.
+The block instructs the model to match greetings to actual time and to
+default to skipping greetings entirely (per R7 brevity rules).
+
+### Workspace route (`/app/team/[employee]`)
+
+Single dynamic page handles all 9. Validation: invalid id 404s; tier-
+locked id redirects to `/app/settings?reason=workspace_locked&employee=<id>`.
+
+Layout:
+- **Header band** with department-color gradient, employee avatar (size
+  56), name in dept color, role + tagline, "Talk to {name}" CTA tinted
+  with the dept color.
+- **Quick start** — 4 employee-specific prompt cards (defined in
+  `src/lib/conduit/workspace-prompts.ts`). Each links to
+  `/app?pin=<employee>&prompt=<encoded>`.
+- **This cycle stats** — 3 tiles. For Engineering: "Builds shipped"
+  (live builds in current cycle). For canExecute employees: "Artifacts
+  produced." For non-execute employees: "Activity: Conversational"
+  with an explainer line. Plus "Conversations" count + "Last active"
+  relative time.
+- **Recent activity** — last 10 mixed (artifacts produced + conversations
+  responded in), sorted desc. Artifact rows open the drawer; conversation
+  rows open the chat with `?c=`.
+- **Empty state** — bespoke per-employee copy via `emptyStateCopy()`:
+  Jarvis gets "You haven't checked in with me yet…", canExecute employees
+  get "Marketing's ready when you are.", non-execute get
+  "Sales hasn't run any plays yet…autonomous execution coming in a future
+  update." Empty zone has a soft dept-color glow.
+
+### Quick-start handoff
+
+Chat client picks up `?pin=<employee>&prompt=<text>` on mount, sets the
+pin state + prefills the input, then `window.history.replaceState` strips
+the params so refresh doesn't re-trigger. Tier-restricted pins are silently
+ignored.
+
+### Sidebar restructure
+
+Replaced the "Team status" panel with a "Team" navigation list. Each row
+is now a `<Link>` to `/app/team/<id>` with a 2px dept-colored left bar
+when active, the same ambient cycling pulse + streaming override from
+R2.5. Tier-locked rows render at 50% opacity with a `Lock` icon and
+redirect to `/app/settings` instead of the workspace.
+
+### Settings → Profile timezone
+
+Dropdown of common North America + Europe + Asia + Australia zones plus
+the current value. Saves on change via new `/api/conduit/account/prefs`
+endpoint. Time-aware prompt picks up the new value on next turn.
+
+### Tier gating
+
+- Free: Jarvis + Marketing workspaces accessible.
+- Pro: + Sales + Engineering.
+- Enterprise / internal_account: all 9.
+- Direct deep-link to a locked workspace 302s to `/app/settings` with
+  the upgrade reason in the query string.
+
+### Verification
+
+- `npm run build` clean (26 routes).
+- Migration 009 applied.
+- Local: `/app/team/<allowed>` 307→sign-in for unauth (expected); auth
+  gate fires before tier check / 404, which is correct.
+- Live workspace + time-aware test reserved for Luis after deploy.
+
+### What's NOT in this round
+
+- Real Sales execution (lead lists / automated outreach) — R9 (or
+  multi-employee orchestration; Luis decides next)
+- Cross-conversation memory layer — R10
+- Voice full-duplex — R11
+- Open-ended Engineering via Claude Code subprocess — R12
+- Mobile (Expo) app — R13

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, FileText, Mic, MicOff, Send, Square } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
@@ -136,6 +136,7 @@ export function Chat({
   );
   const suggestions = suggestionsForTier(allowedSet);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [conversationId, setConversationId] = useState<string | null>(
     initialId,
   );
@@ -149,6 +150,31 @@ export function Chat({
   const [paywall, setPaywall] = useState<PaywallPayload | null>(null);
   const [streamingEmployee, setStreamingEmployee] =
     useState<EmployeeKey | null>(null);
+
+  // R8: workspace handoff. ?pin=<employee>&prompt=<text> from /app/team/* —
+  // apply once on mount, then strip from URL so refresh doesn't re-trigger.
+  useEffect(() => {
+    const pinParam = searchParams.get("pin");
+    const promptParam = searchParams.get("prompt");
+    let touched = false;
+    if (pinParam && allowedSet.has(pinParam as EmployeeKey)) {
+      setPin(pinParam as EmployeeKey);
+      touched = true;
+    }
+    if (promptParam) {
+      setInput(promptParam);
+      touched = true;
+    }
+    if (touched) {
+      // Strip the query params without scrolling.
+      const cid = searchParams.get("c");
+      const path = cid ? `/app?c=${cid}` : "/app";
+      window.history.replaceState({}, "", path);
+    }
+    // Run only on mount; we explicitly don't want to react to subsequent
+    // searchParams changes (e.g. when /app sets ?c=).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Voice input (browser STT)
   const speech = useSpeechRecognition();

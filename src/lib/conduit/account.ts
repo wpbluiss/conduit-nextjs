@@ -22,6 +22,8 @@ export interface ConduitAccount {
   voice_enabled: boolean;
   voice_speed: number;
   voice_auto_play: boolean;
+  // R8 time-aware
+  timezone: string;
   created_at: string;
   updated_at: string;
 }
