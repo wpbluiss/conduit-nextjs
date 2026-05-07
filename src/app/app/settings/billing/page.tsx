@@ -5,12 +5,12 @@ import { loadSettingsData } from "@/lib/conduit/settings-data";
 
 export const dynamic = "force-dynamic";
 
-export default async function SettingsPage() {
+export default async function BillingSettings() {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/sign-in?next=/app/settings");
+  if (!user) redirect("/auth/sign-in?next=/app/settings/billing");
   const data = await loadSettingsData(supabase, user);
 
   return (
@@ -22,6 +22,7 @@ export default async function SettingsPage() {
           fullName={data.fullName}
           account={data.account}
           usage={data.usage}
+          defaultTab="billing"
         />
       </div>
     </div>

@@ -61,20 +61,29 @@ const COMMON_TIMEZONES = [
   "Australia/Sydney",
 ];
 
+export type SettingsTabKey =
+  | "profile"
+  | "business"
+  | "voice"
+  | "memory"
+  | "team"
+  | "usage"
+  | "billing";
+
 export function SettingsTabs({
   email,
   fullName,
   account,
   usage,
+  defaultTab = "profile",
 }: {
   email: string;
   fullName: string;
   account: AccountData;
   usage: UsageData;
+  defaultTab?: SettingsTabKey;
 }) {
-  const [tab, setTab] = useState<
-    "profile" | "business" | "voice" | "memory" | "usage" | "billing"
-  >("profile");
+  const [tab, setTab] = useState<SettingsTabKey>(defaultTab);
 
   return (
     <div>
@@ -85,6 +94,7 @@ export function SettingsTabs({
             ["business", "Business"],
             ["voice", "Voice"],
             ["memory", "Memory"],
+            ["team", "Team"],
             ["usage", "Usage"],
             ["billing", "Billing"],
           ] as const
@@ -121,8 +131,39 @@ export function SettingsTabs({
         />
       )}
       {tab === "memory" && <MemoryTab />}
+      {tab === "team" && <TeamTab />}
       {tab === "usage" && <UsageTab usage={usage} />}
       {tab === "billing" && <BillingTab account={account} usage={usage} />}
+    </div>
+  );
+}
+
+function TeamTab() {
+  return (
+    <div className="space-y-6 text-sm">
+      <div>
+        <p className="text-[var(--color-text-muted)] max-w-xl">
+          Per-employee voice picks live in the <strong>Voice</strong> tab. This
+          tab will also gain personality tuning (tone sliders, custom system
+          prompt overrides) in a future update.
+        </p>
+      </div>
+      <div
+        className="conduit-card p-5"
+        style={{
+          background:
+            "linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-elevated)), var(--color-surface-elevated))",
+        }}
+      >
+        <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
+          Coming soon
+        </div>
+        <p className="serif text-2xl">Personality tuning</p>
+        <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+          Dial each employee&apos;s tone, verbosity, and risk appetite. Pin
+          custom system prompt addenda that ride along with every turn.
+        </p>
+      </div>
     </div>
   );
 }
