@@ -1498,3 +1498,61 @@ area: Settings, Billing, Sign out, account email, "Praxis Flow ·
 Sign-in default redirect: `/app` → `/app/workspace`. Existing chat URLs
 (`/app?c=<id>`) still work since `/app` keeps its current chat surface.
 
+
+
+## Round Brand-3 — Conduit Marketing Rewrite (2026-05-07)
+
+Merged to main as b06ce49. Marketing site rewritten around the brand
+split (Conduit = company, Praxis = product).
+
+### Homepage
+Trimmed from 13 sections to 7 with the locked spec from the batch
+brief:
+- Hero — "Conduit. The company building Praxis." + new subhead
+- ProductTiles (new) — Praxis Console (Live) / Mobile (TestFlight) /
+  HQ (Q3 2026)
+- Story — preserved from R1; copy already references Praxis
+- Vision (new) — 3-paragraph manifesto
+- Pricing — rewritten to mirror runtime tiers (Free / Pro $29 /
+  Enterprise $199, Praxis Flow vs Praxis Depth language)
+- FinalCTA — "Open Praxis Console" primary, "See the product family"
+  secondary
+- Footer — four-column layout (Conduit / Praxis / Conduit company /
+  Legal)
+
+Removed from homepage but kept in src/components for /products/* in
+R4: PlatformTeaser, LiveAgentGrid, Constellation, Departments,
+Terminal, CaseStudy.
+
+### New routes
+- /about — mission + vision + founder story.
+- /products — index for the three product detail pages.
+
+### Navbar
+Links: /#products, /about, /#pricing. CTA "Talk to Conduit" → "Open
+Praxis".
+
+## Round Brand-4 — Praxis Product Detail Pages (2026-05-07)
+
+Merged to main as a4edc74.
+
+### New routes
+- /products/praxis-console — 5 feature sections (Voice mode, Real
+  leads, Memory, Atlas, Engineering), alternating-side visuals,
+  pricing CTA.
+- /products/praxis-mobile — TestFlight waitlist landing with phone
+  mockup, three feature cards, email-capture forms top + bottom.
+- /products/praxis-hq — Q3 2026 vision page with geometric grid
+  placeholder, three "floor" feature cards, Q3 callout, waitlist.
+
+### Backend
+- Migration 017_waitlist.sql adds conduit_waitlist (product, email,
+  source) with UNIQUE (product, email) + insert-only RLS policy
+  (anon + authenticated).
+- /api/conduit/waitlist POST validates product + email and returns
+  { ok, duplicate? } — idempotent on duplicates.
+- WaitlistForm.tsx is the shared client component used on both Mobile
+  and HQ pages.
+
+Migration applied to project mvuslmfjkkuizixjpkgl.
+
