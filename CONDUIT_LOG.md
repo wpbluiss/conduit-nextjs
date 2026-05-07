@@ -1453,3 +1453,48 @@ Historical CONDUIT_LOG entries reference Jarvis verbatim; this is
 intentional (history is what it was). Forward-looking docs use
 Atlas.
 
+
+
+## Round Brand-2 — Praxis Console Redesign (2026-05-07)
+
+Merged to main as ed7d577 (final commit). Console moved from chat-first
+to a section-based dashboard layout matching Anthropic Console / OpenAI
+Platform density.
+
+### New routes
+- `/app/workspace` — default landing after sign-in. Welcome line,
+  4 dashboard cards (Atlas pinged you / Pipeline / Last conversation /
+  Voice minutes today, all real RLS-scoped data), and a 9-employee team
+  grid with last-active stamps.
+- `/app/analytics` — three weekly summary cards + coming-soon block.
+- `/app/voice` — voice room landing with daily/per-session caps,
+  employee picker, and recent voice sessions list.
+- `/app/settings/{profile,voice,memory,billing,team}` — sub-routes that
+  render the existing tabbed UI with a different `defaultTab` prop, so
+  bookmarks land on the right tab without a URL flicker.
+
+### Sidebar
+Replaces the flat sidebar with section-based nav: Workspace, Team
+(collapsible employee list), Voice Room, Leads, Memory, Builds,
+Analytics. Recent conversations list moved below primary nav. Bottom
+area: Settings, Billing, Sign out, account email, "Praxis Flow ·
+<tier>" tier label.
+
+### Employee workspaces
+- Added a new `EmployeeRightRail` component (server-side, fetches its
+  own data) — About / Recent context (last 3 memory notes) / Quick
+  actions (deep-links into chat with `?pin=&prompt=`).
+- Wired into both `/app/team/[employee]` and the Sales workspace.
+- Visible on lg+ screens; hidden on tablet and mobile so the main
+  surface stays usable.
+
+### Settings
+- New "Team" tab is a placeholder for personality tuning + a pointer
+  back to per-employee voice picks (which still live in Voice).
+- `loadSettingsData(supabase, user)` extracts the shared loader so each
+  sub-route page is a thin wrapper.
+
+### Auth
+Sign-in default redirect: `/app` → `/app/workspace`. Existing chat URLs
+(`/app?c=<id>`) still work since `/app` keeps its current chat surface.
+
