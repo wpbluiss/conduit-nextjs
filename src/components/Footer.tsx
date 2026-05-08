@@ -23,7 +23,7 @@ const COLS: {
       { href: "/products/praxis-hq", label: "HQ" },
       { href: "/pricing", label: "Pricing" },
       { href: "#", label: "Status", soon: true },
-      { href: "#", label: "Changelog", soon: true },
+      { href: "/changelog", label: "Changelog" },
     ],
   },
   {
@@ -33,7 +33,7 @@ const COLS: {
       { href: "/approach", label: "Approach" },
       { href: "/about#vision", label: "Vision" },
       { href: "/customers", label: "Customers" },
-      { href: "#", label: "Careers", soon: true },
+      { href: "/careers", label: "Careers" },
       { href: "#", label: "Press", soon: true },
       { href: "mailto:luis@conduitai.io", label: "Contact" },
     ],
@@ -41,8 +41,8 @@ const COLS: {
   {
     title: "Engineering",
     items: [
+      { href: "/engineering", label: "Engineering" },
       { href: "/blog.html", label: "Blog" },
-      { href: "/blog-ai-engineering-department.html", label: "Engineering blog" },
       {
         href: "https://github.com/wpbluiss",
         label: "Open source",
@@ -58,7 +58,7 @@ const COLS: {
     items: [
       { href: "/customers/lunaro", label: "Lunaro Insurance" },
       { href: "/customers", label: "Customer stories" },
-      { href: "#", label: "Trust + Security", soon: true },
+      { href: "/trust", label: "Trust + Security" },
       { href: "#", label: "Compliance", soon: true },
       {
         href: "mailto:luis@conduitai.io?subject=Become%20a%20customer",

@@ -4,6 +4,7 @@ import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FinalCTA from "@/components/FinalCTA";
+import { ProofBar } from "@/components/marketing/ProofBar";
 
 export const metadata: Metadata = {
   title: "Customers — Built on Praxis",
@@ -38,15 +39,18 @@ export default function CustomersIndex() {
       {/* Grid */}
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
+          {/* Customer proof bar — quantified gravity (Phase 4 #3) */}
+          <ProofBar className="mb-12 md:mb-14" />
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6">
             <Link
               href="/customers/lunaro"
-              className="conduit-card group block p-8 md:p-10 min-h-[420px] flex flex-col"
+              className="conduit-card is-celebration group block p-8 md:p-10 min-h-[420px] flex flex-col"
             >
               <div className="flex items-center gap-3 mb-7">
                 <svg width="36" height="36" viewBox="0 0 16 16" aria-hidden>
                   <circle cx="8" cy="8" r="6.2" fill="#7C5BFF" />
-                  <circle cx="11" cy="6" r="5" fill="#0A0908" />
+                  <circle cx="11" cy="6" r="5" fill="#FAFAF7" />
                 </svg>
                 <span
                   className="text-[22px] tracking-tight text-[var(--color-cream)]"
@@ -76,7 +80,7 @@ export default function CustomersIndex() {
                 <Stat n="9" label="AI employees" />
               </div>
 
-              <div className="mt-7 inline-flex items-center gap-1.5 text-[14px] text-[var(--color-indigo-500)] font-medium group-hover:gap-2.5 transition-[gap]">
+              <div className="mt-7 inline-flex items-center gap-1.5 text-[14px] text-[var(--color-ember-500)] font-medium group-hover:gap-2.5 transition-[gap]">
                 Read the case study
                 <ArrowRight size={14} weight="bold" />
               </div>

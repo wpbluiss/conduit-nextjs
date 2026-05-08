@@ -5,7 +5,14 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
-const STEP = 0.08;
+/* Institutional pacing — slower than v2's 80ms stagger. Reads as gravitas. */
+const PACE = {
+  eyebrow:    { delay: 0.00, duration: 0.80 },
+  headline:   { delay: 0.20, duration: 1.50 },
+  subhead:    { delay: 0.50, duration: 1.00 },
+  ctas:       { delay: 0.80, duration: 0.80 },
+  proofStrip: { delay: 1.40, duration: 0.80 },
+} as const;
 
 export default function Hero() {
   // Stable dust-mote positions (deterministic per seed)
@@ -55,7 +62,7 @@ export default function Hero() {
             <motion.p
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: EASE, delay: STEP * 0 }}
+              transition={{ duration: PACE.eyebrow.duration, ease: EASE, delay: PACE.eyebrow.delay }}
               className="conduit-caption conduit-caption-ember"
             >
               Praxis · Operating system for AI workforces
@@ -64,7 +71,7 @@ export default function Hero() {
             <motion.h1
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.0, ease: EASE, delay: STEP * 1 }}
+              transition={{ duration: PACE.headline.duration, ease: EASE, delay: PACE.headline.delay }}
               className="conduit-display-hero mt-6"
             >
               Stop hiring.
@@ -81,7 +88,7 @@ export default function Hero() {
             <motion.p
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: EASE, delay: STEP * 2 }}
+              transition={{ duration: PACE.subhead.duration, ease: EASE, delay: PACE.subhead.delay }}
               className="conduit-body-lg mt-7 max-w-[560px]"
             >
               Conduit builds Praxis — the operating system for autonomous AI
@@ -92,7 +99,7 @@ export default function Hero() {
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: EASE, delay: STEP * 3 }}
+              transition={{ duration: PACE.ctas.duration, ease: EASE, delay: PACE.ctas.delay }}
               className="flex flex-col sm:flex-row gap-3 mt-8"
             >
               <Link href="/auth/sign-up" className="conduit-btn-primary">
@@ -107,7 +114,7 @@ export default function Hero() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, ease: EASE, delay: STEP * 5 }}
+              transition={{ duration: PACE.proofStrip.duration, ease: EASE, delay: PACE.proofStrip.delay }}
               className="mt-14 md:mt-16 flex items-center gap-5 flex-wrap"
             >
               <span className="conduit-caption text-[var(--color-cream-mute)] mr-1">
@@ -139,7 +146,7 @@ function LunaroMark() {
     <div className="flex items-center gap-2.5">
       <svg width="22" height="22" viewBox="0 0 16 16" aria-hidden>
         <circle cx="8" cy="8" r="6.2" fill="#7C5BFF" />
-        <circle cx="11" cy="6" r="5" fill="#0A0908" />
+        <circle cx="11" cy="6" r="5" fill="#FAFAF7" />
       </svg>
       <span
         className="text-[14px] tracking-tight text-[var(--color-cream)]"

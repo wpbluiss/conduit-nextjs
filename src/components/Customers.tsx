@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Quotes } from "@phosphor-icons/react";
+import { ProofBar } from "@/components/marketing/ProofBar";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 
@@ -25,6 +26,9 @@ export default function Customers() {
             <span className="conduit-ember-text">Real results.</span>
           </h2>
         </motion.div>
+
+        {/* Customer proof bar — quantified gravity (Phase 4 #3) */}
+        <ProofBar className="mb-12 md:mb-14" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6">
           {/* Lunaro card */}
