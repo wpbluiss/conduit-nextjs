@@ -153,7 +153,7 @@ export default function PraxisConsolePage() {
                 className="absolute -inset-12 rounded-[40px] pointer-events-none"
                 style={{
                   background:
-                    "radial-gradient(ellipse at center, rgba(214,120,23,0.22) 0%, transparent 65%)",
+                    "radial-gradient(ellipse at center, rgba(91, 99, 232,0.22) 0%, transparent 65%)",
                   filter: "blur(40px)",
                 }}
               />
@@ -161,7 +161,7 @@ export default function PraxisConsolePage() {
                 className="relative aspect-[4/3] bg-[var(--color-ink-surface)] border border-[var(--color-edge)] rounded-2xl overflow-hidden"
                 style={{
                   boxShadow:
-                    "inset 0 0 0 1px rgba(214,120,23,0.12), 0 0 60px rgba(214,120,23,0.18), 0 24px 64px rgba(0,0,0,0.55)",
+                    "inset 0 0 0 1px rgba(91, 99, 232,0.12), 0 0 60px rgba(91, 99, 232,0.18), 0 24px 64px rgba(0,0,0,0.55)",
                 }}
               >
                 <div className="px-4 py-3 border-b border-[var(--color-edge-subtle)] flex items-center gap-3 bg-[var(--color-ink-surface-elevated)]">
@@ -182,7 +182,7 @@ export default function PraxisConsolePage() {
                     <Users
                       size={56}
                       weight="duotone"
-                      color="#D67817"
+                      color="#5B63E8"
                       className="mx-auto"
                     />
                     <p className="mt-4 conduit-caption conduit-caption-ember">
@@ -212,7 +212,7 @@ export default function PraxisConsolePage() {
             {CAPABILITIES.map((c) => (
               <div key={c.title} className="conduit-card p-7 md:p-8">
                 <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)] mb-6">
-                  <c.Icon size={22} weight="regular" color="#D67817" />
+                  <c.Icon size={22} weight="regular" color="#5B63E8" />
                 </div>
                 <h3
                   className="text-[24px] leading-[1.1] tracking-[-0.02em] text-[var(--color-cream)]"
@@ -279,7 +279,7 @@ export default function PraxisConsolePage() {
                 </p>
                 <button
                   type="button"
-                  className="mt-2 inline-flex items-center gap-1.5 text-[12px] text-[var(--color-cream-mute)] hover:text-[var(--color-ember-500)] transition-colors w-fit"
+                  className="mt-2 inline-flex items-center gap-1.5 text-[12px] text-[var(--color-cream-mute)] hover:text-[var(--color-indigo-500)] transition-colors w-fit"
                 >
                   <MicrophoneStage size={12} weight="regular" />
                   Voice sample · soon
@@ -413,7 +413,7 @@ function SubsystemCard({
   return (
     <div className="conduit-card p-7 md:p-8">
       <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)] mb-6">
-        <Icon size={22} weight="regular" color="#D67817" />
+        <Icon size={22} weight="regular" color="#5B63E8" />
       </div>
       <h3
         className="text-[24px] leading-[1.1] tracking-[-0.02em] text-[var(--color-cream)]"

@@ -24,7 +24,7 @@ export default function Cinematic() {
         className="origin-left absolute top-0 left-0 right-0 h-px"
         style={{
           background:
-            "linear-gradient(90deg, transparent, rgba(214,120,23,0.6), transparent)",
+            "linear-gradient(90deg, transparent, rgba(91, 99, 232,0.6), transparent)",
         }}
         aria-hidden
       />
@@ -64,17 +64,17 @@ export default function Cinematic() {
             className="absolute -inset-16 pointer-events-none"
             style={{
               background:
-                "radial-gradient(ellipse at center, rgba(214,120,23,0.18) 0%, transparent 65%)",
+                "radial-gradient(ellipse at center, rgba(91, 99, 232,0.18) 0%, transparent 65%)",
               filter: "blur(40px)",
             }}
           />
 
-          {/* Frame */}
+          {/* Frame — dark Console-style chrome embedded in light section */}
           <div
-            className="relative aspect-[16/9] rounded-2xl overflow-hidden bg-[var(--color-ink-surface)]"
+            className="relative conduit-inverse aspect-[16/9] rounded-2xl overflow-hidden bg-[var(--color-ink-surface)]"
             style={{
               boxShadow:
-                "inset 0 0 0 1px rgba(214,120,23,0.18), 0 0 80px rgba(214,120,23,0.18), 0 32px 80px rgba(0,0,0,0.6)",
+                "inset 0 0 0 1px rgba(91, 99, 232, 0.18), 0 0 80px rgba(91, 99, 232, 0.18), 0 32px 80px rgba(15, 17, 21, 0.16)",
             }}
           >
             {/*
@@ -102,7 +102,7 @@ export default function Cinematic() {
               className="absolute inset-0 pointer-events-none"
               style={{
                 background:
-                  "radial-gradient(ellipse 50% 50% at 90% 10%, rgba(214,120,23,0.12) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 10% 90%, rgba(168,85,247,0.06) 0%, transparent 60%)",
+                  "radial-gradient(ellipse 50% 50% at 90% 10%, rgba(91, 99, 232,0.12) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 10% 90%, rgba(168,85,247,0.06) 0%, transparent 60%)",
               }}
             />
           </div>
@@ -151,7 +151,7 @@ export default function Cinematic() {
         >
           <Link
             href="/products/praxis-hq"
-            className="inline-flex items-center gap-2 text-[14px] text-[var(--color-ember-500)] hover:gap-3 transition-[gap]"
+            className="inline-flex items-center gap-2 text-[14px] text-[var(--color-indigo-500)] hover:gap-3 transition-[gap]"
           >
             Reserve early access
             <ArrowRight size={14} weight="bold" />
@@ -174,7 +174,7 @@ function CinematicFallback() {
           className="w-[420px] h-[420px] rounded-full"
           style={{
             background:
-              "radial-gradient(circle at center, rgba(214,120,23,0.25) 0%, transparent 60%)",
+              "radial-gradient(circle at center, rgba(91, 99, 232,0.25) 0%, transparent 60%)",
             filter: "blur(20px)",
           }}
         />
@@ -200,12 +200,12 @@ function CinematicFallback() {
           className="w-24 h-24 rounded-2xl flex items-center justify-center"
           style={{
             background: "var(--color-ink-surface-elevated)",
-            border: "1px solid rgba(214,120,23,0.3)",
+            border: "1px solid rgba(91, 99, 232,0.3)",
             boxShadow:
-              "inset 0 0 0 1px rgba(214,120,23,0.15), 0 0 40px rgba(214,120,23,0.25)",
+              "inset 0 0 0 1px rgba(91, 99, 232,0.15), 0 0 40px rgba(91, 99, 232,0.25)",
           }}
         >
-          <Buildings size={42} weight="duotone" color="#D67817" />
+          <Buildings size={42} weight="duotone" color="#5B63E8" />
         </div>
         <p className="conduit-caption conduit-caption-ember">
           Cinematic preview coming soon

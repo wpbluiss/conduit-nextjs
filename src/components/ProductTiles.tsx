@@ -26,7 +26,7 @@ function ConsoleMark() {
         width="52"
         height="36"
         rx="4"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1.5"
       />
       <line
@@ -34,19 +34,19 @@ function ConsoleMark() {
         y1="22"
         x2="58"
         y2="22"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1"
         opacity="0.55"
       />
-      <circle cx="11" cy="17" r="1.2" fill="#D67817" />
-      <circle cx="15" cy="17" r="1.2" fill="#D67817" opacity="0.6" />
-      <circle cx="19" cy="17" r="1.2" fill="#D67817" opacity="0.4" />
+      <circle cx="11" cy="17" r="1.2" fill="#5B63E8" />
+      <circle cx="15" cy="17" r="1.2" fill="#5B63E8" opacity="0.6" />
+      <circle cx="19" cy="17" r="1.2" fill="#5B63E8" opacity="0.4" />
       <line
         x1="14"
         y1="30"
         x2="32"
         y2="30"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1"
         strokeLinecap="round"
         opacity="0.45"
@@ -56,7 +56,7 @@ function ConsoleMark() {
         y1="34"
         x2="24"
         y2="34"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1"
         strokeLinecap="round"
         opacity="0.45"
@@ -66,7 +66,7 @@ function ConsoleMark() {
         y1="40"
         x2="50"
         y2="40"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1.5"
         strokeLinecap="round"
         opacity="0.85"
@@ -76,7 +76,7 @@ function ConsoleMark() {
         y1="44"
         x2="50"
         y2="44"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1.5"
         strokeLinecap="round"
         opacity="0.85"
@@ -86,7 +86,7 @@ function ConsoleMark() {
         y1="56"
         x2="42"
         y2="56"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1.5"
         strokeLinecap="round"
       />
@@ -103,7 +103,7 @@ function MobileMark() {
         width="24"
         height="48"
         rx="4"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1.5"
       />
       <line
@@ -111,24 +111,24 @@ function MobileMark() {
         y1="50"
         x2="38"
         y2="50"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1.5"
         strokeLinecap="round"
       />
-      <circle cx="32" cy="14" r="1" fill="#D67817" opacity="0.6" />
-      <circle cx="32" cy="30" r="3" fill="#D67817" />
+      <circle cx="32" cy="14" r="1" fill="#5B63E8" opacity="0.6" />
+      <circle cx="32" cy="30" r="3" fill="#5B63E8" />
       <circle
         cx="32"
         cy="30"
         r="6"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1"
         opacity="0.5"
         fill="none"
       />
       <path
         d="M 50 22 Q 56 30 50 38"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1.5"
         strokeLinecap="round"
         opacity="0.7"
@@ -136,7 +136,7 @@ function MobileMark() {
       />
       <path
         d="M 14 22 Q 8 30 14 38"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1.5"
         strokeLinecap="round"
         opacity="0.7"
@@ -144,7 +144,7 @@ function MobileMark() {
       />
       <path
         d="M 56 18 Q 62 30 56 42"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1.5"
         strokeLinecap="round"
         opacity="0.4"
@@ -152,7 +152,7 @@ function MobileMark() {
       />
       <path
         d="M 8 18 Q 2 30 8 42"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1.5"
         strokeLinecap="round"
         opacity="0.4"
@@ -167,7 +167,7 @@ function HqMark() {
     <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden fill="none">
       <path
         d="M 8 56 L 8 24 L 32 12 L 56 24 L 56 56 Z"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1.5"
         strokeLinejoin="round"
       />
@@ -176,7 +176,7 @@ function HqMark() {
         y1="24"
         x2="56"
         y2="24"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1"
         opacity="0.5"
       />
@@ -185,7 +185,7 @@ function HqMark() {
         y1="12"
         x2="32"
         y2="56"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1"
         opacity="0.5"
       />
@@ -194,18 +194,18 @@ function HqMark() {
         y1="40"
         x2="56"
         y2="40"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1"
         opacity="0.5"
       />
-      <rect x="14" y="29" width="5" height="5" fill="#D67817" opacity="0.85" />
-      <rect x="22" y="29" width="5" height="5" fill="#D67817" opacity="0.4" />
-      <rect x="37" y="29" width="5" height="5" fill="#D67817" opacity="0.85" />
-      <rect x="45" y="29" width="5" height="5" fill="#D67817" opacity="0.4" />
-      <rect x="14" y="46" width="5" height="5" fill="#D67817" opacity="0.4" />
-      <rect x="22" y="46" width="5" height="5" fill="#D67817" opacity="0.85" />
-      <rect x="37" y="46" width="5" height="5" fill="#D67817" opacity="0.4" />
-      <rect x="45" y="46" width="5" height="5" fill="#D67817" opacity="0.85" />
+      <rect x="14" y="29" width="5" height="5" fill="#5B63E8" opacity="0.85" />
+      <rect x="22" y="29" width="5" height="5" fill="#5B63E8" opacity="0.4" />
+      <rect x="37" y="29" width="5" height="5" fill="#5B63E8" opacity="0.85" />
+      <rect x="45" y="29" width="5" height="5" fill="#5B63E8" opacity="0.4" />
+      <rect x="14" y="46" width="5" height="5" fill="#5B63E8" opacity="0.4" />
+      <rect x="22" y="46" width="5" height="5" fill="#5B63E8" opacity="0.85" />
+      <rect x="37" y="46" width="5" height="5" fill="#5B63E8" opacity="0.4" />
+      <rect x="45" y="46" width="5" height="5" fill="#5B63E8" opacity="0.85" />
     </svg>
   );
 }
@@ -294,7 +294,7 @@ export default function ProductTiles() {
                 className="conduit-card group block p-7 md:p-8 h-full min-h-[480px] flex flex-col"
               >
                 <div className="flex items-start justify-between mb-8">
-                  <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)] group-hover:border-[rgba(214,120,23,0.35)] transition-colors">
+                  <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)] group-hover:border-[rgba(91, 99, 232,0.35)] transition-colors">
                     <c.Mark />
                   </div>
                   <StatusBadge status={c.status} />
@@ -306,13 +306,13 @@ export default function ProductTiles() {
                 >
                   {c.title}
                 </h3>
-                <p className="text-[16px] mt-2 text-[var(--color-ember-300)] tracking-[-0.005em]">
+                <p className="text-[16px] mt-2 text-[var(--color-indigo-300)] tracking-[-0.005em]">
                   {c.tagline}
                 </p>
                 <p className="conduit-body-md mt-5 flex-1 leading-[1.6]">
                   {c.body}
                 </p>
-                <div className="mt-7 inline-flex items-center gap-1.5 text-[14px] text-[var(--color-ember-500)] font-medium group-hover:gap-2.5 transition-[gap]">
+                <div className="mt-7 inline-flex items-center gap-1.5 text-[14px] text-[var(--color-indigo-500)] font-medium group-hover:gap-2.5 transition-[gap]">
                   {c.cta.label}
                   <ArrowRight size={14} weight="bold" />
                 </div>

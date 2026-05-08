@@ -171,13 +171,13 @@ function ConsolePreview() {
   ];
 
   return (
-    <div className="relative">
+    <div className="relative conduit-inverse rounded-2xl">
       <div
         aria-hidden
         className="absolute -inset-12 rounded-[40px] pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse at center, rgba(214,120,23,0.25) 0%, transparent 65%)",
+            "radial-gradient(ellipse at center, rgba(91, 99, 232, 0.22) 0%, transparent 65%)",
           filter: "blur(40px)",
         }}
       />
@@ -185,7 +185,7 @@ function ConsolePreview() {
         className="relative bg-[var(--color-ink-surface)] border border-[var(--color-edge)] rounded-2xl overflow-hidden"
         style={{
           boxShadow:
-            "inset 0 0 0 1px rgba(214,120,23,0.12), 0 0 60px rgba(214,120,23,0.18), 0 24px 64px rgba(0,0,0,0.55)",
+            "inset 0 0 0 1px rgba(91, 99, 232, 0.14), 0 0 60px rgba(91, 99, 232, 0.20), 0 24px 64px rgba(15, 17, 21, 0.20)",
         }}
       >
         {/* Window chrome */}
@@ -221,7 +221,7 @@ function ConsolePreview() {
                   className="flex items-center gap-2 px-2 py-1.5 rounded-md text-[12px]"
                   style={{
                     background: e.active
-                      ? "rgba(214,120,23,0.07)"
+                      ? "rgba(91, 99, 232,0.07)"
                       : "transparent",
                     color: e.active
                       ? "var(--color-cream)"
@@ -265,8 +265,8 @@ function ConsolePreview() {
                 <div
                   className="max-w-[78%] px-3.5 py-2 text-[13px] text-[var(--color-cream)]"
                   style={{
-                    background: "rgba(214, 120, 23, 0.12)",
-                    border: "1px solid rgba(214, 120, 23, 0.28)",
+                    background: "rgba(91, 99, 232, 0.12)",
+                    border: "1px solid rgba(91, 99, 232, 0.28)",
                     borderRadius: "16px 16px 4px 16px",
                   }}
                 >
@@ -327,7 +327,7 @@ function ConsolePreview() {
                 </span>
                 <span
                   className="w-7 h-7 rounded-full flex items-center justify-center"
-                  style={{ background: "var(--color-ember-500)" }}
+                  style={{ background: "var(--color-indigo-500)" }}
                 >
                   <ArrowRight size={12} weight="bold" color="#0A0908" />
                 </span>

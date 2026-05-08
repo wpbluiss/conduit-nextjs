@@ -106,7 +106,7 @@ export default function PraxisHQPage() {
               className="absolute -inset-12 rounded-[40px] pointer-events-none"
               style={{
                 background:
-                  "radial-gradient(ellipse at center, rgba(214,120,23,0.22) 0%, transparent 65%)",
+                  "radial-gradient(ellipse at center, rgba(91, 99, 232,0.22) 0%, transparent 65%)",
                 filter: "blur(40px)",
               }}
             />
@@ -114,7 +114,7 @@ export default function PraxisHQPage() {
               className="relative aspect-[16/9] rounded-2xl overflow-hidden bg-[var(--color-ink-surface)]"
               style={{
                 boxShadow:
-                  "inset 0 0 0 1px rgba(214,120,23,0.18), 0 0 80px rgba(214,120,23,0.18), 0 32px 80px rgba(0,0,0,0.6)",
+                  "inset 0 0 0 1px rgba(91, 99, 232,0.18), 0 0 80px rgba(91, 99, 232,0.18), 0 32px 80px rgba(0,0,0,0.6)",
               }}
             >
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--color-ink-canvas)]">
@@ -126,7 +126,7 @@ export default function PraxisHQPage() {
                     className="w-[420px] h-[420px] rounded-full"
                     style={{
                       background:
-                        "radial-gradient(circle at center, rgba(214,120,23,0.25) 0%, transparent 60%)",
+                        "radial-gradient(circle at center, rgba(91, 99, 232,0.25) 0%, transparent 60%)",
                       filter: "blur(20px)",
                     }}
                   />
@@ -149,12 +149,12 @@ export default function PraxisHQPage() {
                     className="w-24 h-24 rounded-2xl flex items-center justify-center"
                     style={{
                       background: "var(--color-ink-surface-elevated)",
-                      border: "1px solid rgba(214,120,23,0.3)",
+                      border: "1px solid rgba(91, 99, 232,0.3)",
                       boxShadow:
-                        "inset 0 0 0 1px rgba(214,120,23,0.15), 0 0 40px rgba(214,120,23,0.25)",
+                        "inset 0 0 0 1px rgba(91, 99, 232,0.15), 0 0 40px rgba(91, 99, 232,0.25)",
                     }}
                   >
-                    <Buildings size={42} weight="duotone" color="#D67817" />
+                    <Buildings size={42} weight="duotone" color="#5B63E8" />
                   </div>
                   <p className="conduit-caption conduit-caption-ember">
                     Cinematic walkthrough · Q3 2026
@@ -191,8 +191,8 @@ export default function PraxisHQPage() {
             {ROOMS.map((r) => (
               <div key={r.title} className="conduit-card p-7 md:p-8 group">
                 <div className="flex items-start gap-5">
-                  <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)] shrink-0 group-hover:border-[rgba(214,120,23,0.4)] transition-colors">
-                    <r.Icon size={26} weight="duotone" color="#D67817" />
+                  <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)] shrink-0 group-hover:border-[rgba(91, 99, 232,0.4)] transition-colors">
+                    <r.Icon size={26} weight="duotone" color="#5B63E8" />
                   </div>
                   <div>
                     <h3
@@ -251,7 +251,7 @@ export default function PraxisHQPage() {
                 className="conduit-card p-6 md:p-7 flex items-start gap-5"
               >
                 <span
-                  className="text-[44px] tracking-[-0.04em] text-[var(--color-ember-500)] leading-[0.85] shrink-0"
+                  className="text-[44px] tracking-[-0.04em] text-[var(--color-indigo-500)] leading-[0.85] shrink-0"
                   style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
                 >
                   0{i + 1}
@@ -347,7 +347,7 @@ function SpatialDiagram() {
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(214,120,23,0.14), transparent 65%)",
+              "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(91, 99, 232,0.14), transparent 65%)",
           }}
         />
         <svg
@@ -368,7 +368,7 @@ function SpatialDiagram() {
               y1="200"
               x2={x}
               y2={y}
-              stroke="#D67817"
+              stroke="#5B63E8"
               strokeWidth="1"
               strokeOpacity="0.35"
               strokeDasharray="4 4"
@@ -380,8 +380,8 @@ function SpatialDiagram() {
             cx="400"
             cy="200"
             r="56"
-            fill="rgba(214,120,23,0.08)"
-            stroke="#D67817"
+            fill="rgba(91, 99, 232,0.08)"
+            stroke="#5B63E8"
             strokeWidth="1.5"
           />
           <text
@@ -432,7 +432,7 @@ function SpatialDiagram() {
             style={{ left: n.left, top: n.top }}
           >
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge)]">
-              <n.Icon size={14} weight="regular" color="#D67817" />
+              <n.Icon size={14} weight="regular" color="#5B63E8" />
               <span className="text-[12px] text-[var(--color-cream)] tracking-tight">
                 {n.label}
               </span>

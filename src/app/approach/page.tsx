@@ -114,14 +114,14 @@ export default function ApproachPage() {
                     className="h-px mb-16 md:mb-20"
                     style={{
                       background:
-                        "linear-gradient(90deg, transparent, rgba(214,120,23,0.4), transparent)",
+                        "linear-gradient(90deg, transparent, rgba(91, 99, 232,0.4), transparent)",
                     }}
                   />
                 )}
 
                 <div className="flex items-baseline gap-5 mb-6">
                   <span
-                    className="text-[44px] md:text-[56px] tracking-[-0.04em] text-[var(--color-ember-500)] leading-[0.85]"
+                    className="text-[44px] md:text-[56px] tracking-[-0.04em] text-[var(--color-indigo-500)] leading-[0.85]"
                     style={{
                       fontFamily: "var(--font-serif)",
                       fontWeight: 500,

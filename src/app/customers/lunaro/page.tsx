@@ -68,7 +68,7 @@ export default function LunaroCaseStudy() {
           style={{
             background: `
               radial-gradient(ellipse 60% 50% at 80% 0%, rgba(124,91,255,0.18), transparent 60%),
-              radial-gradient(ellipse 50% 40% at 0% 100%, rgba(214,120,23,0.08), transparent 55%)
+              radial-gradient(ellipse 50% 40% at 0% 100%, rgba(91, 99, 232,0.08), transparent 55%)
             `,
           }}
         />
@@ -160,7 +160,7 @@ export default function LunaroCaseStudy() {
             {HIGHLIGHTS.map((h) => (
               <div key={h.title} className="conduit-card p-7 md:p-8">
                 <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)] mb-6">
-                  <h.Icon size={22} weight="regular" color="#D67817" />
+                  <h.Icon size={22} weight="regular" color="#5B63E8" />
                 </div>
                 <h3
                   className="text-[22px] leading-[1.15] tracking-[-0.015em] text-[var(--color-cream)]"
@@ -184,7 +184,7 @@ export default function LunaroCaseStudy() {
             <Quotes
               size={36}
               weight="duotone"
-              color="#D67817"
+              color="#5B63E8"
               className="mb-5 opacity-70"
             />
             <blockquote className="text-[24px] md:text-[28px] leading-[1.5] tracking-[-0.015em] text-[var(--color-cream)] italic">
@@ -199,7 +199,7 @@ export default function LunaroCaseStudy() {
             <div className="mt-12 pt-12 border-t border-[var(--color-edge-subtle)] flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
               <Link
                 href="/products"
-                className="inline-flex items-center gap-2 text-[15px] text-[var(--color-ember-500)] hover:gap-3 transition-[gap] font-medium"
+                className="inline-flex items-center gap-2 text-[15px] text-[var(--color-indigo-500)] hover:gap-3 transition-[gap] font-medium"
               >
                 Read more about Lunaro
                 <ArrowUpRight size={16} weight="bold" />

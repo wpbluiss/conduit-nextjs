@@ -111,7 +111,7 @@ export default function Footer() {
         className="absolute -top-20 -right-20 w-[600px] h-[600px] pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse at center, rgba(214,120,23,0.06) 0%, transparent 60%)",
+            "radial-gradient(ellipse at center, rgba(91, 99, 232,0.06) 0%, transparent 60%)",
         }}
       />
 
@@ -161,7 +161,7 @@ export default function Footer() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Get product updates"
-                  className="flex-1 px-4 py-3 bg-[var(--color-ink-surface)] border border-[var(--color-edge)] rounded-xl text-[14px] text-[var(--color-cream)] placeholder:text-[var(--color-cream-mute)] focus:border-[var(--color-ember-500)] focus:outline-none transition-colors"
+                  className="flex-1 px-4 py-3 bg-[var(--color-ink-surface)] border border-[var(--color-edge)] rounded-xl text-[14px] text-[var(--color-cream)] placeholder:text-[var(--color-cream-mute)] focus:border-[var(--color-indigo-500)] focus:outline-none transition-colors"
                 />
                 <button
                   type="submit"
@@ -204,7 +204,7 @@ export default function Footer() {
                         href={l.href}
                         target={l.external ? "_blank" : undefined}
                         rel={l.external ? "noreferrer" : undefined}
-                        className="text-[14px] text-[var(--color-cream-soft)] hover:text-[var(--color-ember-500)] transition-colors"
+                        className="text-[14px] text-[var(--color-cream-soft)] hover:text-[var(--color-indigo-500)] transition-colors"
                       >
                         {l.label}
                       </Link>
@@ -252,7 +252,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noreferrer"
                   aria-label={s.label}
-                  className="w-9 h-9 flex items-center justify-center rounded-lg border border-[var(--color-edge-subtle)] text-[var(--color-cream-mute)] hover:text-[var(--color-ember-500)] hover:border-[var(--color-edge)] transition-colors"
+                  className="w-9 h-9 flex items-center justify-center rounded-lg border border-[var(--color-edge-subtle)] text-[var(--color-cream-mute)] hover:text-[var(--color-indigo-500)] hover:border-[var(--color-edge)] transition-colors"
                 >
                   <Icon size={16} weight="regular" />
                 </a>

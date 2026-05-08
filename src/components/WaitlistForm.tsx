@@ -127,7 +127,7 @@ export default function WaitlistForm({
                   onChange={(e) =>
                     setExtras((s) => ({ ...s, [f.name]: e.target.value }))
                   }
-                  className="w-full bg-[var(--color-ink-surface)] border border-[var(--color-edge)] focus:border-[var(--color-ember-500)] outline-none px-3.5 py-3 text-[14px] text-[var(--color-cream)] rounded-xl transition-colors"
+                  className="w-full bg-[var(--color-ink-surface)] border border-[var(--color-edge)] focus:border-[var(--color-indigo-500)] outline-none px-3.5 py-3 text-[14px] text-[var(--color-cream)] rounded-xl transition-colors"
                 >
                   <option value="" disabled>
                     Choose one…
@@ -156,7 +156,7 @@ export default function WaitlistForm({
                     setExtras((s) => ({ ...s, [f.name]: e.target.value }))
                   }
                   placeholder={f.placeholder}
-                  className="w-full bg-[var(--color-ink-surface)] border border-[var(--color-edge)] focus:border-[var(--color-ember-500)] outline-none px-3.5 py-3 text-[14px] text-[var(--color-cream)] placeholder:text-[var(--color-cream-mute)] rounded-xl transition-colors"
+                  className="w-full bg-[var(--color-ink-surface)] border border-[var(--color-edge)] focus:border-[var(--color-indigo-500)] outline-none px-3.5 py-3 text-[14px] text-[var(--color-cream)] placeholder:text-[var(--color-cream-mute)] rounded-xl transition-colors"
                 />
               </div>
             ),
@@ -182,7 +182,7 @@ export default function WaitlistForm({
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             autoComplete="email"
-            className="flex-1 bg-[var(--color-ink-surface)] border border-[var(--color-edge)] focus:border-[var(--color-ember-500)] outline-none px-4 py-3 text-[14px] text-[var(--color-cream)] placeholder:text-[var(--color-cream-mute)] rounded-xl transition-colors"
+            className="flex-1 bg-[var(--color-ink-surface)] border border-[var(--color-edge)] focus:border-[var(--color-indigo-500)] outline-none px-4 py-3 text-[14px] text-[var(--color-cream)] placeholder:text-[var(--color-cream-mute)] rounded-xl transition-colors"
           />
           <button
             type="submit"

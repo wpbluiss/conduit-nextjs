@@ -36,15 +36,15 @@ export default function Customers() {
           >
             <Link
               href="/customers/lunaro"
-              className="conduit-card group block p-8 md:p-10 h-full min-h-[420px] flex flex-col"
+              className="conduit-card is-celebration group block p-8 md:p-10 h-full min-h-[420px] flex flex-col"
             >
               <div className="flex items-center gap-3 mb-7">
                 <svg width="36" height="36" viewBox="0 0 16 16" aria-hidden>
                   <circle cx="8" cy="8" r="6.2" fill="#7C5BFF" />
-                  <circle cx="11" cy="6" r="5" fill="#0A0908" />
+                  <circle cx="11" cy="6" r="5" fill="#FAFAF7" />
                 </svg>
                 <span
-                  className="text-[20px] tracking-tight text-[var(--color-cream)]"
+                  className="text-[20px] tracking-tight text-[var(--color-ink-primary)]"
                   style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
                 >
                   Lunaro Insurance
@@ -52,24 +52,25 @@ export default function Customers() {
               </div>
 
               {/* Stats row — Stripe-style data-forward */}
-              <div className="flex items-baseline flex-wrap gap-x-5 gap-y-3 mb-8 pb-8 border-b border-[var(--color-edge-subtle)]">
+              <div className="flex items-baseline flex-wrap gap-x-5 gap-y-3 mb-8 pb-8 border-b border-[var(--color-border-subtle)]">
                 <Stat n="200+" label="Contacts" />
                 <Stat n="6" label="Pipelines" />
                 <Stat n="9" label="AI employees" />
               </div>
 
+              {/* Celebration accent — the only place ember lives in v3 body */}
               <Quotes
                 size={32}
                 weight="duotone"
                 color="#D67817"
                 className="mb-3 opacity-60"
               />
-              <p className="text-[17px] md:text-[19px] text-[var(--color-cream)] leading-[1.55] flex-1 italic">
+              <p className="text-[17px] md:text-[19px] text-[var(--color-ink-primary)] leading-[1.55] flex-1 italic">
                 The first vertical built on Praxis. From zero to a working CRM
                 in a weekend, then turned into a real partnership.
               </p>
 
-              <p className="text-[12px] uppercase tracking-[0.06em] text-[var(--color-cream-mute)] mt-7 mb-5">
+              <p className="text-[12px] uppercase tracking-[0.06em] text-[var(--color-ink-tertiary)] mt-7 mb-5">
                 Conduit &times; Lunaro &middot; 50/50 partnership
               </p>
 
@@ -102,7 +103,7 @@ export default function Customers() {
         >
           <Link
             href="/customers"
-            className="inline-flex items-center gap-2 text-[14px] text-[var(--color-cream-soft)] hover:text-[var(--color-ember-500)] transition-colors"
+            className="inline-flex items-center gap-2 text-[14px] text-[var(--color-cream-soft)] hover:text-[var(--color-indigo-500)] transition-colors"
           >
             See all customers
             <ArrowRight size={14} weight="bold" />

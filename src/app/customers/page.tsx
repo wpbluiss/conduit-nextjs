@@ -76,7 +76,7 @@ export default function CustomersIndex() {
                 <Stat n="9" label="AI employees" />
               </div>
 
-              <div className="mt-7 inline-flex items-center gap-1.5 text-[14px] text-[var(--color-ember-500)] font-medium group-hover:gap-2.5 transition-[gap]">
+              <div className="mt-7 inline-flex items-center gap-1.5 text-[14px] text-[var(--color-indigo-500)] font-medium group-hover:gap-2.5 transition-[gap]">
                 Read the case study
                 <ArrowRight size={14} weight="bold" />
               </div>

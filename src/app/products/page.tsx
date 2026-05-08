@@ -109,7 +109,7 @@ function ProductPreview({ slug }: { slug: string }) {
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 60% 60% at 70% 20%, rgba(214,120,23,0.16), transparent 60%)",
+              "radial-gradient(ellipse 60% 60% at 70% 20%, rgba(91, 99, 232,0.16), transparent 60%)",
           }}
         />
         <div className="px-4 py-3 border-b border-[var(--color-edge-subtle)] flex items-center gap-2 bg-[var(--color-ink-surface-elevated)] relative">
@@ -126,7 +126,7 @@ function ProductPreview({ slug }: { slug: string }) {
           </span>
         </div>
         <div className="absolute inset-x-8 top-16 bottom-8 flex items-center justify-center">
-          <Monitor size={88} weight="duotone" color="#D67817" />
+          <Monitor size={88} weight="duotone" color="#5B63E8" />
         </div>
       </div>
     );
@@ -139,10 +139,10 @@ function ProductPreview({ slug }: { slug: string }) {
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(214,120,23,0.18), transparent 65%)",
+              "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(91, 99, 232,0.18), transparent 65%)",
           }}
         />
-        <DeviceMobile size={108} weight="duotone" color="#D67817" />
+        <DeviceMobile size={108} weight="duotone" color="#5B63E8" />
       </div>
     );
   }
@@ -153,7 +153,7 @@ function ProductPreview({ slug }: { slug: string }) {
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 60% 60% at 50% 50%, rgba(214,120,23,0.14), transparent 60%)",
+            "radial-gradient(ellipse 60% 60% at 50% 50%, rgba(91, 99, 232,0.14), transparent 60%)",
         }}
       />
       <div
@@ -169,7 +169,7 @@ function ProductPreview({ slug }: { slug: string }) {
             "radial-gradient(ellipse at center, black 30%, transparent 75%)",
         }}
       />
-      <Buildings size={108} weight="duotone" color="#D67817" />
+      <Buildings size={108} weight="duotone" color="#5B63E8" />
     </div>
   );
 }
@@ -230,7 +230,7 @@ export default function ProductsIndex() {
                 >
                   {p.name}
                 </h2>
-                <p className="text-[18px] mt-3 text-[var(--color-ember-300)]">
+                <p className="text-[18px] mt-3 text-[var(--color-indigo-300)]">
                   {p.tagline}
                 </p>
                 <div className="mt-6 space-y-4 text-[15px] md:text-[16px] text-[var(--color-cream-soft)] leading-[1.65]">
@@ -246,7 +246,7 @@ export default function ProductsIndex() {
                     >
                       <span
                         aria-hidden
-                        className="w-1 h-1 mt-[10px] rounded-full bg-[var(--color-ember-500)] shrink-0"
+                        className="w-1 h-1 mt-[10px] rounded-full bg-[var(--color-indigo-500)] shrink-0"
                       />
                       <span>{f}</span>
                     </li>

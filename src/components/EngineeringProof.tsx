@@ -15,7 +15,7 @@ export default function EngineeringProof() {
         className="absolute -top-40 -left-40 w-[700px] h-[700px] pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse at center, rgba(214,120,23,0.08) 0%, transparent 60%)",
+            "radial-gradient(ellipse at center, rgba(91, 99, 232,0.08) 0%, transparent 60%)",
         }}
       />
 
@@ -97,7 +97,7 @@ function Stat({
 }) {
   return (
     <div className="conduit-card p-4">
-      <Icon size={18} weight="regular" color="#D67817" />
+      <Icon size={18} weight="regular" color="#5B63E8" />
       <span
         className="block text-[26px] leading-[1.0] text-[var(--color-cream)] tracking-[-0.025em] mt-3"
         style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
@@ -242,7 +242,7 @@ function Line({
 
 // Token color spans
 function K({ children }: { children: React.ReactNode }) {
-  return <span style={{ color: "#E9AF6F" }}>{children}</span>;
+  return <span style={{ color: "#A8AFFB" }}>{children}</span>;
 }
 function V({ children }: { children: React.ReactNode }) {
   return <span style={{ color: "#F5EFE6" }}>{children}</span>;
@@ -254,7 +254,7 @@ function F({ children }: { children: React.ReactNode }) {
   return <span style={{ color: "#FFC899" }}>{children}</span>;
 }
 function T({ children }: { children: React.ReactNode }) {
-  return <span style={{ color: "#D67817" }}>{children}</span>;
+  return <span style={{ color: "#5B63E8" }}>{children}</span>;
 }
 function C({ children }: { children: React.ReactNode }) {
   return <span style={{ color: "#847A6E", fontStyle: "italic" }}>{children}</span>;

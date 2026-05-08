@@ -99,7 +99,7 @@ function CellRender({ value, popular }: { value: Cell; popular?: boolean }) {
       <Check
         size={18}
         weight="bold"
-        color={popular ? "#D67817" : "#9DD8B1"}
+        color={popular ? "#5B63E8" : "#9DD8B1"}
       />
     );
   }
@@ -175,11 +175,11 @@ export default function PricingPage() {
                   <th
                     className="text-center p-5 w-[20%] relative"
                     style={{
-                      background: "rgba(214,120,23,0.04)",
+                      background: "rgba(91, 99, 232,0.04)",
                       borderRadius: "12px 12px 0 0",
                     }}
                   >
-                    <span className="conduit-caption text-[var(--color-ember-500)]">
+                    <span className="conduit-caption text-[var(--color-indigo-500)]">
                       Pro
                     </span>
                     <p
@@ -222,7 +222,7 @@ export default function PricingPage() {
                     </td>
                     <td
                       className="p-5 text-center align-top"
-                      style={{ background: "rgba(214,120,23,0.04)" }}
+                      style={{ background: "rgba(91, 99, 232,0.04)" }}
                     >
                       <CellRender value={row.values[1]} popular />
                     </td>
@@ -236,7 +236,7 @@ export default function PricingPage() {
                   <td className="p-5 text-center">
                     <Link
                       href="/auth/sign-up"
-                      className="text-[13px] text-[var(--color-ember-500)] inline-flex items-center gap-1 hover:gap-2 transition-[gap]"
+                      className="text-[13px] text-[var(--color-indigo-500)] inline-flex items-center gap-1 hover:gap-2 transition-[gap]"
                     >
                       Start free
                       <ArrowRight size={12} weight="bold" />
@@ -245,7 +245,7 @@ export default function PricingPage() {
                   <td
                     className="p-5 text-center"
                     style={{
-                      background: "rgba(214,120,23,0.04)",
+                      background: "rgba(91, 99, 232,0.04)",
                       borderRadius: "0 0 12px 12px",
                     }}
                   >
@@ -260,7 +260,7 @@ export default function PricingPage() {
                   <td className="p-5 text-center">
                     <Link
                       href="mailto:luis@conduitai.io?subject=Praxis%20Enterprise"
-                      className="text-[13px] text-[var(--color-ember-500)] inline-flex items-center gap-1 hover:gap-2 transition-[gap]"
+                      className="text-[13px] text-[var(--color-indigo-500)] inline-flex items-center gap-1 hover:gap-2 transition-[gap]"
                     >
                       Talk to founder
                       <ArrowRight size={12} weight="bold" />
@@ -300,7 +300,7 @@ export default function PricingPage() {
                     </dt>
                     <span
                       aria-hidden
-                      className="shrink-0 mt-1.5 w-6 h-6 rounded-full bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge)] flex items-center justify-center text-[var(--color-cream-mute)] group-hover:text-[var(--color-ember-500)] group-hover:border-[var(--color-ember-500)] transition-colors group-open:rotate-45 duration-300"
+                      className="shrink-0 mt-1.5 w-6 h-6 rounded-full bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge)] flex items-center justify-center text-[var(--color-cream-mute)] group-hover:text-[var(--color-indigo-500)] group-hover:border-[var(--color-indigo-500)] transition-colors group-open:rotate-45 duration-300"
                       style={{ fontSize: "14px" }}
                     >
                       +

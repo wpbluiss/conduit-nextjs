@@ -18,9 +18,9 @@ export default function FinalCTA() {
         className="absolute inset-0 pointer-events-none"
         style={{
           background: `
-            radial-gradient(ellipse 60% 50% at 50% 100%, rgba(214,120,23,0.22), transparent 65%),
+            radial-gradient(ellipse 60% 50% at 50% 100%, rgba(91, 99, 232,0.22), transparent 65%),
             radial-gradient(ellipse 50% 40% at 0% 0%, rgba(168,85,247,0.08), transparent 60%),
-            radial-gradient(ellipse 40% 30% at 100% 50%, rgba(214,120,23,0.12), transparent 60%)
+            radial-gradient(ellipse 40% 30% at 100% 50%, rgba(91, 99, 232,0.12), transparent 60%)
           `,
         }}
       />
@@ -31,7 +31,7 @@ export default function FinalCTA() {
         className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[800px] h-[400px] pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse at center bottom, rgba(214,120,23,0.35) 0%, transparent 65%)",
+            "radial-gradient(ellipse at center bottom, rgba(91, 99, 232,0.35) 0%, transparent 65%)",
           filter: "blur(60px)",
         }}
       />
@@ -115,7 +115,7 @@ export default function FinalCTA() {
           Or email{" "}
           <Link
             href="mailto:luis@conduitai.io"
-            className="text-[var(--color-cream)] underline underline-offset-4 decoration-[var(--color-edge)] hover:decoration-[var(--color-ember-500)] transition-colors"
+            className="text-[var(--color-cream)] underline underline-offset-4 decoration-[var(--color-edge)] hover:decoration-[var(--color-indigo-500)] transition-colors"
           >
             luis@conduitai.io
           </Link>{" "}

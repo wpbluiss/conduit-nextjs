@@ -76,7 +76,7 @@ export default function Pricing() {
         className="absolute -top-40 right-0 w-[700px] h-[700px] pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse at center, rgba(214,120,23,0.06) 0%, transparent 60%)",
+            "radial-gradient(ellipse at center, rgba(91, 99, 232,0.06) 0%, transparent 60%)",
         }}
       />
 
@@ -151,7 +151,7 @@ export default function Pricing() {
                       <Check
                         size={14}
                         weight="bold"
-                        color={t.popular ? "#D67817" : "#9DD8B1"}
+                        color={t.popular ? "#5B63E8" : "#9DD8B1"}
                         className="mt-1 shrink-0"
                       />
                       <span>{f}</span>
@@ -181,7 +181,7 @@ export default function Pricing() {
           Top up tokens any time — $10 / $25 / $50 packs from the{" "}
           <Link
             href="/app/settings/billing"
-            className="text-[var(--color-cream)] hover:text-[var(--color-ember-500)] underline underline-offset-2 decoration-[var(--color-edge)] hover:decoration-[var(--color-ember-500)] transition-colors"
+            className="text-[var(--color-cream)] hover:text-[var(--color-indigo-500)] underline underline-offset-2 decoration-[var(--color-edge)] hover:decoration-[var(--color-indigo-500)] transition-colors"
           >
             billing settings
           </Link>{" "}

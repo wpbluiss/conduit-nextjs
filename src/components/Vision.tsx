@@ -112,7 +112,7 @@ export default function Vision() {
           >
             <Link
               href="/approach"
-              className="inline-flex items-center gap-2 text-[15px] text-[var(--color-ember-500)] hover:gap-3 transition-[gap] font-medium"
+              className="inline-flex items-center gap-2 text-[15px] text-[var(--color-indigo-500)] hover:gap-3 transition-[gap] font-medium"
             >
               Read the full thesis
               <ArrowRight size={14} weight="bold" />

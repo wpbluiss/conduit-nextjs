@@ -112,7 +112,7 @@ export default function AboutPage() {
             {APPROACH.map((a) => (
               <div key={a.title} className="conduit-card p-7 md:p-8">
                 <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)] mb-6">
-                  <a.Icon size={22} weight="regular" color="#D67817" />
+                  <a.Icon size={22} weight="regular" color="#5B63E8" />
                 </div>
                 <h3
                   className="text-[22px] leading-[1.15] tracking-[-0.015em] text-[var(--color-cream)]"
@@ -130,7 +130,7 @@ export default function AboutPage() {
           <div className="mt-12 text-center">
             <Link
               href="/approach"
-              className="inline-flex items-center gap-2 text-[15px] text-[var(--color-ember-500)] hover:gap-3 transition-[gap] font-medium"
+              className="inline-flex items-center gap-2 text-[15px] text-[var(--color-indigo-500)] hover:gap-3 transition-[gap] font-medium"
             >
               Read the full thesis
               <ArrowRight size={14} weight="bold" />
@@ -172,7 +172,7 @@ export default function AboutPage() {
                 insurance agencies — from blank repo to working product in a
                 weekend, then a real go-to-market.
               </p>
-              <div className="mt-6 inline-flex items-center gap-1.5 text-[14px] text-[var(--color-ember-500)] font-medium group-hover:gap-2.5 transition-[gap]">
+              <div className="mt-6 inline-flex items-center gap-1.5 text-[14px] text-[var(--color-indigo-500)] font-medium group-hover:gap-2.5 transition-[gap]">
                 Read the case study
                 <ArrowRight size={14} weight="bold" />
               </div>
@@ -253,7 +253,7 @@ function ContactRow({
         {href ? (
           <Link
             href={href}
-            className="text-[15px] md:text-[16px] text-[var(--color-cream)] hover:text-[var(--color-ember-500)] tracking-tight underline underline-offset-4 decoration-[var(--color-edge)] hover:decoration-[var(--color-ember-500)] transition-colors"
+            className="text-[15px] md:text-[16px] text-[var(--color-cream)] hover:text-[var(--color-indigo-500)] tracking-tight underline underline-offset-4 decoration-[var(--color-edge)] hover:decoration-[var(--color-indigo-500)] transition-colors"
           >
             {value}
           </Link>

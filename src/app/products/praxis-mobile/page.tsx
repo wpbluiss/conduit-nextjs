@@ -81,7 +81,7 @@ export default function PraxisMobilePage() {
                 className="absolute -inset-12 rounded-[40px] pointer-events-none"
                 style={{
                   background:
-                    "radial-gradient(ellipse at center, rgba(214,120,23,0.22) 0%, transparent 65%)",
+                    "radial-gradient(ellipse at center, rgba(91, 99, 232,0.22) 0%, transparent 65%)",
                   filter: "blur(40px)",
                 }}
               />
@@ -120,7 +120,7 @@ export default function PraxisMobilePage() {
                   >
                     <span
                       aria-hidden
-                      className="w-1 h-1 mt-[10px] rounded-full bg-[var(--color-ember-500)] shrink-0"
+                      className="w-1 h-1 mt-[10px] rounded-full bg-[var(--color-indigo-500)] shrink-0"
                     />
                     <span>{f}</span>
                   </li>
@@ -163,7 +163,7 @@ export default function PraxisMobilePage() {
                   >
                     <span
                       aria-hidden
-                      className="w-1 h-1 mt-[10px] rounded-full bg-[var(--color-ember-500)] shrink-0"
+                      className="w-1 h-1 mt-[10px] rounded-full bg-[var(--color-indigo-500)] shrink-0"
                     />
                     <span>{f}</span>
                   </li>
@@ -181,7 +181,7 @@ export default function PraxisMobilePage() {
             {FEATURES.map((f) => (
               <div key={f.title} className="conduit-card p-7 md:p-8">
                 <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)] mb-6">
-                  <f.Icon size={22} weight="regular" color="#D67817" />
+                  <f.Icon size={22} weight="regular" color="#5B63E8" />
                 </div>
                 <h3
                   className="text-[22px] leading-[1.1] tracking-[-0.02em] text-[var(--color-cream)]"
@@ -260,7 +260,7 @@ function PhoneMockup() {
         className="aspect-[9/19] rounded-[44px] p-2.5 bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge)]"
         style={{
           boxShadow:
-            "inset 0 0 0 1px rgba(214,120,23,0.1), 0 0 60px rgba(214,120,23,0.16), 0 24px 48px rgba(0,0,0,0.6)",
+            "inset 0 0 0 1px rgba(91, 99, 232,0.1), 0 0 60px rgba(91, 99, 232,0.16), 0 24px 48px rgba(0,0,0,0.6)",
         }}
       >
         <div
@@ -285,7 +285,7 @@ function PhoneMockup() {
                 className="absolute -inset-3 rounded-full"
                 style={{
                   background:
-                    "radial-gradient(circle at center, rgba(214,120,23,0.35) 0%, transparent 70%)",
+                    "radial-gradient(circle at center, rgba(91, 99, 232,0.35) 0%, transparent 70%)",
                   filter: "blur(8px)",
                 }}
               />
@@ -293,7 +293,7 @@ function PhoneMockup() {
                 className="relative w-20 h-20 rounded-full flex items-center justify-center"
                 style={{
                   background:
-                    "radial-gradient(circle at 35% 30%, #F5DDC3, #D67817 60%, #8F4709)",
+                    "radial-gradient(circle at 35% 30%, #DDE0FE, #5B63E8 60%, #3D44C2)",
                   boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.15)",
                 }}
               >
@@ -343,7 +343,7 @@ function WaveformIllustration() {
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(214,120,23,0.18), transparent 65%)",
+            "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(91, 99, 232,0.18), transparent 65%)",
         }}
       />
       <div className="absolute inset-0 flex items-center justify-center gap-[2px] px-8">
@@ -354,9 +354,9 @@ function WaveformIllustration() {
             style={{
               width: 3,
               height: `${b.height}px`,
-              background: "var(--color-ember-500)",
+              background: "var(--color-indigo-500)",
               opacity: 0.85,
-              boxShadow: "0 0 4px rgba(214,120,23,0.3)",
+              boxShadow: "0 0 4px rgba(91, 99, 232,0.3)",
             }}
           />
         ))}
@@ -377,7 +377,7 @@ function NotificationIllustration() {
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(214,120,23,0.12), transparent 65%)",
+            "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(91, 99, 232,0.12), transparent 65%)",
         }}
       />
       <div className="relative w-full max-w-[360px] space-y-3">
@@ -418,16 +418,16 @@ function NotificationCard({
       className="px-4 py-3 rounded-xl"
       style={{
         background: highlight
-          ? "rgba(214,120,23,0.1)"
+          ? "rgba(91, 99, 232,0.1)"
           : "var(--color-ink-canvas)",
         border: highlight
-          ? "1px solid rgba(214,120,23,0.4)"
+          ? "1px solid rgba(91, 99, 232,0.4)"
           : "1px solid var(--color-edge-subtle)",
       }}
     >
       <div className="flex items-center justify-between mb-1.5">
         <div className="flex items-center gap-2">
-          <span className="w-5 h-5 rounded-full bg-[var(--color-ember-500)] flex items-center justify-center text-[9px] font-semibold text-[var(--color-ink-canvas)]">
+          <span className="w-5 h-5 rounded-full bg-[var(--color-indigo-500)] flex items-center justify-center text-[9px] font-semibold text-[var(--color-ink-canvas)]">
             {name[0]}
           </span>
           <span className="text-[12px] font-semibold text-[var(--color-cream)]">
