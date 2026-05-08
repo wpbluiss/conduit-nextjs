@@ -11,6 +11,28 @@ import {
   type EmployeeId,
 } from "@/lib/conduit/employees";
 import { EmployeeAvatar } from "@/components/conduit/EmployeeBadge";
+import EnterTheRoomCard from "@/components/conduit/voice/EnterTheRoomCard";
+
+// Tier-aware participant set for the "Enter the room" hero. Free is locked
+// out (the card renders an upgrade prompt). Pro gets the core 4 (Atlas +
+// the three execution employees). Enterprise + internal get the full team.
+function pickRoomParticipants(
+  tierId: string,
+  internal: boolean,
+): EmployeeId[] {
+  if (internal || tierId === "enterprise") return EMPLOYEE_ORDER;
+  if (tierId === "pro") {
+    return ["jarvis", "marketing", "sales", "engineering"];
+  }
+  return [];
+}
+
+function tierLabelFor(tierId: string, internal: boolean, count: number): string {
+  if (internal) return `Internal · full team (${count})`;
+  if (tierId === "enterprise") return `Enterprise · full team (${count})`;
+  if (tierId === "pro") return `Pro · ${count} in the room`;
+  return "Pro perk";
+}
 
 export const dynamic = "force-dynamic";
 
@@ -82,6 +104,10 @@ export default async function VoiceRoomLanding() {
   const allowed = (
     internal ? EMPLOYEE_ORDER : tier.allowedEmployees
   ) as EmployeeId[];
+
+  const roomParticipants = pickRoomParticipants(tier.id, internal);
+  const roomAvailable = ttsAllowed && roomParticipants.length >= 2;
+  const roomTierLabel = tierLabelFor(tier.id, internal, roomParticipants.length);
 
   return (
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-10">
@@ -176,13 +202,20 @@ export default async function VoiceRoomLanding() {
           </div>
         </div>
 
-        {/* Pick an employee */}
+        {/* Enter the room — the multi-employee experience. */}
+        <EnterTheRoomCard
+          participants={roomParticipants}
+          available={roomAvailable}
+          tierLabel={roomTierLabel}
+        />
+
+        {/* Pick an employee for a 1:1. */}
         <div className="mb-3 flex items-baseline justify-between">
           <h2 className="text-[12px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-            Talk to
+            Talk solo
           </h2>
           <span className="text-[10px] text-[var(--color-text-muted)]">
-            Click to open the workspace + start voice
+            1-on-1 conversation · opens the workspace
           </span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-10">

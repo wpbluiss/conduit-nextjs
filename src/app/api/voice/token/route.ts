@@ -25,7 +25,9 @@ interface TokenBody {
 const MAX_PARTICIPANTS_BY_TIER: Record<string, number> = {
   free: 2,
   pro: 4,
-  enterprise: 8,
+  // Polish 2026-05-07: 8 → 9. The full team is 9 (1 Atlas + 8 specialists);
+  // capping at 8 silently locked enterprise out of the "Enter the room" hero.
+  enterprise: 9,
 };
 
 export async function POST(request: NextRequest) {
