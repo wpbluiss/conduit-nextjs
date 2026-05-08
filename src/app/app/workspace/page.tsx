@@ -18,6 +18,7 @@ import { tierById } from "@/lib/billing/tiers";
 import { readVoiceCeilings } from "@/lib/voice/config";
 import { EmployeeAvatar } from "@/components/conduit/EmployeeBadge";
 import type { EmployeeKey } from "@/lib/ai/provider";
+import { getLastActiveByEmployee } from "@/lib/conduit/employee-activity";
 
 export const dynamic = "force-dynamic";
 
@@ -135,27 +136,11 @@ export default async function WorkspaceDashboard() {
   const voiceMinutesToday = Math.floor(voiceSecondsToday / 60);
   const voiceCapMinutes = ceilings.dailyMinutes;
 
-  // Last activity per employee for the team grid status dots.
-  const { data: lastByEmpRows } = await supabase
-    .from("conduit_messages")
-    .select("employee, created_at, conversation_id")
-    .eq("role", "assistant")
-    .order("created_at", { ascending: false })
-    .limit(150);
-  const accountConvosQ = await supabase
-    .from("conduit_conversations")
-    .select("id")
-    .eq("account_id", account.id);
-  const accountConvoIds = new Set(
-    (accountConvosQ.data ?? []).map((c) => c.id as string),
-  );
-  const lastByEmp: Record<string, string> = {};
-  for (const r of lastByEmpRows ?? []) {
-    const e = r.employee as string | null;
-    const cid = r.conversation_id as string | null;
-    if (!e || !cid || !accountConvoIds.has(cid)) continue;
-    if (!lastByEmp[e]) lastByEmp[e] = r.created_at as string;
-  }
+  // Last activity per employee for the team grid status dots. Polish
+  // 2026-05-07: was reading conduit_messages only — voice-only sessions
+  // and engineering builds didn't bump it, so the grid showed stale stamps
+  // when Luis had just talked or shipped. Helper merges all three signals.
+  const lastByEmp = await getLastActiveByEmployee(supabase, account.id);
 
   return (
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-10">

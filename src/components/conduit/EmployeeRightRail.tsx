@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Hammer } from "lucide-react";
 import {
   EMPLOYEES,
   type EmployeeId,
@@ -11,6 +11,14 @@ interface MemoryRow {
   kind: string;
   content: string;
   tags: string[] | null;
+  created_at: string;
+}
+
+interface EngSession {
+  id: string;
+  prompt: string;
+  status: string;
+  deploy_url: string | null;
   created_at: string;
 }
 
@@ -25,6 +33,22 @@ const QUICK_ACTIONS: Record<EmployeeId, string[]> = {
   ops: ["Build an SOP for client onboarding", "Set up weekly standup"],
   legal: ["Draft a basic NDA", "Draft a service agreement"],
 };
+
+const ACTIVE_STATUSES = new Set(["pending", "running", "deploying"]);
+
+function relativeTime(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return "—";
+  const diff = Date.now() - t;
+  const m = Math.round(diff / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.round(h / 24);
+  return `${d}d ago`;
+}
 
 export default async function EmployeeRightRail({
   supabase,
@@ -41,16 +65,26 @@ export default async function EmployeeRightRail({
   // (e.g. tag "sales") or the employee name in content. Falls back to
   // recent memory if nothing matches.
   const tag = employeeId;
-  const { data: byTag } = await supabase
-    .from("conduit_memory")
-    .select("id, kind, content, tags, created_at")
-    .eq("account_id", accountId)
-    .is("archived_at", null)
-    .contains("tags", [tag])
-    .order("created_at", { ascending: false })
-    .limit(3);
+  const [byTagQ, engSessionsQ] = await Promise.all([
+    supabase
+      .from("conduit_memory")
+      .select("id, kind, content, tags, created_at")
+      .eq("account_id", accountId)
+      .is("archived_at", null)
+      .contains("tags", [tag])
+      .order("created_at", { ascending: false })
+      .limit(3),
+    employeeId === "engineering"
+      ? supabase
+          .from("conduit_engineering_sessions")
+          .select("id, prompt, status, deploy_url, created_at")
+          .eq("account_id", accountId)
+          .order("created_at", { ascending: false })
+          .limit(3)
+      : Promise.resolve({ data: [] as EngSession[] }),
+  ]);
 
-  let memory: MemoryRow[] = (byTag ?? []) as MemoryRow[];
+  let memory: MemoryRow[] = (byTagQ.data ?? []) as MemoryRow[];
   if (memory.length < 3) {
     const { data: recent } = await supabase
       .from("conduit_memory")
@@ -66,6 +100,8 @@ export default async function EmployeeRightRail({
     }
   }
 
+  const engSessions = ((engSessionsQ.data ?? []) as EngSession[]).slice(0, 3);
+  const activeSession = engSessions.find((s) => ACTIVE_STATUSES.has(s.status));
   const actions = QUICK_ACTIONS[employeeId] ?? [];
 
   return (
@@ -105,13 +141,30 @@ export default async function EmployeeRightRail({
         <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
           Recent context
         </div>
-        {memory.length === 0 ? (
+        {memory.length === 0 && engSessions.length === 0 ? (
           <p className="text-xs text-[var(--color-text-muted)]">
             No memory notes yet. Tell Atlas about {meta.name.toLowerCase()}{" "}
             and he&apos;ll save what matters.
           </p>
         ) : (
           <ul className="space-y-2">
+            {/* Engineering: surface recent build sessions before memory notes
+                so a freshly-shipped build is the first thing the user sees. */}
+            {engSessions.map((s) => (
+              <li key={`s-${s.id}`}>
+                <Link
+                  href={`/app/builds?session=${s.id}`}
+                  className="conduit-card px-3 py-2 text-xs leading-snug block hover:border-[var(--color-accent)] transition-colors"
+                >
+                  <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1 inline-flex items-center gap-1.5">
+                    <Hammer size={10} /> build · {s.status} · {relativeTime(s.created_at)}
+                  </div>
+                  <p className="text-[var(--color-text)] line-clamp-2">
+                    {s.prompt}
+                  </p>
+                </Link>
+              </li>
+            ))}
             {memory.map((m) => (
               <li
                 key={m.id}
@@ -142,6 +195,21 @@ export default async function EmployeeRightRail({
             Quick actions
           </div>
           <div className="space-y-1.5">
+            {/* Engineering: if a build is in flight, lead with a Resume link. */}
+            {employeeId === "engineering" && activeSession && (
+              <Link
+                href={`/app/builds?session=${activeSession.id}`}
+                style={{
+                  ["--dept" as string]: meta.color,
+                  ["--dept-soft" as string]: meta.colorSoft,
+                }}
+                className="conduit-suggestion px-3 py-2.5 text-[12px] block leading-snug border-[var(--color-accent)]"
+              >
+                <span className="inline-flex items-center gap-1.5">
+                  <Hammer size={11} /> Resume last build · {activeSession.status}
+                </span>
+              </Link>
+            )}
             {actions.map((a) => (
               <Link
                 key={a}

@@ -315,8 +315,12 @@ export default function BuildSession({
               onClick={onClose}
               className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
             >
-              Close session
+              Minimize
             </button>
+            <p className="text-[10px] text-[var(--color-text-muted)] mt-1.5 leading-snug">
+              Build keeps running. Reopen any time from{" "}
+              <span className="text-[var(--color-text)]">Builds</span>.
+            </p>
           </div>
         </aside>
       </div>
