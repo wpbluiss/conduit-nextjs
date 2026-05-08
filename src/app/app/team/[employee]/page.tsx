@@ -18,6 +18,7 @@ import SalesWorkspace from "@/components/conduit/sales/SalesWorkspace";
 import VoiceModeButton from "@/components/conduit/voice/VoiceModeButton";
 import EmployeeRightRail from "@/components/conduit/EmployeeRightRail";
 import EngineeringBuildButton from "@/components/conduit/engineering/EngineeringBuildButton";
+import { getLastActiveForEmployee } from "@/lib/conduit/employee-activity";
 
 export const dynamic = "force-dynamic";
 
@@ -127,8 +128,14 @@ export default async function WorkspacePage({ params }: PageProps) {
     (conversationsQ.data ?? []).map((m) => m.conversation_id as string),
   );
   const conversationCount = conversationIds.size;
-  const lastActiveIso =
-    (lastMessageQ.data?.[0]?.created_at as string | undefined) ?? null;
+  // Polish 2026-05-07: merges conduit_messages + conduit_voice_sessions +
+  // conduit_engineering_sessions so the stat reflects every signal that
+  // should bump it, not just text chat.
+  const lastActiveIso = await getLastActiveForEmployee(
+    supabase,
+    account.id,
+    employeeId,
+  );
 
   // Recent activity — last 10 of (artifacts produced + conversations responded in).
   const [recentArtifacts, recentConvos] = await Promise.all([
