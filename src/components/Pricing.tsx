@@ -1,19 +1,27 @@
+"use client";
+
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { ArrowRight, Check } from "@phosphor-icons/react";
+
+const EASE = [0.25, 1, 0.5, 1] as const;
+
 type Tier = {
   name: string;
   price: string;
   priceSuffix?: string;
   tagline: string;
   features: string[];
-  cta: { label: string; href: string; primary?: boolean };
+  cta: { label: string; href: string };
   popular?: boolean;
-  checkColor: string;
+  ctaPrimary?: boolean;
 };
 
 // Mirrors the runtime tiers in src/lib/billing/tiers.ts so the marketing
 // promise matches what the Praxis Console actually sells.
 const TIERS: Tier[] = [
   {
-    name: "FREE",
+    name: "Free",
     price: "$0",
     priceSuffix: "/mo",
     tagline: "For founders kicking the tires.",
@@ -24,10 +32,9 @@ const TIERS: Tier[] = [
       "Voice input in chat",
     ],
     cta: { label: "Open Praxis", href: "/auth/sign-up" },
-    checkColor: "#34D399",
   },
   {
-    name: "PRO",
+    name: "Pro",
     price: "$29",
     priceSuffix: "/mo",
     tagline: "For solo founders running a real business.",
@@ -36,14 +43,14 @@ const TIERS: Tier[] = [
       "Atlas + Marketing + Sales + Engineering",
       "1M tokens / month",
       "30 voice minutes per day",
-      "Real lead pipelines (Sales) + real builds (Engineering)",
+      "Real lead pipelines + real builds",
     ],
-    cta: { label: "Start Pro", href: "/auth/sign-up?tier=pro", primary: true },
+    cta: { label: "Start Pro", href: "/auth/sign-up?tier=pro" },
     popular: true,
-    checkColor: "#FF8A3D",
+    ctaPrimary: true,
   },
   {
-    name: "ENTERPRISE",
+    name: "Enterprise",
     price: "$199",
     priceSuffix: "/mo",
     tagline: "For teams replacing whole departments.",
@@ -52,99 +59,134 @@ const TIERS: Tier[] = [
       "All 9 employees (Finance, Compliance, HR, Ops, Legal)",
       "5M tokens / month",
       "Unlimited voice + roundtable",
-      "Multi-user (when shipped) + priority routing",
+      "Multi-user + priority routing",
     ],
     cta: { label: "Talk to founder", href: "mailto:luis@conduitai.io" },
-    checkColor: "#A855F7",
   },
 ];
 
-function Check({ color }: { color: string }) {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" className="mt-[5px] flex-shrink-0">
-      <path
-        d="M3 7l3 3 5-6"
-        stroke={color}
-        strokeWidth="1.5"
-        fill="none"
-        strokeLinecap="square"
-      />
-    </svg>
-  );
-}
-
 export default function Pricing() {
   return (
-    <section id="pricing" className="py-20 md:py-32 px-6 border-t border-[#1F1C19]">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-14 md:mb-20 max-w-3xl mx-auto">
-          <p className="eyebrow mb-4 inline-flex items-center">
-            <span className="eyebrow-dot" style={{ color: "#FF8A3D" }} aria-hidden="true" />
-            Pricing
-          </p>
-          <h2 className="serif text-[36px] md:text-[56px] text-[#F5F1EA]">
-            Three tiers. One workforce.
-          </h2>
-          <p className="mt-5 text-[16px] md:text-[18px] text-[#8C8884] leading-relaxed">
-            Praxis Flow runs everywhere; Praxis Depth (extended thinking)
-            kicks in on Enterprise for the reasoning-heavy turns.
-          </p>
-        </div>
+    <section
+      id="pricing"
+      className="relative conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)] overflow-hidden"
+    >
+      <div
+        aria-hidden
+        className="absolute -top-40 right-0 w-[700px] h-[700px] pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, rgba(214,120,23,0.06) 0%, transparent 60%)",
+        }}
+      />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-          {TIERS.map((t) => (
-            <div
+      <div className="relative conduit-container">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-15%" }}
+          transition={{ duration: 0.8, ease: EASE }}
+          className="text-center max-w-[760px] mx-auto mb-16 md:mb-20"
+        >
+          <p className="conduit-caption conduit-caption-ember">Pricing</p>
+          <h2 className="conduit-display-xl mt-5">
+            Three tiers.{" "}
+            <span className="conduit-ember-text">One workforce.</span>
+          </h2>
+          <p className="conduit-body-lg mt-6 max-w-[600px] mx-auto">
+            Praxis Flow runs everywhere. Praxis Depth (extended thinking) kicks
+            in on Enterprise for the reasoning-heavy turns.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 items-stretch">
+          {TIERS.map((t, i) => (
+            <motion.div
               key={t.name}
-              className={`relative p-8 md:p-10 bg-[#0A0908] flex flex-col ${
-                t.popular
-                  ? "border border-[#FF8A3D] md:-mt-4 md:mb-[-1rem]"
-                  : "border border-[#1F1C19]"
-              }`}
+              initial={{ opacity: 0, y: 32 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-10%" }}
+              transition={{ duration: 0.8, ease: EASE, delay: i * 0.08 }}
+              className={t.popular ? "md:-my-3 md:scale-[1.02]" : ""}
             >
-              {t.popular && (
-                <span className="absolute -top-3 left-8 md:left-10 bg-[#FF8A3D] text-[#0A0908] text-[10px] uppercase tracking-[1.8px] px-3 py-1 font-medium">
-                  Most popular
-                </span>
-              )}
-              <p className="eyebrow text-[#8C8884] mb-5">{t.name}</p>
-              <div className="flex items-baseline gap-1 mb-2">
-                <span className="serif text-[48px] md:text-[56px] text-[#F5F1EA] leading-none">
-                  {t.price}
-                </span>
-                {t.priceSuffix && (
-                  <span className="text-[18px] text-[#8C8884]">{t.priceSuffix}</span>
-                )}
-              </div>
-              <p className="text-[14px] text-[#8C8884] mb-6">{t.tagline}</p>
-              <div className="divider mb-6" />
-              <ul className="space-y-3 mb-10 flex-1">
-                {t.features.map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-[14px] text-[#F5F1EA]">
-                    <Check color={t.checkColor} />
-                    <span>{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <a
-                href={t.cta.href}
-                className={`${t.cta.primary ? "btn-primary" : "btn-secondary"} justify-center`}
+              <div
+                className={`conduit-card relative p-8 md:p-10 h-full flex flex-col ${
+                  t.popular ? "is-featured" : ""
+                }`}
               >
-                {t.cta.label} <span aria-hidden="true">→</span>
-              </a>
-            </div>
+                {t.popular && (
+                  <span className="conduit-badge conduit-badge-popular absolute -top-3 left-1/2 -translate-x-1/2">
+                    Most Popular
+                  </span>
+                )}
+
+                <p className="conduit-caption text-[var(--color-cream-mute)] mb-6">
+                  {t.name}
+                </p>
+                <div className="flex items-baseline gap-1 mb-3">
+                  <span
+                    className="text-[56px] md:text-[64px] leading-[0.95] tracking-[-0.035em] text-[var(--color-cream)]"
+                    style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
+                  >
+                    {t.price}
+                  </span>
+                  {t.priceSuffix && (
+                    <span className="text-[18px] text-[var(--color-cream-mute)]">
+                      {t.priceSuffix}
+                    </span>
+                  )}
+                </div>
+                <p className="text-[14px] text-[var(--color-cream-soft)] mb-7 leading-[1.55]">
+                  {t.tagline}
+                </p>
+
+                <div className="h-px bg-[var(--color-edge-subtle)] mb-7" />
+
+                <ul className="space-y-3.5 mb-10 flex-1">
+                  {t.features.map((f) => (
+                    <li
+                      key={f}
+                      className="flex items-start gap-3 text-[14px] text-[var(--color-cream)] leading-[1.55]"
+                    >
+                      <Check
+                        size={14}
+                        weight="bold"
+                        color={t.popular ? "#D67817" : "#9DD8B1"}
+                        className="mt-1 shrink-0"
+                      />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href={t.cta.href}
+                  className={`${t.ctaPrimary ? "conduit-btn-primary" : "conduit-btn-secondary"} justify-center w-full`}
+                >
+                  {t.cta.label}
+                  <ArrowRight size={14} weight="bold" />
+                </Link>
+              </div>
+            </motion.div>
           ))}
         </div>
 
-        <p className="text-center mt-12 md:mt-16 text-[14px] text-[#8C8884] max-w-2xl mx-auto">
-          Top up tokens any time — $10 / $25 / $50 packs from the
-          <a
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: "-10%" }}
+          transition={{ duration: 0.8, ease: EASE, delay: 0.3 }}
+          className="text-center mt-14 md:mt-16 text-[14px] text-[var(--color-cream-mute)] max-w-[640px] mx-auto leading-[1.6]"
+        >
+          Top up tokens any time — $10 / $25 / $50 packs from the{" "}
+          <Link
             href="/app/settings/billing"
-            className="text-[#F5F1EA] hover:text-[#FF8A3D] mx-1"
+            className="text-[var(--color-cream)] hover:text-[var(--color-ember-500)] underline underline-offset-2 decoration-[var(--color-edge)] hover:decoration-[var(--color-ember-500)] transition-colors"
           >
             billing settings
-          </a>
+          </Link>{" "}
           inside the Console.
-        </p>
+        </motion.p>
       </div>
     </section>
   );

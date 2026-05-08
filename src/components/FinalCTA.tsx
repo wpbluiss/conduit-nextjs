@@ -1,46 +1,127 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { ArrowRight } from "@phosphor-icons/react";
+
+const EASE = [0.25, 1, 0.5, 1] as const;
 
 export default function FinalCTA() {
   return (
     <section
       id="cta"
-      className="relative py-24 md:py-32 px-6 bg-[#14110F] border-t border-[#1F1C19] overflow-hidden"
+      className="relative py-32 md:py-44 conduit-bg-canvas overflow-hidden border-t border-[var(--color-edge-subtle)]"
     >
-      <div className="cta-mesh" aria-hidden="true" />
-      <div className="relative max-w-4xl mx-auto text-center">
-        <h2 className="serif text-[40px] md:text-[64px] text-[#F5F1EA] leading-[1.05]">
-          Stop hiring. Start deploying.
-        </h2>
-        <p className="mt-6 md:mt-8 text-[17px] md:text-[20px] text-[#8C8884] max-w-2xl mx-auto leading-relaxed">
+      {/* Strong ember mesh */}
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(ellipse 60% 50% at 50% 100%, rgba(214,120,23,0.22), transparent 65%),
+            radial-gradient(ellipse 50% 40% at 0% 0%, rgba(168,85,247,0.08), transparent 60%),
+            radial-gradient(ellipse 40% 30% at 100% 50%, rgba(214,120,23,0.12), transparent 60%)
+          `,
+        }}
+      />
+
+      {/* Center ember aura */}
+      <div
+        aria-hidden
+        className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[800px] h-[400px] pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse at center bottom, rgba(214,120,23,0.35) 0%, transparent 65%)",
+          filter: "blur(60px)",
+        }}
+      />
+
+      <motion.div
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-15%" }}
+        variants={{
+          hidden: {},
+          show: { transition: { staggerChildren: 0.12 } },
+        }}
+        className="relative max-w-[720px] mx-auto px-6 text-center"
+      >
+        <motion.h2
+          variants={{
+            hidden: { opacity: 0, y: 16 },
+            show: {
+              opacity: 1,
+              y: 0,
+              transition: { duration: 1.0, ease: EASE },
+            },
+          }}
+          className="conduit-display-2xl"
+        >
+          Stop hiring. <span className="conduit-ember-text">Start deploying.</span>
+        </motion.h2>
+
+        <motion.p
+          variants={{
+            hidden: { opacity: 0, y: 8 },
+            show: {
+              opacity: 1,
+              y: 0,
+              transition: { duration: 0.8, ease: EASE },
+            },
+          }}
+          className="conduit-body-lg mt-6 max-w-[520px] mx-auto"
+        >
           Praxis is live. Free to start. The Console is the door.
-        </p>
-        <div className="mt-10 md:mt-12 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4">
+        </motion.p>
+
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 8 },
+            show: {
+              opacity: 1,
+              y: 0,
+              transition: { duration: 0.8, ease: EASE },
+            },
+          }}
+          className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3"
+        >
           <Link
             href="/auth/sign-up"
-            className="btn-primary text-[16px]"
-            style={{ padding: "20px 44px" }}
+            className="conduit-btn-primary justify-center"
+            style={{ padding: "16px 32px", fontSize: "15px" }}
           >
-            Open Praxis Console <span aria-hidden="true">→</span>
+            Open Praxis Console
+            <ArrowRight size={16} weight="bold" />
           </Link>
           <Link
             href="/products"
-            className="btn-secondary text-[16px]"
-            style={{ padding: "20px 32px" }}
+            className="conduit-btn-secondary justify-center"
+            style={{ padding: "16px 28px", fontSize: "15px" }}
           >
             See the product family
           </Link>
-        </div>
-        <p className="mt-8 text-[14px] text-[#8C8884]">
+        </motion.div>
+
+        <motion.p
+          variants={{
+            hidden: { opacity: 0 },
+            show: {
+              opacity: 1,
+              transition: { duration: 0.8, ease: EASE, delay: 0.2 },
+            },
+          }}
+          className="mt-8 text-[14px] text-[var(--color-cream-mute)]"
+        >
           Or email{" "}
-          <a
+          <Link
             href="mailto:luis@conduitai.io"
-            className="text-[#F5F1EA] underline underline-offset-4 decoration-[#FF8A3D]/50 hover:decoration-[#FF8A3D]"
+            className="text-[var(--color-cream)] underline underline-offset-4 decoration-[var(--color-edge)] hover:decoration-[var(--color-ember-500)] transition-colors"
           >
             luis@conduitai.io
-          </a>{" "}
+          </Link>{" "}
           directly.
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
     </section>
   );
 }
