@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 @theme inline {
+  /* ============================================================
+   * /app Console tokens (DO NOT MODIFY — Console redesign tokens)
+   * ============================================================ */
   --color-surface: #0A0908;
   --color-surface-elevated: #14110F;
   --color-surface-raised: #1A1714;
@@ -43,6 +46,65 @@
   --font-serif: "Fraunces", ui-serif, Georgia, Cambria, "Times New Roman", serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  /* ============================================================
+   * Conduit Marketing — Visual overhaul v2 (2026-05-08)
+   * Dark-first marketing tokens. Additive — old tokens preserved.
+   * ============================================================ */
+
+  /* Ember accent — the signature. Warm amber, NOT generic orange. */
+  --color-ember-50: #FBF1E8;
+  --color-ember-100: #F5DDC3;
+  --color-ember-300: #E9AF6F;
+  --color-ember-500: #D67817;
+  --color-ember-700: #8F4709;
+  --color-ember-900: #482402;
+
+  /* Ink scale — warm dark canvas */
+  --color-ink-canvas: #0A0908;
+  --color-ink-surface: #14110F;
+  --color-ink-surface-subtle: #1A1612;
+  --color-ink-surface-elevated: #221C17;
+
+  /* Cream scale — warm text on dark */
+  --color-cream: #F5EFE6;
+  --color-cream-soft: #B8AC9C;
+  --color-cream-mute: #847A6E;
+  --color-cream-faint: #5A5248;
+
+  /* Edge scale — borders on dark */
+  --color-edge: #2D2620;
+  --color-edge-subtle: #221C17;
+  --color-edge-strong: #3D352D;
+
+  /* Semantic */
+  --color-conduit-success: #4ADE80;
+  --color-conduit-warning: #FBBF24;
+  --color-conduit-danger: #F87171;
+  --color-conduit-info: #60A5FA;
+}
+
+:root {
+  /* Motion — ease-out-quart is the Conduit motion signature. */
+  --conduit-ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --conduit-ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+
+  /* Gradients */
+  --conduit-gradient-ember-radial: radial-gradient(
+    ellipse 70% 60% at 85% 0%,
+    rgba(214, 120, 23, 0.18) 0%,
+    transparent 60%
+  );
+  --conduit-gradient-ember-line: linear-gradient(
+    90deg, transparent, rgba(214, 120, 23, 0.6), transparent
+  );
+  --conduit-gradient-text-warm: linear-gradient(
+    135deg, #F5EFE6 0%, #E9AF6F 100%
+  );
+  --conduit-gradient-mesh:
+    radial-gradient(ellipse 80% 60% at 80% 0%, rgba(214, 120, 23, 0.18), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 0% 100%, rgba(168, 85, 247, 0.06), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(214, 120, 23, 0.04), transparent 70%);
 }
 
 html {
@@ -521,4 +583,415 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .building { animation: none; transform: rotateX(22deg); }
   .floor { transition: none !important; transform: none !important; opacity: 1 !important; }
+}
+
+/* ============================================================
+ * CONDUIT MARKETING — visual overhaul v2 utilities
+ * Scoped to marketing surfaces. /app Console untouched.
+ * ============================================================ */
+
+/* Backdrops */
+.conduit-bg-canvas { background: var(--color-ink-canvas); }
+.conduit-bg-surface { background: var(--color-ink-surface); }
+.conduit-bg-surface-subtle { background: var(--color-ink-surface-subtle); }
+.conduit-bg-surface-elevated { background: var(--color-ink-surface-elevated); }
+
+/* Hero mesh — layered radial gradients */
+.conduit-mesh {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--conduit-gradient-mesh);
+  z-index: 0;
+}
+
+/* Ember radial — top-right signature */
+.conduit-ember-radial {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--conduit-gradient-ember-radial);
+  z-index: 0;
+}
+
+/* Hairline ember divider */
+.conduit-ember-line {
+  display: block;
+  height: 1px;
+  background: var(--conduit-gradient-ember-line);
+  width: 100%;
+}
+
+/* Gradient text — warm cream → ember */
+.conduit-ember-text {
+  background: var(--conduit-gradient-text-warm);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Lift + ring shadows (dark-mode shadow recipe) */
+.conduit-lift-sm { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05); }
+.conduit-lift-md {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.4);
+}
+.conduit-lift-lg {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 16px 48px rgba(0, 0, 0, 0.5);
+}
+.conduit-glow-ember { box-shadow: 0 0 48px rgba(214, 120, 23, 0.25); }
+.conduit-aura-ember { box-shadow: 0 0 120px rgba(214, 120, 23, 0.15); }
+
+/* Buttons */
+.conduit-btn-primary {
+  background: var(--color-ember-500);
+  color: var(--color-ink-canvas);
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  font-size: 0.9375rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition:
+    background 200ms var(--conduit-ease-out-quart),
+    box-shadow 200ms var(--conduit-ease-out-quart),
+    transform 200ms var(--conduit-ease-out-quart);
+}
+.conduit-btn-primary:hover {
+  background: #E0852A;
+  box-shadow: 0 0 48px rgba(214, 120, 23, 0.4);
+  transform: translateY(-1px);
+}
+.conduit-btn-primary:active { transform: translateY(0); }
+
+.conduit-btn-secondary {
+  background: transparent;
+  color: var(--color-cream);
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  font-size: 0.9375rem;
+  border: 1px solid var(--color-edge);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition:
+    border-color 200ms var(--conduit-ease-out-quart),
+    color 200ms var(--conduit-ease-out-quart),
+    background 200ms var(--conduit-ease-out-quart);
+}
+.conduit-btn-secondary:hover {
+  border-color: var(--color-ember-500);
+  color: var(--color-ember-500);
+  background: rgba(214, 120, 23, 0.04);
+}
+
+/* Marketing card — ember-glow ring on hover */
+.conduit-card {
+  background: var(--color-ink-surface);
+  border: 1px solid var(--color-edge-subtle);
+  border-radius: 16px;
+  position: relative;
+  transition:
+    border-color 400ms var(--conduit-ease-out-quart),
+    box-shadow 400ms var(--conduit-ease-out-quart),
+    transform 400ms var(--conduit-ease-out-quart);
+}
+.conduit-card:hover {
+  border-color: rgba(214, 120, 23, 0.3);
+  box-shadow:
+    inset 0 0 0 1px rgba(214, 120, 23, 0.08),
+    0 0 32px rgba(214, 120, 23, 0.08),
+    0 16px 48px rgba(0, 0, 0, 0.4);
+  transform: translateY(-4px);
+}
+.conduit-card.is-featured {
+  border-color: rgba(214, 120, 23, 0.35);
+  box-shadow:
+    inset 0 0 0 1px rgba(214, 120, 23, 0.12),
+    0 0 48px rgba(214, 120, 23, 0.1);
+}
+
+/* Eyebrow — caption + ember dot */
+.conduit-caption {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--color-cream-mute);
+}
+.conduit-caption-ember { color: var(--color-ember-500); }
+.conduit-caption-ember::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--color-ember-500);
+  margin-right: 10px;
+  transform: translateY(-1px);
+  vertical-align: middle;
+  box-shadow: 0 0 8px rgba(214, 120, 23, 0.6);
+}
+
+/* Display typography — fluid clamp() */
+.conduit-display-hero {
+  font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 5vw + 1rem, 5rem);
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+  font-weight: 500;
+  color: var(--color-cream);
+}
+.conduit-display-2xl {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 4vw + 0.5rem, 3.5rem);
+  line-height: 1.0;
+  letter-spacing: -0.04em;
+  font-weight: 500;
+  color: var(--color-cream);
+}
+.conduit-display-xl {
+  font-family: var(--font-serif);
+  font-size: clamp(1.75rem, 3vw + 0.5rem, 2.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-weight: 500;
+  color: var(--color-cream);
+}
+.conduit-display-lg {
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 2vw + 0.5rem, 1.875rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  color: var(--color-cream);
+}
+.conduit-heading-md {
+  font-family: var(--font-sans);
+  font-size: 1.25rem;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+  color: var(--color-cream);
+}
+.conduit-body-lg {
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--color-cream-soft);
+}
+.conduit-body-md {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--color-cream-soft);
+}
+.conduit-mono {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  font-weight: 500;
+}
+
+/* Pull-quote — italic Fraunces with ember accent line */
+.conduit-pullquote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(1.5rem, 2.5vw + 0.5rem, 1.875rem);
+  line-height: 1.4;
+  letter-spacing: -0.015em;
+  color: var(--color-cream);
+  border-left: 2px solid var(--color-ember-500);
+  padding-left: 24px;
+  position: relative;
+}
+.conduit-pullquote::before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--color-ember-500),
+    rgba(214, 120, 23, 0.2)
+  );
+}
+
+/* Section + container helpers */
+.conduit-section { padding-block: 96px; }
+@media (min-width: 768px) {
+  .conduit-section { padding-block: 128px; }
+}
+.conduit-hero-section { padding-block: 96px 64px; }
+@media (min-width: 768px) {
+  .conduit-hero-section { padding-block: 200px 96px; }
+}
+.conduit-container {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+@media (min-width: 768px) {
+  .conduit-container { padding-inline: 40px; }
+}
+.conduit-prose {
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+/* Hero stagger reveal */
+@keyframes conduit-fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.conduit-fade-up {
+  opacity: 0;
+  animation: conduit-fade-up 800ms var(--conduit-ease-out-quart) forwards;
+}
+
+/* Scroll-triggered reveal */
+@keyframes conduit-reveal {
+  from { opacity: 0; transform: translateY(32px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.conduit-reveal { opacity: 0; }
+.conduit-reveal.is-visible {
+  animation: conduit-reveal 800ms var(--conduit-ease-out-quart) forwards;
+}
+
+/* Hero dust-mote drift (CSS-only) */
+@keyframes conduit-dust-drift {
+  0% { transform: translate(0, 0) scale(1); opacity: 0; }
+  10%, 90% { opacity: 0.5; }
+  100% { transform: translate(40px, -120px) scale(0.8); opacity: 0; }
+}
+.conduit-dust {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: rgba(214, 120, 23, 0.7);
+  pointer-events: none;
+  box-shadow: 0 0 6px rgba(214, 120, 23, 0.5);
+  animation: conduit-dust-drift 12s linear infinite;
+}
+
+/* Ember-line sweep — used before display headlines on hero/cinematic moments */
+@keyframes conduit-line-sweep {
+  0% { transform: scaleX(0); transform-origin: left; }
+  60% { transform: scaleX(1); transform-origin: left; }
+  60.01% { transform-origin: right; }
+  100% { transform: scaleX(0); transform-origin: right; }
+}
+.conduit-line-sweep {
+  display: block;
+  height: 1px;
+  background: var(--conduit-gradient-ember-line);
+  animation: conduit-line-sweep 1600ms var(--conduit-ease-in-out-quart) forwards;
+}
+
+/* Status badge */
+.conduit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.conduit-badge-live {
+  background: rgba(74, 222, 128, 0.1);
+  color: var(--color-conduit-success);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+}
+.conduit-badge-beta {
+  background: rgba(251, 191, 36, 0.1);
+  color: var(--color-conduit-warning);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+.conduit-badge-soon {
+  background: rgba(96, 165, 250, 0.1);
+  color: var(--color-conduit-info);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+}
+.conduit-badge-popular {
+  background: var(--color-ember-500);
+  color: var(--color-ink-canvas);
+  border: none;
+}
+.conduit-badge .conduit-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+
+/* Code block — gradient frame (Vercel steal) */
+.conduit-code-frame {
+  position: relative;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(214, 120, 23, 0.4) 0%,
+    rgba(214, 120, 23, 0.1) 30%,
+    rgba(168, 85, 247, 0.1) 70%,
+    rgba(214, 120, 23, 0.3) 100%
+  );
+}
+.conduit-code-frame > pre,
+.conduit-code-frame > .conduit-code-inner {
+  background: var(--color-ink-canvas);
+  border-radius: 15px;
+  padding: 24px 28px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-cream);
+  margin: 0;
+}
+
+/* Glass nav (sticky over hero) */
+.conduit-nav-glass {
+  background: rgba(10, 9, 8, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--color-edge-subtle);
+}
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+  .conduit-mesh,
+  .conduit-ember-radial,
+  .conduit-dust,
+  .conduit-line-sweep { display: none !important; }
+  .conduit-fade-up,
+  .conduit-reveal,
+  .conduit-reveal.is-visible {
+    opacity: 1 !important;
+    animation: none !important;
+    transform: none !important;
+  }
+  .conduit-card { transition: none !important; }
+  .conduit-card:hover { transform: none !important; }
 }
