@@ -1,146 +1,281 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Buildings, DeviceMobile, Monitor } from "@phosphor-icons/react/dist/ssr";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import FinalCTA from "@/components/FinalCTA";
 
 export const metadata: Metadata = {
-  title: "Products — Praxis by Conduit",
+  title: "Products — The Praxis family",
   description:
-    "Praxis Console (live), Praxis Mobile (TestFlight this week), and Praxis HQ (Q3 2026). Three surfaces, one autonomous workforce.",
+    "Praxis Console (live), Praxis Mobile (TestFlight), and Praxis HQ (Q3 2026). Three surfaces, one autonomous workforce.",
 };
 
-interface Product {
+type Status = "live" | "beta" | "soon";
+
+type Product = {
   slug: string;
   name: string;
-  status: string;
+  status: Status;
+  statusLabel: string;
   tagline: string;
   body: string[];
-  cta: { label: string; href: string };
-  accent: string;
-  accentSoft: string;
-}
+  features: string[];
+  primary: { label: string; href: string };
+  secondary: { label: string; href: string };
+};
 
 const PRODUCTS: Product[] = [
   {
     slug: "praxis-console",
     name: "Praxis Console",
-    status: "Live",
-    tagline: "The web app where you talk to your AI workforce.",
+    status: "live",
+    statusLabel: "Live",
+    tagline: "Your AI workforce, in one place.",
     body: [
-      "Atlas, your Chief of Staff, picks up the phone first. He routes to specialist employees — Marketing, Sales, Engineering, Finance, Compliance, HR, Ops, Legal — or handles strategic work himself.",
-      "Voice mode runs as a Zoom-like room with the team. Sales has a real lead pipeline (no Apollo, no Bright Data — Overpass + Reddit + Google Maps). Engineering ships real sites you can put a domain on the same hour.",
+      "The web app where you talk to Atlas, your Chief of Staff, and eight specialist employees. Voice mode, real lead pipelines, real builds.",
+      "Open it in a tab next to your work. The team is already there — Marketing, Sales, Engineering, Finance, Compliance, HR, Ops, Legal — picking up tasks the moment you ask.",
     ],
-    cta: { label: "Open the Console", href: "/auth/sign-up" },
-    accent: "#FF8A3D",
-    accentSoft: "rgba(255, 138, 61, 0.14)",
+    features: [
+      "Atlas Chief of Staff with cross-conversation memory",
+      "Voice Room with real-time roundtable",
+      "Lead pipelines built on free, open data sources",
+      "Engineering ships real GitHub + Vercel deploys",
+    ],
+    primary: { label: "Open the Console", href: "/auth/sign-up" },
+    secondary: { label: "Tour Console", href: "/products/praxis-console" },
   },
   {
     slug: "praxis-mobile",
     name: "Praxis Mobile",
-    status: "TestFlight this week",
-    tagline: "Voice-first Praxis in your pocket.",
+    status: "beta",
+    statusLabel: "TestFlight",
+    tagline: "Praxis in your pocket.",
     body: [
-      "Native iOS and Android. The fastest path to your workforce while you&apos;re between meetings or driving back from a property tour.",
-      "Push notifications when Atlas needs a decision or a lead heats up. Voice room joinable from a notification. The chat surfaces and roundtable carry over from the Console.",
+      "Native iOS and Android. Voice-first conversations with your team between meetings, in the car, on a walk.",
+      "Push notifications when Atlas needs a decision or a lead heats up. Voice rooms joinable from a notification. Same brain as Console — different surface.",
     ],
-    cta: { label: "Join the waitlist", href: "/products/praxis-mobile" },
-    accent: "#34D399",
-    accentSoft: "rgba(52, 211, 153, 0.14)",
+    features: [
+      "Native Expo build, not a WebView wrapper",
+      "Background voice rooms for hands-free use",
+      "Smart push — only when a decision is needed",
+      "Quiet hours respect your timezone",
+    ],
+    primary: { label: "Join the waitlist", href: "/products/praxis-mobile" },
+    secondary: { label: "Tour Mobile", href: "/products/praxis-mobile" },
   },
   {
     slug: "praxis-hq",
     name: "Praxis HQ",
-    status: "Q3 2026",
-    tagline: "A 3D office you can walk through.",
+    status: "soon",
+    statusLabel: "Q3 2026",
+    tagline: "Walk through your AI headquarters.",
     body: [
-      "Each employee has a desk, an avatar, a presence. Step into the marketing room and watch a campaign get drafted in real time, then walk down the hall to engineering and spin up a build.",
-      "The bet is that spatial software makes your AI workforce feel like a workforce, not a chat window. Same brain underneath; different surface for the moments that deserve it.",
+      "A spatial workspace where each employee has a desk, a presence, a voice. Step into the marketing room and watch a campaign get drafted in real time.",
+      "Walk down the hall to engineering and spin up a build. Roundtable in the boardroom. Same brain as Console and Mobile — cinematic surface for the moments that deserve it.",
     ],
-    cta: { label: "Early access", href: "/products/praxis-hq" },
-    accent: "#A855F7",
-    accentSoft: "rgba(168, 85, 247, 0.14)",
+    features: [
+      "Cinematic 3D office with rendered employees",
+      "Roundtable rooms with spatial audio",
+      "Live build wall, live deal floor",
+      "Headphones on, walk into your company",
+    ],
+    primary: { label: "Reserve early access", href: "/products/praxis-hq" },
+    secondary: { label: "Tour HQ", href: "/products/praxis-hq" },
   },
 ];
 
+function StatusBadge({ status, label }: { status: Status; label: string }) {
+  const klass =
+    status === "live"
+      ? "conduit-badge-live"
+      : status === "beta"
+        ? "conduit-badge-beta"
+        : "conduit-badge-soon";
+  return (
+    <span className={`conduit-badge ${klass}`}>
+      {status === "live" ? <span className="conduit-badge-dot" /> : null}
+      {label}
+    </span>
+  );
+}
+
+function ProductPreview({ slug }: { slug: string }) {
+  if (slug === "praxis-console") {
+    return (
+      <div className="aspect-[16/10] rounded-xl overflow-hidden bg-[var(--color-ink-canvas)] border border-[var(--color-edge)] relative">
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 60% 60% at 70% 20%, rgba(214,120,23,0.16), transparent 60%)",
+          }}
+        />
+        <div className="px-4 py-3 border-b border-[var(--color-edge-subtle)] flex items-center gap-2 bg-[var(--color-ink-surface-elevated)] relative">
+          <div className="flex gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#FF6058]/60" />
+            <span className="w-2 h-2 rounded-full bg-[#FFBD2E]/60" />
+            <span className="w-2 h-2 rounded-full bg-[#28C940]/60" />
+          </div>
+          <span
+            className="text-[10px] text-[var(--color-cream-mute)]"
+            style={{ fontFamily: "var(--font-mono)" }}
+          >
+            conduitai.io/app
+          </span>
+        </div>
+        <div className="absolute inset-x-8 top-16 bottom-8 flex items-center justify-center">
+          <Monitor size={88} weight="duotone" color="#D67817" />
+        </div>
+      </div>
+    );
+  }
+  if (slug === "praxis-mobile") {
+    return (
+      <div className="aspect-[16/10] rounded-xl overflow-hidden bg-[var(--color-ink-canvas)] border border-[var(--color-edge)] relative flex items-center justify-center">
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(214,120,23,0.18), transparent 65%)",
+          }}
+        />
+        <DeviceMobile size={108} weight="duotone" color="#D67817" />
+      </div>
+    );
+  }
+  return (
+    <div className="aspect-[16/10] rounded-xl overflow-hidden bg-[var(--color-ink-canvas)] border border-[var(--color-edge)] relative flex items-center justify-center">
+      <div
+        aria-hidden
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 60% at 50% 50%, rgba(214,120,23,0.14), transparent 60%)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 opacity-[0.05]"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, #F5EFE6 1px, transparent 1px), linear-gradient(to bottom, #F5EFE6 1px, transparent 1px)",
+          backgroundSize: "24px 24px",
+          maskImage:
+            "radial-gradient(ellipse at center, black 30%, transparent 75%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse at center, black 30%, transparent 75%)",
+        }}
+      />
+      <Buildings size={108} weight="duotone" color="#D67817" />
+    </div>
+  );
+}
+
 export default function ProductsIndex() {
   return (
-    <main>
+    <main className="conduit-bg-canvas">
       <Navbar />
 
-      <section className="relative px-6 pt-32 pb-12 md:pt-40 md:pb-16">
-        <div className="max-w-3xl mx-auto">
-          <p className="eyebrow mb-6">Praxis · Product family</p>
-          <h1 className="serif text-[44px] md:text-[68px] leading-[1.0] tracking-[-0.02em] text-[#F5F1EA]">
-            Three surfaces.
-            <br />
-            One workforce.
-          </h1>
-          <p className="mt-7 text-[17px] md:text-[20px] text-[#8C8884] leading-[1.7] max-w-2xl">
-            The Praxis product family runs on the same brain — Atlas plus eight
-            specialists. Pick the surface that fits the moment.
-          </p>
+      {/* Hero */}
+      <section className="relative overflow-hidden conduit-hero-section">
+        <div className="conduit-mesh" aria-hidden />
+        <div className="conduit-ember-radial" aria-hidden />
+        <div className="relative conduit-container">
+          <div className="max-w-[820px]">
+            <p className="conduit-caption conduit-caption-ember">
+              The Praxis product family
+            </p>
+            <h1 className="conduit-display-hero mt-6">
+              Three surfaces.{" "}
+              <span className="conduit-ember-text">One workforce.</span>
+            </h1>
+            <p className="conduit-body-lg mt-6 max-w-[640px]">
+              The Praxis product family runs on the same brain — Atlas plus
+              eight specialists, one shared memory. Pick the surface that fits
+              the moment.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 mt-9">
+              <Link href="/auth/sign-up" className="conduit-btn-primary">
+                Open Praxis Console
+                <ArrowRight size={16} weight="bold" />
+              </Link>
+              <Link href="/pricing" className="conduit-btn-secondary">
+                See pricing
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="px-6 py-12 md:py-16 border-t border-[#1F1C19]">
-        <div className="max-w-5xl mx-auto space-y-6">
-          {PRODUCTS.map((p) => (
-            <Link
+      {/* Detailed product cards */}
+      <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
+        <div className="conduit-container space-y-6 lg:space-y-8">
+          {PRODUCTS.map((p, idx) => (
+            <article
               key={p.slug}
-              href={`/products/${p.slug}`}
-              className="block p-7 md:p-10 bg-[#0A0908] border border-[#1F1C19] hover:border-[var(--accent)]/60 transition-colors group"
-              style={{ ["--accent" as string]: p.accent }}
+              className="conduit-card p-6 md:p-10 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-8 lg:gap-12"
             >
-              <div className="grid md:grid-cols-[1fr_auto] gap-6 md:gap-12 items-start">
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span
-                      aria-hidden
-                      className="inline-block w-1.5 h-1.5 rounded-full"
-                      style={{
-                        background:
-                          p.status === "Live" ? p.accent : "transparent",
-                        boxShadow: `inset 0 0 0 1px ${p.accent}`,
-                      }}
-                    />
-                    <span
-                      className="text-[10px] uppercase tracking-[0.2em]"
-                      style={{ color: p.accent }}
-                    >
-                      {p.status}
-                    </span>
-                  </div>
-                  <h2 className="serif text-[32px] md:text-[44px] text-[#F5F1EA] leading-[1.05]">
-                    {p.name}
-                  </h2>
-                  <p
-                    className="mt-3 text-[16px] md:text-[18px]"
-                    style={{ color: p.accent }}
-                  >
-                    {p.tagline}
-                  </p>
-                  <div className="mt-5 space-y-4 text-[15px] text-[#8C8884] leading-[1.7]">
-                    {p.body.map((line, idx) => (
-                      <p key={idx}>{line}</p>
-                    ))}
-                  </div>
+              <div
+                className={`flex flex-col ${idx % 2 === 1 ? "lg:order-2" : ""}`}
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <StatusBadge status={p.status} label={p.statusLabel} />
                 </div>
-                <div className="md:pt-2">
-                  <span
-                    className="inline-flex items-center gap-1.5 text-[14px] font-medium group-hover:gap-2.5 transition-all"
-                    style={{ color: p.accent }}
+                <h2
+                  className="text-[36px] md:text-[44px] leading-[1.05] tracking-[-0.025em] text-[var(--color-cream)]"
+                  style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
+                >
+                  {p.name}
+                </h2>
+                <p className="text-[18px] mt-3 text-[var(--color-ember-300)]">
+                  {p.tagline}
+                </p>
+                <div className="mt-6 space-y-4 text-[15px] md:text-[16px] text-[var(--color-cream-soft)] leading-[1.65]">
+                  {p.body.map((b, i) => (
+                    <p key={i}>{b}</p>
+                  ))}
+                </div>
+                <ul className="mt-7 space-y-2.5">
+                  {p.features.map((f) => (
+                    <li
+                      key={f}
+                      className="flex items-start gap-3 text-[14px] text-[var(--color-cream)] leading-[1.55]"
+                    >
+                      <span
+                        aria-hidden
+                        className="w-1 h-1 mt-[10px] rounded-full bg-[var(--color-ember-500)] shrink-0"
+                      />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-9 flex flex-col sm:flex-row gap-3">
+                  <Link href={p.primary.href} className="conduit-btn-primary">
+                    {p.primary.label}
+                    <ArrowRight size={14} weight="bold" />
+                  </Link>
+                  <Link
+                    href={p.secondary.href}
+                    className="conduit-btn-secondary"
                   >
-                    {p.cta.label}
-                    <ArrowRight size={14} />
-                  </span>
+                    {p.secondary.label}
+                  </Link>
                 </div>
               </div>
-            </Link>
+              <div
+                className={`relative ${idx % 2 === 1 ? "lg:order-1" : ""}`}
+              >
+                <ProductPreview slug={p.slug} />
+              </div>
+            </article>
           ))}
         </div>
       </section>
 
+      <FinalCTA />
       <Footer />
     </main>
   );

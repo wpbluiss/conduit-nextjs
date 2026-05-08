@@ -1,177 +1,454 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Building2, Footprints, Users2 } from "lucide-react";
+import {
+  ArrowRight,
+  Buildings,
+  Compass,
+  Lightning,
+  MicrophoneStage,
+  Network,
+  Rocket,
+  Users,
+} from "@phosphor-icons/react/dist/ssr";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import FinalCTA from "@/components/FinalCTA";
 import WaitlistForm from "@/components/WaitlistForm";
 
 export const metadata: Metadata = {
   title: "Praxis HQ — Walk through your AI headquarters",
   description:
-    "A 3D office where each AI employee has a desk, an avatar, a presence. Step in, watch the team work, talk to a specialist. Q3 2026.",
+    "A spatial workspace where each AI employee has a desk, an avatar, a presence. Step in, watch the team work, talk to a specialist. Q3 2026.",
 };
 
-const FLOORS = [
+const ROOMS = [
   {
-    icon: <Footprints size={18} />,
-    title: "Walk in.",
-    body: "Lobby first. Atlas is at the front, ready to brief you on what the team's been up to since you last logged in. Scroll the floor map; click any room to step inside.",
+    Icon: Compass,
+    title: "Marketing room",
+    body: "Drafts on the wall, voice samples on the desk, a live editor surface where the team revises copy in real time.",
   },
   {
-    icon: <Users2 size={18} />,
-    title: "Each employee, present.",
-    body: "Marketing has a content room with the most recent drafts on the wall. Sales has a pipeline view you can walk along. Engineering has a build wall showing live deployments. They speak when you approach.",
+    Icon: Network,
+    title: "Engineering bay",
+    body: "Build wall showing live deploys. Walk up to a build to inspect logs, file diffs, and the running preview URL.",
   },
   {
-    icon: <Building2 size={18} />,
-    title: "Same brain, spatial surface.",
-    body: "Memory, leads, builds, voice — all the same backend as Console and Mobile. HQ is the surface for the moments when chat-in-a-rectangle isn't enough.",
+    Icon: Users,
+    title: "Boardroom",
+    body: "Roundtable mode for messy decisions. All nine employees sit at the table with spatial audio. You moderate.",
+  },
+  {
+    Icon: MicrophoneStage,
+    title: "Atlas's office",
+    body: "The room where memory lives. Walk in to review what Atlas has captured about you, your business, your team.",
+  },
+];
+
+const TIMELINE = [
+  {
+    period: "Q2 2026",
+    title: "Closed alpha",
+    body: "First 50 customers from the waitlist walk through the lobby. Marketing room and Atlas's office go live.",
+  },
+  {
+    period: "Q3 2026",
+    title: "Public early access",
+    body: "Engineering bay + Boardroom ship. Roundtable spatial audio. Open to Pro and Enterprise tiers.",
+  },
+  {
+    period: "Q4 2026",
+    title: "Multi-user HQ",
+    body: "Walk into your team's HQ together. Co-presence with humans + AI in the same room.",
   },
 ];
 
 export default function PraxisHQPage() {
-  const accent = "#A855F7";
-
   return (
-    <main>
+    <main className="conduit-bg-canvas">
       <Navbar />
 
-      <section
-        className="relative px-6 pt-32 pb-12 md:pt-40 md:pb-16"
-        style={{ ["--accent" as string]: accent }}
-      >
-        <div className="max-w-3xl mx-auto">
-          <p
-            className="eyebrow mb-6 inline-flex items-center"
-            style={{ color: accent }}
-          >
-            <span
+      {/* Hero */}
+      <section className="relative overflow-hidden conduit-hero-section">
+        <div className="conduit-mesh" aria-hidden />
+        <div className="conduit-ember-radial" aria-hidden />
+        <div className="relative conduit-container">
+          <div className="max-w-[820px]">
+            <p className="conduit-caption conduit-caption-ember">
+              Praxis HQ · Q3 2026
+            </p>
+            <h1 className="conduit-display-hero mt-6">
+              Walk into a company you{" "}
+              <span className="conduit-ember-text">don&rsquo;t have to staff.</span>
+            </h1>
+            <p className="conduit-body-lg mt-6 max-w-[640px]">
+              A spatial workspace where each Praxis employee has a desk, a
+              presence, a voice. Step into the marketing room and watch a
+              campaign drafted in real time. Walk to the engineering bay and
+              spin up a build.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 mt-9">
+              <Link href="#early-access" className="conduit-btn-primary">
+                Reserve early access
+                <ArrowRight size={14} weight="bold" />
+              </Link>
+              <Link href="/products/praxis-console" className="conduit-btn-secondary">
+                Use Praxis Console today
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Cinematic preview frame */}
+        <div className="relative conduit-container mt-16 md:mt-20">
+          <div className="relative">
+            <div
               aria-hidden
-              className="inline-block w-1.5 h-1.5 rounded-full mr-2"
+              className="absolute -inset-12 rounded-[40px] pointer-events-none"
               style={{
-                background: "transparent",
-                boxShadow: `inset 0 0 0 1px ${accent}`,
+                background:
+                  "radial-gradient(ellipse at center, rgba(214,120,23,0.22) 0%, transparent 65%)",
+                filter: "blur(40px)",
               }}
             />
-            Praxis HQ · Q3 2026
-          </p>
-          <h1 className="serif text-[44px] md:text-[68px] leading-[1.0] tracking-[-0.02em] text-[#F5F1EA]">
-            Walk through your AI headquarters.
-          </h1>
-          <p className="mt-7 text-[17px] md:text-[20px] text-[#8C8884] leading-[1.7] max-w-2xl">
-            A 3D office where each Praxis employee has a desk, an avatar, a
-            presence. Step into the marketing room and watch a campaign get
-            drafted in real time. Walk down the hall to engineering and spin
-            up a new build.
-          </p>
-        </div>
-      </section>
-
-      {/* Visual block — 3D placeholder. Real Unity render goes here when the
-          first frames land in /public. */}
-      <section className="px-6 py-12 md:py-16 border-t border-[#1F1C19]">
-        <div className="max-w-5xl mx-auto">
-          <div
-            className="aspect-[16/9] rounded-lg border border-[#1F1C19] relative overflow-hidden"
-            style={{
-              background: `radial-gradient(circle at 30% 30%, color-mix(in srgb, ${accent} 18%, #0A0908) 0%, #0A0908 60%)`,
-            }}
-          >
-            <div className="absolute inset-0 grid grid-cols-12 grid-rows-6 opacity-30">
-              {Array.from({ length: 72 }).map((_, i) => (
+            <div
+              className="relative aspect-[16/9] rounded-2xl overflow-hidden bg-[var(--color-ink-surface)]"
+              style={{
+                boxShadow:
+                  "inset 0 0 0 1px rgba(214,120,23,0.18), 0 0 80px rgba(214,120,23,0.18), 0 32px 80px rgba(0,0,0,0.6)",
+              }}
+            >
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--color-ink-canvas)]">
                 <div
-                  key={i}
-                  className="border border-[#1F1C19]"
+                  aria-hidden
+                  className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                >
+                  <div
+                    className="w-[420px] h-[420px] rounded-full"
+                    style={{
+                      background:
+                        "radial-gradient(circle at center, rgba(214,120,23,0.25) 0%, transparent 60%)",
+                      filter: "blur(20px)",
+                    }}
+                  />
+                </div>
+                <div
+                  aria-hidden
+                  className="absolute inset-0 opacity-[0.05]"
                   style={{
-                    background:
-                      Math.random() > 0.92
-                        ? `color-mix(in srgb, ${accent} 30%, transparent)`
-                        : "transparent",
+                    backgroundImage:
+                      "linear-gradient(to right, #F5EFE6 1px, transparent 1px), linear-gradient(to bottom, #F5EFE6 1px, transparent 1px)",
+                    backgroundSize: "32px 32px",
+                    maskImage:
+                      "radial-gradient(ellipse at center, black 30%, transparent 75%)",
+                    WebkitMaskImage:
+                      "radial-gradient(ellipse at center, black 30%, transparent 75%)",
                   }}
                 />
-              ))}
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <span
-                  aria-hidden
-                  className="inline-flex items-center justify-center w-12 h-12 rounded-md mb-3"
-                  style={{
-                    background: `color-mix(in srgb, ${accent} 20%, transparent)`,
-                    color: accent,
-                  }}
-                >
-                  <Building2 size={20} />
-                </span>
-                <p className="serif text-[22px] text-[#F5F1EA]">
-                  Praxis HQ · Q3 2026
-                </p>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-[#5C5854] mt-2">
-                  Render coming · early access opens this summer
-                </p>
+                <div className="relative flex flex-col items-center gap-5">
+                  <div
+                    className="w-24 h-24 rounded-2xl flex items-center justify-center"
+                    style={{
+                      background: "var(--color-ink-surface-elevated)",
+                      border: "1px solid rgba(214,120,23,0.3)",
+                      boxShadow:
+                        "inset 0 0 0 1px rgba(214,120,23,0.15), 0 0 40px rgba(214,120,23,0.25)",
+                    }}
+                  >
+                    <Buildings size={42} weight="duotone" color="#D67817" />
+                  </div>
+                  <p className="conduit-caption conduit-caption-ember">
+                    Cinematic walkthrough · Q3 2026
+                  </p>
+                  <p className="text-[14px] text-[var(--color-cream-mute)] max-w-[400px] text-center">
+                    Render in production. The first frames drop in /public/videos
+                    when alpha customers start walking through the lobby.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="px-6 py-16 md:py-24 border-t border-[#1F1C19]">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-5">
-            {FLOORS.map((f) => (
-              <div
-                key={f.title}
-                className="p-7 bg-[#0A0908] border border-[#1F1C19] flex flex-col gap-3"
-              >
-                <span
-                  aria-hidden
-                  className="inline-flex items-center justify-center w-9 h-9 rounded-md"
-                  style={{
-                    background: `color-mix(in srgb, ${accent} 16%, transparent)`,
-                    color: accent,
-                  }}
-                >
-                  {f.icon}
-                </span>
-                <h3 className="serif text-[22px] text-[#F5F1EA]">{f.title}</h3>
-                <p className="text-[14px] text-[#8C8884] leading-relaxed">
-                  {f.body}
-                </p>
+      {/* What you'll walk into */}
+      <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
+        <div className="conduit-container">
+          <div className="max-w-[760px] mb-14 md:mb-16">
+            <p className="conduit-caption conduit-caption-ember">
+              What you&rsquo;ll walk into
+            </p>
+            <h2 className="conduit-display-2xl mt-5">
+              Four rooms.{" "}
+              <span className="conduit-ember-text">All nine employees.</span>
+            </h2>
+            <p className="conduit-body-lg mt-5 max-w-[600px]">
+              Each room is a different surface for a different mode of work.
+              Walk in, look around, listen.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {ROOMS.map((r) => (
+              <div key={r.title} className="conduit-card p-7 md:p-8 group">
+                <div className="flex items-start gap-5">
+                  <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)] shrink-0 group-hover:border-[rgba(214,120,23,0.4)] transition-colors">
+                    <r.Icon size={26} weight="duotone" color="#D67817" />
+                  </div>
+                  <div>
+                    <h3
+                      className="text-[24px] leading-[1.1] tracking-[-0.02em] text-[var(--color-cream)]"
+                      style={{
+                        fontFamily: "var(--font-serif)",
+                        fontWeight: 500,
+                      }}
+                    >
+                      {r.title}
+                    </h3>
+                    <p className="text-[14px] mt-2.5 text-[var(--color-cream-soft)] leading-[1.65]">
+                      {r.body}
+                    </p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="px-6 py-20 md:py-28 border-t border-[#1F1C19] bg-[#14110F]">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="serif text-[32px] md:text-[44px] leading-[1.05] text-[#F5F1EA]">
-            Q3 2026.
-          </h2>
-          <p className="mt-5 text-[16px] text-[#8C8884]">
-            Early access opens this summer. Drop your email below and
-            you&apos;ll get an invite the day the first floor goes live. No
-            spam — only the handful of emails it takes to get you walking
-            through the building.
-          </p>
-          <div className="mt-8 inline-flex flex-col items-center gap-4">
+      {/* How it works */}
+      <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
+        <div className="conduit-container">
+          <div className="max-w-[760px] mb-14 md:mb-16">
+            <p className="conduit-caption conduit-caption-ember">How it works</p>
+            <h2 className="conduit-display-2xl mt-5">
+              Same brain.{" "}
+              <span className="conduit-ember-text">Spatial surface.</span>
+            </h2>
+            <p className="conduit-body-lg mt-5 max-w-[600px]">
+              HQ shares Console&rsquo;s memory, voice, lead pipeline, and
+              build pipeline. The difference is presence.
+            </p>
+          </div>
+
+          <SpatialDiagram />
+        </div>
+      </section>
+
+      {/* Timeline */}
+      <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
+        <div className="conduit-container">
+          <div className="max-w-[760px] mb-14 md:mb-16">
+            <p className="conduit-caption conduit-caption-ember">Timeline</p>
+            <h2 className="conduit-display-2xl mt-5">
+              From lobby to multi-user.
+            </h2>
+          </div>
+
+          <ol className="space-y-3 max-w-[760px]">
+            {TIMELINE.map((t, i) => (
+              <li
+                key={t.title}
+                className="conduit-card p-6 md:p-7 flex items-start gap-5"
+              >
+                <span
+                  className="text-[44px] tracking-[-0.04em] text-[var(--color-ember-500)] leading-[0.85] shrink-0"
+                  style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
+                >
+                  0{i + 1}
+                </span>
+                <div>
+                  <p className="conduit-caption text-[var(--color-cream-mute)]">
+                    {t.period}
+                  </p>
+                  <h3
+                    className="text-[22px] mt-1 tracking-[-0.015em] text-[var(--color-cream)]"
+                    style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
+                  >
+                    {t.title}
+                  </h3>
+                  <p className="text-[14px] mt-2 text-[var(--color-cream-soft)] leading-[1.6]">
+                    {t.body}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* Early access form */}
+      <section
+        id="early-access"
+        className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]"
+      >
+        <div className="conduit-container">
+          <div className="max-w-[600px] mx-auto text-center">
+            <p className="conduit-caption conduit-caption-ember">
+              Reserve early access
+            </p>
+            <h2 className="conduit-display-xl mt-5">
+              Be among the first 50.
+            </h2>
+            <p className="conduit-body-lg mt-5">
+              The closed alpha opens this summer. We&rsquo;re hand-picking 50
+              customers from the waitlist to walk through the lobby first. Tell
+              us a bit about you and how you&rsquo;d use HQ.
+            </p>
+          </div>
+          <div className="mt-10 flex justify-center">
             <WaitlistForm
               product="praxis-hq"
-              source="hq_landing_footer"
-              ctaLabel="Get early access"
-              accent={accent}
+              source="hq_landing_form"
+              ctaLabel="Request early access"
+              extraFields={[
+                {
+                  kind: "text",
+                  name: "agency",
+                  label: "Agency or company",
+                  placeholder: "Acme Insurance",
+                },
+                {
+                  kind: "select",
+                  name: "use_case",
+                  label: "Primary use case",
+                  options: [
+                    { value: "sales-floor", label: "Sales floor" },
+                    { value: "marketing-studio", label: "Marketing studio" },
+                    {
+                      value: "engineering-bay",
+                      label: "Engineering bay",
+                    },
+                    {
+                      value: "executive-roundtable",
+                      label: "Executive roundtable",
+                    },
+                    { value: "exploring", label: "Just curious" },
+                  ],
+                },
+              ]}
             />
-            <Link
-              href="/auth/sign-up"
-              className="text-[14px] text-[#8C8884] hover:text-[#F5F1EA]"
-            >
-              Or open the web Console today →
-            </Link>
           </div>
         </div>
       </section>
 
+      <FinalCTA />
       <Footer />
     </main>
+  );
+}
+
+function SpatialDiagram() {
+  // Hub-and-spoke diagram: shared brain center, four rooms around it.
+  return (
+    <div className="relative max-w-[1100px] mx-auto">
+      <div className="aspect-[16/8] rounded-2xl bg-[var(--color-ink-surface)] border border-[var(--color-edge)] overflow-hidden relative">
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(214,120,23,0.14), transparent 65%)",
+          }}
+        />
+        <svg
+          className="absolute inset-0 w-full h-full"
+          viewBox="0 0 800 400"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          {/* Connection lines from center to nodes */}
+          {[
+            [200, 90],
+            [600, 90],
+            [200, 310],
+            [600, 310],
+          ].map(([x, y], i) => (
+            <line
+              key={i}
+              x1="400"
+              y1="200"
+              x2={x}
+              y2={y}
+              stroke="#D67817"
+              strokeWidth="1"
+              strokeOpacity="0.35"
+              strokeDasharray="4 4"
+            />
+          ))}
+
+          {/* Center brain node */}
+          <circle
+            cx="400"
+            cy="200"
+            r="56"
+            fill="rgba(214,120,23,0.08)"
+            stroke="#D67817"
+            strokeWidth="1.5"
+          />
+          <text
+            x="400"
+            y="195"
+            textAnchor="middle"
+            className="fill-[#F5EFE6]"
+            style={{ font: "500 14px var(--font-sans)" }}
+          >
+            Praxis brain
+          </text>
+          <text
+            x="400"
+            y="215"
+            textAnchor="middle"
+            className="fill-[#847A6E]"
+            style={{ font: "500 11px var(--font-sans)" }}
+          >
+            memory · voice · execution
+          </text>
+        </svg>
+
+        {/* Room nodes — absolutely positioned text + frame */}
+        {[
+          { left: "20%", top: "10%", label: "Marketing room", Icon: Compass },
+          {
+            left: "70%",
+            top: "10%",
+            label: "Engineering bay",
+            Icon: Network,
+          },
+          {
+            left: "20%",
+            top: "65%",
+            label: "Boardroom",
+            Icon: Users,
+          },
+          {
+            left: "70%",
+            top: "65%",
+            label: "Atlas's office",
+            Icon: Lightning,
+          },
+        ].map((n) => (
+          <div
+            key={n.label}
+            className="absolute"
+            style={{ left: n.left, top: n.top }}
+          >
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge)]">
+              <n.Icon size={14} weight="regular" color="#D67817" />
+              <span className="text-[12px] text-[var(--color-cream)] tracking-tight">
+                {n.label}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="conduit-caption text-[var(--color-cream-mute)] text-center mt-6">
+        <Rocket
+          size={14}
+          weight="regular"
+          className="inline-block mr-1.5 -mt-0.5"
+          color="#847A6E"
+        />
+        One brain. Four rooms. Every employee, present.
+      </p>
+    </div>
   );
 }

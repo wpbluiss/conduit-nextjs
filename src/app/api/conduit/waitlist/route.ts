@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
   const product = (body.product ?? "").trim();
   const email = (body.email ?? "").trim().toLowerCase();
-  const source = (body.source ?? "").trim().slice(0, 64) || null;
+  const source = (body.source ?? "").trim().slice(0, 256) || null;
 
   if (!VALID_PRODUCTS.has(product)) {
     return NextResponse.json({ error: "invalid_product" }, { status: 400 });
