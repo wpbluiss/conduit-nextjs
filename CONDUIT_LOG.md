@@ -1929,3 +1929,116 @@ Eight sections in order:
   static fallback. When the first MP4 lands at
   `/public/videos/praxis-hq-preview.mp4`, swap the commented
   `<video>` block back in.
+
+---
+
+## 2026-05-08 — Voice Architecture Fix + R15.5 + R16 Phase 3.1
+
+Three tracks in one round. Branch
+feat/voice-fix-and-execution-2026-05-08; HEAD 502ff9c.
+
+### Track 1 — Atlas voice cut-off, architectural
+
+R12 polish (2026-05-07) tuned three knobs (RMS gate, server_vad
+threshold, AEC) and Atlas was still self-cutting. Knob-tuning was
+the wrong shape of fix. Diagnosed in docs/voice-architecture-fix.md
+and rewrote the agent's audio path from reactive to proactive.
+
+Old shape: feed all user mic to Realtime, let server VAD fire on
+the (echo-contaminated) stream, then second-guess each fire with
+cooldown + RMS gate. Edge cases got through; agentSpeaking flipped
+to false on text_done while TTS was still draining for seconds, an
+unguarded trailing window where echo could trigger a response
+auto-create against the agent's own voice.
+
+New shape: don't ship user mic to Realtime while the agent has
+audio in flight. Two-state gate (listening/gated). Closes on first
+text_delta, opens 800ms after TTS 'done' (covers WS close + LiveKit
+publish queue + browser playback latency). Real interrupts during
+gated state are detected in-worker via sustained voice-level RMS
+(>=0.04 for 100ms — high enough to reject coughs / keyboard / echo,
+low enough to catch normal speech).
+
+Removes redundant cooldown timer, lastUserAudioAt energy gate, and
+the !agentSpeaking guard. (conduit-voice-worker 1f934b5)
+
+### Track 2 — R15.5 Engineering execution depth
+
+Six pieces, paired across conduit-nextjs (88f6cf2) and
+conduit-engineering-worker (3015a51).
+
+1. Public release: dropped the internal_account 403. Tier-based
+   daily caps in /lib/engineering/limits.ts (free=1/day, pro=10/day,
+   enterprise=unlimited). internal_account bypasses all caps.
+2. Spend cap: $-denominated daily ceiling (free=$0.50, pro=$5,
+   enterprise=$50). Cost from total tokens × Sonnet 4 pricing.
+3. Abort path: POST /api/engineering/session/[id]/abort marks the
+   row 'aborted' (new status; migration 019) and asks the worker to
+   SIGTERM the claude subprocess. BuildSession X button now actually
+   kills active builds. Worker tracks an abortedSessions Set so
+   later status writes don't overwrite the 'aborted' status.
+4. File persistence: parent_session_id column + "Continue" button
+   on completed sessions. Worker copies the parent's workspace into
+   the new session before claude runs and uses a continuation-flavored
+   prompt prefix. Cleanup keeps workspaces on success (until the
+   container restarts — Railway's natural retention bound for v1).
+5. Live token streaming: 30s flush interval in runClaude, paired
+   with the existing realtime UPDATE on the session row, so the
+   BuildSession stats panel ticks up live.
+6. Usage banner on /app/builds.
+
+Migration 019_engineering_v2 extended the status enum and added the
+parent_session_id column. New routes:
+/api/engineering/session/[id]/abort and /api/engineering/usage.
+
+### Track 3 — R16 Phase 3.1 Marketing worker scaffolding
+
+New repo wpbluiss/conduit-marketing-worker. Architecturally a
+sibling of the engineering worker:
+
+- Two-stage debian-slim Dockerfile.
+- Express on PORT, HMAC-authed POST /generate and
+  POST /session/:id/abort.
+- Per-session ephemeral /workspace, 30-min hard timeout.
+- Claude (Sonnet 4.6) acts as creative director — returns a
+  structured asset plan as JSON (rationale + assets[]). Worker
+  walks the plan in order, honoring depends_on so a video can be
+  built from the hero image.
+- providers.ts ships stubs for fal.ai / ElevenLabs / Runway.
+  Phase 3.1 returns deterministic placeholder URLs when keys
+  aren't set so the end-to-end Praxis UI flow is testable before
+  keys land. Phase 3.2 fills in real HTTP calls + CapCut stitching.
+
+Praxis side (502ff9c):
+- Migration 020_marketing.sql (numbered 020 because R15.5 took 019).
+- /api/marketing/session POST/GET/abort routes; gated to
+  internal_account first (Phase 3.1 brief).
+- /lib/marketing/{hmac.ts, worker.ts} bridge mirroring engineering.
+- /lib/ai/employees/marketing.ts rewritten as senior creative
+  director: brand-aware, audience-aware, refuses to fake-render
+  visual assets in chat.
+
+Phase 3.2 (deferred): real provider HTTP calls, MarketingSession
+overlay component, /app/team/marketing Generate button, public
+release with tier caps. Phase 3.3 (R16.5): OAuth posting to
+IG/TikTok/LinkedIn.
+
+### What's NOT verified end-to-end this round
+
+The voice fix and the engineering R15.5 features need Luis at
+the mic / browser to fully verify; the marketing scaffolding
+verifies once the new Railway service is deployed. See
+SESSION_HANDOFF_2026-05-08.md for the verification checklist.
+
+### What needs Luis to land it
+
+1. Trigger redeploy on conduit-voice-worker (no new env vars).
+2. Trigger redeploy on conduit-engineering-worker (no new env vars).
+3. Create Railway service from wpbluiss/conduit-marketing-worker;
+   add MARKETING_WORKER_SECRET (openssl rand -hex 32),
+   ANTHROPIC_API_KEY, NEXT_PUBLIC_SUPABASE_URL,
+   SUPABASE_SERVICE_ROLE_KEY. Provider keys (FAL_API_KEY etc) are
+   optional in Phase 3.1 — missing keys → stubs.
+4. Apply migrations 019 + 020 to mvuslmfjkkuizixjpkgl.
+5. Add MARKETING_WORKER_URL + MARKETING_WORKER_SECRET to Vercel.
+6. Merge feat/voice-fix-and-execution-2026-05-08 to main.

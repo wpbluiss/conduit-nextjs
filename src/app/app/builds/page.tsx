@@ -1,14 +1,18 @@
-// /app/builds — preserves R7 templates list as tab 1, adds R15 engineering
-// sessions list as tab 2. Tab state is client-side; the page itself is a
-// server component that fetches both datasets and hands them to a client
-// shell. R7 cards keep their existing visual + behavior unchanged.
+// /app/builds — preserves R7 templates list as tab 1, R15 engineering
+// sessions list as tab 2.
+//
+// R15.5 changes: the internal-only gate on the engineering tab is gone.
+// Every authenticated user can see + open their engineering builds. The
+// daily build + spend caps are enforced server-side; UsageBanner inside
+// BuildsTabs surfaces today's usage.
 
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getOrCreateAccount } from "@/lib/conduit/account";
 import { tierById } from "@/lib/billing/tiers";
-import { Hammer, Lock } from "lucide-react";
+import { Hammer } from "lucide-react";
 import { isEngineeringConfigured } from "@/lib/builds/executor";
+import { loadDailyEngineeringUsage } from "@/lib/engineering/limits";
 import BuildsTabs, {
   type R7Build,
   type EngSession,
@@ -25,36 +29,9 @@ export default async function BuildsPage() {
   const account = await getOrCreateAccount(supabase, user);
   const tier = tierById(account.tier_id);
   const internal = Boolean(account.internal_account);
-  const buildsAllowed =
-    internal || tier.allowedEmployees.includes("engineering");
   const configured = isEngineeringConfigured();
 
-  if (!buildsAllowed) {
-    return (
-      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8">
-        <div className="mx-auto max-w-3xl">
-          <h1 className="serif text-3xl mb-2 flex items-center gap-2">
-            <Hammer size={22} /> Builds
-          </h1>
-          <div className="conduit-card p-6 mt-6">
-            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
-              <Lock size={12} /> Pro feature
-            </div>
-            <p className="serif text-2xl">Engineering builds are a Pro perk</p>
-            <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-              Upgrade to ship landing pages, CRMs, blogs, and forms straight
-              from chat.
-            </p>
-            <Link href="/app/settings" className="btn-primary mt-4">
-              Compare plans →
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const [{ data: r7Rows }, { data: engRows }] = await Promise.all([
+  const [{ data: r7Rows }, { data: engRows }, usage] = await Promise.all([
     supabase
       .from("conduit_builds")
       .select(
@@ -64,16 +41,15 @@ export default async function BuildsPage() {
       .is("archived_at", null)
       .order("created_at", { ascending: false })
       .limit(200),
-    internal
-      ? supabase
-          .from("conduit_engineering_sessions")
-          .select(
-            "id, prompt, build_type, status, deploy_url, github_repo, total_input_tokens, total_output_tokens, error_message, started_at, completed_at, created_at",
-          )
-          .eq("account_id", account.id)
-          .order("created_at", { ascending: false })
-          .limit(100)
-      : Promise.resolve({ data: [] as EngSession[] }),
+    supabase
+      .from("conduit_engineering_sessions")
+      .select(
+        "id, prompt, build_type, status, deploy_url, github_repo, total_input_tokens, total_output_tokens, error_message, started_at, completed_at, created_at, parent_session_id",
+      )
+      .eq("account_id", account.id)
+      .order("created_at", { ascending: false })
+      .limit(100),
+    loadDailyEngineeringUsage(supabase, account.id, account),
   ]);
 
   return (
@@ -82,7 +58,7 @@ export default async function BuildsPage() {
         <h1 className="serif text-3xl mb-2 flex items-center gap-2">
           <Hammer size={22} /> Builds
         </h1>
-        <p className="text-sm text-[var(--color-text-muted)] mb-8">
+        <p className="text-sm text-[var(--color-text-muted)] mb-6">
           Every site Engineering has shipped for you.
         </p>
 
@@ -97,7 +73,21 @@ export default async function BuildsPage() {
           r7Builds={(r7Rows ?? []) as unknown as R7Build[]}
           engSessions={(engRows ?? []) as unknown as EngSession[]}
           internal={internal}
+          tierName={tier.name}
+          usage={usage}
         />
+
+        {!internal && tier.id === "free" && (
+          <p className="mt-6 text-xs text-[var(--color-text-muted)]">
+            On the Free plan you get 1 engineering build per day.{" "}
+            <Link
+              href="/app/settings/billing"
+              className="text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+            >
+              Upgrade to Pro for 10/day →
+            </Link>
+          </p>
+        )}
       </div>
     </div>
   );
