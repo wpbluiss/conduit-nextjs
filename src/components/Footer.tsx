@@ -9,7 +9,7 @@ import {
   LinkedinLogo,
   XLogo,
 } from "@phosphor-icons/react";
-import { BrandMark } from "@/components/Brand/BrandMark";
+import Logo from "@/components/Logo";
 
 const COLS: {
   title: string;
@@ -120,7 +120,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 pb-16 md:pb-20 border-b border-[var(--color-edge-subtle)]">
           <div>
             <Link href="/" className="inline-flex items-center gap-3" aria-label="Conduit">
-              <BrandMark size={36} />
+              <Logo size={36} />
               <span
                 className="text-[28px] tracking-tight text-[var(--color-ink-primary)]"
                 style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}

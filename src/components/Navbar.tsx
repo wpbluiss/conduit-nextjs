@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, List, X } from "@phosphor-icons/react";
-import { BrandMark } from "@/components/Brand/BrandMark";
+import Logo from "@/components/Logo";
 
 // ─── Product marks (small geometric SVGs for mega-menu) ──────────────
 
@@ -302,7 +302,7 @@ export default function Navbar() {
             className="flex items-center gap-2.5 group"
             aria-label="Conduit"
           >
-            <BrandMark size={28} />
+            <Logo size={28} />
             <span
               className="text-[17px] tracking-tight text-[var(--color-ink-primary)] transition-[font-size] duration-300"
               style={{
@@ -430,7 +430,7 @@ export default function Navbar() {
                     className="flex items-center gap-2.5"
                     aria-label="Conduit"
                   >
-                    <BrandMark size={28} />
+                    <Logo size={28} />
                     <span
                       className="text-[17px] text-[var(--color-ink-primary)]"
                       style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
