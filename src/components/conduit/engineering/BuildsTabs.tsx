@@ -5,7 +5,8 @@
 // for internal_account users for v1, others see an early-access notice.
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 import BuildSession from "./BuildSession";
 
@@ -49,14 +50,34 @@ interface Props {
 }
 
 export default function BuildsTabs({ r7Builds, engSessions, internal }: Props) {
+  // Deeplink: /app/builds?session=<id> auto-opens BuildSession on that row.
+  // The right rail Recent Context links here so re-entering an in-flight or
+  // finished build is one click.
+  const params = useSearchParams();
+  const sessionFromUrl = params.get("session");
+
   // Default the tab to whichever has rows; if both empty, default to templates
-  // for non-internal users and engineering for internal.
+  // for non-internal users and engineering for internal. A ?session deeplink
+  // forces the engineering tab.
   const defaultTab: "templates" | "engineering" =
-    internal && engSessions.length > 0
+    sessionFromUrl
       ? "engineering"
-      : "templates";
+      : internal && engSessions.length > 0
+        ? "engineering"
+        : "templates";
   const [tab, setTab] = useState<"templates" | "engineering">(defaultTab);
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(
+    sessionFromUrl,
+  );
+
+  // If the deeplink changes (e.g. user clicks two right-rail links in a row
+  // without unmounting), follow it.
+  useEffect(() => {
+    if (sessionFromUrl) {
+      setTab("engineering");
+      setActiveSessionId(sessionFromUrl);
+    }
+  }, [sessionFromUrl]);
 
   return (
     <>
