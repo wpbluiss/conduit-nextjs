@@ -131,7 +131,21 @@ export default function VoiceRoom({
 
   // Single-shot connect on mount.
   useEffect(() => {
-    const room = new Room({ adaptiveStream: true, dynacast: true });
+    // Polish 2026-05-07: explicit audio capture constraints for the mic
+    // track LiveKit publishes. autoGainControl was the culprit pushing
+    // baseline room noise above the worker's RMS gate, which was
+    // self-cutting Atlas mid-sentence. echoCancellation + noiseSuppression
+    // stay on (defaults) so the agent's own outbound audio doesn't bleed
+    // back into the inbound stream.
+    const room = new Room({
+      adaptiveStream: true,
+      dynacast: true,
+      audioCaptureDefaults: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: false,
+      },
+    });
     roomRef.current = room;
 
     const onLocalPublished = (pub: LocalTrackPublication) => {
