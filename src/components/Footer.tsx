@@ -9,42 +9,7 @@ import {
   LinkedinLogo,
   XLogo,
 } from "@phosphor-icons/react";
-
-function ConduitMark({ size = 32 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 32 32"
-      aria-hidden="true"
-      className="shrink-0"
-    >
-      <defs>
-        <radialGradient id="conduit-mark-fill-footer" cx="0.35" cy="0.3" r="0.85">
-          <stop offset="0%" stopColor="#F5DDC3" />
-          <stop offset="55%" stopColor="#D67817" />
-          <stop offset="100%" stopColor="#8F4709" />
-        </radialGradient>
-      </defs>
-      <circle
-        cx="16"
-        cy="16"
-        r="14"
-        fill="url(#conduit-mark-fill-footer)"
-      />
-      <line
-        x1="16"
-        y1="3"
-        x2="16"
-        y2="29"
-        stroke="#0A0908"
-        strokeOpacity="0.55"
-        strokeWidth="0.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
+import { BrandMark } from "@/components/Brand/BrandMark";
 
 const COLS: {
   title: string;
@@ -155,9 +120,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 pb-16 md:pb-20 border-b border-[var(--color-edge-subtle)]">
           <div>
             <Link href="/" className="inline-flex items-center gap-3" aria-label="Conduit">
-              <ConduitMark size={36} />
+              <BrandMark size={36} />
               <span
-                className="text-[28px] tracking-tight text-[var(--color-cream)]"
+                className="text-[28px] tracking-tight text-[var(--color-ink-primary)]"
                 style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
               >
                 Conduit

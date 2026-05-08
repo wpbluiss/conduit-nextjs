@@ -4,39 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, List, X } from "@phosphor-icons/react";
-
-// ─── Mark ──────────────────────────────────────────────────────────────
-
-function ConduitMark({ size = 28 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 32 32"
-      aria-hidden="true"
-      className="shrink-0"
-    >
-      <defs>
-        <radialGradient id="conduit-mark-fill" cx="0.35" cy="0.3" r="0.85">
-          <stop offset="0%" stopColor="#F5DDC3" />
-          <stop offset="55%" stopColor="#D67817" />
-          <stop offset="100%" stopColor="#8F4709" />
-        </radialGradient>
-      </defs>
-      <circle cx="16" cy="16" r="14" fill="url(#conduit-mark-fill)" />
-      <line
-        x1="16"
-        y1="3"
-        x2="16"
-        y2="29"
-        stroke="#0A0908"
-        strokeOpacity="0.55"
-        strokeWidth="0.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
+import { BrandMark } from "@/components/Brand/BrandMark";
 
 // ─── Product marks (small geometric SVGs for mega-menu) ──────────────
 
@@ -55,7 +23,7 @@ function ConsoleMark() {
         width="28"
         height="20"
         rx="2"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1.5"
       />
       <line
@@ -63,17 +31,17 @@ function ConsoleMark() {
         y1="12"
         x2="32"
         y2="12"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1"
         strokeOpacity="0.6"
       />
-      <circle cx="7" cy="9.5" r="0.8" fill="#D67817" />
+      <circle cx="7" cy="9.5" r="0.8" fill="#5B63E8" />
       <line
         x1="14"
         y1="32"
         x2="22"
         y2="32"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1.5"
         strokeLinecap="round"
       />
@@ -96,7 +64,7 @@ function MobileMark() {
         width="14"
         height="28"
         rx="2.5"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1.5"
       />
       <line
@@ -104,13 +72,13 @@ function MobileMark() {
         y1="29"
         x2="21"
         y2="29"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1.2"
         strokeLinecap="round"
       />
       <path
         d="M 27 14 Q 30 18 27 22"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1.2"
         strokeLinecap="round"
         fill="none"
@@ -118,7 +86,7 @@ function MobileMark() {
       />
       <path
         d="M 30 11 Q 34 18 30 25"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1.2"
         strokeLinecap="round"
         fill="none"
@@ -139,7 +107,7 @@ function HqMark() {
     >
       <path
         d="M 6 30 L 6 14 L 18 8 L 30 14 L 30 30 Z"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1.5"
         strokeLinejoin="round"
       />
@@ -148,7 +116,7 @@ function HqMark() {
         y1="14"
         x2="30"
         y2="14"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1"
         strokeOpacity="0.6"
       />
@@ -157,14 +125,14 @@ function HqMark() {
         y1="8"
         x2="18"
         y2="30"
-        stroke="#D67817"
+        stroke="#5B63E8"
         strokeWidth="1"
         strokeOpacity="0.6"
       />
-      <rect x="9" y="18" width="3" height="3" fill="#D67817" opacity="0.85" />
-      <rect x="14" y="18" width="3" height="3" fill="#D67817" opacity="0.5" />
-      <rect x="19" y="18" width="3" height="3" fill="#D67817" opacity="0.85" />
-      <rect x="24" y="18" width="3" height="3" fill="#D67817" opacity="0.5" />
+      <rect x="9" y="18" width="3" height="3" fill="#5B63E8" opacity="0.85" />
+      <rect x="14" y="18" width="3" height="3" fill="#5B63E8" opacity="0.5" />
+      <rect x="19" y="18" width="3" height="3" fill="#5B63E8" opacity="0.85" />
+      <rect x="24" y="18" width="3" height="3" fill="#5B63E8" opacity="0.5" />
     </svg>
   );
 }
@@ -328,16 +296,20 @@ export default function Navbar() {
         onMouseLeave={handleMenuLeave}
       >
         <div className="max-w-[1280px] mx-auto px-6 md:px-10 h-16 md:h-20 flex items-center justify-between">
-          {/* Wordmark */}
+          {/* Wordmark — institutional indigo rails + Fraunces wordmark */}
           <Link
             href="/"
             className="flex items-center gap-2.5 group"
             aria-label="Conduit"
           >
-            <ConduitMark size={28} />
+            <BrandMark size={28} />
             <span
-              className="text-[17px] tracking-tight text-[var(--color-cream)]"
-              style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
+              className="text-[17px] tracking-tight text-[var(--color-ink-primary)] transition-[font-size] duration-300"
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontWeight: 500,
+                fontSize: scrolled ? "15px" : "17px",
+              }}
             >
               Conduit
             </span>
@@ -439,9 +411,9 @@ export default function Navbar() {
             <div
               className="absolute inset-0"
               style={{
-                background: "rgba(10, 9, 8, 0.85)",
-                backdropFilter: "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)",
+                background: "rgba(250, 250, 247, 0.92)",
+                backdropFilter: "blur(20px) saturate(160%)",
+                WebkitBackdropFilter: "blur(20px) saturate(160%)",
               }}
             />
             <motion.div
@@ -458,9 +430,9 @@ export default function Navbar() {
                     className="flex items-center gap-2.5"
                     aria-label="Conduit"
                   >
-                    <ConduitMark size={28} />
+                    <BrandMark size={28} />
                     <span
-                      className="text-[17px] text-[var(--color-cream)]"
+                      className="text-[17px] text-[var(--color-ink-primary)]"
                       style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
                     >
                       Conduit
@@ -640,7 +612,7 @@ function ProductsMenu() {
             <p className="text-[13px] leading-[1.5] text-[var(--color-cream-mute)] group-hover:text-[var(--color-cream-soft)] transition-colors">
               {p.desc}
             </p>
-            <span className="text-[12px] text-[var(--color-ember-500)] inline-flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-[12px] text-[var(--color-indigo-500)] inline-flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
               Learn more
               <ArrowRight size={12} weight="bold" />
             </span>
@@ -666,7 +638,7 @@ function ColumnsMenu({ cols }: { cols: LinkColumn[] }) {
                   href={l.href}
                   target={l.external ? "_blank" : undefined}
                   rel={l.external ? "noreferrer" : undefined}
-                  className="text-[14px] text-[var(--color-cream)] hover:text-[var(--color-ember-500)] transition-colors"
+                  className="text-[14px] text-[var(--color-ink-primary)] hover:text-[var(--color-indigo-500)] transition-colors"
                 >
                   {l.label}
                 </Link>
