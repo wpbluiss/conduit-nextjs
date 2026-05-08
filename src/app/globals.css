@@ -109,6 +109,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* Account for the sticky marketing nav when jumping to anchors. */
+  scroll-padding-top: 96px;
 }
 
 body {
@@ -979,8 +981,36 @@ body {
   border-bottom: 1px solid var(--color-edge-subtle);
 }
 
+/* Skip-to-main accessibility link */
+.conduit-skip-link {
+  position: fixed;
+  top: -40px;
+  left: 16px;
+  background: var(--color-ember-500);
+  color: var(--color-ink-canvas);
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 13px;
+  z-index: 100;
+  transition: top 200ms var(--conduit-ease-out-quart);
+}
+.conduit-skip-link:focus {
+  top: 12px;
+  outline: 2px solid var(--color-cream);
+  outline-offset: 2px;
+}
+
+/* Mobile-tighter section padding override */
+@media (max-width: 640px) {
+  .conduit-section { padding-block: 64px; }
+  .conduit-hero-section { padding-block: 96px 48px; }
+  .conduit-container { padding-inline: 20px; }
+}
+
 /* Reduced motion respect */
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   .conduit-mesh,
   .conduit-ember-radial,
   .conduit-dust,

@@ -66,7 +66,12 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${fraunces.variable} ${jetbrainsMono.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <a href="#main-content" className="conduit-skip-link">
+          Skip to content
+        </a>
+        <div id="main-content">{children}</div>
+      </body>
     </html>
   );
 }
