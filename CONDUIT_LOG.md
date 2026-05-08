@@ -1665,3 +1665,91 @@ out, and it's the safer v1 surface.
   100-200 builds before refill. R15.5 hardening will add a per-account
   spend cap.
 
+
+## Polish Batch — 2026-05-07 (post-R15 ship)
+
+Branch: feat/conduit-polish-batch-2026-05-07. Worker repos touched:
+conduit-voice-worker (252458f) + conduit-engineering-worker (d1c4c2f).
+Five fixes in one batch.
+
+### Bug 1 — Atlas voice cut-offs (still)
+After R15 shipped, Luis hit voice mode and Atlas was still trimming itself
+to single sentences on first response and after every short user turn.
+The R12 polish (RMS gate at 0.005 + 800ms cooldown + VAD threshold 0.8 /
+silence 600ms) wasn't enough. Three knobs turned:
+
+- LiveKit Room now constructed with audioCaptureDefaults that explicitly
+  set autoGainControl=false. AGC was the prime suspect — it pushes
+  baseline mic noise above the worker's RMS gate so the gate "passes"
+  the agent's own outbound bleed and treats it as a real interrupt.
+  Echo cancellation + noise suppression stay on (defaults).
+  (conduit-nextjs de74246)
+- Worker RMS threshold 0.005 → 0.015 (closer to actual syllable energy)
+  and interrupt cooldown 800ms → 1500ms (covers the case where a
+  buffered stale frame from the previous turn slips into the new turn's
+  evaluation window). (conduit-voice-worker 252458f)
+- Worker server_vad knobs: threshold maxed at 0.9, silence_duration
+  600ms → 1000ms. Fewer spurious user_speech_started events upstream
+  of the gate. (conduit-voice-worker 252458f)
+
+Belt-and-suspenders. End-to-end verification needs Luis at the mic.
+
+### Bug 2 — Voice Room was just a list (no entry point)
+/app/voice rendered 9 employee tiles and shipped each user into a 1-on-1
+solo call. The R12.5 worker + multi-avatar VoiceRoom UI have supported
+roundtable mode for weeks; only the entry point was missing. New
+EnterTheRoomCard component sits above the (now-renamed) "Talk solo"
+grid and mints a roundtable token — full team for internal/enterprise,
+core 4 (Atlas + Marketing + Sales + Engineering) for pro, locked + upgrade
+CTA for free. /api/voice/token enterprise cap bumped 8 → 9 since the
+full team is 9 (Atlas + 8 specialists). VoiceRoom multi-avatar layout
+already handles 9 — the existing flex-wrap grid scales down on mobile.
+(conduit-nextjs ade3f04)
+
+### Bug 3a — BuildSession reopen + right rail integration
+EmployeeRightRail (engineering only) Recent Context now leads with the
+3 most recent conduit_engineering_sessions, each linking to
+/app/builds?session=<id>. Quick Actions: a "Resume last build" link
+appears at the top when any session is in pending/running/deploying,
+showing live status. BuildsTabs reads ?session via useSearchParams and
+auto-opens BuildSession for that id (force-switching to the engineering
+tab); BuildSession already had backfill + realtime so the reopen flow
+covers both live and replay. BuildSession close button renamed to
+"Minimize" with a hint that the build keeps running — the dual-button
+kill/minimize design the brief asked for is deferred until R15.5 ships
+the worker abort path. (conduit-nextjs 9e7ad56)
+
+### Bug 3b — Last-active timestamps included only chat
+Workspace dashboard team grid + per-employee workspace "Last active"
+stat both read conduit_messages only. Voice-only sessions and engineering
+builds didn't bump them, so "Active 23h ago" stuck around even when Luis
+had just hung up the phone or shipped a build five minutes earlier. New
+helper at src/lib/conduit/employee-activity.ts queries conduit_messages
+(assistant turns scoped to the account's conversations) +
+conduit_voice_sessions.started_at + conduit_engineering_sessions
+(completed_at falls back to created_at, attributed to engineering),
+takes the max per employee. Both pages call it; both render server-side
+so there's no client cache. (conduit-nextjs 4d9818b)
+
+### Bug 3c — Engineering memory writes on terminal state
+After every terminal state, the worker writes a 'context' memory note
+attributed to 'jarvis' (preserves the R10 Atlas-only-writer invariant)
+so Atlas + the Engineering right rail surface what just shipped without
+the user telling him. Direct service-role insert from the worker — no
+new env vars (would have needed CONDUIT_WORKER_SECRET on the engineering
+worker to call /api/voice/memory-write, which the polish-batch brief
+explicitly forbade). Failures here are logged but never flip a successful
+build into a failed one. (conduit-engineering-worker d1c4c2f)
+
+### What's NOT verified end-to-end this round
+Three of the five fixes need Luis at the mic / shell to fully verify:
+- Bug 1: requires speaking to Atlas to confirm the multi-sentence
+  response holds.
+- Bug 2: requires entering the room and saying "team, status update"
+  to confirm the round-robin still fires across 9 employees.
+- Bug 3c: requires running a real build (Railway must be live) to see
+  the memory note land in the right rail.
+
+Bugs 3a + 3b are static enough to verify by reading the code; both
+type-check and `next build` is clean.
+

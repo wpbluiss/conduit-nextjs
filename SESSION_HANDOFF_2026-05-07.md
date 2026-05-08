@@ -84,8 +84,40 @@ R15 needs added: ENGINEERING_WORKER_URL, ENGINEERING_WORKER_SECRET.
 
 ## R15 known v1 limitations (planned for R15.5)
 - No iptables egress allowlist on the worker (Railway capability constraint).
-- No abort path — "Close session" closes the overlay; the worker keeps running.
+- No abort path — "Minimize" closes the overlay; the worker keeps running.
 - Live token count lags the terminal by seconds (bumped at exit).
 - Bot Anthropic key on the worker has no per-account spend cap.
 - Chat-triggered build via [START_BUILD: ...] tag is deferred (workspace button
   is the v1 surface).
+
+## Polish Batch (2026-05-07, post-R15) — STAGED
+
+Branch: feat/conduit-polish-batch-2026-05-07. Five fixes; all three repos
+touched. Both worker repos pushed to their respective mains. Praxis branch
+needs review + merge.
+
+### What needs you to land it
+1. Voice worker (Railway): conduit-voice-worker is at HEAD 252458f. Trigger
+   a redeploy on Railway so the VAD / RMS gate / cooldown changes take
+   effect. No new env vars.
+2. Engineering worker (Railway): conduit-engineering-worker is at HEAD
+   d1c4c2f. Same — trigger redeploy. No new env vars.
+3. Praxis: merge feat/conduit-polish-batch-2026-05-07 to main. Vercel
+   auto-deploy picks it up.
+
+### Verification checklist (you, at the mic / browser)
+1. Atlas voice — open Voice Mode with Atlas, ask "tell me about my
+   pipeline." Atlas should give a multi-sentence response without
+   self-cutting. Try interrupting mid-response by speaking — agent
+   stops cleanly.
+2. Voice Room — /app/voice → "Enter the room" hero card → click → 9-avatar
+   layout opens → say "team, status update" → multiple employees speak
+   in sequence with their own voices → Atlas closes.
+3. Engineering reopen — /app/builds → click a finished session row →
+   BuildSession replay opens with full log + file tree + Open Preview
+   button → click Open Preview → site loads in a new tab.
+4. Workspace dashboard — refresh /app/workspace. Team-grid stamps reflect
+   reality (a recently-voice-active employee should NOT say "23h ago").
+5. Memory write — after a successful build completes, the Engineering
+   workspace right rail Recent Context should show the build as a memory
+   note ("Shipped a build: …. Live at …. Xk tokens.").
