@@ -1,23 +1,11 @@
 // POST /api/engineering/session — kicks off a new Engineering build.
-//
-// R15.5: public release. The internal_account 403 gate is gone; every
-// authenticated user can request a build. Tier-based daily limits
-// (build count + $ spend cap) gate runaway usage. internal_account
-// users bypass all caps.
-//
-// Optional `parentSessionId` clones the parent's workspace files into
-// the new session before claude runs — used by the "Continue from
-// previous build" flow. The worker tolerates a missing parent
-// workspace (e.g. parent was cleaned up after failure) by starting fresh.
+// v1 gate: account.internal_account === true. Everyone else gets a clean 403
+// with "early access" copy that the modal can render.
 
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getOrCreateAccount } from "@/lib/conduit/account";
 import { startWorkerSession } from "@/lib/engineering/worker";
-import {
-  decideLimit,
-  loadDailyEngineeringUsage,
-} from "@/lib/engineering/limits";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,7 +14,6 @@ interface Body {
   prompt?: string;
   buildType?: string | null;
   conversationId?: string | null;
-  parentSessionId?: string | null;
 }
 
 export async function POST(req: Request) {
@@ -39,23 +26,14 @@ export async function POST(req: Request) {
   }
   const account = await getOrCreateAccount(supabase, user);
 
-  // R15.5: tier-based daily limit instead of internal_account 403.
-  const usage = await loadDailyEngineeringUsage(supabase, account.id, account);
-  const decision = decideLimit(usage);
-  if (!decision.allowed) {
+  if (!account.internal_account) {
     return NextResponse.json(
       {
-        error: decision.reason ?? "rate_limited",
-        message: decision.message ?? "Daily build limit reached.",
-        usage: {
-          buildsToday: usage.buildsToday,
-          spendCentsToday: usage.spendCentsToday,
-          buildsLimit: usage.buildsLimit,
-          spendCapCents: usage.spendCapCents,
-          tier: usage.tier,
-        },
+        error: "early_access",
+        message:
+          "Engineering builds are in early access. We'll open them up after the next round of hardening.",
       },
-      { status: 429 },
+      { status: 403 },
     );
   }
 
@@ -80,23 +58,6 @@ export async function POST(req: Request) {
   }
   const buildType = body.buildType?.trim() ?? null;
   const conversationId = body.conversationId ?? null;
-  const parentSessionId = body.parentSessionId ?? null;
-
-  // RLS guards parent ownership, but a 404 here gives a cleaner UX than
-  // surfacing the worker-side "couldn't find parent workspace" log.
-  if (parentSessionId) {
-    const { data: parent } = await supabase
-      .from("conduit_engineering_sessions")
-      .select("id")
-      .eq("id", parentSessionId)
-      .maybeSingle();
-    if (!parent) {
-      return NextResponse.json(
-        { error: "parent_not_found", message: "Parent build not found." },
-        { status: 404 },
-      );
-    }
-  }
 
   const { data: session, error } = await supabase
     .from("conduit_engineering_sessions")
@@ -105,7 +66,6 @@ export async function POST(req: Request) {
       conversation_id: conversationId,
       prompt,
       build_type: buildType,
-      parent_session_id: parentSessionId,
       status: "pending",
     })
     .select("id, status, created_at")
@@ -124,10 +84,10 @@ export async function POST(req: Request) {
     accountId: account.id,
     prompt,
     buildType,
-    parentSessionId,
   });
 
   if (!start.ok) {
+    // Mark the row failed so the UI doesn't spin. The user can try again.
     await supabase
       .from("conduit_engineering_sessions")
       .update({
@@ -151,12 +111,5 @@ export async function POST(req: Request) {
     session_id: sessionId,
     status: "pending",
     realtime_channel: `engineering:${sessionId}`,
-    usage: {
-      buildsToday: usage.buildsToday + 1,
-      spendCentsToday: usage.spendCentsToday,
-      buildsLimit: usage.buildsLimit,
-      spendCapCents: usage.spendCapCents,
-      tier: usage.tier,
-    },
   });
 }
