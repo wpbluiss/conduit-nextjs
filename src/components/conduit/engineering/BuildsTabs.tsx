@@ -1,14 +1,22 @@
 "use client";
 
 // Two-tab shell for /app/builds. Left tab preserves R7 (templates) cards
-// exactly. Right tab is the new R15 engineering sessions list — only loaded
-// for internal_account users for v1, others see an early-access notice.
+// exactly. Right tab is the R15 engineering sessions list.
+//
+// R15.5 changes:
+//   - Engineering tab is no longer gated by internal_account; every
+//     user sees their own builds (RLS scopes the rows) and can open them.
+//   - UsageBanner surfaces today's build count + spend against tier caps.
+//   - Per-card "Continue" button submits a follow-up prompt with
+//     parentSessionId — the worker copies the parent's workspace files
+//     into the new session so the user can iterate.
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, ArrowRight, X } from "lucide-react";
 import BuildSession from "./BuildSession";
+import type { DailyUsage } from "@/lib/engineering/limits";
 
 export interface R7Build {
   id: string;
@@ -32,7 +40,8 @@ export interface EngSession {
     | "deploying"
     | "complete"
     | "failed"
-    | "timeout";
+    | "timeout"
+    | "aborted";
   deploy_url: string | null;
   github_repo: string | null;
   total_input_tokens: number | null;
@@ -41,37 +50,39 @@ export interface EngSession {
   started_at: string | null;
   completed_at: string | null;
   created_at: string;
+  parent_session_id?: string | null;
 }
 
 interface Props {
   r7Builds: R7Build[];
   engSessions: EngSession[];
   internal: boolean;
+  tierName: string;
+  usage: DailyUsage;
 }
 
-export default function BuildsTabs({ r7Builds, engSessions, internal }: Props) {
-  // Deeplink: /app/builds?session=<id> auto-opens BuildSession on that row.
-  // The right rail Recent Context links here so re-entering an in-flight or
-  // finished build is one click.
+export default function BuildsTabs({
+  r7Builds,
+  engSessions,
+  internal,
+  tierName,
+  usage,
+}: Props) {
   const params = useSearchParams();
   const sessionFromUrl = params.get("session");
 
-  // Default the tab to whichever has rows; if both empty, default to templates
-  // for non-internal users and engineering for internal. A ?session deeplink
-  // forces the engineering tab.
   const defaultTab: "templates" | "engineering" =
     sessionFromUrl
       ? "engineering"
-      : internal && engSessions.length > 0
+      : engSessions.length > 0
         ? "engineering"
         : "templates";
   const [tab, setTab] = useState<"templates" | "engineering">(defaultTab);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(
     sessionFromUrl,
   );
+  const [continueParent, setContinueParent] = useState<EngSession | null>(null);
 
-  // If the deeplink changes (e.g. user clicks two right-rail links in a row
-  // without unmounting), follow it.
   useEffect(() => {
     if (sessionFromUrl) {
       setTab("engineering");
@@ -92,18 +103,21 @@ export default function BuildsTabs({ r7Builds, engSessions, internal }: Props) {
           active={tab === "engineering"}
           onClick={() => setTab("engineering")}
           label="Engineering Builds"
-          count={internal ? engSessions.length : null}
-          badge={internal ? null : "Early access"}
+          count={engSessions.length}
         />
       </div>
+
+      {tab === "engineering" && (
+        <UsageBanner usage={usage} internal={internal} tierName={tierName} />
+      )}
 
       {tab === "templates" ? (
         <TemplatesTab builds={r7Builds} />
       ) : (
         <EngineeringTab
           sessions={engSessions}
-          internal={internal}
           onOpen={setActiveSessionId}
+          onContinue={setContinueParent}
         />
       )}
 
@@ -113,7 +127,78 @@ export default function BuildsTabs({ r7Builds, engSessions, internal }: Props) {
           onClose={() => setActiveSessionId(null)}
         />
       )}
+
+      {continueParent && (
+        <ContinueModal
+          parent={continueParent}
+          onClose={() => setContinueParent(null)}
+          onCreated={(newId) => {
+            setContinueParent(null);
+            setActiveSessionId(newId);
+          }}
+        />
+      )}
     </>
+  );
+}
+
+function UsageBanner({
+  usage,
+  internal,
+  tierName,
+}: {
+  usage: DailyUsage;
+  internal: boolean;
+  tierName: string;
+}) {
+  if (internal || usage.unlimited) {
+    return (
+      <div className="flex items-center gap-3 mb-4 text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+        <span className="text-[var(--color-green)]">●</span> Unlimited
+        engineering builds (internal account)
+      </div>
+    );
+  }
+  const buildsRemaining = Math.max(
+    0,
+    usage.buildsLimit - usage.buildsToday,
+  );
+  const spendCents = usage.spendCentsToday;
+  const dollars = (spendCents / 100).toFixed(2);
+  const capDollars = (usage.spendCapCents / 100).toFixed(2);
+  const buildsExhausted = buildsRemaining === 0;
+  const spendExhausted = spendCents >= usage.spendCapCents;
+  const exhausted = buildsExhausted || spendExhausted;
+
+  return (
+    <div
+      className="conduit-card p-3 mb-4 flex items-center justify-between text-xs"
+      style={{
+        borderColor: exhausted
+          ? "color-mix(in srgb, var(--color-pink) 35%, transparent)"
+          : undefined,
+      }}
+    >
+      <div className="flex items-center gap-4">
+        <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+          Today &middot; {tierName}
+        </span>
+        <span className={buildsExhausted ? "text-[var(--color-pink)]" : ""}>
+          {usage.buildsToday} / {usage.buildsLimit} builds
+        </span>
+        <span className={spendExhausted ? "text-[var(--color-pink)]" : ""}>
+          ${dollars} / ${capDollars} spend
+        </span>
+      </div>
+      {exhausted && (
+        <Link
+          href="/app/settings/billing"
+          className="text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+        >
+          Upgrade →
+        </Link>
+      )}
+    </div>
   );
 }
 
@@ -221,28 +306,13 @@ function TemplatesTab({ builds }: { builds: R7Build[] }) {
 
 function EngineeringTab({
   sessions,
-  internal,
   onOpen,
+  onContinue,
 }: {
   sessions: EngSession[];
-  internal: boolean;
   onOpen: (id: string) => void;
+  onContinue: (parent: EngSession) => void;
 }) {
-  if (!internal) {
-    return (
-      <div className="conduit-card p-6 max-w-md">
-        <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
-          Early access
-        </div>
-        <p className="text-[var(--color-text)] mb-2">
-          Real-execution engineering builds are in private beta.
-        </p>
-        <p className="text-xs text-[var(--color-text-muted)]">
-          Templates (the other tab) ship today on every plan.
-        </p>
-      </div>
-    );
-  }
   if (sessions.length === 0) {
     return (
       <div className="conduit-card p-8 max-w-md">
@@ -261,44 +331,170 @@ function EngineeringTab({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       {sessions.map((s) => (
-        <button
+        <div
           key={s.id}
-          type="button"
-          onClick={() => onOpen(s.id)}
-          className="conduit-card border-l-[3px] p-5 flex flex-col gap-3 text-left hover:border-[var(--color-accent)] transition-colors"
+          className="conduit-card border-l-[3px] p-5 flex flex-col gap-3 text-left"
           style={{ borderLeftColor: "var(--color-dept-engineering)" }}
         >
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-              {s.build_type ?? "custom"}
-            </span>
-            <StatusPill status={s.status} />
-          </div>
-          <div className="serif text-base leading-snug line-clamp-2">
-            {s.prompt}
-          </div>
-          {s.deploy_url ? (
-            <span className="text-xs text-[var(--color-accent)] inline-flex items-center gap-1 truncate">
-              {s.deploy_url.replace(/^https?:\/\//, "")}
-              <ExternalLink size={11} />
-            </span>
-          ) : s.error_message ? (
-            <p className="text-xs text-[var(--color-pink)] line-clamp-2">
-              {s.error_message}
-            </p>
-          ) : (
-            <p className="text-xs text-[var(--color-text-muted)]">
-              {labelForLiveStatus(s.status)}
-            </p>
-          )}
-          <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted)] mt-auto pt-2">
+          <button
+            type="button"
+            onClick={() => onOpen(s.id)}
+            className="flex flex-col gap-3 text-left hover:opacity-95 transition-opacity"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                {s.build_type ?? "custom"}
+                {s.parent_session_id && (
+                  <span className="ml-2 text-[var(--color-accent)]">
+                    · continuation
+                  </span>
+                )}
+              </span>
+              <StatusPill status={s.status} />
+            </div>
+            <div className="serif text-base leading-snug line-clamp-2">
+              {s.prompt}
+            </div>
+            {s.deploy_url ? (
+              <span className="text-xs text-[var(--color-accent)] inline-flex items-center gap-1 truncate">
+                {s.deploy_url.replace(/^https?:\/\//, "")}
+                <ExternalLink size={11} />
+              </span>
+            ) : s.error_message ? (
+              <p className="text-xs text-[var(--color-pink)] line-clamp-2">
+                {s.error_message}
+              </p>
+            ) : (
+              <p className="text-xs text-[var(--color-text-muted)]">
+                {labelForLiveStatus(s.status)}
+              </p>
+            )}
+          </button>
+          <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted)] pt-2 border-t border-[var(--color-border)]">
             <span>{new Date(s.created_at).toLocaleString()}</span>
-            <span>
-              {(s.total_input_tokens ?? 0) + (s.total_output_tokens ?? 0)}t
+            <span className="flex items-center gap-3">
+              <span>
+                {(s.total_input_tokens ?? 0) + (s.total_output_tokens ?? 0)}t
+              </span>
+              {s.status === "complete" && (
+                <button
+                  type="button"
+                  onClick={() => onContinue(s)}
+                  className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.15em] text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+                  title="Continue from this build (clones the workspace files)"
+                >
+                  Continue <ArrowRight size={10} />
+                </button>
+              )}
             </span>
           </div>
-        </button>
+        </div>
       ))}
+    </div>
+  );
+}
+
+function ContinueModal({
+  parent,
+  onClose,
+  onCreated,
+}: {
+  parent: EngSession;
+  onClose: () => void;
+  onCreated: (newSessionId: string) => void;
+}) {
+  const [prompt, setPrompt] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async () => {
+    if (prompt.trim().length < 8) {
+      setError("Tell Engineering what to change (8+ characters).");
+      return;
+    }
+    setSubmitting(true);
+    setError(null);
+    try {
+      const r = await fetch("/api/engineering/session", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          prompt: prompt.trim(),
+          buildType: parent.build_type,
+          parentSessionId: parent.id,
+        }),
+      });
+      const j = (await r.json()) as {
+        session_id?: string;
+        message?: string;
+        error?: string;
+      };
+      if (!r.ok || !j.session_id) {
+        setError(j.message ?? j.error ?? `error_${r.status}`);
+        setSubmitting(false);
+        return;
+      }
+      onCreated(j.session_id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "submit_failed");
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="w-full max-w-lg conduit-card p-6">
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-1">
+              Continue build
+            </div>
+            <p className="serif text-lg line-clamp-2">{parent.prompt}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+            aria-label="Close"
+          >
+            <X size={16} />
+          </button>
+        </div>
+        <p className="text-xs text-[var(--color-text-muted)] mb-3">
+          Engineering will start a new build with this prompt and the
+          previous build&apos;s files already in place.
+        </p>
+        <textarea
+          autoFocus
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder="What should change?"
+          rows={4}
+          className="w-full rounded-md bg-[var(--color-card)] border border-[var(--color-border)] p-3 text-sm focus:outline-none focus:border-[var(--color-accent)]"
+          disabled={submitting}
+        />
+        {error && (
+          <p className="text-xs text-[var(--color-pink)] mt-2">{error}</p>
+        )}
+        <div className="flex items-center justify-end gap-2 mt-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] px-3 py-1.5"
+            disabled={submitting}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={submit}
+            className="btn-primary"
+            disabled={submitting}
+          >
+            {submitting ? "Starting…" : "Start continuation →"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -311,6 +507,8 @@ function labelForLiveStatus(s: string): string {
       return "Running…";
     case "deploying":
       return "Deploying…";
+    case "aborted":
+      return "Aborted";
     default:
       return "—";
   }
@@ -327,6 +525,7 @@ function StatusPill({ status }: { status: string }) {
     complete: { color: "var(--color-green)", label: "Live" },
     failed: { color: "var(--color-pink)", label: "Failed" },
     timeout: { color: "var(--color-pink)", label: "Timed out" },
+    aborted: { color: "var(--color-text-muted)", label: "Aborted" },
     archived: { color: "var(--color-text-muted)", label: "Archived" },
   };
   const m = map[status] ?? map.pending;

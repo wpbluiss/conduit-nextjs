@@ -8,6 +8,7 @@ import {
   X,
   AlertTriangle,
   CheckCircle2,
+  StopCircle,
 } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
@@ -17,7 +18,8 @@ export type SessionStatus =
   | "deploying"
   | "complete"
   | "failed"
-  | "timeout";
+  | "timeout"
+  | "aborted";
 
 export interface SessionRow {
   id: string;
@@ -67,6 +69,7 @@ export default function BuildSession({
   const [session, setSession] = useState<SessionRow | null>(initialSession);
   const [logs, setLogs] = useState<LogRow[]>(initialLogs);
   const [error, setError] = useState<string | null>(null);
+  const [aborting, setAborting] = useState(false);
   const terminalRef = useRef<HTMLDivElement | null>(null);
 
   // Backfill if we weren't seeded.
@@ -163,6 +166,38 @@ export default function BuildSession({
       ? logs.slice(logs.length - TERMINAL_RENDER_CAP)
       : logs;
 
+  const isAbortable =
+    status === "pending" || status === "running" || status === "deploying";
+
+  const onAbort = async () => {
+    if (!isAbortable || aborting) return;
+    if (
+      !window.confirm(
+        "Stop this build? The worker subprocess will be killed and the session marked aborted.",
+      )
+    ) {
+      return;
+    }
+    setAborting(true);
+    try {
+      const r = await fetch(`/api/engineering/session/${sessionId}/abort`, {
+        method: "POST",
+      });
+      if (!r.ok) {
+        const j = (await r.json().catch(() => ({}))) as {
+          error?: string;
+          status?: string;
+        };
+        setError(j.error ?? `abort_${r.status}`);
+      }
+      // Realtime UPDATE on the session row will flip status to 'aborted'.
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "abort_failed");
+    } finally {
+      setAborting(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-[var(--color-bg)]">
       {/* Header */}
@@ -189,14 +224,28 @@ export default function BuildSession({
             {session?.prompt ?? "Build session"}
           </span>
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-[var(--color-card-hover)] text-[var(--color-text-muted)]"
-          aria-label="Close"
-        >
-          <X size={16} />
-        </button>
+        <div className="flex items-center gap-2">
+          {isAbortable && (
+            <button
+              type="button"
+              onClick={onAbort}
+              disabled={aborting}
+              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md border border-[var(--color-border)] hover:border-[var(--color-pink)] hover:text-[var(--color-pink)] text-xs text-[var(--color-text-muted)] transition-colors disabled:opacity-50"
+              title="Kill the worker subprocess for this build"
+            >
+              <StopCircle size={13} />
+              {aborting ? "Stopping…" : "Stop build"}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-[var(--color-card-hover)] text-[var(--color-text-muted)]"
+            aria-label="Close"
+          >
+            <X size={16} />
+          </button>
+        </div>
       </div>
 
       {/* Body */}
@@ -378,12 +427,15 @@ function labelForStatus(s: SessionStatus): string {
       return "Failed";
     case "timeout":
       return "Timed out";
+    case "aborted":
+      return "Aborted";
   }
 }
 
 function colorForStatus(s: SessionStatus): string {
   switch (s) {
     case "pending":
+    case "aborted":
       return "var(--color-text-muted)";
     case "running":
     case "deploying":
