@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Quotes } from "@phosphor-icons/react";
+import { ArrowRight, Briefcase, Quotes } from "@phosphor-icons/react";
 import { ProofBar } from "@/components/marketing/ProofBar";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
@@ -136,10 +136,22 @@ function Stat({ n, label }: { n: string; label: string }) {
 
 function GhostCard({ caption }: { caption: string }) {
   return (
-    <div className="rounded-2xl border border-dashed border-[var(--color-edge)] p-6 flex items-center justify-center min-h-[200px] bg-[var(--color-ink-canvas)]/40">
-      <p className="conduit-caption text-[var(--color-cream-faint)]">
+    <Link
+      href="mailto:luis@conduitai.io?subject=Become%20a%20customer"
+      className="group rounded-2xl border border-dashed border-[var(--color-border-default)] hover:border-[var(--color-border-strong)] bg-[var(--color-bg-surface)] p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[200px] opacity-60 hover:opacity-90 transition-[opacity,border-color,transform] duration-300 hover:scale-[1.01]"
+    >
+      <Briefcase
+        size={28}
+        weight="duotone"
+        className="text-[var(--color-ink-tertiary)]"
+      />
+      <p className="conduit-caption text-[var(--color-ink-tertiary)]">
         {caption}
       </p>
-    </div>
+      <span className="text-[13px] text-[var(--color-indigo-500)] inline-flex items-center gap-1 group-hover:gap-1.5 transition-[gap]">
+        Become a customer
+        <ArrowRight size={12} weight="bold" />
+      </span>
+    </Link>
   );
 }
