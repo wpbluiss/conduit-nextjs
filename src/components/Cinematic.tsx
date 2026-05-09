@@ -69,40 +69,23 @@ export default function Cinematic() {
             }}
           />
 
-          {/* Frame — dark Console-style chrome embedded in light section */}
+          {/* Frame — ember-glow celebration ring around the cinematic moment */}
           <div
             className="relative conduit-inverse aspect-[16/9] rounded-2xl overflow-hidden bg-[var(--color-ink-surface)]"
             style={{
               boxShadow:
-                "inset 0 0 0 1px rgba(91, 99, 232, 0.18), 0 0 80px rgba(91, 99, 232, 0.18), 0 32px 80px rgba(15, 17, 21, 0.16)",
+                "inset 0 0 0 1px rgba(214, 120, 23, 0.28), 0 0 80px rgba(214, 120, 23, 0.18), 0 32px 80px rgba(15, 17, 21, 0.16)",
             }}
           >
-            {/*
-              When /public/videos/praxis-hq-preview.mp4 exists, swap
-              the fallback below for:
-              <video
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="metadata"
-                className="absolute inset-0 w-full h-full object-cover"
-                poster="/videos/praxis-hq-poster.jpg"
-              >
-                <source src="/videos/praxis-hq-preview.mp4" type="video/mp4" />
-              </video>
-            */}
-
-            {/* Static fallback */}
             <CinematicFallback />
 
-            {/* Corner ember gradient overlay */}
+            {/* Corner accent overlay — ember celebration tone */}
             <div
               aria-hidden
               className="absolute inset-0 pointer-events-none"
               style={{
                 background:
-                  "radial-gradient(ellipse 50% 50% at 90% 10%, rgba(91, 99, 232,0.12) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 10% 90%, rgba(168,85,247,0.06) 0%, transparent 60%)",
+                  "radial-gradient(ellipse 50% 50% at 90% 10%, rgba(214, 120, 23, 0.10) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 10% 90%, rgba(91, 99, 232, 0.08) 0%, transparent 60%)",
               }}
             />
           </div>
@@ -164,21 +147,16 @@ export default function Cinematic() {
 
 function CinematicFallback() {
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--color-ink-canvas)]">
-      {/* Animated ember pulse behind icon */}
+    <div className="absolute inset-0 flex items-center justify-center bg-[var(--color-ink-canvas)]">
+      {/* Indigo-mesh backdrop */}
       <div
         aria-hidden
-        className="absolute inset-0 flex items-center justify-center pointer-events-none"
-      >
-        <div
-          className="w-[420px] h-[420px] rounded-full"
-          style={{
-            background:
-              "radial-gradient(circle at center, rgba(91, 99, 232,0.25) 0%, transparent 60%)",
-            filter: "blur(20px)",
-          }}
-        />
-      </div>
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 70% 60% at 50% 45%, rgba(91, 99, 232, 0.22) 0%, transparent 70%), radial-gradient(ellipse 40% 50% at 20% 100%, rgba(168, 175, 251, 0.10) 0%, transparent 65%)",
+        }}
+      />
 
       {/* Subtle grid pattern */}
       <div
@@ -195,24 +173,32 @@ function CinematicFallback() {
         }}
       />
 
-      <div className="relative flex flex-col items-center gap-5">
-        <div
-          className="w-24 h-24 rounded-2xl flex items-center justify-center"
-          style={{
-            background: "var(--color-ink-surface-elevated)",
-            border: "1px solid rgba(91, 99, 232,0.3)",
-            boxShadow:
-              "inset 0 0 0 1px rgba(91, 99, 232,0.15), 0 0 40px rgba(91, 99, 232,0.25)",
-          }}
-        >
-          <Buildings size={42} weight="duotone" color="#5B63E8" />
+      <div className="relative z-10 flex flex-col items-center text-center px-8 max-w-[760px]">
+        <p className="conduit-caption text-[var(--color-ink-tertiary)]">
+          Cinematic preview · Q3 2026
+        </p>
+
+        <div className="relative mt-8 mb-10">
+          <div
+            aria-hidden
+            className="absolute inset-[-40px] pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(circle at center, rgba(168, 175, 251, 0.35) 0%, transparent 70%)",
+              filter: "blur(24px)",
+            }}
+          />
+          <Buildings
+            size={96}
+            weight="duotone"
+            color="#A8AFFB"
+            className="relative"
+          />
         </div>
-        <p className="conduit-caption conduit-caption-ember">
-          Cinematic preview coming soon
-        </p>
-        <p className="text-[14px] text-[var(--color-cream-mute)] max-w-[400px] text-center">
-          Walk-through render in production. Drop in /public/videos/praxis-hq-preview.mp4 to swap.
-        </p>
+
+        <h3 className="conduit-display-lg text-[var(--color-cream)]">
+          Walk into a company you don&rsquo;t have to staff.
+        </h3>
       </div>
     </div>
   );
