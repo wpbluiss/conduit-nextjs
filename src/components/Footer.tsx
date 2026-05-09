@@ -93,14 +93,54 @@ const SOCIALS: { icon: typeof XLogo; href: string; label: string }[] = [
   },
 ];
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function Footer() {
   const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email.trim()) return;
-    setSubmitted(true);
+    const trimmed = email.trim().toLowerCase();
+    if (!EMAIL_RE.test(trimmed)) {
+      setStatus("error");
+      setErrorMsg("Enter a valid email address.");
+      return;
+    }
+    setStatus("loading");
+    setErrorMsg(null);
+    try {
+      const r = await fetch("/api/conduit/waitlist", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          product: "praxis-hq",
+          email: trimmed,
+          source: "newsletter:footer",
+        }),
+      });
+      const j = (await r.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+      };
+      if (!r.ok || !j.ok) {
+        setStatus("error");
+        setErrorMsg(
+          j.error === "invalid_email"
+            ? "That doesn't look like a valid email."
+            : "Couldn't save that, try again in a moment.",
+        );
+        return;
+      }
+      setStatus("success");
+      setEmail("");
+    } catch {
+      setStatus("error");
+      setErrorMsg("Network hiccup. Try again in a moment.");
+    }
   }
 
   return (
@@ -141,37 +181,55 @@ export default function Footer() {
               Product updates, customer stories, and the occasional thesis on
               what the next decade of AI workforces looks like.
             </p>
-            {submitted ? (
+            {status === "success" ? (
               <div className="flex items-center gap-2 text-[14px] text-[var(--color-conduit-success)]">
                 <CheckCircle size={18} weight="fill" />
-                <span>You&rsquo;re on the list. Talk soon.</span>
+                <span>You&rsquo;re on the list.</span>
               </div>
             ) : (
-              <form
-                onSubmit={handleSubmit}
-                className="flex flex-col sm:flex-row gap-3 max-w-md"
-              >
-                <label htmlFor="footer-email" className="sr-only">
-                  Email address
-                </label>
-                <input
-                  id="footer-email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Get product updates"
-                  className="flex-1 px-4 py-3 bg-[var(--color-ink-surface)] border border-[var(--color-edge)] rounded-xl text-[14px] text-[var(--color-cream)] placeholder:text-[var(--color-cream-mute)] focus:border-[var(--color-indigo-500)] focus:outline-none transition-colors"
-                />
-                <button
-                  type="submit"
-                  className="conduit-btn-primary justify-center"
-                  style={{ padding: "12px 20px", fontSize: "14px" }}
+              <>
+                <form
+                  onSubmit={handleSubmit}
+                  noValidate
+                  className="flex flex-col sm:flex-row gap-3 max-w-md"
                 >
-                  Subscribe
-                  <ArrowRight size={14} weight="bold" />
-                </button>
-              </form>
+                  <label htmlFor="footer-email" className="sr-only">
+                    Email address
+                  </label>
+                  <input
+                    id="footer-email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (status === "error") {
+                        setStatus("idle");
+                        setErrorMsg(null);
+                      }
+                    }}
+                    placeholder="Get product updates"
+                    className="flex-1 px-4 py-3 bg-[var(--color-ink-surface)] border border-[var(--color-edge)] rounded-xl text-[14px] text-[var(--color-cream)] placeholder:text-[var(--color-cream-mute)] focus:border-[var(--color-indigo-500)] focus:outline-none transition-colors"
+                  />
+                  <button
+                    type="submit"
+                    disabled={status === "loading"}
+                    className="conduit-btn-primary justify-center disabled:opacity-50"
+                    style={{ padding: "12px 20px", fontSize: "14px" }}
+                  >
+                    {status === "loading" ? "Saving…" : "Subscribe"}
+                    {status !== "loading" && (
+                      <ArrowRight size={14} weight="bold" />
+                    )}
+                  </button>
+                </form>
+                {status === "error" && errorMsg && (
+                  <p className="mt-2 text-[13px] text-[var(--color-conduit-danger)]">
+                    {errorMsg}
+                  </p>
+                )}
+              </>
             )}
             <p className="text-[12px] text-[var(--color-cream-mute)] mt-3">
               We respect your inbox.
