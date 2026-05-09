@@ -302,13 +302,19 @@ export default function Navbar() {
             className="flex items-center gap-2.5 group"
             aria-label="Conduit"
           >
-            <Logo size={28} />
+            <span className="hidden md:block">
+              <Logo size={scrolled ? 28 : 32} />
+            </span>
+            <span className="md:hidden">
+              <Logo size={36} />
+            </span>
             <span
-              className="text-[17px] tracking-tight text-[var(--color-ink-primary)] transition-[font-size] duration-300"
+              className={`text-[20px] tracking-tight text-[var(--color-ink-primary)] transition-[font-size] duration-300 ${
+                scrolled ? "md:text-[17px]" : "md:text-[19px]"
+              }`}
               style={{
                 fontFamily: "var(--font-serif)",
                 fontWeight: 500,
-                fontSize: scrolled ? "15px" : "17px",
               }}
             >
               Conduit
@@ -430,9 +436,9 @@ export default function Navbar() {
                     className="flex items-center gap-2.5"
                     aria-label="Conduit"
                   >
-                    <Logo size={28} />
+                    <Logo size={32} />
                     <span
-                      className="text-[17px] text-[var(--color-ink-primary)]"
+                      className="text-[19px] text-[var(--color-ink-primary)]"
                       style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
                     >
                       Conduit
