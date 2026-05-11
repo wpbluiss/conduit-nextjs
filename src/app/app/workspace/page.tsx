@@ -8,7 +8,7 @@ import {
   Mic2,
 } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getOrCreateAccount, userDisplayName } from "@/lib/conduit/account";
+import { getCurrentAccount, userDisplayName } from "@/lib/conduit/account";
 import {
   EMPLOYEE_ORDER,
   EMPLOYEES,
@@ -38,13 +38,10 @@ function relativeTime(iso: string | null | undefined): string {
 }
 
 export default async function WorkspaceDashboard() {
+  const current = await getCurrentAccount();
+  if (!current) redirect("/auth/sign-in?next=/app/workspace");
+  const { account, user } = current;
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/sign-in?next=/app/workspace");
-
-  const account = await getOrCreateAccount(supabase, user);
   const tier = tierById(account.tier_id);
   const internal = Boolean(account.internal_account);
   const allowed = (

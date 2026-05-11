@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowRight, FileText, Hammer, MessageSquare } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getOrCreateAccount } from "@/lib/conduit/account";
+import { getCurrentAccount } from "@/lib/conduit/account";
 import {
   EMPLOYEES,
   type EmployeeId,
@@ -47,13 +47,10 @@ export default async function WorkspacePage({ params }: PageProps) {
   const employeeId = employeeParam as EmployeeId;
   const employee = EMPLOYEES[employeeId];
 
+  const current = await getCurrentAccount();
+  if (!current) redirect("/auth/sign-in?next=/app/team/" + employeeId);
+  const { account } = current;
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/sign-in?next=/app/team/" + employeeId);
-
-  const account = await getOrCreateAccount(supabase, user);
   const tier = tierById(account.tier_id);
   const allowed =
     Boolean(account.internal_account) ||
@@ -71,55 +68,43 @@ export default async function WorkspacePage({ params }: PageProps) {
 
   const cycleStart = new Date(account.billing_cycle_start);
 
-  // Stats — run in parallel.
-  const [artifactsCountQ, lastMessageQ, conversationsQ, buildsCountQ] =
-    await Promise.all([
-      supabase
-        .from("conduit_artifacts")
-        .select("id", { count: "exact", head: true })
-        .eq("account_id", account.id)
-        .eq("produced_by", employeeId)
-        .gte("created_at", cycleStart.toISOString()),
-      supabase
-        .from("conduit_messages")
-        .select("created_at, conversation_id")
-        .eq("role", "assistant")
-        .eq("employee", employeeId)
-        .in(
-          "conversation_id",
-          (
-            await supabase
-              .from("conduit_conversations")
-              .select("id")
-              .eq("account_id", account.id)
-          ).data?.map((c) => c.id) ?? [],
-        )
-        .order("created_at", { ascending: false })
-        .limit(1),
-      supabase
-        .from("conduit_messages")
-        .select("conversation_id")
-        .eq("role", "assistant")
-        .eq("employee", employeeId)
-        .gte("created_at", cycleStart.toISOString())
-        .in(
-          "conversation_id",
-          (
-            await supabase
-              .from("conduit_conversations")
-              .select("id")
-              .eq("account_id", account.id)
-          ).data?.map((c) => c.id) ?? [],
-        ),
-      employeeId === "engineering"
-        ? supabase
-            .from("conduit_builds")
-            .select("id", { count: "exact", head: true })
-            .eq("account_id", account.id)
-            .eq("status", "live")
-            .gte("created_at", cycleStart.toISOString())
-        : Promise.resolve({ count: 0 } as { count: number | null }),
-    ]);
+  // Stats — run in parallel. Previously this Promise.all wrapper hid two
+  // serial `await supabase.from("conduit_conversations").select("id")` calls
+  // inside its arguments, so the conversations query fired twice in sequence
+  // before the rest of the parallel block even started. Fetch the convo IDs
+  // once up front, then fan out the dependent queries together.
+  const accountConvoIdsQ = await supabase
+    .from("conduit_conversations")
+    .select("id")
+    .eq("account_id", account.id);
+  const accountConvoIds =
+    (accountConvoIdsQ.data ?? []).map((c) => c.id as string);
+
+  const [artifactsCountQ, conversationsQ, buildsCountQ] = await Promise.all([
+    supabase
+      .from("conduit_artifacts")
+      .select("id", { count: "exact", head: true })
+      .eq("account_id", account.id)
+      .eq("produced_by", employeeId)
+      .gte("created_at", cycleStart.toISOString()),
+    accountConvoIds.length
+      ? supabase
+          .from("conduit_messages")
+          .select("conversation_id")
+          .eq("role", "assistant")
+          .eq("employee", employeeId)
+          .gte("created_at", cycleStart.toISOString())
+          .in("conversation_id", accountConvoIds)
+      : Promise.resolve({ data: [] as { conversation_id: string }[] }),
+    employeeId === "engineering"
+      ? supabase
+          .from("conduit_builds")
+          .select("id", { count: "exact", head: true })
+          .eq("account_id", account.id)
+          .eq("status", "live")
+          .gte("created_at", cycleStart.toISOString())
+      : Promise.resolve({ count: 0 } as { count: number | null }),
+  ]);
 
   const artifactsCount = artifactsCountQ.count ?? 0;
   const buildsCount =

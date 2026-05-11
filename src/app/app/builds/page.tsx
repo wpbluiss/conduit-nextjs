@@ -8,7 +8,7 @@
 
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getOrCreateAccount } from "@/lib/conduit/account";
+import { getCurrentAccount } from "@/lib/conduit/account";
 import { tierById } from "@/lib/billing/tiers";
 import { Hammer } from "lucide-react";
 import { isEngineeringConfigured } from "@/lib/builds/executor";
@@ -21,12 +21,10 @@ import BuildsTabs, {
 export const dynamic = "force-dynamic";
 
 export default async function BuildsPage() {
+  const current = await getCurrentAccount();
+  if (!current) return null;
+  const { account } = current;
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-  const account = await getOrCreateAccount(supabase, user);
   const tier = tierById(account.tier_id);
   const internal = Boolean(account.internal_account);
   const configured = isEngineeringConfigured();

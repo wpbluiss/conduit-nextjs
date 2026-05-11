@@ -1,4 +1,9 @@
+import { cache } from "react";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
+import {
+  createSupabaseServerClient,
+  getCurrentUser,
+} from "@/lib/supabase/server";
 
 export interface ConduitAccount {
   id: string;
@@ -100,3 +105,23 @@ export async function rollBillingCycleIfDue(
     .single();
   return (data as ConduitAccount) ?? account;
 }
+
+/**
+ * Per-request shared account fetch. Use this from server components instead of
+ * the two-step "get supabase, get user, getOrCreateAccount" pattern — the
+ * layout and the destination page then share one auth check + one account
+ * fetch via React `cache()`, instead of doing both twice.
+ *
+ * Returns null if the user isn't authenticated; the caller is responsible for
+ * the redirect (kept here so this stays safe to call from anywhere).
+ */
+export const getCurrentAccount = cache(async function (): Promise<{
+  account: ConduitAccount;
+  user: User;
+} | null> {
+  const supabase = await createSupabaseServerClient();
+  const user = await getCurrentUser();
+  if (!user) return null;
+  const account = await getOrCreateAccount(supabase, user);
+  return { account, user };
+});

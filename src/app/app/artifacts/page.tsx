@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getOrCreateAccount } from "@/lib/conduit/account";
+import { getCurrentAccount } from "@/lib/conduit/account";
 import { FileText } from "lucide-react";
 import {
   DEPT_COLOR,
@@ -26,12 +26,10 @@ function asEmployee(s: string): EmployeeKey {
 }
 
 export default async function ArtifactsPage() {
+  const current = await getCurrentAccount();
+  if (!current) return null;
+  const { account } = current;
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-  const account = await getOrCreateAccount(supabase, user);
 
   const { data: artifacts } = await supabase
     .from("conduit_artifacts")

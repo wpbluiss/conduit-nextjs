@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getOrCreateAccount, userDisplayName } from "@/lib/conduit/account";
+import { getCurrentAccount, userDisplayName } from "@/lib/conduit/account";
 import { Chat, type MessageRow } from "@/components/conduit/Chat";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { tierById } from "@/lib/billing/tiers";
@@ -13,13 +13,10 @@ interface PageProps {
 
 export default async function ChatPage({ searchParams }: PageProps) {
   const params = await searchParams;
+  const current = await getCurrentAccount();
+  if (!current) return null;
+  const { account, user } = current;
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  const account = await getOrCreateAccount(supabase, user);
 
   let conversationId: string | null = null;
   let messages: MessageRow[] = [];

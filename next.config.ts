@@ -1,7 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    // Console pages are `force-dynamic` (auth + per-account data), so the
+    // client router cache is off by default in Next.js 15+. Setting a small
+    // staleTimes.dynamic window restores the snappy "tab I just visited a
+    // few seconds ago opens instantly" feel without making data stale enough
+    // to mislead.
+    staleTimes: {
+      dynamic: 30,
+      static: 180,
+    },
+  },
 };
 
 export default nextConfig;

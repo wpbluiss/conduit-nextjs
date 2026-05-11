@@ -1,7 +1,11 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
-export async function createSupabaseServerClient() {
+// Wrapping in React `cache()` makes one server render share a single Supabase
+// client + a single auth check across layout, page, and any helpers — so the
+// /app layout and child page no longer issue two getUser() calls per request.
+export const createSupabaseServerClient = cache(async function () {
   const cookieStore = await cookies();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -21,4 +25,12 @@ export async function createSupabaseServerClient() {
       },
     },
   });
-}
+});
+
+export const getCurrentUser = cache(async function () {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user;
+});

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Mic, Lock } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getOrCreateAccount } from "@/lib/conduit/account";
+import { getCurrentAccount } from "@/lib/conduit/account";
 import { tierById } from "@/lib/billing/tiers";
 import { readVoiceCeilings } from "@/lib/voice/config";
 import {
@@ -58,13 +58,10 @@ function relativeTime(iso: string | null): string {
 }
 
 export default async function VoiceRoomLanding() {
+  const current = await getCurrentAccount();
+  if (!current) redirect("/auth/sign-in?next=/app/voice");
+  const { account } = current;
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/sign-in?next=/app/voice");
-
-  const account = await getOrCreateAccount(supabase, user);
   const tier = tierById(account.tier_id);
   const internal = Boolean(account.internal_account);
   const ttsAllowed = internal || account.tier_id !== "free";

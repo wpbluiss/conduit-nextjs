@@ -1,17 +1,14 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getOrCreateAccount } from "@/lib/conduit/account";
+import { getCurrentAccount } from "@/lib/conduit/account";
 
 export const dynamic = "force-dynamic";
 
 export default async function AnalyticsPage() {
+  const current = await getCurrentAccount();
+  if (!current) redirect("/auth/sign-in?next=/app/analytics");
+  const { account } = current;
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/sign-in?next=/app/analytics");
-
-  const account = await getOrCreateAccount(supabase, user);
 
   // Last 7 days window for top three cards.
   const weekStart = new Date();

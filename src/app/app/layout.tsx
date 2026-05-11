@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getOrCreateAccount } from "@/lib/conduit/account";
+import { getCurrentAccount } from "@/lib/conduit/account";
 import { Sidebar } from "@/components/conduit/Sidebar";
 import { OnboardingModal } from "@/components/conduit/OnboardingModal";
 import { UpgradeNudge } from "@/components/conduit/UpgradeNudge";
@@ -16,15 +16,12 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  const current = await getCurrentAccount();
+  if (!current) {
     redirect("/auth/sign-in?next=/app");
   }
-
-  const account = await getOrCreateAccount(supabase, user);
+  const { account, user } = current;
+  const supabase = await createSupabaseServerClient();
   const onboarded = Boolean(
     account.business_type && account.business_description,
   );
