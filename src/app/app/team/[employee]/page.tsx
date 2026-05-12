@@ -18,7 +18,20 @@ import SalesWorkspace from "@/components/conduit/sales/SalesWorkspace";
 import VoiceModeButton from "@/components/conduit/voice/VoiceModeButton";
 import EmployeeRightRail from "@/components/conduit/EmployeeRightRail";
 import EngineeringBuildButton from "@/components/conduit/engineering/EngineeringBuildButton";
+import MarketingWorkspace from "@/components/conduit/workspaces/MarketingWorkspace";
+import OpsWorkspace from "@/components/conduit/workspaces/OpsWorkspace";
+import ComplianceWorkspace from "@/components/conduit/workspaces/ComplianceWorkspace";
+import HRWorkspace from "@/components/conduit/workspaces/HRWorkspace";
+import LegalWorkspace from "@/components/conduit/workspaces/LegalWorkspace";
 import { getLastActiveForEmployee } from "@/lib/conduit/employee-activity";
+
+const V2_EMPLOYEES = new Set<EmployeeId>([
+  "marketing",
+  "ops",
+  "compliance",
+  "hr",
+  "legal",
+]);
 
 export const dynamic = "force-dynamic";
 
@@ -80,31 +93,40 @@ export default async function WorkspacePage({ params }: PageProps) {
   const accountConvoIds =
     (accountConvoIdsQ.data ?? []).map((c) => c.id as string);
 
-  const [artifactsCountQ, conversationsQ, buildsCountQ] = await Promise.all([
-    supabase
-      .from("conduit_artifacts")
-      .select("id", { count: "exact", head: true })
-      .eq("account_id", account.id)
-      .eq("produced_by", employeeId)
-      .gte("created_at", cycleStart.toISOString()),
-    accountConvoIds.length
-      ? supabase
-          .from("conduit_messages")
-          .select("conversation_id")
-          .eq("role", "assistant")
-          .eq("employee", employeeId)
-          .gte("created_at", cycleStart.toISOString())
-          .in("conversation_id", accountConvoIds)
-      : Promise.resolve({ data: [] as { conversation_id: string }[] }),
-    employeeId === "engineering"
-      ? supabase
-          .from("conduit_builds")
-          .select("id", { count: "exact", head: true })
-          .eq("account_id", account.id)
-          .eq("status", "live")
-          .gte("created_at", cycleStart.toISOString())
-      : Promise.resolve({ count: 0 } as { count: number | null }),
-  ]);
+  const [artifactsCountQ, conversationsQ, buildsCountQ, marketingRecentQ] =
+    await Promise.all([
+      supabase
+        .from("conduit_artifacts")
+        .select("id", { count: "exact", head: true })
+        .eq("account_id", account.id)
+        .eq("produced_by", employeeId)
+        .gte("created_at", cycleStart.toISOString()),
+      accountConvoIds.length
+        ? supabase
+            .from("conduit_messages")
+            .select("conversation_id")
+            .eq("role", "assistant")
+            .eq("employee", employeeId)
+            .gte("created_at", cycleStart.toISOString())
+            .in("conversation_id", accountConvoIds)
+        : Promise.resolve({ data: [] as { conversation_id: string }[] }),
+      employeeId === "engineering"
+        ? supabase
+            .from("conduit_builds")
+            .select("id", { count: "exact", head: true })
+            .eq("account_id", account.id)
+            .eq("status", "live")
+            .gte("created_at", cycleStart.toISOString())
+        : Promise.resolve({ count: 0 } as { count: number | null }),
+      employeeId === "marketing"
+        ? supabase
+            .from("conduit_marketing_sessions")
+            .select("id, prompt, status, created_at, output_urls")
+            .eq("account_id", account.id)
+            .order("created_at", { ascending: false })
+            .limit(5)
+        : Promise.resolve({ data: [] as unknown[] }),
+    ]);
 
   const artifactsCount = artifactsCountQ.count ?? 0;
   const buildsCount =
@@ -267,51 +289,71 @@ export default async function WorkspacePage({ params }: PageProps) {
       </div>
 
       <div className="mx-auto max-w-4xl px-4 md:px-8 py-8 space-y-10">
-        {/* Quick start */}
-        <section>
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-3">
-            Quick start
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {prompts.map((p) => (
-              <Link
-                key={p}
-                href={`/app?pin=${employeeId}&prompt=${encodeURIComponent(p)}`}
-                style={{
-                  ["--dept" as string]: dept,
-                  ["--dept-soft" as string]: employee.colorSoft,
-                }}
-                className="conduit-suggestion px-4 py-3 text-sm block"
-              >
-                {p}
-              </Link>
-            ))}
-          </div>
-        </section>
+        {V2_EMPLOYEES.has(employeeId) ? (
+          employeeId === "marketing" ? (
+            <MarketingWorkspace
+              recent={
+                (marketingRecentQ.data ?? []) as unknown as Parameters<
+                  typeof MarketingWorkspace
+                >[0]["recent"]
+              }
+            />
+          ) : employeeId === "ops" ? (
+            <OpsWorkspace />
+          ) : employeeId === "compliance" ? (
+            <ComplianceWorkspace />
+          ) : employeeId === "hr" ? (
+            <HRWorkspace />
+          ) : employeeId === "legal" ? (
+            <LegalWorkspace />
+          ) : null
+        ) : (
+          <>
+            {/* Quick start */}
+            <section>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-3">
+                Quick start
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {prompts.map((p) => (
+                  <Link
+                    key={p}
+                    href={`/app?pin=${employeeId}&prompt=${encodeURIComponent(p)}`}
+                    style={{
+                      ["--dept" as string]: dept,
+                      ["--dept-soft" as string]: employee.colorSoft,
+                    }}
+                    className="conduit-suggestion px-4 py-3 text-sm block"
+                  >
+                    {p}
+                  </Link>
+                ))}
+              </div>
+            </section>
 
-        {/* Stats */}
-        <section>
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-3">
-            This cycle
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {employeeId === "engineering" ? (
-              <Stat label="Builds shipped" value={String(buildsCount)} />
-            ) : employee.canExecute ? (
-              <Stat
-                label="Artifacts produced"
-                value={String(artifactsCount)}
-              />
-            ) : (
-              <Stat label="Activity" value="Conversational" sub="No autonomous execution yet" />
-            )}
-            <Stat label="Conversations" value={String(conversationCount)} />
-            <Stat label="Last active" value={relativeTime(lastActiveIso)} />
-          </div>
-        </section>
+            {/* Stats */}
+            <section>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-3">
+                This cycle
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {employeeId === "engineering" ? (
+                  <Stat label="Builds shipped" value={String(buildsCount)} />
+                ) : employee.canExecute ? (
+                  <Stat
+                    label="Artifacts produced"
+                    value={String(artifactsCount)}
+                  />
+                ) : (
+                  <Stat label="Activity" value="Conversational" sub="No autonomous execution yet" />
+                )}
+                <Stat label="Conversations" value={String(conversationCount)} />
+                <Stat label="Last active" value={relativeTime(lastActiveIso)} />
+              </div>
+            </section>
 
-        {/* Recent activity / empty */}
-        <section>
+            {/* Recent activity / empty */}
+            <section>
           <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-3">
             Recent activity
           </div>
@@ -402,6 +444,8 @@ export default async function WorkspacePage({ params }: PageProps) {
             </ul>
           )}
         </section>
+          </>
+        )}
       </div>
       </div>
       <div className="hidden lg:block">
