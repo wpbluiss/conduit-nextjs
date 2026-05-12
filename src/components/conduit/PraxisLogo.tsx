@@ -8,12 +8,17 @@ interface Props {
   glow?: boolean;
 }
 
+// Natural aspect of the cleaned mark (632x961 → ~0.658 W/H).
+const MARK_ASPECT = 632 / 961;
+
 export function PraxisLogo({
   size = 22,
   withWordmark = false,
   className = "",
   glow = false,
 }: Props) {
+  const height = size;
+  const width = Math.round(size * MARK_ASPECT);
   return (
     <span
       className={`inline-flex items-center gap-2 ${className}`}
@@ -22,11 +27,11 @@ export function PraxisLogo({
       <Image
         src="/praxis-mark.png"
         alt=""
-        width={size}
-        height={size}
+        width={width}
+        height={height}
         priority
         className={glow ? "praxis-mark" : undefined}
-        style={{ display: "block", width: size, height: size }}
+        style={{ display: "block", width, height }}
       />
       {withWordmark && (
         <span
