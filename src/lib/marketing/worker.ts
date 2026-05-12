@@ -4,6 +4,16 @@
 
 import { signMarketingSession } from "./hmac";
 
+// Mirrors engineering/worker.ts — Railway exposes the worker domain
+// host-only, and a scheme-less env var trips fetch() with "Failed to
+// parse URL." Normalize so writes survive a misconfigured env var.
+function resolveWorkerBase(): string | null {
+  const raw = process.env.MARKETING_WORKER_URL?.trim();
+  if (!raw) return null;
+  const withScheme = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+  return withScheme.replace(/\/$/, "");
+}
+
 export interface MarketingWorkerStartInput {
   sessionId: string;
   accountId: string;
@@ -19,8 +29,8 @@ export interface MarketingWorkerStartInput {
 export async function startMarketingWorkerSession(
   input: MarketingWorkerStartInput,
 ): Promise<{ ok: boolean; status: number; error?: string }> {
-  const url = process.env.MARKETING_WORKER_URL;
-  if (!url) {
+  const base = resolveWorkerBase();
+  if (!base) {
     return { ok: false, status: 0, error: "worker_url_missing" };
   }
   const ts = Date.now();
@@ -35,7 +45,7 @@ export async function startMarketingWorkerSession(
     };
   }
   try {
-    const r = await fetch(`${url.replace(/\/$/, "")}/generate`, {
+    const r = await fetch(`${base}/generate`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -62,8 +72,8 @@ export async function startMarketingWorkerSession(
 export async function abortMarketingWorkerSession(
   sessionId: string,
 ): Promise<{ ok: boolean; status: number; found?: boolean; error?: string }> {
-  const url = process.env.MARKETING_WORKER_URL;
-  if (!url) return { ok: false, status: 0, error: "worker_url_missing" };
+  const base = resolveWorkerBase();
+  if (!base) return { ok: false, status: 0, error: "worker_url_missing" };
   const ts = Date.now();
   let sig: string;
   try {
@@ -77,7 +87,7 @@ export async function abortMarketingWorkerSession(
   }
   try {
     const r = await fetch(
-      `${url.replace(/\/$/, "")}/session/${sessionId}/abort`,
+      `${base}/session/${sessionId}/abort`,
       {
         method: "POST",
         headers: {

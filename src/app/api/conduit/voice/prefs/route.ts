@@ -4,7 +4,17 @@ import { getOrCreateAccount } from "@/lib/conduit/account";
 
 export const runtime = "nodejs";
 
-const VALID_EMPLOYEES = ["jarvis", "marketing", "sales", "engineering"];
+const VALID_EMPLOYEES = [
+  "jarvis",
+  "marketing",
+  "sales",
+  "engineering",
+  "finance",
+  "compliance",
+  "hr",
+  "ops",
+  "legal",
+];
 
 export async function GET() {
   const supabase = await createSupabaseServerClient();

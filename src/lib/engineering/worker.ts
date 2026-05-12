@@ -6,6 +6,17 @@
 
 import { signSession } from "./hmac";
 
+// Railway's dashboard shows worker domains host-only (no scheme). Operators
+// have set ENGINEERING_WORKER_URL without "https://" before, which trips
+// Node's fetch() with "Failed to parse URL". Normalize so missing schemes
+// don't silently fail every build.
+function resolveWorkerBase(): string | null {
+  const raw = process.env.ENGINEERING_WORKER_URL?.trim();
+  if (!raw) return null;
+  const withScheme = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+  return withScheme.replace(/\/$/, "");
+}
+
 export interface WorkerStartInput {
   sessionId: string;
   accountId: string;
@@ -17,8 +28,8 @@ export interface WorkerStartInput {
 export async function startWorkerSession(
   input: WorkerStartInput,
 ): Promise<{ ok: boolean; status: number; error?: string }> {
-  const url = process.env.ENGINEERING_WORKER_URL;
-  if (!url) {
+  const base = resolveWorkerBase();
+  if (!base) {
     return { ok: false, status: 0, error: "worker_url_missing" };
   }
   const ts = Date.now();
@@ -34,7 +45,7 @@ export async function startWorkerSession(
   }
 
   try {
-    const r = await fetch(`${url.replace(/\/$/, "")}/session`, {
+    const r = await fetch(`${base}/session`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -67,8 +78,8 @@ export async function startWorkerSession(
 export async function abortWorkerSession(
   sessionId: string,
 ): Promise<{ ok: boolean; status: number; found?: boolean; error?: string }> {
-  const url = process.env.ENGINEERING_WORKER_URL;
-  if (!url) {
+  const base = resolveWorkerBase();
+  if (!base) {
     return { ok: false, status: 0, error: "worker_url_missing" };
   }
   const ts = Date.now();
@@ -84,7 +95,7 @@ export async function abortWorkerSession(
   }
   try {
     const r = await fetch(
-      `${url.replace(/\/$/, "")}/session/${sessionId}/abort`,
+      `${base}/session/${sessionId}/abort`,
       {
         method: "POST",
         headers: {

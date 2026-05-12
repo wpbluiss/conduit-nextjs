@@ -1,14 +1,12 @@
 /**
- * PraxisLogo — geometric purple prism mark.
+ * PraxisLogo — curved P single-letter mark.
  *
- * Three-faced isometric cube. Single form, three brand-purple tones
- * for depth (hi → base → deep). Lands in:
- *   - Sidebar header (replacing the legacy dot+wordmark)
- *   - OnboardingModal eyebrow
- *   - Any "Praxis" attribution chip in /app
- *
- * Mirrors Praxis Mobile R19 brand spec — same prism, same tonal axis.
- * Renders crisply at 14px through 96px.
+ * R2 approximation of the ChatGPT-rendered curved P used by Praxis Mobile
+ * R20. Single brand-purple glyph (oklch(50% 0.22 290)), rounded geometric
+ * proportions, evenodd-fill bowl interior so the letterform reads cleanly
+ * from 14px through 96px. The real exported asset will land in a follow-up
+ * ticket; until then this SVG carries the same identity in the rail and
+ * onboarding chip.
  */
 
 interface Props {
@@ -40,36 +38,11 @@ export function PraxisLogo({
         className={glow ? "praxis-mark" : undefined}
         style={{ display: "block" }}
       >
-        {/* Top face — brightest */}
         <path
-          d="M12 2 L22 7 L12 12 L2 7 Z"
-          fill="var(--color-praxis-purple-hi)"
-        />
-        {/* Left face — base purple */}
-        <path
-          d="M2 7 L2 17 L12 22 L12 12 Z"
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M8 3.5 A0.5 0.5 0 0 1 8.5 3 H11 A5.5 5.5 0 0 1 11 14 V20.5 A0.5 0.5 0 0 1 10.5 21 H8.5 A0.5 0.5 0 0 1 8 20.5 Z M11 6 A2.5 2.5 0 0 1 11 11 Z"
           fill="var(--color-praxis-purple)"
-        />
-        {/* Right face — deepest, gives the prism its volume */}
-        <path
-          d="M22 7 L22 17 L12 22 L12 12 Z"
-          fill="var(--color-praxis-purple-deep)"
-        />
-        {/* Inner edges — hairline highlight along the top seams */}
-        <path
-          d="M2 7 L12 12 L22 7"
-          stroke="oklch(85% 0.10 290)"
-          strokeWidth="0.6"
-          strokeOpacity="0.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M12 12 L12 22"
-          stroke="oklch(85% 0.10 290)"
-          strokeWidth="0.6"
-          strokeOpacity="0.25"
-          strokeLinecap="round"
         />
       </svg>
       {withWordmark && (
