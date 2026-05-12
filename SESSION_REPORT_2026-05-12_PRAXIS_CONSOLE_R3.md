@@ -196,3 +196,24 @@ so render is unblocked.
   schemas land.
 - Audit the engineering build terminal in light mode if user reports
   it feels out of place — currently dark in both themes by design.
+
+---
+
+## R3-4 (email / Resend cutover) — closed, no-op
+
+**Outcome:** No DNS changes, no code changes. Resend domain `conduitai.io`
+was verified ~3 months ago (apex DKIM + `mail.conduitai.io` SPF/MX,
+account region `us-east-1`). `RESEND_DEV_TO` was already removed from
+Vercel production by the time this round closed, so live sending is
+active.
+
+**Correction to my earlier output in this thread:**
+- DNS for `conduitai.io` is hosted at **Porkbun**, not Namecheap. Any
+  future record additions go in the Porkbun zone editor.
+- The DNS table I drafted is unnecessary; the records were already in
+  place. Logged for future reference; **do not** add them — Porkbun
+  already serves the authoritative answers Resend expects.
+
+**R3 round closed.** Four shipped items (workspace dark theme,
+light/dark toggle, builds Show-failed toggle, per-employee workspace
+V2) plus this no-op email-cutover check.
