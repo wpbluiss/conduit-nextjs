@@ -85,6 +85,45 @@
   --color-dept-ops-soft: rgba(20, 184, 166, 0.14);
   --color-dept-legal: #3B82F6;               /* indigo-blue */
   --color-dept-legal-soft: rgba(59, 130, 246, 0.14);
+
+  /* ---- Surface/ink token overrides for the marketing card primitives ----
+   * `.conduit-card`, `.conduit-bg-surface*`, etc. were authored against the
+   * Conduit marketing palette (white surfaces, dark ink). Inside Praxis
+   * Console they must read as dark. Remap the v3 names to Praxis surfaces
+   * so every consumer flips without component edits. */
+  --color-bg-canvas: var(--color-surface);
+  --color-bg-surface: var(--color-surface-elevated);
+  --color-bg-surface-subtle: var(--color-surface-raised);
+  --color-bg-surface-sunken: var(--color-surface);
+  --color-bg-inverse: var(--color-surface);
+  --color-bg-inverse-elevated: var(--color-surface-elevated);
+
+  --color-ink-primary: var(--color-text);
+  --color-ink-secondary: var(--color-text-muted);
+  --color-ink-tertiary: var(--color-text-muted);
+  --color-ink-on-inverse: var(--color-text);
+  --color-ink-on-inverse-soft: var(--color-text-muted);
+  --color-ink-on-inverse-mute: var(--color-text-muted);
+
+  --color-border-subtle: var(--color-border);
+  --color-border-default: var(--color-border-soft);
+  --color-border-strong: var(--color-border-soft);
+  --color-border-on-inverse: var(--color-border);
+  --color-border-on-inverse-strong: var(--color-border-soft);
+}
+
+/* Force text color inside .conduit-card to follow Praxis tokens — some
+ * marketing typography utilities (eyebrow, caption, etc.) set ink colors
+ * explicitly. */
+.praxis-root .conduit-card {
+  color: var(--color-text);
+}
+.praxis-root .conduit-card:hover {
+  border-color: color-mix(in srgb, var(--color-praxis-purple) 35%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-praxis-purple) 10%, transparent),
+    0 0 32px color-mix(in srgb, var(--color-praxis-purple) 14%, transparent),
+    0 16px 48px rgba(0, 0, 0, 0.4);
 }
 
 /* Tinted canvas — replaces the orange-tinted radial with a
