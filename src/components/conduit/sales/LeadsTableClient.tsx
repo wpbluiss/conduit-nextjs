@@ -553,7 +553,10 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
         {running && (
           <div
             className="rounded-md p-3 text-sm flex items-center gap-2"
-            style={{ background: `${deptColor}1a`, color: deptColor }}
+            style={{
+              background: `color-mix(in srgb, ${deptColor} 10%, transparent)`,
+              color: deptColor,
+            }}
           >
             <Loader2 size={14} className="animate-spin" />
             <span>{phase || "Working…"}</span>

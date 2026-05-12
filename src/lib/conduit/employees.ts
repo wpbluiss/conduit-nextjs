@@ -33,13 +33,18 @@ export interface EmployeeConfig {
   voiceCategory: IntentClass;
 }
 
+// Dept color values resolve through CSS variables, not hardcoded hex.
+// That lets praxis-tokens.css swap colors per theme (deep emerald on
+// light bone, bright emerald on dark amethyst) without component edits.
+// On marketing surfaces (no .praxis-root wrapper), globals.css :root
+// supplies dark-theme jewel-tones as the default.
 export const EMPLOYEES: Record<EmployeeId, EmployeeConfig> = {
   jarvis: {
     id: "jarvis",
     name: "Atlas",
     role: "Chief of Staff",
-    color: "#C8C5BD",
-    colorSoft: "rgba(200, 197, 189, 0.14)",
+    color: "var(--color-dept-jarvis)",
+    colorSoft: "var(--color-dept-jarvis-soft)",
     initial: "A",
     tagline: "Your right hand. Routes work, holds the bigger picture.",
     canExecute: true,
@@ -49,8 +54,8 @@ export const EMPLOYEES: Record<EmployeeId, EmployeeConfig> = {
     id: "marketing",
     name: "Marketing",
     role: "Content + Brand",
-    color: "#FF8A3D",
-    colorSoft: "rgba(255, 138, 61, 0.14)",
+    color: "var(--color-dept-marketing)",
+    colorSoft: "var(--color-dept-marketing-soft)",
     initial: "M",
     tagline: "Writes, designs, and ships content for your business.",
     canExecute: true,
@@ -60,8 +65,8 @@ export const EMPLOYEES: Record<EmployeeId, EmployeeConfig> = {
     id: "sales",
     name: "Sales",
     role: "Pipeline + Outreach",
-    color: "#34D399",
-    colorSoft: "rgba(52, 211, 153, 0.14)",
+    color: "var(--color-dept-sales)",
+    colorSoft: "var(--color-dept-sales-soft)",
     initial: "S",
     tagline: "Prospects, qualifies, calls, and closes.",
     canExecute: false,
@@ -71,8 +76,8 @@ export const EMPLOYEES: Record<EmployeeId, EmployeeConfig> = {
     id: "engineering",
     name: "Engineering",
     role: "Build + Ship",
-    color: "#60A5FA",
-    colorSoft: "rgba(96, 165, 250, 0.14)",
+    color: "var(--color-dept-engineering)",
+    colorSoft: "var(--color-dept-engineering-soft)",
     initial: "E",
     tagline: "Builds tools, websites, CRMs, automations.",
     canExecute: true, // R7: real builds via templates + GitHub + Vercel
@@ -82,8 +87,8 @@ export const EMPLOYEES: Record<EmployeeId, EmployeeConfig> = {
     id: "finance",
     name: "Finance",
     role: "Books + Strategy",
-    color: "#EAB308",
-    colorSoft: "rgba(234, 179, 8, 0.14)",
+    color: "var(--color-dept-finance)",
+    colorSoft: "var(--color-dept-finance-soft)",
     initial: "F",
     tagline: "P&L, commissions, cash strategy, projections.",
     canExecute: false,
@@ -93,8 +98,8 @@ export const EMPLOYEES: Record<EmployeeId, EmployeeConfig> = {
     id: "compliance",
     name: "Compliance",
     role: "Regs + Risk",
-    color: "#A855F7",
-    colorSoft: "rgba(168, 85, 247, 0.14)",
+    color: "var(--color-dept-compliance)",
+    colorSoft: "var(--color-dept-compliance-soft)",
     initial: "C",
     tagline: "Regulatory guidance, licensing, HIPAA awareness.",
     canExecute: false,
@@ -104,8 +109,8 @@ export const EMPLOYEES: Record<EmployeeId, EmployeeConfig> = {
     id: "hr",
     name: "HR",
     role: "People + Hiring",
-    color: "#EC4899",
-    colorSoft: "rgba(236, 72, 153, 0.14)",
+    color: "var(--color-dept-hr)",
+    colorSoft: "var(--color-dept-hr-soft)",
     initial: "H",
     tagline: "Recruitment, handbooks, team structure.",
     canExecute: true, // produces real artifacts (job descs, handbooks)
@@ -115,8 +120,8 @@ export const EMPLOYEES: Record<EmployeeId, EmployeeConfig> = {
     id: "ops",
     name: "Operations",
     role: "Calendar + Process",
-    color: "#14B8A6",
-    colorSoft: "rgba(20, 184, 166, 0.14)",
+    color: "var(--color-dept-ops)",
+    colorSoft: "var(--color-dept-ops-soft)",
     initial: "O",
     tagline: "Scheduling, internal coordination, process design.",
     canExecute: true, // SOPs, checklists, process docs
@@ -126,8 +131,8 @@ export const EMPLOYEES: Record<EmployeeId, EmployeeConfig> = {
     id: "legal",
     name: "Legal",
     role: "Contracts + Agreements",
-    color: "#3B82F6",
-    colorSoft: "rgba(59, 130, 246, 0.14)",
+    color: "var(--color-dept-legal)",
+    colorSoft: "var(--color-dept-legal-soft)",
     initial: "L",
     tagline:
       "Contracts, BAAs, basic agreements (with attorney-review disclaimer).",

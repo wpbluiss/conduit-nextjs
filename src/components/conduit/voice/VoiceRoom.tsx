@@ -311,7 +311,9 @@ export default function VoiceRoom({
                   {isActive && connected && (
                     <div
                       className="absolute -inset-1 rounded-full animate-pulse"
-                      style={{ boxShadow: `0 0 0 3px ${d.color}66` }}
+                      style={{
+                        boxShadow: `0 0 0 3px color-mix(in srgb, ${d.color} 40%, transparent)`,
+                      }}
                     />
                   )}
                   <div
@@ -336,7 +338,9 @@ export default function VoiceRoom({
             {connected && agentPresent && (
               <div
                 className="absolute -inset-2 rounded-full animate-pulse"
-                style={{ boxShadow: `0 0 0 4px ${deptColor}33` }}
+                style={{
+                  boxShadow: `0 0 0 4px color-mix(in srgb, ${deptColor} 20%, transparent)`,
+                }}
               />
             )}
           </div>
