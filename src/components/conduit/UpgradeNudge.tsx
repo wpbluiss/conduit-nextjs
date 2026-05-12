@@ -43,7 +43,7 @@ export function UpgradeNudge({
     >
       <Sparkles size={14} className="text-[var(--color-accent)]" />
       <span className="text-[var(--color-text)]">
-        You&apos;re on Conduit Free. Want premium routing?
+        You&apos;re on Praxis Free. Want premium routing?
       </span>
       <Link
         href="/app/settings"

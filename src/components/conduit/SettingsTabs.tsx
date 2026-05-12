@@ -1257,9 +1257,9 @@ function BillingTab({
       <div className="space-y-6 text-sm">
         <div className="conduit-card p-6">
           <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
-            Internal Account · Conduit Team
+            Internal Account · Conduit AI Team
           </div>
-          {/* Conduit (the company) intentional — internal team badge. */}
+          {/* Conduit AI (the parent company) intentional — internal team badge. */}
           <div className="serif text-2xl">No charge, full access</div>
           <p className="mt-2 text-[var(--color-text-muted)]">
             You&apos;re on the internal team account. All tiers, all

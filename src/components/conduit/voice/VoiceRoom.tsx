@@ -280,7 +280,7 @@ export default function VoiceRoom({
     <div className="fixed inset-0 z-[60] bg-black/85 backdrop-blur-md flex flex-col text-white">
       <div className="px-4 md:px-6 py-3 flex items-center justify-between border-b border-white/10">
         <div className="text-[10px] uppercase tracking-[0.22em] text-white/60">
-          Conduit Voice · {isRoundTable ? "Round-table" : employeeName}
+          Praxis Voice · {isRoundTable ? "Round-table" : employeeName}
         </div>
         <button
           type="button"

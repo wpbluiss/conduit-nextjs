@@ -35,28 +35,30 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://conduitai.io"),
-  title: "Conduit — Intelligence at work",
+  title: "Conduit AI — Intelligence at work",
   description:
-    "Conduit builds Praxis, the operating system for autonomous AI workforces. Voice, sales, engineering, ops, finance — running 24/7.",
+    "Conduit AI builds Praxis, the operating system for autonomous AI workforces. Voice, sales, engineering, ops, finance — running 24/7.",
   icons: {
-    icon: "/favicon.svg",
-    apple: "/favicon.svg",
+    icon: "/praxis-mark.png",
+    apple: "/praxis-mark.png",
   },
   openGraph: {
-    title: "Conduit — Intelligence at work",
+    title: "Conduit AI — Intelligence at work",
     description:
-      "Conduit builds Praxis, the operating system for autonomous AI workforces. Voice, sales, engineering, ops, finance — running 24/7.",
+      "Conduit AI builds Praxis, the operating system for autonomous AI workforces. Voice, sales, engineering, ops, finance — running 24/7.",
     url: "https://conduitai.io",
-    siteName: "Conduit",
+    siteName: "Conduit AI",
     type: "website",
-    images: [{ url: "/logo.svg", width: 1200, height: 1200, alt: "Conduit" }],
+    images: [
+      { url: "/praxis-mark.png", width: 632, height: 961, alt: "Praxis" },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Conduit — Intelligence at work",
+    title: "Conduit AI — Intelligence at work",
     description:
-      "Conduit builds Praxis, the operating system for autonomous AI workforces.",
-    images: ["/logo.svg"],
+      "Conduit AI builds Praxis, the operating system for autonomous AI workforces.",
+    images: ["/praxis-mark.png"],
   },
 };
 
