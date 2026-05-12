@@ -67,7 +67,7 @@ export default async function AppLayout({
     "you";
 
   return (
-    <div className="h-screen flex bg-[var(--color-surface)] text-[var(--color-text)]">
+    <div className="praxis-root h-screen flex bg-[var(--color-surface)] text-[var(--color-text)]">
       <RouteProgress />
       <Sidebar
         userEmail={user.email ?? ""}

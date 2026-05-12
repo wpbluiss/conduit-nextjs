@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Fraunces, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import "@/styles/praxis-tokens.css";
 
 const inter = Inter({
   variable: "--font-sans",

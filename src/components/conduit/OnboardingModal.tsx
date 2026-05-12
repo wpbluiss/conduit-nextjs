@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
+import { PraxisLogo } from "./PraxisLogo";
 
 const BUSINESS_TYPES = [
   "cleaning",
@@ -64,11 +65,7 @@ export function OnboardingModal({
       <div className="px-8 md:px-12 pt-8">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-2 mb-2">
-            <span
-              aria-hidden
-              className="inline-block w-2 h-2 rounded-full"
-              style={{ background: "var(--color-accent)" }}
-            />
+            <PraxisLogo size={14} />
             <span className="text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
               Praxis · Step {Math.min(step, 3)} of 3
             </span>
@@ -132,7 +129,7 @@ export function OnboardingModal({
                     onClick={() => setBusinessType(t)}
                     className={`px-4 py-2 text-sm rounded-full border transition-colors ${
                       businessType === t
-                        ? "border-[var(--color-accent)] text-[var(--color-accent-hi)] bg-[rgba(255,138,61,0.08)]"
+                        ? "border-[var(--color-accent)] text-[var(--color-accent-hi)] bg-[color-mix(in_srgb,var(--color-accent)_10%,transparent)]"
                         : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-text)] hover:text-[var(--color-text)]"
                     }`}
                   >

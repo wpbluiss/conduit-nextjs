@@ -20,8 +20,9 @@ import {
   X,
 } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
-import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
+import { DEPT_COLOR, EMPLOYEE_ICON, employeeLabel } from "./EmployeeBadge";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
+import { PraxisLogo } from "./PraxisLogo";
 
 interface ConvoSummary {
   id: string;
@@ -103,16 +104,9 @@ export function Sidebar({
           <Link
             href="/app/workspace"
             onClick={close}
-            className="flex items-center gap-2"
+            className="flex items-center"
           >
-            <span
-              aria-hidden
-              className="inline-block w-2 h-2 rounded-full"
-              style={{ background: "var(--color-accent)" }}
-            />
-            <span className="serif text-xl text-[var(--color-text)]">
-              Praxis
-            </span>
+            <PraxisLogo size={20} withWordmark glow />
           </Link>
           <button
             type="button"
@@ -174,6 +168,7 @@ export function Sidebar({
                   const isStreaming = streamingEmployee === emp;
                   const allowed = allowedEmployees.includes(emp);
                   const active = pathname === `/app/team/${emp}`;
+                  const Icon = EMPLOYEE_ICON[emp];
                   const rowInner = (
                     <span className="relative flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-colors duration-100 hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]">
                       {active && (
@@ -185,14 +180,14 @@ export function Sidebar({
                       )}
                       <span
                         aria-hidden
-                        className="inline-flex items-center justify-center shrink-0 w-4 h-4 rounded-full text-[8px] font-medium"
+                        className="inline-flex items-center justify-center shrink-0 w-5 h-5 rounded-md"
                         style={{
-                          background: `color-mix(in srgb, ${DEPT_COLOR[emp]} 20%, var(--color-surface-elevated))`,
+                          background: `color-mix(in srgb, ${DEPT_COLOR[emp]} 18%, var(--color-surface-elevated))`,
                           color: DEPT_COLOR[emp],
-                          boxShadow: `inset 0 0 0 1px ${DEPT_COLOR[emp]}`,
+                          boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[emp]} 65%, transparent)`,
                         }}
                       >
-                        {emp === "jarvis" ? "A" : emp.charAt(0).toUpperCase()}
+                        <Icon size={11} strokeWidth={2.25} />
                       </span>
                       <span className="text-[var(--color-text)] truncate flex-1">
                         {employeeLabel(emp)}
@@ -200,7 +195,7 @@ export function Sidebar({
                       {!allowed ? (
                         <Lock
                           size={10}
-                          aria-label="Locked"
+                          aria-label="Locked — upgrade to unlock"
                           className="text-[var(--color-text-muted)]"
                         />
                       ) : (
@@ -209,8 +204,11 @@ export function Sidebar({
                           style={{
                             background: isStreaming
                               ? DEPT_COLOR[emp]
-                              : "var(--color-text-muted)",
-                            opacity: isStreaming ? 1 : 0.4,
+                              : DEPT_COLOR[emp],
+                            opacity: isStreaming ? 1 : 0.55,
+                            boxShadow: isStreaming
+                              ? `0 0 6px ${DEPT_COLOR[emp]}`
+                              : "none",
                           }}
                           aria-label={isStreaming ? "Active" : "Online"}
                         />
@@ -220,7 +218,6 @@ export function Sidebar({
                   return (
                     <li
                       key={emp}
-                      className={allowed ? "" : "opacity-60"}
                       title={allowed ? undefined : "Available on a higher plan"}
                     >
                       {allowed ? (
@@ -235,7 +232,7 @@ export function Sidebar({
                         <Link
                           href="/app/settings"
                           onClick={close}
-                          className="block cursor-not-allowed"
+                          className="block"
                         >
                           {rowInner}
                         </Link>
@@ -335,19 +332,22 @@ export function Sidebar({
                           }}
                         />
                       ) : (
-                        <span
-                          aria-hidden
-                          className="inline-flex items-center justify-center shrink-0 w-3 h-3 rounded-full text-[7px] font-medium"
-                          style={{
-                            background: `color-mix(in srgb, ${DEPT_COLOR[empKey]} 20%, var(--color-surface-elevated))`,
-                            color: DEPT_COLOR[empKey],
-                            boxShadow: `inset 0 0 0 1px ${DEPT_COLOR[empKey]}`,
-                          }}
-                        >
-                          {empKey === "jarvis"
-                            ? "A"
-                            : empKey.charAt(0).toUpperCase()}
-                        </span>
+                        (() => {
+                          const RecentIcon = EMPLOYEE_ICON[empKey];
+                          return (
+                            <span
+                              aria-hidden
+                              className="inline-flex items-center justify-center shrink-0 w-3.5 h-3.5 rounded-[4px]"
+                              style={{
+                                background: `color-mix(in srgb, ${DEPT_COLOR[empKey]} 18%, var(--color-surface-elevated))`,
+                                color: DEPT_COLOR[empKey],
+                                boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[empKey]} 60%, transparent)`,
+                              }}
+                            >
+                              <RecentIcon size={9} strokeWidth={2.5} />
+                            </span>
+                          );
+                        })()
                       )}
                       <span className="truncate">
                         {c.title || "Untitled chat"}

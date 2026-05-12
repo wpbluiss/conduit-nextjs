@@ -1,0 +1,107 @@
+/* ============================================================
+ * Praxis Console — R14 jewel-tone token sheet
+ *
+ * Surface-only override. Scoped to `.praxis-root` so it never
+ * touches the Conduit marketing site (different brand identity:
+ * indigo, light-first, separate from Praxis).
+ *
+ * Brand axes:
+ *   Primary  → brand purple   oklch(50% 0.22 290)  — deep amethyst
+ *   Secondary → electric blue oklch(60% 0.22 248)  — sapphire
+ *   Canvas   → Praxis dark surfaces (warm-cooled black)
+ *
+ * Employee jewel-tones mirror Praxis Mobile R14. Engineering
+ * specifically moves to electric blue. The rest are tightened
+ * (deeper, more saturated) but visually compatible with the
+ * existing employee accent system in `lib/conduit/employees.ts`.
+ *
+ * Why scope to .praxis-root and not @theme:
+ *   - @theme is global (Conduit marketing would inherit it)
+ *   - Praxis is a sibling brand to Conduit AI parent — needs
+ *     to coexist, not collide.
+ *   - .praxis-root sits on the /app shell, so cascade limits
+ *     these tokens to the Console subtree.
+ * ============================================================ */
+
+.praxis-root {
+  /* ---- Praxis brand axis ---- */
+  --color-praxis-purple: oklch(50% 0.22 290);
+  --color-praxis-purple-hi: oklch(60% 0.20 290);
+  --color-praxis-purple-deep: oklch(40% 0.22 290);
+  --color-praxis-purple-soft: oklch(50% 0.22 290 / 0.14);
+  --color-praxis-purple-glow: oklch(50% 0.22 290 / 0.35);
+
+  --color-praxis-blue: oklch(60% 0.22 248);
+  --color-praxis-blue-hi: oklch(68% 0.20 248);
+  --color-praxis-blue-soft: oklch(60% 0.22 248 / 0.14);
+
+  /* ---- Praxis dark canvas (carried from prior Console, refined) ---- */
+  --color-surface: #0A0815;
+  --color-surface-elevated: #131027;
+  --color-surface-raised: #1A152F;
+  --color-border: #221C3A;
+  --color-border-soft: #2C2548;
+
+  /* ---- Text ---- */
+  --color-text: #F5F1EA;
+  --color-text-muted: #8A88A4;
+
+  /* ---- ACCENT REASSIGN — was warm orange, now brand purple ----
+   * Every `var(--color-accent)` call site in Console (workspace
+   * tiles, chat composer focus, voice mic, etc.) now reads as
+   * brand purple. No component edits needed for the swap. */
+  --color-accent: var(--color-praxis-purple);
+  --color-accent-hi: var(--color-praxis-purple-hi);
+  --color-accent-deep: var(--color-praxis-purple-deep);
+  --color-accent-soft: var(--color-praxis-purple-soft);
+
+  /* ---- Status palette (jewel-tones, used by voice/state pips) ---- */
+  --color-cyan: oklch(75% 0.15 200);
+  --color-purple: oklch(60% 0.20 295);
+  --color-green: oklch(70% 0.17 155);
+  --color-pink: oklch(70% 0.20 0);
+  --color-amber: oklch(78% 0.16 80);
+
+  /* ---- Employee jewel-tone signatures ----
+   * Mirrors `lib/conduit/employees.ts`. Component code reads
+   * dept color from that file directly; these tokens give
+   * other components (.conduit-canvas, gradients) a way to
+   * reference them via CSS. */
+  --color-dept-jarvis: #C8C5BD;              /* platinum */
+  --color-dept-jarvis-soft: rgba(200, 197, 189, 0.14);
+  --color-dept-marketing: #FF8A3D;           /* topaz */
+  --color-dept-marketing-soft: rgba(255, 138, 61, 0.14);
+  --color-dept-sales: #34D399;               /* emerald */
+  --color-dept-sales-soft: rgba(52, 211, 153, 0.14);
+  --color-dept-engineering: oklch(60% 0.22 248); /* electric sapphire */
+  --color-dept-engineering-soft: oklch(60% 0.22 248 / 0.14);
+  --color-dept-finance: #EAB308;             /* citrine */
+  --color-dept-finance-soft: rgba(234, 179, 8, 0.14);
+  --color-dept-compliance: #A855F7;          /* amethyst (lighter than brand purple) */
+  --color-dept-compliance-soft: rgba(168, 85, 247, 0.14);
+  --color-dept-hr: #EC4899;                  /* rose */
+  --color-dept-hr-soft: rgba(236, 72, 153, 0.14);
+  --color-dept-ops: #14B8A6;                 /* teal */
+  --color-dept-ops-soft: rgba(20, 184, 166, 0.14);
+  --color-dept-legal: #3B82F6;               /* indigo-blue */
+  --color-dept-legal-soft: rgba(59, 130, 246, 0.14);
+}
+
+/* Tinted canvas — replaces the orange-tinted radial with a
+ * brand-purple top-left gradient on the /app surface. */
+.praxis-root .conduit-canvas {
+  background:
+    radial-gradient(
+      ellipse 90% 60% at 0% 0%,
+      color-mix(in srgb, var(--color-praxis-purple) 8%, var(--color-surface) 92%),
+      var(--color-surface) 60%
+    );
+  color: var(--color-text);
+}
+
+/* Glow ring for the Praxis brand mark in the rail. */
+.praxis-mark {
+  filter:
+    drop-shadow(0 0 8px color-mix(in srgb, var(--color-praxis-purple) 35%, transparent))
+    drop-shadow(0 0 24px color-mix(in srgb, var(--color-praxis-purple) 18%, transparent));
+}
