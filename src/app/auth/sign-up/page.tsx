@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { PraxisLogo } from "@/components/conduit/PraxisLogo";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -45,17 +46,18 @@ export default function SignUpPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6 py-16 bg-[var(--color-surface)]">
+    <main className="praxis-root min-h-screen flex items-center justify-center px-6 py-16 bg-[var(--color-surface)]">
       <div className="w-full max-w-sm">
         <div className="mb-10 text-center">
           <Link
             href="/"
-            className="serif text-3xl text-[var(--color-text)]"
+            className="inline-flex items-center justify-center"
+            aria-label="Praxis"
           >
-            Conduit
+            <PraxisLogo size={48} withWordmark glow />
           </Link>
-          <p className="mt-3 text-sm text-[var(--color-text-muted)]">
-            Create your workspace
+          <p className="mt-4 text-sm text-[var(--color-text-muted)]">
+            Create your Praxis workspace
           </p>
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
