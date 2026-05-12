@@ -16,6 +16,7 @@ import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
 import { ORDERED_TIERS, TOPUPS, tierById, type TierId } from "@/lib/billing/tiers";
 import { DEFAULT_EMPLOYEE_VOICES, VOICE_NAMES } from "@/lib/voice/defaults";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface UsageData {
   totals: { input: number; output: number; cost: number };
@@ -40,6 +41,7 @@ interface AccountData {
   internal_account?: boolean;
   has_stripe_customer?: boolean;
   timezone?: string;
+  theme_preference?: "system" | "light" | "dark" | null;
 }
 
 const COMMON_TIMEZONES = [
@@ -120,6 +122,7 @@ export function SettingsTabs({
           creatorMode={Boolean(account.creator_mode)}
           creatorModeVersion={account.creator_mode_version ?? 1}
           timezone={account.timezone ?? "America/New_York"}
+          themePref={account.theme_preference ?? "system"}
         />
       )}
       {tab === "business" && <BusinessTab account={account} />}
@@ -865,12 +868,14 @@ function ProfileTab({
   creatorMode,
   creatorModeVersion,
   timezone,
+  themePref,
 }: {
   email: string;
   fullName: string;
   creatorMode: boolean;
   creatorModeVersion: number;
   timezone: string;
+  themePref: "system" | "light" | "dark";
 }) {
   const [tz, setTz] = useState(timezone);
   const [saving, setSaving] = useState(false);
@@ -907,6 +912,7 @@ function ProfileTab({
         </div>
         <div>{email}</div>
       </div>
+      <ThemeToggle initialPref={themePref} />
       <div>
         <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2">
           Timezone

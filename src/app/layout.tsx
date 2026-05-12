@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Fraunces, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import "@/styles/praxis-tokens.css";
+import { ThemeBoot } from "@/components/conduit/ThemeBoot";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -66,7 +67,11 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${inter.variable} ${fraunces.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
     >
+      <head>
+        <ThemeBoot />
+      </head>
       <body>
         <a href="#main-content" className="conduit-skip-link">
           Skip to content

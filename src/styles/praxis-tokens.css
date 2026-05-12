@@ -144,3 +144,119 @@
     drop-shadow(0 0 8px color-mix(in srgb, var(--color-praxis-purple) 35%, transparent))
     drop-shadow(0 0 24px color-mix(in srgb, var(--color-praxis-purple) 18%, transparent));
 }
+
+/* ============================================================
+ * Praxis — LIGHT theme variant
+ *
+ * Dark stays primary (no override below this selector). Light is a real
+ * polished alternative, not an inverse: warm bone canvas, deeper brand
+ * purple for contrast, soft warm-gray borders. The marketing /app
+ * primitives (.conduit-card, etc.) follow because they read these tokens.
+ *
+ * Activated when ThemeBoot writes data-praxis-theme="light" on <html>.
+ * ============================================================ */
+html[data-praxis-theme="light"] .praxis-root {
+  /* Brand purple deepens slightly so it reads on a light canvas */
+  --color-praxis-purple: oklch(45% 0.22 290);
+  --color-praxis-purple-hi: oklch(54% 0.21 290);
+  --color-praxis-purple-deep: oklch(36% 0.22 290);
+  --color-praxis-purple-soft: oklch(45% 0.22 290 / 0.10);
+  --color-praxis-purple-glow: oklch(45% 0.22 290 / 0.28);
+
+  --color-praxis-blue: oklch(54% 0.22 248);
+  --color-praxis-blue-hi: oklch(62% 0.21 248);
+  --color-praxis-blue-soft: oklch(54% 0.22 248 / 0.10);
+
+  /* Warm bone canvas — paper-like, not blue-white */
+  --color-surface: #F7F4EE;
+  --color-surface-elevated: #FFFFFF;
+  --color-surface-raised: #EFEBE2;
+  --color-border: #E2DCD0;
+  --color-border-soft: #CFC8B9;
+
+  /* Deep warm ink, with a hint of purple in the muted tone */
+  --color-text: #14101F;
+  --color-text-muted: #5A5670;
+
+  --color-accent: var(--color-praxis-purple);
+  --color-accent-hi: var(--color-praxis-purple-hi);
+  --color-accent-deep: var(--color-praxis-purple-deep);
+  --color-accent-soft: var(--color-praxis-purple-soft);
+
+  /* Status palette deepens for contrast on light */
+  --color-cyan: oklch(50% 0.15 200);
+  --color-purple: oklch(45% 0.20 295);
+  --color-green: oklch(50% 0.17 155);
+  --color-pink: oklch(50% 0.20 0);
+  --color-amber: oklch(58% 0.16 80);
+
+  /* Dept signatures stay readable — minor desaturation on the lightest
+   * jewels so they don't burn on a bone canvas. */
+  --color-dept-jarvis: #6B665C;
+  --color-dept-jarvis-soft: rgba(107, 102, 92, 0.10);
+  --color-dept-marketing: #C76A2A;
+  --color-dept-marketing-soft: rgba(199, 106, 42, 0.10);
+  --color-dept-sales: #15803D;
+  --color-dept-sales-soft: rgba(21, 128, 61, 0.10);
+  --color-dept-engineering: oklch(48% 0.22 248);
+  --color-dept-engineering-soft: oklch(48% 0.22 248 / 0.10);
+  --color-dept-finance: #A16207;
+  --color-dept-finance-soft: rgba(161, 98, 7, 0.10);
+  --color-dept-compliance: #7E22CE;
+  --color-dept-compliance-soft: rgba(126, 34, 206, 0.10);
+  --color-dept-hr: #BE185D;
+  --color-dept-hr-soft: rgba(190, 24, 93, 0.10);
+  --color-dept-ops: #0F766E;
+  --color-dept-ops-soft: rgba(15, 118, 110, 0.10);
+  --color-dept-legal: #1D4ED8;
+  --color-dept-legal-soft: rgba(29, 78, 216, 0.10);
+
+  /* Marketing v3 names remapped to the light Praxis surfaces */
+  --color-bg-canvas: var(--color-surface);
+  --color-bg-surface: var(--color-surface-elevated);
+  --color-bg-surface-subtle: var(--color-surface-raised);
+  --color-bg-surface-sunken: var(--color-surface);
+  --color-bg-inverse: var(--color-surface);
+  --color-bg-inverse-elevated: var(--color-surface-elevated);
+
+  --color-ink-primary: var(--color-text);
+  --color-ink-secondary: var(--color-text-muted);
+  --color-ink-tertiary: var(--color-text-muted);
+  --color-ink-on-inverse: var(--color-text);
+  --color-ink-on-inverse-soft: var(--color-text-muted);
+  --color-ink-on-inverse-mute: var(--color-text-muted);
+
+  --color-border-subtle: var(--color-border);
+  --color-border-default: var(--color-border-soft);
+  --color-border-strong: var(--color-border-soft);
+  --color-border-on-inverse: var(--color-border);
+  --color-border-on-inverse-strong: var(--color-border-soft);
+}
+
+/* Canvas radial — subtler purple wash, lifts off the bone */
+html[data-praxis-theme="light"] .praxis-root .conduit-canvas {
+  background:
+    radial-gradient(
+      ellipse 90% 60% at 0% 0%,
+      color-mix(in srgb, var(--color-praxis-purple) 5%, var(--color-surface) 95%),
+      var(--color-surface) 65%
+    );
+  color: var(--color-text);
+}
+
+/* Card hover in light mode — drop the heavy dark shadow */
+html[data-praxis-theme="light"] .praxis-root .conduit-card:hover {
+  border-color: color-mix(in srgb, var(--color-praxis-purple) 40%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-praxis-purple) 10%, transparent),
+    0 1px 2px rgba(20, 16, 31, 0.04),
+    0 8px 24px rgba(20, 16, 31, 0.08);
+}
+
+/* Scrollbar follows surface in light mode */
+html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-track {
+  background: var(--color-surface-raised);
+}
+html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-thumb {
+  background: var(--color-border-soft);
+}

@@ -31,6 +31,10 @@ export interface ConduitAccount {
   timezone: string;
   // R9 voice-room teaser
   notify_voice_room_ready: boolean;
+  // R3 theme pref — 'system' (default) | 'light' | 'dark'.
+  // Hydrated only after migration 021 runs; falls back to 'system' for
+  // older rows that don't have the column yet.
+  theme_preference?: "system" | "light" | "dark" | null;
   created_at: string;
   updated_at: string;
 }
