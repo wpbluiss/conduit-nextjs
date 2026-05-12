@@ -14,9 +14,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ExternalLink, ArrowRight, X } from "lucide-react";
+import { ExternalLink, ArrowRight, EyeOff, X } from "lucide-react";
 import BuildSession from "./BuildSession";
 import type { DailyUsage } from "@/lib/engineering/limits";
+
+const FAILED_STATUSES = new Set(["failed", "timeout", "aborted"]);
+const SHOW_FAILED_KEY = "praxis.builds.showFailed";
 
 export interface R7Build {
   id: string;
@@ -82,6 +85,7 @@ export default function BuildsTabs({
     sessionFromUrl,
   );
   const [continueParent, setContinueParent] = useState<EngSession | null>(null);
+  const [showFailed, setShowFailed] = useState(false);
 
   useEffect(() => {
     if (sessionFromUrl) {
@@ -90,20 +94,53 @@ export default function BuildsTabs({
     }
   }, [sessionFromUrl]);
 
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem(SHOW_FAILED_KEY);
+      if (v === "1") setShowFailed(true);
+    } catch {}
+  }, []);
+
+  const persistShowFailed = (next: boolean) => {
+    setShowFailed(next);
+    try {
+      localStorage.setItem(SHOW_FAILED_KEY, next ? "1" : "0");
+    } catch {}
+  };
+
+  const visibleEng = showFailed
+    ? engSessions
+    : engSessions.filter((s) => !FAILED_STATUSES.has(s.status));
+  const hiddenEngCount = engSessions.length - visibleEng.length;
+
+  const visibleR7 = showFailed
+    ? r7Builds
+    : r7Builds.filter((b) => !FAILED_STATUSES.has(b.status));
+  const hiddenR7Count = r7Builds.length - visibleR7.length;
+
   return (
     <>
-      <div className="flex items-center gap-1 border-b border-[var(--color-border)] mb-6 -mt-2">
-        <Tab
-          active={tab === "templates"}
-          onClick={() => setTab("templates")}
-          label="R7 Templates"
-          count={r7Builds.length}
-        />
-        <Tab
-          active={tab === "engineering"}
-          onClick={() => setTab("engineering")}
-          label="Engineering Builds"
-          count={engSessions.length}
+      <div className="flex items-center justify-between gap-3 border-b border-[var(--color-border)] mb-6 -mt-2">
+        <div className="flex items-center gap-1">
+          <Tab
+            active={tab === "templates"}
+            onClick={() => setTab("templates")}
+            label="R7 Templates"
+            count={visibleR7.length}
+          />
+          <Tab
+            active={tab === "engineering"}
+            onClick={() => setTab("engineering")}
+            label="Engineering Builds"
+            count={visibleEng.length}
+          />
+        </div>
+        <FailedToggle
+          showFailed={showFailed}
+          onToggle={persistShowFailed}
+          hiddenCount={
+            tab === "engineering" ? hiddenEngCount : hiddenR7Count
+          }
         />
       </div>
 
@@ -112,10 +149,10 @@ export default function BuildsTabs({
       )}
 
       {tab === "templates" ? (
-        <TemplatesTab builds={r7Builds} />
+        <TemplatesTab builds={visibleR7} />
       ) : (
         <EngineeringTab
-          sessions={engSessions}
+          sessions={visibleEng}
           onOpen={setActiveSessionId}
           onContinue={setContinueParent}
         />
@@ -199,6 +236,36 @@ function UsageBanner({
         </Link>
       )}
     </div>
+  );
+}
+
+function FailedToggle({
+  showFailed,
+  onToggle,
+  hiddenCount,
+}: {
+  showFailed: boolean;
+  onToggle: (next: boolean) => void;
+  hiddenCount: number;
+}) {
+  // Nothing to surface if no failures exist and the toggle is already off.
+  if (!showFailed && hiddenCount === 0) return null;
+  return (
+    <button
+      type="button"
+      onClick={() => onToggle(!showFailed)}
+      className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] pb-2"
+      title={
+        showFailed
+          ? "Hide failed and aborted builds"
+          : "Show failed and aborted builds"
+      }
+    >
+      <EyeOff size={11} />
+      {showFailed
+        ? "Hide failed"
+        : `Show failed${hiddenCount > 0 ? ` (${hiddenCount})` : ""}`}
+    </button>
   );
 }
 
