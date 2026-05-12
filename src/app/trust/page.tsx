@@ -13,7 +13,7 @@ import FinalCTA from "@/components/FinalCTA";
 import { PageHeader } from "@/components/marketing/PageHeader";
 
 export const metadata: Metadata = {
-  title: "Trust + Security — Conduit",
+  title: "Trust + Security — Conduit AI",
   description:
     "How Praxis handles your data, your team's voice, and your customers' contacts. Encryption, retention, access, and what we promise.",
 };

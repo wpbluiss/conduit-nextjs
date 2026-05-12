@@ -12,9 +12,9 @@ import Footer from "@/components/Footer";
 import FinalCTA from "@/components/FinalCTA";
 
 export const metadata: Metadata = {
-  title: "About — Conduit",
+  title: "About — Conduit AI",
   description:
-    "Conduit is the company. Praxis is the product. We're building the operating system for businesses that won't be staffed.",
+    "Conduit AI is the company. Praxis is the product. We're building the operating system for businesses that won't be staffed.",
 };
 
 const APPROACH = [
@@ -47,7 +47,7 @@ export default function AboutPage() {
         <div className="relative conduit-container">
           <div className="max-w-[820px]">
             <p className="conduit-caption conduit-caption-ember">
-              About Conduit
+              About Conduit AI
             </p>
             <h1 className="conduit-display-hero mt-6">
               We&rsquo;re building the operating system for{" "}
@@ -56,7 +56,7 @@ export default function AboutPage() {
               </span>
             </h1>
             <p className="conduit-body-lg mt-6 max-w-[640px]">
-              Conduit is the company. Praxis is the product. Here&rsquo;s
+              Conduit AI is the company. Praxis is the product. Here&rsquo;s
               where we&rsquo;re headed and why.
             </p>
           </div>

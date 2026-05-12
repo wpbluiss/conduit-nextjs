@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, List, X } from "@phosphor-icons/react";
-import Logo from "@/components/Logo";
 
 // ─── Product marks (small geometric SVGs for mega-menu) ──────────────
 
@@ -299,15 +298,9 @@ export default function Navbar() {
           {/* Wordmark — institutional indigo rails + Fraunces wordmark */}
           <Link
             href="/"
-            className="flex items-center gap-2.5 group"
-            aria-label="Conduit"
+            className="flex items-center group"
+            aria-label="Conduit AI"
           >
-            <span className="hidden md:block">
-              <Logo size={scrolled ? 28 : 32} />
-            </span>
-            <span className="md:hidden">
-              <Logo size={36} />
-            </span>
             <span
               className={`text-[20px] tracking-tight text-[var(--color-ink-primary)] transition-[font-size] duration-300 ${
                 scrolled ? "md:text-[17px]" : "md:text-[19px]"
@@ -317,7 +310,7 @@ export default function Navbar() {
                 fontWeight: 500,
               }}
             >
-              Conduit
+              Conduit AI
             </span>
           </Link>
 
@@ -433,15 +426,14 @@ export default function Navbar() {
                   <Link
                     href="/"
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-2.5"
-                    aria-label="Conduit"
+                    className="flex items-center"
+                    aria-label="Conduit AI"
                   >
-                    <Logo size={32} />
                     <span
                       className="text-[19px] text-[var(--color-ink-primary)]"
                       style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
                     >
-                      Conduit
+                      Conduit AI
                     </span>
                   </Link>
                   <button

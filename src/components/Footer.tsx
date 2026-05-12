@@ -9,7 +9,6 @@ import {
   LinkedinLogo,
   XLogo,
 } from "@phosphor-icons/react";
-import Logo from "@/components/Logo";
 
 const COLS: {
   title: string;
@@ -80,16 +79,16 @@ const COLS: {
 ];
 
 const SOCIALS: { icon: typeof XLogo; href: string; label: string }[] = [
-  { icon: XLogo, href: "https://x.com/luiswpb", label: "Conduit on X" },
+  { icon: XLogo, href: "https://x.com/luiswpb", label: "Conduit AI on X" },
   {
     icon: GithubLogo,
     href: "https://github.com/wpbluiss",
-    label: "Conduit on GitHub",
+    label: "Conduit AI on GitHub",
   },
   {
     icon: LinkedinLogo,
     href: "https://linkedin.com/company/conduitai",
-    label: "Conduit on LinkedIn",
+    label: "Conduit AI on LinkedIn",
   },
 ];
 
@@ -159,13 +158,12 @@ export default function Footer() {
         {/* Top band — wordmark + tagline + newsletter */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 pb-16 md:pb-20 border-b border-[var(--color-edge-subtle)]">
           <div>
-            <Link href="/" className="inline-flex items-center gap-3" aria-label="Conduit">
-              <Logo size={36} />
+            <Link href="/" className="inline-flex items-center gap-3" aria-label="Conduit AI">
               <span
                 className="text-[28px] tracking-tight text-[var(--color-ink-primary)]"
                 style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
               >
-                Conduit
+                Conduit AI
               </span>
             </Link>
             <p className="conduit-display-lg mt-6 max-w-md">
@@ -277,7 +275,7 @@ export default function Footer() {
         {/* Bottom band */}
         <div className="pt-8 border-t border-[var(--color-edge-subtle)] flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6 text-[13px] text-[var(--color-cream-mute)]">
-            <span>&copy; 2026 Conduit. West Palm Beach, FL.</span>
+            <span>&copy; 2026 Conduit AI. West Palm Beach, FL.</span>
             <div className="flex items-center gap-5">
               <Link
                 href="/privacy-policy.html"

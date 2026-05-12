@@ -59,7 +59,7 @@ const SECTIONS: Section[] = [
     body: [
       "The default shape of running a business is still a payroll system, an HR vendor, a calendar of interviews, and a Slack full of people doing tasks software could do. The rituals — standups, sync meetings, weekly all-hands — are infrastructure for coordinating humans, not infrastructure for getting work done.",
       "We think that shape is transitional. The next decade of business will not be defined by the founders who hire faster. It will be defined by the founders who deploy software workforces and treat headcount as the exception, not the rule.",
-      "Conduit is being built solo today. That isn't permanent — it's a proof point. The thesis is that the kind of leverage Praxis provides will compound until a small group of operators can run companies that previously required dozens or hundreds of people. We want to be the operating system that group runs on.",
+      "Conduit AI is being built solo today. That isn't permanent — it's a proof point. The thesis is that the kind of leverage Praxis provides will compound until a small group of operators can run companies that previously required dozens or hundreds of people. We want to be the operating system that group runs on.",
     ],
     quote:
       "The next decade doesn't belong to companies that hire faster. It belongs to companies that don't hire at all.",
@@ -85,7 +85,7 @@ export default function ApproachPage() {
         <div className="relative conduit-container">
           <div className="conduit-prose text-center">
             <p className="conduit-caption conduit-caption-ember">
-              The Conduit approach
+              The Conduit AI approach
             </p>
             <h1 className="conduit-display-hero mt-6">
               How we think about{" "}

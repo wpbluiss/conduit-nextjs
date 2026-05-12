@@ -7,7 +7,7 @@ import FinalCTA from "@/components/FinalCTA";
 import { PageHeader } from "@/components/marketing/PageHeader";
 
 export const metadata: Metadata = {
-  title: "Careers — Conduit",
+  title: "Careers — Conduit AI",
   description:
     "We're not hiring yet. Here's how we'd think about it when we are.",
 };
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 const PRINCIPLES = [
   {
     title: "Builders, not staff",
-    body: "Every Conduit employee owns shipped artifacts — code, copy, customer outcomes — not just process. If you'd be happier in a planning role, we're not the right team yet.",
+    body: "Every Conduit AI employee owns shipped artifacts — code, copy, customer outcomes — not just process. If you'd be happier in a planning role, we're not the right team yet.",
   },
   {
     title: "AI-native by default",
@@ -85,7 +85,7 @@ export default function CareersPage() {
               you brought along. We&rsquo;ll always read a thoughtful note.
             </p>
             <Link
-              href="mailto:luis@conduitai.io?subject=I%20want%20to%20build%20at%20Conduit"
+              href="mailto:luis@conduitai.io?subject=I%20want%20to%20build%20at%20Conduit%20AI"
               className="conduit-btn-primary mt-9 inline-flex"
             >
               Write the founder

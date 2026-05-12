@@ -75,7 +75,7 @@ export default function Customers() {
               </p>
 
               <p className="text-[12px] uppercase tracking-[0.06em] text-[var(--color-ink-tertiary)] mt-7 mb-5">
-                Conduit &times; Lunaro &middot; 50/50 partnership
+                Conduit AI &times; Lunaro &middot; 50/50 partnership
               </p>
 
               <div className="inline-flex items-center gap-1.5 text-[14px] text-[var(--color-ember-500)] font-medium group-hover:gap-2.5 transition-[gap]">

@@ -33,7 +33,7 @@ const STORY = [
   },
   {
     eyebrow: "The result",
-    body: "Conduit and Lunaro Insurance turned the build into a 50/50 partnership. The CRM runs at jonathan-demo.vercel.app today, and the first agency is live with 200+ contacts and 6 working pipelines. The next 5 agencies are in onboarding.",
+    body: "Conduit AI and Lunaro Insurance turned the build into a 50/50 partnership. The CRM runs at jonathan-demo.vercel.app today, and the first agency is live with 200+ contacts and 6 working pipelines. The next 5 agencies are in onboarding.",
   },
 ];
 

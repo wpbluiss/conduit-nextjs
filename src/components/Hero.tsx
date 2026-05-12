@@ -91,9 +91,9 @@ export default function Hero() {
               transition={{ duration: PACE.subhead.duration, ease: EASE, delay: PACE.subhead.delay }}
               className="conduit-body-lg mt-7 max-w-[560px]"
             >
-              Conduit builds Praxis — the operating system for autonomous AI
-              workforces. Voice, sales, engineering, ops, finance. Running 24/7
-              for the businesses that hire them.
+              Conduit AI builds Praxis — the operating system for autonomous
+              AI workforces. Voice, sales, engineering, ops, finance. Running
+              24/7 for the businesses that hire them.
             </motion.p>
 
             <motion.div

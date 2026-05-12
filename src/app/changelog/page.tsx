@@ -5,7 +5,7 @@ import FinalCTA from "@/components/FinalCTA";
 import { PageHeader } from "@/components/marketing/PageHeader";
 
 export const metadata: Metadata = {
-  title: "Changelog — Conduit",
+  title: "Changelog — Conduit AI",
   description:
     "Every shipped change to Praxis. Date-stamped, factual, no marketing.",
 };

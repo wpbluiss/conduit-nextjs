@@ -7,7 +7,7 @@ import FinalCTA from "@/components/FinalCTA";
 import { PageHeader } from "@/components/marketing/PageHeader";
 
 export const metadata: Metadata = {
-  title: "Engineering — Conduit",
+  title: "Engineering — Conduit AI",
   description:
     "How Praxis is built. Architecture notes, engineering decisions, and posts from the team shipping autonomous AI workforces.",
 };
