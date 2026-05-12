@@ -759,7 +759,7 @@ export function Chat({
               <span aria-hidden>▾</span>
               {pinOpen && (
                 <div
-                  className="absolute bottom-full left-0 mb-2 w-56 conduit-card overflow-hidden text-left z-10"
+                  className="absolute bottom-full left-0 mb-2 w-56 rounded-xl bg-[var(--color-surface-elevated)] border border-[var(--color-border)] shadow-[0_10px_30px_rgba(0,0,0,0.35)] overflow-hidden text-left z-10"
                   onMouseLeave={() => setPinOpen(false)}
                 >
                   {pinOptions.map((o) => (
@@ -773,7 +773,7 @@ export function Chat({
                       }}
                       className={`w-full text-left px-3 py-2 text-xs flex items-center gap-2 hover:bg-[var(--color-surface-raised)] ${
                         pin === o.value
-                          ? "text-[var(--color-text)]"
+                          ? "text-[var(--color-text)] bg-[var(--color-surface-raised)]"
                           : "text-[var(--color-text-muted)]"
                       }`}
                     >
