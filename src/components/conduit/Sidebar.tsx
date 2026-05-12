@@ -106,7 +106,7 @@ export function Sidebar({
             onClick={close}
             className="flex items-center"
           >
-            <PraxisLogo size={20} withWordmark glow />
+            <PraxisLogo size={32} withWordmark glow />
           </Link>
           <button
             type="button"

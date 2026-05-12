@@ -65,7 +65,7 @@ export function OnboardingModal({
       <div className="px-8 md:px-12 pt-8">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-2 mb-2">
-            <PraxisLogo size={14} />
+            <PraxisLogo size={24} />
             <span className="text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
               Praxis · Step {Math.min(step, 3)} of 3
             </span>
