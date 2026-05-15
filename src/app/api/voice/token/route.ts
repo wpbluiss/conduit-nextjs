@@ -20,6 +20,12 @@ interface TokenBody {
   // R12.5: link a voice session back to its originating text
   // conversation. Worker uses this when writing transcript turns back.
   conversation_id?: string;
+  // Voice Room v1 — Story 5: continue from a prior voice session. When
+  // present, the route validates ownership + age (<= 14 days) +
+  // non-empty transcript_summary and propagates the id into LiveKit
+  // room metadata so the worker can bootstrap the new agent's
+  // first-turn context.
+  parent_session_id?: string;
 }
 
 const MAX_PARTICIPANTS_BY_TIER: Record<string, number> = {
@@ -29,6 +35,12 @@ const MAX_PARTICIPANTS_BY_TIER: Record<string, number> = {
   // capping at 8 silently locked enterprise out of the "Enter the room" hero.
   enterprise: 9,
 };
+
+// Voice Room v1 — Story 5 (continuation) validation constants. Contract
+// at specs/voice-room-for-ai-employees/contracts/voice-token-extension.md.
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const CONTINUATION_WINDOW_MS = 14 * 24 * 60 * 60 * 1000;
 
 export async function POST(request: NextRequest) {
   const supabase = await createSupabaseServerClient();
@@ -154,6 +166,70 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Story 5 (FR-007 / FR-008 / FR-015): optional "continue from a prior
+  // voice session" mode. Validate ownership + recency + summary-presence
+  // before minting the JWT. The worker (W6) reads parent_session_id from
+  // LiveKit room metadata on join and fetches the prior session's
+  // transcript_summary + last 6 turn pairs via its admin Supabase
+  // client — metadata stays small here.
+  let parentSessionId: string | null = null;
+  let parentSessionStartedAt: string | null = null;
+  if (body.parent_session_id !== undefined) {
+    const raw =
+      typeof body.parent_session_id === "string"
+        ? body.parent_session_id.trim()
+        : "";
+    if (!raw || !UUID_RE.test(raw)) {
+      return NextResponse.json(
+        { error: "parent_session_invalid", message: "Bad parent_session_id." },
+        { status: 400 },
+      );
+    }
+    // Owner-scoped lookup. RLS already filters by account ownership; the
+    // explicit account_id eq is defense in depth. On any miss — uuid that
+    // doesn't exist OR is owned by someone else — return 403 without
+    // distinguishing, so existence isn't leaked to other accounts.
+    const { data: parent, error: parentErr } = await supabase
+      .from("conduit_voice_sessions")
+      .select("id, started_at, created_at, transcript_summary")
+      .eq("id", raw)
+      .eq("account_id", account.id)
+      .maybeSingle();
+    if (parentErr || !parent) {
+      return NextResponse.json(
+        { error: "parent_session_forbidden" },
+        { status: 403 },
+      );
+    }
+    const summary =
+      typeof parent.transcript_summary === "string"
+        ? parent.transcript_summary.trim()
+        : "";
+    if (summary.length === 0) {
+      return NextResponse.json(
+        {
+          error: "parent_session_unavailable",
+          message: "That session has no summary to continue from.",
+        },
+        { status: 400 },
+      );
+    }
+    const createdAtMs = parent.created_at
+      ? new Date(parent.created_at as string).getTime()
+      : 0;
+    if (createdAtMs < Date.now() - CONTINUATION_WINDOW_MS) {
+      return NextResponse.json(
+        {
+          error: "parent_session_too_old",
+          message: "Sessions older than 14 days can't be continued.",
+        },
+        { status: 400 },
+      );
+    }
+    parentSessionId = parent.id as string;
+    parentSessionStartedAt = (parent.started_at as string) ?? null;
+  }
+
   const voiceConfig = await resolveVoiceId(supabase, account.id, employeeId);
 
   // R12.5: resolve a voice for each participant up-front so the worker
@@ -192,6 +268,11 @@ export async function POST(request: NextRequest) {
       participants,
       participant_voices: participantVoices,
       conversation_id: body.conversation_id ?? null,
+      // Voice Room v1 — Story 5: when non-null, worker (W6) fetches the
+      // prior session's transcript_summary + last 6 turn pairs from
+      // Supabase via its admin client and primes the new agent's first
+      // turn. Kept as just the id so JWT metadata stays small.
+      parent_session_id: parentSessionId,
     }),
   });
   at.addGrant({
@@ -221,5 +302,11 @@ export async function POST(request: NextRequest) {
     participants,
     participant_voices: participantVoices,
     conversation_id: body.conversation_id ?? null,
+    // Voice Room v1 — Story 5: echoed so the client can render
+    // ContinuationBadge ("Continuing your conversation from <relative
+    // time>") without a second round-trip. Both null when no
+    // parent_session_id was requested or it failed validation.
+    parent_session_id: parentSessionId,
+    parent_session_started_at: parentSessionStartedAt,
   });
 }
