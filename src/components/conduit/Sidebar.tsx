@@ -23,6 +23,8 @@ import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, EMPLOYEE_ICON, employeeLabel } from "./EmployeeBadge";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import { PraxisLogo } from "./PraxisLogo";
+import { SidebarBuildPip } from "./builds/in-flight/SidebarBuildPip";
+import type { InFlightBuild } from "@/lib/engineering/in-flight";
 
 interface ConvoSummary {
   id: string;
@@ -45,6 +47,8 @@ export function Sidebar({
   team,
   allowedEmployees,
   tierName,
+  accountId,
+  inFlightBuildsInitial,
 }: {
   userEmail: string;
   accountName: string;
@@ -52,6 +56,8 @@ export function Sidebar({
   team: TeamActivity[];
   allowedEmployees: EmployeeKey[];
   tierName?: string;
+  accountId: string;
+  inFlightBuildsInitial: InFlightBuild[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -269,13 +275,30 @@ export function Sidebar({
               onClick={close}
             />
             {allowedEmployees.includes("engineering") && (
-              <NavLink
+              <Link
                 href="/app/builds"
-                icon={<Hammer size={14} />}
-                label="Builds"
-                active={isActive("/app/builds")}
                 onClick={close}
-              />
+                className={`relative flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors duration-100 ${
+                  isActive("/app/builds")
+                    ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
+                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
+                }`}
+              >
+                {isActive("/app/builds") && (
+                  <span
+                    aria-hidden
+                    className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
+                  />
+                )}
+                <span className="relative inline-flex">
+                  <Hammer size={14} />
+                  <SidebarBuildPip
+                    initial={inFlightBuildsInitial}
+                    accountId={accountId}
+                  />
+                </span>
+                <span>Builds</span>
+              </Link>
             )}
             <NavLink
               href="/app/analytics"

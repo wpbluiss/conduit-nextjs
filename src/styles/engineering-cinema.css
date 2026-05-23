@@ -1,0 +1,803 @@
+/* ============================================================
+ * Engineering Build Cinema — R16
+ *
+ * Companion to praxis-system.css. Adds the "Construction Site"
+ * cinema vocabulary: stage band, craft strip with spark sweep,
+ * preview-iframe curtain rise, reconnecting pip, in-flight tile
+ * shell. Consumes praxis-tokens (--space-*, --radius-*, --dept,
+ * --dept-edge, --dept-glow, --dept-radial, --rhythm-*).
+ *
+ * Scoping: every selector under .praxis-root. Reduced-motion
+ * gating mirrors praxis-system.css — animations live inside
+ * `@media not (prefers-reduced-motion: reduce)`.
+ *
+ * The one memorable moment: when deploy_url first arrives, the
+ * iframe materializes via a curtain rise (clip-path reveal +
+ * opacity overlap). Everything else exists to compose around it.
+ * ============================================================ */
+
+/* ------------------------------------------------------------
+ * .eng-cinema — top-level page container
+ * ------------------------------------------------------------ */
+
+.praxis-root .eng-cinema {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: var(--space-5);
+  gap: var(--space-5);
+  isolation: isolate;
+}
+
+.praxis-root .eng-cinema::before {
+  /* dept-tinted radial gradient mesh, anchored top-right.
+   * Pure CSS, no JS, low opacity, gives the canvas atmosphere
+   * without competing with the stage band. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(
+    --dept-radial,
+    radial-gradient(120% 80% at 100% 0%, color-mix(in srgb, var(--color-accent) 6%, transparent), transparent 60%)
+  );
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------
+ * .eng-cinema-header — title + status pill + abort + close
+ * ------------------------------------------------------------ */
+
+.praxis-root .eng-cinema-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.praxis-root .eng-cinema-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  flex: 1;
+}
+
+.praxis-root .eng-cinema-prompt {
+  font-family: var(--font-serif, serif);
+  font-size: var(--text-body-lg);
+  line-height: 1.3;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.praxis-root .eng-cinema-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border: 1px solid var(--pill-edge, color-mix(in srgb, var(--dept) 28%, transparent));
+  color: var(--pill-color, var(--dept));
+  background: var(--pill-bg, color-mix(in srgb, var(--dept) 14%, transparent));
+  flex-shrink: 0;
+}
+
+.praxis-root .eng-cinema-pill[data-status="complete"] {
+  --pill-color: var(--color-green);
+  --pill-edge: color-mix(in srgb, var(--color-green) 28%, transparent);
+  --pill-bg: color-mix(in srgb, var(--color-green) 14%, transparent);
+}
+.praxis-root .eng-cinema-pill[data-status="failed"],
+.praxis-root .eng-cinema-pill[data-status="timeout"] {
+  --pill-color: var(--color-pink);
+  --pill-edge: color-mix(in srgb, var(--color-pink) 28%, transparent);
+  --pill-bg: color-mix(in srgb, var(--color-pink) 14%, transparent);
+}
+.praxis-root .eng-cinema-pill[data-status="aborted"] {
+  --pill-color: var(--color-text-muted);
+  --pill-edge: color-mix(in srgb, var(--color-text-muted) 28%, transparent);
+  --pill-bg: color-mix(in srgb, var(--color-text-muted) 14%, transparent);
+}
+
+.praxis-root .eng-cinema-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* ------------------------------------------------------------
+ * .eng-cinema-stage — top: step indicator + elapsed + spend
+ * ------------------------------------------------------------ */
+
+.praxis-root .eng-cinema-stage {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-5);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--elev-rest-2, 0 1px 2px rgba(0,0,0,0.06));
+}
+
+.praxis-root .eng-cinema-step-label {
+  font-family: var(--font-serif, serif);
+  font-size: var(--text-display-lg, 32px);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  margin-top: var(--space-2);
+}
+
+.praxis-root .eng-cinema-step-eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dept, var(--color-text-muted));
+  font-weight: 500;
+}
+
+.praxis-root .eng-cinema-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: flex-end;
+  text-align: right;
+  min-width: 0;
+}
+
+.praxis-root .eng-cinema-meta-row {
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: var(--space-3);
+  row-gap: 4px;
+  align-items: baseline;
+}
+
+.praxis-root .eng-cinema-meta-label {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+.praxis-root .eng-cinema-meta-value {
+  font-size: var(--text-body, 14px);
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Soft progress ribbon under the step label.
+ * Renders as an ambient strip when no quantitative index/total exists,
+ * fills proportionally when grounded data is available. */
+.praxis-root .eng-cinema-stage-ribbon {
+  grid-column: 1 / -1;
+  margin-top: var(--space-3);
+  height: 3px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--dept, var(--color-accent)) 12%, transparent);
+  position: relative;
+  overflow: hidden;
+}
+
+.praxis-root .eng-cinema-stage-ribbon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--dept, var(--color-accent)) 50%,
+    transparent 100%
+  );
+  width: 40%;
+  border-radius: 9999px;
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  @keyframes eng-stage-ribbon-sweep {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(250%); }
+  }
+  .praxis-root .eng-cinema-stage-ribbon::after {
+    animation: eng-stage-ribbon-sweep 3.6s ease-in-out infinite;
+  }
+}
+
+/* Terminal-state stage band: ribbon disabled */
+.praxis-root .eng-cinema-stage[data-terminal="true"] .eng-cinema-stage-ribbon::after {
+  display: none;
+}
+.praxis-root .eng-cinema-stage[data-terminal="true"] .eng-cinema-stage-ribbon {
+  display: none;
+}
+
+/* ------------------------------------------------------------
+ * .eng-cinema-craft — middle: file chips with spark sweep
+ * ------------------------------------------------------------ */
+
+.praxis-root .eng-cinema-craft {
+  position: relative;
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.praxis-root .eng-cinema-craft-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.praxis-root .eng-cinema-craft-title {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.praxis-root .eng-cinema-craft-count {
+  font-size: var(--text-body-sm, 13px);
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.praxis-root .eng-cinema-craft-strip {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.praxis-root .eng-cinema-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 12px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  color: var(--color-text-muted);
+  letter-spacing: 0.02em;
+  scroll-snap-align: start;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.praxis-root .eng-cinema-chip[data-kind="edit"] {
+  color: var(--color-text);
+  border-color: color-mix(in srgb, var(--dept, var(--color-accent)) 25%, var(--color-border));
+}
+
+.praxis-root .eng-cinema-chip[data-recent="true"] {
+  color: var(--color-text);
+  border-color: var(--dept, var(--color-accent));
+  background: color-mix(in srgb, var(--dept, var(--color-accent)) 5%, var(--color-surface));
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  /* Chip enter — fires on first paint via animation-name */
+  @keyframes eng-chip-enter {
+    0% { transform: scale(0.85); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .praxis-root .eng-cinema-chip {
+    animation: eng-chip-enter 180ms ease-out both;
+  }
+
+  /* Most-recent chip pulse — opacity-only */
+  @keyframes eng-chip-pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.7; }
+  }
+  .praxis-root .eng-cinema-chip[data-recent="true"] {
+    animation: eng-chip-enter 180ms ease-out, eng-chip-pulse 600ms ease-in-out infinite 180ms;
+  }
+
+  /* Spark bar sweep — fires when craft strip data-spark="1|2|3" cycles */
+  @keyframes eng-spark-sweep {
+    0%   { transform: translateX(-12px); opacity: 0; }
+    20%  { opacity: 1; }
+    100% { transform: translateX(calc(100% + 12px)); opacity: 0; }
+  }
+
+  .praxis-root .eng-cinema-craft[data-spark] .eng-cinema-spark {
+    animation: eng-spark-sweep 280ms ease-out forwards;
+  }
+}
+
+.praxis-root .eng-cinema-spark {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--dept, var(--color-accent)) 50%,
+    transparent
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+.praxis-root .eng-cinema-craft-empty {
+  font-size: var(--text-body-sm, 13px);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ------------------------------------------------------------
+ * .eng-cinema-preview — bottom: live preview iframe or placeholder
+ * ------------------------------------------------------------ */
+
+.praxis-root .eng-cinema-preview {
+  position: relative;
+  flex: 1;
+  min-height: 320px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-elevated);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.praxis-root .eng-cinema-preview-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 320px;
+  padding: var(--space-5);
+  gap: var(--space-3);
+  color: var(--color-text-muted);
+  font-style: italic;
+  text-align: center;
+}
+
+.praxis-root .eng-cinema-preview-placeholder-headline {
+  font-family: var(--font-serif, serif);
+  font-style: italic;
+  font-size: var(--text-body-lg);
+  color: var(--color-text-muted);
+  max-width: 32ch;
+  line-height: 1.4;
+}
+
+.praxis-root .eng-cinema-preview-iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  background: var(--color-surface);
+}
+
+/* Curtain rise — the one memorable moment */
+.praxis-root .eng-cinema-preview-iframe[data-state="loaded"] {
+  /* Static fallback for reduced-motion */
+  opacity: 1;
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  @keyframes eng-curtain-rise {
+    0%   { clip-path: inset(100% 0 0 0); opacity: 0; }
+    40%  { opacity: 1; }
+    100% { clip-path: inset(0 0 0 0); opacity: 1; }
+  }
+  .praxis-root .eng-cinema-preview-iframe[data-state="loaded"] {
+    animation: eng-curtain-rise 480ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+}
+
+.praxis-root .eng-cinema-preview-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 320px;
+  padding: var(--space-5);
+  gap: var(--space-3);
+  text-align: center;
+}
+
+.praxis-root .eng-cinema-preview-fallback-url {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: var(--text-body-sm);
+  color: var(--color-text);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-input, 8px);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ------------------------------------------------------------
+ * .eng-cinema-log — collapsible raw terminal panel
+ * ------------------------------------------------------------ */
+
+.praxis-root .eng-cinema-log {
+  border-radius: var(--radius-card);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.praxis-root .eng-cinema-log-summary {
+  list-style: none;
+  padding: var(--space-3) var(--space-5);
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  transition: color 100ms ease;
+}
+.praxis-root .eng-cinema-log-summary::-webkit-details-marker { display: none; }
+.praxis-root .eng-cinema-log-summary:hover { color: var(--color-text); }
+.praxis-root .eng-cinema-log[open] .eng-cinema-log-summary {
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.praxis-root .eng-cinema-log-scroll {
+  height: 280px;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11px;
+  line-height: 1.6;
+  background: #08090b;
+  color: #d2d6dc;
+}
+
+.praxis-root .eng-cinema-log-line {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.praxis-root .eng-cinema-log-ts {
+  color: #586374;
+  margin-right: 8px;
+  user-select: none;
+}
+
+.praxis-root .eng-cinema-log-level-stderr  { color: #ff9aa2; }
+.praxis-root .eng-cinema-log-level-system  { color: #7ad8a8; }
+.praxis-root .eng-cinema-log-level-info    { color: #9ec5ff; }
+.praxis-root .eng-cinema-log-level-stdout  { color: #d2d6dc; }
+
+/* ------------------------------------------------------------
+ * .eng-cinema-summary — shipped / failed terminal-state block
+ * ------------------------------------------------------------ */
+
+.praxis-root .eng-cinema-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-card);
+  background: color-mix(in srgb, var(--dept, var(--color-accent)) 4%, var(--color-surface-elevated));
+  border: 1px solid color-mix(in srgb, var(--dept, var(--color-accent)) 25%, var(--color-border));
+}
+
+.praxis-root .eng-cinema-summary-headline {
+  font-family: var(--font-serif, serif);
+  font-size: var(--text-display-md, 24px);
+  line-height: 1.2;
+  color: var(--color-text);
+}
+
+.praxis-root .eng-cinema-summary-body {
+  font-size: var(--text-body, 14px);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.praxis-root .eng-cinema-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.praxis-root .eng-cinema-summary-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.praxis-root .eng-cinema-summary-stat-label {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.praxis-root .eng-cinema-summary-stat-value {
+  font-size: var(--text-body-lg, 15px);
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.praxis-root .eng-cinema-summary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+/* Failure summary tint */
+.praxis-root .eng-cinema-summary[data-status="failed"],
+.praxis-root .eng-cinema-summary[data-status="timeout"] {
+  background: color-mix(in srgb, var(--color-pink) 4%, var(--color-surface-elevated));
+  border-color: color-mix(in srgb, var(--color-pink) 25%, var(--color-border));
+}
+
+.praxis-root .eng-cinema-summary[data-status="aborted"] {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-border);
+}
+
+.praxis-root .eng-cinema-summary-rawdetails {
+  margin-top: var(--space-2);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  padding: var(--space-3);
+  border-radius: var(--radius-input, 8px);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Celebration moment on the step label when transitioning to shipped */
+@media not (prefers-reduced-motion: reduce) {
+  @keyframes eng-celebration {
+    0%   { transform: scale(1); opacity: 1; }
+    20%  { transform: scale(1.04); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .praxis-root .eng-cinema-stage[data-celebrating="true"] .eng-cinema-step-label {
+    animation: eng-celebration 1.8s cubic-bezier(0.22, 0.61, 0.36, 1) 1;
+  }
+}
+
+/* ------------------------------------------------------------
+ * .eng-reconnecting-pip — degraded / reconnecting indicator
+ * ------------------------------------------------------------ */
+
+.praxis-root .eng-reconnecting-pip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: color-mix(in srgb, var(--color-amber) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-amber) 35%, transparent);
+  color: var(--color-amber);
+}
+
+.praxis-root .eng-reconnecting-pip[data-kind="reconciling"] {
+  background: color-mix(in srgb, var(--color-green) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-green) 35%, transparent);
+  color: var(--color-green);
+}
+
+.praxis-root .eng-reconnecting-pip[data-kind="investigating"] {
+  background: color-mix(in srgb, var(--color-amber) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-amber) 35%, transparent);
+  color: var(--color-amber);
+}
+
+.praxis-root .eng-reconnecting-pip-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: currentColor;
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  @keyframes eng-reconnect-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .praxis-root .eng-reconnecting-pip-dot {
+    animation: eng-reconnect-pulse 1.2s ease-in-out infinite;
+  }
+}
+
+/* ------------------------------------------------------------
+ * .eng-inflight-strip — workspace dashboard above-the-hero strip
+ * Reuses .praxis-live-strip structure with engineering-specific extras.
+ * Mirrors PraxisLiveStrip CSS at praxis-system.css:495–531.
+ * ------------------------------------------------------------ */
+
+.praxis-root .eng-inflight-strip {
+  /* Wraps .praxis-live-strip; the inner Link element gets the styles */
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.praxis-root .eng-inflight-strip .praxis-live-strip {
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+.praxis-root .eng-inflight-strip:hover .praxis-live-strip {
+  border-color: var(--dept, var(--color-accent));
+}
+
+.praxis-root .eng-inflight-strip-meta {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-body-sm, 13px);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.praxis-root .eng-inflight-strip-celebration {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--dept, var(--color-accent)) 14%, transparent),
+    transparent 70%
+  );
+}
+
+.praxis-root .eng-inflight-strip[data-state="failed"] .praxis-live-strip,
+.praxis-root .eng-inflight-strip[data-state="failed"] .praxis-live-strip-wave > i {
+  --dept: var(--color-pink);
+  --dept-edge: color-mix(in srgb, var(--color-pink) 35%, transparent);
+}
+
+/* ------------------------------------------------------------
+ * .eng-sidebar-pip — small dept-tinted dot on /app/builds sidebar entry
+ * ------------------------------------------------------------ */
+
+.praxis-root .eng-sidebar-pip {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--color-dept-engineering);
+  pointer-events: none;
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  @keyframes eng-sidebar-pip-pulse {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50%      { opacity: 1; transform: scale(1.15); }
+  }
+  .praxis-root .eng-sidebar-pip {
+    animation: eng-sidebar-pip-pulse 2.4s ease-in-out infinite;
+  }
+}
+
+/* ------------------------------------------------------------
+ * Mobile reflow (≤ 640px) — Constitution V mobile sweep
+ * ------------------------------------------------------------ */
+
+@media (max-width: 640px) {
+  .praxis-root .eng-cinema {
+    padding: var(--space-3);
+    gap: var(--space-3);
+  }
+
+  .praxis-root .eng-cinema-stage {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+    padding: var(--space-4);
+  }
+
+  .praxis-root .eng-cinema-step-label {
+    font-size: var(--text-display-md, 24px);
+  }
+
+  .praxis-root .eng-cinema-meta {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .praxis-root .eng-cinema-meta-row {
+    grid-template-columns: 80px auto;
+    column-gap: var(--space-2);
+  }
+
+  .praxis-root .eng-cinema-meta-label,
+  .praxis-root .eng-cinema-meta-value {
+    text-align: left;
+  }
+
+  .praxis-root .eng-cinema-header {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .praxis-root .eng-cinema-prompt {
+    font-size: var(--text-body);
+    flex-basis: 100%;
+    order: 99;
+  }
+
+  .praxis-root .eng-cinema-preview {
+    min-height: 240px;
+  }
+
+  .praxis-root .eng-cinema-summary-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .praxis-root .eng-cinema-summary-headline {
+    font-size: var(--text-display-md, 22px);
+  }
+
+  .praxis-root .eng-inflight-strip-meta {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------
+ * Cinema entrance — fades the whole tree in on mount.
+ * Single keyframe; not gated per-component for cohesion.
+ * ------------------------------------------------------------ */
+
+@media not (prefers-reduced-motion: reduce) {
+  @keyframes eng-cinema-enter {
+    0%   { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .praxis-root .eng-cinema > * {
+    animation: eng-cinema-enter 280ms ease-out both;
+  }
+  .praxis-root .eng-cinema > *:nth-child(2) { animation-delay: 60ms; }
+  .praxis-root .eng-cinema > *:nth-child(3) { animation-delay: 120ms; }
+  .praxis-root .eng-cinema > *:nth-child(4) { animation-delay: 180ms; }
+  .praxis-root .eng-cinema > *:nth-child(5) { animation-delay: 240ms; }
+}

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Hammer, Lock, Loader2, X } from "lucide-react";
-import BuildSession from "./BuildSession";
 
 interface Props {
   internalAccount: boolean;
@@ -36,12 +36,12 @@ export default function EngineeringBuildButton({
   internalAccount,
   deptColor,
 }: Props) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("");
   const [buildType, setBuildType] = useState("landing-page");
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
 
   if (!internalAccount) {
     return (
@@ -72,9 +72,10 @@ export default function EngineeringBuildButton({
         setError(json.message ?? json.error ?? `request_${r.status}`);
         return;
       }
-      setActiveSessionId(json.session_id);
       setOpen(false);
       setPrompt("");
+      // Hand off to the durable cinema URL — never an in-memory modal.
+      router.push(`/app/builds/${json.session_id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "submit_failed");
     } finally {
@@ -186,12 +187,6 @@ export default function EngineeringBuildButton({
         </div>
       )}
 
-      {activeSessionId && (
-        <BuildSession
-          sessionId={activeSessionId}
-          onClose={() => setActiveSessionId(null)}
-        />
-      )}
     </>
   );
 }

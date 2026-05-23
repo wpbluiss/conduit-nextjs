@@ -3,14 +3,18 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import type { EmployeeId } from "@/lib/conduit/employees";
-import { EMPLOYEES } from "@/lib/conduit/employees";
+import { EMPLOYEES, isValidEmployee } from "@/lib/conduit/employees";
 
 interface Props {
-  /** Employee currently in the live voice room (drives the strip color). */
-  employee: EmployeeId;
+  /**
+   * Employee currently in the live voice room (drives strip color + name).
+   * Optional: when omitted or unknown, renders a neutral
+   * "Voice room · live now" in the accent color.
+   */
+  employee?: EmployeeId;
   /** URL to rejoin (typically /app/voice). */
   rejoinHref: string;
-  /** Optional copy override; defaults to "{name} · live now". */
+  /** Optional copy override. */
   label?: string;
 }
 
@@ -23,21 +27,24 @@ interface Props {
  * keeps things explicit.
  */
 export function PraxisLiveStrip({ employee, rejoinHref, label }: Props) {
-  const meta = EMPLOYEES[employee];
+  const meta =
+    employee && isValidEmployee(employee) ? EMPLOYEES[employee] : null;
+  const displayLabel =
+    label ?? (meta ? `${meta.name} · live now` : "Voice room · live now");
   return (
-    <div className="praxis-live-strip" data-dept={employee} role="status">
+    <div className="praxis-live-strip" data-dept={meta?.id} role="status">
       <span className="praxis-live-strip-wave" aria-hidden>
         <i /><i /><i />
       </span>
       <span className="praxis-eyebrow" style={{ color: "var(--color-text)" }}>
-        {label ?? `${meta.name} · live now`}
+        {displayLabel}
       </span>
       <Link
         href={rejoinHref}
         className="praxis-eyebrow"
         style={{
           marginLeft: "auto",
-          color: "var(--dept)",
+          color: "var(--dept, var(--color-accent))",
           textDecoration: "none",
           display: "inline-flex",
           alignItems: "center",

@@ -210,11 +210,17 @@ export function PraxisTeamRoster({
     >
       {cards.map((c) => {
         const meta = EMPLOYEES[c.employee];
-        const href = c.isAllowed
-          ? `/app/team/${c.employee}`
-          : "/app/settings/billing";
         const isInFlightEng =
           c.employee === "engineering" && Boolean(c.row.in_flight_build_id);
+        // When Engineering has a build in flight, the click target on the
+        // team card routes the user to the cinema (where the build is happening
+        // right now) rather than to Engineering's profile page. The profile is
+        // still reachable via the sidebar's Team list.
+        const href = !c.isAllowed
+          ? "/app/settings/billing"
+          : isInFlightEng && c.row.in_flight_build_id
+            ? `/app/builds/${c.row.in_flight_build_id}`
+            : `/app/team/${c.employee}`;
         const isHotLead =
           c.employee === "sales" &&
           c.row.top_lead_score !== null &&
@@ -234,7 +240,7 @@ export function PraxisTeamRoster({
         if (!c.isAllowed) {
           bottomLine = `Hire ${meta.name}`;
         } else if (isInFlightEng) {
-          bottomLine = "1 build in flight";
+          bottomLine = "Building now →";
         } else if (isHotLead) {
           bottomLine = `Just scored: ${c.row.top_lead_name} · ${c.row.top_lead_score}/100`;
         } else if (c.row.last_artifact_title) {

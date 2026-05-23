@@ -3,6 +3,7 @@ import { Inter, Fraunces, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import "@/styles/praxis-tokens.css";
 import "@/styles/praxis-system.css";
+import "@/styles/engineering-cinema.css";
 import { ThemeBoot } from "@/components/conduit/ThemeBoot";
 
 const inter = Inter({

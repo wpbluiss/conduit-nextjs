@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentAccount, userDisplayName } from "@/lib/conduit/account";
 import { tierById } from "@/lib/billing/tiers";
-import { EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
+import { EMPLOYEE_ORDER, isValidEmployee, type EmployeeId } from "@/lib/conduit/employees";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
   getTeamActivityBundle,
@@ -17,6 +17,8 @@ import { PraxisWelcomeHero } from "@/components/conduit/praxis/PraxisWelcomeHero
 import { PraxisLiveStrip } from "@/components/conduit/praxis/PraxisLiveStrip";
 import { PraxisCard } from "@/components/conduit/praxis/PraxisCard";
 import { PraxisTeamRoster } from "@/components/conduit/praxis/PraxisTeamRoster";
+import { EngineeringBuildStrip } from "@/components/conduit/builds/in-flight/EngineeringBuildStrip";
+import { getInFlightBuilds } from "@/lib/engineering/in-flight";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +40,7 @@ export default async function WorkspaceDashboard() {
   // Server-render the initial activity bundle. Client roster takes
   // this as `initial` and polls /api/conduit/team-activity every 60s
   // to refresh.
-  const [bundle, atlasMemoryQ, lastConvoQ] = await Promise.all([
+  const [bundle, atlasMemoryQ, lastConvoQ, inFlightBuilds] = await Promise.all([
     getTeamActivityBundle(supabase, account.id),
     supabase
       .from("conduit_memory")
@@ -54,6 +56,7 @@ export default async function WorkspaceDashboard() {
       .eq("account_id", account.id)
       .order("updated_at", { ascending: false })
       .limit(1),
+    getInFlightBuilds(supabase, account.id),
   ]);
 
   const atlasMemory = atlasMemoryQ.data?.[0] ?? null;
@@ -156,11 +159,21 @@ export default async function WorkspaceDashboard() {
         {bundle.voice_live && (
           <PraxisLiveStrip
             employee={
-              (lastConvoRaw?.dominant_employee as EmployeeId | null) ?? "jarvis"
+              lastConversation?.dominant_employee &&
+              isValidEmployee(lastConversation.dominant_employee)
+                ? lastConversation.dominant_employee
+                : undefined
             }
             rejoinHref="/app/voice"
           />
         )}
+
+        {/* Engineering build in-flight strip — only when ≥1 active build */}
+        <EngineeringBuildStrip
+          initial={inFlightBuilds}
+          accountId={account.id}
+          internalAccount={internal}
+        />
 
         {/* Welcome hero */}
         <PraxisWelcomeHero copy={copy} activityBucket={bucket} />

@@ -9,6 +9,7 @@ import { PraxisCanvasTintProvider } from "@/components/conduit/praxis/PraxisCanv
 import { tierById } from "@/lib/billing/tiers";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import type { EmployeeKey } from "@/lib/ai/provider";
+import { getInFlightBuilds } from "@/lib/engineering/in-flight";
 
 export const dynamic = "force-dynamic";
 
@@ -27,12 +28,15 @@ export default async function AppLayout({
     account.business_type && account.business_description,
   );
 
-  const { data: convos } = await supabase
-    .from("conduit_conversations")
-    .select("id, title, updated_at, dominant_employee")
-    .eq("account_id", account.id)
-    .order("updated_at", { ascending: false })
-    .limit(50);
+  const [{ data: convos }, inFlightBuildsInitial] = await Promise.all([
+    supabase
+      .from("conduit_conversations")
+      .select("id, title, updated_at, dominant_employee")
+      .eq("account_id", account.id)
+      .order("updated_at", { ascending: false })
+      .limit(50),
+    getInFlightBuilds(supabase, account.id),
+  ]);
 
   // Last activity per employee (for team status dots)
   const { data: latestPerEmployee } = await supabase
@@ -82,6 +86,8 @@ export default async function AppLayout({
               ? "Internal"
               : tierById(account.tier_id).name
           }
+          accountId={account.id}
+          inFlightBuildsInitial={inFlightBuildsInitial}
         />
         <main className="conduit-canvas praxis-canvas-tint flex-1 flex flex-col min-w-0">
           <UpgradeNudge

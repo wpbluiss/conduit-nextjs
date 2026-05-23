@@ -7,6 +7,7 @@
 // BuildsTabs surfaces today's usage.
 
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentAccount } from "@/lib/conduit/account";
 import { tierById } from "@/lib/billing/tiers";
@@ -20,7 +21,17 @@ import BuildsTabs, {
 
 export const dynamic = "force-dynamic";
 
-export default async function BuildsPage() {
+interface Ctx {
+  searchParams: Promise<{ session?: string; continue?: string }>;
+}
+
+export default async function BuildsPage({ searchParams }: Ctx) {
+  const sp = await searchParams;
+  // Backward-compat: /app/builds?session=<id> → /app/builds/<id>
+  if (sp.session) {
+    redirect(`/app/builds/${sp.session}`);
+  }
+
   const current = await getCurrentAccount();
   if (!current) return null;
   const { account } = current;

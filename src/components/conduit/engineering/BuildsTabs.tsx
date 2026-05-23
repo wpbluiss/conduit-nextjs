@@ -13,9 +13,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ExternalLink, ArrowRight, EyeOff, X } from "lucide-react";
-import BuildSession from "./BuildSession";
 import type { DailyUsage } from "@/lib/engineering/limits";
 
 const FAILED_STATUSES = new Set(["failed", "timeout", "aborted"]);
@@ -71,28 +70,26 @@ export default function BuildsTabs({
   tierName,
   usage,
 }: Props) {
+  const router = useRouter();
   const params = useSearchParams();
-  const sessionFromUrl = params.get("session");
+  const continueFromUrl = params.get("continue");
 
   const defaultTab: "templates" | "engineering" =
-    sessionFromUrl
-      ? "engineering"
-      : engSessions.length > 0
-        ? "engineering"
-        : "templates";
+    engSessions.length > 0 ? "engineering" : "templates";
   const [tab, setTab] = useState<"templates" | "engineering">(defaultTab);
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(
-    sessionFromUrl,
-  );
   const [continueParent, setContinueParent] = useState<EngSession | null>(null);
   const [showFailed, setShowFailed] = useState(false);
 
+  // ?continue=<id> opens the ContinueModal preloaded with that session.
+  // Triggered by the cinema's failure-recovery affordance (BuildShippedSummary).
   useEffect(() => {
-    if (sessionFromUrl) {
+    if (!continueFromUrl) return;
+    const match = engSessions.find((s) => s.id === continueFromUrl);
+    if (match) {
       setTab("engineering");
-      setActiveSessionId(sessionFromUrl);
+      setContinueParent(match);
     }
-  }, [sessionFromUrl]);
+  }, [continueFromUrl, engSessions]);
 
   useEffect(() => {
     try {
@@ -153,15 +150,7 @@ export default function BuildsTabs({
       ) : (
         <EngineeringTab
           sessions={visibleEng}
-          onOpen={setActiveSessionId}
           onContinue={setContinueParent}
-        />
-      )}
-
-      {activeSessionId && (
-        <BuildSession
-          sessionId={activeSessionId}
-          onClose={() => setActiveSessionId(null)}
         />
       )}
 
@@ -171,7 +160,8 @@ export default function BuildsTabs({
           onClose={() => setContinueParent(null)}
           onCreated={(newId) => {
             setContinueParent(null);
-            setActiveSessionId(newId);
+            // Hand off to the durable cinema URL — same affordance as fresh builds.
+            router.push(`/app/builds/${newId}`);
           }}
         />
       )}
@@ -373,11 +363,9 @@ function TemplatesTab({ builds }: { builds: R7Build[] }) {
 
 function EngineeringTab({
   sessions,
-  onOpen,
   onContinue,
 }: {
   sessions: EngSession[];
-  onOpen: (id: string) => void;
   onContinue: (parent: EngSession) => void;
 }) {
   if (sessions.length === 0) {
@@ -403,9 +391,8 @@ function EngineeringTab({
           className="conduit-card border-l-[3px] p-5 flex flex-col gap-3 text-left"
           style={{ borderLeftColor: "var(--color-dept-engineering)" }}
         >
-          <button
-            type="button"
-            onClick={() => onOpen(s.id)}
+          <Link
+            href={`/app/builds/${s.id}`}
             className="flex flex-col gap-3 text-left hover:opacity-95 transition-opacity"
           >
             <div className="flex items-center justify-between">
@@ -436,7 +423,7 @@ function EngineeringTab({
                 {labelForLiveStatus(s.status)}
               </p>
             )}
-          </button>
+          </Link>
           <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted)] pt-2 border-t border-[var(--color-border)]">
             <span>{new Date(s.created_at).toLocaleString()}</span>
             <span className="flex items-center gap-3">
