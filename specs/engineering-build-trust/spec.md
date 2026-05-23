@@ -226,6 +226,42 @@ Confirm the historical view renders with deploy URL + summary.
 
 ---
 
+### User Story 5b — Live code-stream cinema panel (Priority: P2, Phase B)
+
+When Engineering is writing a file, Luis sees the actual code — line by line,
+syntax-highlighted, with a brief rainbow stripe sweeping across each new line
+as it lands — appear in the cinema. Not a terminal scroll, not a list of file
+names: the literal code being written by Engineering, materialized in front
+of him as it streams from the worker.
+
+**Why this priority**: surfaced after Phase A preview-validated (2026-05-23,
+Lunaro build `b81aea12`). The cinema delivers durability and step honesty;
+the craft strip already shows file names. What's missing for the
+"watch-a-craftsman-work" feel is the code itself. This is the unforgettable
+moment the user named after seeing the cinema work end-to-end.
+
+**Independent Test**: Trigger a build. Open the cinema. Confirm a new panel
+renders, file tabs across the top, code body underneath; as Engineering
+streams chunks, the code types in line-by-line, syntax-highlighted, with a
+rainbow sweep on each new line.
+
+**Diagnosis + locked approach**: see
+[`phase-b-code-stream.md`](./phase-b-code-stream.md). The diagnosis confirms
+that today's `conduit_engineering_logs` realtime stream carries file NAMES
+(via `WRITE <path>` system logs) but no content — Claude's per-token output
+is consumed by the worker but never forwarded. The locked approach is Path C
+(worker streams Claude tokens per chunk via stdout logs) + Prism-based
+syntax highlighting + a rainbow line-arrival sweep.
+
+**Gate state**: BLOCKED on
+(a) Phase A preview validation,
+(b) a worker-repo PR that emits per-chunk stdout per Path C,
+(c) a full Phase B spec section + plan + tasks before any in-repo code is
+authored. Listed here so the priority + framing are anchored in the
+canonical spec; the design + FRs land when the gate clears.
+
+---
+
 ### User Story 6 — Build-status pulse in the chat surface (Priority: P3)
 
 When a build is in flight, the Engineering employee's avatar in the chat
