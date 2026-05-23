@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/conduit/Sidebar";
 import { OnboardingModal } from "@/components/conduit/OnboardingModal";
 import { UpgradeNudge } from "@/components/conduit/UpgradeNudge";
 import { RouteProgress } from "@/components/conduit/RouteProgress";
+import { PraxisCanvasTintProvider } from "@/components/conduit/praxis/PraxisCanvasTintProvider";
 import { tierById } from "@/lib/billing/tiers";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import type { EmployeeKey } from "@/lib/ai/provider";
@@ -68,27 +69,29 @@ export default async function AppLayout({
 
   return (
     <div className="praxis-root h-screen flex bg-[var(--color-surface)] text-[var(--color-text)]">
-      <RouteProgress />
-      <Sidebar
-        userEmail={user.email ?? ""}
-        accountName={account.name}
-        conversations={convos ?? []}
-        team={team}
-        allowedEmployees={allowedEmployees}
-        tierName={
-          account.internal_account
-            ? "Internal"
-            : tierById(account.tier_id).name
-        }
-      />
-      <main className="conduit-canvas flex-1 flex flex-col min-w-0">
-        <UpgradeNudge
-          tierId={account.tier_id ?? "free"}
-          internalAccount={Boolean(account.internal_account)}
+      <PraxisCanvasTintProvider>
+        <RouteProgress />
+        <Sidebar
+          userEmail={user.email ?? ""}
+          accountName={account.name}
+          conversations={convos ?? []}
+          team={team}
+          allowedEmployees={allowedEmployees}
+          tierName={
+            account.internal_account
+              ? "Internal"
+              : tierById(account.tier_id).name
+          }
         />
-        {children}
-      </main>
-      {!onboarded && <OnboardingModal defaultName={userName} />}
+        <main className="conduit-canvas praxis-canvas-tint flex-1 flex flex-col min-w-0">
+          <UpgradeNudge
+            tierId={account.tier_id ?? "free"}
+            internalAccount={Boolean(account.internal_account)}
+          />
+          {children}
+        </main>
+        {!onboarded && <OnboardingModal defaultName={userName} />}
+      </PraxisCanvasTintProvider>
     </div>
   );
 }

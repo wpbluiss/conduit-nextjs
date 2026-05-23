@@ -1,41 +1,24 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import {
-  ArrowRight,
-  Brain,
-  ListTodo,
-  MessageSquare,
-  Mic2,
-} from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentAccount, userDisplayName } from "@/lib/conduit/account";
-import {
-  EMPLOYEE_ORDER,
-  EMPLOYEES,
-  type EmployeeId,
-} from "@/lib/conduit/employees";
 import { tierById } from "@/lib/billing/tiers";
-import { readVoiceCeilings } from "@/lib/voice/config";
-import { EmployeeAvatar } from "@/components/conduit/EmployeeBadge";
+import { EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
 import type { EmployeeKey } from "@/lib/ai/provider";
-import { getLastActiveByEmployee } from "@/lib/conduit/employee-activity";
+import {
+  getTeamActivityBundle,
+  pickPrimaryEvent,
+} from "@/lib/conduit/team-activity";
+import {
+  activityBucket,
+  composeWelcomeCopy,
+  timeOfDayBucket,
+} from "@/lib/conduit/welcome-copy";
+import { PraxisWelcomeHero } from "@/components/conduit/praxis/PraxisWelcomeHero";
+import { PraxisLiveStrip } from "@/components/conduit/praxis/PraxisLiveStrip";
+import { PraxisCard } from "@/components/conduit/praxis/PraxisCard";
+import { PraxisTeamRoster } from "@/components/conduit/praxis/PraxisTeamRoster";
 
 export const dynamic = "force-dynamic";
-
-function relativeTime(iso: string | null | undefined): string {
-  if (!iso) return "—";
-  const t = new Date(iso).getTime();
-  if (Number.isNaN(t)) return "—";
-  const diff = Date.now() - t;
-  const m = Math.round(diff / 60000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
-  const h = Math.round(m / 60);
-  if (h < 24) return `${h}h ago`;
-  const d = Math.round(h / 24);
-  if (d < 7) return `${d}d ago`;
-  return new Date(iso).toLocaleDateString();
-}
 
 export default async function WorkspaceDashboard() {
   const current = await getCurrentAccount();
@@ -49,21 +32,14 @@ export default async function WorkspaceDashboard() {
       ? (EMPLOYEE_ORDER as EmployeeKey[])
       : (tier.allowedEmployees as EmployeeKey[])
   ) as EmployeeKey[];
-
+  const allowedSet = new Set<EmployeeId>(allowed as EmployeeId[]);
   const firstName = userDisplayName(user).split(" ")[0];
 
-  // 4 dashboard tiles — fetch in parallel.
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-
-  const [
-    atlasMemoryQ,
-    leadsQ,
-    topLeadQ,
-    lastConvoQ,
-    voiceTodayQ,
-    ceilings,
-  ] = await Promise.all([
+  // Server-render the initial activity bundle. Client roster takes
+  // this as `initial` and polls /api/conduit/team-activity every 60s
+  // to refresh.
+  const [bundle, atlasMemoryQ, lastConvoQ] = await Promise.all([
+    getTeamActivityBundle(supabase, account.id),
     supabase
       .from("conduit_memory")
       .select("id, kind, content, tags, created_at")
@@ -73,282 +49,285 @@ export default async function WorkspaceDashboard() {
       .order("created_at", { ascending: false })
       .limit(1),
     supabase
-      .from("sales_leads")
-      .select("id", { count: "exact", head: true })
-      .eq("account_id", account.id)
-      .in("status", ["new", "qualified", "contacted"]),
-    supabase
-      .from("sales_leads")
-      .select("id, business_name, score, status")
-      .eq("account_id", account.id)
-      .in("status", ["new", "qualified", "contacted"])
-      .order("score", { ascending: false })
-      .limit(1),
-    supabase
       .from("conduit_conversations")
-      .select(
-        "id, title, updated_at, dominant_employee",
-      )
+      .select("id, title, updated_at, dominant_employee")
       .eq("account_id", account.id)
       .order("updated_at", { ascending: false })
       .limit(1),
-    supabase
-      .from("conduit_voice_sessions")
-      .select("duration_seconds")
-      .eq("account_id", account.id)
-      .gte("started_at", todayStart.toISOString())
-      .not("duration_seconds", "is", null),
-    readVoiceCeilings(supabase),
   ]);
 
-  const atlasMemory =
-    (atlasMemoryQ.data?.[0] as
-      | {
-          id: string;
-          kind: string;
-          content: string;
-          tags: string[] | null;
-          created_at: string;
-        }
-      | undefined) ?? null;
-
-  const pipelineCount = leadsQ.count ?? 0;
-  const topLead = topLeadQ.data?.[0] as
-    | { id: string; business_name: string; score: number; status: string }
-    | undefined;
-
-  const lastConvo = lastConvoQ.data?.[0] as
-    | {
-        id: string;
-        title: string | null;
-        updated_at: string;
-        dominant_employee: string | null;
+  const atlasMemory = atlasMemoryQ.data?.[0] ?? null;
+  const lastConvoRaw = lastConvoQ.data?.[0] ?? null;
+  const lastConversation = lastConvoRaw
+    ? {
+        id: lastConvoRaw.id as string,
+        title: (lastConvoRaw.title as string | null) ?? null,
+        updated_at: lastConvoRaw.updated_at as string,
+        dominant_employee:
+          (lastConvoRaw.dominant_employee as EmployeeId | null) ?? null,
       }
-    | undefined;
+    : null;
 
-  const voiceSecondsToday = (voiceTodayQ.data ?? []).reduce(
+  const primaryEvent = pickPrimaryEvent({
+    bundle,
+    atlasMemory: atlasMemory
+      ? {
+          content: atlasMemory.content as string,
+          created_at: atlasMemory.created_at as string,
+          primary_employee: "jarvis",
+        }
+      : null,
+    lastConversation,
+    sessionMountedAt: Date.now(),
+  });
+
+  // Most-engaged dept in last 7 days — pick the one with the
+  // freshest last_active_at among non-Atlas employees.
+  let mostEngaged: EmployeeId | null = null;
+  let mostEngagedTs = 0;
+  const sevenDaysAgo = Date.now() - 7 * 24 * 3600 * 1000;
+  for (const e of EMPLOYEE_ORDER) {
+    if (e === "jarvis") continue;
+    const iso = bundle.employees[e].last_active_at;
+    if (!iso) continue;
+    const ts = new Date(iso).getTime();
+    if (ts > mostEngagedTs && ts >= sevenDaysAgo) {
+      mostEngagedTs = ts;
+      mostEngaged = e;
+    }
+  }
+
+  const copy = composeWelcomeCopy({
+    firstName,
+    hoursSinceLastVisit: null,
+    timeOfDay: timeOfDayBucket(),
+    primaryEvent: primaryEvent.kind === "none" ? null : primaryEvent,
+  });
+
+  // Activity bucket — count signals in last hour for breath cadence.
+  const oneHourAgo = Date.now() - 3600_000;
+  let signalCount = 0;
+  for (const e of EMPLOYEE_ORDER) {
+    const last = bundle.employees[e].last_active_at;
+    if (last && new Date(last).getTime() >= oneHourAgo) signalCount++;
+  }
+  const bucket = activityBucket(signalCount);
+
+  // KPI tile data.
+  const pipelineCount = bundle.employees.sales.top_lead_score !== null
+    ? bundle.employees.sales.top_lead_name
+    : null;
+  const topLeadScore = bundle.employees.sales.top_lead_score;
+  const topLeadName = bundle.employees.sales.top_lead_name;
+
+  // Voice today: sum durations from today's voice sessions
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const { data: voiceTodayRows } = await supabase
+    .from("conduit_voice_sessions")
+    .select("duration_seconds")
+    .eq("account_id", account.id)
+    .gte("started_at", todayStart.toISOString())
+    .not("duration_seconds", "is", null);
+  const voiceSecondsToday = (voiceTodayRows ?? []).reduce(
     (sum, s) => sum + ((s.duration_seconds as number | null) ?? 0),
     0,
   );
   const voiceMinutesToday = Math.floor(voiceSecondsToday / 60);
-  const voiceCapMinutes = ceilings.dailyMinutes;
 
-  // Last activity per employee for the team grid status dots. Polish
-  // 2026-05-07: was reading conduit_messages only — voice-only sessions
-  // and engineering builds didn't bump it, so the grid showed stale stamps
-  // when Luis had just talked or shipped. Helper merges all three signals.
-  const lastByEmp = await getLastActiveByEmployee(supabase, account.id);
+  // Voice cap (from existing tier config).
+  const { readVoiceCeilings } = await import("@/lib/voice/config");
+  const ceilings = await readVoiceCeilings(supabase);
+  const voiceCapMinutes = ceilings.dailyMinutes;
 
   return (
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-10">
-      <div className="mx-auto max-w-5xl">
-        {/* Welcome */}
-        <div className="mb-8">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)] flex items-center gap-2">
-            <span className="live-dot" aria-hidden /> Praxis Console · {tier.name}
-            {internal && " · Internal"}
-          </p>
-          <h1 className="serif text-4xl md:text-5xl mt-2">
-            Welcome back, {firstName}.
-          </h1>
-        </div>
+      <div
+        className="mx-auto"
+        style={{
+          maxWidth: "72rem",
+          display: "flex",
+          flexDirection: "column",
+          gap: "var(--space-10)",
+        }}
+      >
 
-        {/* 4-tile dashboard */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-12">
+        {/* Live-strip — only when voice session active */}
+        {bundle.voice_live && (
+          <PraxisLiveStrip
+            employee={
+              (lastConvoRaw?.dominant_employee as EmployeeId | null) ?? "jarvis"
+            }
+            rejoinHref="/app/voice"
+          />
+        )}
+
+        {/* Welcome hero */}
+        <PraxisWelcomeHero copy={copy} activityBucket={bucket} />
+
+        {/* KPI tiles — operational row */}
+        <div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+          style={{ gap: "var(--space-3)" }}
+          data-cluster="kpi"
+        >
           {/* Atlas pinged you */}
-          <Link
+          <PraxisCard
+            variant="kpi"
+            dept="jarvis"
             href="/app/team/jarvis"
-            className="conduit-card border-l-[3px] p-5 hover:border-[var(--color-accent)] transition-colors flex flex-col gap-2 min-h-[140px]"
-            style={{ borderLeftColor: EMPLOYEES.jarvis.color }}
+            ariaLabel="Atlas pinged you"
           >
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
-                <Brain size={11} /> Atlas pinged you
-              </span>
-              <EmployeeAvatar employee="jarvis" size={20} />
-            </div>
+            <p className="praxis-eyebrow" style={{ marginBottom: "var(--space-3)" }}>
+              ATLAS PINGED YOU
+            </p>
             {atlasMemory ? (
-              <>
-                <p className="text-[13px] text-[var(--color-text)] leading-snug line-clamp-3 flex-1">
-                  {atlasMemory.content}
-                </p>
-                <span className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-1">
-                  {atlasMemory.kind} · {relativeTime(atlasMemory.created_at)}
-                </span>
-              </>
+              <p
+                className="praxis-body-sm"
+                style={{
+                  color: "var(--color-text)",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}
+              >
+                {atlasMemory.content as string}
+              </p>
             ) : (
-              <p className="text-[13px] text-[var(--color-text-muted)] leading-snug flex-1">
-                Atlas hasn&apos;t saved any context yet. Tell him about your
-                business and he&apos;ll start tracking.
+              <p className="praxis-body-sm" style={{ color: "var(--color-text-muted)" }}>
+                Tell Atlas about your business — he&apos;ll start tracking what matters.
               </p>
             )}
-          </Link>
+          </PraxisCard>
 
           {/* Pipeline */}
-          <Link
+          <PraxisCard
+            variant="kpi"
+            dept="sales"
             href="/app/team/sales"
-            className="conduit-card border-l-[3px] p-5 hover:border-[var(--color-accent)] transition-colors flex flex-col gap-2 min-h-[140px]"
-            style={{ borderLeftColor: EMPLOYEES.sales.color }}
+            ariaLabel="Sales pipeline"
           >
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
-                <ListTodo size={11} /> Pipeline
-              </span>
-              <EmployeeAvatar employee="sales" size={20} />
-            </div>
-            <div className="serif text-3xl text-[var(--color-text)]">
-              {pipelineCount.toLocaleString()}
-            </div>
-            <span className="text-[12px] text-[var(--color-text-muted)] truncate">
-              {topLead
-                ? `Top: ${topLead.business_name}`
-                : "No active leads. Run discovery in Sales."}
-            </span>
-          </Link>
+            <p className="praxis-eyebrow" style={{ marginBottom: "var(--space-3)" }}>
+              PIPELINE
+            </p>
+            <p className="praxis-numeric-display">
+              {topLeadScore !== null ? topLeadScore : "—"}
+            </p>
+            <p
+              className="praxis-microlabel"
+              style={{
+                marginTop: "var(--space-2)",
+                textTransform: "none",
+                letterSpacing: 0,
+                fontSize: "11px",
+                color: "var(--color-text-muted)",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {topLeadName ? `Top: ${topLeadName}` : pipelineCount ? "" : "No active leads"}
+            </p>
+          </PraxisCard>
 
           {/* Last conversation */}
-          <Link
-            href={lastConvo ? `/app?c=${lastConvo.id}` : "/app"}
-            className="conduit-card border-l-[3px] p-5 hover:border-[var(--color-accent)] transition-colors flex flex-col gap-2 min-h-[140px]"
-            style={{
-              borderLeftColor: lastConvo
-                ? EMPLOYEES[
-                    (EMPLOYEE_ORDER as string[]).includes(
-                      lastConvo.dominant_employee ?? "",
-                    )
-                      ? (lastConvo.dominant_employee as EmployeeId)
-                      : "jarvis"
-                  ].color
-                : "var(--color-border)",
-            }}
+          <PraxisCard
+            variant="kpi"
+            dept={lastConversation?.dominant_employee ?? undefined}
+            href={lastConversation ? `/app?c=${lastConversation.id}` : "/app"}
+            ariaLabel="Last conversation"
           >
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
-                <MessageSquare size={11} /> Last conversation
-              </span>
-            </div>
-            {lastConvo ? (
+            <p className="praxis-eyebrow" style={{ marginBottom: "var(--space-3)" }}>
+              LAST CONVERSATION
+            </p>
+            {lastConversation ? (
               <>
-                <p className="text-[13px] text-[var(--color-text)] leading-snug line-clamp-2 flex-1">
-                  {lastConvo.title || "Untitled chat"}
+                <p
+                  className="praxis-body-sm"
+                  style={{
+                    color: "var(--color-text)",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
+                  {lastConversation.title ?? "Untitled chat"}
                 </p>
-                <span className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] inline-flex items-center gap-1">
-                  Continue <ArrowRight size={10} /> ·{" "}
-                  {relativeTime(lastConvo.updated_at)}
-                </span>
+                <p className="praxis-microlabel" style={{ marginTop: "var(--space-2)" }}>
+                  Continue →
+                </p>
               </>
             ) : (
-              <p className="text-[13px] text-[var(--color-text-muted)] leading-snug flex-1">
-                No conversations yet. Talk to Atlas — he&apos;ll route the
-                request to the right employee.
+              <p className="praxis-body-sm" style={{ color: "var(--color-text-muted)" }}>
+                Talk to Atlas — he&apos;ll route the request.
               </p>
             )}
-          </Link>
+          </PraxisCard>
 
           {/* Voice minutes today */}
-          <Link
+          <PraxisCard
+            variant="kpi"
             href="/app/voice"
-            className="conduit-card border-l-[3px] p-5 hover:border-[var(--color-accent)] transition-colors flex flex-col gap-2 min-h-[140px]"
-            style={{ borderLeftColor: "var(--color-accent)" }}
+            ariaLabel="Voice minutes today"
           >
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
-                <Mic2 size={11} /> Voice minutes today
-              </span>
-            </div>
-            <div className="serif text-3xl text-[var(--color-text)]">
+            <p className="praxis-eyebrow" style={{ marginBottom: "var(--space-3)" }}>
+              VOICE TODAY
+            </p>
+            <p className="praxis-numeric-display">
               {voiceMinutesToday}
-              <span className="text-base text-[var(--color-text-muted)]">
-                {" "}
-                / {voiceCapMinutes}
+              <span style={{ fontSize: "1rem", color: "var(--color-text-muted)" }}>
+                {" "}/ {voiceCapMinutes}
               </span>
-            </div>
-            <div className="h-1.5 rounded-full bg-[var(--color-border)] overflow-hidden">
+            </p>
+            <div
+              style={{
+                marginTop: "var(--space-2)",
+                height: "4px",
+                borderRadius: "9999px",
+                background: "var(--color-border)",
+                overflow: "hidden",
+              }}
+            >
               <div
-                className="h-1.5 rounded-full bg-[var(--color-accent)]"
                 style={{
+                  height: "100%",
+                  borderRadius: "9999px",
+                  background: "var(--color-accent)",
                   width: `${Math.min(
                     100,
-                    Math.round(
-                      (voiceMinutesToday / Math.max(1, voiceCapMinutes)) * 100,
-                    ),
+                    Math.round((voiceMinutesToday / Math.max(1, voiceCapMinutes)) * 100),
                   )}%`,
+                  transition: "width 220ms var(--praxis-ease-out-quart)",
                 }}
               />
             </div>
-            <span className="text-[10px] text-[var(--color-text-muted)]">
-              Resets at midnight
-            </span>
-          </Link>
+          </PraxisCard>
         </div>
 
-        {/* Team grid */}
-        <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="text-[12px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-            Your team
-          </h2>
-          <span className="text-[10px] text-[var(--color-text-muted)]">
-            {allowed.length} active
-          </span>
+        {/* Team roster */}
+        <div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              justifyContent: "space-between",
+              marginBottom: "var(--space-4)",
+            }}
+          >
+            <h2 className="praxis-eyebrow">Your team</h2>
+            <span className="praxis-microlabel" style={{ textTransform: "none", letterSpacing: 0 }}>
+              {allowed.length} active
+            </span>
+          </div>
+          <PraxisTeamRoster
+            initial={bundle}
+            allowedEmployees={allowedSet}
+            mostEngagedDept={mostEngaged}
+          />
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {(EMPLOYEE_ORDER as EmployeeKey[]).map((emp) => {
-            const isAllowed = allowed.includes(emp);
-            const meta = EMPLOYEES[emp];
-            const lastIso = lastByEmp[emp];
-            return (
-              <Link
-                key={emp}
-                href={
-                  isAllowed
-                    ? `/app/team/${emp}`
-                    : "/app/settings/billing"
-                }
-                className={`conduit-card border-l-[3px] p-4 transition-colors flex flex-col gap-2 ${
-                  isAllowed
-                    ? "hover:border-[var(--color-accent)]"
-                    : "opacity-60"
-                }`}
-                style={{ borderLeftColor: meta.color }}
-                title={
-                  isAllowed
-                    ? meta.tagline
-                    : `${meta.name} unlocks on a higher plan.`
-                }
-              >
-                <div className="flex items-center justify-between">
-                  <EmployeeAvatar employee={emp} size={24} />
-                  <span
-                    className="w-1.5 h-1.5 rounded-full"
-                    style={{
-                      background: isAllowed ? meta.color : "var(--color-text-muted)",
-                      opacity: isAllowed ? 0.85 : 0.4,
-                    }}
-                    aria-label={isAllowed ? "Online" : "Locked"}
-                  />
-                </div>
-                <div>
-                  <div
-                    className="text-[13px] font-medium"
-                    style={{ color: meta.color }}
-                  >
-                    {meta.name}
-                  </div>
-                  <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] truncate">
-                    {meta.role}
-                  </div>
-                </div>
-                <div className="text-[10px] text-[var(--color-text-muted)] mt-auto">
-                  {isAllowed
-                    ? lastIso
-                      ? `Active ${relativeTime(lastIso)}`
-                      : "Online"
-                    : "Locked"}
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+
       </div>
     </div>
   );

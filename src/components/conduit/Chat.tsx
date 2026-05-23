@@ -2,17 +2,25 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, FileText, Mic, MicOff, Send, Square } from "lucide-react";
+import { ArrowRight, FileText } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
   DEPT_COLOR,
   DEPT_COLOR_SOFT,
   EmployeeAvatar,
-  EmployeeBadge,
   employeeLabel,
 } from "./EmployeeBadge";
 import { PaywallModal, type PaywallPayload } from "./PaywallModal";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { PraxisAvatar } from "./praxis/PraxisAvatar";
+import { PraxisSuggestionTile } from "./praxis/PraxisSuggestionTile";
+import { PraxisHandoffBaton } from "./praxis/PraxisHandoffBaton";
+import {
+  PraxisComposerPill,
+  type PinValue as PraxisPinValue,
+} from "./praxis/PraxisComposerPill";
+import { composeChatEmptyCopy, timeOfDayBucket } from "@/lib/conduit/welcome-copy";
+import type { EmployeeId } from "@/lib/conduit/employees";
 
 export interface VoicePrefs {
   enabled: boolean;
@@ -153,7 +161,6 @@ export function Chat({
   const [messages, setMessages] = useState<MessageRow[]>(initialMessages);
   const [input, setInput] = useState("");
   const [pin, setPin] = useState<PinValue>("auto");
-  const [pinOpen, setPinOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [drawerArtifactId, setDrawerArtifactId] = useState<string | null>(null);
@@ -703,11 +710,6 @@ export function Chat({
     [conversationId, loading, pin, router],
   );
 
-  const pinLabel =
-    pinOptions.find((o) => o.value === pin)?.label ?? "Atlas (auto-route)";
-  const pinAvatarEmp: EmployeeKey =
-    pin === "auto" || pin === "team" ? "jarvis" : (pin as EmployeeKey);
-
   return (
     <>
       <div
@@ -740,145 +742,52 @@ export function Chat({
         </div>
       </div>
 
-      <div className="px-4 md:px-8 py-3 md:py-4 bg-[var(--color-surface)]">
-        <div className="mx-auto max-w-3xl">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
+      <div
+        className="px-4 md:px-8 py-3 md:py-4"
+        style={{ background: "var(--color-surface)" }}
+      >
+        <div className="mx-auto" style={{ maxWidth: "48rem" }}>
+          <PraxisComposerPill
+            value={input}
+            onChange={(next) => {
+              // R13: any user typing into the chat stops in-flight streaming
+              // audio so the user's attention isn't competing with the
+              // agent's voice.
+              if (
+                next.length > input.length &&
+                (playingMessageIdx !== null || streamingAudioActiveRef.current)
+              ) {
+                stopAudio();
+              }
+              setInput(next);
+            }}
+            onSubmit={() => {
+              if (speech.listening) speech.stop();
               send(input);
             }}
-            className="conduit-pill-input flex items-center gap-2 px-2 py-2"
+            pin={pin as PraxisPinValue}
+            pinOptions={pinOptions as { value: PraxisPinValue; label: string }[]}
+            onPinChange={(next) => setPin(next as PinValue)}
+            speechSupported={speech.supported}
+            speechListening={speech.listening}
+            onSpeechToggle={() => {
+              if (!speech.supported) return;
+              if (speech.listening) {
+                speech.stop();
+                const t = lastTranscriptRef.current.trim();
+                if (t) setTimeout(() => send(t), 0);
+              } else {
+                speech.start();
+              }
+            }}
+            loading={loading}
+            streamingEmployee={streamingEmployee as EmployeeId | null}
+            placeholder={speech.listening ? "Listening…" : "Talk to your team…"}
+          />
+          <div
+            className="mt-2 h-4 text-center"
+            style={{ fontSize: "11px" }}
           >
-            <button
-              type="button"
-              onClick={() => setPinOpen((v) => !v)}
-              className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full hover:bg-[var(--color-surface-raised)] text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] shrink-0 relative"
-            >
-              <EmployeeAvatar employee={pinAvatarEmp} size={22} />
-              <span>{pinLabel}</span>
-              <span aria-hidden>▾</span>
-              {pinOpen && (
-                <div
-                  className="absolute bottom-full left-0 mb-2 w-56 rounded-xl bg-[var(--color-surface-elevated)] border border-[var(--color-border)] shadow-[0_10px_30px_rgba(0,0,0,0.35)] overflow-hidden text-left z-10"
-                  onMouseLeave={() => setPinOpen(false)}
-                >
-                  {pinOptions.map((o) => (
-                    <button
-                      key={o.value}
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setPin(o.value);
-                        setPinOpen(false);
-                      }}
-                      className={`w-full text-left px-3 py-2 text-xs flex items-center gap-2 hover:bg-[var(--color-surface-raised)] ${
-                        pin === o.value
-                          ? "text-[var(--color-text)] bg-[var(--color-surface-raised)]"
-                          : "text-[var(--color-text-muted)]"
-                      }`}
-                    >
-                      <EmployeeAvatar
-                        employee={
-                          o.value === "auto" || o.value === "team"
-                            ? "jarvis"
-                            : (o.value as EmployeeKey)
-                        }
-                        size={18}
-                      />
-                      <span>{o.label}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </button>
-            <textarea
-              value={input}
-              onChange={(e) => {
-                const next = e.target.value;
-                // R13: any user typing into the chat stops in-flight
-                // streaming audio (and batched audio) so the user's
-                // attention isn't competing with the agent's voice.
-                if (
-                  next.length > input.length &&
-                  (playingMessageIdx !== null ||
-                    streamingAudioActiveRef.current)
-                ) {
-                  stopAudio();
-                }
-                setInput(next);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  if (speech.listening) speech.stop();
-                  send(input);
-                }
-              }}
-              rows={1}
-              placeholder={
-                speech.listening ? "Listening…" : "Talk to your team…"
-              }
-              className="flex-1 resize-none bg-transparent outline-none px-2 py-2 text-[15px] max-h-32 leading-snug"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                if (!speech.supported) return;
-                if (speech.listening) {
-                  speech.stop();
-                  // Auto-submit if there's a transcript
-                  const t = lastTranscriptRef.current.trim();
-                  if (t) {
-                    setTimeout(() => send(t), 0);
-                  }
-                } else {
-                  speech.start();
-                }
-              }}
-              disabled={!speech.supported}
-              aria-label={
-                !speech.supported
-                  ? "Voice input not supported in this browser"
-                  : speech.listening
-                    ? "Stop listening"
-                    : "Start voice input"
-              }
-              title={
-                !speech.supported
-                  ? "Voice input not supported in this browser. Try Chrome."
-                  : speech.listening
-                    ? "Stop and send"
-                    : "Hold or click to talk"
-              }
-              className={`shrink-0 w-10 h-10 rounded-full inline-flex items-center justify-center transition-colors ${
-                speech.listening
-                  ? "bg-[var(--color-accent)] text-[#0A0908] employee-pulse"
-                  : speech.supported
-                    ? "border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-accent)]"
-                    : "border border-[var(--color-border)] text-[var(--color-text-muted)] opacity-40 cursor-not-allowed"
-              }`}
-              style={{
-                ["--dept" as string]: "var(--color-accent)",
-              }}
-            >
-              {speech.listening ? (
-                <Mic size={16} />
-              ) : speech.supported ? (
-                <Mic size={16} />
-              ) : (
-                <MicOff size={16} />
-              )}
-            </button>
-            <button
-              type="submit"
-              disabled={loading || !input.trim()}
-              aria-label="Send"
-              className="conduit-circle-btn shrink-0"
-            >
-              <Send size={16} />
-            </button>
-          </form>
-          <div className="mt-2 h-4 text-center text-[11px]">
             {streamingEmployee ? (
               <span
                 className="presence-line"
@@ -887,7 +796,7 @@ export function Chat({
                 {employeeLabel(streamingEmployee)} is thinking…
               </span>
             ) : (
-              <span className="text-[var(--color-text-muted)]">
+              <span style={{ color: "var(--color-text-muted)" }}>
                 Shift+Enter for newline
               </span>
             )}
@@ -909,20 +818,31 @@ export function Chat({
         />
       )}
 
-      {playingMessageIdx !== null && (
-        <button
-          onClick={stopAudio}
-          className="fixed bottom-24 right-6 md:bottom-6 z-30 conduit-card px-4 py-2.5 text-xs flex items-center gap-2 hover:border-[var(--color-accent)] transition-colors"
-          aria-label="Stop voice playback"
-          title="ESC to stop"
-        >
-          <span
-            className="inline-block w-2 h-2 rounded-sm"
-            style={{ background: "var(--color-accent)" }}
-          />
-          Stop voice
-        </button>
-      )}
+      {playingMessageIdx !== null && (() => {
+        const speakingEmp =
+          (messages[playingMessageIdx]?.employee as EmployeeKey | null) ?? null;
+        const deptColor = speakingEmp
+          ? DEPT_COLOR[speakingEmp]
+          : "var(--color-accent)";
+        return (
+          <button
+            onClick={stopAudio}
+            className="fixed bottom-24 right-6 md:bottom-6 z-30 conduit-card px-4 py-2.5 text-xs flex items-center gap-2 transition-colors"
+            style={{
+              borderColor: deptColor,
+              color: deptColor,
+            }}
+            aria-label="Stop voice playback"
+            title="ESC to stop"
+          >
+            <span
+              className="inline-block w-2 h-2 rounded-sm"
+              style={{ background: deptColor }}
+            />
+            Stop voice
+          </button>
+        );
+      })()}
     </>
   );
 }
@@ -936,43 +856,64 @@ function EmptyState({
   onSend: (text: string, pin?: EmployeeKey) => void;
   suggestions: Suggestion[];
 }) {
+  const copy = composeChatEmptyCopy({
+    firstName,
+    timeOfDay: timeOfDayBucket(),
+  });
   return (
-    <div className="hero-fade-in pt-8 md:pt-16">
-      <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)] mb-3 flex items-center">
-        <span aria-hidden className="live-dot" />
-        Your team is online · {firstName}
+    <div
+      style={{
+        paddingTop: "var(--space-8)",
+      }}
+    >
+      <p className="praxis-eyebrow">
+        <span
+          aria-hidden
+          style={{
+            width: 6,
+            height: 6,
+            borderRadius: 9999,
+            background: "var(--color-green)",
+            boxShadow:
+              "0 0 6px color-mix(in srgb, var(--color-green) 70%, transparent)",
+            display: "inline-block",
+          }}
+        />
+        {copy.eyebrow} · {firstName}
       </p>
-      <h1 className="serif text-3xl md:text-5xl text-[var(--color-text)] leading-[1.05]">
-        What are we building today?
-      </h1>
-      <p className="mt-4 text-sm text-[var(--color-text-muted)] max-w-xl">
-        Talk to Atlas. He routes the right employee — or handles it
-        himself.
+      <div
+        style={{
+          marginTop: "var(--space-4)",
+          display: "flex",
+          alignItems: "flex-start",
+          gap: "var(--space-3)",
+        }}
+      >
+        <PraxisAvatar employee="jarvis" size="xl" pulse="ambient" />
+        <h1 className="praxis-display-1">{copy.headline}</h1>
+      </div>
+      <p
+        className="praxis-body-lg"
+        style={{ marginTop: "var(--space-4)", maxWidth: "36rem" }}
+      >
+        {copy.subline}
       </p>
-      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div
+        className="grid grid-cols-1 sm:grid-cols-2"
+        style={{
+          marginTop: "var(--space-8)",
+          gap: "var(--space-3)",
+        }}
+      >
         {suggestions.map((s) => (
-          <button
+          <PraxisSuggestionTile
             key={s.text}
-            onClick={() => onSend(s.text, s.pin)}
-            style={{
-              ["--dept" as string]: DEPT_COLOR[s.dept],
-              ["--dept-soft" as string]: DEPT_COLOR_SOFT[s.dept],
-            }}
-            className="conduit-suggestion px-4 py-4 text-left flex flex-col gap-2"
-          >
-            <div className="flex items-center gap-2">
-              <EmployeeAvatar employee={s.dept} size={22} />
-              <span
-                className="text-[10px] uppercase tracking-[0.2em]"
-                style={{ color: DEPT_COLOR[s.dept] }}
-              >
-                {s.hint}
-              </span>
-            </div>
-            <span className="text-sm text-[var(--color-text)]">
-              {s.text}
-            </span>
-          </button>
+            dept={s.dept}
+            hint={s.hint}
+            prompt={s.text}
+            pin={s.pin}
+            onSelect={(text, pin) => onSend(text, pin)}
+          />
         ))}
       </div>
     </div>
@@ -1003,30 +944,17 @@ const MessageBubble = memo(function MessageBubble({
   }
 
   if (message.role === "system" && message.handoffTo) {
+    // Note: `from` would ideally be the previous assistant message's employee,
+    // but the MessageBubble doesn't have prev-message context. Default to
+    // Atlas (jarvis) as the routing source — accurate for the vast majority
+    // of handoffs since Atlas IS the router.
+    const from: EmployeeId = "jarvis";
     return (
-      <div
-        className="handoff-card flex items-center gap-3 my-3"
-        style={{ ["--dept" as string]: DEPT_COLOR[message.handoffTo] }}
-      >
-        <div
-          className="flex-1 h-px"
-          style={{
-            background: `linear-gradient(to right, transparent, ${DEPT_COLOR[message.handoffTo]} 50%, transparent)`,
-            opacity: 0.5,
-          }}
-        />
-        <div className="flex items-center gap-2 text-xs">
-          <EmployeeAvatar employee={message.handoffTo} size={20} />
-          <span style={{ color: DEPT_COLOR[message.handoffTo] }}>
-            {employeeLabel(message.handoffTo)} is taking this from here
-          </span>
-        </div>
-        <div
-          className="flex-1 h-px"
-          style={{
-            background: `linear-gradient(to right, transparent, ${DEPT_COLOR[message.handoffTo]} 50%, transparent)`,
-            opacity: 0.5,
-          }}
+      <div style={{ marginTop: "var(--space-3)", marginBottom: "var(--space-3)" }}>
+        <PraxisHandoffBaton
+          from={from}
+          to={message.handoffTo as EmployeeId}
+          label={`${employeeLabel("jarvis" as EmployeeKey)} → ${employeeLabel(message.handoffTo)}`}
         />
       </div>
     );

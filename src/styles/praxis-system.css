@@ -1,0 +1,584 @@
+/* ============================================================
+ * Praxis Console — Premium Redesign R15 — system sheet
+ *
+ * Companion to praxis-tokens.css. Consumes the locked tokens
+ * (--space-*, --radius-*, --rhythm-*, --tint-*, --elev-*, etc.)
+ * and exposes utility classes that the redesigned surfaces
+ * (workspace dashboard, team grid, team-page header, chat shell)
+ * use directly. No surface should hand-author the same visuals
+ * inline.
+ *
+ * Scope: every selector is namespaced under .praxis-root so this
+ * sheet never reaches Conduit marketing.
+ *
+ * Reduced-motion: every keyframe is gated by
+ *   @media not (prefers-reduced-motion: reduce)
+ * so animations don't fire under user preference (FR-057, R-010).
+ * Static rest-state always renders.
+ *
+ * Composition note: the existing .conduit-* primitives stay in
+ * place for out-of-scope surfaces (sidebar body, settings, voice,
+ * artifacts, builds, analytics, modals). The .praxis-* family is
+ * additive; both coexist through this round (R-006).
+ * ============================================================ */
+
+/* ------------------------------------------------------------
+ * Keyframes (FR-055)
+ * ------------------------------------------------------------ */
+
+@media not (prefers-reduced-motion: reduce) {
+
+  /* Ambient pulse — role-typed cadence driven by --rhythm-{dept} on
+   * the consuming element. Single keyframe; nine cadences. */
+  @keyframes praxis-pulse {
+    0%, 100% {
+      opacity: 0.78;
+      box-shadow: 0 0 0 0 transparent;
+    }
+    50% {
+      opacity: 1;
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--dept, transparent) 20%, transparent);
+    }
+  }
+
+  /* Streaming pulse — stronger, steady, fixed 1.1s. Overrides
+   * ambient via specificity (FR-060 conflict resolution). */
+  @keyframes praxis-pulse-streaming {
+    0%, 100% {
+      box-shadow:
+        0 0 0 0 transparent,
+        0 0 6px color-mix(in srgb, var(--dept, transparent) 70%, transparent);
+      opacity: 1;
+    }
+    50% {
+      box-shadow:
+        0 0 0 5px color-mix(in srgb, var(--dept, transparent) 35%, transparent),
+        0 0 12px color-mix(in srgb, var(--dept, transparent) 80%, transparent);
+      opacity: 1;
+    }
+  }
+
+  /* Ship-celebration — one-shot flash + outward bloom (1.2s).
+   * Fires once on detection of a fresh-since-mount artifact/build. */
+  @keyframes praxis-pulse-celebration {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--dept, transparent) 0%, transparent);
+      transform: scale(1);
+    }
+    20% {
+      box-shadow: 0 0 0 8px color-mix(in srgb, var(--dept, transparent) 40%, transparent);
+      transform: scale(1.04);
+    }
+    100% {
+      box-shadow: 0 0 0 24px color-mix(in srgb, var(--dept, transparent) 0%, transparent);
+      transform: scale(1);
+    }
+  }
+
+  /* Breath — subtle translate-y on hero composition. Cadence keyed
+   * to overall team activity via data-activity-bucket (FR-012). */
+  @keyframes praxis-breath {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-1.5px); }
+  }
+
+  /* Baton — handoff card edge color transition (480ms ease-baton). */
+  @keyframes praxis-baton {
+    0% {
+      border-left-color: var(--from, transparent);
+      border-right-color: var(--from, transparent);
+    }
+    100% {
+      border-left-color: var(--from, transparent);
+      border-right-color: var(--to, transparent);
+    }
+  }
+
+  /* Time-fade — used by stamp updates (200ms ease-out-quart). */
+  @keyframes praxis-time-fade {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+}
+
+/* ------------------------------------------------------------
+ * .praxis-card — universal card material (P-001)
+ *
+ * Inputs (CSS custom properties set by consumer):
+ *   --dept        — base dept color (drives top-edge + glow chain)
+ *   --dept-edge   — derived (set by component to var(--tint-{d}-edge))
+ *   --dept-glow   — derived (set by component to var(--tint-{d}-glow))
+ *   --dept-radial — derived (set by component to var(--tint-{d}-radial))
+ * ------------------------------------------------------------ */
+
+.praxis-root .praxis-card {
+  position: relative;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-card);
+  box-shadow: var(--elev-rest-1);
+  color: var(--color-text);
+  isolation: isolate;
+  transition:
+    box-shadow 280ms var(--praxis-ease-out-quart),
+    border-color 280ms var(--praxis-ease-out-quart),
+    transform 280ms var(--praxis-ease-out-quart);
+}
+
+/* Top-edge gradient indicator (FR-023) — replaces the 3px left stripe
+ * with a 1px top-edge gradient that fades from dept→transparent. */
+.praxis-root .praxis-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--dept-edge, transparent), transparent 70%);
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  pointer-events: none;
+}
+
+/* Hover: lift + dept-tinted outer glow. Reduced-motion suppresses
+ * the translate; the glow becomes a static border swap. */
+.praxis-root .praxis-card[data-interactive="true"]:hover,
+.praxis-root a.praxis-card:hover,
+.praxis-root button.praxis-card:hover {
+  border-color: var(--dept-edge, var(--color-border-soft));
+  box-shadow: var(--elev-hover-2);
+  transform: var(--lift-card);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .praxis-root .praxis-card { transition: none; }
+  .praxis-root .praxis-card[data-interactive="true"]:hover,
+  .praxis-root a.praxis-card:hover,
+  .praxis-root button.praxis-card:hover {
+    transform: none;
+    box-shadow: var(--elev-rest-2);
+  }
+}
+
+/* Variants */
+
+.praxis-root .praxis-card-kpi {
+  padding: var(--space-card-lg);
+  background: var(--color-surface-raised);
+  box-shadow: var(--elev-rest-2);
+}
+.praxis-root .praxis-card-kpi[data-interactive="true"]:hover,
+.praxis-root a.praxis-card-kpi:hover {
+  box-shadow: var(--elev-hover-2);
+}
+
+.praxis-root .praxis-card-team {
+  padding: var(--space-card-md);
+  /* Bottom-right radial dept signature (FR-024) */
+  background:
+    var(--dept-radial, none),
+    var(--color-surface-elevated);
+}
+.praxis-root .praxis-card-team[data-interactive="true"]:hover,
+.praxis-root a.praxis-card-team:hover {
+  box-shadow: var(--elev-hover-3);
+}
+
+.praxis-root .praxis-card-stat {
+  padding: var(--space-card-sm);
+}
+/* Stats are not interactive — no top-edge indicator, no hover */
+.praxis-root .praxis-card-stat::before { display: none; }
+
+.praxis-root .praxis-card-activity {
+  padding: var(--space-card-sm) var(--space-card-md);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+/* Locked / ghosted variant — FR-027 */
+.praxis-root .praxis-card[data-locked="true"] {
+  filter: saturate(0.40) brightness(0.70);
+  transition: filter 220ms var(--praxis-ease-out-quart),
+              border-color 280ms var(--praxis-ease-out-quart),
+              box-shadow 280ms var(--praxis-ease-out-quart);
+}
+.praxis-root .praxis-card[data-locked="true"]:hover {
+  filter: saturate(0.55) brightness(0.78);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-accent) 18%, transparent);
+  transform: none;
+}
+
+/* ------------------------------------------------------------
+ * .praxis-avatar — employee chip (P-002)
+ *
+ * Inputs:
+ *   data-dept    — resolves all colors via --color-dept-{dept}
+ *   data-size    — sm | md | lg | xl | 2xl
+ *   data-pulse   — ambient | streaming | celebration (optional)
+ * ------------------------------------------------------------ */
+
+.praxis-root .praxis-avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--dept, transparent) 8%, transparent) 0%, transparent 60%),
+    color-mix(in srgb, var(--dept, transparent) 14%, var(--color-surface-elevated) 86%);
+  box-shadow:
+    inset 0 0 0 1.5px var(--dept, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: var(--dept, var(--color-text));
+  flex-shrink: 0;
+}
+
+.praxis-root .praxis-avatar[data-size="sm"]  { width: 20px; height: 20px; }
+.praxis-root .praxis-avatar[data-size="md"]  { width: 24px; height: 24px; }
+.praxis-root .praxis-avatar[data-size="lg"]  { width: 28px; height: 28px; }
+.praxis-root .praxis-avatar[data-size="xl"]  { width: 32px; height: 32px; }
+.praxis-root .praxis-avatar[data-size="2xl"] { width: 56px; height: 56px; }
+
+/* Atlas variant — slightly warmer inner gradient + permanent
+ * presence pip (FR-028). */
+.praxis-root .praxis-avatar-atlas {
+  background:
+    linear-gradient(180deg, rgba(255, 245, 230, 0.12) 0%, transparent 60%),
+    color-mix(in srgb, var(--color-dept-jarvis) 18%, var(--color-surface-elevated) 82%);
+}
+.praxis-root .praxis-avatar-atlas::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--color-dept-jarvis);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--color-dept-jarvis) 70%, transparent),
+              0 0 0 2px var(--color-surface);
+}
+
+/* Ghosted variant — applies the locked tier desaturation directly */
+.praxis-root .praxis-avatar-ghosted {
+  filter: saturate(0.4) brightness(0.7);
+}
+
+/* ------------------------------------------------------------
+ * .praxis-pulse-pip — standalone status pip (P-003)
+ *
+ * Used in card corners, sidebar rows.
+ * ------------------------------------------------------------ */
+
+.praxis-root .praxis-pulse-pip {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--dept, var(--color-text-muted));
+  flex-shrink: 0;
+  opacity: 0.78;
+}
+.praxis-root .praxis-pulse-pip[data-size="6"] { width: 6px; height: 6px; }
+
+@media not (prefers-reduced-motion: reduce) {
+  .praxis-root .praxis-pulse-pip[data-state="ambient"] {
+    animation: praxis-pulse var(--rhythm, 3s) ease-in-out infinite;
+  }
+  .praxis-root .praxis-pulse-pip[data-state="streaming"] {
+    animation: praxis-pulse-streaming 1.1s ease-in-out infinite;
+    opacity: 1;
+  }
+}
+
+/* Also apply pulse to avatars when consumer requests it */
+@media not (prefers-reduced-motion: reduce) {
+  .praxis-root .praxis-avatar[data-pulse="ambient"] {
+    animation: praxis-pulse var(--rhythm, 3s) ease-in-out infinite;
+  }
+  .praxis-root .praxis-avatar[data-pulse="streaming"] {
+    animation: praxis-pulse-streaming 1.1s ease-in-out infinite;
+  }
+  .praxis-root .praxis-avatar[data-pulse="celebration"] {
+    animation: praxis-pulse-celebration 1200ms var(--praxis-ease-out-quart) 1;
+  }
+}
+
+/* ------------------------------------------------------------
+ * .praxis-canvas-tint — the room-level tint engine (P-004 / R-005)
+ *
+ * Single attribute on a single ancestor element. CSS does all the
+ * visual work; React provider just writes data-dept (+ optional
+ * data-tint-strength="strong" for pinned-in-chat).
+ *
+ * 240ms in / 480ms out per FR-011 — the room "settles" on release.
+ * ------------------------------------------------------------ */
+
+.praxis-root .praxis-canvas-tint {
+  transition: background 240ms var(--praxis-ease-out-quart);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .praxis-root .praxis-canvas-tint { transition: none; }
+}
+
+.praxis-root .praxis-canvas-tint[data-dept="jarvis"]      { background: radial-gradient(ellipse 90% 60% at 0% 0%, var(--tint-jarvis-wash), var(--color-surface) 60%); }
+.praxis-root .praxis-canvas-tint[data-dept="marketing"]   { background: radial-gradient(ellipse 90% 60% at 0% 0%, var(--tint-marketing-wash), var(--color-surface) 60%); }
+.praxis-root .praxis-canvas-tint[data-dept="sales"]       { background: radial-gradient(ellipse 90% 60% at 0% 0%, var(--tint-sales-wash), var(--color-surface) 60%); }
+.praxis-root .praxis-canvas-tint[data-dept="engineering"] { background: radial-gradient(ellipse 90% 60% at 0% 0%, var(--tint-engineering-wash), var(--color-surface) 60%); }
+.praxis-root .praxis-canvas-tint[data-dept="finance"]     { background: radial-gradient(ellipse 90% 60% at 0% 0%, var(--tint-finance-wash), var(--color-surface) 60%); }
+.praxis-root .praxis-canvas-tint[data-dept="compliance"]  { background: radial-gradient(ellipse 90% 60% at 0% 0%, var(--tint-compliance-wash), var(--color-surface) 60%); }
+.praxis-root .praxis-canvas-tint[data-dept="hr"]          { background: radial-gradient(ellipse 90% 60% at 0% 0%, var(--tint-hr-wash), var(--color-surface) 60%); }
+.praxis-root .praxis-canvas-tint[data-dept="ops"]         { background: radial-gradient(ellipse 90% 60% at 0% 0%, var(--tint-ops-wash), var(--color-surface) 60%); }
+.praxis-root .praxis-canvas-tint[data-dept="legal"]       { background: radial-gradient(ellipse 90% 60% at 0% 0%, var(--tint-legal-wash), var(--color-surface) 60%); }
+
+/* Strong variant (pinned-in-chat, persistent ~8-10%) */
+.praxis-root .praxis-canvas-tint[data-tint-strength="strong"][data-dept="jarvis"]      { background: radial-gradient(ellipse 90% 60% at 0% 0%, var(--tint-jarvis-wash-strong), var(--color-surface) 65%); }
+.praxis-root .praxis-canvas-tint[data-tint-strength="strong"][data-dept="marketing"]   { background: radial-gradient(ellipse 90% 60% at 0% 0%, var(--tint-marketing-wash-strong), var(--color-surface) 65%); }
+.praxis-root .praxis-canvas-tint[data-tint-strength="strong"][data-dept="sales"]       { background: radial-gradient(ellipse 90% 60% at 0% 0%, var(--tint-sales-wash-strong), var(--color-surface) 65%); }
+.praxis-root .praxis-canvas-tint[data-tint-strength="strong"][data-dept="engineering"] { background: radial-gradient(ellipse 90% 60% at 0% 0%, var(--tint-engineering-wash-strong), var(--color-surface) 65%); }
+.praxis-root .praxis-canvas-tint[data-tint-strength="strong"][data-dept="finance"]     { background: radial-gradient(ellipse 90% 60% at 0% 0%, var(--tint-finance-wash-strong), var(--color-surface) 65%); }
+.praxis-root .praxis-canvas-tint[data-tint-strength="strong"][data-dept="compliance"]  { background: radial-gradient(ellipse 90% 60% at 0% 0%, var(--tint-compliance-wash-strong), var(--color-surface) 65%); }
+.praxis-root .praxis-canvas-tint[data-tint-strength="strong"][data-dept="hr"]          { background: radial-gradient(ellipse 90% 60% at 0% 0%, var(--tint-hr-wash-strong), var(--color-surface) 65%); }
+.praxis-root .praxis-canvas-tint[data-tint-strength="strong"][data-dept="ops"]         { background: radial-gradient(ellipse 90% 60% at 0% 0%, var(--tint-ops-wash-strong), var(--color-surface) 65%); }
+.praxis-root .praxis-canvas-tint[data-tint-strength="strong"][data-dept="legal"]       { background: radial-gradient(ellipse 90% 60% at 0% 0%, var(--tint-legal-wash-strong), var(--color-surface) 65%); }
+
+/* ------------------------------------------------------------
+ * Typography primitives (FR-017, FR-043, FR-044, FR-045)
+ * ------------------------------------------------------------ */
+
+.praxis-root .praxis-display-1 {
+  font-family: var(--font-serif);
+  font-size: var(--text-display-1);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+.praxis-root .praxis-display-2 {
+  font-family: var(--font-serif);
+  font-size: var(--text-display-2);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+.praxis-root .praxis-display-3 {
+  font-family: var(--font-serif);
+  font-size: var(--text-display-3);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+
+.praxis-root .praxis-eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--text-eyebrow-size);
+  font-weight: var(--text-eyebrow-weight);
+  letter-spacing: var(--text-eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.praxis-root .praxis-microlabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-microlabel-size);
+  font-weight: 500;
+  letter-spacing: var(--text-microlabel-tracking);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.praxis-root .praxis-body-sm { font-size: var(--text-body-sm); line-height: 1.5; }
+.praxis-root .praxis-body    { font-size: var(--text-body); line-height: 1.55; }
+.praxis-root .praxis-body-lg { font-size: var(--text-body-lg); line-height: 1.55; color: var(--color-text-muted); }
+
+.praxis-root .praxis-numeric-display {
+  font-family: var(--font-mono);
+  font-size: var(--text-display-3);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-feature-settings: "tnum" 1;
+  color: var(--color-text);
+}
+.praxis-root .praxis-numeric-body {
+  font-family: var(--font-mono);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  font-feature-settings: "tnum" 1;
+  color: var(--color-text);
+}
+
+/* Time-since cross-fade (FR-020) */
+@media not (prefers-reduced-motion: reduce) {
+  .praxis-root .praxis-time-fade {
+    animation: praxis-time-fade 200ms var(--praxis-ease-out-quart);
+  }
+}
+
+/* ------------------------------------------------------------
+ * .praxis-tag-locked — ghosted pill for tier-locked rows
+ * ------------------------------------------------------------ */
+
+.praxis-root .praxis-tag-locked {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-sans);
+  font-size: var(--text-microlabel-size);
+  font-weight: 500;
+  letter-spacing: var(--text-microlabel-tracking);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  background: color-mix(in srgb, var(--color-text-muted) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-text-muted) 18%, transparent);
+}
+
+/* ------------------------------------------------------------
+ * .praxis-composer-pill — chat composer (P-010 / FR-009 / FR-052)
+ *
+ * Demoted resting border so the room outranks the input.
+ * Dept-colored focus ring only on focus.
+ * ------------------------------------------------------------ */
+
+.praxis-root .praxis-composer-pill {
+  background: var(--color-surface-elevated);
+  border: 1px solid color-mix(in srgb, var(--color-border-soft) 60%, transparent);
+  border-radius: var(--radius-pill);
+  transition: border-color 200ms var(--praxis-ease-out-quart),
+              box-shadow 200ms var(--praxis-ease-out-quart);
+}
+.praxis-root .praxis-composer-pill[data-state="focus"],
+.praxis-root .praxis-composer-pill:focus-within {
+  border-color: var(--dept-edge, var(--color-accent));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--dept, var(--color-accent)) 12%, transparent);
+}
+
+/* ------------------------------------------------------------
+ * .praxis-handoff-baton — chat handoff (P-009 / FR-031)
+ *
+ * Animates left-edge from outgoing dept to incoming dept over
+ * 480ms. Inputs: --from (outgoing color), --to (incoming color).
+ * ------------------------------------------------------------ */
+
+.praxis-root .praxis-handoff-baton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-left: 2px solid var(--from, var(--color-border));
+  border-right: 2px solid var(--from, var(--color-border));
+}
+@media not (prefers-reduced-motion: reduce) {
+  .praxis-root .praxis-handoff-baton {
+    animation: praxis-baton 480ms var(--praxis-ease-baton) forwards;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .praxis-root .praxis-handoff-baton {
+    border-right-color: var(--to, var(--color-border));
+  }
+}
+
+/* ------------------------------------------------------------
+ * .praxis-live-strip — above-the-hero voice-active strip (P-007)
+ * ------------------------------------------------------------ */
+
+.praxis-root .praxis-live-strip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-card);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--dept, var(--color-accent)) 14%, transparent), transparent 60%),
+    var(--color-surface-elevated);
+  border: 1px solid var(--dept-edge, var(--color-accent));
+  color: var(--color-text);
+}
+.praxis-root .praxis-live-strip-wave {
+  display: inline-flex;
+  align-items: end;
+  gap: 2px;
+  height: 14px;
+}
+.praxis-root .praxis-live-strip-wave > i {
+  display: block;
+  width: 2px;
+  background: var(--dept, var(--color-accent));
+  border-radius: 9999px;
+  height: 6px;
+}
+@media not (prefers-reduced-motion: reduce) {
+  @keyframes praxis-live-wave-1 { 0%, 100% { height: 6px; } 50% { height: 14px; } }
+  @keyframes praxis-live-wave-2 { 0%, 100% { height: 12px; } 50% { height: 4px; } }
+  @keyframes praxis-live-wave-3 { 0%, 100% { height: 5px; } 50% { height: 12px; } }
+  .praxis-root .praxis-live-strip-wave > i:nth-child(1) { animation: praxis-live-wave-1 0.9s ease-in-out infinite; }
+  .praxis-root .praxis-live-strip-wave > i:nth-child(2) { animation: praxis-live-wave-2 0.9s ease-in-out infinite; }
+  .praxis-root .praxis-live-strip-wave > i:nth-child(3) { animation: praxis-live-wave-3 0.9s ease-in-out infinite; }
+}
+
+/* ------------------------------------------------------------
+ * .praxis-welcome-hero — dashboard hero composition (P-006)
+ * ------------------------------------------------------------ */
+
+.praxis-root .praxis-welcome-hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  will-change: transform;
+}
+@media not (prefers-reduced-motion: reduce) {
+  .praxis-root .praxis-welcome-hero[data-activity-bucket="none"] {
+    animation: praxis-breath 4s ease-in-out infinite;
+  }
+  .praxis-root .praxis-welcome-hero[data-activity-bucket="low"] {
+    animation: praxis-breath 3s ease-in-out infinite;
+  }
+  .praxis-root .praxis-welcome-hero[data-activity-bucket="high"] {
+    animation: praxis-breath 2s ease-in-out infinite;
+  }
+}
+
+/* ------------------------------------------------------------
+ * Utility: dept-resolved property bundles
+ *
+ * A consuming component sets `data-dept="marketing"` on the wrapper
+ * and these rules cascade --dept, --dept-edge, --dept-glow,
+ * --dept-radial, --rhythm down the tree. Saves repeating the
+ * inline style block at every call site.
+ * ------------------------------------------------------------ */
+
+.praxis-root [data-dept="jarvis"]      { --dept: var(--color-dept-jarvis);      --dept-edge: var(--tint-jarvis-edge);      --dept-glow: var(--tint-jarvis-glow);      --dept-radial: var(--tint-jarvis-radial);      --rhythm: var(--rhythm-jarvis); }
+.praxis-root [data-dept="marketing"]   { --dept: var(--color-dept-marketing);   --dept-edge: var(--tint-marketing-edge);   --dept-glow: var(--tint-marketing-glow);   --dept-radial: var(--tint-marketing-radial);   --rhythm: var(--rhythm-marketing); }
+.praxis-root [data-dept="sales"]       { --dept: var(--color-dept-sales);       --dept-edge: var(--tint-sales-edge);       --dept-glow: var(--tint-sales-glow);       --dept-radial: var(--tint-sales-radial);       --rhythm: var(--rhythm-sales); }
+.praxis-root [data-dept="engineering"] { --dept: var(--color-dept-engineering); --dept-edge: var(--tint-engineering-edge); --dept-glow: var(--tint-engineering-glow); --dept-radial: var(--tint-engineering-radial); --rhythm: var(--rhythm-engineering); }
+.praxis-root [data-dept="finance"]     { --dept: var(--color-dept-finance);     --dept-edge: var(--tint-finance-edge);     --dept-glow: var(--tint-finance-glow);     --dept-radial: var(--tint-finance-radial);     --rhythm: var(--rhythm-finance); }
+.praxis-root [data-dept="compliance"]  { --dept: var(--color-dept-compliance);  --dept-edge: var(--tint-compliance-edge);  --dept-glow: var(--tint-compliance-glow);  --dept-radial: var(--tint-compliance-radial);  --rhythm: var(--rhythm-compliance); }
+.praxis-root [data-dept="hr"]          { --dept: var(--color-dept-hr);          --dept-edge: var(--tint-hr-edge);          --dept-glow: var(--tint-hr-glow);          --dept-radial: var(--tint-hr-radial);          --rhythm: var(--rhythm-hr); }
+.praxis-root [data-dept="ops"]         { --dept: var(--color-dept-ops);         --dept-edge: var(--tint-ops-edge);         --dept-glow: var(--tint-ops-glow);         --dept-radial: var(--tint-ops-radial);         --rhythm: var(--rhythm-ops); }
+.praxis-root [data-dept="legal"]       { --dept: var(--color-dept-legal);       --dept-edge: var(--tint-legal-edge);       --dept-glow: var(--tint-legal-glow);       --dept-radial: var(--tint-legal-radial);       --rhythm: var(--rhythm-legal); }
+
+/* ------------------------------------------------------------
+ * View-transition reservations
+ *
+ * Components opt-in with `view-transition-name: vt-employee-{id}`
+ * via inline style. The browser cross-fades color + geometry
+ * between source (team card on dashboard) and destination (team
+ * page header avatar) per R-001.
+ *
+ * No global rules here — components own the naming so collisions
+ * are intentional (matched source/destination pairs).
+ * ------------------------------------------------------------ */

@@ -260,3 +260,221 @@ html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-track {
 html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-thumb {
   background: var(--color-border-soft);
 }
+
+/* ============================================================
+ * Praxis Console — Premium Redesign R15 (additive token set)
+ *
+ * Locked at GATE 2 (spec.md / plan.md / data-model.md). These
+ * tokens are the spine of every redesigned surface (workspace
+ * dashboard, team grid + team-page header, chat shell). Anything
+ * not on this sheet that ends up on a redesigned surface is a
+ * violation of FR-036/037/038 — see contracts/tokens.md §I for
+ * the lint pattern.
+ *
+ * Layering: every token here lives inside .praxis-root (and its
+ * light-theme companion below) so the entire system flips per
+ * theme via the existing data-praxis-theme switch. The marketing
+ * site (no .praxis-root wrapper) never sees these tokens.
+ *
+ * Companion sheet: src/styles/praxis-system.css consumes these
+ * tokens. Component code reads tokens via var(--…); never literal.
+ * ============================================================ */
+
+.praxis-root {
+  /* ---- Spacing scale (FR-040) ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* ---- Card padding presets (FR-041) ---- */
+  --space-card-sm: 12px;
+  --space-card-md: 20px;
+  --space-card-lg: 28px;
+
+  /* ---- Radii (FR-042) ---- */
+  --radius-pill: 9999px;
+  --radius-md: 8px;
+  --radius-card: 16px;
+  --radius-hero: 20px;
+
+  /* ---- Typography display scale (Fraunces, FR-043) ----
+   * Single hero step shared across dashboard, team page, chat empty.
+   * Numeric display uses JetBrains Mono with tabular figures (FR-045). */
+  --text-display-1: clamp(2.25rem, 4vw + 0.5rem, 3.25rem);
+  --text-display-2: clamp(1.75rem, 2.5vw + 0.5rem, 2.25rem);
+  --text-display-3: 1.5rem;
+
+  /* ---- Typography UI scale (Inter, FR-044) ---- */
+  --text-eyebrow-size: 11px;
+  --text-eyebrow-weight: 500;
+  --text-eyebrow-tracking: 0.18em;
+  --text-microlabel-size: 10px;
+  --text-microlabel-tracking: 0.15em;
+  --text-body-sm: 13px;
+  --text-body: 15px;
+  --text-body-lg: 17px;
+
+  /* ---- Motion: easing curves (FR-053) ---- */
+  --praxis-ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --praxis-ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+  --praxis-ease-baton: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---- Motion: lifts ---- */
+  --lift-card: translateY(-2px);
+
+  /* ---- Motion: role-typed ambient pulse cadences (FR-054) ----
+   * User-approved at GATE 1. Each dept's "character" expressed as
+   * a CSS variable so cadence tuning post-ship is a one-file change. */
+  --rhythm-jarvis: 4s;
+  --rhythm-marketing: 3s;
+  --rhythm-sales: 2.5s;
+  --rhythm-engineering: 2s;
+  --rhythm-finance: 5s;
+  --rhythm-compliance: 6s;
+  --rhythm-hr: 3.5s;
+  --rhythm-ops: 3s;
+  --rhythm-legal: 5s;
+
+  /* ---- Elevation (FR-046) ----
+   * Three rest levels, three hover levels. Hover levels parameterize
+   * the dept-tinted outer glow via a consumed --dept-glow custom
+   * property — components set --dept-glow to var(--tint-{dept}-glow)
+   * before applying the hover-elev token. */
+  --elev-rest-1: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  --elev-rest-2:
+    0 1px 2px rgba(0, 0, 0, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --elev-rest-3:
+    0 4px 16px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --elev-hover-1:
+    0 1px 2px rgba(0, 0, 0, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 0 0 1px var(--dept-edge, transparent);
+  --elev-hover-2:
+    0 4px 16px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 0 32px var(--dept-glow, transparent);
+  --elev-hover-3:
+    0 16px 48px rgba(0, 0, 0, 0.40),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 0 0 1px var(--dept-edge, transparent),
+    0 0 48px var(--dept-glow, transparent);
+
+  /* ---- Per-dept derived tints (FR-047) ----
+   * 5 derivations × 9 depts = 45 declarations. Programmatic via
+   * color-mix() so adding a 10th dept later is a one-line change
+   * (define --color-dept-newdept and the tints auto-derive).
+   * Atlas exception: jarvis is platinum (no chroma to tint with);
+   * falls through to a neutral warm wash. */
+
+  /* Atlas (neutral warm wash exception) */
+  --tint-jarvis-wash: color-mix(in srgb, var(--color-text) 4%, var(--color-surface) 96%);
+  --tint-jarvis-wash-strong: color-mix(in srgb, var(--color-text) 8%, var(--color-surface) 92%);
+  --tint-jarvis-glow: color-mix(in srgb, var(--color-dept-jarvis) 14%, transparent);
+  --tint-jarvis-edge: color-mix(in srgb, var(--color-dept-jarvis) 35%, transparent);
+  --tint-jarvis-radial: radial-gradient(120% 80% at 100% 100%, color-mix(in srgb, var(--color-dept-jarvis) 8%, transparent), transparent 60%);
+
+  /* Marketing (topaz) */
+  --tint-marketing-wash: color-mix(in srgb, var(--color-dept-marketing) 5%, var(--color-surface) 95%);
+  --tint-marketing-wash-strong: color-mix(in srgb, var(--color-dept-marketing) 9%, var(--color-surface) 91%);
+  --tint-marketing-glow: color-mix(in srgb, var(--color-dept-marketing) 14%, transparent);
+  --tint-marketing-edge: color-mix(in srgb, var(--color-dept-marketing) 35%, transparent);
+  --tint-marketing-radial: radial-gradient(120% 80% at 100% 100%, color-mix(in srgb, var(--color-dept-marketing) 8%, transparent), transparent 60%);
+
+  /* Sales (emerald) */
+  --tint-sales-wash: color-mix(in srgb, var(--color-dept-sales) 5%, var(--color-surface) 95%);
+  --tint-sales-wash-strong: color-mix(in srgb, var(--color-dept-sales) 9%, var(--color-surface) 91%);
+  --tint-sales-glow: color-mix(in srgb, var(--color-dept-sales) 14%, transparent);
+  --tint-sales-edge: color-mix(in srgb, var(--color-dept-sales) 35%, transparent);
+  --tint-sales-radial: radial-gradient(120% 80% at 100% 100%, color-mix(in srgb, var(--color-dept-sales) 8%, transparent), transparent 60%);
+
+  /* Engineering (electric sapphire) */
+  --tint-engineering-wash: color-mix(in srgb, var(--color-dept-engineering) 5%, var(--color-surface) 95%);
+  --tint-engineering-wash-strong: color-mix(in srgb, var(--color-dept-engineering) 9%, var(--color-surface) 91%);
+  --tint-engineering-glow: color-mix(in srgb, var(--color-dept-engineering) 14%, transparent);
+  --tint-engineering-edge: color-mix(in srgb, var(--color-dept-engineering) 35%, transparent);
+  --tint-engineering-radial: radial-gradient(120% 80% at 100% 100%, color-mix(in srgb, var(--color-dept-engineering) 8%, transparent), transparent 60%);
+
+  /* Finance (citrine) */
+  --tint-finance-wash: color-mix(in srgb, var(--color-dept-finance) 5%, var(--color-surface) 95%);
+  --tint-finance-wash-strong: color-mix(in srgb, var(--color-dept-finance) 9%, var(--color-surface) 91%);
+  --tint-finance-glow: color-mix(in srgb, var(--color-dept-finance) 14%, transparent);
+  --tint-finance-edge: color-mix(in srgb, var(--color-dept-finance) 35%, transparent);
+  --tint-finance-radial: radial-gradient(120% 80% at 100% 100%, color-mix(in srgb, var(--color-dept-finance) 8%, transparent), transparent 60%);
+
+  /* Compliance (amethyst) */
+  --tint-compliance-wash: color-mix(in srgb, var(--color-dept-compliance) 5%, var(--color-surface) 95%);
+  --tint-compliance-wash-strong: color-mix(in srgb, var(--color-dept-compliance) 9%, var(--color-surface) 91%);
+  --tint-compliance-glow: color-mix(in srgb, var(--color-dept-compliance) 14%, transparent);
+  --tint-compliance-edge: color-mix(in srgb, var(--color-dept-compliance) 35%, transparent);
+  --tint-compliance-radial: radial-gradient(120% 80% at 100% 100%, color-mix(in srgb, var(--color-dept-compliance) 8%, transparent), transparent 60%);
+
+  /* HR (rose) */
+  --tint-hr-wash: color-mix(in srgb, var(--color-dept-hr) 5%, var(--color-surface) 95%);
+  --tint-hr-wash-strong: color-mix(in srgb, var(--color-dept-hr) 9%, var(--color-surface) 91%);
+  --tint-hr-glow: color-mix(in srgb, var(--color-dept-hr) 14%, transparent);
+  --tint-hr-edge: color-mix(in srgb, var(--color-dept-hr) 35%, transparent);
+  --tint-hr-radial: radial-gradient(120% 80% at 100% 100%, color-mix(in srgb, var(--color-dept-hr) 8%, transparent), transparent 60%);
+
+  /* Operations (teal) */
+  --tint-ops-wash: color-mix(in srgb, var(--color-dept-ops) 5%, var(--color-surface) 95%);
+  --tint-ops-wash-strong: color-mix(in srgb, var(--color-dept-ops) 9%, var(--color-surface) 91%);
+  --tint-ops-glow: color-mix(in srgb, var(--color-dept-ops) 14%, transparent);
+  --tint-ops-edge: color-mix(in srgb, var(--color-dept-ops) 35%, transparent);
+  --tint-ops-radial: radial-gradient(120% 80% at 100% 100%, color-mix(in srgb, var(--color-dept-ops) 8%, transparent), transparent 60%);
+
+  /* Legal (indigo-blue) */
+  --tint-legal-wash: color-mix(in srgb, var(--color-dept-legal) 5%, var(--color-surface) 95%);
+  --tint-legal-wash-strong: color-mix(in srgb, var(--color-dept-legal) 9%, var(--color-surface) 91%);
+  --tint-legal-glow: color-mix(in srgb, var(--color-dept-legal) 14%, transparent);
+  --tint-legal-edge: color-mix(in srgb, var(--color-dept-legal) 35%, transparent);
+  --tint-legal-radial: radial-gradient(120% 80% at 100% 100%, color-mix(in srgb, var(--color-dept-legal) 8%, transparent), transparent 60%);
+}
+
+/* ---- Mobile pulse cadence multiplier (FR-054) ----
+ * ×1.2 slower on small screens to reduce visual noise. */
+@media (max-width: 640px) {
+  .praxis-root {
+    --rhythm-jarvis: 4.8s;
+    --rhythm-marketing: 3.6s;
+    --rhythm-sales: 3s;
+    --rhythm-engineering: 2.4s;
+    --rhythm-finance: 6s;
+    --rhythm-compliance: 7.2s;
+    --rhythm-hr: 4.2s;
+    --rhythm-ops: 3.6s;
+    --rhythm-legal: 6s;
+  }
+}
+
+/* ---- Light-theme elevation overrides ----
+ * Heavy black shadows pollute the warm bone canvas; substitute
+ * with tinted ink shadows that don't introduce cold gray smudges. */
+html[data-praxis-theme="light"] .praxis-root {
+  --elev-rest-1: inset 0 1px 0 rgba(255, 255, 255, 0.70);
+  --elev-rest-2:
+    0 1px 2px rgba(20, 16, 31, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.70);
+  --elev-rest-3:
+    0 4px 16px rgba(20, 16, 31, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.70);
+  --elev-hover-1:
+    0 1px 2px rgba(20, 16, 31, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.70),
+    0 0 0 1px var(--dept-edge, transparent);
+  --elev-hover-2:
+    0 4px 16px rgba(20, 16, 31, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.70),
+    0 0 24px var(--dept-glow, transparent);
+  --elev-hover-3:
+    0 8px 24px rgba(20, 16, 31, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.70),
+    0 0 0 1px var(--dept-edge, transparent),
+    0 0 32px var(--dept-glow, transparent);
+}

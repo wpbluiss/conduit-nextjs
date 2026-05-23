@@ -13,7 +13,8 @@ import {
   emptyStateCopy,
 } from "@/lib/conduit/workspace-prompts";
 import { tierById } from "@/lib/billing/tiers";
-import { EmployeeAvatar } from "@/components/conduit/EmployeeBadge";
+import { PraxisAvatar } from "@/components/conduit/praxis/PraxisAvatar";
+import { PraxisRoomBinder } from "@/components/conduit/praxis/PraxisCanvasTintProvider";
 import SalesWorkspace from "@/components/conduit/sales/SalesWorkspace";
 import VoiceModeButton from "@/components/conduit/voice/VoiceModeButton";
 import EmployeeRightRail from "@/components/conduit/EmployeeRightRail";
@@ -236,35 +237,51 @@ export default async function WorkspacePage({ params }: PageProps) {
   const dept = employee.color;
 
   return (
-    <div className="flex-1 flex min-h-0 overflow-hidden">
+    <div className="flex-1 flex min-h-0 overflow-hidden" data-dept={employeeId}>
+      {/* PraxisRoomBinder pins canvas tint to this employee for the
+          duration of the page. Cleared on unmount. */}
+      <PraxisRoomBinder employee={employeeId} />
       <div className="flex-1 overflow-y-auto">
-      {/* Header band */}
+      {/* Header band — redesigned per S-002. Tint comes from the
+          PraxisCanvasTintProvider (layout-level); local gradient
+          removed so the room-level wash isn't competing. */}
       <div
-        className="px-4 md:px-8 py-8 md:py-10 border-b border-[var(--color-border)]"
         style={{
-          background: `linear-gradient(135deg, ${employee.colorSoft}, transparent 60%)`,
+          paddingLeft: "var(--space-4)",
+          paddingRight: "var(--space-4)",
+          paddingTop: "var(--space-10)",
+          paddingBottom: "var(--space-8)",
+          borderBottom: "1px solid var(--color-border)",
         }}
       >
-        <div className="mx-auto max-w-4xl flex flex-wrap items-center gap-4 md:gap-6">
-          <EmployeeAvatar employee={employeeId} size={56} />
-          <div className="min-w-0 flex-1">
-            <div
-              className="text-[10px] uppercase tracking-[0.2em]"
-              style={{ color: dept }}
-            >
+        <div
+          className="mx-auto"
+          style={{
+            maxWidth: "64rem",
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: "var(--space-6)",
+          }}
+        >
+          <PraxisAvatar
+            employee={employeeId}
+            size="2xl"
+            pulse="ambient"
+            style={{ viewTransitionName: `vt-employee-${employeeId}` }}
+          />
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <p className="praxis-eyebrow" style={{ color: "var(--dept)" }}>
               {employee.role}
-            </div>
-            <h1
-              className="serif text-3xl md:text-4xl mt-1"
-              style={{ color: dept }}
-            >
+            </p>
+            <h1 className="praxis-display-1" style={{ marginTop: "var(--space-2)", color: "var(--dept)" }}>
               {employee.name}
             </h1>
-            <p className="mt-1 text-sm text-[var(--color-text-muted)] max-w-xl">
+            <p className="praxis-body-lg" style={{ marginTop: "var(--space-2)", maxWidth: "36rem" }}>
               {employee.tagline}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
             <VoiceModeButton
               employeeId={employeeId}
               employeeName={employee.name}
@@ -280,7 +297,7 @@ export default async function WorkspacePage({ params }: PageProps) {
             <Link
               href={`/app?pin=${employeeId}`}
               className="btn-primary !text-sm"
-              style={{ background: dept, color: "#0A0908" }}
+              style={{ background: dept, color: "var(--color-surface)" }}
             >
               Talk to {employee.name} <ArrowRight size={14} />
             </Link>
