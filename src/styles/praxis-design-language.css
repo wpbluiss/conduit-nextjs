@@ -1,0 +1,550 @@
+/* ============================================================
+ * Praxis Design Language — R18 Slice 0
+ *
+ * Single source of truth for the new visual constitution.
+ * Tokens prefixed --pdl-* to namespace cleanly alongside the
+ * existing --color-*, --space-*, --radius-* token sets while
+ * surfaces migrate.
+ *
+ * Theme scoping: dark is the default (.praxis-root). Light theme
+ * activates via html[data-praxis-theme="light"] .praxis-root
+ * (same selector pattern as praxis-tokens.css R3 light overrides;
+ * ThemeBoot.tsx writes data-praxis-theme pre-paint).
+ *
+ * Reduced-motion: utility classes that include keyframes are
+ * gated with @media not (prefers-reduced-motion: reduce).
+ *
+ * Contracts:
+ *   specs/praxis-design-language/contracts/foundations.md
+ * ============================================================ */
+
+/* ------------------------------------------------------------
+ * Dark theme — default
+ * ------------------------------------------------------------ */
+
+.praxis-root {
+  /* Canvas tiers */
+  --pdl-canvas:           #0A0815;
+  --pdl-surface:          #131027;
+  --pdl-surface-raised:   #1A152F;
+  --pdl-surface-glass:    rgba(20, 16, 31, 0.65);
+
+  /* Text */
+  --pdl-text:             #F5F1EA;
+  --pdl-text-muted:       #8A88A4;
+  --pdl-text-soft:        #5E5C76;
+
+  /* Borders */
+  --pdl-border-hairline:  rgba(245, 241, 234, 0.08);
+  --pdl-border-default:   rgba(245, 241, 234, 0.14);
+  --pdl-border-strong:    rgba(245, 241, 234, 0.22);
+
+  /* Accent — brand purple (carry from existing praxis axis) */
+  --pdl-accent:           oklch(58% 0.22 290);
+  --pdl-accent-soft:      oklch(58% 0.22 290 / 0.14);
+  --pdl-accent-glow:      oklch(58% 0.22 290 / 0.35);
+
+  /* Node-graph */
+  --pdl-node-fill:        var(--pdl-surface);
+  --pdl-node-border:      var(--pdl-border-default);
+  --pdl-node-glow:        oklch(70% 0.22 290 / 0.50);
+  --pdl-edge:             rgba(245, 241, 234, 0.18);
+  --pdl-dot-grid:         rgba(245, 241, 234, 0.05);
+  --pdl-dot-grid-strong:  rgba(245, 241, 234, 0.10);
+
+  /* Dept jewel-tones (dark) — 9 employees */
+  --pdl-dept-jarvis:       #C8C5BD;             /* platinum */
+  --pdl-dept-marketing:    #FF8A3D;             /* topaz */
+  --pdl-dept-sales:        #34D399;             /* emerald */
+  --pdl-dept-engineering:  oklch(60% 0.22 248); /* sapphire */
+  --pdl-dept-finance:      #EAB308;             /* citrine */
+  --pdl-dept-compliance:   #A855F7;             /* amethyst */
+  --pdl-dept-hr:           #EC4899;             /* rose */
+  --pdl-dept-ops:          #14B8A6;             /* teal */
+  --pdl-dept-legal:        #3B82F6;             /* indigo-blue */
+
+  /* Spacing — 10-step T-shirt */
+  --pdl-space-xs:   4px;
+  --pdl-space-sm:   8px;
+  --pdl-space-md:   12px;
+  --pdl-space:      16px;
+  --pdl-space-lg:   24px;
+  --pdl-space-xl:   32px;
+  --pdl-space-2xl:  48px;
+  --pdl-space-3xl:  64px;
+  --pdl-space-4xl:  96px;
+
+  /* Radii — 5 steps */
+  --pdl-radius-sharp:    4px;
+  --pdl-radius-default:  8px;
+  --pdl-radius-soft:     12px;
+  --pdl-radius-soft-lg:  16px;
+  --pdl-radius-round:    9999px;
+
+  /* Elevation — 4 steps */
+  --pdl-elev-1: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --pdl-elev-2: 0 4px 16px rgba(0, 0, 0, 0.40);
+  --pdl-elev-3: 0 16px 48px rgba(0, 0, 0, 0.50);
+  --pdl-elev-glow: 0 0 24px var(--pdl-accent-glow);
+
+  /* Motion — 5 durations, 3 easings */
+  --pdl-dur-ultra:        120ms;
+  --pdl-dur-default:      220ms;
+  --pdl-dur-emphasis:     360ms;
+  --pdl-dur-transition:   480ms;
+  --pdl-dur-celebration:  1200ms;
+
+  --pdl-ease:           cubic-bezier(0.22, 0.61, 0.36, 1);
+  --pdl-ease-emphasis:  cubic-bezier(0.4, 0, 0.2, 1);
+  --pdl-ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ------------------------------------------------------------
+ * Light theme override
+ * ------------------------------------------------------------ */
+
+html[data-praxis-theme="light"] .praxis-root {
+  /* Canvas tiers */
+  --pdl-canvas:           #F7F4EE;
+  --pdl-surface:          #FFFFFF;
+  --pdl-surface-raised:   #FAF7F1;
+  --pdl-surface-glass:    rgba(255, 255, 255, 0.75);
+
+  /* Text */
+  --pdl-text:             #14101F;
+  --pdl-text-muted:       #6A6878;
+  --pdl-text-soft:        #A5A3B3;
+
+  /* Borders */
+  --pdl-border-hairline:  rgba(20, 16, 31, 0.06);
+  --pdl-border-default:   rgba(20, 16, 31, 0.12);
+  --pdl-border-strong:    rgba(20, 16, 31, 0.20);
+
+  /* Accent — deepened brand purple for bone-canvas legibility */
+  --pdl-accent:           oklch(42% 0.20 290);
+  --pdl-accent-soft:      oklch(42% 0.20 290 / 0.12);
+  --pdl-accent-glow:      oklch(42% 0.20 290 / 0.25);
+
+  /* Node-graph */
+  --pdl-node-glow:        oklch(42% 0.20 290 / 0.30);
+  --pdl-edge:             rgba(20, 16, 31, 0.16);
+  --pdl-dot-grid:         rgba(20, 16, 31, 0.06);
+  --pdl-dot-grid-strong:  rgba(20, 16, 31, 0.12);
+
+  /* Dept jewel-tones (light) — deepened/desaturated for bone canvas */
+  --pdl-dept-jarvis:       #7F7C72;
+  --pdl-dept-marketing:    #C76A2A;
+  --pdl-dept-sales:        #128054;
+  --pdl-dept-engineering:  oklch(38% 0.20 248);
+  --pdl-dept-finance:      #A77D08;
+  --pdl-dept-compliance:   #6C2BBA;
+  --pdl-dept-hr:           #B62571;
+  --pdl-dept-ops:          #0A6B62;
+  --pdl-dept-legal:        #1E4FB0;
+
+  /* Elevation — lighter shadows on warm canvas */
+  --pdl-elev-1: 0 1px 2px rgba(20, 16, 31, 0.06);
+  --pdl-elev-2: 0 4px 16px rgba(20, 16, 31, 0.08);
+  --pdl-elev-3: 0 16px 48px rgba(20, 16, 31, 0.12);
+}
+
+/* ------------------------------------------------------------
+ * .pdl-glass — glassmorphic surface recipe
+ *
+ * Used by Tooltip, Popover, Drawer, Modal, and any future
+ * floating surface. Single source of truth — never hand-roll
+ * the blur recipe at consumer sites.
+ * ------------------------------------------------------------ */
+
+.praxis-root .pdl-glass {
+  background: var(--pdl-surface-glass);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--pdl-border-hairline);
+  box-shadow: var(--pdl-elev-3);
+  border-radius: var(--pdl-radius-soft-lg);
+  color: var(--pdl-text);
+}
+
+/* ------------------------------------------------------------
+ * .pdl-canvas-grid — dotted-grid background
+ *
+ * 24px spacing, 1px dots. Forms the spatial canvas for the
+ * Memory node-graph (Slice 1) and future spatial surfaces.
+ * data-strong="true" doubles dot opacity for higher contrast.
+ * ------------------------------------------------------------ */
+
+.praxis-root .pdl-canvas-grid {
+  background-color: var(--pdl-canvas);
+  background-image:
+    radial-gradient(circle, var(--pdl-dot-grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: 0 0;
+}
+
+.praxis-root .pdl-canvas-grid[data-strong="true"] {
+  background-image:
+    radial-gradient(circle, var(--pdl-dot-grid-strong) 1px, transparent 1px);
+}
+
+/* ------------------------------------------------------------
+ * .pdl-hover-reveal — hide-until-hover utility
+ *
+ * Default: hidden (visibility + opacity). On parent hover:
+ * visible with 4px translate-up reveal. Touch devices: always
+ * visible. Reduced-motion: opacity-only transition.
+ *
+ * Consumers wrap their action layer in <div class="pdl-hover-reveal">
+ * inside a parent that exposes :hover.
+ * ------------------------------------------------------------ */
+
+.praxis-root .pdl-hover-reveal {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition:
+    opacity var(--pdl-dur-default) var(--pdl-ease),
+    transform var(--pdl-dur-default) var(--pdl-ease),
+    visibility 0s linear var(--pdl-dur-default);
+  pointer-events: none;
+}
+
+.praxis-root *:hover > .pdl-hover-reveal,
+.praxis-root *:focus-within > .pdl-hover-reveal,
+.praxis-root .pdl-hover-reveal[data-force-visible="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition:
+    opacity var(--pdl-dur-default) var(--pdl-ease),
+    transform var(--pdl-dur-default) var(--pdl-ease),
+    visibility 0s linear 0s;
+  pointer-events: auto;
+}
+
+@media (hover: none) {
+  .praxis-root .pdl-hover-reveal {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .praxis-root .pdl-hover-reveal,
+  .praxis-root *:hover > .pdl-hover-reveal,
+  .praxis-root *:focus-within > .pdl-hover-reveal {
+    transition: opacity var(--pdl-dur-default) linear, visibility 0s linear var(--pdl-dur-default);
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------------------
+ * Drawer + Modal backdrop
+ * ------------------------------------------------------------ */
+
+.praxis-root .pdl-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 50;
+}
+
+html[data-praxis-theme="light"] .praxis-root .pdl-scrim {
+  background: rgba(20, 16, 31, 0.20);
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  @keyframes pdl-scrim-fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  .praxis-root .pdl-scrim {
+    animation: pdl-scrim-fade-in var(--pdl-dur-default) var(--pdl-ease);
+  }
+}
+
+/* Drawer panel — slides from right (desktop) / bottom (mobile) */
+.praxis-root .pdl-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(420px, 100vw);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 640px) {
+  .praxis-root .pdl-drawer {
+    top: auto;
+    width: 100vw;
+    max-height: 90vh;
+    border-top-left-radius: var(--pdl-radius-soft-lg);
+    border-top-right-radius: var(--pdl-radius-soft-lg);
+  }
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  @keyframes pdl-drawer-slide-right {
+    0%   { transform: translateX(100%); }
+    100% { transform: translateX(0); }
+  }
+  @keyframes pdl-drawer-slide-up {
+    0%   { transform: translateY(100%); }
+    100% { transform: translateY(0); }
+  }
+  .praxis-root .pdl-drawer {
+    animation: pdl-drawer-slide-right var(--pdl-dur-emphasis) var(--pdl-ease);
+  }
+  @media (max-width: 640px) {
+    .praxis-root .pdl-drawer {
+      animation: pdl-drawer-slide-up var(--pdl-dur-emphasis) var(--pdl-ease);
+    }
+  }
+}
+
+/* Modal panel — centered */
+.praxis-root .pdl-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(480px, calc(100vw - 32px));
+  max-height: calc(100vh - 64px);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  @keyframes pdl-modal-pop {
+    0%   { transform: translate(-50%, -50%) scale(0.96); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  }
+  .praxis-root .pdl-modal {
+    animation: pdl-modal-pop var(--pdl-dur-emphasis) var(--pdl-ease);
+  }
+}
+
+/* ------------------------------------------------------------
+ * .pdl-tooltip — small glassmorphic floating panel
+ *
+ * Used by Tooltip primitive. Pointer-events disabled by default
+ * so it doesn't intercept clicks on the underlying canvas.
+ * ------------------------------------------------------------ */
+
+.praxis-root .pdl-tooltip {
+  position: absolute;
+  z-index: 40;
+  padding: var(--pdl-space-sm) var(--pdl-space-md);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--pdl-text);
+  max-width: 280px;
+  pointer-events: none;
+}
+
+.praxis-root .pdl-tooltip[data-interactive="true"] {
+  pointer-events: auto;
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  @keyframes pdl-tooltip-in {
+    0%   { opacity: 0; transform: translateY(4px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .praxis-root .pdl-tooltip {
+    animation: pdl-tooltip-in var(--pdl-dur-default) var(--pdl-ease);
+  }
+}
+
+/* ------------------------------------------------------------
+ * .pdl-popover — glassmorphic click-triggered surface
+ * ------------------------------------------------------------ */
+
+.praxis-root .pdl-popover {
+  position: absolute;
+  z-index: 45;
+  min-width: 200px;
+  max-width: 360px;
+  padding: var(--pdl-space-md);
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  @keyframes pdl-popover-in {
+    0%   { opacity: 0; transform: translateY(-4px) scale(0.98); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .praxis-root .pdl-popover {
+    animation: pdl-popover-in var(--pdl-dur-default) var(--pdl-ease);
+    transform-origin: top center;
+  }
+}
+
+/* ------------------------------------------------------------
+ * .pdl-node — graph node circle
+ *
+ * Position is set inline by consumers (absolute x/y).
+ * tone (CSS color) drives the glow on hover.
+ * data-state="hover" forces glow without :hover media.
+ * ------------------------------------------------------------ */
+
+.praxis-root .pdl-node {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--pdl-node-fill);
+  border: 1px solid var(--pdl-node-border);
+  border-radius: var(--pdl-radius-round);
+  color: var(--pdl-text);
+  cursor: pointer;
+  transition:
+    box-shadow var(--pdl-dur-default) var(--pdl-ease),
+    border-color var(--pdl-dur-default) var(--pdl-ease),
+    transform var(--pdl-dur-default) var(--pdl-ease);
+  will-change: transform, box-shadow;
+  transform: translate(-50%, -50%);
+}
+
+.praxis-root .pdl-node:hover,
+.praxis-root .pdl-node[data-state="hover"] {
+  box-shadow: 0 0 24px var(--pdl-tone, var(--pdl-node-glow));
+  border-color: var(--pdl-tone, var(--pdl-accent));
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  @keyframes pdl-node-pulse {
+    0%, 100% { opacity: 0.85; }
+    50%      { opacity: 1; }
+  }
+  .praxis-root .pdl-node[data-state="idle"]:not(:hover) {
+    animation: pdl-node-pulse 4s ease-in-out infinite;
+  }
+}
+
+/* ------------------------------------------------------------
+ * .pdl-pill-tabs — 2-3 pill tabs per surface
+ * ------------------------------------------------------------ */
+
+.praxis-root .pdl-pill-tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--pdl-radius-round);
+}
+
+.praxis-root .pdl-pill-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--pdl-text-muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--pdl-radius-round);
+  cursor: pointer;
+  transition:
+    color var(--pdl-dur-default) var(--pdl-ease),
+    background var(--pdl-dur-default) var(--pdl-ease);
+}
+
+.praxis-root .pdl-pill-tab:hover {
+  color: var(--pdl-text);
+}
+
+.praxis-root .pdl-pill-tab[data-active="true"] {
+  color: var(--pdl-text);
+  background: var(--pdl-accent);
+  color: #FFFFFF;
+}
+
+html[data-praxis-theme="light"] .praxis-root .pdl-pill-tab[data-active="true"] {
+  color: #FFFFFF;
+}
+
+/* ------------------------------------------------------------
+ * .pdl-composer — glassmorphic input shell
+ * ------------------------------------------------------------ */
+
+.praxis-root .pdl-composer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pdl-space-md);
+  padding: var(--pdl-space-md);
+}
+
+.praxis-root .pdl-composer-textarea {
+  width: 100%;
+  min-height: 60px;
+  background: transparent;
+  border: 0;
+  outline: none;
+  resize: vertical;
+  color: var(--pdl-text);
+  font-family: var(--font-serif, serif);
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.praxis-root .pdl-composer-textarea::placeholder {
+  color: var(--pdl-text-muted);
+  font-style: italic;
+}
+
+.praxis-root .pdl-composer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pdl-space-sm);
+}
+
+/* ------------------------------------------------------------
+ * .pdl-brand-chip — circular surface containing a brand mark
+ * ------------------------------------------------------------ */
+
+.praxis-root .pdl-brand-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--pdl-surface);
+  border: 1px solid var(--pdl-border-hairline);
+  border-radius: var(--pdl-radius-round);
+  overflow: hidden;
+}
+
+html[data-praxis-theme="light"] .praxis-root .pdl-brand-chip {
+  background: var(--pdl-surface-raised);
+}
+
+.praxis-root .pdl-brand-chip[data-size="sm"] { width: 20px; height: 20px; }
+.praxis-root .pdl-brand-chip[data-size="md"] { width: 32px; height: 32px; }
+.praxis-root .pdl-brand-chip[data-size="lg"] { width: 48px; height: 48px; }
+
+/* ------------------------------------------------------------
+ * .pdl-avatar — composes DeptIcon or BrandChip in a surface
+ * ------------------------------------------------------------ */
+
+.praxis-root .pdl-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--pdl-surface);
+  border: 1px solid var(--pdl-border-hairline);
+  border-radius: var(--pdl-radius-round);
+  color: var(--pdl-text);
+  flex-shrink: 0;
+}
+
+.praxis-root .pdl-avatar[data-size="sm"] { width: 20px; height: 20px; }
+.praxis-root .pdl-avatar[data-size="md"] { width: 32px; height: 32px; }
+.praxis-root .pdl-avatar[data-size="lg"] { width: 48px; height: 48px; }
+.praxis-root .pdl-avatar[data-size="xl"] { width: 72px; height: 72px; }

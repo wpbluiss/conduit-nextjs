@@ -1,18 +1,20 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Fraunces, JetBrains_Mono } from "next/font/google";
+import { Fraunces, JetBrains_Mono } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 import "@/styles/praxis-tokens.css";
 import "@/styles/praxis-system.css";
+import "@/styles/praxis-design-language.css";
 import "@/styles/engineering-cinema.css";
 import "@/styles/memory-desk.css";
 import { ThemeBoot } from "@/components/conduit/ThemeBoot";
 
-const inter = Inter({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  display: "swap",
-});
+// R18 Slice 0: body sans switched from Inter to Geist Sans per the
+// design-language spec (frontend-design skill forbids Inter as generic
+// AI aesthetic). GeistSans is Vercel's font; ships with next/font-
+// compatible `.variable` binding directly. Bound to --font-sans so every
+// existing `font-sans` Tailwind utility class continues to work without
+// per-component edits.
 
 const fraunces = Fraunces({
   variable: "--font-serif",
@@ -71,7 +73,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${fraunces.variable} ${jetbrainsMono.variable}`}
+      className={`${GeistSans.variable} ${fraunces.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
       <head>
