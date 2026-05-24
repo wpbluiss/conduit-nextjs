@@ -1,6 +1,10 @@
-// R17 Slice 1: top-level Memory Desk surface.
-// Promoted out of /app/settings/memory (which now redirects here).
-// Contract: specs/memory-and-connectors/contracts/memory-desk.md
+// R18 Slice 1: Memory canvas (node-graph on dotted grid).
+// Server-fetches identically to R17 Slice 1 plus position_x/y from the
+// R18 migration. Mounts <MemoryCanvas> (replaces the R17 <MemoryDesk>
+// dossier; that component + MemorySection/MemoryCard/MemoryAddForm are
+// deleted in this slice).
+//
+// Contract: specs/praxis-design-language/contracts/memory-canvas.md §2
 
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -8,7 +12,7 @@ import { getCurrentAccount } from "@/lib/conduit/account";
 import { tierById } from "@/lib/billing/tiers";
 import type { EmployeeId } from "@/lib/conduit/employees";
 import type { MemoryRecord } from "@/lib/ai/memory";
-import { MemoryDesk } from "@/components/conduit/memory/MemoryDesk";
+import { MemoryCanvas } from "@/components/conduit/memory/MemoryCanvas";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +27,7 @@ export default async function MemoryPage() {
   const { data: memoryRows } = await supabase
     .from("conduit_memory")
     .select(
-      "id, account_id, kind, content, tags, source_conversation_id, source_message_id, written_by, created_at, updated_at, archived_at, superseded_by, pinned, locked",
+      "id, account_id, kind, content, tags, source_conversation_id, source_message_id, written_by, created_at, updated_at, archived_at, superseded_by, pinned, locked, position_x, position_y",
     )
     .eq("account_id", account.id)
     .is("archived_at", null)
@@ -54,5 +58,5 @@ export default async function MemoryPage() {
       }) as MemoryRecord,
   );
 
-  return <MemoryDesk initial={initial} cap={cap} />;
+  return <MemoryCanvas initial={initial} cap={cap} />;
 }

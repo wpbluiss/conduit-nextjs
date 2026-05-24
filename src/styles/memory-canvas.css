@@ -1,0 +1,409 @@
+/* ============================================================
+ * Memory Canvas — R18 Slice 1
+ *
+ * Built on the validated /app/pdl-scratch canvas preview. Reuses
+ * the .pdl-canvas-grid + .pdl-glass + pdl Node/Edge primitives;
+ * adds memory-specific tooltip + composer treatments as canvas-
+ * local glassmorphic surfaces (NOT via the broken pdl Tooltip /
+ * Popover primitives — those are a separate FIX item per the
+ * Slice 0 validation punch-list).
+ *
+ * Contract: specs/praxis-design-language/contracts/memory-canvas.md
+ * ============================================================ */
+
+/* ------------------------------------------------------------
+ * Page shell
+ * ------------------------------------------------------------ */
+
+.praxis-root .mem-canvas-page {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: calc(100vh - 0px);
+  display: flex;
+  flex-direction: column;
+}
+
+.praxis-root .mem-canvas-header {
+  position: absolute;
+  top: var(--pdl-space-lg);
+  left: var(--pdl-space-lg);
+  z-index: 10;
+  display: flex;
+  align-items: baseline;
+  gap: var(--pdl-space-md);
+  pointer-events: none;
+}
+
+.praxis-root .mem-canvas-title {
+  font-family: var(--font-serif, serif);
+  font-size: 22px;
+  line-height: 1.2;
+  color: var(--pdl-text);
+  margin: 0;
+}
+
+.praxis-root .mem-canvas-count {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--pdl-text-muted);
+  font-variant-numeric: tabular-nums;
+  padding: 4px 10px;
+  border-radius: var(--pdl-radius-round);
+  background: var(--pdl-surface-glass);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--pdl-border-hairline);
+}
+
+.praxis-root .mem-canvas-shell {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+/* Edge SVG layer fills the canvas; non-interactive. */
+.praxis-root .mem-edge-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* ------------------------------------------------------------
+ * Memory node — wraps pdl Node with kind glyph + lock overlay
+ * ------------------------------------------------------------ */
+
+.praxis-root .mem-node-wrap {
+  position: absolute;
+  /* Centering handled by inner pdl-node's translate(-50%, -50%). */
+  pointer-events: auto;
+}
+
+.praxis-root .mem-node-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pdl-text);
+}
+
+.praxis-root .mem-node-lock {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: var(--pdl-surface);
+  border: 1px solid var(--pdl-border-default);
+  border-radius: var(--pdl-radius-round);
+  color: var(--pdl-text-muted);
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  @keyframes mem-node-enter {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+  .praxis-root .mem-node-wrap[data-fresh="true"] .pdl-node {
+    animation: mem-node-enter 480ms var(--pdl-ease-spring);
+  }
+}
+
+/* ------------------------------------------------------------
+ * Memory tooltip — canvas-local glassmorphic panel
+ * (Replaces the broken pdl Tooltip primitive per punch-list.)
+ * ------------------------------------------------------------ */
+
+.praxis-root .mem-tooltip {
+  position: absolute;
+  z-index: 30;
+  padding: var(--pdl-space);
+  border-radius: var(--pdl-radius-soft);
+  width: 300px;
+  max-width: 92vw;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pdl-space-md);
+  /* Glass recipe inlined here so we don't depend on .pdl-glass-the-class
+   * styling that may compete with size constraints. Same recipe values. */
+  background: var(--pdl-surface-glass);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--pdl-border-default);
+  box-shadow: var(--pdl-elev-3);
+  color: var(--pdl-text);
+}
+
+.praxis-root .mem-tooltip-kind {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--pdl-text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.praxis-root .mem-tooltip-content {
+  font-family: var(--font-serif, serif);
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--pdl-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+}
+
+.praxis-root .mem-tooltip-scope {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.praxis-root .mem-tooltip-scope-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--pdl-radius-round);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--pdl-text);
+  background: color-mix(in srgb, var(--mem-dept, var(--pdl-text-muted)) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--mem-dept, var(--pdl-text-muted)) 35%, transparent);
+}
+
+.praxis-root .mem-tooltip-scope-chip[data-global="true"] {
+  background: color-mix(in srgb, var(--pdl-text-muted) 12%, transparent);
+  border-color: var(--pdl-border-default);
+  color: var(--pdl-text-muted);
+}
+
+.praxis-root .mem-tooltip-actions {
+  display: flex;
+  gap: 6px;
+  padding-top: var(--pdl-space-sm);
+  border-top: 1px solid var(--pdl-border-hairline);
+}
+
+.praxis-root .mem-tooltip-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid var(--pdl-border-hairline);
+  border-radius: var(--pdl-radius-default);
+  color: var(--pdl-text-muted);
+  cursor: pointer;
+  transition: color var(--pdl-dur-ultra) var(--pdl-ease),
+              background var(--pdl-dur-ultra) var(--pdl-ease),
+              border-color var(--pdl-dur-ultra) var(--pdl-ease);
+}
+
+.praxis-root .mem-tooltip-action:hover {
+  color: var(--pdl-text);
+  background: var(--pdl-surface-raised);
+  border-color: var(--pdl-border-default);
+}
+
+.praxis-root .mem-tooltip-action[data-active="true"] {
+  color: var(--pdl-accent);
+  background: var(--pdl-accent-soft);
+  border-color: color-mix(in srgb, var(--pdl-accent) 40%, transparent);
+}
+
+.praxis-root .mem-tooltip-action[data-destructive="true"]:hover {
+  color: oklch(70% 0.20 0);
+  border-color: color-mix(in srgb, oklch(70% 0.20 0) 35%, transparent);
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  @keyframes mem-tooltip-in {
+    0%   { opacity: 0; transform: translateY(4px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .praxis-root .mem-tooltip {
+    animation: mem-tooltip-in var(--pdl-dur-default) var(--pdl-ease);
+  }
+}
+
+/* ------------------------------------------------------------
+ * Memory composer — canvas-local glassmorphic panel
+ * (Replaces broken Drawer/Modal use-case for inline canvas adds.)
+ * ------------------------------------------------------------ */
+
+.praxis-root .mem-composer {
+  position: absolute;
+  z-index: 40;
+  width: 360px;
+  max-width: 92vw;
+  padding: var(--pdl-space);
+  border-radius: var(--pdl-radius-soft-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pdl-space-md);
+  background: var(--pdl-surface-glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--pdl-border-default);
+  box-shadow: var(--pdl-elev-3);
+  color: var(--pdl-text);
+}
+
+.praxis-root .mem-composer-label {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--pdl-text-muted);
+}
+
+.praxis-root .mem-composer-textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: var(--pdl-space-sm) var(--pdl-space-md);
+  background: var(--pdl-canvas);
+  border: 1px solid var(--pdl-border-hairline);
+  border-radius: var(--pdl-radius-default);
+  color: var(--pdl-text);
+  font-family: var(--font-serif, serif);
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+  transition: border-color var(--pdl-dur-ultra) var(--pdl-ease);
+}
+
+.praxis-root .mem-composer-textarea:focus {
+  border-color: var(--pdl-accent);
+}
+
+.praxis-root .mem-composer-textarea::placeholder {
+  color: var(--pdl-text-muted);
+  font-style: italic;
+}
+
+.praxis-root .mem-composer-tags-input {
+  width: 100%;
+  padding: 6px 10px;
+  background: var(--pdl-canvas);
+  border: 1px solid var(--pdl-border-hairline);
+  border-radius: var(--pdl-radius-default);
+  color: var(--pdl-text);
+  font-size: 12px;
+  outline: none;
+}
+
+.praxis-root .mem-composer-tags-input:focus {
+  border-color: var(--pdl-accent);
+}
+
+.praxis-root .mem-composer-error {
+  font-size: 12px;
+  color: oklch(70% 0.20 0);
+}
+
+.praxis-root .mem-composer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--pdl-space-sm);
+  padding-top: var(--pdl-space-sm);
+  border-top: 1px solid var(--pdl-border-hairline);
+}
+
+.praxis-root .mem-composer-cancel {
+  font-size: 12px;
+  color: var(--pdl-text-muted);
+  background: transparent;
+  border: 0;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: color var(--pdl-dur-ultra) var(--pdl-ease);
+}
+
+.praxis-root .mem-composer-cancel:hover {
+  color: var(--pdl-text);
+}
+
+.praxis-root .mem-composer-save {
+  font-size: 12px;
+  color: #FFFFFF;
+  background: var(--pdl-accent);
+  border: 0;
+  padding: 8px 16px;
+  border-radius: var(--pdl-radius-default);
+  cursor: pointer;
+  transition: opacity var(--pdl-dur-ultra) var(--pdl-ease);
+}
+
+.praxis-root .mem-composer-save:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  @keyframes mem-composer-in {
+    0%   { opacity: 0; transform: translateY(4px) scale(0.96); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .praxis-root .mem-composer {
+    animation: mem-composer-in var(--pdl-dur-emphasis) var(--pdl-ease);
+  }
+}
+
+/* ------------------------------------------------------------
+ * Mobile reflow
+ * ------------------------------------------------------------ */
+
+@media (max-width: 640px) {
+  .praxis-root .mem-canvas-header {
+    top: var(--pdl-space-md);
+    left: var(--pdl-space-md);
+  }
+  .praxis-root .mem-canvas-title {
+    font-size: 18px;
+  }
+  .praxis-root .mem-tooltip {
+    /* On mobile, anchor to bottom edge as a sheet rather than next to node. */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--pdl-radius-soft-lg) var(--pdl-radius-soft-lg) 0 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+  .praxis-root .mem-composer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--pdl-radius-soft-lg) var(--pdl-radius-soft-lg) 0 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+}

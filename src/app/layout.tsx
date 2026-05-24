@@ -6,7 +6,7 @@ import "@/styles/praxis-tokens.css";
 import "@/styles/praxis-system.css";
 import "@/styles/praxis-design-language.css";
 import "@/styles/engineering-cinema.css";
-import "@/styles/memory-desk.css";
+import "@/styles/memory-canvas.css";
 import { ThemeBoot } from "@/components/conduit/ThemeBoot";
 
 // R18 Slice 0: body sans switched from Inter to Geist Sans per the

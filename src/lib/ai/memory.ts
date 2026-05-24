@@ -66,6 +66,10 @@ export interface MemoryRecord {
   locked: boolean;
   /** R17 — empty = global; populated = scoped to these employees only. */
   scope: EmployeeId[];
+  /** R18 Slice 1 — forward-compat for v2 drag-to-arrange. v1 auto-layout
+   *  ignores; only used when BOTH non-null. */
+  position_x: number | null;
+  position_y: number | null;
 }
 
 export interface RememberWrite {

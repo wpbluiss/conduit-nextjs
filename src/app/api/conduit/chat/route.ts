@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
   const { data: memoryRows } = await supabase
     .from("conduit_memory")
     .select(
-      "id, account_id, kind, content, tags, source_conversation_id, source_message_id, written_by, created_at, updated_at, archived_at, superseded_by, pinned, locked",
+      "id, account_id, kind, content, tags, source_conversation_id, source_message_id, written_by, created_at, updated_at, archived_at, superseded_by, pinned, locked, position_x, position_y",
     )
     .eq("account_id", account.id)
     .is("archived_at", null)
