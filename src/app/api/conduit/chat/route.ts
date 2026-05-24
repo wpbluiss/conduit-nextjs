@@ -35,6 +35,7 @@ import {
   synthesisBrief,
 } from "@/lib/ai/roundtable";
 import {
+  memoriesForEmployee,
   parseMemoryWrites,
   renderMemoryBlock,
   trimMemoriesForPrompt,
@@ -144,19 +145,45 @@ export async function POST(request: NextRequest) {
   const ordered = (history ?? []).slice().reverse();
 
   // R10: load memory once per turn for system-prompt injection.
+  // R17: load with scope, then build per-employee blocks lazily.
   const { data: memoryRows } = await supabase
     .from("conduit_memory")
     .select(
-      "id, account_id, kind, content, tags, source_conversation_id, source_message_id, written_by, created_at, updated_at, archived_at, superseded_by",
+      "id, account_id, kind, content, tags, source_conversation_id, source_message_id, written_by, created_at, updated_at, archived_at, superseded_by, pinned, locked",
     )
     .eq("account_id", account.id)
     .is("archived_at", null)
+    .order("pinned", { ascending: false })
     .order("created_at", { ascending: false })
     .limit(60);
-  const memories = trimMemoriesForPrompt(
-    (memoryRows ?? []) as MemoryRecord[],
+  const memIds = (memoryRows ?? []).map((m) => m.id as string);
+  const { data: scopeRows } = memIds.length
+    ? await supabase
+        .from("conduit_memory_scope")
+        .select("memory_id, employee_id")
+        .in("memory_id", memIds)
+    : { data: [] as { memory_id: string; employee_id: string }[] };
+  const scopeMap = new Map<string, EmployeeKey[]>();
+  for (const r of scopeRows ?? []) {
+    const arr = scopeMap.get(r.memory_id as string) ?? [];
+    arr.push(r.employee_id as EmployeeKey);
+    scopeMap.set(r.memory_id as string, arr);
+  }
+  const allMemoriesWithScope: MemoryRecord[] = (memoryRows ?? []).map(
+    (m) =>
+      ({
+        ...m,
+        scope: scopeMap.get(m.id as string) ?? [],
+      }) as MemoryRecord,
   );
-  const memoryBlock = renderMemoryBlock(memories);
+  // memoryBlockFor returns the per-employee filtered + trimmed prompt block.
+  // Atlas (jarvis) sees everything; other employees see global + their-scope.
+  const memoryBlockFor = (employeeId: EmployeeKey): string =>
+    renderMemoryBlock(
+      trimMemoriesForPrompt(
+        memoriesForEmployee(allMemoriesWithScope, employeeId),
+      ),
+    );
 
   const ctx: AccountContext = {
     user_name: userDisplayName(user),
@@ -476,7 +503,9 @@ export async function POST(request: NextRequest) {
         // everyone except Atlas; Atlas's MEMORY INSTRUCTIONS section is
         // already baked into the employee body). Memory comes ahead of time
         // so the model has context before it sees the user's turn.
-        const systemPrompt = memoryBlock + withTime;
+        // R17: per-employee filter — Atlas sees all; others see global +
+        // their-scope only.
+        const systemPrompt = memoryBlockFor(employee) + withTime;
 
         let fullText = "";
         let inputTokens = 0;
@@ -617,12 +646,20 @@ export async function POST(request: NextRequest) {
         // Memory writes — execute after we have the message id for source linkage.
         for (const sup of supersedes) {
           // Verify the old memory belongs to this account before mutating.
+          // R17: also check the locked flag — locked memories are user-
+          // authoritative and Atlas cannot overwrite them.
           const { data: old } = await supabase
             .from("conduit_memory")
-            .select("id, account_id")
+            .select("id, account_id, locked")
             .eq("id", sup.oldId)
             .maybeSingle();
           if (!old || old.account_id !== accountId) continue;
+          if (old.locked) {
+            console.warn(
+              `[chat] skipped [SUPERSEDE] on locked memory ${sup.oldId}`,
+            );
+            continue;
+          }
 
           const { data: newRow } = await supabase
             .from("conduit_memory")
@@ -638,6 +675,15 @@ export async function POST(request: NextRequest) {
             .select("id, kind, content, tags")
             .single();
           if (newRow) {
+            // R17: write scope rows for the new memory if Atlas specified one.
+            if (sup.scope.length > 0) {
+              await supabase.from("conduit_memory_scope").insert(
+                sup.scope.map((employee_id) => ({
+                  memory_id: newRow.id as string,
+                  employee_id,
+                })),
+              );
+            }
             await supabase
               .from("conduit_memory")
               .update({
@@ -698,6 +744,15 @@ export async function POST(request: NextRequest) {
               .select("id, kind, content, tags")
               .single();
             if (row) {
+              // R17: write scope rows when Atlas specified scope.
+              if (r.scope.length > 0) {
+                await supabase.from("conduit_memory_scope").insert(
+                  r.scope.map((employee_id) => ({
+                    memory_id: row.id as string,
+                    employee_id,
+                  })),
+                );
+              }
               send("memory_written", {
                 id: row.id,
                 kind: row.kind,
@@ -853,7 +908,7 @@ export async function POST(request: NextRequest) {
             try {
               const baseSystem = systemPromptFor(emp, ctx);
               const systemPrompt =
-                memoryBlock +
+                memoryBlockFor(emp) +
                 withTimeAware(baseSystem, {
                   timezone: account.timezone || "America/New_York",
                 });
@@ -948,7 +1003,7 @@ export async function POST(request: NextRequest) {
           send("round_table_synthesis_start", {});
           const baseSystem = systemPromptFor("jarvis", ctx);
           const systemPrompt =
-            memoryBlock +
+            memoryBlockFor("jarvis") +
             withTimeAware(baseSystem, {
               timezone: account.timezone || "America/New_York",
             });

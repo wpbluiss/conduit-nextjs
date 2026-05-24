@@ -268,10 +268,10 @@ export function Sidebar({
               />
             )}
             <NavLink
-              href="/app/settings/memory"
+              href="/app/memory"
               icon={<Brain size={14} />}
               label="Memory"
-              active={isActive("/app/settings/memory")}
+              active={isActive("/app/memory")}
               onClick={close}
             />
             {allowedEmployees.includes("engineering") && (
@@ -392,7 +392,6 @@ export function Sidebar({
             active={
               pathname === "/app/settings" ||
               (pathname.startsWith("/app/settings/") &&
-                !pathname.startsWith("/app/settings/memory") &&
                 !pathname.startsWith("/app/settings/billing"))
             }
             onClick={close}

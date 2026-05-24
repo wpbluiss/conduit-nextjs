@@ -6,6 +6,26 @@ import { tierById } from "@/lib/billing/tiers";
 export const runtime = "nodejs";
 
 const VALID_KINDS = ["fact", "preference", "decision", "goal", "context"];
+const VALID_EMPLOYEES = [
+  "jarvis",
+  "marketing",
+  "sales",
+  "engineering",
+  "finance",
+  "compliance",
+  "hr",
+  "ops",
+  "legal",
+];
+
+function sanitizeScope(input: unknown): string[] {
+  if (!Array.isArray(input)) return [];
+  return input
+    .map((s) => String(s).trim().toLowerCase())
+    .filter((s) => VALID_EMPLOYEES.includes(s))
+    .filter((s, i, arr) => arr.indexOf(s) === i)
+    .slice(0, 9);
+}
 
 export async function GET(request: NextRequest) {
   const supabase = await createSupabaseServerClient();
@@ -23,9 +43,10 @@ export async function GET(request: NextRequest) {
   let q = supabase
     .from("conduit_memory")
     .select(
-      "id, kind, content, tags, source_conversation_id, source_message_id, written_by, created_at, updated_at, archived_at, superseded_by",
+      "id, kind, content, tags, source_conversation_id, source_message_id, written_by, created_at, updated_at, archived_at, superseded_by, pinned, locked",
     )
     .eq("account_id", account.id)
+    .order("pinned", { ascending: false })
     .order("created_at", { ascending: false })
     .limit(500);
   if (!includeArchived) q = q.is("archived_at", null);
@@ -35,9 +56,29 @@ export async function GET(request: NextRequest) {
   if (error) {
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
+
+  // R17: attach scope to each memory.
+  const memIds = (data ?? []).map((m) => m.id as string);
+  const { data: scopeRows } = memIds.length
+    ? await supabase
+        .from("conduit_memory_scope")
+        .select("memory_id, employee_id")
+        .in("memory_id", memIds)
+    : { data: [] as { memory_id: string; employee_id: string }[] };
+  const scopeMap = new Map<string, string[]>();
+  for (const r of scopeRows ?? []) {
+    const arr = scopeMap.get(r.memory_id as string) ?? [];
+    arr.push(r.employee_id as string);
+    scopeMap.set(r.memory_id as string, arr);
+  }
+  const memoriesWithScope = (data ?? []).map((m) => ({
+    ...m,
+    scope: scopeMap.get(m.id as string) ?? [],
+  }));
+
   const tier = tierById(account.tier_id);
   return NextResponse.json({
-    memories: data ?? [],
+    memories: memoriesWithScope,
     cap: account.internal_account ? 5000 : tier.memoryCap,
   });
 }
@@ -55,6 +96,7 @@ export async function POST(request: NextRequest) {
     kind?: string;
     content?: string;
     tags?: string[];
+    scope?: string[];
   };
   try {
     body = await request.json();
@@ -74,6 +116,7 @@ export async function POST(request: NextRequest) {
     .map((t) => String(t).trim().toLowerCase())
     .filter((t) => t.length > 0 && t.length < 32)
     .slice(0, 5);
+  const scope = sanitizeScope(body.scope);
 
   const account = await getOrCreateAccount(supabase, user);
 
@@ -105,11 +148,22 @@ export async function POST(request: NextRequest) {
       written_by: "user",
     })
     .select(
-      "id, kind, content, tags, source_conversation_id, source_message_id, written_by, created_at, updated_at, archived_at",
+      "id, kind, content, tags, source_conversation_id, source_message_id, written_by, created_at, updated_at, archived_at, pinned, locked",
     )
     .single();
   if (error || !data) {
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
-  return NextResponse.json({ memory: data });
+
+  // R17: insert scope rows if provided.
+  if (scope.length > 0) {
+    await supabase.from("conduit_memory_scope").insert(
+      scope.map((employee_id) => ({
+        memory_id: data.id as string,
+        employee_id,
+      })),
+    );
+  }
+
+  return NextResponse.json({ memory: { ...data, scope } });
 }

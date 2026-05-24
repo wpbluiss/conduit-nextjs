@@ -4,6 +4,7 @@ import "./globals.css";
 import "@/styles/praxis-tokens.css";
 import "@/styles/praxis-system.css";
 import "@/styles/engineering-cinema.css";
+import "@/styles/memory-desk.css";
 import { ThemeBoot } from "@/components/conduit/ThemeBoot";
 
 const inter = Inter({
