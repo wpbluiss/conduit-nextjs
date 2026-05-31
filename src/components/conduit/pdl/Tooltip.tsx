@@ -142,16 +142,21 @@ export function Tooltip({
         mounted &&
         anchor &&
         createPortal(
-          <div
-            id={id}
-            role="tooltip"
-            className={`praxis-root pdl-tooltip pdl-glass${className ? ` ${className}` : ""}`}
-            data-interactive={interactive || undefined}
-            style={style}
-            onMouseEnter={interactive ? cancelClose : undefined}
-            onMouseLeave={interactive ? onMouseLeave : undefined}
-          >
-            {children}
+          // .praxis-root PARENT wrapper (mirrors Drawer/Modal) so the
+          // `.praxis-root .pdl-tooltip` / `.pdl-glass` descendant recipes
+          // resolve on the portaled surface.
+          <div className="praxis-root">
+            <div
+              id={id}
+              role="tooltip"
+              className={`pdl-tooltip pdl-glass${className ? ` ${className}` : ""}`}
+              data-interactive={interactive || undefined}
+              style={style}
+              onMouseEnter={interactive ? cancelClose : undefined}
+              onMouseLeave={interactive ? onMouseLeave : undefined}
+            >
+              {children}
+            </div>
           </div>,
           document.body,
         )}

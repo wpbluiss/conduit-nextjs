@@ -25,6 +25,8 @@ interface Props {
   side?: Side;
   align?: Align;
   className?: string;
+  /** Accessible name for the role="dialog" surface (WCAG 4.1.2). */
+  ariaLabel?: string;
 }
 
 const OFFSET = 8;
@@ -35,6 +37,7 @@ export function Popover({
   side = "bottom",
   align = "center",
   className,
+  ariaLabel,
 }: Props) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -146,14 +149,22 @@ export function Popover({
         mounted &&
         anchor &&
         createPortal(
-          <div
-            ref={popRef}
-            id={id}
-            role="dialog"
-            className={`praxis-root pdl-popover pdl-glass${className ? ` ${className}` : ""}`}
-            style={style}
-          >
-            {typeof children === "function" ? children(close) : children}
+          // Wrap in a .praxis-root PARENT (mirrors Drawer/Modal) so the
+          // `.praxis-root .pdl-popover` / `.pdl-glass` descendant recipes
+          // resolve. Putting praxis-root on the styled node itself (the old
+          // approach) left the surface unstyled — the same defect that
+          // forced Slice 1 to hand-roll its own canvas-local tooltip.
+          <div className="praxis-root">
+            <div
+              ref={popRef}
+              id={id}
+              role="dialog"
+              aria-label={ariaLabel}
+              className={`pdl-popover pdl-glass${className ? ` ${className}` : ""}`}
+              style={style}
+            >
+              {typeof children === "function" ? children(close) : children}
+            </div>
           </div>,
           document.body,
         )}

@@ -1,23 +1,40 @@
 "use client";
 
+// Praxis Design Language — R18 Sidebar slice
+//
+// The primary chrome, rebuilt on pdl/* primitives + --pdl-* tokens.
+// Closes spec findings S-1 (team list → right-flyout popover), S-2
+// (always-visible "+ New chat" → one quiet icon affordance), S-3
+// (icon-default rail, hover-peek + pin-lock), S-4 (quiet active cue,
+// no heavy stripe), C-1 (token-aware mobile scrim, no bg-black/60).
+//
+// Behaviours preserved from the prior rail: streaming employee dot
+// (conduit:stream), in-flight build pip, allowed-employee lock gating,
+// recent conversations, tier line, sign-out, mobile open/close.
+
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   BarChart3,
   Brain,
+  ChevronRight,
   CreditCard,
   Hammer,
   LayoutGrid,
   Lock,
   LogOut,
+  Menu,
   Mic,
+  Pin,
+  PinOff,
   Plus,
   Settings,
   Sparkles,
+  UserRound,
   Users2,
-  Menu,
   X,
+  type LucideIcon,
 } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, EMPLOYEE_ICON, employeeLabel } from "./EmployeeBadge";
@@ -25,6 +42,7 @@ import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import { PraxisLogo } from "./PraxisLogo";
 import { SidebarBuildPip } from "./builds/in-flight/SidebarBuildPip";
 import type { InFlightBuild } from "@/lib/engineering/in-flight";
+import { Popover } from "./pdl/Popover";
 
 interface ConvoSummary {
   id: string;
@@ -39,6 +57,7 @@ interface TeamActivity {
 }
 
 const TEAM: EmployeeKey[] = EMPLOYEE_ORDER as EmployeeKey[];
+const PIN_KEY = "praxis:sidebar:pinned";
 
 export function Sidebar({
   userEmail,
@@ -63,12 +82,35 @@ export function Sidebar({
   const pathname = usePathname();
   const params = useSearchParams();
   const activeId = params.get("c");
+
+  // Mobile off-canvas state.
   const [open, setOpen] = useState(false);
-  const [teamExpanded, setTeamExpanded] = useState(true);
+  const close = useCallback(() => setOpen(false), []);
 
-  const close = () => setOpen(false);
+  // Desktop pin (hover-peek by default; pin locks the panel open in flow).
+  // SSR renders collapsed; the persisted pin is applied post-hydration so
+  // there is no markup mismatch.
+  const [pinned, setPinned] = useState(false);
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(PIN_KEY) === "1") setPinned(true);
+    } catch {
+      /* private mode / disabled storage — fall back to unpinned */
+    }
+  }, []);
+  const togglePin = useCallback(() => {
+    setPinned((v) => {
+      const next = !v;
+      try {
+        localStorage.setItem(PIN_KEY, next ? "1" : "0");
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }, []);
 
-  // Streaming employee: pulsed strong + steady while a Chat is streaming.
+  // Streaming employee — pulsed dot in the team flyout + pip on the Team icon.
   const [streamingEmployee, setStreamingEmployee] =
     useState<EmployeeKey | null>(null);
   useEffect(() => {
@@ -88,344 +130,279 @@ export function Sidebar({
   const isActive = (path: string) =>
     pathname === path || pathname.startsWith(path + "/");
   const isChat = pathname === "/app";
+  const onTeam = pathname.startsWith("/app/team/");
+  const showLeads = allowedEmployees.includes("sales");
+  const showBuilds = allowedEmployees.includes("engineering");
+
+  const newChat = () => {
+    close();
+    router.push("/app");
+    router.refresh();
+  };
 
   return (
     <>
+      {/* Mobile menu trigger */}
       <button
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open menu"
-        className="md:hidden fixed top-3 left-3 z-30 conduit-card p-2"
+        className="pdl-sidebar-menu-btn"
       >
         <Menu size={18} />
       </button>
 
       <aside
-        className={`fixed md:static z-40 inset-y-0 left-0 w-64 bg-[var(--color-surface)] border-r border-[var(--color-border)] flex flex-col transform ${
-          open ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 transition-transform duration-200`}
+        className="pdl-sidebar-rail"
+        data-pinned={pinned || undefined}
+        data-open={open || undefined}
       >
-        {/* Header — Praxis wordmark + workspace name */}
-        <div className="px-5 py-4 flex items-center justify-between border-b border-[var(--color-border)]">
-          <Link
-            href="/app/workspace"
-            onClick={close}
-            className="flex items-center"
-          >
-            <PraxisLogo size={32} withWordmark glow />
-          </Link>
-          <button
-            type="button"
-            onClick={close}
-            aria-label="Close menu"
-            className="md:hidden text-[var(--color-text-muted)]"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        <div className="px-5 py-3 border-b border-[var(--color-border)]">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-            Workspace
-          </div>
-          <div className="mt-1 text-sm truncate">{accountName}</div>
-        </div>
-
-        {/* New chat — quick action */}
-        <button
-          type="button"
-          onClick={() => {
-            close();
-            router.push("/app");
-            router.refresh();
-          }}
-          className="mx-3 my-3 conduit-card px-3 py-2 text-sm flex items-center gap-2 hover:border-[var(--color-accent)] hover:text-[var(--color-accent-hi)] transition-colors"
-        >
-          <Plus size={14} /> New chat
-        </button>
-
-        {/* Primary nav sections */}
-        <nav className="flex-1 overflow-y-auto px-2 pb-3">
-          <NavLink
-            href="/app/workspace"
-            icon={<LayoutGrid size={14} />}
-            label="Workspace"
-            active={isActive("/app/workspace")}
-            onClick={close}
-          />
-
-          {/* Team header (collapsible) */}
-          <div className="mt-3">
+        <div className="pdl-sidebar-panel">
+          {/* Header — Praxis mark + wordmark + pin / close */}
+          <div className="pdl-sidebar-header">
+            <Link
+              href="/app/workspace"
+              onClick={close}
+              className="pdl-sidebar-brand"
+              aria-label="Praxis — Workspace"
+            >
+              <span className="pdl-brand-icon">
+                <PraxisLogo size={24} glow />
+              </span>
+              <span className="pdl-brand-word pdl-reveal">Praxis</span>
+            </Link>
             <button
               type="button"
-              onClick={() => setTeamExpanded((v) => !v)}
-              className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+              onClick={togglePin}
+              className="pdl-pin-btn pdl-reveal"
+              data-pinned={pinned || undefined}
+              aria-label={pinned ? "Unpin sidebar" : "Pin sidebar open"}
+              aria-pressed={pinned}
             >
-              <span className="inline-flex items-center gap-1.5">
-                <Users2 size={11} /> Team
-              </span>
-              <span aria-hidden className="text-[10px]">
-                {teamExpanded ? "−" : "+"}
-              </span>
+              {pinned ? <PinOff size={15} /> : <Pin size={15} />}
             </button>
-            {teamExpanded && (
-              <ul className="space-y-0.5 mt-1">
-                {TEAM.map((emp) => {
-                  const isStreaming = streamingEmployee === emp;
-                  const allowed = allowedEmployees.includes(emp);
-                  const active = pathname === `/app/team/${emp}`;
-                  const Icon = EMPLOYEE_ICON[emp];
-                  const rowInner = (
-                    <span className="relative flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-colors duration-100 hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]">
-                      {active && (
+            <button
+              type="button"
+              onClick={close}
+              className="pdl-sidebar-close"
+              aria-label="Close menu"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          <nav className="pdl-sidebar-nav">
+            {/* New chat — the single quiet add affordance (S-2) */}
+            <button
+              type="button"
+              onClick={newChat}
+              className="pdl-nav-item"
+              data-variant="newchat"
+              data-active={isChat && !activeId ? true : undefined}
+              aria-label="New chat"
+            >
+              <span className="pdl-nav-icon">
+                <Plus size={18} />
+              </span>
+              <span className="pdl-nav-label">New chat</span>
+            </button>
+
+            <NavItem
+              href="/app/workspace"
+              Icon={LayoutGrid}
+              label="Workspace"
+              active={isActive("/app/workspace")}
+              onClick={close}
+            />
+            <NavItem
+              href="/app/memory"
+              Icon={Brain}
+              label="Memory"
+              active={isActive("/app/memory")}
+              onClick={close}
+            />
+
+            {/* Team — single item, right-flyout to the 9 specialists (S-1) */}
+            <Popover
+              side="right"
+              align="start"
+              className="pdl-sidebar-flyout"
+              ariaLabel="Your team"
+              trigger={
+                <button
+                  type="button"
+                  className="pdl-nav-item"
+                  data-active={onTeam || undefined}
+                  aria-label="Team"
+                >
+                  <span className="pdl-nav-icon">
+                    <span className="pdl-glyph-wrap">
+                      <Users2 size={18} />
+                      {streamingEmployee && (
                         <span
+                          className="pdl-nav-streaming-pip"
                           aria-hidden
-                          className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full"
-                          style={{ background: DEPT_COLOR[emp] }}
-                        />
-                      )}
-                      <span
-                        aria-hidden
-                        className="inline-flex items-center justify-center shrink-0 w-5 h-5 rounded-md"
-                        style={{
-                          background: `color-mix(in srgb, ${DEPT_COLOR[emp]} 18%, var(--color-surface-elevated))`,
-                          color: DEPT_COLOR[emp],
-                          boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[emp]} 65%, transparent)`,
-                        }}
-                      >
-                        <Icon size={11} strokeWidth={2.25} />
-                      </span>
-                      <span className="text-[var(--color-text)] truncate flex-1">
-                        {employeeLabel(emp)}
-                      </span>
-                      {!allowed ? (
-                        <Lock
-                          size={10}
-                          aria-label="Locked — upgrade to unlock"
-                          className="text-[var(--color-text-muted)]"
-                        />
-                      ) : (
-                        <span
-                          className="w-1.5 h-1.5 rounded-full"
-                          style={{
-                            background: isStreaming
-                              ? DEPT_COLOR[emp]
-                              : DEPT_COLOR[emp],
-                            opacity: isStreaming ? 1 : 0.55,
-                            boxShadow: isStreaming
-                              ? `0 0 6px ${DEPT_COLOR[emp]}`
-                              : "none",
-                          }}
-                          aria-label={isStreaming ? "Active" : "Online"}
                         />
                       )}
                     </span>
-                  );
-                  return (
-                    <li
-                      key={emp}
-                      title={allowed ? undefined : "Available on a higher plan"}
-                    >
-                      {allowed ? (
-                        <Link
-                          href={`/app/team/${emp}`}
-                          onClick={close}
-                          className="block"
-                        >
-                          {rowInner}
-                        </Link>
-                      ) : (
-                        <Link
-                          href="/app/settings"
-                          onClick={close}
-                          className="block"
-                        >
-                          {rowInner}
-                        </Link>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
+                  </span>
+                  <span className="pdl-nav-label">Team</span>
+                  <span className="pdl-nav-trail pdl-reveal">
+                    <ChevronRight size={14} />
+                  </span>
+                </button>
+              }
+            >
+              {(closeFlyout) => (
+                <TeamFlyout
+                  allowedEmployees={allowedEmployees}
+                  streamingEmployee={streamingEmployee}
+                  pathname={pathname}
+                  onNavigate={() => {
+                    closeFlyout();
+                    close();
+                  }}
+                />
+              )}
+            </Popover>
 
-          <div className="mt-3 space-y-0.5">
-            <NavLink
+            {showBuilds && (
+              <Link
+                href="/app/builds"
+                onClick={close}
+                className="pdl-nav-item"
+                data-active={isActive("/app/builds") || undefined}
+              >
+                <span className="pdl-nav-icon">
+                  <span className="pdl-glyph-wrap">
+                    <Hammer size={18} />
+                    <SidebarBuildPip
+                      initial={inFlightBuildsInitial}
+                      accountId={accountId}
+                    />
+                  </span>
+                </span>
+                <span className="pdl-nav-label">Builds</span>
+              </Link>
+            )}
+
+            <NavItem
               href="/app/voice"
-              icon={<Mic size={14} />}
+              Icon={Mic}
               label="Voice Room"
               active={isActive("/app/voice")}
               onClick={close}
             />
-            {allowedEmployees.includes("sales") && (
-              <NavLink
+            {showLeads && (
+              <NavItem
                 href="/app/team/sales"
-                icon={<Sparkles size={14} />}
+                Icon={Sparkles}
                 label="Leads"
                 active={pathname === "/app/team/sales"}
                 onClick={close}
               />
             )}
-            <NavLink
-              href="/app/memory"
-              icon={<Brain size={14} />}
-              label="Memory"
-              active={isActive("/app/memory")}
-              onClick={close}
-            />
-            {allowedEmployees.includes("engineering") && (
-              <Link
-                href="/app/builds"
-                onClick={close}
-                className={`relative flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors duration-100 ${
-                  isActive("/app/builds")
-                    ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
-                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
-                }`}
-              >
-                {isActive("/app/builds") && (
-                  <span
-                    aria-hidden
-                    className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
-                  />
-                )}
-                <span className="relative inline-flex">
-                  <Hammer size={14} />
-                  <SidebarBuildPip
-                    initial={inFlightBuildsInitial}
-                    accountId={accountId}
-                  />
-                </span>
-                <span>Builds</span>
-              </Link>
-            )}
-            <NavLink
+            <NavItem
               href="/app/analytics"
-              icon={<BarChart3 size={14} />}
+              Icon={BarChart3}
               label="Analytics"
               active={isActive("/app/analytics")}
               onClick={close}
             />
-          </div>
 
-          {/* Recent conversations */}
-          {conversations.length > 0 && (
-            <div className="mt-4">
-              <div className="px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-                Recent
-              </div>
-              <div className="space-y-0.5">
-                {conversations.slice(0, 8).map((c) => {
+            {/* Recent — reveal-only, max 4 (P3 density) */}
+            {conversations.length > 0 && (
+              <div className="pdl-collapsible">
+                <div className="pdl-nav-group-label">Recent</div>
+                {conversations.slice(0, 4).map((c) => {
                   const active = isChat && activeId === c.id;
                   const dom = c.dominant_employee;
-                  const isTeam = dom === "team";
+                  const isTeamConvo = dom === "team";
                   const empKey = (
                     dom && (TEAM as string[]).includes(dom) ? dom : "jarvis"
                   ) as EmployeeKey;
+                  const RecentIcon = EMPLOYEE_ICON[empKey];
                   return (
                     <Link
                       key={c.id}
                       href={`/app?c=${c.id}`}
                       onClick={close}
-                      className={`relative flex items-center gap-2 pl-3 pr-3 py-1.5 text-xs rounded-lg transition-colors duration-100 ${
-                        active
-                          ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
-                          : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
-                      }`}
+                      className="pdl-recent-row"
+                      data-active={active || undefined}
                     >
-                      {active && (
-                        <span
-                          aria-hidden
-                          className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full"
-                          style={{
-                            background: isTeam
-                              ? "var(--color-accent)"
-                              : DEPT_COLOR[empKey],
-                          }}
-                        />
-                      )}
-                      {isTeam ? (
-                        <span
-                          aria-hidden
-                          className="inline-block w-3 h-3 rounded-full shrink-0"
-                          style={{
-                            background:
-                              "conic-gradient(from 90deg, var(--color-dept-marketing), var(--color-dept-sales), var(--color-dept-engineering), var(--color-dept-jarvis), var(--color-dept-marketing))",
-                          }}
-                        />
-                      ) : (
-                        (() => {
-                          const RecentIcon = EMPLOYEE_ICON[empKey];
-                          return (
-                            <span
-                              aria-hidden
-                              className="inline-flex items-center justify-center shrink-0 w-3.5 h-3.5 rounded-[4px]"
-                              style={{
-                                background: `color-mix(in srgb, ${DEPT_COLOR[empKey]} 18%, var(--color-surface-elevated))`,
-                                color: DEPT_COLOR[empKey],
-                                boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[empKey]} 60%, transparent)`,
-                              }}
-                            >
-                              <RecentIcon size={9} strokeWidth={2.5} />
-                            </span>
-                          );
-                        })()
-                      )}
-                      <span className="truncate">
+                      <span className="pdl-recent-glyph">
+                        {isTeamConvo ? (
+                          <span
+                            className="pdl-dept-glyph"
+                            data-team="true"
+                            aria-hidden
+                          />
+                        ) : (
+                          <span
+                            className="pdl-dept-glyph"
+                            style={
+                              {
+                                ["--dept"]: DEPT_COLOR[empKey],
+                              } as React.CSSProperties
+                            }
+                            aria-hidden
+                          >
+                            <RecentIcon size={11} strokeWidth={2.5} />
+                          </span>
+                        )}
+                      </span>
+                      <span className="pdl-recent-title">
                         {c.title || "Untitled chat"}
                       </span>
                     </Link>
                   );
                 })}
               </div>
-            </div>
-          )}
-        </nav>
+            )}
+          </nav>
 
-        {/* Bottom — settings, billing, sign out, email, tier */}
-        <div className="px-2 pt-2 pb-3 border-t border-[var(--color-border)] space-y-0.5">
-          <NavLink
-            href="/app/settings"
-            icon={<Settings size={14} />}
-            label="Settings"
-            active={
-              pathname === "/app/settings" ||
-              (pathname.startsWith("/app/settings/") &&
-                !pathname.startsWith("/app/settings/billing"))
-            }
-            onClick={close}
-            small
-          />
-          <NavLink
-            href="/app/settings/billing"
-            icon={<CreditCard size={14} />}
-            label="Billing"
-            active={isActive("/app/settings/billing")}
-            onClick={close}
-            small
-          />
-          <form action="/auth/sign-out" method="post">
-            <button
-              type="submit"
-              className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] rounded-lg transition-colors duration-100"
+          {/* Footer — account menu (settings, billing, sign-out, tier) */}
+          <div className="pdl-sidebar-footer">
+            <Popover
+              side="top"
+              align="start"
+              className="pdl-sidebar-flyout"
+              ariaLabel="Account menu"
+              trigger={
+                <button
+                  type="button"
+                  className="pdl-nav-item"
+                  aria-label="Account menu"
+                >
+                  <span className="pdl-nav-icon">
+                    <UserRound size={18} />
+                  </span>
+                  <span className="pdl-nav-label">{accountName}</span>
+                </button>
+              }
             >
-              <LogOut size={14} /> Sign out
-            </button>
-          </form>
-          <div className="px-3 pt-2 text-[10px] text-[var(--color-text-muted)] truncate">
-            {userEmail}
-          </div>
-          <div className="px-3 text-[10px] text-[var(--color-text-muted)]">
-            Praxis Flow{tierName ? ` · ${tierName}` : ""}
+              {(closeMenu) => (
+                <AccountMenu
+                  accountName={accountName}
+                  userEmail={userEmail}
+                  tierName={tierName}
+                  onNavigate={() => {
+                    closeMenu();
+                    close();
+                  }}
+                />
+              )}
+            </Popover>
           </div>
         </div>
       </aside>
 
+      {/* Mobile scrim — token-aware (C-1: no more bg-black/60) */}
       {open && (
         <div
           onClick={close}
-          className="fixed inset-0 z-30 bg-black/60 md:hidden"
+          className="pdl-scrim md:hidden"
+          style={{ zIndex: 55 }}
           aria-hidden
         />
       )}
@@ -433,41 +410,138 @@ export function Sidebar({
   );
 }
 
-function NavLink({
+function NavItem({
   href,
-  icon,
+  Icon,
   label,
   active,
   onClick,
-  small = false,
 }: {
   href: string;
-  icon: React.ReactNode;
+  Icon: LucideIcon;
   label: string;
   active: boolean;
   onClick?: () => void;
-  small?: boolean;
 }) {
   return (
     <Link
       href={href}
       onClick={onClick}
-      className={`relative flex items-center gap-2 px-3 ${
-        small ? "py-1.5 text-xs" : "py-2 text-sm"
-      } rounded-lg transition-colors duration-100 ${
-        active
-          ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
-          : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
-      }`}
+      className="pdl-nav-item"
+      data-active={active || undefined}
     >
-      {active && (
-        <span
-          aria-hidden
-          className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
-        />
-      )}
-      {icon}
-      <span>{label}</span>
+      <span className="pdl-nav-icon">
+        <Icon size={18} />
+      </span>
+      <span className="pdl-nav-label">{label}</span>
     </Link>
+  );
+}
+
+function TeamFlyout({
+  allowedEmployees,
+  streamingEmployee,
+  pathname,
+  onNavigate,
+}: {
+  allowedEmployees: EmployeeKey[];
+  streamingEmployee: EmployeeKey | null;
+  pathname: string;
+  onNavigate: () => void;
+}) {
+  return (
+    <div className="pdl-flyout">
+      <div className="pdl-flyout-head">
+        <div className="pdl-flyout-title">Your team</div>
+        <div className="pdl-flyout-sub">9 specialists</div>
+      </div>
+      {TEAM.map((emp) => {
+        const allowed = allowedEmployees.includes(emp);
+        const active = pathname === `/app/team/${emp}`;
+        const streaming = streamingEmployee === emp;
+        const Icon = EMPLOYEE_ICON[emp];
+        return (
+          <Link
+            key={emp}
+            href={allowed ? `/app/team/${emp}` : "/app/settings"}
+            onClick={onNavigate}
+            className="pdl-flyout-row"
+            data-active={active || undefined}
+            data-locked={!allowed || undefined}
+            title={allowed ? undefined : "Available on a higher plan"}
+          >
+            <span
+              className="pdl-dept-glyph"
+              style={{ ["--dept"]: DEPT_COLOR[emp] } as React.CSSProperties}
+              aria-hidden
+            >
+              <Icon size={12} strokeWidth={2.25} />
+            </span>
+            <span className="pdl-flyout-label">{employeeLabel(emp)}</span>
+            {allowed ? (
+              <span
+                className="pdl-status-dot"
+                data-streaming={streaming || undefined}
+                style={{ ["--dept"]: DEPT_COLOR[emp] } as React.CSSProperties}
+                aria-label={streaming ? "Active now" : "Online"}
+              />
+            ) : (
+              <Lock
+                size={12}
+                className="text-[var(--pdl-text-muted)]"
+                aria-label="Locked — upgrade to unlock"
+              />
+            )}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+function AccountMenu({
+  accountName,
+  userEmail,
+  tierName,
+  onNavigate,
+}: {
+  accountName: string;
+  userEmail: string;
+  tierName?: string;
+  onNavigate: () => void;
+}) {
+  return (
+    <div className="pdl-flyout">
+      <div className="pdl-flyout-head">
+        <div className="pdl-flyout-title">{accountName}</div>
+        <div className="pdl-flyout-sub">{userEmail}</div>
+        <span className="pdl-tier-chip">
+          Praxis Flow{tierName ? ` · ${tierName}` : ""}
+        </span>
+      </div>
+      <Link
+        href="/app/settings"
+        onClick={onNavigate}
+        className="pdl-flyout-row"
+      >
+        <Settings size={15} />
+        <span className="pdl-flyout-label">Settings</span>
+      </Link>
+      <Link
+        href="/app/settings/billing"
+        onClick={onNavigate}
+        className="pdl-flyout-row"
+      >
+        <CreditCard size={15} />
+        <span className="pdl-flyout-label">Billing</span>
+      </Link>
+      <div className="pdl-flyout-sep" />
+      <form action="/auth/sign-out" method="post">
+        <button type="submit" className="pdl-flyout-row">
+          <LogOut size={15} />
+          <span className="pdl-flyout-label">Sign out</span>
+        </button>
+      </form>
+    </div>
   );
 }
