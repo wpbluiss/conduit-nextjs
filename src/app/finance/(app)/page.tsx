@@ -8,6 +8,7 @@ import { fmtMoney } from "@/lib/finance/constants";
 import { GoalHero } from "@/components/finance/GoalHero";
 import { MetricCard } from "@/components/finance/MetricCard";
 import { QuickAddRow } from "@/components/finance/QuickAdd";
+import { AllocationPlanner } from "@/components/finance/AllocationPlanner";
 import { Card, SectionTitle, Pill, EmptyState } from "@/components/finance/ui";
 import { Flame, Sparkle, Warning, CheckCircle } from "@phosphor-icons/react/dist/ssr";
 
@@ -104,6 +105,9 @@ export default async function FinanceHome() {
         />
         <MetricCard label="Total debt" value={debt.total} tone="pink" delay={0.15} hint={`${debt.debts.length} active`} />
       </div>
+
+      {/* Allocation engine */}
+      <AllocationPlanner snap={snap} />
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Debt-killer summary */}
