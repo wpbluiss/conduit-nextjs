@@ -3,9 +3,9 @@
 A Linear-inspired, dark, aurora-accented personal finance app for one shared
 household with one goal: **$75,000 down payment in ~15 months.**
 
-- **Live preview URL:** https://conduit-nextjs-git-claude-luis-delia-f-d6ae53-wpbluiss-projects.vercel.app/finance
+- **Live URL (public):** https://www.conduitai.io/finance
 - **First login:** `luisdelia@praxisbank.app` / `LuisDelia$75K-2026`
-- **Lives at:** `/finance` inside the existing `conduit-nextjs` repo/project (the rest of the site is untouched).
+- **Lives at:** `/finance` inside the existing `conduit-nextjs` repo/project (the rest of the site is untouched). Shipped to production, so it's public (no Vercel login) and still protected by the household login.
 
 ## Stack
 Next.js 16 (App Router) · TypeScript · Tailwind v4 · Framer Motion · Recharts ·
