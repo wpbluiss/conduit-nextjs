@@ -51,7 +51,7 @@ export function AdvisorChat({ initial }: { initial: Msg[] }) {
   }
 
   return (
-    <div className="fin-card flex flex-col" style={{ height: "calc(100vh - 9rem)" }}>
+    <div className="fin-card flex flex-col" style={{ height: "calc(100dvh - 9rem)" }}>
       <div className="flex items-center gap-3 border-b border-white/5 px-5 py-4">
         <div className="rounded-lg bg-violet-400/15 p-2">
           <Sparkle size={20} weight="fill" className="text-violet-300" />

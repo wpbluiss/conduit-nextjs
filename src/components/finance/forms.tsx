@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { clsx } from "./clsx";
 
@@ -144,6 +145,19 @@ export function FormModal({
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  // Lock background scroll while the sheet is open.
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
 
   function submit(formData: FormData) {
     start(async () => {
@@ -162,40 +176,46 @@ export function FormModal({
       <Button variant={triggerVariant} onClick={() => setOpen(true)} className={triggerClassName}>
         {trigger}
       </Button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <div
-              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-              onClick={() => setOpen(false)}
-            />
-            <motion.div
-              className="fin-card relative z-10 w-full max-w-md p-6"
-              initial={{ y: 24, opacity: 0, scale: 0.98 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: 24, opacity: 0, scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 320, damping: 30 }}
-            >
-              <h3 className="text-lg font-semibold tracking-tight">{title}</h3>
-              {description && (
-                <p className="text-sm text-[var(--fin-muted)] mt-1 mb-4">{description}</p>
-              )}
-              <form action={submit} className="mt-4 space-y-3">
-                {children}
-                {error && <p className="text-xs text-red-300">{error}</p>}
-                <div className="pt-1">
-                  <SubmitButton pending={pending}>{title}</SubmitButton>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {open && (
+              <motion.div
+                className="fin-scope fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4"
+                style={{ background: "transparent" }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <div
+                  className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                  onClick={() => setOpen(false)}
+                />
+                <motion.div
+                  className="fin-card relative z-10 w-full max-w-md p-6 max-h-[90dvh] overflow-y-auto rounded-b-none sm:rounded-[18px]"
+                  initial={{ y: 24, opacity: 0, scale: 0.98 }}
+                  animate={{ y: 0, opacity: 1, scale: 1 }}
+                  exit={{ y: 24, opacity: 0, scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 320, damping: 30 }}
+                  style={{ overflowY: "auto" }}
+                >
+                  <h3 className="text-lg font-semibold tracking-tight">{title}</h3>
+                  {description && (
+                    <p className="text-sm text-[var(--fin-muted)] mt-1 mb-4">{description}</p>
+                  )}
+                  <form action={submit} className="mt-4 space-y-3">
+                    {children}
+                    {error && <p className="text-xs text-red-300">{error}</p>}
+                    <div className="pt-1 pb-[env(safe-area-inset-bottom)]">
+                      <SubmitButton pending={pending}>{title}</SubmitButton>
+                    </div>
+                  </form>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
     </>
   );
 }
