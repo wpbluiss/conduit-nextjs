@@ -14,7 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, Code2, TrendingUp, Megaphone, DollarSign, Wrench, ShieldCheck,
   Users, Scale, SquarePen, Menu, ArrowUp, Paperclip, Search, Settings,
-  MoreHorizontal, Command, Slash, AtSign, Copy, RefreshCw, Hammer, FileText,
+  MoreHorizontal, Command, Slash, AtSign, Copy, RefreshCw, Hammer, FileText, Download, Printer, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
@@ -33,14 +33,23 @@ const SLASH: { cmd: string; desc: string; emp: EmployeeId; template: string; ico
   { cmd: "/review", desc: "Legal review", emp: "legal", template: "Review ", icon: Scale },
 ];
 
+// Deliverables are type-aware: code downloads as runnable source; docs as
+// Markdown and can also export to PDF.
+const DOC_TYPES = new Set(["post", "doc", "brief", "proposal", "report", "letter", "plan", "copy", "email", "memo"]);
+function extFor(type: string) { return type === "migration" || type === "sql" ? "sql" : type === "code" || type === "build" ? "ts" : "md"; }
+function slugify(s: string) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "artifact"; }
+function escapeHtml(s: string) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
 export type LiveMsg = {
   id?: string;
   role: "user" | "assistant" | "system";
   employee?: EmployeeId | null;
   content: string;
   pending?: boolean;
+  artifacts?: { id: string; title: string; type: string; by: EmployeeId }[];
 };
 type Convo = { id: string; title: string; updated_at: string };
+type OpenArt = { id: string; title: string; type: string; by: EmployeeId };
 
 export function LiveChat({
   firstName, conversations, activeConversationId, initialMessages, allowedEmployees, initialPin,
@@ -66,6 +75,10 @@ export function LiveChat({
   const [paletteQ, setPaletteQ] = React.useState("");
   const [reactions, setReactions] = React.useState<Record<string, string>>({});
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
+  const [openArtifact, setOpenArtifact] = React.useState<OpenArt | null>(null);
+  const [artContent, setArtContent] = React.useState<string | null>(null);
+  const [artLoading, setArtLoading] = React.useState(false);
+  const [artCopied, setArtCopied] = React.useState(false);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const taRef = React.useRef<HTMLTextAreaElement>(null);
   const emp = EMPLOYEES[pin];
@@ -89,12 +102,24 @@ export function LiveChat({
     const t = setTimeout(() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }), 60);
     return () => clearTimeout(t);
   }, [messages, loading]);
+  React.useEffect(() => {
+    if (!openArtifact) { setArtContent(null); return; }
+    let alive = true; setArtLoading(true); setArtContent(null);
+    fetch(`/api/conduit/artifacts/${openArtifact.id}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => { if (alive) { setArtContent((j?.artifact?.content as string) ?? "(could not load this artifact)"); setArtLoading(false); } })
+      .catch(() => { if (alive) { setArtContent("(could not load this artifact)"); setArtLoading(false); } });
+    return () => { alive = false; };
+  }, [openArtifact]);
 
   function grow() { const ta = taRef.current; if (!ta) return; ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, 160) + "px"; }
   function applySlash(s: typeof SLASH[number]) { setPin(s.emp); setInput(s.template); taRef.current?.focus(); }
   function applyMention(id: EmployeeId) { setInput((v) => v.replace(/(^|\s)@\w*$/, (_m, p1) => `${p1}@${EMPLOYEES[id].name} `)); setPin(id); taRef.current?.focus(); }
   function react(id: string, e: string) { setReactions((r) => ({ ...r, [id]: r[id] === e ? "" : e })); }
   function copyMsg(m: LiveMsg) { navigator.clipboard?.writeText(m.content).catch(() => {}); const k = m.id ?? ""; setCopiedId(k); setTimeout(() => setCopiedId((c) => (c === k ? null : c)), 1400); }
+  function copyArt() { if (!artContent) return; navigator.clipboard?.writeText(artContent).catch(() => {}); setArtCopied(true); setTimeout(() => setArtCopied(false), 1400); }
+  function downloadArt() { if (!openArtifact || !artContent) return; const blob = new Blob([artContent], { type: "text/plain;charset=utf-8" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `${slugify(openArtifact.title)}.${extFor(openArtifact.type)}`; a.click(); URL.revokeObjectURL(url); }
+  function pdfArt() { if (!openArtifact || !artContent) return; const w = window.open("", "_blank"); if (!w) return; w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(openArtifact.title)}</title><style>body{font-family:Georgia,serif;max-width:680px;margin:48px auto;padding:0 24px;color:#111;line-height:1.6}.k{color:#888;text-transform:uppercase;letter-spacing:.14em;font-size:11px;font-family:system-ui,sans-serif}h1{font-family:system-ui,sans-serif;font-size:22px;margin:.2em 0 1em}pre{white-space:pre-wrap;font-family:inherit;margin:0}</style></head><body><div class="k">${escapeHtml(openArtifact.type)} · by ${escapeHtml(EMPLOYEES[openArtifact.by]?.name ?? "Praxis")} · Praxis</div><h1>${escapeHtml(openArtifact.title)}</h1><pre>${escapeHtml(artContent)}</pre></body></html>`); w.document.close(); w.focus(); setTimeout(() => { try { w.print(); } catch { /* ignore */ } }, 350); }
 
   const send = React.useCallback(async (text: string) => {
     const trimmed = text.trim();
@@ -122,6 +147,7 @@ export function LiveChat({
         else if (event === "message_end") { finish((data.employee as EmployeeId) || current); }
         else if (event === "done") { const cid = data.conversation_id as string; if (cid && cid !== convoId) { setConvoId(cid); window.history.replaceState({}, "", `/chat?c=${cid}`); } }
         else if (event === "error") { append((data.employee as EmployeeId) || current, `\n\n${(data.message as string) || "Try again in a moment."}`); finish(current); }
+        else if (event === "artifact") { const a = { id: data.id as string, title: (data.title as string) || "Untitled", type: (data.type as string) || "doc", by: ((data.employee as EmployeeId) || current) }; setMessages((p) => { const n = [...p]; for (let j = n.length - 1; j >= 0; j--) { if (n[j].role === "assistant" && n[j].employee === a.by) { n[j] = { ...n[j], artifacts: [...(n[j].artifacts ?? []), a] }; break; } } return n; }); }
         else if (event === "paywall_required") { finish(current); setMessages((p) => [...p, { role: "system", content: (data.message as string) || "Upgrade required to continue." }]); }
       };
       while (true) {
@@ -187,6 +213,27 @@ export function LiveChat({
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {openArtifact && (
+          <div className="fixed inset-0 z-50 flex">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setOpenArtifact(null)} className="flex-1 bg-black/50" />
+            <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", stiffness: 300, damping: 32 }} className="flex h-full w-full max-w-2xl flex-col border-l border-white/10 bg-card">
+              <div className="flex items-center gap-2 border-b border-white/8 px-5 py-4">
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-secondary text-primary"><FileText className="size-5" /></span>
+                <div className="min-w-0 flex-1"><p className="wm-label">{openArtifact.type} · by {EMPLOYEES[openArtifact.by]?.name ?? "Praxis"}</p><h2 className="truncate text-lg font-semibold">{openArtifact.title}</h2></div>
+                <Button onClick={copyArt} disabled={!artContent} size="icon" variant="ghost" className="size-9 rounded-lg text-muted-foreground hover:bg-secondary" title="Copy">{artCopied ? <span className="text-xs text-primary">✓</span> : <Copy className="size-4" />}</Button>
+                <Button onClick={downloadArt} disabled={!artContent} size="sm" variant="secondary" className="gap-1.5 rounded-lg bg-secondary text-xs"><Download className="size-3.5" /> {extFor(openArtifact.type).toUpperCase()}</Button>
+                {DOC_TYPES.has(openArtifact.type) && <Button onClick={pdfArt} disabled={!artContent} size="sm" variant="secondary" className="gap-1.5 rounded-lg bg-secondary text-xs"><Printer className="size-3.5" /> PDF</Button>}
+                <Button onClick={() => setOpenArtifact(null)} size="icon" variant="ghost" className="size-9 rounded-lg text-muted-foreground hover:bg-secondary"><X className="size-4" /></Button>
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto p-5">
+                {artLoading || artContent === null ? <p className="text-sm text-muted-foreground">Loading…</p> : <pre className="whitespace-pre-wrap font-mono text-[13px] leading-relaxed text-foreground/90">{artContent}</pre>}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center gap-3 border-b border-white/8 bg-background/70 px-4 py-3 backdrop-blur">
           <Button size="icon" variant="secondary" className="size-9 rounded-lg bg-secondary lg:hidden" onClick={() => setDrawer(true)}><Menu className="size-4" /></Button>
@@ -225,6 +272,13 @@ export function LiveChat({
                     ) : (
                       <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">{m.content}{m.pending && <span className="ml-0.5 inline-block h-4 w-[3px] translate-y-0.5 animate-pulse rounded-full bg-primary align-middle" />}</div>
                     )}
+                    {m.artifacts?.map((a) => (
+                      <button key={a.id} onClick={() => setOpenArtifact(a)} className="mt-3 flex w-full max-w-sm items-center gap-3 rounded-xl border border-white/10 bg-secondary/40 p-3 text-left transition-colors hover:border-primary/40 hover:bg-secondary">
+                        <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary"><FileText className="size-5" /></span>
+                        <span className="min-w-0 flex-1"><span className="wm-label block">{a.type}</span><span className="block truncate text-sm font-medium">{a.title}</span></span>
+                        <span className="shrink-0 text-xs text-primary">Open →</span>
+                      </button>
+                    ))}
                     {!m.pending && (
                       <div className="mt-2 flex items-center gap-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
                         <button onClick={() => copyMsg(m)} className="flex items-center gap-1 rounded-md px-1.5 py-1 text-xs hover:bg-secondary hover:text-foreground">{copiedId === k ? <span className="text-primary">Copied</span> : <Copy className="size-3.5" />}</button>
