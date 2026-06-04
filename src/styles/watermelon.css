@@ -1,0 +1,85 @@
+/* ============================================================================
+ * Watermelon UI — Praxis rebrand: "Bold & playful" palette + scope.
+ *
+ * The shadcn-style --color-* token MAPPINGS live in globals.css (so Tailwind v4
+ * generates the bg-primary/bg-card/... utilities). This file only sets the
+ * concrete VALUES, scoped to `.wm-rebrand`, so the live app is untouched: every
+ * token resolves via `var(--wm-*, fallback)` and --wm-* only exists in here.
+ * ========================================================================== */
+
+.wm-rebrand {
+  /* core surfaces */
+  --wm-background: #0b0710;
+  --wm-foreground: #f5f1fb;
+  --wm-card: #171022;
+  --wm-card-foreground: #f5f1fb;
+  --wm-popover: #171022;
+  --wm-popover-foreground: #f5f1fb;
+  /* brand */
+  --wm-primary: #8b5cf6;          /* electric violet */
+  --wm-primary-foreground: #ffffff;
+  --wm-secondary: #241a38;
+  --wm-secondary-foreground: #e9e2fb;
+  --wm-muted: #1c1530;
+  --wm-muted-foreground: #a99fc7;
+  --wm-accent-foreground: #ffd6ec;
+  --wm-destructive: #ff4d6d;
+  --wm-destructive-foreground: #ffffff;
+  --wm-input: #2c2245;
+  --wm-ring: #8b5cf6;
+
+  /* decorative playful palette */
+  --wm-violet: #8b5cf6;
+  --wm-pink: #ff5da2;
+  --wm-lime: #c2ff45;
+  --wm-cyan: #22d3ee;
+  --wm-amber: #ffb23c;
+  --wm-blue: #5b8cff;
+
+  background: var(--wm-background);
+  color: var(--wm-foreground);
+  font-feature-settings: "ss01", "cv01";
+}
+
+/* Animated aurora blobs for the hero / page background. */
+.wm-aurora { position: relative; isolation: isolate; overflow: hidden; }
+.wm-aurora::before,
+.wm-aurora::after {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  z-index: -1;
+  background:
+    radial-gradient(38% 38% at 18% 22%, color-mix(in srgb, var(--wm-violet) 55%, transparent), transparent 70%),
+    radial-gradient(34% 34% at 82% 18%, color-mix(in srgb, var(--wm-pink) 50%, transparent), transparent 70%),
+    radial-gradient(40% 40% at 70% 86%, color-mix(in srgb, var(--wm-cyan) 38%, transparent), transparent 72%),
+    radial-gradient(30% 30% at 30% 88%, color-mix(in srgb, var(--wm-amber) 32%, transparent), transparent 72%);
+  filter: blur(36px) saturate(135%);
+  animation: wm-float 18s ease-in-out infinite alternate;
+}
+.wm-aurora::after { animation-duration: 26s; animation-direction: alternate-reverse; opacity: 0.7; }
+
+@keyframes wm-float {
+  0%   { transform: translate3d(0,0,0) scale(1) rotate(0deg); }
+  100% { transform: translate3d(0,-3%,0) scale(1.08) rotate(8deg); }
+}
+
+/* Soft dotted grid texture. */
+.wm-grid {
+  background-image: radial-gradient(color-mix(in srgb, var(--wm-foreground) 9%, transparent) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Gradient ink for headlines / wordmark. */
+.wm-ink {
+  background: linear-gradient(96deg, var(--wm-violet), var(--wm-pink) 55%, var(--wm-amber));
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+
+.wm-ring-soft { box-shadow: 0 0 0 1px color-mix(in srgb, var(--wm-foreground) 8%, transparent); }
+.wm-glow { box-shadow: 0 18px 60px -22px color-mix(in srgb, var(--wm-violet) 70%, transparent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .wm-aurora::before, .wm-aurora::after { animation: none; }
+}
