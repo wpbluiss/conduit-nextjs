@@ -1,0 +1,130 @@
+/* ===========================================================
+   Praxis Private Bank — finance app scope only.
+   Linear-inspired near-black base + aurora accent system.
+   All classes prefixed `fin-` so they never touch the rest
+   of the existing site.
+   =========================================================== */
+
+.fin-scope {
+  --fin-bg: #07070A;
+  --fin-bg-soft: #0C0C12;
+  --fin-card: rgba(20, 20, 28, 0.55);
+  --fin-card-border: rgba(255, 255, 255, 0.07);
+  --fin-text: #F4F4F7;
+  --fin-muted: #8A8A99;
+  --fin-violet: #7C5CFF;
+  --fin-cyan: #22D3EE;
+  --fin-pink: #F472B6;
+  --fin-green: #34D399;
+  --fin-amber: #FBBF24;
+  background: var(--fin-bg);
+  color: var(--fin-text);
+  font-feature-settings: "ss01", "cv01";
+}
+
+/* ---- Aurora background ---- */
+.fin-aurora {
+  position: fixed;
+  inset: -20% -10% auto -10%;
+  height: 70vh;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(80px) saturate(135%);
+  opacity: 0.55;
+  background:
+    radial-gradient(40% 50% at 20% 30%, rgba(124, 92, 255, 0.55), transparent 70%),
+    radial-gradient(38% 45% at 75% 25%, rgba(34, 211, 238, 0.42), transparent 70%),
+    radial-gradient(35% 45% at 55% 60%, rgba(244, 114, 182, 0.40), transparent 70%);
+  animation: fin-aurora-drift 18s ease-in-out infinite alternate;
+}
+@keyframes fin-aurora-drift {
+  0%   { transform: translate3d(0,0,0) scale(1); }
+  50%  { transform: translate3d(4%, 2%, 0) scale(1.08); }
+  100% { transform: translate3d(-3%, 4%, 0) scale(1.04); }
+}
+
+/* ---- Gradient / rainbow sheen text ---- */
+.fin-gradient-text {
+  background: linear-gradient(100deg, #7C5CFF 0%, #22D3EE 35%, #34D399 60%, #F472B6 100%);
+  background-size: 220% 220%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: fin-sheen 6s ease infinite;
+}
+@keyframes fin-sheen {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ---- Glass card ---- */
+.fin-card {
+  background: var(--fin-card);
+  border: 1px solid var(--fin-card-border);
+  border-radius: 18px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ---- Glow / gradient border for hero metrics ---- */
+.fin-glow {
+  position: relative;
+}
+.fin-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(120deg, #7C5CFF, #22D3EE, #F472B6, #34D399);
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: fin-sheen 7s ease infinite;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* ---- Shimmer line for bg-animate buttons ---- */
+.fin-btn-animate {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(110deg, #7C5CFF, #22D3EE 50%, #7C5CFF);
+  background-size: 200% 100%;
+  animation: fin-btn-slide 4s linear infinite;
+}
+@keyframes fin-btn-slide {
+  to { background-position: -200% 0; }
+}
+
+/* ---- Subtle grid texture ---- */
+.fin-grid-texture {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+/* ---- Fade/slide entrance (used where framer-motion is overkill) ---- */
+@keyframes fin-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fin-rise { animation: fin-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* numeric tabular feel */
+.fin-num { font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+
+/* font helpers (fonts bound by the root layout) */
+.fin-display { font-family: var(--font-serif), Georgia, serif; }
+.fin-mono { font-family: var(--font-mono), ui-monospace, monospace; }
+.fin-scope { font-family: var(--font-sans), system-ui, sans-serif; }
+
+/* custom scrollbars inside the app */
+.fin-scope ::-webkit-scrollbar { width: 10px; height: 10px; }
+.fin-scope ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 8px; }
+.fin-scope ::-webkit-scrollbar-track { background: transparent; }
