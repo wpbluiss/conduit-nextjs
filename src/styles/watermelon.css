@@ -81,6 +81,10 @@
   color: var(--wm-muted-foreground);
 }
 
+/* Hide scrollbar on horizontal chip rails (team switcher). */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
 @media (prefers-reduced-motion: reduce) {
   .wm-aurora::before { animation: none; }
 }
