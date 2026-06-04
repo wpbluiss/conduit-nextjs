@@ -15,7 +15,7 @@ import {
   Sparkles, Code2, TrendingUp, Megaphone, DollarSign, Wrench, ShieldCheck,
   Users, Scale, SquarePen, Menu, ArrowUp, Paperclip, Mic, Search, Settings,
   MoreHorizontal, Copy, RefreshCw, Command, AtSign, Slash, CornerDownLeft,
-  Hammer, FileText, Zap, X, Download, Printer, Check,
+  Hammer, FileText, Zap, X, Download, Printer, Check, AudioLines, PhoneOff, MicOff, Keyboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -164,6 +164,10 @@ export default function ChatPreview() {
   const [artCopied, setArtCopied] = React.useState(false);
   const [recording, setRecording] = React.useState(false);
   const [recSecs, setRecSecs] = React.useState(0);
+  const [liveRoom, setLiveRoom] = React.useState(false);
+  const [liveStatus, setLiveStatus] = React.useState<"listening" | "speaking">("listening");
+  const [muted, setMuted] = React.useState(false);
+  const [caption, setCaption] = React.useState("");
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const taRef = React.useRef<HTMLTextAreaElement>(null);
   const emp = EMP[activeEmp];
@@ -214,6 +218,23 @@ export default function ChatPreview() {
   }, [recording]);
   function finishRec() { setRecording(false); setInput((v) => (v ? v + " " : "") + "How long until the RLS migration is safe to ship?"); setTimeout(() => { taRef.current?.focus(); grow(); }, 0); }
   function cancelRec() { setRecording(false); }
+  React.useEffect(() => {
+    if (!liveRoom) return;
+    const lines = [GREETING[activeEmp], REPLY[activeEmp], "Want me to start on that right now?"];
+    let i = 0; let alive = true;
+    const cycle = () => {
+      if (!alive) return;
+      setLiveStatus("listening"); setCaption("");
+      setTimeout(() => { if (alive) { setLiveStatus("speaking"); setCaption(lines[i % lines.length]); i += 1; } }, 1800);
+      setTimeout(() => { if (alive) cycle(); }, 5200);
+    };
+    cycle();
+    return () => { alive = false; };
+  }, [liveRoom, activeEmp]);
+  function endCall() {
+    setLiveRoom(false);
+    setMessages((m) => [...m, { id: "vc" + Date.now(), role: "assistant", emp: activeEmp, content: `🎙️ Voice room ended — ${REPLY[activeEmp]}` }]);
+  }
   function applySlash(s: typeof SLASH[number]) { setActiveEmp(s.emp); setInput(s.template); taRef.current?.focus(); }
   function applyMention(id: EmpId) { setInput((v) => v.replace(/(^|\s)@\w*$/, (_m, p1) => `${p1}@${EMP[id].name} `)); setActiveEmp(id); taRef.current?.focus(); }
   function copyArtifact() { if (!artifact) return; navigator.clipboard?.writeText(artifact.content).catch(() => {}); setArtCopied(true); setTimeout(() => setArtCopied(false), 1400); }
@@ -308,12 +329,40 @@ export default function ChatPreview() {
         )}
       </AnimatePresence>
 
+      {/* in-chat live voice room — full-screen, returns to the same thread */}
+      <AnimatePresence>
+        {liveRoom && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="wm-aurora fixed inset-0 z-[70] flex flex-col items-center justify-between bg-background px-6 py-12 text-center">
+            <div className="flex flex-col items-center gap-1.5">
+              <p className="wm-label flex items-center gap-1.5"><span className="size-1.5 animate-pulse rounded-full bg-primary" /> Live room</p>
+              <h2 className="text-2xl font-semibold tracking-tight">{emp.name}</h2>
+              <p className="text-sm text-muted-foreground">{muted ? "You're muted" : liveStatus === "speaking" ? `${emp.name} is speaking…` : "Listening…"}</p>
+            </div>
+            <div className="relative grid place-items-center">
+              {[0, 1, 2].map((r) => (<motion.span key={r} className="absolute size-44 rounded-full border border-primary/30" animate={{ scale: [1, 1.9], opacity: [0.5, 0] }} transition={{ duration: 2.4, repeat: Infinity, delay: r * 0.8, ease: "easeOut" }} />))}
+              <motion.div className="grid size-44 place-items-center rounded-full wm-glow" style={{ background: "radial-gradient(circle at 50% 32%, var(--wm-ember-hi), var(--wm-ember-deep))" }} animate={liveStatus === "speaking" ? { scale: [1, 1.08, 0.98, 1.05, 1] } : { scale: [1, 1.03, 1] }} transition={{ duration: liveStatus === "speaking" ? 0.6 : 2, repeat: Infinity, ease: "easeInOut" }}>
+                <emp.icon className="size-16 text-primary-foreground" />
+              </motion.div>
+            </div>
+            <div className="flex min-h-16 max-w-md items-center text-lg leading-relaxed">{caption}</div>
+            <div className="flex items-center gap-5">
+              <button onClick={() => setMuted((m) => !m)} className={`grid size-14 place-items-center rounded-full border border-white/10 ${muted ? "bg-secondary text-primary" : "bg-secondary/60 text-foreground hover:bg-secondary"}`}>{muted ? <MicOff className="size-6" /> : <Mic className="size-6" />}</button>
+              <button onClick={endCall} className="grid size-16 place-items-center rounded-full bg-destructive text-white"><PhoneOff className="size-7" /></button>
+              <button onClick={() => setLiveRoom(false)} title="Back to text" className="grid size-14 place-items-center rounded-full border border-white/10 bg-secondary/60 text-foreground hover:bg-secondary"><Keyboard className="size-6" /></button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center gap-3 border-b border-white/8 bg-background/70 px-4 py-3 backdrop-blur">
           <Button size="icon" variant="secondary" className="size-9 rounded-lg bg-secondary lg:hidden" onClick={() => setDrawer(true)}><Menu className="size-4" /></Button>
           <span className="grid size-9 place-items-center rounded-xl bg-secondary text-primary"><emp.icon className="size-5" /></span>
           <div className="min-w-0"><p className="truncate font-semibold leading-tight">{emp.name}</p><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="size-1.5 rounded-full bg-primary" /> {emp.role} · 9 online</p></div>
-          <button onClick={() => setPalette(true)} className="ml-auto hidden items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground sm:flex"><Command className="size-3" />K</button>
+          <div className="ml-auto flex items-center gap-1.5">
+            <button onClick={() => setLiveRoom(true)} className="flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground wm-glow"><AudioLines className="size-3.5" /> Live</button>
+            <button onClick={() => setPalette(true)} className="hidden items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground sm:flex"><Command className="size-3" />K</button>
+          </div>
         </header>
 
         <div className="no-scrollbar flex items-center gap-2 overflow-x-auto border-b border-white/8 px-4 py-2.5">
