@@ -15,7 +15,7 @@ import {
   Sparkles, Code2, TrendingUp, Megaphone, DollarSign, Wrench, ShieldCheck,
   Users, Scale, SquarePen, Menu, ArrowUp, Paperclip, Mic, Search, Settings,
   MoreHorizontal, Copy, RefreshCw, Command, AtSign, Slash, CornerDownLeft,
-  Hammer, FileText, Zap, X, Download, Printer,
+  Hammer, FileText, Zap, X, Download, Printer, Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -162,6 +162,8 @@ export default function ChatPreview() {
   const [paletteQ, setPaletteQ] = React.useState("");
   const [artifact, setArtifact] = React.useState<Artifact | null>(null);
   const [artCopied, setArtCopied] = React.useState(false);
+  const [recording, setRecording] = React.useState(false);
+  const [recSecs, setRecSecs] = React.useState(0);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const taRef = React.useRef<HTMLTextAreaElement>(null);
   const emp = EMP[activeEmp];
@@ -204,6 +206,14 @@ export default function ChatPreview() {
   }
   function copy(m: Msg) { navigator.clipboard?.writeText(m.content).catch(() => {}); setCopied(m.id); setTimeout(() => setCopied((c) => (c === m.id ? null : c)), 1400); }
   function react(id: string, e: string) { setReactions((r) => ({ ...r, [id]: r[id] === e ? "" : e })); }
+  React.useEffect(() => {
+    if (!recording) return;
+    setRecSecs(0);
+    const id = setInterval(() => setRecSecs((s) => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [recording]);
+  function finishRec() { setRecording(false); setInput((v) => (v ? v + " " : "") + "How long until the RLS migration is safe to ship?"); setTimeout(() => { taRef.current?.focus(); grow(); }, 0); }
+  function cancelRec() { setRecording(false); }
   function applySlash(s: typeof SLASH[number]) { setActiveEmp(s.emp); setInput(s.template); taRef.current?.focus(); }
   function applyMention(id: EmpId) { setInput((v) => v.replace(/(^|\s)@\w*$/, (_m, p1) => `${p1}@${EMP[id].name} `)); setActiveEmp(id); taRef.current?.focus(); }
   function copyArtifact() { if (!artifact) return; navigator.clipboard?.writeText(artifact.content).catch(() => {}); setArtCopied(true); setTimeout(() => setArtCopied(false), 1400); }
@@ -364,12 +374,25 @@ export default function ChatPreview() {
                 </motion.div>
               )}
             </AnimatePresence>
-            <div className="flex items-end gap-2 rounded-2xl border border-white/10 bg-secondary/60 p-2 transition-all focus-within:border-primary/50 focus-within:bg-secondary focus-within:wm-glow">
-              <Button type="button" size="icon" variant="ghost" className="size-9 shrink-0 rounded-xl text-muted-foreground hover:bg-input hover:text-foreground"><Paperclip className="size-4" /></Button>
-              <textarea ref={taRef} value={input} rows={1} onChange={(e) => { setInput(e.target.value); grow(); }} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !menu) { e.preventDefault(); push(input); } }} placeholder={`Message ${emp.name}…  ·  / for commands  ·  @ to route`} className="max-h-40 flex-1 resize-none bg-transparent py-2 text-[15px] leading-relaxed outline-none placeholder:text-muted-foreground" />
-              <Button type="button" size="icon" variant="ghost" className="size-9 shrink-0 rounded-xl text-muted-foreground hover:bg-input hover:text-foreground"><Mic className="size-4" /></Button>
-              <motion.div whileTap={{ scale: 0.9 }}><Button type="submit" size="icon" disabled={!input.trim() || thinking} className="size-9 shrink-0 rounded-xl wm-glow disabled:opacity-40"><ArrowUp className="size-4" /></Button></motion.div>
-            </div>
+            {recording ? (
+              <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 rounded-2xl border border-primary/40 bg-secondary p-2 pl-4 wm-glow">
+                <span className="flex shrink-0 items-center gap-1.5 font-mono text-sm font-medium text-primary"><span className="size-2 animate-pulse rounded-full bg-primary" />{Math.floor(recSecs / 60)}:{String(recSecs % 60).padStart(2, "0")}</span>
+                <div className="flex h-8 flex-1 items-center gap-[3px] overflow-hidden">
+                  {Array.from({ length: 36 }).map((_, i) => (
+                    <motion.span key={i} className="h-full w-[3px] shrink-0 origin-center rounded-full bg-primary/70" animate={{ scaleY: [0.2, 0.85, 0.4, 0.7, 0.25] }} transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.045, ease: "easeInOut" }} />
+                  ))}
+                </div>
+                <Button type="button" onClick={cancelRec} size="icon" variant="ghost" className="size-9 shrink-0 rounded-xl text-muted-foreground hover:bg-input"><X className="size-4" /></Button>
+                <Button type="button" onClick={finishRec} size="icon" className="size-9 shrink-0 rounded-xl wm-glow"><Check className="size-4" /></Button>
+              </motion.div>
+            ) : (
+              <div className="flex items-end gap-2 rounded-2xl border border-white/10 bg-secondary/60 p-2 transition-all focus-within:border-primary/50 focus-within:bg-secondary focus-within:wm-glow">
+                <Button type="button" size="icon" variant="ghost" className="size-9 shrink-0 rounded-xl text-muted-foreground hover:bg-input hover:text-foreground"><Paperclip className="size-4" /></Button>
+                <textarea ref={taRef} value={input} rows={1} onChange={(e) => { setInput(e.target.value); grow(); }} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !menu) { e.preventDefault(); push(input); } }} placeholder={`Message ${emp.name}…  ·  / for commands  ·  @ to route`} className="max-h-40 flex-1 resize-none bg-transparent py-2 text-[15px] leading-relaxed outline-none placeholder:text-muted-foreground" />
+                <Button type="button" onClick={() => setRecording(true)} size="icon" variant="ghost" className="size-9 shrink-0 rounded-xl text-muted-foreground hover:bg-input hover:text-foreground"><Mic className="size-4" /></Button>
+                <motion.div whileTap={{ scale: 0.9 }}><Button type="submit" size="icon" disabled={!input.trim() || thinking} className="size-9 shrink-0 rounded-xl wm-glow disabled:opacity-40"><ArrowUp className="size-4" /></Button></motion.div>
+              </div>
+            )}
             <p className="wm-label mt-2 flex items-center justify-center gap-3"><span className="flex items-center gap-1"><Command className="size-3" />K palette</span><span className="flex items-center gap-1"><Slash className="size-3" />commands</span><span className="flex items-center gap-1"><AtSign className="size-3" />route</span></p>
           </form>
         </div>
