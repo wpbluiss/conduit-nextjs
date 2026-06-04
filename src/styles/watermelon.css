@@ -1,85 +1,86 @@
 /* ============================================================================
- * Watermelon UI — Praxis rebrand: "Bold & playful" palette + scope.
+ * Conduit / Praxis rebrand — disciplined single-accent identity.
  *
- * The shadcn-style --color-* token MAPPINGS live in globals.css (so Tailwind v4
- * generates the bg-primary/bg-card/... utilities). This file only sets the
- * concrete VALUES, scoped to `.wm-rebrand`, so the live app is untouched: every
- * token resolves via `var(--wm-*, fallback)` and --wm-* only exists in here.
+ * One brand color (ember) on warm near-black. No rainbow, no violet/blue/pink.
+ * Reads "engineered by a team", not "AI generated". Scoped to `.wm-rebrand`;
+ * the shadcn token MAPPINGS live in globals.css and resolve via var(--wm-*).
  * ========================================================================== */
 
 .wm-rebrand {
-  /* core surfaces */
-  --wm-background: #0b0710;
-  --wm-foreground: #f5f1fb;
-  --wm-card: #171022;
-  --wm-card-foreground: #f5f1fb;
-  --wm-popover: #171022;
-  --wm-popover-foreground: #f5f1fb;
-  /* brand */
-  --wm-primary: #8b5cf6;          /* electric violet */
-  --wm-primary-foreground: #ffffff;
-  --wm-secondary: #241a38;
-  --wm-secondary-foreground: #e9e2fb;
-  --wm-muted: #1c1530;
-  --wm-muted-foreground: #a99fc7;
-  --wm-accent-foreground: #ffd6ec;
-  --wm-destructive: #ff4d6d;
-  --wm-destructive-foreground: #ffffff;
-  --wm-input: #2c2245;
-  --wm-ring: #8b5cf6;
+  /* warm-neutral surfaces (Conduit console palette) */
+  --wm-background: #0a0908;
+  --wm-foreground: #f5f1ea;
+  --wm-card: #131110;
+  --wm-card-foreground: #f5f1ea;
+  --wm-popover: #131110;
+  --wm-popover-foreground: #f5f1ea;
 
-  /* decorative playful palette */
-  --wm-violet: #8b5cf6;
-  --wm-pink: #ff5da2;
-  --wm-lime: #c2ff45;
-  --wm-cyan: #22d3ee;
-  --wm-amber: #ffb23c;
-  --wm-blue: #5b8cff;
+  /* the ONE accent: ember */
+  --wm-primary: #ff8a3d;
+  --wm-primary-foreground: #1b1206;
+  --wm-secondary: #1b1714;
+  --wm-secondary-foreground: #f5f1ea;
+  --wm-muted: #181513;
+  --wm-muted-foreground: #8c8884;
+  --wm-accent-foreground: #ffd9bf;
+  --wm-destructive: #e5484d;
+  --wm-destructive-foreground: #ffffff;
+  --wm-input: #221f1b;
+  --wm-ring: #ff8a3d;
+
+  /* ember ramp (the only hues used decoratively) */
+  --wm-ember: #ff8a3d;
+  --wm-ember-hi: #ffa876;
+  --wm-ember-deep: #d9532a;
+  /* functional status — muted, used only as tiny indicators */
+  --wm-ok: #5b9d76;
+  --wm-idle: #6b6660;
 
   background: var(--wm-background);
   color: var(--wm-foreground);
-  font-feature-settings: "ss01", "cv01";
+  font-feature-settings: "ss01", "cv01", "tnum";
 }
 
-/* Animated aurora blobs for the hero / page background. */
+/* Subtle SINGLE-hue ember wash — no rainbow, low presence. */
 .wm-aurora { position: relative; isolation: isolate; overflow: hidden; }
-.wm-aurora::before,
-.wm-aurora::after {
+.wm-aurora::before {
   content: "";
   position: absolute;
-  inset: -40%;
+  inset: -30%;
   z-index: -1;
   background:
-    radial-gradient(38% 38% at 18% 22%, color-mix(in srgb, var(--wm-violet) 55%, transparent), transparent 70%),
-    radial-gradient(34% 34% at 82% 18%, color-mix(in srgb, var(--wm-pink) 50%, transparent), transparent 70%),
-    radial-gradient(40% 40% at 70% 86%, color-mix(in srgb, var(--wm-cyan) 38%, transparent), transparent 72%),
-    radial-gradient(30% 30% at 30% 88%, color-mix(in srgb, var(--wm-amber) 32%, transparent), transparent 72%);
-  filter: blur(36px) saturate(135%);
-  animation: wm-float 18s ease-in-out infinite alternate;
-}
-.wm-aurora::after { animation-duration: 26s; animation-direction: alternate-reverse; opacity: 0.7; }
-
-@keyframes wm-float {
-  0%   { transform: translate3d(0,0,0) scale(1) rotate(0deg); }
-  100% { transform: translate3d(0,-3%,0) scale(1.08) rotate(8deg); }
+    radial-gradient(46% 60% at 50% -10%, color-mix(in srgb, var(--wm-ember) 22%, transparent), transparent 70%);
+  filter: blur(30px);
 }
 
-/* Soft dotted grid texture. */
+/* Fine engineered grid texture. */
 .wm-grid {
-  background-image: radial-gradient(color-mix(in srgb, var(--wm-foreground) 9%, transparent) 1px, transparent 1px);
-  background-size: 22px 22px;
+  background-image: radial-gradient(color-mix(in srgb, var(--wm-foreground) 6%, transparent) 1px, transparent 1px);
+  background-size: 26px 26px;
 }
 
-/* Gradient ink for headlines / wordmark. */
+/* Hairline separators / rings for a precise, built look. */
+.wm-hair { border-color: color-mix(in srgb, var(--wm-foreground) 9%, transparent); }
+
+/* Single-hue ember emphasis for one or two words — tonal, not rainbow. */
 .wm-ink {
-  background: linear-gradient(96deg, var(--wm-violet), var(--wm-pink) 55%, var(--wm-amber));
+  background: linear-gradient(180deg, var(--wm-ember-hi), var(--wm-ember));
   -webkit-background-clip: text; background-clip: text;
   color: transparent;
 }
 
-.wm-ring-soft { box-shadow: 0 0 0 1px color-mix(in srgb, var(--wm-foreground) 8%, transparent); }
-.wm-glow { box-shadow: 0 18px 60px -22px color-mix(in srgb, var(--wm-violet) 70%, transparent); }
+/* Restrained ember glow, used sparingly on the primary CTA only. */
+.wm-glow { box-shadow: 0 10px 34px -16px color-mix(in srgb, var(--wm-ember) 65%, transparent); }
+
+/* Mono label: uppercase, tracked-out — the "spec sheet" voice. */
+.wm-label {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.66rem;
+  color: var(--wm-muted-foreground);
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .wm-aurora::before, .wm-aurora::after { animation: none; }
+  .wm-aurora::before { animation: none; }
 }
