@@ -337,7 +337,7 @@ export default function ChatPreview() {
       {/* in-chat live voice room — multi-agent, moderated, returns to the same thread */}
       <AnimatePresence>
         {liveRoom && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="wm-aurora fixed inset-0 z-[70] flex flex-col items-center justify-between bg-background px-6 py-12 text-center">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ background: "radial-gradient(60% 55% at 50% 28%, color-mix(in srgb, var(--wm-ember) 13%, var(--wm-background)), var(--wm-background) 72%)", transform: "translateZ(0)" }} className="fixed inset-0 z-[70] flex flex-col items-center justify-between overflow-hidden px-6 py-12 text-center">
             <div className="flex flex-col items-center gap-3">
               <p className="wm-label flex items-center gap-1.5"><span className="size-1.5 animate-pulse rounded-full bg-primary" /> Live room · {participants.length} in the room</p>
               <div className="flex items-center gap-3">
@@ -350,7 +350,7 @@ export default function ChatPreview() {
               </div>
             </div>
             <div className="relative grid place-items-center">
-              {[0, 1, 2].map((r) => (<motion.span key={r} className="absolute size-40 rounded-full border border-primary/30" animate={{ scale: [1, 1.9], opacity: [0.5, 0] }} transition={{ duration: 2.4, repeat: Infinity, delay: r * 0.8, ease: "easeOut" }} />))}
+              {[0, 1].map((r) => (<motion.span key={r} className="absolute size-40 rounded-full border border-primary/25" animate={{ scale: [1, 1.85], opacity: [0.4, 0] }} transition={{ duration: 2.6, repeat: Infinity, delay: r * 1.1, ease: "easeOut" }} />))}
               <motion.div className="grid size-40 place-items-center rounded-full wm-glow" style={{ background: "radial-gradient(circle at 50% 32%, var(--wm-ember-hi), var(--wm-ember-deep))" }} animate={liveStatus === "speaking" ? { scale: [1, 1.08, 0.98, 1.05, 1] } : { scale: [1, 1.03, 1] }} transition={{ duration: liveStatus === "speaking" ? 0.6 : 2, repeat: Infinity, ease: "easeInOut" }}>
                 {React.createElement(EMP[speaker].icon, { className: "size-14 text-primary-foreground" })}
               </motion.div>
