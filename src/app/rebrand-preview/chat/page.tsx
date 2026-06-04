@@ -15,7 +15,7 @@ import {
   Sparkles, Code2, TrendingUp, Megaphone, DollarSign, Wrench, ShieldCheck,
   Users, Scale, SquarePen, Menu, ArrowUp, Paperclip, Mic, Search, Settings,
   MoreHorizontal, Copy, RefreshCw, Command, AtSign, Slash, CornerDownLeft,
-  Hammer, FileText, Zap, X,
+  Hammer, FileText, Zap, X, Download, Printer,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -131,6 +131,13 @@ const SLASH: { cmd: string; desc: string; emp: EmpId; template: string; icon: Ic
   { cmd: "/review", desc: "Legal review", emp: "legal", template: "Review ", icon: Scale },
 ];
 
+// Deliverables are type-aware: code/migrations download as runnable source;
+// documents download as Markdown and can also export to PDF.
+const DOC_TYPES = new Set(["post", "doc", "brief", "contract", "proposal", "report", "letter", "plan"]);
+function extFor(type: string) { return type === "migration" ? "sql" : type === "code" ? "ts" : "md"; }
+function slugify(s: string) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""); }
+function escapeHtml(s: string) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
 function StreamingText({ text, animate }: { text: string; animate: boolean }) {
   const words = React.useMemo(() => text.split(" "), [text]);
   const [n, setN] = React.useState(animate ? 0 : words.length);
@@ -200,6 +207,20 @@ export default function ChatPreview() {
   function applySlash(s: typeof SLASH[number]) { setActiveEmp(s.emp); setInput(s.template); taRef.current?.focus(); }
   function applyMention(id: EmpId) { setInput((v) => v.replace(/(^|\s)@\w*$/, (_m, p1) => `${p1}@${EMP[id].name} `)); setActiveEmp(id); taRef.current?.focus(); }
   function copyArtifact() { if (!artifact) return; navigator.clipboard?.writeText(artifact.content).catch(() => {}); setArtCopied(true); setTimeout(() => setArtCopied(false), 1400); }
+  function downloadArtifact() {
+    if (!artifact) return;
+    const blob = new Blob([artifact.content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `${slugify(artifact.title)}.${extFor(artifact.type)}`; a.click();
+    URL.revokeObjectURL(url);
+  }
+  function downloadPdf() {
+    if (!artifact) return;
+    const w = window.open("", "_blank"); if (!w) return;
+    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(artifact.title)}</title><style>body{font-family:Georgia,'Times New Roman',serif;max-width:680px;margin:48px auto;padding:0 24px;color:#111;line-height:1.6}.k{color:#888;text-transform:uppercase;letter-spacing:.14em;font-size:11px;font-family:system-ui,sans-serif}h1{font-family:system-ui,sans-serif;font-size:22px;margin:.2em 0 1em}pre{white-space:pre-wrap;font-family:inherit;margin:0}</style></head><body><div class="k">${escapeHtml(artifact.type)} · by ${escapeHtml(EMP[artifact.by].name)} · Praxis</div><h1>${escapeHtml(artifact.title)}</h1><pre>${escapeHtml(artifact.content)}</pre></body></html>`);
+    w.document.close(); w.focus(); setTimeout(() => { try { w.print(); } catch { /* ignore */ } }, 350);
+  }
 
   const last = messages[messages.length - 1];
   const showSuggest = !thinking && last?.role === "assistant" && menu === null;
@@ -264,7 +285,9 @@ export default function ChatPreview() {
               <div className="flex items-center gap-3 border-b border-white/8 px-5 py-4">
                 <span className="grid size-9 place-items-center rounded-xl bg-secondary text-primary"><FileText className="size-5" /></span>
                 <div className="min-w-0 flex-1"><p className="wm-label">{artifact.type} · by {EMP[artifact.by].name}</p><h2 className="truncate text-lg font-semibold">{artifact.title}</h2></div>
-                <Button onClick={copyArtifact} size="sm" variant="secondary" className="rounded-lg bg-secondary text-xs">{artCopied ? <span className="text-primary">Copied</span> : <><Copy className="size-3.5" /> Copy</>}</Button>
+                <Button onClick={copyArtifact} size="icon" variant="ghost" className="size-9 rounded-lg text-muted-foreground hover:bg-secondary" title="Copy">{artCopied ? <span className="text-xs text-primary">✓</span> : <Copy className="size-4" />}</Button>
+                <Button onClick={downloadArtifact} size="sm" variant="secondary" className="gap-1.5 rounded-lg bg-secondary text-xs" title={`Download .${extFor(artifact.type)}`}><Download className="size-3.5" /> {extFor(artifact.type).toUpperCase()}</Button>
+                {DOC_TYPES.has(artifact.type) && <Button onClick={downloadPdf} size="sm" variant="secondary" className="gap-1.5 rounded-lg bg-secondary text-xs" title="Save as PDF"><Printer className="size-3.5" /> PDF</Button>}
                 <Button onClick={() => setArtifact(null)} size="icon" variant="ghost" className="size-9 rounded-lg text-muted-foreground hover:bg-secondary"><X className="size-4" /></Button>
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto p-5">
