@@ -168,6 +168,8 @@ export default function ChatPreview() {
   const [liveStatus, setLiveStatus] = React.useState<"listening" | "speaking">("listening");
   const [muted, setMuted] = React.useState(false);
   const [caption, setCaption] = React.useState("");
+  const [participants, setParticipants] = React.useState<EmpId[]>([]);
+  const [speaker, setSpeaker] = React.useState<EmpId>("atlas");
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const taRef = React.useRef<HTMLTextAreaElement>(null);
   const emp = EMP[activeEmp];
@@ -218,22 +220,25 @@ export default function ChatPreview() {
   }, [recording]);
   function finishRec() { setRecording(false); setInput((v) => (v ? v + " " : "") + "How long until the RLS migration is safe to ship?"); setTimeout(() => { taRef.current?.focus(); grow(); }, 0); }
   function cancelRec() { setRecording(false); }
+  function openLive() {
+    const room = Array.from(new Set<EmpId>([activeEmp, "atlas", "engineering", "finance"])).slice(0, 4);
+    setParticipants(room); setSpeaker(room[0]); setMuted(false); setLiveRoom(true);
+  }
   React.useEffect(() => {
-    if (!liveRoom) return;
-    const lines = [GREETING[activeEmp], REPLY[activeEmp], "Want me to start on that right now?"];
+    if (!liveRoom || participants.length === 0) return;
     let i = 0; let alive = true;
-    const cycle = () => {
+    const turn = () => {
       if (!alive) return;
       setLiveStatus("listening"); setCaption("");
-      setTimeout(() => { if (alive) { setLiveStatus("speaking"); setCaption(lines[i % lines.length]); i += 1; } }, 1800);
-      setTimeout(() => { if (alive) cycle(); }, 5200);
+      setTimeout(() => { if (!alive) return; const sp = participants[i % participants.length]; setSpeaker(sp); setLiveStatus("speaking"); setCaption(REPLY[sp]); i += 1; }, 1400);
+      setTimeout(() => { if (alive) turn(); }, 4600);
     };
-    cycle();
+    turn();
     return () => { alive = false; };
-  }, [liveRoom, activeEmp]);
+  }, [liveRoom, participants]);
   function endCall() {
     setLiveRoom(false);
-    setMessages((m) => [...m, { id: "vc" + Date.now(), role: "assistant", emp: activeEmp, content: `🎙️ Voice room ended — ${REPLY[activeEmp]}` }]);
+    setMessages((m) => [...m, { id: "vc" + Date.now(), role: "assistant", emp: "atlas", content: `🎙️ Team voice room ended (${participants.map((p) => EMP[p].name).join(", ")}). I'll drop a summary of who said what + the action items right here.` }]);
   }
   function applySlash(s: typeof SLASH[number]) { setActiveEmp(s.emp); setInput(s.template); taRef.current?.focus(); }
   function applyMention(id: EmpId) { setInput((v) => v.replace(/(^|\s)@\w*$/, (_m, p1) => `${p1}@${EMP[id].name} `)); setActiveEmp(id); taRef.current?.focus(); }
@@ -329,22 +334,31 @@ export default function ChatPreview() {
         )}
       </AnimatePresence>
 
-      {/* in-chat live voice room — full-screen, returns to the same thread */}
+      {/* in-chat live voice room — multi-agent, moderated, returns to the same thread */}
       <AnimatePresence>
         {liveRoom && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="wm-aurora fixed inset-0 z-[70] flex flex-col items-center justify-between bg-background px-6 py-12 text-center">
-            <div className="flex flex-col items-center gap-1.5">
-              <p className="wm-label flex items-center gap-1.5"><span className="size-1.5 animate-pulse rounded-full bg-primary" /> Live room</p>
-              <h2 className="text-2xl font-semibold tracking-tight">{emp.name}</h2>
-              <p className="text-sm text-muted-foreground">{muted ? "You're muted" : liveStatus === "speaking" ? `${emp.name} is speaking…` : "Listening…"}</p>
+            <div className="flex flex-col items-center gap-3">
+              <p className="wm-label flex items-center gap-1.5"><span className="size-1.5 animate-pulse rounded-full bg-primary" /> Live room · {participants.length} in the room</p>
+              <div className="flex items-center gap-3">
+                {participants.map((id) => { const E = EMP[id]; const on = id === speaker; return (
+                  <div key={id} className="flex flex-col items-center gap-1">
+                    <motion.span animate={{ scale: on ? 1.12 : 1, opacity: on ? 1 : 0.5 }} className={`grid size-12 place-items-center rounded-full bg-secondary text-primary ${on ? "ring-2 ring-primary wm-glow" : "border border-white/10"}`}><E.icon className="size-5" /></motion.span>
+                    <span className="text-[11px] text-muted-foreground">{E.name}</span>
+                  </div>
+                ); })}
+              </div>
             </div>
             <div className="relative grid place-items-center">
-              {[0, 1, 2].map((r) => (<motion.span key={r} className="absolute size-44 rounded-full border border-primary/30" animate={{ scale: [1, 1.9], opacity: [0.5, 0] }} transition={{ duration: 2.4, repeat: Infinity, delay: r * 0.8, ease: "easeOut" }} />))}
-              <motion.div className="grid size-44 place-items-center rounded-full wm-glow" style={{ background: "radial-gradient(circle at 50% 32%, var(--wm-ember-hi), var(--wm-ember-deep))" }} animate={liveStatus === "speaking" ? { scale: [1, 1.08, 0.98, 1.05, 1] } : { scale: [1, 1.03, 1] }} transition={{ duration: liveStatus === "speaking" ? 0.6 : 2, repeat: Infinity, ease: "easeInOut" }}>
-                <emp.icon className="size-16 text-primary-foreground" />
+              {[0, 1, 2].map((r) => (<motion.span key={r} className="absolute size-40 rounded-full border border-primary/30" animate={{ scale: [1, 1.9], opacity: [0.5, 0] }} transition={{ duration: 2.4, repeat: Infinity, delay: r * 0.8, ease: "easeOut" }} />))}
+              <motion.div className="grid size-40 place-items-center rounded-full wm-glow" style={{ background: "radial-gradient(circle at 50% 32%, var(--wm-ember-hi), var(--wm-ember-deep))" }} animate={liveStatus === "speaking" ? { scale: [1, 1.08, 0.98, 1.05, 1] } : { scale: [1, 1.03, 1] }} transition={{ duration: liveStatus === "speaking" ? 0.6 : 2, repeat: Infinity, ease: "easeInOut" }}>
+                {React.createElement(EMP[speaker].icon, { className: "size-14 text-primary-foreground" })}
               </motion.div>
             </div>
-            <div className="flex min-h-16 max-w-md items-center text-lg leading-relaxed">{caption}</div>
+            <div className="flex flex-col items-center gap-1.5">
+              <p className="text-sm text-muted-foreground">{muted ? "You're muted" : liveStatus === "speaking" ? `${EMP[speaker].name} is speaking · the rest are listening` : "Go ahead — the room's listening…"}</p>
+              <div className="flex min-h-14 max-w-md items-center text-lg leading-relaxed">{caption && <span><span className="font-semibold text-primary">{EMP[speaker].name}:</span> {caption}</span>}</div>
+            </div>
             <div className="flex items-center gap-5">
               <button onClick={() => setMuted((m) => !m)} className={`grid size-14 place-items-center rounded-full border border-white/10 ${muted ? "bg-secondary text-primary" : "bg-secondary/60 text-foreground hover:bg-secondary"}`}>{muted ? <MicOff className="size-6" /> : <Mic className="size-6" />}</button>
               <button onClick={endCall} className="grid size-16 place-items-center rounded-full bg-destructive text-white"><PhoneOff className="size-7" /></button>
@@ -360,7 +374,7 @@ export default function ChatPreview() {
           <span className="grid size-9 place-items-center rounded-xl bg-secondary text-primary"><emp.icon className="size-5" /></span>
           <div className="min-w-0"><p className="truncate font-semibold leading-tight">{emp.name}</p><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="size-1.5 rounded-full bg-primary" /> {emp.role} · 9 online</p></div>
           <div className="ml-auto flex items-center gap-1.5">
-            <button onClick={() => setLiveRoom(true)} className="flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground wm-glow"><AudioLines className="size-3.5" /> Live</button>
+            <button onClick={openLive} className="flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground wm-glow"><AudioLines className="size-3.5" /> Live</button>
             <button onClick={() => setPalette(true)} className="hidden items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground sm:flex"><Command className="size-3" />K</button>
           </div>
         </header>
