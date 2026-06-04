@@ -14,10 +14,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, Code2, TrendingUp, Megaphone, DollarSign, Wrench, ShieldCheck,
   Users, Scale, SquarePen, Menu, ArrowUp, Paperclip, Search, Settings,
-  MoreHorizontal, Command, Slash, AtSign, Copy, RefreshCw, Hammer, FileText, Download, Printer, X,
+  MoreHorizontal, Command, Slash, AtSign, Copy, RefreshCw, Hammer, FileText, Download, Printer, X, AudioLines,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
+import PraxisLiveRoom from "@/components/conduit/voice/PraxisLiveRoom";
+import type { VoiceTokenResponse } from "@/components/conduit/voice/VoiceRoom";
 
 type Icon = React.ComponentType<{ className?: string }>;
 const ICON: Record<EmployeeId, Icon> = {
@@ -79,6 +81,9 @@ export function LiveChat({
   const [artContent, setArtContent] = React.useState<string | null>(null);
   const [artLoading, setArtLoading] = React.useState(false);
   const [artCopied, setArtCopied] = React.useState(false);
+  const [roomToken, setRoomToken] = React.useState<VoiceTokenResponse | null>(null);
+  const [launching, setLaunching] = React.useState(false);
+  const [voiceErr, setVoiceErr] = React.useState<string | null>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const taRef = React.useRef<HTMLTextAreaElement>(null);
   const emp = EMPLOYEES[pin];
@@ -163,6 +168,30 @@ export function LiveChat({
     } finally { setLoading(false); router.refresh(); }
   }, [convoId, loading, pin, router]);
 
+  async function openLive() {
+    if (launching || roomToken) return;
+    setVoiceErr(null); setLaunching(true);
+    try {
+      const probe = await navigator.mediaDevices.getUserMedia({ audio: true });
+      probe.getTracks().forEach((t) => t.stop());
+      const res = await fetch("/api/voice/token", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ employee_id: pin, mode: "roundtable", participants: roster, conversation_id: convoId ?? undefined }),
+      });
+      if (!res.ok) {
+        const e = (await res.json().catch(() => ({}))) as { error?: string; message?: string };
+        setVoiceErr(e.message || e.error || "Couldn't start the live room.");
+        return;
+      }
+      setRoomToken((await res.json()) as VoiceTokenResponse);
+    } catch (err) {
+      const e = err as { name?: string; message?: string };
+      setVoiceErr(e.name === "NotAllowedError" || e.name === "PermissionDeniedError"
+        ? "Mic permission denied — enable it in your browser settings."
+        : (e.message || "Couldn't start the live room."));
+    } finally { setLaunching(false); }
+  }
+
   const Rail = (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between gap-2 p-3">
@@ -234,12 +263,23 @@ export function LiveChat({
         )}
       </AnimatePresence>
 
+      {roomToken && <PraxisLiveRoom tokenResponse={roomToken} onClose={() => { setRoomToken(null); router.refresh(); }} />}
+      {voiceErr && (
+        <div className="fixed top-4 left-1/2 z-[80] -translate-x-1/2 rounded-lg border border-destructive/40 bg-card px-4 py-2.5 text-sm wm-glow">
+          <span className="text-destructive">{voiceErr}</span>
+          <button onClick={() => setVoiceErr(null)} className="ml-3 text-xs text-muted-foreground underline">dismiss</button>
+        </div>
+      )}
+
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center gap-3 border-b border-white/8 bg-background/70 px-4 py-3 backdrop-blur">
           <Button size="icon" variant="secondary" className="size-9 rounded-lg bg-secondary lg:hidden" onClick={() => setDrawer(true)}><Menu className="size-4" /></Button>
           <span className="grid size-9 place-items-center rounded-xl bg-secondary text-primary"><EmpIcon className="size-5" /></span>
           <div className="min-w-0"><p className="truncate font-semibold leading-tight">{emp.name}</p><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="size-1.5 rounded-full bg-primary" /> {emp.role}</p></div>
-          <button onClick={() => setPalette(true)} className="ml-auto hidden items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground sm:flex"><Command className="size-3" />K</button>
+          <div className="ml-auto flex items-center gap-1.5">
+            <button onClick={openLive} disabled={launching} className="flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground wm-glow disabled:opacity-50"><AudioLines className="size-3.5" /> {launching ? "Connecting…" : "Live"}</button>
+            <button onClick={() => setPalette(true)} className="hidden items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground sm:flex"><Command className="size-3" />K</button>
+          </div>
         </header>
 
         <div className="no-scrollbar flex items-center gap-2 overflow-x-auto border-b border-white/8 px-4 py-2.5">
