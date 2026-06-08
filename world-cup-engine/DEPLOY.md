@@ -24,28 +24,25 @@ to tap-publish.
    curl -fsSL https://get.docker.com | sh
    ```
 
-## Step 2 — Run n8n (the orchestrator) (10 min)
+## Step 2 — Bring up n8n + the renderer (one command) (10 min)
+Copy `automation/docker-compose.yml` and `automation/.env.example` onto the VPS,
+rename the env file and fill it in:
 ```
-docker run -d --restart always --name n8n \
-  -p 5678:5678 \
-  -e N8N_SECURE_COOKIE=false \
-  -v n8n_data:/home/node/.n8n \
-  docker.n8n.io/n8nio/n8n
+cp .env.example .env
+nano .env            # paste your free Pexels API key (pexels.com/api)
+docker compose up -d
 ```
-Open `http://YOUR_SERVER_IP:5678` and create your n8n login.
+That starts both services. Open **n8n** at `http://YOUR_SERVER_IP:5678` (create a
+login) and the **renderer** runs on `:3123`.
+Renderer repo/options: https://github.com/gyoridavid/short-video-maker
 
-## Step 3 — Run the renderer (short-video-maker) (10 min)
-```
-docker run -d --restart always --name svm \
-  -p 3123:3123 \
-  -e PEXELS_API_KEY=YOUR_FREE_PEXELS_KEY \
-  gyoridavid/short-video-maker:latest-tiny
-```
-(Get a free Pexels API key at pexels.com/api. The renderer exposes a REST API on
-:3123 that n8n calls.) Repo + options: https://github.com/gyoridavid/short-video-maker
+> For long-form (8–15 min) docs later, add **MoneyPrinterTurbo**
+> (https://github.com/harry0703/MoneyPrinterTurbo) as a second renderer service — same idea.
 
-> For long-form (8–15 min) docs, use **MoneyPrinterTurbo** instead/in addition
-> (https://github.com/harry0703/MoneyPrinterTurbo) — same idea, run its Docker, call it from n8n.
+## Step 3 — Import the starter workflow (5 min)
+In n8n: **Workflows → Import from File →** `automation/n8n-workflow.json`. It pre-builds
+the Schedule → Script → Render → YouTube-upload chain. You'll finish the credentials in
+Step 4–5. Node-by-node detail is in `automation/workflow-blueprint.md`.
 
 ## Step 4 — YouTube Data API (15 min)
 1. console.cloud.google.com → New Project → enable **YouTube Data API v3**.

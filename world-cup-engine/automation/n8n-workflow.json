@@ -1,0 +1,71 @@
+{
+  "name": "The Lost XI - Auto Short (starter)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [ { "field": "hours", "hoursInterval": 5 } ] }
+      },
+      "name": "Every 5 hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [ 240, 300 ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "script",
+              "type": "string",
+              "value": "PASTE A SCRIPT FROM episodes/ OR read the next 'pending' row from a Google Sheet here"
+            },
+            {
+              "name": "title",
+              "type": "string",
+              "value": "Football's One-Armed Hero 💪 #WorldCup2026"
+            }
+          ]
+        }
+      },
+      "name": "Set Script + Title",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [ 460, 300 ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://renderer:3123/api/short-video",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"scenes\": [ { \"text\": $json.script, \"searchTerms\": [\"vintage football\", \"old stadium\"] } ],\n  \"config\": { \"paddingBack\": 1500, \"music\": \"epic\", \"captionPosition\": \"center\" }\n}"
+      },
+      "name": "Render Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [ 680, 300 ],
+      "notes": "Verify the renderer's exact API path/body in its README. short-video-maker exposes a REST + MCP API on :3123. Poll its status endpoint until the mp4 is ready, then pass the file to the upload node."
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "upload",
+        "title": "={{ $json.title }}",
+        "categoryId": "17",
+        "options": { "privacyStatus": "private" }
+      },
+      "name": "YouTube Upload (private)",
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [ 900, 300 ],
+      "notes": "Attach YouTube OAuth2 credential. privacyStatus stays 'private' until the compliance audit passes; you tap publish in the app."
+    }
+  ],
+  "connections": {
+    "Every 5 hours": { "main": [ [ { "node": "Set Script + Title", "type": "main", "index": 0 } ] ] },
+    "Set Script + Title": { "main": [ [ { "node": "Render Video", "type": "main", "index": 0 } ] ] },
+    "Render Video": { "main": [ [ { "node": "YouTube Upload (private)", "type": "main", "index": 0 } ] ] }
+  },
+  "settings": {},
+  "_README": "STARTER SKELETON — import into n8n (Workflows -> Import from File), then: (1) attach your YouTube OAuth2 credential to the upload node, (2) confirm the renderer API path/body against the short-video-maker README, (3) add a TTS node (edge-tts free or ElevenLabs) before Render if you want narration baked in, (4) add an Images node if using AI stills instead of stock, (5) add a 'notify me' node (Telegram/email) after upload. Full node-by-node guidance is in workflow-blueprint.md."
+}

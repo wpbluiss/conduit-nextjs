@@ -1,0 +1,35 @@
+# The Lost XI auto-engine — brings up n8n (orchestrator) + the video renderer.
+# Usage on your VPS:
+#   1) install Docker:  curl -fsSL https://get.docker.com | sh
+#   2) put this file + .env next to each other
+#   3) run:  docker compose up -d
+#   4) open n8n at http://YOUR_SERVER_IP:5678  and the renderer at :3123
+
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_SECURE_COOKIE=false
+      - GENERIC_TIMEZONE=America/New_York
+      - N8N_HOST=${N8N_HOST:-localhost}
+      - WEBHOOK_URL=http://${N8N_HOST:-localhost}:5678/
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+  renderer:
+    image: gyoridavid/short-video-maker:latest-tiny
+    restart: always
+    ports:
+      - "3123:3123"
+    environment:
+      - PEXELS_API_KEY=${PEXELS_API_KEY}
+      - LOG_LEVEL=info
+    volumes:
+      - renderer_data:/app/data
+
+volumes:
+  n8n_data:
+  renderer_data:
