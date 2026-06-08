@@ -13,7 +13,8 @@ YouTube app.
 - **Profile picture (1:1):** https://d8j0ntlcm91z4.cloudfront.net/user_3AoegsLFIePR6HScU62sFkkBVw5/hf_20260608_160126_5976f6a8-bedd-45d3-9ce7-99256f2a57cd.png
 - **Banner (16:9):** https://d8j0ntlcm91z4.cloudfront.net/user_3AoegsLFIePR6HScU62sFkkBVw5/hf_20260608_160128_a2e87255-d9dc-4848-a98d-355ff1890e9f.png
 - **First Short hero frame (9:16):** https://d8j0ntlcm91z4.cloudfront.net/user_3AoegsLFIePR6HScU62sFkkBVw5/hf_20260608_160130_bef7ae4c-7c4f-4bae-a5bb-9fa9bba3d227.png
-- **First Short VIDEO (mp4):** https://d8j0ntlcm91z4.cloudfront.net/user_3AoegsLFIePR6HScU62sFkkBVw5/hf_20260608_160738_d9d568ce-e0a0-4e58-9bae-02b0e08d1011.mp4
+- **First Short VIDEO (15s mp4):** https://d8j0ntlcm91z4.cloudfront.net/user_3AoegsLFIePR6HScU62sFkkBVw5/hf_20260608_162446_9b7f4bb4-3798-41d6-8515-82901135dc8b.mp4
+  - Note: 15s is the per-clip ceiling of the chat tools. Mute the clip's original sound in YouTube's Shorts editor and tap **Add sound** for a trending track. Full narrated 25–30s+ Shorts require the deployed engine (`DEPLOY.md`).
 
 > Banner note: YouTube's banner safe-area is the centered strip. The text is centered
 > so it survives the crop on TV/desktop/mobile. If YouTube asks for a bigger file,
