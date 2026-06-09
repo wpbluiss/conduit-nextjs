@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export default async function ChatPage({
   searchParams,
 }: {
-  searchParams: Promise<{ c?: string; pin?: string }>;
+  searchParams: Promise<{ c?: string; pin?: string; new?: string }>;
 }) {
   const sp = await searchParams;
   const current = await getCurrentAccount();
@@ -37,7 +37,9 @@ export default async function ChatPage({
     updated_at: c.updated_at as string,
   }));
 
-  const activeId = sp?.c ?? conversations[0]?.id ?? null;
+  // ?new=1 starts a fresh empty thread; otherwise ?c= wins, falling back to
+  // the most recent conversation on plain /chat.
+  const activeId = sp?.new ? null : sp?.c ?? conversations[0]?.id ?? null;
   let initialMessages: LiveMsg[] = [];
   if (activeId) {
     const msgsQ = await supabase

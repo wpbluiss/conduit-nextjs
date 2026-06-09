@@ -70,6 +70,9 @@ export function LiveChat({
   const [messages, setMessages] = React.useState<LiveMsg[]>(initialMessages);
   const [convoId, setConvoId] = React.useState<string | null>(activeConversationId);
   const [pin, setPin] = React.useState<EmployeeId>(initialPin ?? "jarvis");
+  // Only force an employee when the user explicitly picked one; otherwise
+  // let Atlas auto-route (the engine's handoff magic).
+  const [userPinned, setUserPinned] = React.useState<boolean>(Boolean(initialPin));
   const [input, setInput] = React.useState("");
   const [drawer, setDrawer] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -88,6 +91,14 @@ export function LiveChat({
   const taRef = React.useRef<HTMLTextAreaElement>(null);
   const emp = EMPLOYEES[pin];
   const EmpIcon = ICON[pin] ?? Sparkles;
+
+  // Sync canonical server data into state whenever the route changes
+  // (conversation switch, new chat, post-send refresh). Without this the
+  // rail navigates but the thread keeps showing stale state.
+  React.useEffect(() => {
+    setMessages(initialMessages);
+    setConvoId(activeConversationId);
+  }, [activeConversationId, initialMessages]);
 
   const slashOpen = input.startsWith("/") && !input.includes(" ");
   const mentionMatch = input.match(/(^|\s)@(\w*)$/);
@@ -118,8 +129,8 @@ export function LiveChat({
   }, [openArtifact]);
 
   function grow() { const ta = taRef.current; if (!ta) return; ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, 160) + "px"; }
-  function applySlash(s: typeof SLASH[number]) { setPin(s.emp); setInput(s.template); taRef.current?.focus(); }
-  function applyMention(id: EmployeeId) { setInput((v) => v.replace(/(^|\s)@\w*$/, (_m, p1) => `${p1}@${EMPLOYEES[id].name} `)); setPin(id); taRef.current?.focus(); }
+  function applySlash(s: typeof SLASH[number]) { setPin(s.emp); setUserPinned(true); setInput(s.template); taRef.current?.focus(); }
+  function applyMention(id: EmployeeId) { setInput((v) => v.replace(/(^|\s)@\w*$/, (_m, p1) => `${p1}@${EMPLOYEES[id].name} `)); setPin(id); setUserPinned(true); taRef.current?.focus(); }
   function react(id: string, e: string) { setReactions((r) => ({ ...r, [id]: r[id] === e ? "" : e })); }
   function copyMsg(m: LiveMsg) { navigator.clipboard?.writeText(m.content).catch(() => {}); const k = m.id ?? ""; setCopiedId(k); setTimeout(() => setCopiedId((c) => (c === k ? null : c)), 1400); }
   function copyArt() { if (!artContent) return; navigator.clipboard?.writeText(artContent).catch(() => {}); setArtCopied(true); setTimeout(() => setArtCopied(false), 1400); }
@@ -137,7 +148,8 @@ export function LiveChat({
     const append = (e: EmployeeId, d: string) => setMessages((p) => { const n = [...p]; const last = n[n.length - 1]; if (last && last.role === "assistant" && last.pending && last.employee === e) last.content += d; return n; });
     const finish = (e: EmployeeId) => setMessages((p) => { const n = [...p]; const last = n[n.length - 1]; if (last && last.role === "assistant" && last.pending && last.employee === e) last.pending = false; return n; });
     try {
-      const body: Record<string, unknown> = { message: trimmed, employee_override: pin };
+      const body: Record<string, unknown> = { message: trimmed };
+      if (userPinned) body.employee_override = pin;
       if (convoId) body.conversation_id = convoId;
       const resp = await fetch("/api/conduit/chat", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
       if (!resp.ok || !resp.body) {
@@ -196,7 +208,7 @@ export function LiveChat({
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between gap-2 p-3">
         <div className="flex items-center gap-2 px-1"><div className="grid size-8 place-items-center rounded-lg bg-primary"><span className="font-mono text-sm font-bold text-primary-foreground">P</span></div><span className="font-semibold tracking-tight">Praxis</span></div>
-        <Button size="icon" variant="secondary" className="size-9 rounded-lg bg-secondary hover:bg-input" onClick={() => router.push("/chat")}><SquarePen className="size-4" /></Button>
+        <Button size="icon" variant="secondary" className="size-9 rounded-lg bg-secondary hover:bg-input" onClick={() => { setDrawer(false); router.push("/chat?new=1"); }}><SquarePen className="size-4" /></Button>
       </div>
       <div className="px-3 pb-2">
         <button onClick={() => setPalette(true)} className="flex h-9 w-full items-center gap-2 rounded-lg border border-input bg-secondary/50 px-3 text-sm text-muted-foreground hover:bg-secondary"><Search className="size-4" /> Search<span className="ml-auto flex items-center gap-0.5 rounded border border-white/10 px-1.5 py-0.5 text-[10px] font-mono"><Command className="size-2.5" />K</span></button>
@@ -233,9 +245,9 @@ export function LiveChat({
               <div className="flex items-center gap-2 border-b border-white/8 px-4"><Search className="size-4 text-muted-foreground" /><input autoFocus value={paletteQ} onChange={(e) => setPaletteQ(e.target.value)} placeholder="Jump to a teammate, start a chat…" className="h-12 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground" /><kbd className="rounded border border-white/10 px-1.5 py-0.5 text-[10px] text-muted-foreground">esc</kbd></div>
               <div className="max-h-72 overflow-y-auto p-2">
                 <p className="wm-label px-2 py-1.5">Actions</p>
-                <button onClick={() => { setPalette(false); router.push("/chat"); }} className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm hover:bg-secondary"><span className="grid size-7 place-items-center rounded-md bg-secondary text-primary"><SquarePen className="size-4" /></span>New chat</button>
+                <button onClick={() => { setPalette(false); router.push("/chat?new=1"); }} className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm hover:bg-secondary"><span className="grid size-7 place-items-center rounded-md bg-secondary text-primary"><SquarePen className="size-4" /></span>New chat</button>
                 <p className="wm-label px-2 py-1.5 pt-3">Talk to</p>
-                {roster.filter((id) => EMPLOYEES[id].name.toLowerCase().includes(paletteQ.toLowerCase())).map((id) => { const I = ICON[id]; return <button key={id} onClick={() => { setPin(id); setPalette(false); }} className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm hover:bg-secondary"><span className="grid size-7 place-items-center rounded-md bg-secondary text-primary"><I className="size-4" /></span><span className="flex-1">{EMPLOYEES[id].name}</span><span className="text-xs text-muted-foreground">{EMPLOYEES[id].role}</span></button>; })}
+                {roster.filter((id) => EMPLOYEES[id].name.toLowerCase().includes(paletteQ.toLowerCase())).map((id) => { const I = ICON[id]; return <button key={id} onClick={() => { setPin(id); setUserPinned(true); setPalette(false); }} className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm hover:bg-secondary"><span className="grid size-7 place-items-center rounded-md bg-secondary text-primary"><I className="size-4" /></span><span className="flex-1">{EMPLOYEES[id].name}</span><span className="text-xs text-muted-foreground">{EMPLOYEES[id].role}</span></button>; })}
               </div>
             </motion.div>
           </div>
@@ -284,7 +296,7 @@ export function LiveChat({
 
         <div className="no-scrollbar flex items-center gap-2 overflow-x-auto border-b border-white/8 px-4 py-2.5">
           <span className="wm-label shrink-0 pr-1">Talk to</span>
-          {roster.map((id) => { const I = ICON[id]; const on = id === pin; return <button key={id} onClick={() => setPin(id)} className={`flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${on ? "border-primary/50 bg-primary/15 text-foreground" : "border-white/8 text-muted-foreground hover:bg-secondary hover:text-foreground"}`}><I className="size-3.5" />{EMPLOYEES[id].name}</button>; })}
+          {roster.map((id) => { const I = ICON[id]; const on = id === pin && userPinned; return <button key={id} onClick={() => { setPin(id); setUserPinned(true); }} className={`flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${on ? "border-primary/50 bg-primary/15 text-foreground" : "border-white/8 text-muted-foreground hover:bg-secondary hover:text-foreground"}`}><I className="size-3.5" />{EMPLOYEES[id].name}</button>; })}
         </div>
 
         <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
