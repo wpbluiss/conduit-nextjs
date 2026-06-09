@@ -178,7 +178,7 @@ export function LiveChat({
         }
       }
     } finally { setLoading(false); router.refresh(); }
-  }, [convoId, loading, pin, router]);
+  }, [convoId, loading, pin, userPinned, router]);
 
   async function openLive() {
     if (launching || roomToken) return;
@@ -305,7 +305,7 @@ export function LiveChat({
               <div className="flex flex-col items-center gap-4 py-16 text-center">
                 <span className="grid size-14 place-items-center rounded-2xl bg-secondary text-primary"><EmpIcon className="size-7" /></span>
                 <h2 className="text-2xl font-semibold tracking-tight">How can the team help, {firstName}?</h2>
-                <p className="max-w-sm text-muted-foreground">Pick a teammate above, type <span className="font-mono text-foreground">/</span> for commands, or just start — Atlas routes it to whoever's right.</p>
+                <p className="max-w-sm text-muted-foreground">Pick a teammate above, type <span className="font-mono text-foreground">/</span> for commands, or just start — Atlas routes it to whoever&apos;s right.</p>
               </div>
             )}
             {messages.map((m, i) => {
