@@ -5,6 +5,9 @@ export interface Household {
   monthly_savings_target: number;
   goal_start_date: string;
   goal_target_date: string | null;
+  expected_next_deposit: number;
+  expected_deposit_date: string | null;
+  expected_deposit_note: string | null;
   created_at: string;
 }
 

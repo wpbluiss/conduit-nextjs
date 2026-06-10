@@ -287,6 +287,49 @@ export function planAllocation(
   return { lines, leftover: remaining };
 }
 
+// ---------- Combined "due now" list (expenses + child support) ----------
+export interface DueItem {
+  id: string;
+  kind: "expense" | "child_support";
+  name: string;
+  amount: number;
+  due_date: string | null;
+  days: number | null;
+  category: string;
+  person_tag: string;
+}
+
+export function dueNow(s: Snapshot, withinDays = 16): DueItem[] {
+  const items: DueItem[] = [];
+  for (const e of s.expenses) {
+    if (e.paid) continue;
+    const days = e.due_date ? daysBetween(todayISO(), e.due_date) : null;
+    if (days !== null && days > withinDays) continue;
+    if (days === null) continue; // only dated bills show in "due now"
+    items.push({
+      id: e.id, kind: "expense", name: e.name, amount: Number(e.amount),
+      due_date: e.due_date, days, category: e.category, person_tag: e.person_tag,
+    });
+  }
+  // Child support: show if not paid this calendar month and still owed.
+  const cs = s.childSupport;
+  if (cs && Number(cs.remaining_balance) > 0) {
+    const paidThisMonth = s.payments.some(
+      (p) => p.kind === "child_support" && p.date.slice(0, 7) === todayISO().slice(0, 7),
+    );
+    if (!paidThisMonth) {
+      const now = new Date();
+      const dueDate = new Date(now.getFullYear(), now.getMonth(), 15).toISOString().slice(0, 10);
+      items.push({
+        id: cs.id, kind: "child_support", name: "Child support",
+        amount: Number(cs.monthly_amount), due_date: dueDate,
+        days: daysBetween(todayISO(), dueDate), category: "child_support", person_tag: "luis",
+      });
+    }
+  }
+  return items.sort((a, b) => (a.days ?? 99) - (b.days ?? 99));
+}
+
 // ---------- Credit utilization ----------
 export function cardUtilization(accounts: Account[]): {
   account: Account; util: number; over: boolean;

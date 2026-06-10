@@ -243,6 +243,17 @@ export async function updateGoalSettings(form: FormData): Promise<Result> {
   return { ok: !error, error: error?.message };
 }
 
+export async function updateExpectedDeposit(form: FormData): Promise<Result> {
+  const supabase = await db();
+  const { error } = await supabase.from("fin_household").update({
+    expected_next_deposit: num(form.get("expected_next_deposit")),
+    expected_deposit_date: str(form.get("expected_deposit_date")) || null,
+    expected_deposit_note: str(form.get("expected_deposit_note")) || null,
+  }).eq("id", HOUSEHOLD_ID);
+  refresh();
+  return { ok: !error, error: error?.message };
+}
+
 // -------- Investments --------
 export async function addInvestment(form: FormData): Promise<Result> {
   const supabase = await db();
