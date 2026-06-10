@@ -9,6 +9,11 @@ export interface Household {
   expected_deposit_date: string | null;
   expected_deposit_note: string | null;
   join_code: string | null;
+  plan: string;
+  plan_status: string | null;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  current_period_end: string | null;
   created_at: string;
 }
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createSupabaseServerClient, getCurrentUser } from "@/lib/supabase/server";
 import { getSnapshot, getUserHouseholdId } from "@/lib/finance/data";
+import { isPlus, FREE_AI_MONTHLY_LIMIT } from "@/lib/finance/plan";
 import {
   pooledCash, netWorth, projectIncome, goalProgress, orderDebts,
   daysBetween, todayISO, investmentsValue,
@@ -234,6 +235,25 @@ export async function POST(req: Request) {
   const snap = await getSnapshot();
   if (!snap) return NextResponse.json({ error: "No data" }, { status: 500 });
   const sb = await createSupabaseServerClient();
+
+  // Free-tier gate: cap AI messages per month; Plus is unlimited.
+  if (!isPlus(snap.household)) {
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    const { count } = await sb
+      .from("fin_ai_messages")
+      .select("id", { count: "exact", head: true })
+      .eq("role", "user")
+      .gte("created_at", monthStart.toISOString());
+    if ((count ?? 0) >= FREE_AI_MONTHLY_LIMIT) {
+      return NextResponse.json({
+        reply: `You've used your ${FREE_AI_MONTHLY_LIMIT} free advisor messages this month. Upgrade to Cadence Plus for unlimited advice, bank sync, and more — tap Upgrade in the menu.`,
+        actions: [],
+        upsell: true,
+      });
+    }
+  }
 
   const anthropic = new Anthropic({ apiKey });
 

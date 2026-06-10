@@ -352,3 +352,64 @@ export async function addCreditScore(form: FormData): Promise<Result> {
   refresh();
   return { ok: !error, error: error?.message };
 }
+
+// ===================== Billing (Stripe) =====================
+import Stripe from "stripe";
+
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY)
+  : null;
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.conduitai.io";
+
+// Starts a Stripe Checkout session for Cadence Plus. Returns a URL to redirect to.
+export async function createCheckout(): Promise<Result & { url?: string }> {
+  if (!stripe || !process.env.STRIPE_PRICE_CADENCE_PLUS) {
+    return { ok: false, error: "Billing isn't switched on yet — add your Stripe key + price." };
+  }
+  const user = await getCurrentUser();
+  const hh = await getUserHouseholdId();
+  if (!user || !hh) return { ok: false, error: "Not signed in" };
+
+  const supabase = await db();
+  const { data: household } = await supabase
+    .from("fin_household").select("stripe_customer_id").eq("id", hh).single();
+
+  let customerId = household?.stripe_customer_id as string | undefined;
+  if (!customerId) {
+    const customer = await stripe.customers.create({
+      email: user.email ?? undefined,
+      metadata: { household_id: hh },
+    });
+    customerId = customer.id;
+    await supabase.from("fin_household").update({ stripe_customer_id: customerId }).eq("id", hh);
+  }
+
+  const session = await stripe.checkout.sessions.create({
+    mode: "subscription",
+    customer: customerId,
+    client_reference_id: hh,
+    line_items: [{ price: process.env.STRIPE_PRICE_CADENCE_PLUS, quantity: 1 }],
+    success_url: `${SITE_URL}/finance/upgrade?status=success`,
+    cancel_url: `${SITE_URL}/finance/upgrade?status=cancelled`,
+    allow_promotion_codes: true,
+    metadata: { household_id: hh },
+  });
+  return { ok: true, url: session.url ?? undefined };
+}
+
+// Opens the Stripe customer portal so the user can manage/cancel their plan.
+export async function openBillingPortal(): Promise<Result & { url?: string }> {
+  if (!stripe) return { ok: false, error: "Billing isn't switched on yet." };
+  const hh = await getUserHouseholdId();
+  if (!hh) return { ok: false, error: "Not signed in" };
+  const supabase = await db();
+  const { data: household } = await supabase
+    .from("fin_household").select("stripe_customer_id").eq("id", hh).single();
+  if (!household?.stripe_customer_id) return { ok: false, error: "No billing account yet." };
+  const session = await stripe.billingPortal.sessions.create({
+    customer: household.stripe_customer_id as string,
+    return_url: `${SITE_URL}/finance/settings`,
+  });
+  return { ok: true, url: session.url };
+}
