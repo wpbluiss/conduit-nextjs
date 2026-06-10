@@ -48,7 +48,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
             <Icon
               size={18}
               weight={active ? "fill" : "regular"}
-              className={active ? "text-violet-300" : ""}
+              className={active ? "text-[#ffa876]" : ""}
             />
             {item.label}
           </Link>
@@ -116,7 +116,7 @@ export function NavSidebar() {
       {open && (
         <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/70" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 left-0 w-64 bg-[#0C0C12] border-r border-white/10 p-4 flex flex-col justify-between">
+          <div className="absolute inset-y-0 left-0 w-64 bg-[#131110] border-r border-white/10 p-4 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <Brand />

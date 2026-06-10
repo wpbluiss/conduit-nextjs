@@ -78,8 +78,8 @@ export default async function DebtsPage() {
         </ProgressRing>
         <div className="flex-1 w-full">
           {debt.next ? (
-            <div className="rounded-xl bg-pink-400/5 border border-pink-400/15 p-4 flex items-center gap-3">
-              <Flame size={28} weight="fill" className="text-pink-300" />
+            <div className="rounded-xl bg-[#ff8a3d]/5 border border-[#ff8a3d]/15 p-4 flex items-center gap-3">
+              <Flame size={28} weight="fill" className="text-[#ffa876]" />
               <div className="flex-1">
                 <div className="text-[11px] fin-mono uppercase tracking-wide text-[var(--fin-muted)]">
                   Attack next · strategy: {debt.recommendation}
@@ -89,11 +89,11 @@ export default async function DebtsPage() {
               </div>
             </div>
           ) : (
-            <div className="text-emerald-300 font-medium">🎉 All debts cleared. Debt-killer rolls into savings now.</div>
+            <div className="text-[#7cc6a0] font-medium">🎉 All debts cleared. Debt-killer rolls into savings now.</div>
           )}
           <div className="grid grid-cols-3 gap-4 mt-4">
             <div><div className="text-[10px] fin-mono uppercase text-[var(--fin-muted)]">Remaining</div><div className="text-lg font-semibold">{fmtMoney(debt.total)}</div></div>
-            <div><div className="text-[10px] fin-mono uppercase text-[var(--fin-muted)]">Paid off</div><div className="text-lg font-semibold text-emerald-300">{fmtMoney(debt.paidOff)}</div></div>
+            <div><div className="text-[10px] fin-mono uppercase text-[var(--fin-muted)]">Paid off</div><div className="text-lg font-semibold text-[#7cc6a0]">{fmtMoney(debt.paidOff)}</div></div>
             <div><div className="text-[10px] fin-mono uppercase text-[var(--fin-muted)]">Active</div><div className="text-lg font-semibold">{debt.debts.length}</div></div>
           </div>
         </div>
@@ -139,7 +139,7 @@ export default async function DebtsPage() {
                   </div>
                   {d.original_balance > 0 && d.status !== "paid" && (
                     <div className="h-1.5 rounded-full bg-white/5 overflow-hidden mt-2">
-                      <div className="h-full rounded-full" style={{ width: `${Math.max(0, Math.min(100, pct))}%`, background: "linear-gradient(90deg,#F472B6,#FBBF24)" }} />
+                      <div className="h-full rounded-full" style={{ width: `${Math.max(0, Math.min(100, pct))}%`, background: "linear-gradient(90deg,#ffa876,#ffa876)" }} />
                     </div>
                   )}
                   {d.notes && <div className="text-[11px] text-[var(--fin-muted)] mt-1">{d.notes}</div>}
@@ -156,7 +156,7 @@ export default async function DebtsPage() {
           <SectionTitle eyebrow="Obligation · Luis" title="Child support" />
           <div className="grid sm:grid-cols-4 gap-4 items-center">
             <div><div className="text-[10px] fin-mono uppercase text-[var(--fin-muted)]">Monthly</div><div className="text-lg font-semibold">{fmtMoney(cs.monthly_amount)}</div></div>
-            <div><div className="text-[10px] fin-mono uppercase text-[var(--fin-muted)]">Remaining</div><div className="text-lg font-semibold text-amber-300">{fmtMoney(cs.remaining_balance)}</div></div>
+            <div><div className="text-[10px] fin-mono uppercase text-[var(--fin-muted)]">Remaining</div><div className="text-lg font-semibold text-[#ffa876]">{fmtMoney(cs.remaining_balance)}</div></div>
             <div>
               <div className="text-[10px] fin-mono uppercase text-[var(--fin-muted)]">Payoff (at {fmtMoney(cs.monthly_amount)}/mo)</div>
               <div className="text-lg font-semibold">

@@ -17,7 +17,7 @@ function tip(formatter?: (v: number) => string) {
         borderRadius: 12,
         fontSize: 12,
       }}
-      labelStyle={{ color: "#8A8A99" }}
+      labelStyle={{ color: "#8c8884" }}
       formatter={(v: number | string) => (formatter ? formatter(Number(v)) : v)}
     />
   );
@@ -33,8 +33,8 @@ export function SavingsAreaChart({
       <AreaChart data={data} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
         <defs>
           <linearGradient id="finSav" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#7C5CFF" stopOpacity={0.6} />
-            <stop offset="100%" stopColor="#22D3EE" stopOpacity={0.04} />
+            <stop offset="0%" stopColor="#d9532a" stopOpacity={0.6} />
+            <stop offset="100%" stopColor="#ff8a3d" stopOpacity={0.04} />
           </linearGradient>
         </defs>
         <CartesianGrid stroke={grid} vertical={false} />
@@ -42,7 +42,7 @@ export function SavingsAreaChart({
         <YAxis {...axis} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
         {tip((v) => `$${v.toLocaleString()}`)}
         <Area type="monotone" dataKey="target" stroke="rgba(255,255,255,0.3)" strokeDasharray="4 4" fill="none" />
-        <Area type="monotone" dataKey="actual" stroke="#7C5CFF" strokeWidth={2} fill="url(#finSav)" />
+        <Area type="monotone" dataKey="actual" stroke="#d9532a" strokeWidth={2} fill="url(#finSav)" />
       </AreaChart>
     </ResponsiveContainer>
   );
@@ -60,9 +60,9 @@ export function IncomeBarChart({
         <XAxis dataKey="label" {...axis} tickLine={false} axisLine={false} />
         <YAxis {...axis} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v}`} />
         {tip((v) => `$${v.toLocaleString()}`)}
-        <Bar dataKey="luis" stackId="a" fill="#7C5CFF" radius={[0, 0, 0, 0]} />
-        <Bar dataKey="delia" stackId="a" fill="#22D3EE" radius={[0, 0, 0, 0]} />
-        <Bar dataKey="shared" stackId="a" fill="#34D399" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="luis" stackId="a" fill="#d9532a" radius={[0, 0, 0, 0]} />
+        <Bar dataKey="delia" stackId="a" fill="#ff8a3d" radius={[0, 0, 0, 0]} />
+        <Bar dataKey="shared" stackId="a" fill="#ffa876" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -102,8 +102,8 @@ export function UtilizationBars({
         <XAxis type="number" {...axis} domain={[0, 100]} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} />
         <YAxis type="category" dataKey="name" {...axis} width={110} tickLine={false} axisLine={false} />
         {tip((v) => `${v.toFixed(0)}%`)}
-        <ReferenceLine x={10} stroke="#34D399" strokeDasharray="4 4" label={{ value: "10%", fill: "#34D399", fontSize: 11 }} />
-        <Bar dataKey="util" radius={[0, 6, 6, 0]} fill="#F472B6" />
+        <ReferenceLine x={10} stroke="#ffa876" strokeDasharray="4 4" label={{ value: "10%", fill: "#ffa876", fontSize: 11 }} />
+        <Bar dataKey="util" radius={[0, 6, 6, 0]} fill="#ffa876" />
       </BarChart>
     </ResponsiveContainer>
   );

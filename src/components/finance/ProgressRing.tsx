@@ -23,10 +23,10 @@ export function ProgressRing({
       <svg width={size} height={size} className="-rotate-90">
         <defs>
           <linearGradient id="fin-ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#7C5CFF" />
-            <stop offset="40%" stopColor="#22D3EE" />
-            <stop offset="70%" stopColor="#34D399" />
-            <stop offset="100%" stopColor="#F472B6" />
+            <stop offset="0%" stopColor="#d9532a" />
+            <stop offset="40%" stopColor="#ff8a3d" />
+            <stop offset="70%" stopColor="#ffa876" />
+            <stop offset="100%" stopColor="#ffa876" />
           </linearGradient>
           <filter id="fin-ring-glow">
             <feGaussianBlur stdDeviation="4" result="b" />

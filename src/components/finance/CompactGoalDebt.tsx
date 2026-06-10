@@ -49,12 +49,12 @@ export function CompactGoalDebt({
       <Link href="/finance/debts" className="fin-card p-4 flex flex-col justify-center hover:bg-white/[0.03] transition">
         <div className="flex items-center justify-between">
           <div className="fin-mono text-[10px] uppercase tracking-[0.18em] text-[var(--fin-muted)]">Debt-Killer</div>
-          <span className="text-[11px] text-pink-300">{fmtMoney(debtLeft)} left</span>
+          <span className="text-[11px] text-[#ffa876]">{fmtMoney(debtLeft)} left</span>
         </div>
         <div className="h-2 rounded-full bg-white/5 overflow-hidden mt-2">
           <motion.div
             className="h-full rounded-full"
-            style={{ background: "linear-gradient(90deg,#F472B6,#FBBF24)" }}
+            style={{ background: "linear-gradient(90deg,#ffa876,#ffa876)" }}
             initial={{ width: 0 }}
             animate={{ width: `${Math.max(0, Math.min(100, debtPct))}%` }}
             transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}

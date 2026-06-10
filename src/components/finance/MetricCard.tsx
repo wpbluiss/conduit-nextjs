@@ -27,11 +27,11 @@ export function MetricCard({
 }) {
   const tones: Record<string, string> = {
     default: "text-white",
-    violet: "text-violet-300",
-    cyan: "text-cyan-300",
-    green: "text-emerald-300",
-    pink: "text-pink-300",
-    amber: "text-amber-300",
+    violet: "text-[#ffa876]",
+    cyan: "text-[#ffa876]",
+    green: "text-[#7cc6a0]",
+    pink: "text-[#ffa876]",
+    amber: "text-[#ffa876]",
   };
   return (
     <motion.div

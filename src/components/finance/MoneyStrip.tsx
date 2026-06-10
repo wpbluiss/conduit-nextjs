@@ -33,7 +33,7 @@ export function MoneyStrip({
         <div className="fin-mono text-[10px] uppercase tracking-[0.18em] text-[var(--fin-muted)]">
           Pooled cash
         </div>
-        <div className={`text-2xl sm:text-3xl font-semibold mt-1 ${pooled < 0 ? "text-red-300" : "text-cyan-300"}`}>
+        <div className={`text-2xl sm:text-3xl font-semibold mt-1 ${pooled < 0 ? "text-[#f0888c]" : "text-[#ffa876]"}`}>
           <AnimatedNumber value={pooled} prefix="$" decimals={pooled % 1 !== 0 ? 2 : 0} />
         </div>
         <div className="text-[11px] text-[var(--fin-muted)] mt-1">
@@ -58,7 +58,7 @@ export function MoneyStrip({
             <Field label="Note" name="expected_deposit_note" defaultValue={expectedNote ?? ""} />
           </FormModal>
         </div>
-        <div className="text-2xl sm:text-3xl font-semibold mt-1 text-emerald-300">
+        <div className="text-2xl sm:text-3xl font-semibold mt-1 text-[#7cc6a0]">
           <AnimatedNumber value={expected} prefix="$" />
         </div>
         <div className="text-[11px] text-[var(--fin-muted)] mt-1">

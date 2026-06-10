@@ -57,7 +57,7 @@ export function GoalHero({ g }: { g: GoalProgress }) {
                 Status
               </div>
               <div
-                className={`text-lg font-semibold mt-1 ${ahead ? "text-emerald-300" : "text-amber-300"}`}
+                className={`text-lg font-semibold mt-1 ${ahead ? "text-[#7cc6a0]" : "text-[#ffa876]"}`}
               >
                 {ahead ? "Ahead" : "Behind"} by {fmtMoney(Math.abs(g.aheadBehindDollars))}
               </div>
@@ -96,7 +96,7 @@ export function GoalHero({ g }: { g: GoalProgress }) {
               <motion.div
                 className="absolute inset-y-0 left-0 rounded-full"
                 style={{
-                  background: "linear-gradient(90deg,#7C5CFF,#22D3EE,#34D399)",
+                  background: "linear-gradient(90deg,#d9532a,#ff8a3d,#ffa876)",
                 }}
                 initial={{ width: 0 }}
                 animate={{ width: `${Math.min(100, g.pct)}%` }}

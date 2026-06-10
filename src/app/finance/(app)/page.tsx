@@ -71,7 +71,7 @@ export default async function FinanceHome() {
           </div>
           <div className="text-right">
             <div className="fin-mono text-[10px] uppercase tracking-wide text-[var(--fin-muted)]">To pay</div>
-            <div className="text-xl font-semibold text-amber-300">{fmtMoney(dueTotal)}</div>
+            <div className="text-xl font-semibold text-[#ffa876]">{fmtMoney(dueTotal)}</div>
           </div>
         </div>
 
@@ -107,12 +107,12 @@ export default async function FinanceHome() {
         <div className="border-t border-white/10 bg-white/[0.02] px-5 py-4">
           <div className="flex items-center justify-between text-sm">
             <span className="text-[var(--fin-muted)]">Incoming (est.) {fmtMoney(expected)} − due {fmtMoney(dueTotal)}</span>
-            <span className={`text-lg font-semibold ${leftover < 0 ? "text-red-300" : "text-emerald-300"}`}>
+            <span className={`text-lg font-semibold ${leftover < 0 ? "text-[#f0888c]" : "text-[#7cc6a0]"}`}>
               {leftover < 0 ? "−" : ""}{fmtMoney(Math.abs(leftover))} left
             </span>
           </div>
           {leftover < 0 && (
-            <p className="text-[11px] text-amber-300 mt-1">
+            <p className="text-[11px] text-[#ffa876] mt-1">
               Heads up: your due bills exceed the expected check by {fmtMoney(Math.abs(leftover))}. Prioritize the overdraft + past-due items first.
             </p>
           )}
@@ -123,8 +123,8 @@ export default async function FinanceHome() {
       <Link href="/finance/advisor" className="block">
         <Card className="!p-4 hover:bg-white/[0.04] transition">
           <div className="flex items-start gap-3">
-            <div className="mt-0.5 rounded-lg bg-violet-400/15 p-2 shrink-0">
-              <Sparkle size={18} weight="fill" className="text-violet-300" />
+            <div className="mt-0.5 rounded-lg bg-[#ff8a3d]/15 p-2 shrink-0">
+              <Sparkle size={18} weight="fill" className="text-[#ffa876]" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-[11px] fin-mono uppercase tracking-[0.18em] text-[var(--fin-muted)]">Your private bank · brief</div>

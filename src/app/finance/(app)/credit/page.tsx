@@ -76,11 +76,11 @@ export default async function CreditPage() {
         ) : (
           <>
             <CreditLineChart data={chartData} people={[
-              { key: "luis", color: "#7C5CFF" }, { key: "delia", color: "#22D3EE" },
+              { key: "luis", color: "#d9532a" }, { key: "delia", color: "#ff8a3d" },
             ]} />
             <div className="flex gap-4 mt-2 text-[11px] text-[var(--fin-muted)] fin-mono">
-              <span><span className="inline-block w-2 h-2 rounded-full bg-violet-400 mr-1" />Luis</span>
-              <span><span className="inline-block w-2 h-2 rounded-full bg-cyan-400 mr-1" />Delia</span>
+              <span><span className="inline-block w-2 h-2 rounded-full bg-[#d9532a] mr-1" />Luis</span>
+              <span><span className="inline-block w-2 h-2 rounded-full bg-[#ff8a3d] mr-1" />Delia</span>
             </div>
           </>
         )}
@@ -98,7 +98,7 @@ export default async function CreditPage() {
                 <div key={u.account.id} className="flex items-center justify-between text-sm">
                   <span>{u.account.name}</span>
                   <span className="flex items-center gap-2">
-                    <span className={u.over ? "text-amber-300" : "text-emerald-300"}>{u.util.toFixed(0)}%</span>
+                    <span className={u.over ? "text-[#ffa876]" : "text-[#7cc6a0]"}>{u.util.toFixed(0)}%</span>
                     {u.over ? <Pill tone="amber"><Warning size={11} /> over 10%</Pill> : <Pill tone="green"><CheckCircle size={11} /> healthy</Pill>}
                   </span>
                 </div>

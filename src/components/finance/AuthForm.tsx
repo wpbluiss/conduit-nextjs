@@ -91,8 +91,8 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
           />
         </label>
 
-        {error && <p className="text-xs text-red-300">{error}</p>}
-        {notice && <p className="text-xs text-emerald-300">{notice}</p>}
+        {error && <p className="text-xs text-[#f0888c]">{error}</p>}
+        {notice && <p className="text-xs text-[#7cc6a0]">{notice}</p>}
 
         <Button type="submit" variant="animate" disabled={loading} className="w-full">
           {loading ? "…" : mode === "sign-in" ? "Enter the bank" : "Create household"}
@@ -102,14 +102,14 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
           {mode === "sign-in" ? (
             <>
               Need an account?{" "}
-              <Link href="/finance/sign-up" className="text-violet-300 hover:underline">
+              <Link href="/finance/sign-up" className="text-[#ffa876] hover:underline">
                 Create one
               </Link>
             </>
           ) : (
             <>
               Already have one?{" "}
-              <Link href="/finance/sign-in" className="text-violet-300 hover:underline">
+              <Link href="/finance/sign-in" className="text-[#ffa876] hover:underline">
                 Sign in
               </Link>
             </>

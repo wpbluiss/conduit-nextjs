@@ -57,9 +57,9 @@ export default async function PaychecksPage() {
           <SectionTitle eyebrow="Trend" title="Take-home by month" />
           <IncomeBarChart data={chartData} />
           <div className="flex gap-4 mt-2 text-[11px] text-[var(--fin-muted)] fin-mono">
-            <span><span className="inline-block w-2 h-2 rounded-full bg-violet-400 mr-1" />Luis</span>
-            <span><span className="inline-block w-2 h-2 rounded-full bg-cyan-400 mr-1" />Delia</span>
-            <span><span className="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-1" />Shared</span>
+            <span><span className="inline-block w-2 h-2 rounded-full bg-[#d9532a] mr-1" />Luis</span>
+            <span><span className="inline-block w-2 h-2 rounded-full bg-[#ff8a3d] mr-1" />Delia</span>
+            <span><span className="inline-block w-2 h-2 rounded-full bg-[#ffa876] mr-1" />Shared</span>
           </div>
         </Card>
       )}
