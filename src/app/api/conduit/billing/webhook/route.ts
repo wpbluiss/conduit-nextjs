@@ -12,8 +12,12 @@ export const runtime = "nodejs";
 
 // Service-role Supabase client for webhook writes (bypasses RLS).
 function serviceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.SUPABASE_SERVICE_KEY!;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL!;
+  // Match the canonical admin client convention (src/lib/supabase/admin.ts):
+  // prefer SUPABASE_SERVICE_ROLE_KEY, fall back to legacy SUPABASE_SERVICE_KEY.
+  // Without this, a mismatched env name = paid customers silently not upgraded.
+  const key =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_KEY!;
   return createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
