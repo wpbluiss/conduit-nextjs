@@ -81,10 +81,10 @@ function Brand() {
   return (
     <div className="px-3 mb-6">
       <div className="fin-mono text-[10px] uppercase tracking-[0.28em] text-[var(--fin-muted)]">
-        Praxis
+        Conduit AI
       </div>
       <div className="fin-display text-xl leading-tight">
-        <GradientText>Private Bank</GradientText>
+        <GradientText>Cadence</GradientText>
       </div>
     </div>
   );
@@ -106,7 +106,7 @@ export function NavSidebar() {
       {/* Mobile top bar */}
       <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between border-b border-white/5 bg-black/50 backdrop-blur-xl px-4 py-3">
         <div className="fin-display text-base">
-          <GradientText>Private Bank</GradientText>
+          <GradientText>Cadence</GradientText>
         </div>
         <button onClick={() => setOpen(true)} className="text-white p-1">
           <List size={22} />

@@ -1,0 +1,17 @@
+{
+  "name": "Cadence — by Conduit AI",
+  "short_name": "Cadence",
+  "description": "Your AI-powered private bank. One pool, one goal — track income, kill debt, and hit your savings target.",
+  "id": "/finance",
+  "start_url": "/finance",
+  "scope": "/finance",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0908",
+  "theme_color": "#0a0908",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    { "src": "/cadence-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/cadence-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
