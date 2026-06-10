@@ -10,7 +10,7 @@ import { Button, inputCls, labelCls } from "./forms";
 export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
-  const [email, setEmail] = useState(mode === "sign-in" ? "luisdelia@praxisbank.app" : "");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +34,7 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
           router.push("/finance");
           router.refresh();
         } else {
-          setNotice("Account created. If email confirmation is on, confirm then sign in.");
+          setNotice("Check your email to confirm your account, then sign in.");
         }
       }
     } catch (err: unknown) {
@@ -48,21 +48,21 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
     <div className="w-full max-w-sm">
       <div className="mb-8 text-center">
         <div className="fin-mono text-[11px] uppercase tracking-[0.3em] text-[var(--fin-muted)] mb-3">
-          Praxis Private Bank
+          Cadence · by Conduit AI
         </div>
         <h1 className="fin-display text-3xl tracking-tight">
           {mode === "sign-in" ? (
             <>
-              Welcome back, <GradientText>Luis &amp; Delia</GradientText>
+              Welcome back to <GradientText>Cadence</GradientText>
             </>
           ) : (
             <>
-              Create your <GradientText>household</GradientText>
+              Create your <GradientText>Cadence</GradientText> account
             </>
           )}
         </h1>
         <p className="text-sm text-[var(--fin-muted)] mt-2">
-          One shared pool. One goal: <span className="text-white">$75,000</span>.
+          Your AI-powered private bank. One pool, one goal.
         </p>
       </div>
 
@@ -91,25 +91,34 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
           />
         </label>
 
-        {error && <p className="text-xs text-red-300">{error}</p>}
-        {notice && <p className="text-xs text-emerald-300">{notice}</p>}
+        {error && <p className="text-xs text-[#f0888c]">{error}</p>}
+        {notice && <p className="text-xs text-[#7cc6a0]">{notice}</p>}
 
         <Button type="submit" variant="animate" disabled={loading} className="w-full">
-          {loading ? "…" : mode === "sign-in" ? "Enter the bank" : "Create household"}
+          {loading ? "…" : mode === "sign-in" ? "Sign in" : "Create account"}
         </Button>
+
+        {mode === "sign-up" && (
+          <p className="text-center text-[11px] text-[var(--fin-muted)] leading-relaxed">
+            By continuing you agree to our{" "}
+            <Link href="/finance/legal/terms" className="text-[#ffa876] hover:underline">Terms</Link> and{" "}
+            <Link href="/finance/legal/privacy" className="text-[#ffa876] hover:underline">Privacy Policy</Link>.
+            Cadence is a budgeting &amp; education tool, not financial advice.
+          </p>
+        )}
 
         <p className="text-center text-xs text-[var(--fin-muted)] pt-1">
           {mode === "sign-in" ? (
             <>
               Need an account?{" "}
-              <Link href="/finance/sign-up" className="text-violet-300 hover:underline">
+              <Link href="/finance/sign-up" className="text-[#ffa876] hover:underline">
                 Create one
               </Link>
             </>
           ) : (
             <>
               Already have one?{" "}
-              <Link href="/finance/sign-in" className="text-violet-300 hover:underline">
+              <Link href="/finance/sign-in" className="text-[#ffa876] hover:underline">
                 Sign in
               </Link>
             </>

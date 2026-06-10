@@ -1,37 +1,87 @@
+import { cache } from "react";
 import { createSupabaseServerClient, getCurrentUser } from "@/lib/supabase/server";
-import { HOUSEHOLD_ID } from "./constants";
 import type { Snapshot } from "./types";
 
-// Ensures the signed-in user is linked to the shared household. The finance
-// app is a single shared pool, so any authenticated household user maps to the
-// one seeded household. Idempotent.
-export async function ensureHouseholdLink(): Promise<boolean> {
+// The household id owned by the signed-in user (null if they haven't created
+// or joined one yet — which sends them to onboarding). Cached per request.
+export const getUserHouseholdId = cache(async function (): Promise<string | null> {
   const user = await getCurrentUser();
-  if (!user) return false;
+  if (!user) return null;
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from("fin_household_members")
-    .select("user_id")
+    .select("household_id")
     .eq("user_id", user.id)
     .maybeSingle();
-  if (!data) {
-    await supabase
-      .from("fin_household_members")
-      .insert({ user_id: user.id, household_id: HOUSEHOLD_ID });
-  }
-  return true;
+  return data?.household_id ?? null;
+});
+
+function genJoinCode(): string {
+  return Array.from({ length: 6 }, () =>
+    "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)],
+  ).join("");
+}
+
+// Creates a brand-new household for the current user (onboarding). Generates
+// the id client-side so we never need a RLS-blocked returning-select.
+export async function createHousehold(opts: {
+  name: string;
+  savingsGoal: number;
+  monthlyTarget: number;
+  targetDate: string | null;
+}): Promise<{ ok: boolean; id?: string; error?: string }> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+  const supabase = await createSupabaseServerClient();
+
+  const id =
+    globalThis.crypto?.randomUUID?.() ??
+    `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+  const { error: hErr } = await supabase.from("fin_household").insert({
+    id,
+    name: opts.name || "My Household",
+    savings_goal: opts.savingsGoal || 10000,
+    monthly_savings_target: opts.monthlyTarget || 1000,
+    goal_start_date: new Date().toISOString().slice(0, 10),
+    goal_target_date: opts.targetDate || null,
+    join_code: genJoinCode(),
+  });
+  if (hErr) return { ok: false, error: hErr.message };
+
+  const { error: mErr } = await supabase
+    .from("fin_household_members")
+    .insert({ user_id: user.id, household_id: id });
+  if (mErr) return { ok: false, error: mErr.message };
+
+  return { ok: true, id };
+}
+
+// Join an existing household via its share code (couples).
+export async function joinHouseholdByCode(
+  code: string,
+): Promise<{ ok: boolean; id?: string; error?: string }> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.rpc("fin_join_household", {
+    p_code: code.trim().toUpperCase(),
+  });
+  if (error) return { ok: false, error: error.message };
+  if (!data) return { ok: false, error: "No household found for that code." };
+  return { ok: true, id: data as string };
 }
 
 export async function getSnapshot(): Promise<Snapshot | null> {
-  const linked = await ensureHouseholdLink();
-  if (!linked) return null;
+  const hh = await getUserHouseholdId();
+  if (!hh) return null;
   const supabase = await createSupabaseServerClient();
 
   const [
     household, people, accounts, paychecks, inflows, expenses,
     debts, childSupport, payments, savingsLog, investments, creditScores,
   ] = await Promise.all([
-    supabase.from("fin_household").select("*").eq("id", HOUSEHOLD_ID).single(),
+    supabase.from("fin_household").select("*").eq("id", hh).single(),
     supabase.from("fin_people").select("*").order("role"),
     supabase.from("fin_accounts").select("*").order("created_at"),
     supabase.from("fin_paychecks").select("*").order("pay_date", { ascending: false }),

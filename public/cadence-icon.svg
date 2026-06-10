@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Cadence">
+  <defs>
+    <linearGradient id="ember" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffa876"/>
+      <stop offset="0.55" stop-color="#ff8a3d"/>
+      <stop offset="1" stop-color="#d9532a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.32" r="0.7">
+      <stop offset="0" stop-color="#ff8a3d" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#ff8a3d" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#0a0908"/>
+  <rect width="512" height="512" rx="112" fill="url(#glow)"/>
+  <!-- Cadence pulse: a rhythm/heartbeat line = money moving with your paycheck -->
+  <path d="M84 256 H164 L200 168 L256 344 L312 208 L344 256 H428"
+        fill="none" stroke="url(#ember)" stroke-width="26"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="428" cy="256" r="15" fill="#ffa876"/>
+</svg>

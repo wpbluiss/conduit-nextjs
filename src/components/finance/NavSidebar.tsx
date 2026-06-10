@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   House, Wallet, Money, Receipt, Flame, ChartLineUp,
-  Gauge, Sparkle, GearSix, SignOut, List, X,
+  Gauge, Sparkle, GearSix, SignOut, List, X, Crown,
 } from "@phosphor-icons/react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { clsx } from "./clsx";
@@ -20,6 +20,7 @@ const NAV = [
   { href: "/finance/investments", label: "Investments", icon: ChartLineUp },
   { href: "/finance/credit", label: "Credit", icon: Gauge },
   { href: "/finance/advisor", label: "Advisor", icon: Sparkle },
+  { href: "/finance/upgrade", label: "Upgrade", icon: Crown },
   { href: "/finance/settings", label: "Settings", icon: GearSix },
 ];
 
@@ -48,7 +49,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
             <Icon
               size={18}
               weight={active ? "fill" : "regular"}
-              className={active ? "text-violet-300" : ""}
+              className={active ? "text-[#ffa876]" : ""}
             />
             {item.label}
           </Link>
@@ -81,10 +82,10 @@ function Brand() {
   return (
     <div className="px-3 mb-6">
       <div className="fin-mono text-[10px] uppercase tracking-[0.28em] text-[var(--fin-muted)]">
-        Praxis
+        Conduit AI
       </div>
       <div className="fin-display text-xl leading-tight">
-        <GradientText>Private Bank</GradientText>
+        <GradientText>Cadence</GradientText>
       </div>
     </div>
   );
@@ -106,7 +107,7 @@ export function NavSidebar() {
       {/* Mobile top bar */}
       <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between border-b border-white/5 bg-black/50 backdrop-blur-xl px-4 py-3">
         <div className="fin-display text-base">
-          <GradientText>Private Bank</GradientText>
+          <GradientText>Cadence</GradientText>
         </div>
         <button onClick={() => setOpen(true)} className="text-white p-1">
           <List size={22} />
@@ -116,7 +117,7 @@ export function NavSidebar() {
       {open && (
         <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/70" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 left-0 w-64 bg-[#0C0C12] border-r border-white/10 p-4 flex flex-col justify-between">
+          <div className="absolute inset-y-0 left-0 w-64 bg-[#131110] border-r border-white/10 p-4 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <Brand />

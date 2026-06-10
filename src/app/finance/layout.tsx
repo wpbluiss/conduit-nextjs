@@ -1,10 +1,17 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./finance.css";
 import { Aurora } from "@/components/finance/ui";
 
 export const metadata: Metadata = {
-  title: "Praxis — Luis & Delia's Private Bank",
-  description: "One pool. One goal. $75K toward the down payment.",
+  title: "Cadence — by Conduit AI",
+  description: "Your AI-powered private bank. One pool, one goal — track income, kill debt, hit your savings target.",
+  manifest: "/cadence.webmanifest",
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Cadence" },
+  icons: { icon: "/cadence-icon.svg", apple: "/cadence-icon.svg" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0908",
 };
 
 export default function FinanceRootLayout({

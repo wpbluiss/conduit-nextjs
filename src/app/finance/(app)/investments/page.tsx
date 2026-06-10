@@ -12,9 +12,9 @@ import type { Investment } from "@/lib/finance/types";
 export const dynamic = "force-dynamic";
 
 const bucketMeta: Record<string, { label: string; color: string }> = {
-  luis: { label: "Luis", color: "#7C5CFF" },
-  delia: { label: "Delia", color: "#22D3EE" },
-  daughter: { label: "Daughter (custodial)", color: "#F472B6" },
+  luis: { label: "Luis", color: "#d9532a" },
+  delia: { label: "Delia", color: "#ff8a3d" },
+  daughter: { label: "Daughter (custodial)", color: "#ffa876" },
 };
 
 export default async function InvestmentsPage() {
@@ -105,7 +105,7 @@ export default async function InvestmentsPage() {
                       <div className="flex items-center gap-3">
                         <div className="text-right">
                           <div className="font-semibold">{fmtMoney(hv, { cents: true })}</div>
-                          <div className={`text-[11px] ${hg >= 0 ? "text-emerald-300" : "text-pink-300"}`}>
+                          <div className={`text-[11px] ${hg >= 0 ? "text-[#7cc6a0]" : "text-[#ffa876]"}`}>
                             {hg >= 0 ? "+" : ""}{fmtMoney(hg)} ({hgp.toFixed(1)}%)
                           </div>
                         </div>

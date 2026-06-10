@@ -90,14 +90,14 @@ export default async function AccountsPage() {
                     {util !== null && (
                       <div className="text-[11px] text-[var(--fin-muted)] mt-0.5">
                         Utilization {util.toFixed(0)}%{" "}
-                        <span className={util > 10 ? "text-amber-300" : "text-emerald-300"}>
+                        <span className={util > 10 ? "text-[#ffa876]" : "text-[#7cc6a0]"}>
                           ({util > 10 ? "above" : "under"} 10% line)
                         </span>
                       </div>
                     )}
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className={`font-semibold ${a.type === "credit_card" ? "text-pink-300" : ""}`}>
+                    <span className={`font-semibold ${a.type === "credit_card" ? "text-[#ffa876]" : ""}`}>
                       {fmtMoney(Number(a.balance), { cents: true })}
                     </span>
                     <EditBalanceModal id={a.id} name={a.name} balance={Number(a.balance)} />

@@ -32,8 +32,8 @@ export function SettingsForm({
   return (
     <form action={submit} className="space-y-3">
       {children}
-      {error && <p className="text-xs text-red-300">{error}</p>}
-      {saved && <p className="text-xs text-emerald-300">Saved ✓</p>}
+      {error && <p className="text-xs text-[#f0888c]">{error}</p>}
+      {saved && <p className="text-xs text-[#7cc6a0]">Saved ✓</p>}
       <SubmitButton pending={pending} variant="primary">{submitLabel}</SubmitButton>
     </form>
   );

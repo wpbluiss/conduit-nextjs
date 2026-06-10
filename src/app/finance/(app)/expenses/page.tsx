@@ -37,7 +37,7 @@ export default async function ExpensesPage() {
             <div className="text-[11px] text-[var(--fin-muted)] mt-0.5">
               Due {new Date(e.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
               {e.days !== null && (
-                <span className={e.days <= 0 ? " text-red-300" : e.days <= 5 ? " text-amber-300" : ""}>
+                <span className={e.days <= 0 ? " text-[#f0888c]" : e.days <= 5 ? " text-[#ffa876]" : ""}>
                   {" "}· {e.days <= 0 ? "due now" : `${e.days}d`}
                 </span>
               )}

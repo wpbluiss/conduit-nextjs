@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { clsx } from "./clsx";
 
 export const inputCls =
-  "w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm outline-none focus:border-violet-400/50 focus:bg-white/[0.07] transition placeholder:text-white/25 text-[var(--fin-text)]";
+  "w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm outline-none focus:border-[#ff8a3d]/50 focus:bg-white/[0.07] transition placeholder:text-white/25 text-[var(--fin-text)]";
 export const labelCls =
   "block text-[11px] uppercase tracking-[0.16em] text-[var(--fin-muted)] font-mono mb-1.5";
 
@@ -62,7 +62,7 @@ export function SelectField({
       <span className={labelCls}>{label}</span>
       <select className={clsx(inputCls, "appearance-none")} name={name} defaultValue={defaultValue}>
         {options.map((o) => (
-          <option key={o.value} value={o.value} className="bg-[#0C0C12]">
+          <option key={o.value} value={o.value} className="bg-[#131110]">
             {o.label}
           </option>
         ))}
@@ -92,8 +92,8 @@ export function Button({
     primary: "bg-white text-black hover:bg-white/90",
     ghost: "text-[var(--fin-muted)] hover:text-white hover:bg-white/5",
     outline: "border border-white/15 text-white hover:bg-white/5",
-    animate: "fin-btn-animate text-white shadow-lg shadow-violet-500/20",
-    danger: "border border-red-400/20 text-red-300 hover:bg-red-400/10",
+    animate: "fin-btn-animate shadow-lg shadow-[#d9532a]/20",
+    danger: "border border-[#e5484d]/20 text-[#f0888c] hover:bg-[#e5484d]/10",
   };
   return (
     <button
@@ -205,7 +205,7 @@ export function FormModal({
                   )}
                   <form action={submit} className="mt-4 space-y-3">
                     {children}
-                    {error && <p className="text-xs text-red-300">{error}</p>}
+                    {error && <p className="text-xs text-[#f0888c]">{error}</p>}
                     <div className="pt-1 pb-[env(safe-area-inset-bottom)]">
                       <SubmitButton pending={pending}>{title}</SubmitButton>
                     </div>

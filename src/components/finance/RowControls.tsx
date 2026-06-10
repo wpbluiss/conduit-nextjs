@@ -19,7 +19,7 @@ export function DeleteButton({ action }: { action: () => Promise<Result> }) {
       onClick={() => {
         if (confirm("Delete this? This can't be undone.")) start(() => { action(); });
       }}
-      className="p-1.5 rounded-md text-[var(--fin-muted)] hover:text-red-300 hover:bg-red-400/10 transition disabled:opacity-40"
+      className="p-1.5 rounded-md text-[var(--fin-muted)] hover:text-[#f0888c] hover:bg-[#e5484d]/10 transition disabled:opacity-40"
     >
       <Trash size={16} />
     </button>
@@ -32,7 +32,7 @@ export function MarkPaidButton({ id }: { id: string }) {
     <button
       disabled={pending}
       onClick={() => start(() => { markExpensePaid(id); })}
-      className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs text-emerald-300 hover:bg-emerald-400/10 transition disabled:opacity-40"
+      className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs text-[#7cc6a0] hover:bg-[#5b9d76]/10 transition disabled:opacity-40"
     >
       <CheckCircle size={14} weight="fill" /> {pending ? "…" : "Mark paid"}
     </button>

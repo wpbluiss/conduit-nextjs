@@ -55,12 +55,12 @@ export function Pill({
 }) {
   const tones: Record<string, string> = {
     default: "bg-white/5 text-[var(--fin-muted)] border-white/10",
-    green: "bg-emerald-400/10 text-emerald-300 border-emerald-400/20",
-    amber: "bg-amber-400/10 text-amber-300 border-amber-400/20",
-    violet: "bg-violet-400/10 text-violet-300 border-violet-400/20",
-    cyan: "bg-cyan-400/10 text-cyan-300 border-cyan-400/20",
-    pink: "bg-pink-400/10 text-pink-300 border-pink-400/20",
-    red: "bg-red-400/10 text-red-300 border-red-400/20",
+    green: "bg-[#5b9d76]/10 text-[#7cc6a0] border-[#5b9d76]/20",
+    amber: "bg-[#ff8a3d]/10 text-[#ffa876] border-[#ff8a3d]/20",
+    violet: "bg-[#ff8a3d]/10 text-[#ffa876] border-[#ff8a3d]/20",
+    cyan: "bg-[#ff8a3d]/10 text-[#ffa876] border-[#ff8a3d]/20",
+    pink: "bg-[#ff8a3d]/10 text-[#ffa876] border-[#ff8a3d]/20",
+    red: "bg-[#e5484d]/10 text-[#f0888c] border-[#e5484d]/20",
   };
   return (
     <span

@@ -10,9 +10,9 @@ import { AddSavingsModal } from "./QuickAdd";
 const PRESETS = [50, 150, 500, 1000];
 
 const bucketStyle: Record<string, { label: string; bar: string; text: string }> = {
-  expenses: { label: "Due bills", bar: "linear-gradient(90deg,#FBBF24,#F59E0B)", text: "text-amber-300" },
-  savings: { label: "Down-payment goal", bar: "linear-gradient(90deg,#7C5CFF,#22D3EE,#34D399)", text: "text-violet-300" },
-  debt: { label: "Debt-killer", bar: "linear-gradient(90deg,#F472B6,#FBBF24)", text: "text-pink-300" },
+  expenses: { label: "Due bills", bar: "linear-gradient(90deg,#ffa876,#d9532a)", text: "text-[#ffa876]" },
+  savings: { label: "Down-payment goal", bar: "linear-gradient(90deg,#d9532a,#ff8a3d,#ffa876)", text: "text-[#ffa876]" },
+  debt: { label: "Debt-killer", bar: "linear-gradient(90deg,#ffa876,#ffa876)", text: "text-[#ffa876]" },
 };
 
 export function AllocationPlanner({ snap }: { snap: Snapshot }) {
@@ -39,7 +39,7 @@ export function AllocationPlanner({ snap }: { snap: Snapshot }) {
             value={amount || ""}
             onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
             placeholder="Enter an amount"
-            className="w-full rounded-lg bg-white/5 border border-white/10 pl-7 pr-3 py-2.5 text-sm outline-none focus:border-violet-400/50 transition placeholder:text-white/25"
+            className="w-full rounded-lg bg-white/5 border border-white/10 pl-7 pr-3 py-2.5 text-sm outline-none focus:border-[#ff8a3d]/50 transition placeholder:text-white/25"
           />
         </div>
         {PRESETS.map((p) => (
