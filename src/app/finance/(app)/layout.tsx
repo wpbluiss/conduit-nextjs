@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase/server";
+import { getUserHouseholdId } from "@/lib/finance/data";
 import { NavSidebar } from "@/components/finance/NavSidebar";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +12,8 @@ export default async function AppLayout({
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/finance/sign-in");
+  const hh = await getUserHouseholdId();
+  if (!hh) redirect("/finance/onboarding");
 
   return (
     <div>

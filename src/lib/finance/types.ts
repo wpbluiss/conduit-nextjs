@@ -8,6 +8,7 @@ export interface Household {
   expected_next_deposit: number;
   expected_deposit_date: string | null;
   expected_deposit_note: string | null;
+  join_code: string | null;
   created_at: string;
 }
 

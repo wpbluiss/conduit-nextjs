@@ -2,13 +2,30 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient, getCurrentUser } from "@/lib/supabase/server";
-import { HOUSEHOLD_ID } from "./constants";
-import { ensureHouseholdLink } from "./data";
+import { getUserHouseholdId, createHousehold, joinHouseholdByCode } from "./data";
 
-type Result = { ok: boolean; error?: string };
+type Result = { ok: boolean; error?: string; id?: string };
+
+// -------- Onboarding (multi-tenant) --------
+export async function onboardCreateHousehold(form: FormData): Promise<Result> {
+  const res = await createHousehold({
+    name: str(form.get("name"), "My Household"),
+    savingsGoal: num(form.get("savings_goal"), 10000),
+    monthlyTarget: num(form.get("monthly_savings_target"), 1000),
+    targetDate: str(form.get("goal_target_date")) || null,
+  });
+  refresh();
+  return res;
+}
+
+export async function onboardJoinHousehold(form: FormData): Promise<Result> {
+  const res = await joinHouseholdByCode(str(form.get("code")));
+  refresh();
+  return res;
+}
 
 async function db() {
-  await ensureHouseholdLink();
+  await getUserHouseholdId();
   return createSupabaseServerClient();
 }
 
@@ -29,7 +46,7 @@ function str(v: FormDataEntryValue | null, fallback = ""): string {
 export async function linkHousehold(): Promise<Result> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: "Not signed in" };
-  await ensureHouseholdLink();
+  await getUserHouseholdId();
   return { ok: true };
 }
 
@@ -37,7 +54,7 @@ export async function linkHousehold(): Promise<Result> {
 export async function addAccount(form: FormData): Promise<Result> {
   const supabase = await db();
   const { error } = await supabase.from("fin_accounts").insert({
-    household_id: HOUSEHOLD_ID,
+    household_id: (await getUserHouseholdId())!,
     name: str(form.get("name"), "Account"),
     type: str(form.get("type"), "checking"),
     balance: num(form.get("balance")),
@@ -73,7 +90,7 @@ export async function addPaycheck(form: FormData): Promise<Result> {
   const supabase = await db();
   const tag = str(form.get("person_tag"), "shared");
   const { error } = await supabase.from("fin_paychecks").insert({
-    household_id: HOUSEHOLD_ID,
+    household_id: (await getUserHouseholdId())!,
     person_tag: tag,
     job: str(form.get("job")) || null,
     pay_date: str(form.get("pay_date")) || new Date().toISOString().slice(0, 10),
@@ -90,7 +107,7 @@ export async function addPaycheck(form: FormData): Promise<Result> {
 export async function addInflow(form: FormData): Promise<Result> {
   const supabase = await db();
   const { error } = await supabase.from("fin_inflows").insert({
-    household_id: HOUSEHOLD_ID,
+    household_id: (await getUserHouseholdId())!,
     person_tag: str(form.get("person_tag"), "shared"),
     date: str(form.get("date")) || new Date().toISOString().slice(0, 10),
     amount: num(form.get("amount")),
@@ -106,7 +123,7 @@ export async function addExpense(form: FormData): Promise<Result> {
   const supabase = await db();
   const recurring = str(form.get("recurrence"), "none") !== "none";
   const { error } = await supabase.from("fin_expenses").insert({
-    household_id: HOUSEHOLD_ID,
+    household_id: (await getUserHouseholdId())!,
     name: str(form.get("name"), "Expense"),
     category: str(form.get("category"), "general"),
     amount: num(form.get("amount")),
@@ -144,7 +161,7 @@ export async function addDebt(form: FormData): Promise<Result> {
   const supabase = await db();
   const bal = num(form.get("balance"));
   const { error } = await supabase.from("fin_debts").insert({
-    household_id: HOUSEHOLD_ID,
+    household_id: (await getUserHouseholdId())!,
     name: str(form.get("name"), "Debt"),
     balance: bal,
     original_balance: form.get("original_balance") ? num(form.get("original_balance")) : bal,
@@ -170,7 +187,7 @@ export async function logDebtPayment(
   const status = newBalance <= 0 ? "paid" : debt.status === "past_due" ? "active" : debt.status;
   await supabase.from("fin_debts").update({ balance: newBalance, status, updated_at: new Date().toISOString() }).eq("id", id);
   const { error } = await supabase.from("fin_payments").insert({
-    household_id: HOUSEHOLD_ID, kind: "debt", ref_id: id,
+    household_id: (await getUserHouseholdId())!, kind: "debt", ref_id: id,
     label: name || debt.name, amount, on_time: onTime,
     date: new Date().toISOString().slice(0, 10),
   });
@@ -193,7 +210,7 @@ export async function logChildSupportPayment(amount: number, onTime = true): Pro
   const remaining = Math.max(0, Number(cs.remaining_balance) - amount);
   await supabase.from("fin_child_support").update({ remaining_balance: remaining, updated_at: new Date().toISOString() }).eq("id", cs.id);
   const { error } = await supabase.from("fin_payments").insert({
-    household_id: HOUSEHOLD_ID, kind: "child_support", ref_id: cs.id,
+    household_id: (await getUserHouseholdId())!, kind: "child_support", ref_id: cs.id,
     label: "Child support", amount, on_time: onTime,
     date: new Date().toISOString().slice(0, 10),
   });
@@ -213,7 +230,7 @@ export async function updateChildSupport(form: FormData): Promise<Result> {
   if (cs) {
     ({ error } = await supabase.from("fin_child_support").update(patch).eq("id", cs.id));
   } else {
-    ({ error } = await supabase.from("fin_child_support").insert({ household_id: HOUSEHOLD_ID, ...patch }));
+    ({ error } = await supabase.from("fin_child_support").insert({ household_id: (await getUserHouseholdId())!, ...patch }));
   }
   refresh();
   return { ok: !error, error: error?.message };
@@ -223,7 +240,7 @@ export async function updateChildSupport(form: FormData): Promise<Result> {
 export async function addSavings(form: FormData): Promise<Result> {
   const supabase = await db();
   const { error } = await supabase.from("fin_savings_log").insert({
-    household_id: HOUSEHOLD_ID,
+    household_id: (await getUserHouseholdId())!,
     amount: num(form.get("amount")),
     date: str(form.get("date")) || new Date().toISOString().slice(0, 10),
     note: str(form.get("note")) || null,
@@ -238,7 +255,7 @@ export async function updateGoalSettings(form: FormData): Promise<Result> {
     savings_goal: num(form.get("savings_goal"), 75000),
     monthly_savings_target: num(form.get("monthly_savings_target"), 5000),
     goal_target_date: str(form.get("goal_target_date")) || null,
-  }).eq("id", HOUSEHOLD_ID);
+  }).eq("id", (await getUserHouseholdId())!);
   refresh();
   return { ok: !error, error: error?.message };
 }
@@ -249,7 +266,7 @@ export async function updateExpectedDeposit(form: FormData): Promise<Result> {
     expected_next_deposit: num(form.get("expected_next_deposit")),
     expected_deposit_date: str(form.get("expected_deposit_date")) || null,
     expected_deposit_note: str(form.get("expected_deposit_note")) || null,
-  }).eq("id", HOUSEHOLD_ID);
+  }).eq("id", (await getUserHouseholdId())!);
   refresh();
   return { ok: !error, error: error?.message };
 }
@@ -258,7 +275,7 @@ export async function updateExpectedDeposit(form: FormData): Promise<Result> {
 export async function addInvestment(form: FormData): Promise<Result> {
   const supabase = await db();
   const { error } = await supabase.from("fin_investments").insert({
-    household_id: HOUSEHOLD_ID,
+    household_id: (await getUserHouseholdId())!,
     bucket: str(form.get("bucket"), "luis"),
     ticker: str(form.get("ticker"), "VOO").toUpperCase(),
     shares: num(form.get("shares")),
@@ -294,7 +311,7 @@ export async function logInvestmentBuy(form: FormData): Promise<Result> {
     }).eq("id", existing.id);
   } else {
     const { data: created } = await supabase.from("fin_investments").insert({
-      household_id: HOUSEHOLD_ID, bucket, ticker,
+      household_id: (await getUserHouseholdId())!, bucket, ticker,
       shares, cost_basis: amount, current_price: price,
       last_price_update: new Date().toISOString().slice(0, 10),
     }).select("id").single();
@@ -302,7 +319,7 @@ export async function logInvestmentBuy(form: FormData): Promise<Result> {
   }
 
   const { error } = await supabase.from("fin_investment_txns").insert({
-    household_id: HOUSEHOLD_ID, investment_id: investmentId ?? null,
+    household_id: (await getUserHouseholdId())!, investment_id: investmentId ?? null,
     bucket, ticker, amount, shares, price,
     date: str(form.get("date")) || new Date().toISOString().slice(0, 10),
     notes: str(form.get("notes")) || null,
@@ -325,7 +342,7 @@ export async function updateInvestmentPrice(id: string, price: number): Promise<
 export async function addCreditScore(form: FormData): Promise<Result> {
   const supabase = await db();
   const { error } = await supabase.from("fin_credit_scores").insert({
-    household_id: HOUSEHOLD_ID,
+    household_id: (await getUserHouseholdId())!,
     person_tag: str(form.get("person_tag"), "luis"),
     date: str(form.get("date")) || new Date().toISOString().slice(0, 10),
     score: Math.round(num(form.get("score"))),

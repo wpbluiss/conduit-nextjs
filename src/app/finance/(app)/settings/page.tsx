@@ -37,6 +37,18 @@ export default async function SettingsPage() {
         <p className="text-sm text-[var(--fin-muted)] mt-1">Tune the goal and obligations. Nothing is hardcoded.</p>
       </div>
 
+      {h.join_code && (
+        <Card className="!p-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <div className="fin-mono text-[10px] uppercase tracking-[0.18em] text-[var(--fin-muted)]">Household · invite your partner</div>
+              <p className="text-sm text-[var(--fin-muted)] mt-1">Share this code so they join the same pooled view.</p>
+            </div>
+            <div className="fin-mono text-xl font-semibold tracking-[0.25em] text-[#ffa876]">{h.join_code}</div>
+          </div>
+        </Card>
+      )}
+
       <div className="grid lg:grid-cols-2 gap-6">
         <Card>
           <SectionTitle eyebrow="The goal" title="Savings target" />

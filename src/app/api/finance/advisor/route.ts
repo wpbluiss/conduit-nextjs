@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createSupabaseServerClient, getCurrentUser } from "@/lib/supabase/server";
-import { getSnapshot, ensureHouseholdLink } from "@/lib/finance/data";
-import { HOUSEHOLD_ID } from "@/lib/finance/constants";
+import { getSnapshot, getUserHouseholdId } from "@/lib/finance/data";
 import {
   pooledCash, netWorth, projectIncome, goalProgress, orderDebts,
   daysBetween, todayISO, investmentsValue,
@@ -92,8 +91,7 @@ const TOOLS: Anthropic.Tool[] = [
 
 type SB = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 
-async function runTool(sb: SB, name: string, input: Record<string, unknown>): Promise<string> {
-  const hh = HOUSEHOLD_ID;
+async function runTool(sb: SB, hh: string, name: string, input: Record<string, unknown>): Promise<string> {
   const today = todayISO();
   const n = (v: unknown, d = 0) => (typeof v === "number" ? v : parseFloat(String(v ?? "")) || d);
   const s = (v: unknown, d = "") => (v == null ? d : String(v));
@@ -218,7 +216,8 @@ STYLE: Concise, direct, human. Use their names. Use real numbers from the contex
 export async function POST(req: Request) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
-  await ensureHouseholdLink();
+  const hh = await getUserHouseholdId();
+  if (!hh) return NextResponse.json({ error: "No household" }, { status: 400 });
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
@@ -266,7 +265,7 @@ export async function POST(req: Request) {
         messages.push({ role: "assistant", content: resp.content });
         const results: Anthropic.ToolResultBlockParam[] = [];
         for (const tu of toolUses) {
-          const out = await runTool(sb, tu.name, tu.input as Record<string, unknown>);
+          const out = await runTool(sb, hh, tu.name, tu.input as Record<string, unknown>);
           actions.push(out);
           results.push({ type: "tool_result", tool_use_id: tu.id, content: out });
         }
@@ -278,8 +277,8 @@ export async function POST(req: Request) {
 
     // Persist conversation
     await sb.from("fin_ai_messages").insert([
-      { household_id: HOUSEHOLD_ID, role: "user", content: userMessage },
-      { household_id: HOUSEHOLD_ID, role: "assistant", content: finalText },
+      { household_id: hh, role: "user", content: userMessage },
+      { household_id: hh, role: "assistant", content: finalText },
     ]);
 
     return NextResponse.json({ reply: finalText || "Done.", actions });
