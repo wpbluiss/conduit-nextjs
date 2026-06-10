@@ -1,0 +1,90 @@
+/* ============================================================================
+ * Conduit / Praxis rebrand — disciplined single-accent identity.
+ *
+ * One brand color (ember) on warm near-black. No rainbow, no violet/blue/pink.
+ * Reads "engineered by a team", not "AI generated". Scoped to `.wm-rebrand`;
+ * the shadcn token MAPPINGS live in globals.css and resolve via var(--wm-*).
+ * ========================================================================== */
+
+.wm-rebrand {
+  /* warm-neutral surfaces (Conduit console palette) */
+  --wm-background: #0a0908;
+  --wm-foreground: #f5f1ea;
+  --wm-card: #131110;
+  --wm-card-foreground: #f5f1ea;
+  --wm-popover: #131110;
+  --wm-popover-foreground: #f5f1ea;
+
+  /* the ONE accent: ember */
+  --wm-primary: #ff8a3d;
+  --wm-primary-foreground: #1b1206;
+  --wm-secondary: #1b1714;
+  --wm-secondary-foreground: #f5f1ea;
+  --wm-muted: #181513;
+  --wm-muted-foreground: #8c8884;
+  --wm-accent-foreground: #ffd9bf;
+  --wm-destructive: #e5484d;
+  --wm-destructive-foreground: #ffffff;
+  --wm-input: #221f1b;
+  --wm-ring: #ff8a3d;
+
+  /* ember ramp (the only hues used decoratively) */
+  --wm-ember: #ff8a3d;
+  --wm-ember-hi: #ffa876;
+  --wm-ember-deep: #d9532a;
+  /* functional status — muted, used only as tiny indicators */
+  --wm-ok: #5b9d76;
+  --wm-idle: #6b6660;
+
+  background: var(--wm-background);
+  color: var(--wm-foreground);
+  font-feature-settings: "ss01", "cv01", "tnum";
+}
+
+/* Subtle SINGLE-hue ember wash — no rainbow, low presence. */
+.wm-aurora { position: relative; isolation: isolate; overflow: hidden; }
+.wm-aurora::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  z-index: -1;
+  background:
+    radial-gradient(46% 60% at 50% -10%, color-mix(in srgb, var(--wm-ember) 22%, transparent), transparent 70%);
+  filter: blur(30px);
+}
+
+/* Fine engineered grid texture. */
+.wm-grid {
+  background-image: radial-gradient(color-mix(in srgb, var(--wm-foreground) 6%, transparent) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+
+/* Hairline separators / rings for a precise, built look. */
+.wm-hair { border-color: color-mix(in srgb, var(--wm-foreground) 9%, transparent); }
+
+/* Single-hue ember emphasis for one or two words — tonal, not rainbow. */
+.wm-ink {
+  background: linear-gradient(180deg, var(--wm-ember-hi), var(--wm-ember));
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+
+/* Restrained ember glow, used sparingly on the primary CTA only. */
+.wm-glow { box-shadow: 0 10px 34px -16px color-mix(in srgb, var(--wm-ember) 65%, transparent); }
+
+/* Mono label: uppercase, tracked-out — the "spec sheet" voice. */
+.wm-label {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.66rem;
+  color: var(--wm-muted-foreground);
+}
+
+/* Hide scrollbar on horizontal chip rails (team switcher). */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wm-aurora::before { animation: none; }
+}
