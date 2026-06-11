@@ -54,6 +54,11 @@ jobs:
                match the existing patterns. This repo is the founder's life's work — treat
                it with that care.
 
-            6. HANDOFF — In the PR: link the issue, summarize the change, paste your
-               premortem, and list exactly what Luis should check before merging. Keep
-               PRs small and single-purpose so they're easy to approve from a phone.
+            6. HANDOFF — You MUST open the Pull Request yourself, do not stop at pushing
+               a branch. After committing, run:
+               `git push -u origin <your-branch>` then
+               `gh pr create --base main --head <your-branch> --title "<concise>" --body "<summary + premortem + what to verify>"`
+               (the `gh` CLI is installed and authenticated via GITHUB_TOKEN). In the PR:
+               link the issue, summarize the change, paste your premortem, and list exactly
+               what Luis should check before merging. Keep PRs small and single-purpose so
+               they're easy to approve from a phone. Then comment the PR link on the issue.
