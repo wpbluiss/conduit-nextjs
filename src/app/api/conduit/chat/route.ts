@@ -17,6 +17,7 @@ import type { AccountContext } from "@/lib/ai/employees/jarvis";
 import { parseHandoff, parseArtifacts } from "@/lib/ai/parse";
 import { estimateCostCents } from "@/lib/ai/pricing";
 import { classifyIntent, type IntentClass } from "@/lib/ai/intent-classifier";
+import { checkChatRateLimit } from "@/lib/ai/chat-rate-limit";
 import { tierById } from "@/lib/billing/tiers";
 import {
   executeBuild,
@@ -99,6 +100,31 @@ export async function POST(request: NextRequest) {
     );
   }
   const account = await rollBillingCycleIfDue(supabase, initialAccount);
+
+  // Per-account request-rate limit (issue #19). Runs before any conversation
+  // insert or model call so a hammering account costs us nothing. Internal
+  // accounts (e.g. Luis) are exempt so dogfooding/automation isn't throttled.
+  if (!account.internal_account) {
+    const rl = checkChatRateLimit(account.id);
+    if (!rl.ok) {
+      return NextResponse.json(
+        {
+          error: "rate_limited",
+          message: `You're sending messages too quickly. Give the team a moment and try again in ~${rl.retryInSeconds}s.`,
+          retry_after_seconds: rl.retryInSeconds,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rl.retryInSeconds),
+            "X-RateLimit-Limit": String(rl.limit),
+            "X-RateLimit-Remaining": String(rl.remaining),
+          },
+        },
+      );
+    }
+  }
+
   const businessType = account.business_type ?? initialAccount.business_type;
   const businessDescription =
     account.business_description ?? initialAccount.business_description;
