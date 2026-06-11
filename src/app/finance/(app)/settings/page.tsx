@@ -6,6 +6,8 @@ import { Card, SectionTitle, EmptyState } from "@/components/finance/ui";
 import { Field } from "@/components/finance/forms";
 import { SettingsForm } from "@/components/finance/SettingsForm";
 import { SavingsAreaChart } from "@/components/finance/Charts";
+import { DangerZone } from "@/components/finance/DangerZone";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +81,20 @@ export default async function SettingsPage() {
         ) : (
           <SavingsAreaChart data={chart} />
         )}
+      </Card>
+
+      <Card className="!p-4">
+        <div className="flex items-center gap-4 text-sm">
+          <Link href="/finance/legal/terms" className="text-[#ffa876] hover:underline">Terms</Link>
+          <Link href="/finance/legal/privacy" className="text-[#ffa876] hover:underline">Privacy</Link>
+          <Link href="/finance/upgrade" className="text-[#ffa876] hover:underline">Plan</Link>
+          <a href="mailto:support@conduitai.io" className="text-[var(--fin-muted)] hover:text-white">Support</a>
+        </div>
+      </Card>
+
+      <Card className="border-[#e5484d]/25">
+        <SectionTitle eyebrow="Danger zone" title="Delete account" />
+        <DangerZone />
       </Card>
     </div>
   );

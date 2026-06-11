@@ -413,3 +413,10 @@ export async function openBillingPortal(): Promise<Result & { url?: string }> {
   });
   return { ok: true, url: session.url };
 }
+
+// Deletes the caller's account data (and the household if they're the last member).
+export async function deleteMyAccount(): Promise<Result> {
+  const supabase = await db();
+  const { error } = await supabase.rpc("fin_delete_my_account");
+  return { ok: !error, error: error?.message };
+}
