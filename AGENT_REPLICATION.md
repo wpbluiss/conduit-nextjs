@@ -123,3 +123,9 @@ jobs:
 `conduit-mobile` (Praxis app) · `conduit-hq-unity-scripts` (Unity) · `conduit-backend`
 · then the workers (`conduit-engineering-worker`, `conduit-marketing-worker`) and
 `conduit-trading-bot`.
+
+## Making the repos work *together*
+This kit gives each repo its own agents. To make them coordinate — so one team
+shipping automatically queues the next team's unblocked work — see
+[`ORCHESTRATOR.md`](./ORCHESTRATOR.md) (**Conductor**, the cross-repo orchestrator).
+It's already deployed; it just needs a GitHub token provisioned once.
