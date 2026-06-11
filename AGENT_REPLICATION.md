@@ -124,6 +124,14 @@ jobs:
 · then the workers (`conduit-engineering-worker`, `conduit-marketing-worker`) and
 `conduit-trading-bot`.
 
+## Auto-review & merge (taking the human out of the loop)
+`.github/workflows/auto-review-merge.yml` is the "board of directors": it reviews
+open PRs, verifies the build is green, and merges to production autonomously —
+**except** changes that delete data, run destructive migrations, or expose secrets,
+which are labeled `needs-human`. Install it per repo alongside the two workflows
+above to compress the approve-merge bottleneck. (Swap to the Max-plan OAuth token
+to run it at $0.)
+
 ## Making the repos work *together*
 This kit gives each repo its own agents. To make them coordinate — so one team
 shipping automatically queues the next team's unblocked work — see
