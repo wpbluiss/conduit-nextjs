@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SettingsTabs } from "@/components/conduit/SettingsTabs";
+import { PraxisDangerZone } from "@/components/conduit/PraxisDangerZone";
 import { loadSettingsData } from "@/lib/conduit/settings-data";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +25,7 @@ export default async function ProfileSettings() {
           usage={data.usage}
           defaultTab="profile"
         />
+        <PraxisDangerZone />
       </div>
     </div>
   );
