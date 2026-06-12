@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight } from "@phosphor-icons/react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { ArrowRight, Check, X } from "@phosphor-icons/react";
 import { PraxisLogo } from "@/components/conduit/PraxisLogo";
 import { track } from "@/lib/analytics/track";
+import type { SignUpResponse } from "@/lib/auth/types";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 
@@ -20,6 +20,38 @@ const ITEM = {
   show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } },
 };
 
+const ERROR_MESSAGES: Record<string, string> = {
+  email_already_registered: "An account with this email already exists.",
+  password_too_weak: "Password must be at least 8 characters, with a letter and a number.",
+  name_required: "Please enter your name.",
+  invalid_email: "Please enter a valid email address.",
+  signup_failed: "Something went wrong. Please try again.",
+  bad_request: "Invalid request. Please check your inputs.",
+};
+
+function passwordStrength(pw: string) {
+  return {
+    minLength: pw.length >= 8,
+    hasLetter: /[a-zA-Z]/.test(pw),
+    hasDigit: /[0-9]/.test(pw),
+  };
+}
+
+function StrengthRow({ ok, label }: { ok: boolean; label: string }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      {ok ? (
+        <Check size={11} weight="bold" className="text-[var(--color-green)] shrink-0" />
+      ) : (
+        <X size={11} weight="bold" className="text-[var(--color-text-muted)] shrink-0" />
+      )}
+      <span className={ok ? "text-[var(--color-green)]" : "text-[var(--color-text-muted)]"}>
+        {label}
+      </span>
+    </span>
+  );
+}
+
 export default function SignUpPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -28,35 +60,64 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const [passwordTouched, setPasswordTouched] = useState(false);
+
+  const strength = passwordStrength(password);
+  const strengthComplete = strength.minLength && strength.hasLetter && strength.hasDigit;
+  const showStrength = passwordTouched && password.length > 0;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!name.trim()) {
+      setError(ERROR_MESSAGES.name_required);
+      return;
+    }
+    if (!strengthComplete) {
+      setError(ERROR_MESSAGES.password_too_weak);
+      return;
+    }
     setLoading(true);
     setError(null);
     setInfo(null);
     track("signup_started");
-    const supabase = createSupabaseBrowserClient();
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: name },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    if (error) {
-      setError(error.message);
+
+    let res: Response;
+    try {
+      res = await fetch("/api/v1/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, name: name.trim() }),
+      });
+    } catch {
+      setError(ERROR_MESSAGES.signup_failed);
       setLoading(false);
       return;
     }
-    if (data.session) {
-      track("signup_completed");
-      router.replace("/app");
+
+    if (res.status === 201) {
+      const data = (await res.json()) as SignUpResponse;
+      track("signup_completed", { userId: data.userId });
+      router.replace("/app/workspace");
       router.refresh();
-    } else {
-      setInfo("Check your email to confirm. Once confirmed, you can sign in.");
-      setLoading(false);
+      return;
     }
+
+    if (res.status === 202) {
+      await res.json();
+      setInfo("Check your email to confirm your address, then sign in.");
+      setLoading(false);
+      return;
+    }
+
+    let errorCode = "signup_failed";
+    try {
+      const body = await res.json();
+      if (typeof body.error === "string") errorCode = body.error;
+    } catch {
+      // use default
+    }
+    setError(ERROR_MESSAGES[errorCode] ?? ERROR_MESSAGES.signup_failed);
+    setLoading(false);
   }
 
   return (
@@ -156,13 +217,24 @@ export default function SignUpPage() {
                 id="password"
                 type="password"
                 required
-                minLength={8}
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onFocus={() => setPasswordTouched(true)}
                 placeholder="Min. 8 characters"
                 className="w-full rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-default)] px-4 py-3 text-[var(--color-text)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)]"
               />
+              {showStrength && (
+                <motion.div
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px]"
+                >
+                  <StrengthRow ok={strength.minLength} label="8+ characters" />
+                  <StrengthRow ok={strength.hasLetter} label="Contains a letter" />
+                  <StrengthRow ok={strength.hasDigit} label="Contains a number" />
+                </motion.div>
+              )}
             </motion.div>
 
             {error && (
