@@ -44,7 +44,7 @@ export default async function ChatPage({
   if (activeId) {
     const msgsQ = await supabase
       .from("conduit_messages")
-      .select("id, role, employee, content")
+      .select("id, role, employee, content, metadata")
       .eq("conversation_id", activeId)
       .order("created_at", { ascending: true })
       .limit(200);
@@ -55,6 +55,7 @@ export default async function ChatPage({
         role: m.role as "user" | "assistant",
         employee: (m.employee as EmployeeId | null) ?? null,
         content: (m.content as string) ?? "",
+        audio_path: (m.metadata as Record<string, unknown> | null)?.audio_path as string | undefined,
       }));
   }
 

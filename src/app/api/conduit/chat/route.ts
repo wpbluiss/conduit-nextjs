@@ -80,6 +80,7 @@ export async function POST(request: NextRequest) {
     conversation_id?: string;
     message?: string;
     employee_override?: EmployeeKey | "team";
+    audio_path?: string;
   };
   try {
     body = await request.json();
@@ -158,6 +159,7 @@ export async function POST(request: NextRequest) {
     conversation_id: conversationId,
     role: "user",
     content: message,
+    ...(body.audio_path ? { metadata: { audio_path: body.audio_path } } : {}),
   });
 
   // Load last 10 messages of context

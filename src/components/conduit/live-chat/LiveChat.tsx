@@ -15,7 +15,9 @@ import {
   Sparkles, Code2, TrendingUp, Megaphone, DollarSign, Wrench, ShieldCheck,
   Users, Scale, SquarePen, Menu, ArrowUp, Paperclip, Search, Settings,
   MoreHorizontal, Command, Slash, AtSign, Copy, RefreshCw, Hammer, FileText, Download, Printer, X, AudioLines,
+  Mic, Square,
 } from "lucide-react";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { Button } from "@/components/ui/button";
 import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
 import PraxisLiveRoom from "@/components/conduit/voice/PraxisLiveRoom";
@@ -35,6 +37,22 @@ const SLASH: { cmd: string; desc: string; emp: EmployeeId; template: string; ico
   { cmd: "/review", desc: "Legal review", emp: "legal", template: "Review ", icon: Scale },
 ];
 
+// Audio player for voice messages — fetches a 1-hour signed URL from private
+// Supabase Storage bucket and renders a native HTML5 audio element.
+function AudioPlayer({ path }: { path: string }) {
+  const [url, setUrl] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    let alive = true;
+    createSupabaseBrowserClient()
+      .storage.from("chat-audio")
+      .createSignedUrl(path, 3600)
+      .then(({ data }) => { if (alive && data?.signedUrl) setUrl(data.signedUrl); });
+    return () => { alive = false; };
+  }, [path]);
+  if (!url) return <span className="mt-1 block text-xs text-muted-foreground">Loading audio…</span>;
+  return <audio controls className="mt-2 h-8 w-full max-w-xs rounded-md" src={url} />;
+}
+
 // Deliverables are type-aware: code downloads as runnable source; docs as
 // Markdown and can also export to PDF.
 const DOC_TYPES = new Set(["post", "doc", "brief", "proposal", "report", "letter", "plan", "copy", "email", "memo"]);
@@ -49,6 +67,7 @@ export type LiveMsg = {
   content: string;
   pending?: boolean;
   artifacts?: { id: string; title: string; type: string; by: EmployeeId }[];
+  audio_path?: string;
 };
 type Convo = { id: string; title: string; updated_at: string };
 type OpenArt = { id: string; title: string; type: string; by: EmployeeId };
@@ -87,6 +106,12 @@ export function LiveChat({
   const [roomToken, setRoomToken] = React.useState<VoiceTokenResponse | null>(null);
   const [launching, setLaunching] = React.useState(false);
   const [voiceErr, setVoiceErr] = React.useState<string | null>(null);
+  const [recording, setRecording] = React.useState(false);
+  const [recordingSeconds, setRecordingSeconds] = React.useState(0);
+  const [audioUploading, setAudioUploading] = React.useState(false);
+  const [audioErr, setAudioErr] = React.useState<string | null>(null);
+  const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
+  const audioChunksRef = React.useRef<Blob[]>([]);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const taRef = React.useRef<HTMLTextAreaElement>(null);
   const emp = EMPLOYEES[pin];
@@ -128,6 +153,73 @@ export function LiveChat({
     return () => { alive = false; };
   }, [openArtifact]);
 
+  React.useEffect(() => {
+    if (!recording) { setRecordingSeconds(0); return; }
+    const t = setInterval(() => setRecordingSeconds((s) => s + 1), 1000);
+    return () => clearInterval(t);
+  }, [recording]);
+
+  async function startRecording() {
+    setAudioErr(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+      setRecording(true);
+    } catch {
+      setAudioErr("Microphone permission denied or unavailable.");
+      setTimeout(() => setAudioErr(null), 4000);
+    }
+  }
+
+  async function stopAndUpload() {
+    const recorder = mediaRecorderRef.current;
+    if (!recorder) return;
+    setRecording(false);
+    setAudioUploading(true);
+
+    await new Promise<void>((resolve) => {
+      recorder.onstop = () => resolve();
+      recorder.stop();
+      recorder.stream.getTracks().forEach((t) => t.stop());
+    });
+
+    const mimeType = audioChunksRef.current[0]?.type || "audio/webm";
+    const blob = new Blob(audioChunksRef.current, { type: mimeType });
+
+    if (blob.size > 5 * 1024 * 1024) {
+      setAudioUploading(false);
+      setAudioErr("Recording too long — max 5 MB.");
+      setTimeout(() => setAudioErr(null), 4000);
+      return;
+    }
+
+    const supabase = createSupabaseBrowserClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setAudioUploading(false); return; }
+
+    const ext = mimeType.startsWith("audio/webm") ? "webm" : mimeType.startsWith("audio/ogg") ? "ogg" : "webm";
+    const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("chat-audio").upload(path, blob, { contentType: mimeType });
+    setAudioUploading(false);
+
+    if (error) {
+      setAudioErr("Upload failed. Make sure the storage bucket is set up.");
+      setTimeout(() => setAudioErr(null), 5000);
+      return;
+    }
+
+    send("🎤 Voice message", path);
+  }
+
+  function toggleRecording() {
+    if (recording) stopAndUpload();
+    else startRecording();
+  }
+
   function grow() { const ta = taRef.current; if (!ta) return; ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, 160) + "px"; }
   function applySlash(s: typeof SLASH[number]) { setPin(s.emp); setUserPinned(true); setInput(s.template); taRef.current?.focus(); }
   function applyMention(id: EmployeeId) { setInput((v) => v.replace(/(^|\s)@\w*$/, (_m, p1) => `${p1}@${EMPLOYEES[id].name} `)); setPin(id); setUserPinned(true); taRef.current?.focus(); }
@@ -137,12 +229,12 @@ export function LiveChat({
   function downloadArt() { if (!openArtifact || !artContent) return; const blob = new Blob([artContent], { type: "text/plain;charset=utf-8" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `${slugify(openArtifact.title)}.${extFor(openArtifact.type)}`; a.click(); URL.revokeObjectURL(url); }
   function pdfArt() { if (!openArtifact || !artContent) return; const w = window.open("", "_blank"); if (!w) return; w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(openArtifact.title)}</title><style>body{font-family:Georgia,serif;max-width:680px;margin:48px auto;padding:0 24px;color:#111;line-height:1.6}.k{color:#888;text-transform:uppercase;letter-spacing:.14em;font-size:11px;font-family:system-ui,sans-serif}h1{font-family:system-ui,sans-serif;font-size:22px;margin:.2em 0 1em}pre{white-space:pre-wrap;font-family:inherit;margin:0}</style></head><body><div class="k">${escapeHtml(openArtifact.type)} · by ${escapeHtml(EMPLOYEES[openArtifact.by]?.name ?? "Praxis")} · Praxis</div><h1>${escapeHtml(openArtifact.title)}</h1><pre>${escapeHtml(artContent)}</pre></body></html>`); w.document.close(); w.focus(); setTimeout(() => { try { w.print(); } catch { /* ignore */ } }, 350); }
 
-  const send = React.useCallback(async (text: string) => {
+  const send = React.useCallback(async (text: string, audio_path?: string) => {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
     setLoading(true); setInput("");
     if (taRef.current) taRef.current.style.height = "auto";
-    setMessages((p) => [...p, { role: "user", content: trimmed }, { role: "assistant", employee: pin, content: "", pending: true }]);
+    setMessages((p) => [...p, { role: "user", content: trimmed, audio_path }, { role: "assistant", employee: pin, content: "", pending: true }]);
     let current: EmployeeId = pin;
     const ensure = (e: EmployeeId) => setMessages((p) => { const n = [...p]; const last = n[n.length - 1]; if (last && last.role === "assistant" && last.pending && last.employee === e) return n; n.push({ role: "assistant", employee: e, content: "", pending: true }); return n; });
     const append = (e: EmployeeId, d: string) => setMessages((p) => { const n = [...p]; const last = n[n.length - 1]; if (last && last.role === "assistant" && last.pending && last.employee === e) last.content += d; return n; });
@@ -151,6 +243,7 @@ export function LiveChat({
       const body: Record<string, unknown> = { message: trimmed };
       if (userPinned) body.employee_override = pin;
       if (convoId) body.conversation_id = convoId;
+      if (audio_path) body.audio_path = audio_path;
       const resp = await fetch("/api/conduit/chat", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
       if (!resp.ok || !resp.body) {
         if (resp.status === 409) { router.refresh(); return; }
@@ -287,6 +380,12 @@ export function LiveChat({
           <button onClick={() => setVoiceErr(null)} className="ml-3 text-xs text-muted-foreground underline">dismiss</button>
         </div>
       )}
+      {audioErr && (
+        <div className="fixed top-16 left-1/2 z-[80] -translate-x-1/2 rounded-lg border border-destructive/40 bg-card px-4 py-2.5 text-sm wm-glow">
+          <span className="text-destructive">{audioErr}</span>
+          <button onClick={() => setAudioErr(null)} className="ml-3 text-xs text-muted-foreground underline">dismiss</button>
+        </div>
+      )}
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center gap-3 border-b border-white/8 bg-background/70 px-4 py-3 backdrop-blur">
@@ -316,7 +415,12 @@ export function LiveChat({
             {messages.map((m, i) => {
               if (m.role === "system") return <div key={m.id ?? i} className="flex items-center gap-3 py-1"><div className="h-px flex-1 bg-white/8" /><span className="wm-label">{m.content}</span><div className="h-px flex-1 bg-white/8" /></div>;
               if (m.role === "user") return (
-                <motion.div key={m.id ?? i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 28 }} className="flex justify-end"><div className="max-w-[82%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-secondary px-4 py-2.5 text-[15px] leading-relaxed">{m.content}</div></motion.div>
+                <motion.div key={m.id ?? i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 28 }} className="flex justify-end">
+                  <div className="max-w-[82%] rounded-2xl rounded-br-md bg-secondary px-4 py-2.5 text-[15px] leading-relaxed">
+                    <span className="whitespace-pre-wrap">{m.content}</span>
+                    {m.audio_path && <AudioPlayer path={m.audio_path} />}
+                  </div>
+                </motion.div>
               );
               const e = (m.employee as EmployeeId) ?? "jarvis"; const I = ICON[e] ?? Sparkles; const k = m.id ?? String(i);
               return (
@@ -370,8 +474,25 @@ export function LiveChat({
             </AnimatePresence>
             <div className="flex items-end gap-2 rounded-2xl border border-white/10 bg-secondary/60 p-2 transition-all focus-within:border-primary/50 focus-within:bg-secondary focus-within:wm-glow">
               <Button type="button" size="icon" variant="ghost" className="size-9 shrink-0 rounded-xl text-muted-foreground hover:bg-input hover:text-foreground"><Paperclip className="size-4" /></Button>
-              <textarea ref={taRef} value={input} rows={1} onChange={(e) => { setInput(e.target.value); grow(); }} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !menu) { e.preventDefault(); send(input); } }} placeholder={`Message ${emp.name}…  ·  / for commands  ·  @ to route`} className="max-h-40 flex-1 resize-none bg-transparent py-2 text-[15px] leading-relaxed outline-none placeholder:text-muted-foreground" />
-              <motion.div whileTap={{ scale: 0.9 }}><Button type="submit" size="icon" disabled={!input.trim() || loading} className="size-9 shrink-0 rounded-xl wm-glow disabled:opacity-40"><ArrowUp className="size-4" /></Button></motion.div>
+              {recording ? (
+                <div className="flex flex-1 items-center gap-2 py-2">
+                  <span className="size-2 animate-pulse rounded-full bg-destructive" />
+                  <span className="text-sm text-destructive">{recordingSeconds}s</span>
+                  <span className="text-xs text-muted-foreground">Recording… tap stop to send</span>
+                </div>
+              ) : (
+                <textarea ref={taRef} value={input} rows={1} onChange={(e) => { setInput(e.target.value); grow(); }} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !menu) { e.preventDefault(); send(input); } }} placeholder={`Message ${emp.name}…  ·  / for commands  ·  @ to route`} className="max-h-40 flex-1 resize-none bg-transparent py-2 text-[15px] leading-relaxed outline-none placeholder:text-muted-foreground" />
+              )}
+              <Button
+                type="button" size="icon" variant="ghost"
+                className={`size-9 shrink-0 rounded-xl hover:bg-input hover:text-foreground ${recording ? "text-destructive" : "text-muted-foreground"}`}
+                onClick={toggleRecording}
+                disabled={audioUploading || loading}
+                title={recording ? "Stop recording" : "Record voice message"}
+              >
+                {audioUploading ? <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" /> : recording ? <Square className="size-4" /> : <Mic className="size-4" />}
+              </Button>
+              <motion.div whileTap={{ scale: 0.9 }}><Button type="submit" size="icon" disabled={!input.trim() || loading || audioUploading || recording} className="size-9 shrink-0 rounded-xl wm-glow disabled:opacity-40"><ArrowUp className="size-4" /></Button></motion.div>
             </div>
             <p className="wm-label mt-2 flex items-center justify-center gap-3"><span className="flex items-center gap-1"><Command className="size-3" />K</span><span className="flex items-center gap-1"><Slash className="size-3" />commands</span><span className="flex items-center gap-1"><AtSign className="size-3" />route</span></p>
           </form>
