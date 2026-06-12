@@ -1,8 +1,10 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 /* Institutional pacing — slower than v2's 80ms stagger. Reads as gravitas. */
@@ -15,6 +17,17 @@ const PACE = {
 } as const;
 
 export default function Hero() {
+  const reduced = useReducedMotion();
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Scroll progress from section top to section bottom in the viewport.
+  // Background decorations move at 30 % of scroll speed — depth without vertigo.
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+  const bgParallaxY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+
   // Stable dust-mote positions (deterministic per seed)
   const dust = Array.from({ length: 14 }, (_, i) => {
     const seed = i * 137;
@@ -31,29 +44,34 @@ export default function Hero() {
   return (
     <section
       id="top"
+      ref={sectionRef}
       className="relative overflow-hidden conduit-bg-canvas min-h-[100vh] pt-32 md:pt-44 pb-24"
     >
-      <div className="conduit-mesh" aria-hidden />
-      <div className="conduit-ember-radial" aria-hidden />
-      <div
+      {/* Background decoration layer — parallaxes at 30 % of scroll speed */}
+      <motion.div
         aria-hidden
-        className="absolute inset-0 pointer-events-none overflow-hidden"
+        className="absolute inset-0 pointer-events-none"
+        style={{ y: reduced ? 0 : bgParallaxY }}
       >
-        {dust.map((d) => (
-          <span
-            key={d.id}
-            className="conduit-dust"
-            style={{
-              left: d.left,
-              top: d.top,
-              width: `${d.size}px`,
-              height: `${d.size}px`,
-              animationDelay: `${d.delay}s`,
-              animationDuration: `${d.duration}s`,
-            }}
-          />
-        ))}
-      </div>
+        <div className="conduit-mesh" />
+        <div className="conduit-ember-radial" />
+        <div className="absolute inset-0 overflow-hidden">
+          {dust.map((d) => (
+            <span
+              key={d.id}
+              className="conduit-dust"
+              style={{
+                left: d.left,
+                top: d.top,
+                width: `${d.size}px`,
+                height: `${d.size}px`,
+                animationDelay: `${d.delay}s`,
+                animationDuration: `${d.duration}s`,
+              }}
+            />
+          ))}
+        </div>
+      </motion.div>
 
       <div className="relative conduit-container">
         <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-12 lg:gap-20 items-center">

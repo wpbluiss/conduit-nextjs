@@ -284,10 +284,10 @@ export default function ProductTiles() {
           {CARDS.map((c, i) => (
             <motion.div
               key={c.title}
-              initial={{ opacity: 0, y: 32 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 40, scale: 0.98 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true, margin: "-10%" }}
-              transition={{ duration: 0.8, ease: EASE, delay: i * 0.08 }}
+              transition={{ duration: 0.9, ease: EASE, delay: i * 0.12 }}
             >
               <Link
                 href={c.cta.href}
