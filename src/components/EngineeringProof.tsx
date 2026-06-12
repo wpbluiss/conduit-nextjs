@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, GitBranch, Lightning } from "@phosphor-icons/react";
+import PremiumButton from "@/components/conduit/PremiumButton";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 
@@ -55,13 +56,10 @@ export default function EngineeringProof() {
               />
             </div>
 
-            <Link
-              href="/auth/sign-up"
-              className="conduit-btn-primary mt-10"
-            >
+            <PremiumButton href="/auth/sign-up" variant="primary" className="mt-10">
               Run a build
               <ArrowRight size={16} weight="bold" />
-            </Link>
+            </PremiumButton>
           </motion.div>
 
           {/* Right — code preview */}

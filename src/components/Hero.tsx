@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
+import PremiumButton from "@/components/conduit/PremiumButton";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 /* Institutional pacing — slower than v2's 80ms stagger. Reads as gravitas. */
@@ -102,13 +103,13 @@ export default function Hero() {
               transition={{ duration: PACE.ctas.duration, ease: EASE, delay: PACE.ctas.delay }}
               className="flex flex-col sm:flex-row gap-3 mt-8"
             >
-              <Link href="/auth/sign-up" className="conduit-btn-primary">
+              <PremiumButton href="/auth/sign-up" variant="primary">
                 Open Praxis Console
                 <ArrowRight size={16} weight="bold" />
-              </Link>
-              <Link href="/products" className="conduit-btn-secondary">
+              </PremiumButton>
+              <PremiumButton href="/products" variant="secondary">
                 See the product family
-              </Link>
+              </PremiumButton>
             </motion.div>
 
             <motion.div
