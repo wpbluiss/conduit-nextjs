@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowRight,
   Check,
@@ -83,6 +83,29 @@ export function SettingsTabs({
   defaultTab?: SettingsTabKey;
 }) {
   const [tab, setTab] = useState<SettingsTabKey>(defaultTab);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Read Stripe return params once, then strip them from the URL.
+  const checkoutResult = searchParams.get("checkout");
+  const topupResult = searchParams.get("topup");
+  const stripeReturnState: "checkout_success" | "checkout_canceled" | "topup_success" | "topup_canceled" | null =
+    checkoutResult === "success" ? "checkout_success"
+    : checkoutResult === "canceled" ? "checkout_canceled"
+    : topupResult === "success" ? "topup_success"
+    : topupResult === "canceled" ? "topup_canceled"
+    : null;
+
+  useEffect(() => {
+    if (stripeReturnState) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("checkout");
+      url.searchParams.delete("topup");
+      router.replace(url.pathname + (url.search || ""), { scroll: false });
+    }
+    // run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div>
@@ -131,7 +154,9 @@ export function SettingsTabs({
       )}
       {tab === "team" && <TeamTab />}
       {tab === "usage" && <UsageTab usage={usage} />}
-      {tab === "billing" && <BillingTab account={account} usage={usage} />}
+      {tab === "billing" && (
+        <BillingTab account={account} usage={usage} stripeReturnState={stripeReturnState} />
+      )}
     </div>
   );
 }
@@ -858,9 +883,11 @@ function Donut({
 function BillingTab({
   account,
   usage,
+  stripeReturnState,
 }: {
   account: AccountData;
   usage: UsageData;
+  stripeReturnState: "checkout_success" | "checkout_canceled" | "topup_success" | "topup_canceled" | null;
 }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -976,6 +1003,30 @@ function BillingTab({
 
   return (
     <div className="space-y-6 text-sm">
+      {/* Stripe return-state banner */}
+      {stripeReturnState === "checkout_success" && (
+        <div className="conduit-card p-4 border-[var(--color-accent)] flex items-center gap-3">
+          <Check size={16} className="shrink-0 text-[var(--color-accent)]" />
+          <span>
+            Plan upgraded! Your new tier is active. Token allowance resets at the start of your new billing cycle.
+          </span>
+        </div>
+      )}
+      {stripeReturnState === "topup_success" && (
+        <div className="conduit-card p-4 border-[var(--color-accent)] flex items-center gap-3">
+          <Check size={16} className="shrink-0 text-[var(--color-accent)]" />
+          <span>
+            Tokens purchased! Bonus tokens have been added to your account and are available immediately.
+          </span>
+        </div>
+      )}
+      {(stripeReturnState === "checkout_canceled" || stripeReturnState === "topup_canceled") && (
+        <div className="conduit-card p-4 border-[var(--color-border)] flex items-center gap-3 text-[var(--color-text-muted)]">
+          <X size={16} className="shrink-0" />
+          <span>Checkout was canceled — no charge was made.</span>
+        </div>
+      )}
+
       {/* Current plan */}
       <div className="conduit-card p-6 flex items-center justify-between gap-4">
         <div>
