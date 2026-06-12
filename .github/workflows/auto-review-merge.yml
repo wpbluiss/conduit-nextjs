@@ -33,8 +33,7 @@ jobs:
           fetch-depth: 0
       - uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          # claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}  # swap in for $0 Max-plan runs
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: "--max-turns 40"
           prompt: |
             You are the autonomous reviewer/merger ("board of directors") for this repo.

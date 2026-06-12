@@ -27,8 +27,7 @@ jobs:
       - run: sleep 120
       - uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          # claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}  # swap in for $0 Max-plan runs
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: "--max-turns 30"
           prompt: |
             You are the post-deploy QA agent for Praxis (production: https://conduitai.io).

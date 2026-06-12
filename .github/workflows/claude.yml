@@ -29,7 +29,5 @@ jobs:
           fetch-depth: 0
       - uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          # When you mint the Max-plan token from a computer, comment out the
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # line above and use this instead (zero API spend, runs on your sub):
-          # claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
