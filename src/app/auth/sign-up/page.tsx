@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { PraxisLogo } from "@/components/conduit/PraxisLogo";
 import { track } from "@/lib/analytics/track";
+import { PraxisButton } from "@/components/conduit/pdl/Button";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -125,13 +126,15 @@ export default function SignUpPage() {
           {info && (
             <p className="text-sm text-[var(--color-green)]">{info}</p>
           )}
-          <button
+          <PraxisButton
             type="submit"
-            disabled={loading}
-            className="btn-primary w-full justify-center disabled:opacity-50"
+            variant="primary"
+            size="lg"
+            loading={loading}
+            fullWidth
           >
-            {loading ? "Creating workspace..." : "Create workspace"}
-          </button>
+            Create workspace
+          </PraxisButton>
         </form>
         <p className="mt-4 text-center text-[11px] text-[var(--color-text-muted)] leading-relaxed">
           By creating an account you agree to our{" "}

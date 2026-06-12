@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { PraxisLogo } from "@/components/conduit/PraxisLogo";
+import { PraxisButton } from "@/components/conduit/pdl/Button";
 
 export default function SignInPage() {
   return (
@@ -107,13 +108,15 @@ function SignInForm() {
           {error && (
             <p className="text-sm text-[var(--color-pink)]">{error}</p>
           )}
-          <button
+          <PraxisButton
             type="submit"
-            disabled={loading}
-            className="btn-primary w-full justify-center disabled:opacity-50"
+            variant="primary"
+            size="lg"
+            loading={loading}
+            fullWidth
           >
-            {loading ? "Signing in..." : "Sign in"}
-          </button>
+            Sign in
+          </PraxisButton>
         </form>
         <p className="mt-6 text-center text-sm text-[var(--color-text-muted)]">
           New here?{" "}

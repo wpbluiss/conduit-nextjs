@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { PraxisLogo } from "./PraxisLogo";
+import { PraxisButton } from "./pdl/Button";
 
 const DISMISS_KEY = "conduit_onboarding_skip_v1";
 
@@ -136,13 +137,14 @@ export function OnboardingModal({
                 className="mt-8 w-full bg-transparent border-b border-[var(--color-border)] focus:border-[var(--color-accent)] outline-none px-1 py-3 text-2xl md:text-3xl serif placeholder:text-[var(--color-text-muted)]"
               />
               <div className="mt-10 flex justify-end">
-                <button
+                <PraxisButton
                   onClick={() => name.trim() && setStep(2)}
                   disabled={!name.trim()}
-                  className="btn-primary disabled:opacity-40"
+                  variant="primary"
+                  icon={<ArrowRight size={16} />}
                 >
-                  Continue <ArrowRight size={16} />
-                </button>
+                  Continue
+                </PraxisButton>
               </div>
             </div>
           )}
@@ -182,16 +184,17 @@ export function OnboardingModal({
                 />
               )}
               <div className="mt-10 flex justify-between">
-                <button onClick={() => setStep(1)} className="btn-secondary">
+                <PraxisButton onClick={() => setStep(1)} variant="ghost" size="sm">
                   Back
-                </button>
-                <button
+                </PraxisButton>
+                <PraxisButton
                   onClick={() => finalType.trim() && setStep(3)}
                   disabled={!finalType.trim()}
-                  className="btn-primary disabled:opacity-40"
+                  variant="primary"
+                  icon={<ArrowRight size={16} />}
                 >
-                  Continue <ArrowRight size={16} />
-                </button>
+                  Continue
+                </PraxisButton>
               </div>
             </div>
           )}
@@ -218,16 +221,18 @@ export function OnboardingModal({
                 </p>
               )}
               <div className="mt-10 flex justify-between">
-                <button onClick={() => setStep(2)} className="btn-secondary">
+                <PraxisButton onClick={() => setStep(2)} variant="ghost" size="sm">
                   Back
-                </button>
-                <button
+                </PraxisButton>
+                <PraxisButton
                   onClick={submit}
                   disabled={!description.trim() || submitting}
-                  className="btn-primary disabled:opacity-40"
+                  loading={submitting}
+                  variant="primary"
+                  icon={!submitting ? <ArrowRight size={16} /> : undefined}
                 >
-                  Meet Atlas <ArrowRight size={16} />
-                </button>
+                  Meet Atlas
+                </PraxisButton>
               </div>
             </div>
           )}
