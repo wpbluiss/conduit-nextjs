@@ -7,6 +7,11 @@ import {
 } from "@/lib/billing/stripe";
 import { TIERS, type TierId } from "@/lib/billing/tiers";
 import type Stripe from "stripe";
+import { sendEmail } from "@/lib/email/send";
+import {
+  subscriptionReceiptEmail,
+  topupReceiptEmail,
+} from "@/lib/email/templates";
 
 export const runtime = "nodejs";
 
@@ -105,6 +110,17 @@ async function handleEvent(
       const accountId = session.metadata?.account_id;
       if (!accountId) return null;
 
+      const customerEmail = session.customer_details?.email ?? null;
+      const amountStr = session.amount_total
+        ? `$${(session.amount_total / 100).toFixed(2)}`
+        : "";
+      const dateStr = new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      const manageUrl = "https://conduitai.io/app/settings/billing";
+
       if (session.mode === "subscription") {
         const tierId = (session.metadata?.tier_id as TierId) ?? "free";
         const subId =
@@ -122,6 +138,21 @@ async function handleEvent(
             billing_cycle_start: new Date().toISOString(),
           })
           .eq("id", accountId);
+
+        // Fire-and-forget receipt — must not fail the webhook.
+        if (customerEmail) {
+          const tierName = TIERS[tierId]?.name ?? tierId;
+          sendEmail({
+            to: customerEmail,
+            subject: `Praxis ${tierName} — payment confirmed`,
+            html: subscriptionReceiptEmail({
+              tierName,
+              amount: amountStr,
+              date: dateStr,
+              manageUrl,
+            }),
+          }).catch((err) => console.error("[email] receipt send failed", err));
+        }
       } else if (session.mode === "payment") {
         const tokensGranted = parseInt(
           session.metadata?.tokens_granted ?? "0",
@@ -160,6 +191,26 @@ async function handleEvent(
             .from("conduit_accounts")
             .update({ bonus_tokens: next })
             .eq("id", accountId);
+
+          // Fire-and-forget top-up receipt.
+          if (customerEmail) {
+            const tokensFormatted =
+              tokensGranted >= 1000
+                ? `${(tokensGranted / 1000).toFixed(0)}k`
+                : String(tokensGranted);
+            sendEmail({
+              to: customerEmail,
+              subject: `Praxis — ${tokensFormatted} tokens added`,
+              html: topupReceiptEmail({
+                tokensGranted: tokensFormatted,
+                amount: amountStr,
+                date: dateStr,
+                manageUrl,
+              }),
+            }).catch((err) =>
+              console.error("[email] topup receipt send failed", err),
+            );
+          }
         }
       }
       return accountId;
