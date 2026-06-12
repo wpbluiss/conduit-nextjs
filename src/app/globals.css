@@ -878,6 +878,15 @@ body {
   background: rgba(91, 99, 232, 0.08);
 }
 
+/* Ember-identity focus ring — keyboard-only (:focus-visible, not :focus) */
+.conduit-btn-primary:focus-visible,
+.conduit-btn-secondary:focus-visible,
+.conduit-btn-primary-inverse:focus-visible,
+.conduit-btn-secondary-inverse:focus-visible {
+  outline: 2px solid var(--color-ember-500);
+  outline-offset: 3px;
+}
+
 /* Marketing card — indigo-glow ring on hover (light bg) */
 .conduit-card {
   background: var(--color-bg-surface);
