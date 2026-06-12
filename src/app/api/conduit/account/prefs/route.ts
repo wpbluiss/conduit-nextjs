@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
     timezone?: string;
     notify_voice_room_ready?: boolean;
     theme_preference?: "system" | "light" | "dark";
+    dismiss_tour?: boolean;
   };
   try {
     body = await request.json();
@@ -46,6 +47,9 @@ export async function POST(request: NextRequest) {
     body.theme_preference === "dark"
   ) {
     update.theme_preference = body.theme_preference;
+  }
+  if (body.dismiss_tour === true) {
+    update.tour_dismissed_at = new Date().toISOString();
   }
 
   if (Object.keys(update).length === 0) {

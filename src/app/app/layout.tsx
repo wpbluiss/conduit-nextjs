@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentAccount } from "@/lib/conduit/account";
 import { Sidebar } from "@/components/conduit/Sidebar";
 import { OnboardingModal } from "@/components/conduit/OnboardingModal";
+import { WelcomeTourModal } from "@/components/conduit/WelcomeTourModal";
 import { UpgradeNudge } from "@/components/conduit/UpgradeNudge";
 import { RouteProgress } from "@/components/conduit/RouteProgress";
 import { PraxisCanvasTintProvider } from "@/components/conduit/praxis/PraxisCanvasTintProvider";
@@ -97,6 +98,9 @@ export default async function AppLayout({
           {children}
         </main>
         {!onboarded && <OnboardingModal defaultName={userName} />}
+        {onboarded && !account.tour_dismissed_at && (
+          <WelcomeTourModal allowedEmployees={allowedEmployees} />
+        )}
       </PraxisCanvasTintProvider>
     </div>
   );
