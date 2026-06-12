@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -6,9 +7,9 @@ import {
   Minus,
 } from "@phosphor-icons/react/dist/ssr";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import Pricing from "@/components/Pricing";
 import { AnalyticsPageView } from "@/components/conduit/AnalyticsPageView";
+const Pricing = dynamic(() => import("@/components/Pricing"));
+const Footer = dynamic(() => import("@/components/Footer"));
 
 export const metadata: Metadata = {
   title: "Pricing — Three tiers, one workforce",

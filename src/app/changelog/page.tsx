@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import FinalCTA from "@/components/FinalCTA";
 import { PageHeader } from "@/components/marketing/PageHeader";
+const Footer = dynamic(() => import("@/components/Footer"));
+const FinalCTA = dynamic(() => import("@/components/FinalCTA"));
 
 export const metadata: Metadata = {
   title: "Changelog — Conduit AI",

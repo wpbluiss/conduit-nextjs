@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import FinalCTA from "@/components/FinalCTA";
 import { ProofBar } from "@/components/marketing/ProofBar";
+const Footer = dynamic(() => import("@/components/Footer"));
+const FinalCTA = dynamic(() => import("@/components/FinalCTA"));
 
 export const metadata: Metadata = {
   title: "Customers — Built on Praxis",
