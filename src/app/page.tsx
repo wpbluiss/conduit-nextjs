@@ -1,15 +1,21 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import { AnalyticsPageView } from "@/components/conduit/AnalyticsPageView";
-import ProductTiles from "@/components/ProductTiles";
-import Cinematic from "@/components/Cinematic";
-import Vision from "@/components/Vision";
-import Customers from "@/components/Customers";
-import EngineeringProof from "@/components/EngineeringProof";
-import Pricing from "@/components/Pricing";
-import FinalCTA from "@/components/FinalCTA";
-import Footer from "@/components/Footer";
+
+// Below-the-fold sections are dynamically imported to defer their JS
+// chunks (including framer-motion) until after the LCP element is painted.
+// SSR still renders them so content is in the HTML for SEO; only the
+// client-side JS is deferred.
+const ProductTiles = dynamic(() => import("@/components/ProductTiles"));
+const Cinematic = dynamic(() => import("@/components/Cinematic"));
+const Vision = dynamic(() => import("@/components/Vision"));
+const Customers = dynamic(() => import("@/components/Customers"));
+const EngineeringProof = dynamic(() => import("@/components/EngineeringProof"));
+const Pricing = dynamic(() => import("@/components/Pricing"));
+const FinalCTA = dynamic(() => import("@/components/FinalCTA"));
+const Footer = dynamic(() => import("@/components/Footer"));
 
 export const metadata: Metadata = {
   openGraph: {

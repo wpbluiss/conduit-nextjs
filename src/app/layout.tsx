@@ -5,8 +5,9 @@ import "./globals.css";
 import "@/styles/praxis-tokens.css";
 import "@/styles/praxis-system.css";
 import "@/styles/praxis-design-language.css";
-import "@/styles/engineering-cinema.css";
-import "@/styles/memory-canvas.css";
+// engineering-cinema.css and memory-canvas.css are scoped entirely to
+// .praxis-root — they're imported in src/app/app/layout.tsx so marketing
+// routes don't download ~1,200 lines of CSS that are never applied there.
 import { ThemeBoot } from "@/components/conduit/ThemeBoot";
 
 // R18 Slice 0: body sans switched from Inter to Geist Sans per the
