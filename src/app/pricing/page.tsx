@@ -9,6 +9,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Pricing from "@/components/Pricing";
 import { AnalyticsPageView } from "@/components/conduit/AnalyticsPageView";
+import { PageHeader } from "@/components/marketing/PageHeader";
 
 export const metadata: Metadata = {
   title: "Pricing — Three tiers, one workforce",
@@ -136,25 +137,16 @@ export default function PricingPage() {
       <AnalyticsPageView />
       <Navbar />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden conduit-hero-section">
-        <div className="conduit-mesh" aria-hidden />
-        <div className="conduit-ember-radial" aria-hidden />
-        <div className="relative conduit-container">
-          <div className="max-w-[820px]">
-            <p className="conduit-caption conduit-caption-ember">Pricing</p>
-            <h1 className="conduit-display-hero mt-6">
-              Three tiers.{" "}
-              <span className="conduit-ember-text">One workforce.</span>
-            </h1>
-            <p className="conduit-body-lg mt-7 max-w-[640px]">
-              Free to start. Pro for solo founders running a real business.
-              Enterprise for teams replacing whole departments. Top up tokens
-              any time, no commitment.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHeader
+        caption="Pricing"
+        title={
+          <>
+            Three tiers.{" "}
+            <span className="conduit-ember-text">One workforce.</span>
+          </>
+        }
+        subtitle="Free to start. Pro for solo founders running a real business. Enterprise for teams replacing whole departments. Top up tokens any time, no commitment."
+      />
 
       {/* Tier cards (reuses homepage Pricing section) */}
       <Pricing />

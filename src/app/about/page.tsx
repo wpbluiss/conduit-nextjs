@@ -10,6 +10,8 @@ import {
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FinalCTA from "@/components/FinalCTA";
+import { PageHeader } from "@/components/marketing/PageHeader";
+import { ScrollRevealCards, ScrollRevealItem } from "@/components/marketing/ScrollRevealCards";
 
 export const metadata: Metadata = {
   title: "About — Conduit AI",
@@ -56,28 +58,18 @@ export default function AboutPage() {
     <main className="conduit-bg-canvas">
       <Navbar />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden conduit-hero-section">
-        <div className="conduit-mesh" aria-hidden />
-        <div className="conduit-ember-radial" aria-hidden />
-        <div className="relative conduit-container">
-          <div className="max-w-[820px]">
-            <p className="conduit-caption conduit-caption-ember">
-              About Conduit AI
-            </p>
-            <h1 className="conduit-display-hero mt-6">
-              We&rsquo;re building the operating system for{" "}
-              <span className="conduit-ember-text">
-                the businesses that won&rsquo;t be staffed.
-              </span>
-            </h1>
-            <p className="conduit-body-lg mt-6 max-w-[640px]">
-              Conduit AI is the company. Praxis is the product. Here&rsquo;s
-              where we&rsquo;re headed and why.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHeader
+        caption="About Conduit AI"
+        title={
+          <>
+            We&rsquo;re building the operating system for{" "}
+            <span className="conduit-ember-text">
+              the businesses that won&rsquo;t be staffed.
+            </span>
+          </>
+        }
+        subtitle="Conduit AI is the company. Praxis is the product. Here's where we're headed and why."
+      />
 
       {/* Mission */}
       <section
@@ -124,24 +116,26 @@ export default function AboutPage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <ScrollRevealCards className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {APPROACH.map((a) => (
-              <div key={a.title} className="conduit-card p-7 md:p-8">
-                <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)] mb-6">
-                  <a.Icon size={22} weight="regular" color="#5B63E8" />
+              <ScrollRevealItem key={a.title}>
+                <div className="conduit-card p-7 md:p-8 h-full">
+                  <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)] mb-6">
+                    <a.Icon size={22} weight="regular" color="#5B63E8" />
+                  </div>
+                  <h3
+                    className="text-[22px] leading-[1.15] tracking-[-0.015em] text-[var(--color-cream)]"
+                    style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
+                  >
+                    {a.title}
+                  </h3>
+                  <p className="text-[14px] mt-3 text-[var(--color-cream-soft)] leading-[1.65]">
+                    {a.body}
+                  </p>
                 </div>
-                <h3
-                  className="text-[22px] leading-[1.15] tracking-[-0.015em] text-[var(--color-cream)]"
-                  style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
-                >
-                  {a.title}
-                </h3>
-                <p className="text-[14px] mt-3 text-[var(--color-cream-soft)] leading-[1.65]">
-                  {a.body}
-                </p>
-              </div>
+              </ScrollRevealItem>
             ))}
-          </div>
+          </ScrollRevealCards>
 
           <div className="mt-12 text-center">
             <Link
@@ -165,10 +159,11 @@ export default function AboutPage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <ScrollRevealCards className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <ScrollRevealItem className="md:col-span-2">
             <Link
               href="/customers/lunaro"
-              className="conduit-card group block p-7 md:p-8 md:col-span-2"
+              className="conduit-card group block p-7 md:p-8 h-full"
             >
               <div className="flex items-center gap-3 mb-5">
                 <svg width="32" height="32" viewBox="0 0 16 16" aria-hidden>
@@ -193,13 +188,16 @@ export default function AboutPage() {
                 <ArrowRight size={14} weight="bold" />
               </div>
             </Link>
+            </ScrollRevealItem>
 
-            <div className="conduit-card p-7 md:p-8 border-dashed border-[var(--color-edge)] flex items-center justify-center">
-              <p className="conduit-caption text-[var(--color-cream-faint)] text-center">
-                More customers · soon
-              </p>
-            </div>
-          </div>
+            <ScrollRevealItem>
+              <div className="conduit-card p-7 md:p-8 border-dashed border-[var(--color-edge)] flex items-center justify-center h-full">
+                <p className="conduit-caption text-[var(--color-cream-faint)] text-center">
+                  More customers · soon
+                </p>
+              </div>
+            </ScrollRevealItem>
+          </ScrollRevealCards>
         </div>
       </section>
 
