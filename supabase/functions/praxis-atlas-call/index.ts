@@ -1,8 +1,9 @@
 // Praxis — Atlas call control plane (Vapi).
 // Inspect Atlas's Vapi assistant, flip it to a realtime S2S voice, and place live
-// calls to Luis. Read-modify-write on configure so we never clobber a working
-// assistant. Auto-resolves the phone number UUID so the secret can be the number
-// itself. Secrets: VAPI_API_KEY, VAPI_PHONE_NUMBER_ID, VAPI_ATLAS_ASSISTANT_ID, OWNER_PHONE.
+// calls to Luis. On configure: model is deep-merged (keeps the system prompt), voice
+// and transcriber are REPLACED wholesale when provided (so an OpenAI realtime voice
+// doesn't inherit ElevenLabs-only fields). Auto-resolves the phone number UUID.
+// Secrets: VAPI_API_KEY, VAPI_PHONE_NUMBER_ID, VAPI_ATLAS_ASSISTANT_ID, OWNER_PHONE.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
@@ -31,8 +32,6 @@ function deepMerge(base: any, patch: any): any {
   return out;
 }
 const isUuid = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s || "");
-// Resolve a Vapi phoneNumberId: accept a UUID as-is, otherwise look it up by
-// matching the digits of the configured number (or just take the only one).
 async function resolvePhoneId(key: string, given: string, ownerHint: string) {
   if (isUuid(given)) return { id: given, how: "given_uuid" };
   const list = await vapi(`/phone-number`, key);
@@ -53,7 +52,7 @@ Deno.serve(async (req) => {
   if (!secret || req.headers.get("x-praxis-secret") !== secret) return j({ ok: false, error: "unauthorized" }, 401);
 
   let body: any = {}; try { body = await req.json(); } catch {}
-  const action = body.action ?? "inspect"; // inspect | list_numbers | configure | call | configure_and_call
+  const action = body.action ?? "inspect";
 
   const vapiKey = await getSecret(admin, "VAPI_API_KEY");
   const assistantId = body.assistant_id ?? (await getSecret(admin, "VAPI_ATLAS_ASSISTANT_ID"));
@@ -86,15 +85,17 @@ Deno.serve(async (req) => {
       if (!patch) return j({ ok: false, error: "no_patch" }, 400);
       const cur = await vapi(`/assistant/${assistantId}`, vapiKey);
       if (!cur.ok) return j({ ok: false, error: "vapi_get_failed", status: cur.status, body: cur.body }, 502);
-      const merged = deepMerge({ model: cur.body?.model, voice: cur.body?.voice, transcriber: cur.body?.transcriber }, patch);
+      // model: deep-merge (preserve the system prompt). voice/transcriber: replace wholesale when provided.
+      const merged: any = { model: patch.model ? deepMerge(cur.body?.model, patch.model) : cur.body?.model };
+      merged.voice = ("voice" in patch) ? patch.voice : cur.body?.voice;
+      merged.transcriber = ("transcriber" in patch) ? patch.transcriber : cur.body?.transcriber;
       const upd = await vapi(`/assistant/${assistantId}`, vapiKey, { method: "PATCH", body: JSON.stringify(merged) });
       if (!upd.ok) return j({ ok: false, error: "vapi_patch_failed", status: upd.status, body: upd.body }, 502);
       out.configured = { model: upd.body?.model, voice: upd.body?.voice };
-      await log("vapi_configure", { result_model: upd.body?.model });
+      await log("vapi_configure", { result_model: upd.body?.model?.model, result_voice: upd.body?.voice?.provider });
       if (action === "configure") return j(out);
     }
 
-    // call (or tail of configure_and_call)
     if (!assistantId || !to) return j({ ok: false, error: "missing_secrets", missing: [!assistantId && "VAPI_ATLAS_ASSISTANT_ID", !to && "to/OWNER_PHONE"].filter(Boolean) }, 400);
     const resolved = await resolvePhoneId(vapiKey, phoneNumberRaw, to);
     if (!resolved.id) return j({ ok: false, error: "phone_number_unresolved", detail: resolved }, 502);
