@@ -13,6 +13,22 @@ export const metadata: Metadata = {
   title: "Pricing — Three tiers, one workforce",
   description:
     "Free, Pro $29/mo, Enterprise $199/mo. Praxis Flow on every tier; Praxis Depth on Enterprise. Top up tokens any time.",
+  openGraph: {
+    title: "Pricing — Three tiers, one workforce",
+    description:
+      "Free, Pro $29/mo, Enterprise $199/mo. Praxis Flow on every tier; Praxis Depth on Enterprise. Top up tokens any time.",
+    url: "https://conduitai.io/pricing",
+    siteName: "Conduit AI",
+    type: "website",
+    images: [{ url: "/praxis-mark.png", width: 632, height: 961, alt: "Praxis" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pricing — Three tiers, one workforce",
+    description:
+      "Free, Pro $29/mo, Enterprise $199/mo. Praxis Flow on every tier; Praxis Depth on Enterprise.",
+    images: ["/praxis-mark.png"],
+  },
 };
 
 type Cell = boolean | string;

@@ -15,6 +15,22 @@ export const metadata: Metadata = {
   title: "About — Conduit AI",
   description:
     "Conduit AI is the company. Praxis is the product. We're building the operating system for businesses that won't be staffed.",
+  openGraph: {
+    title: "About — Conduit AI",
+    description:
+      "Conduit AI is the company. Praxis is the product. We're building the operating system for businesses that won't be staffed.",
+    url: "https://conduitai.io/about",
+    siteName: "Conduit AI",
+    type: "website",
+    images: [{ url: "/praxis-mark.png", width: 632, height: 961, alt: "Praxis" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About — Conduit AI",
+    description:
+      "Conduit AI is the company. Praxis is the product. Building the OS for businesses that won't be staffed.",
+    images: ["/praxis-mark.png"],
+  },
 };
 
 const APPROACH = [

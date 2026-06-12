@@ -16,6 +16,22 @@ export const metadata: Metadata = {
   title: "Trust + Security — Conduit AI",
   description:
     "How Praxis handles your data, your team's voice, and your customers' contacts. Encryption, retention, access, and what we promise.",
+  openGraph: {
+    title: "Trust + Security — Conduit AI",
+    description:
+      "How Praxis handles your data, your team's voice, and your customers' contacts. Encryption, retention, access, and what we promise.",
+    url: "https://conduitai.io/trust",
+    siteName: "Conduit AI",
+    type: "website",
+    images: [{ url: "/praxis-mark.png", width: 632, height: 961, alt: "Praxis" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Trust + Security — Conduit AI",
+    description:
+      "How Praxis handles your data. Encryption, retention, access, and what we promise.",
+    images: ["/praxis-mark.png"],
+  },
 };
 
 const PILLARS = [
