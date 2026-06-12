@@ -23,8 +23,9 @@ new Claude Code session can pick up seamlessly. (Names of secrets only — never
 
 ### Edge functions + pg_cron jobs
 - `praxis-orchestrator` (Conductor: merged-PR → downstream `claude-queue` issues) — cron `praxis_orchestrator` */15.
-- `praxis-planner` (refills each repo's queue, low-water 8 → 10) — cron `praxis_planner` :05 hourly.
-- `praxis-dispatcher` (fires/enables/disables repo `claude-autopilot.yml` via token; actions: dispatch|enable_workflow|disable_workflow; body.repos optional) — crons `praxis_dispatch_flagship` */15 (conduit-nextjs), `praxis_dispatch_fleet` hourly (private repos).
+- `praxis-planner` (refills each repo's queue, low-water 8 → 10; v3 dedupe-aware: feeds open-PR
+  + in-flight-issue titles into the prompt so it never re-proposes in-flight work) — cron `praxis_planner` :05 hourly.
+- `praxis-dispatcher` (fires/enables/disables repo `claude-autopilot.yml` via token; actions: dispatch|enable_workflow|disable_workflow; body.repos optional. v4 DEDUPE GUARD: before each dispatch, `queueSync()` parks issues referenced by an open PR — label `claude-queue` → `in-flight` — so autopilot never re-picks them and files duplicate PRs; restores `claude-queue` if the PR closes unmerged. Root cause it fixes: issues only close on MERGE, so every 15-min dispatch used to re-pick the same open issues) — crons `praxis_dispatch_flagship` */15 (conduit-nextjs), `praxis_dispatch_fleet` hourly (private repos).
 - `praxis-merger` (reviewed auto-merge across repos; HARD FLOOR: never merges data-deletes, destructive DB migrations, or secret exposure — those it flags) — cron `praxis_merger` */30.
 - `praxis-milestone` (web launch %, capped 90; calls Atlas on +20% milestones) — cron `praxis_milestone` :10 hourly.
 - `praxis-launch-watch` (alerts when a PR needs Luis) — cron `praxis_launch_watch` */20. Uses `praxis-notify`.
@@ -55,7 +56,8 @@ Wired with agents (`agents_wired=true`): `conduit-nextjs` (web, **PUBLIC**, live
   `ui-design-review.yml` (conduit-nextjs: screenshots live pages → Claude vision critique → fixes/issues).
 - **`auto-review-merge.yml` is DISABLED everywhere** (redundant — `praxis-merger` does merging).
 - Standards the agents follow: `CLAUDE.md`, `AGENTS.md`, `DESIGN.md` (world-class UI bar),
-  `ORCHESTRATOR.md`, `AGENT_REPLICATION.md`. Labels: `claude-queue` (work), `[LAUNCH-BLOCKER]`, `[UI]`.
+  `ORCHESTRATOR.md`, `AGENT_REPLICATION.md`. Labels: `claude-queue` (available work),
+  `in-flight` (parked by dispatcher queueSync — an open PR covers it), `[LAUNCH-BLOCKER]`, `[UI]`.
 
 ## Atlas (phone chief of staff)
 - Calls **from 561-678-3691 → to OWNER_PHONE (+1 561-446-4520)** via **Vapi**.
@@ -65,10 +67,21 @@ Wired with agents (`agents_wired=true`): `conduit-nextjs` (web, **PUBLIC**, live
   prompt (never invent; only state tool/`{{status}}` data). Trigger a call:
   `POST praxis-atlas-call {action:"call", message:"..."}` with `x-praxis-secret`.
 
-## Current status (as of 2026-06-12)
+## Current status (as of 2026-06-12 evening)
 - **Web Praxis ~70% launch-ready (build).** Done: legal, SEO, account deletion, rate-limit,
-  analytics, onboarding, polish. Remaining: auth flow, billing/Stripe, tests/CI. ~2 days code.
-- All 6 wired repos sprinting. ~17+ PRs merged 6/12. UI loop + DESIGN.md just added.
+  analytics, onboarding, polish. Remaining: auth flow, billing/Stripe, tests/CI — and PRs
+  for ALL THREE already exist; the gap is review/merge, not code. (One milestone tick
+  hallucinated 100% at 13:44 UTC then reverted — 70 is the honest number.)
+- 35 PRs merged 6/11–6/12. Fleet-ops session 6/12 PM: **deduped the PR backlog** — 17 dup
+  PRs closed with notes (nextjs 105/106/110/112/114/116/117 + e2e 91/96; mobile 32/38/40;
+  backend 24/27; marketing 40; eng-worker 24/27 — kept the better twin of each), lost unique
+  scope re-queued as nextjs issues #133/#134. **e2e suite consolidated on nextjs PR #98**:
+  verified locally — merges clean into main, builds with STUB `NEXT_PUBLIC_SUPABASE_*` values
+  (no repo secrets needed for CI), 8/8 Playwright tests green vs production build. Final
+  workflow YAML for Luis is in a comment on #98 (one manual file: `.github/workflows/e2e.yml`;
+  bot tokens lack `workflows` perm). Dispatcher v4 + planner v3 dedupe guards deployed (above).
+- Launch-watch has flagged for Luis: nextjs **#104 (auth UI), #90/#80/#77 (billing), #98 (e2e)**
+  → these are the 70%→~85% unlock.
 
 ## Pending HUMAN gates (only Luis — agents can't do these)
 1. **Set GitHub Actions spending limit to $0** (Billing) — URGENT, private repos are running.
