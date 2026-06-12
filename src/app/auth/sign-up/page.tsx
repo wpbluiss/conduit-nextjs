@@ -28,7 +28,7 @@ export default function SignUpPage() {
       password,
       options: {
         data: { full_name: name },
-        emailRedirectTo: `${window.location.origin}/app`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/app`,
       },
     });
     if (error) {

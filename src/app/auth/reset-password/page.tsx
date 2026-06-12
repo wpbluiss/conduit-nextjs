@@ -1,105 +1,82 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { PraxisLogo } from "@/components/conduit/PraxisLogo";
 
-export default function SignInPage() {
-  return (
-    <Suspense fallback={<SignInShell />}>
-      <SignInForm />
-    </Suspense>
-  );
-}
-
-function SignInShell() {
-  return (
-    <main className="praxis-root min-h-screen flex items-center justify-center bg-[var(--color-surface)]" />
-  );
-}
-
-function SignInForm() {
+export default function ResetPasswordPage() {
   const router = useRouter();
-  const params = useSearchParams();
-  const next = params.get("next") || "/app/workspace";
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (params.get("error") === "link_expired") {
-      setError("That link has expired. Please sign in or request a new reset link.");
-    }
-  }, [params]);
-
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (password !== confirm) {
+      setError("Passwords don't match.");
+      return;
+    }
     setLoading(true);
     setError(null);
     const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error } = await supabase.auth.updateUser({ password });
+    setLoading(false);
     if (error) {
       setError(error.message);
-      setLoading(false);
       return;
     }
-    router.replace(next);
-    router.refresh();
+    router.replace("/app/workspace");
   }
 
   return (
     <main className="praxis-root min-h-screen flex items-center justify-center px-6 py-16 bg-[var(--color-surface)]">
       <div className="w-full max-w-sm">
         <div className="mb-10 text-center">
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center"
-            aria-label="Praxis"
-          >
+          <Link href="/" className="inline-flex items-center justify-center" aria-label="Praxis">
             <PraxisLogo size={48} withWordmark glow />
           </Link>
           <p className="mt-4 text-sm text-[var(--color-text-muted)]">
-            Sign in to Praxis
+            Choose a new password
           </p>
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
             <label
-              htmlFor="email"
-              className="block text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2"
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-[var(--color-surface-elevated)] hairline px-4 py-3 text-[var(--color-text)] outline-none focus:border-[var(--color-accent)]"
-            />
-          </div>
-          <div>
-            <label
               htmlFor="password"
               className="block text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2"
             >
-              Password
+              New password
             </label>
             <input
               id="password"
               type="password"
               required
-              autoComplete="current-password"
+              minLength={8}
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-[var(--color-surface-elevated)] hairline px-4 py-3 text-[var(--color-text)] outline-none focus:border-[var(--color-accent)]"
+            />
+            <p className="mt-2 text-xs text-[var(--color-text-muted)]">Minimum 8 characters</p>
+          </div>
+          <div>
+            <label
+              htmlFor="confirm"
+              className="block text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2"
+            >
+              Confirm password
+            </label>
+            <input
+              id="confirm"
+              type="password"
+              required
+              minLength={8}
+              autoComplete="new-password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
               className="w-full bg-[var(--color-surface-elevated)] hairline px-4 py-3 text-[var(--color-text)] outline-none focus:border-[var(--color-accent)]"
             />
           </div>
@@ -111,26 +88,9 @@ function SignInForm() {
             disabled={loading}
             className="btn-primary w-full justify-center disabled:opacity-50"
           >
-            {loading ? "Signing in..." : "Sign in"}
+            {loading ? "Saving..." : "Set new password"}
           </button>
-          <p className="text-center text-sm">
-            <Link
-              href="/auth/forgot-password"
-              className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-            >
-              Forgot password?
-            </Link>
-          </p>
         </form>
-        <p className="mt-6 text-center text-sm text-[var(--color-text-muted)]">
-          New here?{" "}
-          <Link
-            href="/auth/sign-up"
-            className="text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
-          >
-            Create an account
-          </Link>
-        </p>
       </div>
     </main>
   );
