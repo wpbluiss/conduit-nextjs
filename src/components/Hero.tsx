@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
@@ -15,6 +15,7 @@ const PACE = {
 } as const;
 
 export default function Hero() {
+  const prefersReducedMotion = useReducedMotion();
   const { scrollY } = useScroll();
   const consoleY = useTransform(scrollY, [0, 600], [0, -40]);
 
@@ -129,10 +130,10 @@ export default function Hero() {
 
           {/* Right — Console preview */}
           <motion.div
-            initial={{ opacity: 0, x: 32, scale: 0.97 }}
+            initial={{ opacity: 0, x: prefersReducedMotion ? 0 : 32, scale: prefersReducedMotion ? 1 : 0.97 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
-            style={{ y: consoleY }}
-            transition={{ duration: 1.2, ease: EASE, delay: 0.2 }}
+            style={prefersReducedMotion ? undefined : { y: consoleY }}
+            transition={{ duration: prefersReducedMotion ? 0 : 1.2, ease: EASE, delay: prefersReducedMotion ? 0 : 0.2 }}
             className="relative hidden lg:block"
           >
             <ConsolePreview />
