@@ -132,6 +132,17 @@ export default function SignUpPage() {
           >
             {loading ? "Creating workspace..." : "Create workspace"}
           </button>
+          <p className="text-xs text-center text-[var(--color-text-muted)]">
+            By creating a workspace you agree to our{" "}
+            <Link href="/legal/terms" className="underline hover:text-[var(--color-text)]">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="/legal/privacy" className="underline hover:text-[var(--color-text)]">
+              Privacy Policy
+            </Link>
+            .
+          </p>
         </form>
         <p className="mt-6 text-center text-sm text-[var(--color-text-muted)]">
           Already have one?{" "}
