@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
@@ -15,6 +15,10 @@ const PACE = {
 } as const;
 
 export default function Hero() {
+  const { scrollY } = useScroll();
+  const prefersReduced = useReducedMotion();
+  const parallaxY = useTransform(scrollY, [0, 600], prefersReduced ? [0, 0] : [0, -40]);
+
   // Stable dust-mote positions (deterministic per seed)
   const dust = Array.from({ length: 14 }, (_, i) => {
     const seed = i * 137;
@@ -121,8 +125,6 @@ export default function Hero() {
                 Already running on Praxis
               </span>
               <LunaroMark />
-              <CustomerSlot label="Slot 02" />
-              <CustomerSlot label="Slot 03" />
             </motion.div>
           </div>
 
@@ -131,6 +133,7 @@ export default function Hero() {
             initial={{ opacity: 0, x: 32, scale: 0.97 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             transition={{ duration: 1.2, ease: EASE, delay: 0.2 }}
+            style={{ y: parallaxY }}
             className="relative hidden lg:block"
           >
             <ConsolePreview />
@@ -154,14 +157,6 @@ function LunaroMark() {
       >
         Lunaro Insurance
       </span>
-    </div>
-  );
-}
-
-function CustomerSlot({ label }: { label: string }) {
-  return (
-    <div className="px-3 py-1.5 border border-dashed border-[var(--color-edge)] rounded-md text-[11px] tracking-wider uppercase text-[var(--color-cream-faint)]">
-      {label}
     </div>
   );
 }
