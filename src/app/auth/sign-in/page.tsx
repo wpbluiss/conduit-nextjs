@@ -20,26 +20,55 @@ function SignInShell() {
   );
 }
 
+function friendlyAuthError(message: string): string {
+  const m = message.toLowerCase();
+  if (m.includes("invalid login") || m.includes("invalid credentials") || m.includes("user not found")) {
+    return "Wrong email or password.";
+  }
+  if (m.includes("email not confirmed")) {
+    return "Check your inbox — you need to confirm your email before signing in.";
+  }
+  if (m.includes("rate limit") || m.includes("too many requests") || m.includes("too many")) {
+    return "Too many attempts. Please wait a minute and try again.";
+  }
+  if (m.includes("link") && m.includes("expired")) {
+    return "That confirmation link has expired. Request a new one below.";
+  }
+  return message;
+}
+
+/** Ensures redirect target is a safe local path. */
+function safeNext(raw: string | null): string {
+  if (!raw) return "/app/workspace";
+  return raw.startsWith("/") && !raw.startsWith("//") ? raw : "/app/workspace";
+}
+
 function SignInForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/app/workspace";
+  const next = safeNext(params.get("next"));
+  const callbackError = params.get("error");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    callbackError === "link_expired"
+      ? "That confirmation link has expired — sign in directly or request a new one."
+      : null,
+  );
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
     const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    if (error) {
-      setError(error.message);
+    if (authError) {
+      setError(friendlyAuthError(authError.message));
       setLoading(false);
       return;
     }
@@ -81,12 +110,20 @@ function SignInForm() {
             />
           </div>
           <div>
-            <label
-              htmlFor="password"
-              className="block text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2"
-            >
-              Password
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label
+                htmlFor="password"
+                className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]"
+              >
+                Password
+              </label>
+              <Link
+                href="/auth/forgot-password"
+                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-accent)]"
+              >
+                Forgot?
+              </Link>
+            </div>
             <input
               id="password"
               type="password"

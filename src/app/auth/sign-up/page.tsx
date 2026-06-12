@@ -7,6 +7,23 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { PraxisLogo } from "@/components/conduit/PraxisLogo";
 import { track } from "@/lib/analytics/track";
 
+function friendlySignupError(message: string): string {
+  const m = message.toLowerCase();
+  if (m.includes("already registered") || m.includes("user already exists") || m.includes("email already")) {
+    return "That email is already registered. Try signing in instead.";
+  }
+  if (m.includes("password") && (m.includes("short") || m.includes("weak") || m.includes("characters"))) {
+    return "Password must be at least 8 characters.";
+  }
+  if (m.includes("invalid email") || m.includes("email is invalid")) {
+    return "Enter a valid email address.";
+  }
+  if (m.includes("rate limit") || m.includes("too many requests") || m.includes("too many")) {
+    return "Too many attempts. Please wait a minute and try again.";
+  }
+  return message;
+}
+
 export default function SignUpPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -23,16 +40,17 @@ export default function SignUpPage() {
     setInfo(null);
     track("signup_started");
     const supabase = createSupabaseBrowserClient();
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { full_name: name },
-        emailRedirectTo: `${window.location.origin}/app`,
+        // Route through /auth/callback so PKCE code is exchanged correctly.
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/app`,
       },
     });
-    if (error) {
-      setError(error.message);
+    if (authError) {
+      setError(friendlySignupError(authError.message));
       setLoading(false);
       return;
     }
@@ -42,7 +60,7 @@ export default function SignUpPage() {
       router.refresh();
     } else {
       setInfo(
-        "Check your email to confirm. Once confirmed, you can sign in.",
+        "Check your email to confirm. Once confirmed you'll be signed in automatically.",
       );
       setLoading(false);
     }
