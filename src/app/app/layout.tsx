@@ -89,7 +89,7 @@ export default async function AppLayout({
           accountId={account.id}
           inFlightBuildsInitial={inFlightBuildsInitial}
         />
-        <main className="conduit-canvas praxis-canvas-tint flex-1 flex flex-col min-w-0">
+        <main className="conduit-canvas praxis-canvas-tint flex-1 flex flex-col min-w-0 pt-12 md:pt-0">
           <UpgradeNudge
             tierId={account.tier_id ?? "free"}
             internalAccount={Boolean(account.internal_account)}
