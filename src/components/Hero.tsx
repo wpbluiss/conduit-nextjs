@@ -1,7 +1,8 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
@@ -15,6 +16,22 @@ const PACE = {
 } as const;
 
 export default function Hero() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+
+  // Scroll-driven parallax — only active when motion is allowed.
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+
+  // Background drifts at 20% of scroll speed (slower = closer to static = feels deep)
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", prefersReducedMotion ? "0%" : "-20%"]);
+  // Text content drifts at 35% (rises gently as you scroll away)
+  const textY = useTransform(scrollYProgress, [0, 1], ["0%", prefersReducedMotion ? "0%" : "-35%"]);
+  // Console preview drifts at 15% (heaviest element, moves least = most depth)
+  const previewY = useTransform(scrollYProgress, [0, 1], ["0%", prefersReducedMotion ? "0%" : "-15%"]);
+
   // Stable dust-mote positions (deterministic per seed)
   const dust = Array.from({ length: 14 }, (_, i) => {
     const seed = i * 137;
@@ -30,11 +47,14 @@ export default function Hero() {
 
   return (
     <section
+      ref={sectionRef}
       id="top"
       className="relative overflow-hidden conduit-bg-canvas min-h-[100vh] pt-32 md:pt-44 pb-24"
     >
-      <div className="conduit-mesh" aria-hidden />
-      <div className="conduit-ember-radial" aria-hidden />
+      <motion.div style={{ y: bgY }} aria-hidden className="absolute inset-0 pointer-events-none">
+        <div className="conduit-mesh absolute inset-0" aria-hidden />
+        <div className="conduit-ember-radial absolute inset-0" aria-hidden />
+      </motion.div>
       <div
         aria-hidden
         className="absolute inset-0 pointer-events-none overflow-hidden"
@@ -57,8 +77,8 @@ export default function Hero() {
 
       <div className="relative conduit-container">
         <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-12 lg:gap-20 items-center">
-          {/* Left — text */}
-          <div className="max-w-[640px]">
+          {/* Left — text (drifts up at 35% scroll speed) */}
+          <motion.div style={{ y: textY }} className="max-w-[640px]">
             <motion.p
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -124,10 +144,11 @@ export default function Hero() {
               <CustomerSlot label="Slot 02" />
               <CustomerSlot label="Slot 03" />
             </motion.div>
-          </div>
+          </motion.div>
 
-          {/* Right — Console preview */}
+          {/* Right — Console preview (drifts at 15% — heaviest element, deepest layer) */}
           <motion.div
+            style={{ y: previewY }}
             initial={{ opacity: 0, x: 32, scale: 0.97 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             transition={{ duration: 1.2, ease: EASE, delay: 0.2 }}
