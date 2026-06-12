@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowRight,
   Check,
+  CheckCircle,
   ExternalLink,
   Lock,
   Play,
@@ -82,7 +83,13 @@ export function SettingsTabs({
   usage: UsageData;
   defaultTab?: SettingsTabKey;
 }) {
-  const [tab, setTab] = useState<SettingsTabKey>(defaultTab);
+  // Auto-select billing tab when returning from a Stripe checkout session.
+  const tabParams = useSearchParams();
+  const hasCheckoutParam =
+    tabParams.get("checkout") !== null || tabParams.get("topup") !== null;
+  const [tab, setTab] = useState<SettingsTabKey>(
+    hasCheckoutParam ? "billing" : defaultTab,
+  );
 
   return (
     <div>
@@ -864,8 +871,39 @@ function BillingTab({
 }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [checkoutBanner, setCheckoutBanner] = useState<"upgrade_success" | "topup_success" | "canceled" | null>(null);
+  const params = useSearchParams();
+  const router = useRouter();
   const tier = tierById(account.tier_id ?? "free");
   const internal = Boolean(account.internal_account);
+
+  useEffect(() => {
+    const checkout = params.get("checkout");
+    const topup = params.get("topup");
+    if (checkout === "success") {
+      setCheckoutBanner("upgrade_success");
+      // Strip the query param so a refresh doesn't re-show the banner.
+      const url = new URL(window.location.href);
+      url.searchParams.delete("checkout");
+      router.replace(url.pathname + (url.search || ""), { scroll: false });
+    } else if (checkout === "canceled") {
+      setCheckoutBanner("canceled");
+      const url = new URL(window.location.href);
+      url.searchParams.delete("checkout");
+      router.replace(url.pathname + (url.search || ""), { scroll: false });
+    } else if (topup === "success") {
+      setCheckoutBanner("topup_success");
+      const url = new URL(window.location.href);
+      url.searchParams.delete("topup");
+      router.replace(url.pathname + (url.search || ""), { scroll: false });
+    } else if (topup === "canceled") {
+      setCheckoutBanner("canceled");
+      const url = new URL(window.location.href);
+      url.searchParams.delete("topup");
+      router.replace(url.pathname + (url.search || ""), { scroll: false });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (internal) {
     return (
@@ -976,6 +1014,43 @@ function BillingTab({
 
   return (
     <div className="space-y-6 text-sm">
+      {/* Post-checkout feedback banner */}
+      {checkoutBanner === "upgrade_success" && (
+        <div className="conduit-card p-4 flex items-start gap-3 border-[var(--color-accent)]">
+          <CheckCircle size={16} className="mt-0.5 shrink-0 text-[var(--color-accent)]" />
+          <div>
+            <p className="font-medium">Subscription activated</p>
+            <p className="text-[var(--color-text-muted)] text-xs mt-0.5">
+              Your plan has been upgraded. The new allowance is active immediately.
+            </p>
+          </div>
+          <button onClick={() => setCheckoutBanner(null)} className="ml-auto shrink-0 text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
+            <X size={14} />
+          </button>
+        </div>
+      )}
+      {checkoutBanner === "topup_success" && (
+        <div className="conduit-card p-4 flex items-start gap-3 border-[var(--color-accent)]">
+          <CheckCircle size={16} className="mt-0.5 shrink-0 text-[var(--color-accent)]" />
+          <div>
+            <p className="font-medium">Tokens added</p>
+            <p className="text-[var(--color-text-muted)] text-xs mt-0.5">
+              Bonus tokens have been credited to your account.
+            </p>
+          </div>
+          <button onClick={() => setCheckoutBanner(null)} className="ml-auto shrink-0 text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
+            <X size={14} />
+          </button>
+        </div>
+      )}
+      {checkoutBanner === "canceled" && (
+        <div className="conduit-card p-4 flex items-start gap-3">
+          <p className="text-[var(--color-text-muted)] text-xs">Checkout canceled — no charge was made.</p>
+          <button onClick={() => setCheckoutBanner(null)} className="ml-auto shrink-0 text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
+            <X size={14} />
+          </button>
+        </div>
+      )}
       {/* Current plan */}
       <div className="conduit-card p-6 flex items-center justify-between gap-4">
         <div>
