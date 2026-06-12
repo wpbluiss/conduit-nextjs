@@ -8,6 +8,22 @@ export const metadata: Metadata = {
   title: "Approach — How we think about workforces",
   description:
     "Praxis isn't an AI product. It's a position on what work looks like next. The full thesis on specialization, memory, voice, execution.",
+  openGraph: {
+    title: "Approach — How we think about workforces",
+    description:
+      "Praxis isn't an AI product. It's a position on what work looks like next. The full thesis on specialization, memory, voice, execution.",
+    url: "https://conduitai.io/approach",
+    siteName: "Conduit AI",
+    type: "website",
+    images: [{ url: "/praxis-mark.png", width: 632, height: 961, alt: "Praxis" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Approach — How we think about workforces",
+    description:
+      "The full thesis on specialization, memory, voice, and execution. Why generality is a recipe for shallowness.",
+    images: ["/praxis-mark.png"],
+  },
 };
 
 const SECTIONS: Section[] = [
