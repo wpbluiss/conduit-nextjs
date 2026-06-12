@@ -11,6 +11,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FinalCTA from "@/components/FinalCTA";
 import { PageHeader } from "@/components/marketing/PageHeader";
+import { ScrollRevealCards, ScrollRevealItem } from "@/components/marketing/ScrollRevealCards";
 
 export const metadata: Metadata = {
   title: "Trust + Security — Conduit AI",
@@ -75,24 +76,26 @@ export default function TrustPage() {
 
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-border-subtle)]">
         <div className="conduit-container">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 max-w-[920px]">
+          <ScrollRevealCards className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 max-w-[920px]">
             {PILLARS.map((p) => (
-              <div key={p.title} className="conduit-card p-7 md:p-8">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--color-indigo-50)]">
-                    <p.Icon size={20} weight="regular" color="#5B63E8" />
+              <ScrollRevealItem key={p.title}>
+                <div className="conduit-card p-7 md:p-8 h-full">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)]">
+                      <p.Icon size={20} weight="regular" color="#5B63E8" />
+                    </div>
+                    <h3
+                      className="text-[18px] leading-[1.2] tracking-[-0.01em] text-[var(--color-cream)]"
+                      style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
+                    >
+                      {p.title}
+                    </h3>
                   </div>
-                  <h3
-                    className="text-[18px] leading-[1.2] tracking-[-0.01em] text-[var(--color-ink-primary)]"
-                    style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
-                  >
-                    {p.title}
-                  </h3>
+                  <p className="conduit-body-md">{p.body}</p>
                 </div>
-                <p className="conduit-body-md">{p.body}</p>
-              </div>
+              </ScrollRevealItem>
             ))}
-          </div>
+          </ScrollRevealCards>
         </div>
       </section>
 
