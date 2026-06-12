@@ -6,6 +6,8 @@ import {
   isBillingConfigured,
 } from "@/lib/billing/stripe";
 import { TIERS, type TierId } from "@/lib/billing/tiers";
+import { sendEmail } from "@/lib/email/send";
+import { paymentReceiptEmail } from "@/lib/email/templates/payment-receipt";
 import type Stripe from "stripe";
 
 export const runtime = "nodejs";
@@ -162,6 +164,28 @@ async function handleEvent(
             .eq("id", accountId);
         }
       }
+      // Send branded payment receipt — fire-and-forget, never blocks billing processing.
+      const toEmail = session.customer_details?.email;
+      if (toEmail && session.amount_total && session.amount_total > 0) {
+        const description =
+          session.mode === "subscription"
+            ? `Praxis ${(session.metadata?.tier_id ?? "Pro")} — monthly subscription`
+            : `Praxis token top-up (${session.metadata?.tokens_granted ?? "?"} tokens)`;
+        const receipt = paymentReceiptEmail({
+          customerEmail: toEmail,
+          amountPaid: session.amount_total,
+          currency: session.currency ?? "usd",
+          description,
+          invoiceId: typeof session.invoice === "string" ? session.invoice : (session.invoice?.id ?? session.id),
+          chargeDate: new Date().toISOString(),
+          receiptUrl: session.invoice?.toString() ? undefined : undefined,
+          dashboardUrl: "https://conduitai.io/app/settings/billing",
+        });
+        sendEmail({ to: toEmail, ...receipt }).catch((e) =>
+          console.error("[email] receipt send failed", e),
+        );
+      }
+
       return accountId;
     }
 
