@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import { AnalyticsPageView } from "@/components/conduit/AnalyticsPageView";
 import ProductTiles from "@/components/ProductTiles";
 import Cinematic from "@/components/Cinematic";
 import Vision from "@/components/Vision";
@@ -35,6 +36,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <main>
+      <AnalyticsPageView />
       <Navbar />
       <Hero />
       <ProductTiles />

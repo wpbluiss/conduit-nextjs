@@ -8,6 +8,7 @@ import {
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Pricing from "@/components/Pricing";
+import { AnalyticsPageView } from "@/components/conduit/AnalyticsPageView";
 
 export const metadata: Metadata = {
   title: "Pricing — Three tiers, one workforce",
@@ -132,6 +133,7 @@ function CellRender({ value, popular }: { value: Cell; popular?: boolean }) {
 export default function PricingPage() {
   return (
     <main className="conduit-bg-canvas">
+      <AnalyticsPageView />
       <Navbar />
 
       {/* Hero */}

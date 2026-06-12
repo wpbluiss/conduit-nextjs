@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { PraxisLogo } from "@/components/conduit/PraxisLogo";
+import { track } from "@/lib/analytics/track";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function SignUpPage() {
     setLoading(true);
     setError(null);
     setInfo(null);
+    track("signup_started");
     const supabase = createSupabaseBrowserClient();
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -35,6 +37,7 @@ export default function SignUpPage() {
       return;
     }
     if (data.session) {
+      track("signup_completed");
       router.replace("/app");
       router.refresh();
     } else {
