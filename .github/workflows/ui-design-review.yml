@@ -1,0 +1,54 @@
+name: UI Design Review
+
+# Visual design-review loop: screenshots the LIVE pages, then has Claude (vision) judge
+# them against world-class product design and either fix the worst gaps directly (PR)
+# or file [UI] issues. Runs on conduit-nextjs (public = free Actions minutes).
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+on:
+  schedule:
+    - cron: "45 */6 * * *"   # a few times a day
+  workflow_dispatch: {}
+
+jobs:
+  ui-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: Screenshot live pages
+        run: |
+          npm i -D playwright@latest
+          npx playwright install --with-deps chromium
+          node scripts/ui-screenshots.mjs || echo "screenshot step soft-failed"
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: "--max-turns 120 --permission-mode bypassPermissions"
+          prompt: |
+            You are the UI design reviewer for Praxis (a flagship product). Read DESIGN.md
+            first — that's the bar (Linear/Vercel/Stripe/Arc tier; ember/PDL identity).
+
+            1. LOOK at every screenshot in `.ui-review/*.png` using the Read tool (they are
+               real captures of the live site at desktop + mobile). Actually view them.
+            2. For each page, critique HONESTLY against world-class design: hierarchy,
+               spacing/rhythm, typography, color/contrast, motion (is there tasteful
+               framer-motion / parallax or is it static and flat?), CTA quality, mobile
+               layout, empty/polish. Be a harsh senior product designer.
+            3. ACT:
+               - Implement the highest-impact improvements directly (edit components/CSS,
+                 add framer-motion scroll-reveal/parallax/micro-interactions, fix spacing &
+                 hierarchy) on a NEW branch, verify `npm run build` + `npx tsc --noEmit`,
+                 and open a PR titled "[UI] <page>: <what improved>" with before/after notes.
+               - For bigger redesigns, open `[UI]` + `claude-queue` issues with specific,
+                 actionable design direction.
+            4. Stay on the ember/PDL identity (DESIGN.md). Don't touch /finance. Keep PRs
+               focused and phone-approvable.
+            Do real work — open at least one improvement PR if anything is below the bar.
