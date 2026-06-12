@@ -348,17 +348,63 @@ body {
   border-color: var(--color-accent);
 }
 
+/* Message entrance — @starting-style provides fade+slide for newly inserted DOM nodes.
+   Graceful no-op in browsers that don't support it (message appears without animation). */
+@keyframes msgEnter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .conduit-bubble-user,
+  .conduit-bubble-assistant {
+    animation: msgEnter 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  /* Prevent the animation from replaying on re-renders by only targeting
+     @starting-style when the browser supports it. */
+  @supports (transition-behavior: allow-discrete) {
+    .conduit-bubble-user,
+    .conduit-bubble-assistant {
+      animation: none;
+      transition: opacity 240ms cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @starting-style {
+      .conduit-bubble-user,
+      .conduit-bubble-assistant {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+    }
+  }
+}
+
 .conduit-bubble-user {
   background: color-mix(in srgb, var(--color-accent) 10%, transparent);
   border: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
-  /* tl, tr, br, bl — large everywhere, small bottom-left = speech-bubble feel */
-  border-radius: 22px 22px 22px 6px;
+  /* tl, tr, br, bl — large everywhere, small bottom-right = outgoing feel */
+  border-radius: 20px 20px 4px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25),
+              inset 0 1px 0 color-mix(in srgb, var(--color-accent) 15%, transparent);
+  font-size: 14.5px;
+  line-height: 1.65;
 }
 .conduit-bubble-assistant {
   background: var(--color-surface-elevated);
-  border-left: 2px solid var(--dept, var(--color-border));
-  /* mirrored: small bottom-right */
-  border-radius: 22px 22px 6px 22px;
+  border: 1px solid var(--color-border-soft);
+  border-left: 2.5px solid var(--dept, var(--color-border));
+  /* mirrored: small bottom-left */
+  border-radius: 4px 20px 20px 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+/* Streaming state: the dept accent pulses subtly on the left border */
+@keyframes streamingBorderPulse {
+  0%, 100% { border-left-color: var(--dept, var(--color-border)); }
+  50%       { border-left-color: color-mix(in srgb, var(--dept, var(--color-border)) 50%, transparent); }
+}
+.conduit-bubble-assistant--streaming {
+  animation: streamingBorderPulse 1.6s ease-in-out infinite;
 }
 
 .conduit-suggestion {
@@ -414,18 +460,19 @@ body {
 }
 
 @keyframes typingDot {
-  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
-  30% { opacity: 1; transform: translateY(-2px); }
+  0%, 60%, 100% { opacity: 0.25; transform: translateY(0) scale(0.85); }
+  30% { opacity: 1; transform: translateY(-3px) scale(1); }
 }
 .typing-dot {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 9999px;
   background: var(--dept, var(--color-text-muted));
-  animation: typingDot 1.2s ease-in-out infinite;
+  box-shadow: 0 0 5px color-mix(in srgb, var(--dept, var(--color-text-muted)) 50%, transparent);
+  animation: typingDot 1.4s cubic-bezier(0.25, 1, 0.5, 1) infinite;
 }
-.typing-dot:nth-child(2) { animation-delay: 150ms; }
-.typing-dot:nth-child(3) { animation-delay: 300ms; }
+.typing-dot:nth-child(2) { animation-delay: 180ms; }
+.typing-dot:nth-child(3) { animation-delay: 360ms; }
 
 @keyframes handoffSlide {
   from { opacity: 0; transform: translateY(-4px); }
@@ -433,6 +480,15 @@ body {
 }
 .handoff-card {
   animation: handoffSlide 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Skeleton shimmer — smoother than Tailwind's animate-pulse */
+@keyframes skeletonShimmer {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+.skeleton-shimmer {
+  animation: skeletonShimmer 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @keyframes onboardingFadeIn {

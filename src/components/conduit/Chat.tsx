@@ -1057,9 +1057,9 @@ const MessageBubble = memo(function MessageBubble({
             </button>
           )}
         </div>
-        <div className="conduit-bubble-assistant px-4 py-3 text-[var(--color-text)] whitespace-pre-wrap leading-relaxed">
+        <div className={`conduit-bubble-assistant px-4 py-3 text-[var(--color-text)] whitespace-pre-wrap leading-relaxed${message.pending ? " conduit-bubble-assistant--streaming" : ""}`}>
           {empty ? (
-            <span className="inline-flex items-center gap-1 py-1">
+            <span className="inline-flex items-center gap-1.5 py-1">
               <span className="typing-dot" />
               <span className="typing-dot" />
               <span className="typing-dot" />
