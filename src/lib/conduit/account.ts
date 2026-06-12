@@ -35,6 +35,8 @@ export interface ConduitAccount {
   // Hydrated only after migration 021 runs; falls back to 'system' for
   // older rows that don't have the column yet.
   theme_preference?: "system" | "light" | "dark" | null;
+  // First-run welcome tour (migration 029). false = not yet seen.
+  seen_welcome_tour?: boolean | null;
   created_at: string;
   updated_at: string;
 }
