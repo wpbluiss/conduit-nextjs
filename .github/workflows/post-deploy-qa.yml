@@ -1,0 +1,61 @@
+name: Post-Deploy QA
+
+# After anything lands on main, Vercel auto-deploys to production (conduitai.io).
+# This is the safety net that makes full-autonomy merging safe to leave alone:
+# it smoke-tests production, and if the deploy is broken it AUTO-REVERTS the commit
+# and files a claude-queue issue so Atlas can delegate the fix. Continuous loop.
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # Give Vercel time to build & promote the new production deploy.
+      - run: sleep 120
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}  # swap in for $0 Max-plan runs
+          claude_args: "--max-turns 30"
+          prompt: |
+            You are the post-deploy QA agent for Praxis (production: https://conduitai.io).
+            A commit just landed on main and Vercel has (re)deployed production. Your job
+            is to confirm production is healthy, and AUTO-REVERT if it is not.
+
+            1. SMOKE TEST production by cur/fetching the live site (NOT localhost). Poll for
+               up to ~4 minutes (the deploy may still be promoting), retrying every ~30s:
+               - `https://conduitai.io/` returns 200 and real HTML (not a Vercel error page);
+               - `https://conduitai.io/api/health` returns 200 (if that route exists);
+               - spot-check 1-2 key routes you can infer from the repo (e.g. the marketing
+                 home and the chat entry). Treat 5xx, build-error pages, or a blank/again
+                 crashing app as FAILURE.
+
+            2. IF HEALTHY — do nothing destructive. Optionally leave a one-line note. Done.
+
+            3. IF BROKEN — restore production immediately:
+               - `git revert --no-edit HEAD` (HEAD is the squash-merged change). If HEAD is
+                 a merge commit, use `git revert --no-edit -m 1 HEAD`. Resolve trivially if
+                 needed; the goal is to get main back to the last-good state.
+               - `git push origin main` (this re-deploys the good version).
+               - Open an issue: `gh issue create --label claude-queue --title
+                 "Production QA failure: auto-reverted <short-sha>" --body "<what failed,
+                 the failing URL/output, the reverted commit, and a request for the owning
+                 department to fix forward>"`. This routes the fix back through the fleet.
+               - Comment the same summary so there's a trail.
+
+            Be conservative about calling something broken (avoid revert-thrash on a slow
+            deploy) but decisive once you've confirmed real failure. `gh` is authenticated
+            via GITHUB_TOKEN.
