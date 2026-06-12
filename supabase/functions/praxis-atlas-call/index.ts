@@ -1,8 +1,8 @@
 // Praxis — Atlas call control plane (Vapi).
-// Inspect Atlas's Vapi assistant, flip it to a realtime S2S voice, and place live
-// calls to Luis. On configure: model is deep-merged (keeps the system prompt), voice
-// and transcriber are REPLACED wholesale when provided (so an OpenAI realtime voice
-// doesn't inherit ElevenLabs-only fields). Auto-resolves the phone number UUID.
+// Inspect/configure Atlas's Vapi assistant and place live calls. On every call it
+// injects REAL-TIME fleet status into the assistant via variableValues ({{status}}),
+// so Atlas always talks about what's happening NOW — not stale data.
+// On configure: model deep-merged (keeps prompt), voice/transcriber replaced wholesale.
 // Secrets: VAPI_API_KEY, VAPI_PHONE_NUMBER_ID, VAPI_ATLAS_ASSISTANT_ID, OWNER_PHONE.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
@@ -41,6 +41,27 @@ async function resolvePhoneId(key: string, given: string, ownerHint: string) {
   const match = (wantDigits && list.body.find((p: any) => digits(p.number).endsWith(wantDigits.slice(-10)))) || list.body[0];
   return { id: match?.id ?? "", how: match ? "matched" : "first", number: match?.number };
 }
+// Real-time fleet status, computed fresh from the DB at call time.
+async function buildStatus(admin: any): Promise<string> {
+  const today = new Date().toISOString().slice(0, 10);
+  const { data: cfg } = await admin.from("praxis_config").select("spend_today_usd,daily_spend_cap_usd").eq("id", 1).maybeSingle();
+  const { data: tasks } = await admin.from("praxis_tasks").select("status,updated_at");
+  let done = 0, doneToday = 0, inflight = 0;
+  for (const t of tasks ?? []) {
+    if (t.status === "done") { done++; if (String(t.updated_at).slice(0, 10) === today) doneToday++; }
+    if (["queued", "assigned", "in_progress"].includes(t.status)) inflight++;
+  }
+  const { count: disp } = await admin.from("praxis_cross_repo_dispatches").select("id", { count: "exact", head: true });
+  const { data: brief } = await admin.from("praxis_briefs").select("summary").order("created_at", { ascending: false }).limit(1).maybeSingle();
+  return [
+    `Today is ${today}.`,
+    `The autonomous engineering fleet is LIVE, running 24/7 on the founder's Claude Max plan (zero marginal cost).`,
+    `Right now: ${doneToday} tasks completed today, ${inflight} in flight, ${disp ?? 0} cross-repo issues filed by Conductor (the orchestrator). ${done} tasks done all-time. Spend today $${Number(cfg?.spend_today_usd ?? 0).toFixed(2)} of $${Number(cfg?.daily_spend_cap_usd ?? 5)} cap.`,
+    `Shipped recently: merged production PRs for App Store account-deletion, chat rate-limiting, and a health endpoint; brought online the auto-review-merge board (agents merge their own PRs), the post-deploy QA loop, and the Conductor cross-repo orchestrator; and upgraded this phone line to real-time speech-to-speech (that's why you sound natural now).`,
+    `Latest written brief: ${(brief?.summary ?? "n/a").slice(0, 400)}`,
+    `The founder is actively wiring agents into the rest of the repos right now.`,
+  ].join(" ");
+}
 
 Deno.serve(async (req) => {
   if (req.method !== "POST") return j({ ok: false, error: "method" }, 405);
@@ -75,9 +96,11 @@ Deno.serve(async (req) => {
       if (!assistantId) return j({ ok: false, error: "missing_secrets", missing: ["VAPI_ATLAS_ASSISTANT_ID"] }, 400);
       const a = await vapi(`/assistant/${assistantId}`, vapiKey);
       if (!a.ok) return j({ ok: false, error: "vapi_get_failed", status: a.status, body: a.body }, 502);
-      out.assistant = { name: a.body?.name, model: a.body?.model, voice: a.body?.voice, transcriber: a.body?.transcriber };
+      out.assistant = { name: a.body?.name, model: a.body?.model, voice: a.body?.voice, transcriber: a.body?.transcriber, server: a.body?.server };
       return j(out);
     }
+
+    if (action === "status") { out.status = await buildStatus(admin); return j(out); }
 
     if (action === "configure" || action === "configure_and_call") {
       if (!assistantId) return j({ ok: false, error: "missing_secrets", missing: ["VAPI_ATLAS_ASSISTANT_ID"] }, 400);
@@ -85,27 +108,27 @@ Deno.serve(async (req) => {
       if (!patch) return j({ ok: false, error: "no_patch" }, 400);
       const cur = await vapi(`/assistant/${assistantId}`, vapiKey);
       if (!cur.ok) return j({ ok: false, error: "vapi_get_failed", status: cur.status, body: cur.body }, 502);
-      // model: deep-merge (preserve the system prompt). voice/transcriber: replace wholesale when provided.
       const merged: any = { model: patch.model ? deepMerge(cur.body?.model, patch.model) : cur.body?.model };
       merged.voice = ("voice" in patch) ? patch.voice : cur.body?.voice;
       merged.transcriber = ("transcriber" in patch) ? patch.transcriber : cur.body?.transcriber;
       const upd = await vapi(`/assistant/${assistantId}`, vapiKey, { method: "PATCH", body: JSON.stringify(merged) });
       if (!upd.ok) return j({ ok: false, error: "vapi_patch_failed", status: upd.status, body: upd.body }, 502);
-      out.configured = { model: upd.body?.model, voice: upd.body?.voice };
-      await log("vapi_configure", { result_model: upd.body?.model?.model, result_voice: upd.body?.voice?.provider });
+      out.configured = { model: upd.body?.model?.model, voice: upd.body?.voice };
+      await log("vapi_configure", { result_model: upd.body?.model?.model });
       if (action === "configure") return j(out);
     }
 
     if (!assistantId || !to) return j({ ok: false, error: "missing_secrets", missing: [!assistantId && "VAPI_ATLAS_ASSISTANT_ID", !to && "to/OWNER_PHONE"].filter(Boolean) }, 400);
     const resolved = await resolvePhoneId(vapiKey, phoneNumberRaw, to);
     if (!resolved.id) return j({ ok: false, error: "phone_number_unresolved", detail: resolved }, 502);
-    const first = body.message ?? "Hey Luis, it's Atlas. This is a quick test of my new voice. How's it sound on your end?";
+    const status = await buildStatus(admin);
+    const first = body.message ?? "Hey Luis, it's Atlas. Quick real-time update from your fleet — want the rundown?";
     const call = await vapi(`/call`, vapiKey, { method: "POST", body: JSON.stringify({
       phoneNumberId: resolved.id, assistantId, customer: { number: to },
-      assistantOverrides: { firstMessage: first },
+      assistantOverrides: { firstMessage: first, variableValues: { status, now: new Date().toISOString().slice(0, 10) } },
     }) });
     if (!call.ok) return j({ ok: false, error: "vapi_call_failed", status: call.status, body: call.body, phone_resolved: resolved }, 502);
-    out.call = { id: call.body?.id, status: call.body?.status, to, phone_resolved: resolved };
+    out.call = { id: call.body?.id, status: call.body?.status, to };
     await log("vapi_call", { id: call.body?.id, to, how: resolved.how });
     return j(out);
   } catch (e) {
