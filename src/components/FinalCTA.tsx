@@ -57,7 +57,8 @@ export default function FinalCTA() {
           }}
           className="conduit-display-2xl"
         >
-          Stop hiring. <span className="conduit-ember-text">Start deploying.</span>
+          Nine specialists.{" "}
+          <span className="conduit-ember-text">Zero payroll.</span>
         </motion.h2>
 
         <motion.p

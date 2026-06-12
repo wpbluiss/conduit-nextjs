@@ -122,7 +122,7 @@ export default function SignUpPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="First Last"
-                className="w-full rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-default)] px-4 py-3 text-[var(--color-text)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)] placeholder:text-[var(--color-text-muted)]"
+                className="w-full rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-default)] px-4 py-3 text-[var(--color-text)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-indigo-500)] focus:shadow-[0_0_0_3px_rgba(91,99,232,0.12)] placeholder:text-[var(--color-text-muted)]"
               />
             </motion.div>
 
@@ -141,7 +141,7 @@ export default function SignUpPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
-                className="w-full rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-default)] px-4 py-3 text-[var(--color-text)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)] placeholder:text-[var(--color-text-muted)]"
+                className="w-full rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-default)] px-4 py-3 text-[var(--color-text)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-indigo-500)] focus:shadow-[0_0_0_3px_rgba(91,99,232,0.12)] placeholder:text-[var(--color-text-muted)]"
               />
             </motion.div>
 
@@ -161,7 +161,7 @@ export default function SignUpPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Min. 8 characters"
-                className="w-full rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-default)] px-4 py-3 text-[var(--color-text)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)]"
+                className="w-full rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-default)] px-4 py-3 text-[var(--color-text)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-indigo-500)] focus:shadow-[0_0_0_3px_rgba(91,99,232,0.12)]"
               />
             </motion.div>
 
@@ -189,7 +189,7 @@ export default function SignUpPage() {
               variants={ITEM}
               type="submit"
               disabled={loading}
-              className="btn-primary w-full justify-center disabled:opacity-60"
+              className="conduit-btn-primary w-full justify-center disabled:opacity-60"
             >
               {loading ? (
                 <>
@@ -214,14 +214,14 @@ export default function SignUpPage() {
             By creating an account you agree to our{" "}
             <Link
               href="/legal/terms"
-              className="underline underline-offset-2 hover:text-[var(--color-accent)] transition-colors"
+              className="underline underline-offset-2 hover:text-[var(--color-indigo-500)] transition-colors"
             >
               Terms
             </Link>{" "}
             and{" "}
             <Link
               href="/legal/privacy"
-              className="underline underline-offset-2 hover:text-[var(--color-accent)] transition-colors"
+              className="underline underline-offset-2 hover:text-[var(--color-indigo-500)] transition-colors"
             >
               Privacy Policy
             </Link>
@@ -231,7 +231,7 @@ export default function SignUpPage() {
             Already have one?{" "}
             <Link
               href="/auth/sign-in"
-              className="text-[var(--color-accent)] hover:text-[var(--color-accent-hi)] transition-colors font-medium"
+              className="text-[var(--color-indigo-500)] hover:text-[var(--color-indigo-700)] transition-colors font-medium"
             >
               Sign in
             </Link>

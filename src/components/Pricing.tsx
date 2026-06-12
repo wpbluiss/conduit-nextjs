@@ -151,7 +151,7 @@ export default function Pricing() {
                       <Check
                         size={14}
                         weight="bold"
-                        color={t.popular ? "#5B63E8" : "#9DD8B1"}
+                        color={t.popular ? "#5B63E8" : "#16A34A"}
                         className="mt-1 shrink-0"
                       />
                       <span>{f}</span>
