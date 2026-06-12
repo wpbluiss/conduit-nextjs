@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
@@ -15,8 +15,9 @@ const PACE = {
 } as const;
 
 export default function Hero() {
+  const shouldReduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
-  const consoleY = useTransform(scrollY, [0, 600], [0, -40]);
+  const consoleYRaw = useTransform(scrollY, [0, 600], [0, -40]);
 
   // Stable dust-mote positions (deterministic per seed)
   const dust = Array.from({ length: 14 }, (_, i) => {
@@ -131,7 +132,7 @@ export default function Hero() {
           <motion.div
             initial={{ opacity: 0, x: 32, scale: 0.97 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
-            style={{ y: consoleY }}
+            style={{ y: shouldReduceMotion ? 0 : consoleYRaw }}
             transition={{ duration: 1.2, ease: EASE, delay: 0.2 }}
             className="relative hidden lg:block"
           >
