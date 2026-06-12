@@ -289,12 +289,12 @@ export default function Footer() {
               >
                 Terms
               </Link>
-              <span
-                className="cursor-default"
-                title="Coming soon"
+              <Link
+                href="/legal/acceptable-use"
+                className="hover:text-[var(--color-cream)] transition-colors"
               >
                 Acceptable use
-              </span>
+              </Link>
             </div>
           </div>
 
