@@ -7,6 +7,8 @@ import {
 } from "@/lib/billing/stripe";
 import { TIERS, type TierId } from "@/lib/billing/tiers";
 import type Stripe from "stripe";
+import { sendEmail } from "@/lib/emails/resend";
+import { receiptEmail } from "@/lib/emails/templates";
 
 export const runtime = "nodejs";
 
@@ -95,6 +97,56 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ received: true });
 }
 
+async function sendReceiptForSession(
+  session: Stripe.Checkout.Session,
+  sb: ReturnType<typeof serviceClient>,
+): Promise<void> {
+  try {
+    const accountId = session.metadata?.account_id;
+    if (!accountId) return;
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL!;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_KEY!;
+    const admin = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+    const { data: authUser } = await admin.auth.admin.getUserById(accountId);
+    const email = authUser?.user?.email;
+    if (!email) return;
+
+    const cents = session.amount_total ?? 0;
+    const dollars = (cents / 100).toFixed(2);
+    const currency = (session.currency ?? "usd").toUpperCase();
+    const total = `${currency} $${dollars}`;
+
+    let description = "Praxis subscription";
+    const mode = session.mode;
+    if (mode === "payment") {
+      const tokens = session.metadata?.tokens_granted ?? "0";
+      description = `Token top-up · ${tokens} tokens`;
+    } else if (mode === "subscription") {
+      const tier = session.metadata?.tier_id ?? "pro";
+      description = `Praxis ${tier.charAt(0).toUpperCase() + tier.slice(1)} plan`;
+    }
+
+    const firstName = authUser?.user?.user_metadata?.first_name as string | undefined ?? "";
+    const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    const receiptId = `RC-${(session.id ?? "").slice(-8).toUpperCase()}`;
+
+    await sendEmail({
+      to: email,
+      subject: `Receipt from Praxis · ${total}`,
+      html: receiptEmail({
+        firstName,
+        items: [{ description, amount: total }],
+        subtotal: total,
+        total,
+        paymentDate: date,
+        receiptId,
+      }),
+    });
+  } catch (err) {
+    console.warn("[email] receipt send failed (non-fatal)", err);
+  }
+}
+
 async function handleEvent(
   event: Stripe.Event,
   sb: ReturnType<typeof serviceClient>,
@@ -162,6 +214,8 @@ async function handleEvent(
             .eq("id", accountId);
         }
       }
+      // Fire receipt email (non-blocking; failure must never crash payment processing)
+      void sendReceiptForSession(session, sb);
       return accountId;
     }
 
