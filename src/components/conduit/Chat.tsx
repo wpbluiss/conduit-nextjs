@@ -3,6 +3,7 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, FileText } from "lucide-react";
+import { motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
   DEPT_COLOR,
@@ -944,28 +945,34 @@ const MessageBubble = memo(function MessageBubble({
 }) {
   if (message.role === "user") {
     return (
-      <div className="flex justify-end">
+      <motion.div
+        className="flex justify-end"
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+      >
         <div className="max-w-[85%] conduit-bubble-user px-4 py-3 text-[var(--color-text)] whitespace-pre-wrap">
           {message.content}
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   if (message.role === "system" && message.handoffTo) {
-    // Note: `from` would ideally be the previous assistant message's employee,
-    // but the MessageBubble doesn't have prev-message context. Default to
-    // Atlas (jarvis) as the routing source — accurate for the vast majority
-    // of handoffs since Atlas IS the router.
     const from: EmployeeId = "jarvis";
     return (
-      <div style={{ marginTop: "var(--space-3)", marginBottom: "var(--space-3)" }}>
+      <motion.div
+        style={{ marginTop: "var(--space-3)", marginBottom: "var(--space-3)" }}
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
+      >
         <PraxisHandoffBaton
           from={from}
           to={message.handoffTo as EmployeeId}
           label={`${employeeLabel("jarvis" as EmployeeKey)} → ${employeeLabel(message.handoffTo)}`}
         />
-      </div>
+      </motion.div>
     );
   }
 
@@ -989,9 +996,12 @@ const MessageBubble = memo(function MessageBubble({
   const empty = !message.content && message.pending;
 
   return (
-    <div
+    <motion.div
       className="flex gap-3"
       style={{ ["--dept" as string]: DEPT_COLOR[employee] }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
     >
       <div className="pt-1 shrink-0">
         <EmployeeAvatar employee={employee} size={32} active={message.pending} />
@@ -1129,7 +1139,7 @@ const MessageBubble = memo(function MessageBubble({
           </button>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 });
 

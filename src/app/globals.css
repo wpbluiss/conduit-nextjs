@@ -349,16 +349,20 @@ body {
 }
 
 .conduit-bubble-user {
-  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
-  /* tl, tr, br, bl — large everywhere, small bottom-left = speech-bubble feel */
+  background: color-mix(in srgb, var(--color-accent) 11%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
   border-radius: 22px 22px 22px 6px;
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--color-accent) 12%, transparent);
+  font-size: 14px;
+  line-height: 1.7;
 }
 .conduit-bubble-assistant {
-  background: var(--color-surface-elevated);
+  background: color-mix(in srgb, var(--dept, var(--color-accent)) 4%, var(--color-surface-elevated));
   border-left: 2px solid var(--dept, var(--color-border));
-  /* mirrored: small bottom-right */
   border-radius: 22px 22px 6px 22px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
+  font-size: 14px;
+  line-height: 1.75;
 }
 
 .conduit-suggestion {
