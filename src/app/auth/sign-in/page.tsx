@@ -20,14 +20,21 @@ function SignInShell() {
   );
 }
 
+const QUERY_ERROR_MESSAGES: Record<string, string> = {
+  confirmation_failed: "Email confirmation failed. Please try signing up again or contact support.",
+};
+
 function SignInForm() {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") || "/app/workspace";
+  const queryError = params.get("error");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    queryError ? (QUERY_ERROR_MESSAGES[queryError] ?? "An error occurred. Please try again.") : null,
+  );
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
