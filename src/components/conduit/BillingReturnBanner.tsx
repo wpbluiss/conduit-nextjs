@@ -1,0 +1,62 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { CheckCircle, X, Info } from "lucide-react";
+
+type BannerType = "checkout_success" | "checkout_canceled" | "topup_success";
+
+const MESSAGES: Record<BannerType, { icon: typeof CheckCircle; text: string; color: string }> = {
+  checkout_success: {
+    icon: CheckCircle,
+    text: "You're upgraded! Your new plan is active.",
+    color: "var(--color-green)",
+  },
+  topup_success: {
+    icon: CheckCircle,
+    text: "Tokens added to your account.",
+    color: "var(--color-green)",
+  },
+  checkout_canceled: {
+    icon: Info,
+    text: "Checkout canceled — no charge was made.",
+    color: "var(--color-text-muted)",
+  },
+};
+
+export function BillingReturnBanner({ type }: { type: BannerType }) {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    // Auto-dismiss success banners after 8 s.
+    if (type !== "checkout_canceled") {
+      const t = setTimeout(() => setVisible(false), 8000);
+      return () => clearTimeout(t);
+    }
+  }, [type]);
+
+  if (!visible) return null;
+
+  const { icon: Icon, text, color } = MESSAGES[type];
+
+  return (
+    <div
+      className="flex items-center gap-3 px-4 py-3 rounded-lg mb-6 text-sm"
+      style={{
+        background: `color-mix(in srgb, ${color} 12%, transparent)`,
+        border: `1px solid color-mix(in srgb, ${color} 30%, transparent)`,
+        color: "var(--color-text)",
+      }}
+    >
+      <Icon size={16} style={{ color, flexShrink: 0 }} />
+      <span className="flex-1">{text}</span>
+      <button
+        type="button"
+        aria-label="Dismiss"
+        onClick={() => setVisible(false)}
+        className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+      >
+        <X size={14} />
+      </button>
+    </div>
+  );
+}
