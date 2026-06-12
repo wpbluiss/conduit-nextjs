@@ -278,13 +278,13 @@ export default function Footer() {
             <span>&copy; 2026 Conduit AI. West Palm Beach, FL.</span>
             <div className="flex items-center gap-5">
               <Link
-                href="/privacy-policy.html"
+                href="/legal/privacy"
                 className="hover:text-[var(--color-cream)] transition-colors"
               >
                 Privacy
               </Link>
               <Link
-                href="/terms.html"
+                href="/legal/terms"
                 className="hover:text-[var(--color-cream)] transition-colors"
               >
                 Terms
