@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 /* Institutional pacing — slower than v2's 80ms stagger. Reads as gravitas. */
@@ -15,6 +16,7 @@ const PACE = {
 } as const;
 
 export default function Hero() {
+  const shouldReduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
   const consoleY = useTransform(scrollY, [0, 600], [0, -40]);
 
@@ -131,7 +133,7 @@ export default function Hero() {
           <motion.div
             initial={{ opacity: 0, x: 32, scale: 0.97 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
-            style={{ y: consoleY }}
+            style={{ y: shouldReduceMotion ? 0 : consoleY }}
             transition={{ duration: 1.2, ease: EASE, delay: 0.2 }}
             className="relative hidden lg:block"
           >
