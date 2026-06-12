@@ -1,64 +1,97 @@
 /**
- * Console-wide loading shell. Renders inside the persistent /app layout
- * (Sidebar + workspace canvas stay mounted), so when the user clicks a
- * sidebar link this fallback appears *instantly* while the destination
- * server-renders.
- *
- * Two important Next.js 16 implications:
- *  - Dynamic pages get prefetched up to the first loading boundary, so the
- *    shell is in the router cache before the user even clicks.
- *  - Shared layouts remain interactive — the sidebar stays clickable even
- *    while a slow tab is rendering, so a mis-click is recoverable.
+ * Chat loading shell. Renders inside the persistent /app layout while the
+ * server component fetches the conversation. Shows message-bubble skeletons
+ * so the layout matches what's about to appear rather than the workspace grid.
  *
  * Keep this lightweight: skeletons only, no data, no client hooks.
  */
-export default function ConsoleLoading() {
+export default function ChatLoading() {
   return (
     <div
-      className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-10"
+      className="flex-1 flex flex-col overflow-hidden"
       aria-busy
       aria-live="polite"
     >
-      <div className="mx-auto max-w-5xl animate-pulse">
-        <div className="mb-8">
-          <div className="h-2.5 w-32 rounded-full bg-[var(--color-border)] opacity-60" />
-          <div className="h-10 md:h-12 w-72 mt-3 rounded-md bg-[var(--color-border)] opacity-70" />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-12">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <SkeletonCard key={i} />
-          ))}
-        </div>
-
-        <div className="h-3 w-24 mb-3 rounded-full bg-[var(--color-border)] opacity-60" />
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <SkeletonCard key={i} short />
-          ))}
-        </div>
+      {/* Message thread skeleton */}
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-6 space-y-5 animate-pulse">
+        <SkeletonBubble align="left" lines={2} wide />
+        <SkeletonBubble align="right" lines={1} />
+        <SkeletonBubble align="left" lines={3} wide />
+        <SkeletonBubble align="right" lines={2} />
+        <SkeletonBubble align="left" lines={1} wide />
       </div>
+
+      {/* Input bar skeleton */}
+      <div
+        className="px-4 md:px-6 py-4 border-t animate-pulse"
+        style={{ borderColor: "var(--color-border)" }}
+      >
+        <div
+          className="rounded-xl h-12 w-full"
+          style={{
+            background: "var(--color-surface-elevated)",
+            border: "1px solid var(--color-border)",
+          }}
+        />
+      </div>
+
       <span className="sr-only">Loading…</span>
     </div>
   );
 }
 
-function SkeletonCard({ short = false }: { short?: boolean }) {
+function SkeletonBubble({
+  align,
+  lines,
+  wide = false,
+}: {
+  align: "left" | "right";
+  lines: number;
+  wide?: boolean;
+}) {
+  const isLeft = align === "left";
   return (
     <div
-      className="conduit-card p-5 flex flex-col gap-2"
-      style={{
-        minHeight: short ? 110 : 140,
-        borderLeftWidth: 3,
-        borderLeftStyle: "solid",
-        borderLeftColor: "var(--color-border)",
-      }}
+      className={`flex gap-3 ${isLeft ? "justify-start" : "justify-end"}`}
     >
-      <div className="h-2 w-20 rounded-full bg-[var(--color-border)] opacity-60" />
-      <div className="h-6 w-3/4 mt-2 rounded-md bg-[var(--color-border)] opacity-70" />
-      {!short && (
-        <div className="h-2 w-1/2 mt-2 rounded-full bg-[var(--color-border)] opacity-50" />
+      {isLeft && (
+        <div
+          className="h-8 w-8 rounded-full shrink-0 mt-0.5"
+          style={{ background: "var(--color-border)", opacity: 0.6 }}
+        />
       )}
+      <div
+        className="flex flex-col gap-1.5"
+        style={{ maxWidth: wide ? "60%" : "40%" }}
+      >
+        {isLeft && (
+          <div
+            className="h-2 w-16 rounded-full mb-1"
+            style={{ background: "var(--color-border)", opacity: 0.5 }}
+          />
+        )}
+        <div
+          className="rounded-2xl px-4 py-3 space-y-2"
+          style={{
+            background: isLeft
+              ? "var(--color-surface-elevated)"
+              : "color-mix(in srgb, var(--color-accent) 15%, var(--color-surface-elevated))",
+            border: "1px solid var(--color-border)",
+          }}
+        >
+          {Array.from({ length: lines }).map((_, i) => (
+            <div
+              key={i}
+              className="h-2.5 rounded-full"
+              style={{
+                background: "var(--color-border)",
+                opacity: 0.6,
+                width: i === lines - 1 ? "65%" : "100%",
+              }}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
