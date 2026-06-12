@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { PraxisLogo } from "./PraxisLogo";
+
+const DISMISS_KEY = "conduit_onboarding_skip_v1";
 
 const BUSINESS_TYPES = [
   "cleaning",
@@ -24,6 +26,8 @@ export function OnboardingModal({
   defaultName: string;
 }) {
   const router = useRouter();
+  // null = not yet determined (avoid SSR flash). true = show. false = hidden.
+  const [visible, setVisible] = useState<boolean | null>(null);
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [name, setName] = useState("");
   const [businessType, setBusinessType] = useState("");
@@ -32,7 +36,26 @@ export function OnboardingModal({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    try {
+      setVisible(!localStorage.getItem(DISMISS_KEY));
+    } catch {
+      setVisible(true);
+    }
+  }, []);
+
+  const dismiss = () => {
+    try {
+      localStorage.setItem(DISMISS_KEY, "1");
+    } catch {
+      /* ignore */
+    }
+    setVisible(false);
+  };
+
   const finalType = businessType === "other" ? customType : businessType;
+
+  if (!visible) return null;
 
   async function submit() {
     setSubmitting(true);
@@ -64,11 +87,22 @@ export function OnboardingModal({
       {/* Step indicator */}
       <div className="px-8 md:px-12 pt-8">
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center gap-2 mb-2">
-            <PraxisLogo size={24} />
-            <span className="text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
-              Praxis · Step {Math.min(step, 3)} of 3
-            </span>
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center gap-2">
+              <PraxisLogo size={24} />
+              <span className="text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
+                Praxis · Step {Math.min(step, 3)} of 3
+              </span>
+            </div>
+            {step < 4 && (
+              <button
+                type="button"
+                onClick={dismiss}
+                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+              >
+                Skip for now
+              </button>
+            )}
           </div>
           <div className="h-[2px] bg-[var(--color-border)] relative rounded-full overflow-hidden">
             <div
