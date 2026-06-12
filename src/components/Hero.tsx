@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
+import PraxisButton from "@/components/marketing/PraxisButton";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 /* Institutional pacing — slower than v2's 80ms stagger. Reads as gravitas. */
@@ -102,13 +102,13 @@ export default function Hero() {
               transition={{ duration: PACE.ctas.duration, ease: EASE, delay: PACE.ctas.delay }}
               className="flex flex-col sm:flex-row gap-3 mt-8"
             >
-              <Link href="/auth/sign-up" className="conduit-btn-primary">
+              <PraxisButton href="/auth/sign-up" size="lg">
                 Open Praxis Console
                 <ArrowRight size={16} weight="bold" />
-              </Link>
-              <Link href="/products" className="conduit-btn-secondary">
+              </PraxisButton>
+              <PraxisButton href="/products" variant="secondary" size="lg">
                 See the product family
-              </Link>
+              </PraxisButton>
             </motion.div>
 
             <motion.div

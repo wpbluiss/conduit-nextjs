@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
+import PraxisButton from "@/components/marketing/PraxisButton";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 
@@ -85,21 +86,13 @@ export default function FinalCTA() {
           }}
           className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3"
         >
-          <Link
-            href="/auth/sign-up"
-            className="conduit-btn-primary justify-center"
-            style={{ padding: "16px 32px", fontSize: "15px" }}
-          >
+          <PraxisButton href="/auth/sign-up" size="lg">
             Open Praxis Console
             <ArrowRight size={16} weight="bold" />
-          </Link>
-          <Link
-            href="/products"
-            className="conduit-btn-secondary justify-center"
-            style={{ padding: "16px 28px", fontSize: "15px" }}
-          >
+          </PraxisButton>
+          <PraxisButton href="/products" variant="secondary" size="lg">
             See the product family
-          </Link>
+          </PraxisButton>
         </motion.div>
 
         <motion.p

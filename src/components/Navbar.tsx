@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, List, X } from "@phosphor-icons/react";
+import PraxisButton from "@/components/marketing/PraxisButton";
 
 // ─── Product marks (small geometric SVGs for mega-menu) ──────────────
 
@@ -347,14 +348,10 @@ export default function Navbar() {
             >
               Sign in
             </Link>
-            <Link
-              href="/auth/sign-up"
-              className="conduit-btn-primary text-[14px]"
-              style={{ padding: "10px 20px" }}
-            >
+            <PraxisButton href="/auth/sign-up" size="sm">
               Open Praxis
               <ArrowRight size={14} weight="bold" />
-            </Link>
+            </PraxisButton>
           </div>
 
           {/* Mobile hamburger */}
@@ -519,14 +516,15 @@ export default function Navbar() {
                   >
                     Sign in
                   </Link>
-                  <Link
+                  <PraxisButton
                     href="/auth/sign-up"
+                    size="md"
+                    className="w-full justify-center"
                     onClick={() => setMobileOpen(false)}
-                    className="conduit-btn-primary justify-center w-full"
                   >
                     Open Praxis Console
                     <ArrowRight size={16} weight="bold" />
-                  </Link>
+                  </PraxisButton>
                 </div>
               </div>
             </motion.div>
