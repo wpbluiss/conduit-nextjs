@@ -801,6 +801,10 @@ body {
   transform: translateY(-1px);
 }
 .conduit-btn-primary:active { transform: translateY(0); }
+.conduit-btn-primary:focus-visible {
+  outline: 2px solid var(--color-ember-500);
+  outline-offset: 2px;
+}
 
 .conduit-btn-secondary {
   background: transparent;
@@ -824,6 +828,10 @@ body {
   border-color: var(--color-indigo-500);
   color: var(--color-indigo-700);
   background: var(--color-indigo-50);
+}
+.conduit-btn-secondary:focus-visible {
+  outline: 2px solid var(--color-ember-500);
+  outline-offset: 2px;
 }
 
 /* Inverse-section buttons (dark bg, hero/cta band) */
@@ -853,6 +861,10 @@ body {
   transform: translateY(-1px);
 }
 .conduit-btn-primary-inverse:active { transform: translateY(0); }
+.conduit-btn-primary-inverse:focus-visible {
+  outline: 2px solid var(--color-ember-300);
+  outline-offset: 2px;
+}
 
 .conduit-btn-secondary-inverse {
   background: transparent;
@@ -876,6 +888,10 @@ body {
   border-color: var(--color-indigo-300);
   color: var(--color-indigo-300);
   background: rgba(91, 99, 232, 0.08);
+}
+.conduit-btn-secondary-inverse:focus-visible {
+  outline: 2px solid var(--color-ember-300);
+  outline-offset: 2px;
 }
 
 /* Marketing card — indigo-glow ring on hover (light bg) */
