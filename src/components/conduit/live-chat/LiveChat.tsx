@@ -154,7 +154,12 @@ export function LiveChat({
       const resp = await fetch("/api/conduit/chat", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
       if (!resp.ok || !resp.body) {
         if (resp.status === 409) { router.refresh(); return; }
-        setMessages((p) => { const n = [...p]; const last = n[n.length - 1]; if (last?.pending) { last.pending = false; last.content = "Something hiccuped. Try that again in a moment."; } return n; });
+        let fallback = "Something hiccuped. Try that again in a moment.";
+        if (resp.status === 429) {
+          const j = (await resp.json().catch(() => ({}))) as { message?: string };
+          fallback = j.message || "You're sending messages too quickly. Give it a moment and try again.";
+        }
+        setMessages((p) => { const n = [...p]; const last = n[n.length - 1]; if (last?.pending) { last.pending = false; last.content = fallback; } return n; });
         return;
       }
       const reader = resp.body.getReader(); const dec = new TextDecoder(); let buf = "";

@@ -357,13 +357,22 @@ export function Chat({
           router.refresh();
           return;
         }
+        let fallback =
+          "Something hiccuped on my end. Try that again in a moment.";
+        if (resp.status === 429) {
+          const j = (await resp.json().catch(() => ({}))) as {
+            message?: string;
+          };
+          fallback =
+            j.message ||
+            "You're sending messages too quickly. Give it a moment and try again.";
+        }
         setMessages((prev) => {
           const next = [...prev];
           const last = next[next.length - 1];
           if (last && last.pending) {
             last.pending = false;
-            last.content =
-              "Something hiccuped on my end. Try that again in a moment.";
+            last.content = fallback;
           }
           return next;
         });
