@@ -13,8 +13,8 @@ permissions:
 
 on:
   schedule:
-    - cron: "25 * * * *"    # AGGRESSIVE: hourly. Dial back to "25 */3 * * *" if Max/Actions limits bite.
-  workflow_dispatch: {}     # manual trigger (phone-friendly: Actions tab → Run workflow)
+    - cron: "25 */6 * * *"   # backstop only; the Supabase dispatcher drives this repo every 15 min
+  workflow_dispatch: {}     # manual trigger + dispatcher target
 
 jobs:
   autopilot:
@@ -26,14 +26,14 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: "--max-turns 80 --permission-mode bypassPermissions"
+          claude_args: "--max-turns 120 --permission-mode bypassPermissions"
           show_full_output: true
           prompt: |
             You are Praxis's autonomous engineering agent for the conduit-nextjs repo.
             Founder (Luis) is away from his computer; you carry the build. Follow these
             rules EXACTLY — they are what make autonomous work safe:
 
-            1. SCOPE — Work through the top 3 highest-priority OPEN issues labeled
+            1. SCOPE — Work through the top 5 highest-priority OPEN issues labeled
                "claude-queue", EACH on its own branch + its own PR. Fully finish and
                open the PR for one before starting the next. If fewer than 3 exist, do
                what's there; if none, exit immediately without changes.
