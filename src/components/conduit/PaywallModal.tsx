@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Sparkles, X } from "lucide-react";
 import { TIERS, TOPUPS, type TierId } from "@/lib/billing/tiers";
+import { track } from "@/lib/analytics/track";
 
 export type PaywallReason =
   | "cap_reached"
@@ -33,7 +34,12 @@ export function PaywallModal({
   );
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    track("paywall_viewed", { reason: payload.reason });
+  }, [payload.reason]);
+
   const upgrade = async (tierId: TierId) => {
+    track("checkout_clicked", { tier_id: tierId, reason: payload.reason });
     setBusy(tierId);
     setError(null);
     try {
