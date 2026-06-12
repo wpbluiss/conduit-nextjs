@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, FileText } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
@@ -870,12 +871,19 @@ function EmptyState({
     timeOfDay: timeOfDayBucket(),
   });
   return (
-    <div
-      style={{
-        paddingTop: "var(--space-8)",
+    <motion.div
+      style={{ paddingTop: "var(--space-8)" }}
+      initial="hidden"
+      animate="show"
+      variants={{
+        hidden: {},
+        show: { transition: { staggerChildren: 0.08 } },
       }}
     >
-      <p className="praxis-eyebrow">
+      <motion.p
+        className="praxis-eyebrow"
+        variants={{ hidden: { opacity: 0, y: 6 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 1, 0.5, 1] } } }}
+      >
         <span
           aria-hidden
           style={{
@@ -889,30 +897,25 @@ function EmptyState({
           }}
         />
         {copy.eyebrow} · {firstName}
-      </p>
-      <div
-        style={{
-          marginTop: "var(--space-4)",
-          display: "flex",
-          alignItems: "flex-start",
-          gap: "var(--space-3)",
-        }}
+      </motion.p>
+      <motion.div
+        style={{ marginTop: "var(--space-4)", display: "flex", alignItems: "flex-start", gap: "var(--space-3)" }}
+        variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 1, 0.5, 1] } } }}
       >
         <PraxisAvatar employee="jarvis" size="xl" pulse="ambient" />
         <h1 className="praxis-display-1">{copy.headline}</h1>
-      </div>
-      <p
+      </motion.div>
+      <motion.p
         className="praxis-body-lg"
         style={{ marginTop: "var(--space-4)", maxWidth: "36rem" }}
+        variants={{ hidden: { opacity: 0, y: 6 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 1, 0.5, 1] } } }}
       >
         {copy.subline}
-      </p>
-      <div
+      </motion.p>
+      <motion.div
         className="grid grid-cols-1 sm:grid-cols-2"
-        style={{
-          marginTop: "var(--space-8)",
-          gap: "var(--space-3)",
-        }}
+        style={{ marginTop: "var(--space-8)", gap: "var(--space-3)" }}
+        variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 1, 0.5, 1] } } }}
       >
         {suggestions.map((s) => (
           <PraxisSuggestionTile
@@ -924,8 +927,8 @@ function EmptyState({
             onSelect={(text, pin) => onSend(text, pin)}
           />
         ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -944,11 +947,16 @@ const MessageBubble = memo(function MessageBubble({
 }) {
   if (message.role === "user") {
     return (
-      <div className="flex justify-end">
-        <div className="max-w-[85%] conduit-bubble-user px-4 py-3 text-[var(--color-text)] whitespace-pre-wrap">
+      <motion.div
+        className="flex justify-end"
+        initial={{ opacity: 0, y: 6, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
+      >
+        <div className="max-w-[85%] conduit-bubble-user px-4 py-3 text-[var(--color-text)] whitespace-pre-wrap text-[15px] leading-[1.65]">
           {message.content}
         </div>
-      </div>
+      </motion.div>
     );
   }
 
@@ -989,9 +997,12 @@ const MessageBubble = memo(function MessageBubble({
   const empty = !message.content && message.pending;
 
   return (
-    <div
+    <motion.div
       className="flex gap-3"
       style={{ ["--dept" as string]: DEPT_COLOR[employee] }}
+      initial={message.pending ? false : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
     >
       <div className="pt-1 shrink-0">
         <EmployeeAvatar employee={employee} size={32} active={message.pending} />
@@ -1057,7 +1068,7 @@ const MessageBubble = memo(function MessageBubble({
             </button>
           )}
         </div>
-        <div className="conduit-bubble-assistant px-4 py-3 text-[var(--color-text)] whitespace-pre-wrap leading-relaxed">
+        <div className="conduit-bubble-assistant px-4 py-3 text-[var(--color-text)] whitespace-pre-wrap text-[15px] leading-[1.7]">
           {empty ? (
             <span className="inline-flex items-center gap-1 py-1">
               <span className="typing-dot" />
@@ -1129,7 +1140,7 @@ const MessageBubble = memo(function MessageBubble({
           </button>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 });
 
