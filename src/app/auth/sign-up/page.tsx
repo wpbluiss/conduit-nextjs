@@ -133,7 +133,18 @@ export default function SignUpPage() {
             {loading ? "Creating workspace..." : "Create workspace"}
           </button>
         </form>
-        <p className="mt-6 text-center text-sm text-[var(--color-text-muted)]">
+        <p className="mt-4 text-center text-[11px] text-[var(--color-text-muted)] leading-relaxed">
+          By creating an account you agree to our{" "}
+          <Link href="/legal/terms" className="underline underline-offset-2 hover:text-[var(--color-accent)]">
+            Terms
+          </Link>{" "}
+          and{" "}
+          <Link href="/legal/privacy" className="underline underline-offset-2 hover:text-[var(--color-accent)]">
+            Privacy Policy
+          </Link>
+          .
+        </p>
+        <p className="mt-4 text-center text-sm text-[var(--color-text-muted)]">
           Already have one?{" "}
           <Link
             href="/auth/sign-in"
