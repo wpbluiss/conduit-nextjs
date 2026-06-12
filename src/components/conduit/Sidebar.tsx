@@ -100,6 +100,15 @@ export function Sidebar({
         <Menu size={18} />
       </button>
 
+      {/* Mobile backdrop — closes the sidebar on outside tap */}
+      {open && (
+        <div
+          className="md:hidden fixed inset-0 z-30 bg-black/50"
+          aria-hidden
+          onClick={close}
+        />
+      )}
+
       <aside
         className={`fixed md:static z-40 inset-y-0 left-0 w-64 bg-[var(--color-surface)] border-r border-[var(--color-border)] flex flex-col transform ${
           open ? "translate-x-0" : "-translate-x-full"
