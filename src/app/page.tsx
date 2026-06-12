@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import { AnalyticsPageView } from "@/components/conduit/AnalyticsPageView";
 import ProductTiles from "@/components/ProductTiles";
-import Cinematic from "@/components/Cinematic";
-import Vision from "@/components/Vision";
-import Customers from "@/components/Customers";
-import EngineeringProof from "@/components/EngineeringProof";
-import Pricing from "@/components/Pricing";
-import FinalCTA from "@/components/FinalCTA";
-import Footer from "@/components/Footer";
+
+// Sections below the hero fold: eagerly SSR'd (SEO) but client JS loaded
+// lazily so the critical render path isn't blocked by framer-motion chunks.
+const Cinematic = dynamic(() => import("@/components/Cinematic"));
+const Vision = dynamic(() => import("@/components/Vision"));
+const Customers = dynamic(() => import("@/components/Customers"));
+const EngineeringProof = dynamic(() => import("@/components/EngineeringProof"));
+const Pricing = dynamic(() => import("@/components/Pricing"));
+const FinalCTA = dynamic(() => import("@/components/FinalCTA"));
+const Footer = dynamic(() => import("@/components/Footer"));
 
 export const metadata: Metadata = {
   openGraph: {

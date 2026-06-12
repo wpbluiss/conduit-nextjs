@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 /* Institutional pacing — slower than v2's 80ms stagger. Reads as gravitas. */
@@ -15,8 +16,12 @@ const PACE = {
 } as const;
 
 export default function Hero() {
-  // Stable dust-mote positions (deterministic per seed)
-  const dust = Array.from({ length: 14 }, (_, i) => {
+  const reducedMotion = useReducedMotion();
+
+  // Skip decorative particles for users who prefer reduced motion (and on
+  // mobile where CSS animation pressure is most felt).
+  const dustCount = reducedMotion ? 0 : 14;
+  const dust = Array.from({ length: dustCount }, (_, i) => {
     const seed = i * 137;
     return {
       id: i,
