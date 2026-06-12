@@ -35,6 +35,9 @@ export interface ConduitAccount {
   // Hydrated only after migration 021 runs; falls back to 'system' for
   // older rows that don't have the column yet.
   theme_preference?: "system" | "light" | "dark" | null;
+  // First-run "meet your team" intro — null means not yet dismissed.
+  // Hydrated after migration 029 runs; undefined before that.
+  intro_dismissed_at?: string | null;
   created_at: string;
   updated_at: string;
 }

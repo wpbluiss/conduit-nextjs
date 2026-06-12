@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
     timezone?: string;
     notify_voice_room_ready?: boolean;
     theme_preference?: "system" | "light" | "dark";
+    intro_dismiss?: boolean;
   };
   try {
     body = await request.json();
@@ -47,6 +48,9 @@ export async function POST(request: NextRequest) {
   ) {
     update.theme_preference = body.theme_preference;
   }
+  if (body.intro_dismiss === true) {
+    update.intro_dismissed_at = new Date().toISOString();
+  }
 
   if (Object.keys(update).length === 0) {
     return NextResponse.json({ error: "no_op" }, { status: 400 });
@@ -68,13 +72,16 @@ export async function POST(request: NextRequest) {
         ? String((error as { message: unknown }).message)
         : "";
     const columnMissing =
-      "theme_preference" in update &&
-      (message.includes("theme_preference") || message.includes("column"));
+      ("theme_preference" in update || "intro_dismissed_at" in update) &&
+      (message.includes("theme_preference") ||
+        message.includes("intro_dismissed_at") ||
+        message.includes("column"));
     if (columnMissing) {
       const rest = { ...update };
       delete (rest as { theme_preference?: unknown }).theme_preference;
+      delete (rest as { intro_dismissed_at?: unknown }).intro_dismissed_at;
       if (Object.keys(rest).length <= 1) {
-        // Only updated_at + theme were requested → soft success.
+        // Only updated_at + optional-column fields were requested → soft success.
         return NextResponse.json({ ok: true, persisted: "local_only" });
       }
       const { error: retryErr } = await supabase
