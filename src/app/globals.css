@@ -878,6 +878,22 @@ body {
   background: rgba(91, 99, 232, 0.08);
 }
 
+/* Focus rings — keyboard navigation, ember identity, :focus-visible only */
+.conduit-btn-primary:focus-visible,
+.conduit-btn-primary-inverse:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.85);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px rgba(91, 99, 232, 0.45);
+}
+.conduit-btn-secondary:focus-visible {
+  outline: 2px solid var(--color-indigo-500);
+  outline-offset: 3px;
+}
+.conduit-btn-secondary-inverse:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 3px;
+}
+
 /* Marketing card — indigo-glow ring on hover (light bg) */
 .conduit-card {
   background: var(--color-bg-surface);
