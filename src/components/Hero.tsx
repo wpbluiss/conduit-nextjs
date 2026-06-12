@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useMotionValue,
+  useReducedMotion,
+} from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
@@ -14,7 +20,21 @@ const PACE = {
   proofStrip: { delay: 1.40, duration: 0.80 },
 } as const;
 
+const MotionLink = motion(Link);
+
 export default function Hero() {
+  const shouldReduceMotion = useReducedMotion();
+  const { scrollY } = useScroll();
+
+  // ConsolePreview drifts up as user scrolls — compositor-only transform, no layout.
+  const scrollParallax = useTransform(scrollY, [0, 600], [0, -40]);
+  const staticZero = useMotionValue(0);
+  const parallaxY = shouldReduceMotion ? staticZero : scrollParallax;
+
+  // Text column drifts down slightly — creates binocular depth against the preview.
+  const textDrift = useTransform(scrollY, [0, 600], [0, 14]);
+  const textParallaxY = shouldReduceMotion ? staticZero : textDrift;
+
   // Stable dust-mote positions (deterministic per seed)
   const dust = Array.from({ length: 14 }, (_, i) => {
     const seed = i * 137;
@@ -57,8 +77,8 @@ export default function Hero() {
 
       <div className="relative conduit-container">
         <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-12 lg:gap-20 items-center">
-          {/* Left — text */}
-          <div className="max-w-[640px]">
+          {/* Left — text, gentle counter-parallax for binocular depth */}
+          <motion.div className="max-w-[640px]" style={{ y: textParallaxY }}>
             <motion.p
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -78,12 +98,6 @@ export default function Hero() {
               <br />
               <span className="conduit-ember-text">Start deploying.</span>
             </motion.h1>
-            {/*
-              Option A — kept for A/B reference:
-              The company that hires zero
-              <br />
-              <span className="conduit-ember-text">and ships everything.</span>
-            */}
 
             <motion.p
               initial={{ opacity: 0, y: 8 }}
@@ -102,13 +116,25 @@ export default function Hero() {
               transition={{ duration: PACE.ctas.duration, ease: EASE, delay: PACE.ctas.delay }}
               className="flex flex-col sm:flex-row gap-3 mt-8"
             >
-              <Link href="/auth/sign-up" className="conduit-btn-primary">
+              <MotionLink
+                href="/auth/sign-up"
+                className="conduit-btn-primary"
+                whileHover={shouldReduceMotion ? {} : { y: -2, boxShadow: "0 8px 32px rgba(91,99,232,0.35)" }}
+                whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
+                transition={{ duration: 0.18, ease: EASE }}
+              >
                 Open Praxis Console
                 <ArrowRight size={16} weight="bold" />
-              </Link>
-              <Link href="/products" className="conduit-btn-secondary">
+              </MotionLink>
+              <MotionLink
+                href="/products"
+                className="conduit-btn-secondary"
+                whileHover={shouldReduceMotion ? {} : { y: -2 }}
+                whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
+                transition={{ duration: 0.18, ease: EASE }}
+              >
                 See the product family
-              </Link>
+              </MotionLink>
             </motion.div>
 
             <motion.div
@@ -124,13 +150,14 @@ export default function Hero() {
               <CustomerSlot label="Slot 02" />
               <CustomerSlot label="Slot 03" />
             </motion.div>
-          </div>
+          </motion.div>
 
-          {/* Right — Console preview */}
+          {/* Right — Console preview with scroll-driven parallax */}
           <motion.div
             initial={{ opacity: 0, x: 32, scale: 0.97 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             transition={{ duration: 1.2, ease: EASE, delay: 0.2 }}
+            style={{ y: parallaxY }}
             className="relative hidden lg:block"
           >
             <ConsolePreview />

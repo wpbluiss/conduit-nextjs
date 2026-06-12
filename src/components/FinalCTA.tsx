@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
+const MotionLink = motion(Link);
 
 export default function FinalCTA() {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <section
       id="cta"
@@ -85,21 +88,27 @@ export default function FinalCTA() {
           }}
           className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3"
         >
-          <Link
+          <MotionLink
             href="/auth/sign-up"
             className="conduit-btn-primary justify-center"
             style={{ padding: "16px 32px", fontSize: "15px" }}
+            whileHover={shouldReduceMotion ? {} : { y: -2, boxShadow: "0 8px 32px rgba(91,99,232,0.40)" }}
+            whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
+            transition={{ duration: 0.18, ease: EASE }}
           >
             Open Praxis Console
             <ArrowRight size={16} weight="bold" />
-          </Link>
-          <Link
+          </MotionLink>
+          <MotionLink
             href="/products"
             className="conduit-btn-secondary justify-center"
             style={{ padding: "16px 28px", fontSize: "15px" }}
+            whileHover={shouldReduceMotion ? {} : { y: -2 }}
+            whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}
+            transition={{ duration: 0.18, ease: EASE }}
           >
             See the product family
-          </Link>
+          </MotionLink>
         </motion.div>
 
         <motion.p
