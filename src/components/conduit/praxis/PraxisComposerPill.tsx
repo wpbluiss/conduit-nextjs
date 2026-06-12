@@ -263,6 +263,7 @@ export function PraxisComposerPill({
         type="submit"
         disabled={loading || !value.trim()}
         aria-label="Send"
+        className="praxis-send-btn"
         style={{
           flexShrink: 0,
           width: "44px",
@@ -276,7 +277,6 @@ export function PraxisComposerPill({
           border: "none",
           cursor: loading || !value.trim() ? "not-allowed" : "pointer",
           opacity: loading || !value.trim() ? 0.4 : 1,
-          transition: "background 180ms var(--praxis-ease-out-quart)",
         }}
       >
         <Send size={16} />

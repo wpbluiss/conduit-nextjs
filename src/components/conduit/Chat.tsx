@@ -1,8 +1,10 @@
 "use client";
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, FileText } from "lucide-react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
   DEPT_COLOR,
@@ -856,6 +858,21 @@ export function Chat({
   );
 }
 
+const EMPTY_STATE_VARIANTS = {
+  container: {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.06, delayChildren: 0.35 } },
+  },
+  tile: {
+    hidden: { opacity: 0, y: 8 },
+    show:   { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
+  },
+  hero: {
+    hidden: { opacity: 0, y: 10 },
+    show:   { opacity: 1, y: 0,  transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
+  },
+} as const;
+
 function EmptyState({
   firstName,
   onSend,
@@ -865,66 +882,71 @@ function EmptyState({
   onSend: (text: string, pin?: EmployeeKey) => void;
   suggestions: Suggestion[];
 }) {
+  const reduced = useReducedMotion();
   const copy = composeChatEmptyCopy({
     firstName,
     timeOfDay: timeOfDayBucket(),
   });
   return (
-    <div
-      style={{
-        paddingTop: "var(--space-8)",
-      }}
-    >
-      <p className="praxis-eyebrow">
-        <span
-          aria-hidden
+    <div style={{ paddingTop: "var(--space-8)" }}>
+      <motion.div
+        initial={reduced ? false : "hidden"}
+        animate="show"
+        variants={EMPTY_STATE_VARIANTS.hero}
+      >
+        <p className="praxis-eyebrow">
+          <span
+            aria-hidden
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: 9999,
+              background: "var(--color-green)",
+              boxShadow:
+                "0 0 6px color-mix(in srgb, var(--color-green) 70%, transparent)",
+              display: "inline-block",
+            }}
+          />
+          {copy.eyebrow} · {firstName}
+        </p>
+        <div
           style={{
-            width: 6,
-            height: 6,
-            borderRadius: 9999,
-            background: "var(--color-green)",
-            boxShadow:
-              "0 0 6px color-mix(in srgb, var(--color-green) 70%, transparent)",
-            display: "inline-block",
+            marginTop: "var(--space-4)",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "var(--space-3)",
           }}
-        />
-        {copy.eyebrow} · {firstName}
-      </p>
-      <div
-        style={{
-          marginTop: "var(--space-4)",
-          display: "flex",
-          alignItems: "flex-start",
-          gap: "var(--space-3)",
-        }}
-      >
-        <PraxisAvatar employee="jarvis" size="xl" pulse="ambient" />
-        <h1 className="praxis-display-1">{copy.headline}</h1>
-      </div>
-      <p
-        className="praxis-body-lg"
-        style={{ marginTop: "var(--space-4)", maxWidth: "36rem" }}
-      >
-        {copy.subline}
-      </p>
-      <div
+        >
+          <PraxisAvatar employee="jarvis" size="xl" pulse="ambient" />
+          <h1 className="praxis-display-1">{copy.headline}</h1>
+        </div>
+        <p
+          className="praxis-body-lg"
+          style={{ marginTop: "var(--space-4)", maxWidth: "36rem" }}
+        >
+          {copy.subline}
+        </p>
+      </motion.div>
+
+      <motion.div
         className="grid grid-cols-1 sm:grid-cols-2"
-        style={{
-          marginTop: "var(--space-8)",
-          gap: "var(--space-3)",
-        }}
+        style={{ marginTop: "var(--space-8)", gap: "var(--space-3)" }}
+        initial={reduced ? false : "hidden"}
+        animate="show"
+        variants={EMPTY_STATE_VARIANTS.container}
       >
         {suggestions.map((s) => (
-          <PraxisSuggestionTile
-            key={s.text}
-            dept={s.dept}
-            hint={s.hint}
-            prompt={s.text}
-            pin={s.pin}
-            onSelect={(text, pin) => onSend(text, pin)}
-          />
+          <motion.div key={s.text} variants={reduced ? undefined : EMPTY_STATE_VARIANTS.tile}>
+            <PraxisSuggestionTile
+              dept={s.dept}
+              hint={s.hint}
+              prompt={s.text}
+              pin={s.pin}
+              onSelect={(text, pin) => onSend(text, pin)}
+            />
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 }
