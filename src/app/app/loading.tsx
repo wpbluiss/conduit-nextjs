@@ -1,64 +1,98 @@
 /**
- * Console-wide loading shell. Renders inside the persistent /app layout
- * (Sidebar + workspace canvas stay mounted), so when the user clicks a
- * sidebar link this fallback appears *instantly* while the destination
- * server-renders.
- *
- * Two important Next.js 16 implications:
- *  - Dynamic pages get prefetched up to the first loading boundary, so the
- *    shell is in the router cache before the user even clicks.
- *  - Shared layouts remain interactive — the sidebar stays clickable even
- *    while a slow tab is rendering, so a mis-click is recoverable.
- *
- * Keep this lightweight: skeletons only, no data, no client hooks.
+ * Console-wide loading shell for the chat page (/app).
+ * Renders inside the persistent /app layout (Sidebar stays mounted).
+ * Shape mirrors the chat thread: message bubbles + fixed-bottom input bar.
  */
-export default function ConsoleLoading() {
+export default function ChatLoading() {
   return (
-    <div
-      className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-10"
-      aria-busy
-      aria-live="polite"
-    >
-      <div className="mx-auto max-w-5xl animate-pulse">
-        <div className="mb-8">
-          <div className="h-2.5 w-32 rounded-full bg-[var(--color-border)] opacity-60" />
-          <div className="h-10 md:h-12 w-72 mt-3 rounded-md bg-[var(--color-border)] opacity-70" />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-12">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <SkeletonCard key={i} />
-          ))}
-        </div>
-
-        <div className="h-3 w-24 mb-3 rounded-full bg-[var(--color-border)] opacity-60" />
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <SkeletonCard key={i} short />
-          ))}
+    <div className="flex-1 flex flex-col min-h-0 overflow-hidden" aria-busy aria-live="polite">
+      {/* Message thread area */}
+      <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-8">
+        <div className="mx-auto max-w-3xl space-y-6 animate-pulse">
+          {/* Assistant message — wide */}
+          <SkeletonBubble side="left" lines={3} width="85%" />
+          {/* User message */}
+          <SkeletonBubble side="right" lines={1} width="52%" />
+          {/* Assistant message — medium */}
+          <SkeletonBubble side="left" lines={2} width="70%" />
+          {/* User message */}
+          <SkeletonBubble side="right" lines={1} width="38%" />
+          {/* Assistant message — longer */}
+          <SkeletonBubble side="left" lines={4} width="90%" />
         </div>
       </div>
-      <span className="sr-only">Loading…</span>
+
+      {/* Input bar */}
+      <div
+        className="px-4 md:px-8 py-3 md:py-4 animate-pulse"
+        style={{ background: "var(--color-surface)" }}
+      >
+        <div className="mx-auto" style={{ maxWidth: "48rem" }}>
+          <div
+            style={{
+              height: 52,
+              borderRadius: 12,
+              background: "var(--color-border)",
+              opacity: 0.5,
+            }}
+          />
+        </div>
+      </div>
+
+      <span className="sr-only">Loading chat…</span>
     </div>
   );
 }
 
-function SkeletonCard({ short = false }: { short?: boolean }) {
+function SkeletonBubble({
+  side,
+  lines,
+  width,
+}: {
+  side: "left" | "right";
+  lines: number;
+  width: string;
+}) {
+  const isRight = side === "right";
   return (
     <div
-      className="conduit-card p-5 flex flex-col gap-2"
       style={{
-        minHeight: short ? 110 : 140,
-        borderLeftWidth: 3,
-        borderLeftStyle: "solid",
-        borderLeftColor: "var(--color-border)",
+        display: "flex",
+        justifyContent: isRight ? "flex-end" : "flex-start",
+        gap: 10,
+        alignItems: "flex-start",
       }}
     >
-      <div className="h-2 w-20 rounded-full bg-[var(--color-border)] opacity-60" />
-      <div className="h-6 w-3/4 mt-2 rounded-md bg-[var(--color-border)] opacity-70" />
-      {!short && (
-        <div className="h-2 w-1/2 mt-2 rounded-full bg-[var(--color-border)] opacity-50" />
+      {/* Avatar dot for assistant messages */}
+      {!isRight && (
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: "50%",
+            background: "var(--color-border)",
+            opacity: 0.55,
+            flexShrink: 0,
+            marginTop: 4,
+          }}
+        />
       )}
+
+      <div style={{ maxWidth: width, width: "100%" }}>
+        {Array.from({ length: lines }).map((_, i) => (
+          <div
+            key={i}
+            style={{
+              height: 14,
+              borderRadius: 6,
+              background: "var(--color-border)",
+              opacity: isRight ? 0.45 : 0.6,
+              marginBottom: i < lines - 1 ? 8 : 0,
+              width: i === lines - 1 && lines > 1 ? "65%" : "100%",
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 }
