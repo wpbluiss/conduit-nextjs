@@ -10,6 +10,7 @@ import {
   Play,
   X,
 } from "lucide-react";
+import { PraxisButton, SpinnerIcon } from "./PraxisButton";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
 import { ORDERED_TIERS, TOPUPS, tierById, type TierId } from "@/lib/billing/tiers";
@@ -1001,14 +1002,16 @@ function BillingTab({
           </div>
         </div>
         {account.has_stripe_customer && (
-          <button
+          <PraxisButton
             onClick={openPortal}
-            disabled={busy !== null}
-            className="btn-secondary !text-xs disabled:opacity-50"
+            isLoading={busy === "portal"}
+            isDisabled={busy !== null && busy !== "portal"}
+            variant="secondary"
+            className="!text-xs"
           >
-            {busy === "portal" ? "Opening…" : "Manage in Stripe"}
+            Manage in Stripe
             <ExternalLink size={12} />
-          </button>
+          </PraxisButton>
         )}
       </div>
 
@@ -1093,14 +1096,16 @@ function BillingTab({
                   )}
                 </ul>
                 {isUpgrade && t.id !== "free" && (
-                  <button
+                  <PraxisButton
                     onClick={() => upgrade(t.id as TierId)}
-                    disabled={busy !== null}
-                    className="mt-4 btn-primary w-full justify-center !text-xs !py-2 disabled:opacity-50"
+                    isLoading={busy === t.id}
+                    isDisabled={busy !== null && busy !== t.id}
+                    variant="primary"
+                    className="mt-4 w-full justify-center !text-xs !py-2"
                   >
-                    {busy === t.id ? "Opening…" : `Upgrade to ${t.name}`}
+                    {`Upgrade to ${t.name}`}
                     <ArrowRight size={12} />
-                  </button>
+                  </PraxisButton>
                 )}
               </div>
             );
@@ -1126,8 +1131,17 @@ function BillingTab({
                 {(t.tokensGranted / 1000).toLocaleString()}k tokens
               </div>
               <span className="mt-3 inline-flex items-center gap-1 text-xs text-[var(--color-accent)]">
-                {busy === t.id ? "Opening…" : "Buy"}
-                <ArrowRight size={11} />
+                {busy === t.id ? (
+                  <>
+                    <SpinnerIcon size={11} />
+                    Opening…
+                  </>
+                ) : (
+                  <>
+                    Buy
+                    <ArrowRight size={11} />
+                  </>
+                )}
               </span>
             </button>
           ))}
