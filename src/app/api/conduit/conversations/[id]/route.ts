@@ -4,11 +4,14 @@ import { getOrCreateAccount } from "@/lib/conduit/account";
 
 export const runtime = "nodejs";
 
+const MAX_PAGE_LIMIT = 100;
+const DEFAULT_PAGE_LIMIT = 50;
+
 interface RouteCtx {
   params: Promise<{ id: string }>;
 }
 
-export async function GET(_request: NextRequest, ctx: RouteCtx) {
+export async function GET(request: NextRequest, ctx: RouteCtx) {
   const { id } = await ctx.params;
   const supabase = await createSupabaseServerClient();
   const {
@@ -29,13 +32,33 @@ export async function GET(_request: NextRequest, ctx: RouteCtx) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
-  const { data: messages } = await supabase
+  const url = new URL(request.url);
+  const before = url.searchParams.get("before"); // ISO timestamp cursor
+  const limitParam = url.searchParams.get("limit");
+  const limit = limitParam
+    ? Math.min(Math.max(1, parseInt(limitParam, 10)), MAX_PAGE_LIMIT)
+    : DEFAULT_PAGE_LIMIT;
+
+  // Fetch limit+1 rows to detect whether there are older messages.
+  // Order descending so "before" cursor and limit apply to the correct window;
+  // we reverse to ascending before returning.
+  let query = supabase
     .from("conduit_messages")
     .select("id, role, employee, content, metadata, created_at")
     .eq("conversation_id", id)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: false })
+    .limit(limit + 1);
 
-  return NextResponse.json({ conversation: convo, messages: messages ?? [] });
+  if (before) {
+    query = query.lt("created_at", before);
+  }
+
+  const { data: rows } = await query;
+  const allRows = rows ?? [];
+  const hasMore = allRows.length > limit;
+  const messages = allRows.slice(0, limit).reverse(); // ascending for display
+
+  return NextResponse.json({ conversation: convo, messages, hasMore });
 }
 
 export async function DELETE(_request: NextRequest, ctx: RouteCtx) {

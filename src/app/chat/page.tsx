@@ -5,6 +5,8 @@ import { tierById } from "@/lib/billing/tiers";
 import { EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
 import { LiveChat, type LiveMsg } from "@/components/conduit/live-chat/LiveChat";
 
+const INITIAL_MSG_LIMIT = 50;
+
 // Wired-live chat in the new ember identity. Additive route (the existing
 // /app chat is untouched); reuses the real /api/conduit/chat SSE engine +
 // real conduit_conversations / conduit_messages for the signed-in account.
@@ -41,20 +43,29 @@ export default async function ChatPage({
   // the most recent conversation on plain /chat.
   const activeId = sp?.new ? null : sp?.c ?? conversations[0]?.id ?? null;
   let initialMessages: LiveMsg[] = [];
+  let initialHasMore = false;
   if (activeId) {
+    // Fetch newest INITIAL_MSG_LIMIT+1 messages (DESC) so we can detect
+    // whether there are older ones without a separate count query, then
+    // reverse to ascending order for display.
     const msgsQ = await supabase
       .from("conduit_messages")
-      .select("id, role, employee, content")
+      .select("id, role, employee, content, created_at")
       .eq("conversation_id", activeId)
-      .order("created_at", { ascending: true })
-      .limit(200);
-    initialMessages = (msgsQ.data ?? [])
+      .order("created_at", { ascending: false })
+      .limit(INITIAL_MSG_LIMIT + 1);
+    const rows = msgsQ.data ?? [];
+    initialHasMore = rows.length > INITIAL_MSG_LIMIT;
+    initialMessages = rows
+      .slice(0, INITIAL_MSG_LIMIT)
+      .reverse()
       .filter((m) => m.role === "user" || m.role === "assistant")
       .map((m) => ({
         id: m.id as string,
         role: m.role as "user" | "assistant",
         employee: (m.employee as EmployeeId | null) ?? null,
         content: (m.content as string) ?? "",
+        created_at: m.created_at as string,
       }));
   }
 
@@ -64,6 +75,7 @@ export default async function ChatPage({
       conversations={conversations}
       activeConversationId={activeId}
       initialMessages={initialMessages}
+      initialHasMore={initialHasMore}
       allowedEmployees={allowed}
       initialPin={(sp?.pin as EmployeeId) ?? null}
     />
