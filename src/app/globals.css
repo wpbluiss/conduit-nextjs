@@ -240,6 +240,32 @@ body {
   border: 1px solid var(--color-border-default);
 }
 
+/* Auth pages — ember CTA on dark inverse background */
+.conduit-auth-btn {
+  background: var(--color-ember-500);
+  color: #0A0908;
+  padding: 14px 32px;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  letter-spacing: -0.005em;
+  transition: background 200ms var(--conduit-ease-out-quart), box-shadow 200ms var(--conduit-ease-out-quart), transform 200ms var(--conduit-ease-out-quart);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.conduit-auth-btn:hover {
+  background: var(--color-ember-300);
+  box-shadow: 0 0 40px rgba(214, 120, 23, 0.35);
+  transform: translateY(-1px);
+}
+.conduit-auth-btn:active { transform: translateY(0); }
+.conduit-auth-btn:focus-visible {
+  outline: 2px solid var(--color-ember-300);
+  outline-offset: 2px;
+}
+
 /* Legacy /app buttons — still target dark Console surface */
 .btn-primary {
   background: var(--color-accent);
