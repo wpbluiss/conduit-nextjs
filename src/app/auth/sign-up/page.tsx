@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
@@ -65,7 +65,25 @@ const STRENGTH_COLORS = [
 ] as const;
 
 export default function SignUpPage() {
+  return (
+    <Suspense fallback={<SignUpShell />}>
+      <SignUpForm />
+    </Suspense>
+  );
+}
+
+function SignUpShell() {
+  return (
+    <main className="conduit-bg-inverse min-h-screen relative overflow-hidden flex items-center justify-center" />
+  );
+}
+
+function SignUpForm() {
   const router = useRouter();
+  const params = useSearchParams();
+  const rawTier = params.get("tier");
+  const tierIntent = rawTier === "pro" || rawTier === "enterprise" ? rawTier : null;
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -76,6 +94,8 @@ export default function SignUpPage() {
 
   const strength = checkPassword(password);
   const showStrength = pwTouched && password.length > 0;
+
+  const billingDest = tierIntent ? `/app/billing?upgrade=${tierIntent}` : null;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -88,14 +108,21 @@ export default function SignUpPage() {
     }
 
     setLoading(true);
-    track("signup_started");
+    track("signup_started", { tier_intent: tierIntent });
     const supabase = createSupabaseBrowserClient();
+
+    // Thread the tier intent through the email-confirmation callback so users
+    // who confirm by email still land on the billing page.
+    const emailRedirectTo = billingDest
+      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(billingDest)}`
+      : `${window.location.origin}/auth/callback`;
+
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { full_name: name },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo,
       },
     });
     if (signUpError) {
@@ -104,8 +131,8 @@ export default function SignUpPage() {
       return;
     }
     if (data.session) {
-      track("signup_completed");
-      router.replace("/app/workspace");
+      track("signup_completed", { tier_intent: tierIntent });
+      router.replace(billingDest ?? "/app/workspace");
       router.refresh();
     } else {
       setInfo("Check your email to confirm your account. Once confirmed, you can sign in.");
@@ -146,7 +173,11 @@ export default function SignUpPage() {
             <PraxisLogo size={48} withWordmark glow />
           </Link>
           <p className="mt-3 text-sm text-[var(--color-ink-on-inverse-soft)]">
-            Create your Praxis workspace
+            {tierIntent === "pro"
+              ? "Create your Pro workspace"
+              : tierIntent === "enterprise"
+                ? "Create your Enterprise workspace"
+                : "Create your Praxis workspace"}
           </p>
         </motion.div>
 
