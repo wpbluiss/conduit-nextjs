@@ -8,6 +8,7 @@ import "@/styles/praxis-design-language.css";
 import "@/styles/engineering-cinema.css";
 import "@/styles/memory-canvas.css";
 import { ThemeBoot } from "@/components/conduit/ThemeBoot";
+import { PwaInstaller } from "@/components/conduit/PwaInstaller";
 
 // R18 Slice 0: body sans switched from Inter to Geist Sans per the
 // design-language spec (frontend-design skill forbids Inter as generic
@@ -43,6 +44,7 @@ export const metadata: Metadata = {
   title: "Conduit AI — Intelligence at work",
   description:
     "Conduit AI builds Praxis, the operating system for autonomous AI workforces. Voice, sales, engineering, ops, finance — running 24/7.",
+  manifest: "/manifest.json",
   icons: {
     icon: "/praxis-mark.png",
     apple: "/praxis-mark.png",
@@ -84,6 +86,7 @@ export default function RootLayout({
           Skip to content
         </a>
         <div id="main-content">{children}</div>
+        <PwaInstaller />
       </body>
     </html>
   );
