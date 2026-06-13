@@ -60,7 +60,7 @@ export default function SignUpPage() {
   }
 
   return (
-    <main className="praxis-root conduit-bg-canvas min-h-screen relative overflow-hidden flex items-center justify-center px-6 py-16">
+    <main className="conduit-bg-inverse min-h-screen relative overflow-hidden flex items-center justify-center px-6 py-16">
       {/* Atmospheric layers */}
       <div className="conduit-mesh" aria-hidden />
       <div className="conduit-ember-radial" aria-hidden />
@@ -91,7 +91,7 @@ export default function SignUpPage() {
           >
             <PraxisLogo size={48} withWordmark glow />
           </Link>
-          <p className="mt-3 text-sm text-[var(--color-text-muted)]">
+          <p className="mt-3 text-sm text-[var(--color-ink-on-inverse-soft)]">
             Create your Praxis workspace
           </p>
         </motion.div>
@@ -99,18 +99,18 @@ export default function SignUpPage() {
         {/* Form card */}
         <motion.div
           variants={ITEM}
-          className="rounded-2xl border border-[var(--color-border-default)] p-8"
+          className="rounded-2xl border border-[rgba(255,255,255,0.08)] p-8"
           style={{
-            background: "var(--color-surface-elevated)",
+            background: "var(--color-bg-inverse-elevated)",
             boxShadow:
-              "inset 0 0 0 1px rgba(255,138,61,0.05), 0 24px 64px rgba(10,9,8,0.45)",
+              "inset 0 0 0 1px rgba(255,138,61,0.07), 0 24px 64px rgba(10,9,8,0.55)",
           }}
         >
           <form onSubmit={onSubmit} className="space-y-5">
             <motion.div variants={ITEM}>
               <label
                 htmlFor="name"
-                className="block text-xs uppercase tracking-[0.14em] text-[var(--color-text-muted)] mb-2"
+                className="block text-xs uppercase tracking-[0.14em] text-[var(--color-ink-on-inverse-soft)] mb-2"
               >
                 Your name
               </label>
@@ -122,14 +122,14 @@ export default function SignUpPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="First Last"
-                className="w-full rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-default)] px-4 py-3 text-[var(--color-text)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)] placeholder:text-[var(--color-text-muted)]"
+                className="w-full rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-ember-500)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)] placeholder:text-[var(--color-ink-on-inverse-mute)]"
               />
             </motion.div>
 
             <motion.div variants={ITEM}>
               <label
                 htmlFor="email"
-                className="block text-xs uppercase tracking-[0.14em] text-[var(--color-text-muted)] mb-2"
+                className="block text-xs uppercase tracking-[0.14em] text-[var(--color-ink-on-inverse-soft)] mb-2"
               >
                 Email
               </label>
@@ -141,14 +141,14 @@ export default function SignUpPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
-                className="w-full rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-default)] px-4 py-3 text-[var(--color-text)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)] placeholder:text-[var(--color-text-muted)]"
+                className="w-full rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-ember-500)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)] placeholder:text-[var(--color-ink-on-inverse-mute)]"
               />
             </motion.div>
 
             <motion.div variants={ITEM}>
               <label
                 htmlFor="password"
-                className="block text-xs uppercase tracking-[0.14em] text-[var(--color-text-muted)] mb-2"
+                className="block text-xs uppercase tracking-[0.14em] text-[var(--color-ink-on-inverse-soft)] mb-2"
               >
                 Password
               </label>
@@ -161,7 +161,7 @@ export default function SignUpPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Min. 8 characters"
-                className="w-full rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-default)] px-4 py-3 text-[var(--color-text)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)]"
+                className="w-full rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-ember-500)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)]"
               />
             </motion.div>
 
@@ -169,7 +169,7 @@ export default function SignUpPage() {
               <motion.p
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-sm text-[var(--color-pink)] leading-[1.5]"
+                className="text-sm text-red-400 leading-[1.5]"
               >
                 {error}
               </motion.p>
@@ -179,7 +179,7 @@ export default function SignUpPage() {
               <motion.p
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-sm text-[var(--color-green)] leading-[1.5]"
+                className="text-sm text-emerald-400 leading-[1.5]"
               >
                 {info}
               </motion.p>
@@ -189,7 +189,7 @@ export default function SignUpPage() {
               variants={ITEM}
               type="submit"
               disabled={loading}
-              className="btn-primary w-full justify-center disabled:opacity-60"
+              className="conduit-auth-btn w-full justify-center disabled:opacity-60"
             >
               {loading ? (
                 <>
@@ -210,28 +210,28 @@ export default function SignUpPage() {
           variants={ITEM}
           className="mt-5 space-y-3 text-center"
         >
-          <p className="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
+          <p className="text-[11px] text-[var(--color-ink-on-inverse-mute)] leading-relaxed">
             By creating an account you agree to our{" "}
             <Link
               href="/legal/terms"
-              className="underline underline-offset-2 hover:text-[var(--color-accent)] transition-colors"
+              className="underline underline-offset-2 hover:text-[var(--color-ember-300)] transition-colors"
             >
               Terms
             </Link>{" "}
             and{" "}
             <Link
               href="/legal/privacy"
-              className="underline underline-offset-2 hover:text-[var(--color-accent)] transition-colors"
+              className="underline underline-offset-2 hover:text-[var(--color-ember-300)] transition-colors"
             >
               Privacy Policy
             </Link>
             .
           </p>
-          <p className="text-sm text-[var(--color-text-muted)]">
+          <p className="text-sm text-[var(--color-ink-on-inverse-soft)]">
             Already have one?{" "}
             <Link
               href="/auth/sign-in"
-              className="text-[var(--color-accent)] hover:text-[var(--color-accent-hi)] transition-colors font-medium"
+              className="text-[var(--color-ember-500)] hover:text-[var(--color-ember-300)] transition-colors font-medium"
             >
               Sign in
             </Link>
