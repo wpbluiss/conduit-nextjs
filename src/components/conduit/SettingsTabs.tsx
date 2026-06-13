@@ -644,13 +644,13 @@ function BusinessTab({ account }: { account: AccountData }) {
         />
       </div>
       {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
-      <button
+      <PraxisButton
         onClick={save}
-        disabled={saving}
-        className="btn-primary disabled:opacity-50"
+        isLoading={saving}
+        loadingText="Saving…"
       >
-        {saving ? "Saving…" : "Save"}
-      </button>
+        Save
+      </PraxisButton>
     </div>
   );
 }
