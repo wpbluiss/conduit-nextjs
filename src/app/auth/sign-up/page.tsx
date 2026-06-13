@@ -29,12 +29,11 @@ interface PasswordStrength {
 function checkPassword(pw: string): PasswordStrength {
   const checks = [
     { test: pw.length >= 8, label: "8+ characters" },
-    { test: /[a-z]/.test(pw), label: "lowercase letter" },
-    { test: /[A-Z]/.test(pw), label: "uppercase letter" },
-    { test: /[0-9]/.test(pw), label: "number" },
+    { test: /[a-zA-Z]/.test(pw), label: "a letter" },
+    { test: /[0-9]/.test(pw), label: "a number" },
   ];
   const missing = checks.filter((c) => !c.test).map((c) => c.label);
-  return { score: 4 - missing.length, missing };
+  return { score: 3 - missing.length, missing };
 }
 
 function parseSupabaseSignUpError(message: string): string {
@@ -57,12 +56,11 @@ function parseSupabaseSignUpError(message: string): string {
   return message;
 }
 
-const STRENGTH_LABELS = ["", "Weak", "Fair", "Good", "Strong"] as const;
+const STRENGTH_LABELS = ["", "Weak", "Fair", "Strong"] as const;
 const STRENGTH_COLORS = [
   "",
   "var(--color-pink)",
   "var(--color-yellow, #f59e0b)",
-  "var(--color-green)",
   "var(--color-green)",
 ] as const;
 
@@ -84,7 +82,7 @@ export default function SignUpPage() {
     setError(null);
     setInfo(null);
 
-    if (strength.score < 4) {
+    if (strength.score < 3) {
       setError(`Password needs: ${strength.missing.join(", ")}.`);
       return;
     }
@@ -216,7 +214,7 @@ export default function SignUpPage() {
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                onBlur={() => setPwTouched(true)}
+                onFocus={() => setPwTouched(true)}
                 placeholder="Min. 8 characters"
                 className="w-full rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-ember-500)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)]"
               />
@@ -232,7 +230,7 @@ export default function SignUpPage() {
                   >
                     {/* Strength bar */}
                     <div className="flex gap-1 mb-1">
-                      {[1, 2, 3, 4].map((n) => (
+                      {[1, 2, 3].map((n) => (
                         <div
                           key={n}
                           className="h-[3px] flex-1 rounded-full transition-all duration-300"
@@ -249,8 +247,8 @@ export default function SignUpPage() {
                       className="text-[11px] transition-colors duration-300"
                       style={{ color: STRENGTH_COLORS[strength.score] || "var(--color-text-muted)" }}
                     >
-                      {strength.score === 4
-                        ? STRENGTH_LABELS[4]
+                      {strength.score === 3
+                        ? STRENGTH_LABELS[3]
                         : `${STRENGTH_LABELS[strength.score] || "Needs"}: ${strength.missing.join(", ")}`}
                     </p>
                   </motion.div>
