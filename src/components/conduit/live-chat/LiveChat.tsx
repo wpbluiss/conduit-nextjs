@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
+import { useUser } from "@/context/UserContext";
 import PraxisLiveRoom from "@/components/conduit/voice/PraxisLiveRoom";
 import type { VoiceTokenResponse } from "@/components/conduit/voice/VoiceRoom";
 
@@ -66,6 +67,7 @@ export function LiveChat({
   initialPin: EmployeeId | null;
 }) {
   const router = useRouter();
+  const currentUser = useUser();
   const allowedSet = new Set<EmployeeId>(allowedEmployees);
   const roster = EMPLOYEE_ORDER.filter((id) => id === "jarvis" || allowedSet.has(id));
 
@@ -271,7 +273,7 @@ export function LiveChat({
           </button>
         ); })}
       </div>
-      <div className="flex items-center gap-3 border-t border-white/8 p-3"><span className="grid size-8 place-items-center rounded-full bg-secondary text-sm font-semibold">{firstName[0]?.toUpperCase() ?? "U"}</span><span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{firstName}</span><span className="block truncate text-xs text-muted-foreground">Praxis</span></span><Settings className="size-4 text-muted-foreground" /></div>
+      <div className="flex items-center gap-3 border-t border-white/8 p-3"><span className="grid size-8 place-items-center rounded-full bg-secondary text-sm font-semibold">{firstName[0]?.toUpperCase() ?? "U"}</span><span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{firstName}</span><span className="block truncate text-xs text-muted-foreground">{currentUser?.email ?? "Praxis"}</span></span><Settings className="size-4 text-muted-foreground" /></div>
     </div>
   );
 

@@ -7,6 +7,7 @@ import { UpgradeNudge } from "@/components/conduit/UpgradeNudge";
 import { RouteProgress } from "@/components/conduit/RouteProgress";
 import { PraxisCanvasTintProvider } from "@/components/conduit/praxis/PraxisCanvasTintProvider";
 import { ToastProvider } from "@/context/ToastContext";
+import { UserProvider } from "@/context/UserContext";
 import { tierById } from "@/lib/billing/tiers";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import type { EmployeeKey } from "@/lib/ai/provider";
@@ -72,8 +73,15 @@ export default async function AppLayout({
     user.email?.split("@")[0] ||
     "you";
 
+  const userContextValue = {
+    id: user.id,
+    email: user.email ?? "",
+    plan: account.internal_account ? "Internal" : tierById(account.tier_id).name,
+  };
+
   return (
     <div className="praxis-root h-screen flex bg-[var(--color-surface)] text-[var(--color-text)]">
+      <UserProvider user={userContextValue}>
       <ToastProvider>
       <PraxisCanvasTintProvider>
         <RouteProgress />
@@ -101,6 +109,7 @@ export default async function AppLayout({
         {!onboarded && <OnboardingModal defaultName={userName} />}
       </PraxisCanvasTintProvider>
       </ToastProvider>
+      </UserProvider>
     </div>
   );
 }
