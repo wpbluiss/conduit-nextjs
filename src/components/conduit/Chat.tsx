@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, FileText } from "lucide-react";
+import { AlertCircle, ArrowRight, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
@@ -168,6 +168,10 @@ export function Chat({
   const [paywall, setPaywall] = useState<PaywallPayload | null>(null);
   const [streamingEmployee, setStreamingEmployee] =
     useState<EmployeeKey | null>(null);
+  const [sendError, setSendError] = useState<{
+    text: string;
+    retryText: string;
+  } | null>(null);
 
   // R8: workspace handoff. ?pin=<employee>&prompt=<text> from /app/team/* —
   // apply once on mount, then strip from URL so refresh doesn't re-trigger.
@@ -307,6 +311,7 @@ export function Chat({
     async (text: string, employeePin?: EmployeeKey) => {
       const trimmed = text.trim();
       if (!trimmed || loading) return;
+      setSendError(null);
       setLoading(true);
       setInput("");
 
@@ -370,13 +375,10 @@ export function Chat({
         }
         setMessages((prev) => {
           const next = [...prev];
-          const last = next[next.length - 1];
-          if (last && last.pending) {
-            last.pending = false;
-            last.content = fallback;
-          }
+          if (next[next.length - 1]?.pending) next.pop();
           return next;
         });
+        setSendError({ text: fallback, retryText: trimmed });
         setLoading(false);
         return;
       }
@@ -681,11 +683,15 @@ export function Chat({
             window.history.replaceState({}, "", `/app?c=${cid}`);
           }
         } else if (event === "error") {
-          appendTo(
-            (data.employee as EmployeeKey) || currentEmployee,
-            `\n\n${(data.message as string) || "Try again in a moment."}`,
-          );
-          finishCurrent(currentEmployee);
+          setMessages((prev) => {
+            const next = [...prev];
+            if (next[next.length - 1]?.pending) next.pop();
+            return next;
+          });
+          setSendError({
+            text: (data.message as string) || "Try again in a moment.",
+            retryText: trimmed,
+          });
         }
       };
 
@@ -749,6 +755,40 @@ export function Chat({
               }
             />
           ))}
+
+          {sendError && (
+            <div
+              className="conduit-card flex items-start gap-3 p-4"
+              style={{
+                borderColor: "rgba(248, 113, 113, 0.25)",
+                background: "rgba(248, 113, 113, 0.06)",
+              }}
+            >
+              <AlertCircle
+                size={16}
+                className="shrink-0 mt-0.5"
+                style={{ color: "#f87171" }}
+              />
+              <p
+                className="flex-1 text-sm leading-relaxed"
+                style={{ color: "var(--color-text)" }}
+              >
+                {sendError.text}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  const retry = sendError.retryText;
+                  setSendError(null);
+                  void send(retry);
+                }}
+                className="shrink-0 text-sm font-medium transition-colors hover:opacity-80"
+                style={{ color: "var(--color-ember-500)" }}
+              >
+                Try again
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
