@@ -23,13 +23,12 @@ new Claude Code session can pick up seamlessly. (Names of secrets only — never
 
 ### Edge functions + pg_cron jobs
 - `praxis-orchestrator` (Conductor: merged-PR → downstream `claude-queue` issues) — cron `praxis_orchestrator` */15.
-- `praxis-planner` (refills each repo's queue, low-water 8 → 10; v3 dedupe-aware: feeds open-PR
-  + in-flight-issue titles into the prompt so it never re-proposes in-flight work) — cron `praxis_planner` :05 hourly.
-- `praxis-dispatcher` (fires/enables/disables repo `claude-autopilot.yml` via token; actions: dispatch|enable_workflow|disable_workflow; body.repos optional. v4 DEDUPE GUARD: before each dispatch, `queueSync()` parks issues referenced by an open PR — label `claude-queue` → `in-flight` — so autopilot never re-picks them and files duplicate PRs; restores `claude-queue` if the PR closes unmerged. Root cause it fixes: issues only close on MERGE, so every 15-min dispatch used to re-pick the same open issues) — crons `praxis_dispatch_flagship` */15 (conduit-nextjs), `praxis_dispatch_fleet` hourly (private repos).
+- `praxis-planner` (refills each repo's queue, low-water 8 → 10) — cron `praxis_planner` :05 hourly.
+- `praxis-dispatcher` (fires/enables/disables repo `claude-autopilot.yml` via token; actions: dispatch|enable_workflow|disable_workflow; body.repos optional) — crons `praxis_dispatch_flagship` */15 (conduit-nextjs), `praxis_dispatch_fleet` hourly (private repos).
 - `praxis-merger` (reviewed auto-merge across repos; HARD FLOOR: never merges data-deletes, destructive DB migrations, or secret exposure — those it flags) — cron `praxis_merger` */30.
 - `praxis-milestone` (web launch %, capped 90; calls Atlas on +20% milestones) — cron `praxis_milestone` :10 hourly.
-- `praxis-launch-watch` (alerts when a PR needs Luis) — cron `praxis_launch_watch` */20. Uses `praxis-notify`.
-- `praxis-notify` (sends to Luis: **Twilio SMS** when configured, else logs to `praxis_runs` event `pending_alert`; Telegram intentionally removed).
+- `praxis-launch-watch` (alerts when a PR needs Luis; ALSO probes conduitai.io `/api/health` every run → events `site_down`/`site_up`, re-alert throttled 6h) — cron `praxis_launch_watch` */20. Uses `praxis-notify`.
+- `praxis-notify` (sends to Luis: **Twilio SMS LIVE** — secrets TWILIO_ACCOUNT_SID/AUTH_TOKEN/SMS_FROM + OWNER_PHONE; else logs `praxis_runs` event `pending_alert`. Response includes `diag` of which secrets are present + Twilio status, no values leaked. Telegram removed).
 - `praxis-atlas-brief` (daily status text/call) — cron `praxis_atlas_brief` 13:00 UTC.
 - `praxis-atlas-call` (Vapi: inspect | configure | call; injects live `{{status}}`).
 - `praxis-atlas-tools` (Vapi voice-tool server — Atlas's hands: `fleet_status, repo_status,
@@ -56,8 +55,7 @@ Wired with agents (`agents_wired=true`): `conduit-nextjs` (web, **PUBLIC**, live
   `ui-design-review.yml` (conduit-nextjs: screenshots live pages → Claude vision critique → fixes/issues).
 - **`auto-review-merge.yml` is DISABLED everywhere** (redundant — `praxis-merger` does merging).
 - Standards the agents follow: `CLAUDE.md`, `AGENTS.md`, `DESIGN.md` (world-class UI bar),
-  `ORCHESTRATOR.md`, `AGENT_REPLICATION.md`. Labels: `claude-queue` (available work),
-  `in-flight` (parked by dispatcher queueSync — an open PR covers it), `[LAUNCH-BLOCKER]`, `[UI]`.
+  `ORCHESTRATOR.md`, `AGENT_REPLICATION.md`. Labels: `claude-queue` (work), `[LAUNCH-BLOCKER]`, `[UI]`.
 
 ## Atlas (phone chief of staff)
 - Calls **from 561-678-3691 → to OWNER_PHONE (+1 561-446-4520)** via **Vapi**.
@@ -67,28 +65,30 @@ Wired with agents (`agents_wired=true`): `conduit-nextjs` (web, **PUBLIC**, live
   prompt (never invent; only state tool/`{{status}}` data). Trigger a call:
   `POST praxis-atlas-call {action:"call", message:"..."}` with `x-praxis-secret`.
 
-## Current status (as of 2026-06-12 evening)
-- **Web Praxis ~70% launch-ready (build).** Done: legal, SEO, account deletion, rate-limit,
-  analytics, onboarding, polish. Remaining: auth flow, billing/Stripe, tests/CI — and PRs
-  for ALL THREE already exist; the gap is review/merge, not code. (One milestone tick
-  hallucinated 100% at 13:44 UTC then reverted — 70 is the honest number.)
-- 35 PRs merged 6/11–6/12. Fleet-ops session 6/12 PM: **deduped the PR backlog** — 17 dup
-  PRs closed with notes (nextjs 105/106/110/112/114/116/117 + e2e 91/96; mobile 32/38/40;
-  backend 24/27; marketing 40; eng-worker 24/27 — kept the better twin of each), lost unique
-  scope re-queued as nextjs issues #133/#134. **e2e suite consolidated on nextjs PR #98**:
-  verified locally — merges clean into main, builds with STUB `NEXT_PUBLIC_SUPABASE_*` values
-  (no repo secrets needed for CI), 8/8 Playwright tests green vs production build. Final
-  workflow YAML for Luis is in a comment on #98 (one manual file: `.github/workflows/e2e.yml`;
-  bot tokens lack `workflows` perm). Dispatcher v4 + planner v3 dedupe guards deployed (above).
-- Launch-watch has flagged for Luis: nextjs **#104 (auth UI), #90/#80/#77 (billing), #98 (e2e)**
-  → these are the 70%→~85% unlock.
+## Current status (as of 2026-06-13, ~02:30 UTC — major gates cleared)
+- **conduitai.io is LIVE again.** It was 402/DEPLOYMENT_DISABLED for ~12h (Vercel paused ALL
+  of Luis's projects over an overdue invoice — not a code/agent issue). Luis paid; site serves
+  latest main. `praxis-launch-watch` now probes `/api/health` every 20m (events `site_down`/`site_up`).
+- **Founder-gate items, now DONE:** ① GitHub Actions budget already $0 w/ stop-usage (all 5
+  product budgets). ② Stripe live keys + 5 price IDs + webhook secret in Vercel (since May 6;
+  prices confirmed live-mode; existing webhook endpoint kept — do NOT create duplicates, each
+  endpoint has its own signing secret). ③ e2e CI workflow (`.github/workflows/e2e.yml`) created.
+  ④ Twilio SMS LIVE — secrets `TWILIO_ACCOUNT_SID` (must be the `AC…` Account SID, NOT an
+  API key SID), `TWILIO_AUTH_TOKEN`, `TWILIO_SMS_FROM` in Edge Function secrets; test returns
+  channel:sms / 201. ⑤ Lunaro (`jonathan-demo`) autopilot was failing every hour (missing
+  `CLAUDE_CODE_OAUTH_TOKEN`); token added, workflow re-enabled, run green.
+- **Build ~70%+ and climbing.** Big 6/12 dedupe: ~20 duplicate PRs closed across repos; merged
+  auth UI (#104), e2e suite (#98), backend signup (#25), hero parallax, FAQ anim, a11y rings +
+  reduced-motion. Dedupe guards deployed: dispatcher v4 `queueSync` (parks `claude-queue`→`in-flight`
+  when an open PR refs the issue) + planner v3 (feeds open-PR/in-flight titles into prompt).
+- NOTE: a milestone tick once hallucinated 100% then reverted to 70 — scorer noise; 70 is honest.
 
-## Pending HUMAN gates (only Luis — agents can't do these)
-1. **Set GitHub Actions spending limit to $0** (Billing) — URGENT, private repos are running.
-2. **Add live Stripe keys** when the billing PR is ready (revenue gate).
-3. (Optional) add Twilio secrets for SMS alerts; or make mobile/marketing/engineering public
-   for free minutes (keep `conduit-backend` + `jonathan-demo` PRIVATE — secrets/client data).
-4. App Store submission; final smoke test + go-live; his eye on deployed UI (top design signal).
+## Remaining (mostly human / non-code)
+1. **Confirm billing end-to-end** with one real test purchase (keys are in; webhook signature
+   must match the endpoint whose `whsec_` is in Vercel `STRIPE_WEBHOOK_SECRET`).
+2. App Store submission; final smoke test + go-live; Luis's eye on deployed UI (top design signal).
+3. Optional: make mobile/marketing/engineering public for free Actions minutes (keep
+   `conduit-backend` + `jonathan-demo` PRIVATE — secrets/client data).
 
 ## House rules
 - Never put secret VALUES in chat — they go to Supabase Edge Function secrets / GitHub secrets.
