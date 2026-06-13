@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { PraxisLogo } from "@/components/conduit/PraxisLogo";
@@ -20,6 +20,51 @@ const ITEM = {
   show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } },
 };
 
+interface PasswordStrength {
+  score: number; // 0-4
+  missing: string[];
+}
+
+function checkPassword(pw: string): PasswordStrength {
+  const checks = [
+    { test: pw.length >= 8, label: "8+ characters" },
+    { test: /[a-z]/.test(pw), label: "lowercase letter" },
+    { test: /[A-Z]/.test(pw), label: "uppercase letter" },
+    { test: /[0-9]/.test(pw), label: "number" },
+  ];
+  const missing = checks.filter((c) => !c.test).map((c) => c.label);
+  return { score: 4 - missing.length, missing };
+}
+
+function parseSupabaseSignUpError(message: string): string {
+  const lower = message.toLowerCase();
+  if (lower.includes("already registered") || lower.includes("already exists")) {
+    return "An account with this email already exists. Try signing in instead.";
+  }
+  if (lower.includes("password should be at least")) {
+    return "Password must be at least 8 characters.";
+  }
+  if (lower.includes("password should contain")) {
+    return "Password must include uppercase, lowercase, and a number.";
+  }
+  if (lower.includes("invalid email")) {
+    return "Please enter a valid email address.";
+  }
+  if (lower.includes("rate limit") || lower.includes("too many")) {
+    return "Too many attempts. Please wait a moment and try again.";
+  }
+  return message;
+}
+
+const STRENGTH_LABELS = ["", "Weak", "Fair", "Good", "Strong"] as const;
+const STRENGTH_COLORS = [
+  "",
+  "var(--color-pink)",
+  "var(--color-yellow, #f59e0b)",
+  "var(--color-green)",
+  "var(--color-green)",
+] as const;
+
 export default function SignUpPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -28,15 +73,25 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const [pwTouched, setPwTouched] = useState(false);
+
+  const strength = checkPassword(password);
+  const showStrength = pwTouched && password.length > 0;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
     setError(null);
     setInfo(null);
+
+    if (strength.score < 4) {
+      setError(`Password needs: ${strength.missing.join(", ")}.`);
+      return;
+    }
+
+    setLoading(true);
     track("signup_started");
     const supabase = createSupabaseBrowserClient();
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -44,17 +99,17 @@ export default function SignUpPage() {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
-    if (error) {
-      setError(error.message);
+    if (signUpError) {
+      setError(parseSupabaseSignUpError(signUpError.message));
       setLoading(false);
       return;
     }
     if (data.session) {
       track("signup_completed");
-      router.replace("/app");
+      router.replace("/app/workspace");
       router.refresh();
     } else {
-      setInfo("Check your email to confirm. Once confirmed, you can sign in.");
+      setInfo("Check your email to confirm your account. Once confirmed, you can sign in.");
       setLoading(false);
     }
   }
@@ -156,17 +211,54 @@ export default function SignUpPage() {
                 id="password"
                 type="password"
                 required
-                minLength={8}
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onBlur={() => setPwTouched(true)}
                 placeholder="Min. 8 characters"
                 className="w-full rounded-lg bg-[var(--color-surface)] border border-[var(--color-border-default)] px-4 py-3 text-[var(--color-text)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)]"
               />
+
+              <AnimatePresence>
+                {showStrength && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="mt-2 overflow-hidden"
+                  >
+                    {/* Strength bar */}
+                    <div className="flex gap-1 mb-1">
+                      {[1, 2, 3, 4].map((n) => (
+                        <div
+                          key={n}
+                          className="h-[3px] flex-1 rounded-full transition-all duration-300"
+                          style={{
+                            background:
+                              n <= strength.score
+                                ? STRENGTH_COLORS[strength.score]
+                                : "var(--color-border-default)",
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <p
+                      className="text-[11px] transition-colors duration-300"
+                      style={{ color: STRENGTH_COLORS[strength.score] || "var(--color-text-muted)" }}
+                    >
+                      {strength.score === 4
+                        ? STRENGTH_LABELS[4]
+                        : `${STRENGTH_LABELS[strength.score] || "Needs"}: ${strength.missing.join(", ")}`}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
 
             {error && (
               <motion.p
+                key={error}
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-sm text-[var(--color-pink)] leading-[1.5]"
