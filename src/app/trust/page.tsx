@@ -40,21 +40,41 @@ const PILLARS = [
     Icon: Lock,
     title: "Encrypted in transit and at rest",
     body: "TLS 1.3 to every endpoint. Postgres at rest encryption via Supabase. LiveKit audio over DTLS-SRTP. Customer data never crosses provider boundaries unencrypted.",
+    iconColor: "#D67817",
+    iconBg: "rgba(214,120,23,0.10)",
+    iconBorder: "rgba(214,120,23,0.24)",
+    iconGlow: "rgba(214,120,23,0.18)",
+    radial: "radial-gradient(ellipse 80% 70% at 0% 0%, rgba(214,120,23,0.09) 0%, transparent 70%)",
   },
   {
     Icon: Database,
     title: "Data residency you can trust",
     body: "Customer data lives in Supabase (US region) and Vercel Functions (matched US regions). No third-party data sales. No model fine-tuning on your conversations.",
+    iconColor: "#5B63E8",
+    iconBg: "rgba(91,99,232,0.10)",
+    iconBorder: "rgba(91,99,232,0.24)",
+    iconGlow: "rgba(91,99,232,0.18)",
+    radial: "radial-gradient(ellipse 80% 70% at 0% 0%, rgba(91,99,232,0.09) 0%, transparent 70%)",
   },
   {
     Icon: ShieldCheck,
     title: "Auth + access control",
     body: "Supabase Auth with row-level security on every customer-facing table. Org-scoped queries throughout. Admins audit-logged. Service-role keys never leave the server.",
+    iconColor: "#34D399",
+    iconBg: "rgba(52,211,153,0.10)",
+    iconBorder: "rgba(52,211,153,0.24)",
+    iconGlow: "rgba(52,211,153,0.18)",
+    radial: "radial-gradient(ellipse 80% 70% at 0% 0%, rgba(52,211,153,0.09) 0%, transparent 70%)",
   },
   {
     Icon: Eye,
     title: "What we don't do",
     body: "We don't train on your messages. We don't sell data to brokers. We don't ship analytics SDKs that exfiltrate behavior. We're a small team — fewer chances for shadow data flows.",
+    iconColor: "#A855F7",
+    iconBg: "rgba(168,85,247,0.10)",
+    iconBorder: "rgba(168,85,247,0.24)",
+    iconGlow: "rgba(168,85,247,0.18)",
+    radial: "radial-gradient(ellipse 80% 70% at 0% 0%, rgba(168,85,247,0.09) 0%, transparent 70%)",
   },
 ];
 
@@ -79,19 +99,33 @@ export default function TrustPage() {
           <ScrollRevealCards className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 max-w-[920px]">
             {PILLARS.map((p) => (
               <ScrollRevealItem key={p.title}>
-                <div className="conduit-card p-7 md:p-8 h-full">
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)]">
-                      <p.Icon size={20} weight="regular" color="#5B63E8" />
+                <div className="conduit-card relative overflow-hidden p-7 md:p-8 h-full">
+                  {/* Per-pillar corner radial accent */}
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ background: p.radial }}
+                  />
+                  {/* Icon + title row */}
+                  <div className="relative flex items-start gap-4 mb-5">
+                    <div
+                      className="shrink-0 w-11 h-11 rounded-xl flex items-center justify-center"
+                      style={{
+                        background: p.iconBg,
+                        border: `1px solid ${p.iconBorder}`,
+                        boxShadow: `0 0 16px ${p.iconGlow}`,
+                      }}
+                    >
+                      <p.Icon size={22} weight="duotone" color={p.iconColor} />
                     </div>
                     <h3
-                      className="text-[18px] leading-[1.2] tracking-[-0.01em] text-[var(--color-cream)]"
+                      className="text-[18px] md:text-[19px] leading-[1.25] tracking-[-0.01em] text-[var(--color-cream)] pt-1"
                       style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
                     >
                       {p.title}
                     </h3>
                   </div>
-                  <p className="conduit-body-md">{p.body}</p>
+                  <p className="relative conduit-body-md leading-[1.65]">{p.body}</p>
                 </div>
               </ScrollRevealItem>
             ))}
