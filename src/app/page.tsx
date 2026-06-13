@@ -29,14 +29,12 @@ export const metadata: Metadata = {
     url: "https://conduitai.io",
     siteName: "Conduit AI",
     type: "website",
-    images: [{ url: "/praxis-mark.png", width: 1200, height: 630, alt: "Praxis — AI workforce platform" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Conduit AI — Intelligence at work",
     description:
       "The operating system for autonomous AI workforces. Nine specialists, one shared brain, running 24/7.",
-    images: ["/praxis-mark.png"],
   },
   alternates: {
     canonical: "https://conduitai.io",
