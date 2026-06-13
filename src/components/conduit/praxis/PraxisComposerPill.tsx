@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Mic, MicOff, Send } from "lucide-react";
+import { Mic, Mic2, MicOff, Send, Square } from "lucide-react";
 import type { EmployeeId } from "@/lib/conduit/employees";
 import { PraxisAvatar } from "./PraxisAvatar";
 import { useDeptTint } from "./usePraxisTint";
+import type { RecordingState } from "@/hooks/useVoiceRecorder";
 
 export type PinValue = EmployeeId | "auto" | "team";
 
@@ -28,6 +29,15 @@ interface Props {
   loading: boolean;
   streamingEmployee?: EmployeeId | null;
   placeholder?: string;
+  /** Whether the browser supports MediaRecorder-based voice messages. */
+  voiceMessageSupported?: boolean;
+  /** Current state of the voice message recorder. */
+  voiceRecordingState?: RecordingState;
+  /** Elapsed recording seconds (shown during recording). */
+  voiceRecordingSeconds?: number;
+  onVoiceRecordStart?(): void;
+  onVoiceRecordStop?(): void;
+  onVoiceRecordCancel?(): void;
 }
 
 /**
@@ -38,6 +48,12 @@ interface Props {
  *
  * Per contracts/primitives.md P-010. Refactor of Chat.tsx:743–880.
  */
+function formatSeconds(s: number): string {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${String(sec).padStart(2, "0")}`;
+}
+
 export function PraxisComposerPill({
   value,
   onChange,
@@ -51,6 +67,12 @@ export function PraxisComposerPill({
   loading,
   streamingEmployee,
   placeholder,
+  voiceMessageSupported = false,
+  voiceRecordingState = "idle",
+  voiceRecordingSeconds = 0,
+  onVoiceRecordStart,
+  onVoiceRecordStop,
+  onVoiceRecordCancel,
 }: Props) {
   const [pinOpen, setPinOpen] = useState(false);
   const tint = useDeptTint();
@@ -258,6 +280,126 @@ export function PraxisComposerPill({
       >
         {speechSupported ? <Mic size={16} /> : <MicOff size={16} />}
       </button>
+
+      {/* Voice message recording — distinct from STT above */}
+      {voiceMessageSupported && (
+        voiceRecordingState === "recording" ? (
+          <div
+            style={{
+              flexShrink: 0,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "var(--space-1)",
+            }}
+          >
+            <span
+              aria-hidden
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                background: "#ef4444",
+                animation: "voiceRecordPulse 1s ease-in-out infinite",
+                flexShrink: 0,
+              }}
+            />
+            <span
+              style={{
+                fontSize: "11px",
+                fontVariantNumeric: "tabular-nums",
+                color: "var(--color-text-muted)",
+                minWidth: "2.8ch",
+              }}
+              aria-live="polite"
+              aria-label={`Recording — ${formatSeconds(voiceRecordingSeconds)}`}
+            >
+              {formatSeconds(voiceRecordingSeconds)}
+            </span>
+            <button
+              type="button"
+              onClick={onVoiceRecordStop}
+              aria-label="Send voice message"
+              title="Send voice message"
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "9999px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "#ef4444",
+                color: "#fff",
+                border: "none",
+                cursor: "pointer",
+                flexShrink: 0,
+              }}
+            >
+              <Square size={14} fill="currentColor" />
+            </button>
+            <button
+              type="button"
+              onClick={onVoiceRecordCancel}
+              aria-label="Cancel recording"
+              title="Cancel recording"
+              style={{
+                width: "32px",
+                height: "32px",
+                borderRadius: "9999px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "transparent",
+                color: "var(--color-text-muted)",
+                border: "1px solid var(--color-border)",
+                cursor: "pointer",
+                fontSize: "12px",
+                flexShrink: 0,
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={onVoiceRecordStart}
+            disabled={voiceRecordingState === "uploading" || loading}
+            aria-label={
+              voiceRecordingState === "uploading"
+                ? "Uploading voice message…"
+                : "Record voice message"
+            }
+            title={
+              voiceRecordingState === "uploading"
+                ? "Uploading…"
+                : "Record a voice message"
+            }
+            style={{
+              flexShrink: 0,
+              width: "40px",
+              height: "40px",
+              borderRadius: "9999px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "transparent",
+              color:
+                voiceRecordingState === "uploading"
+                  ? "var(--color-accent)"
+                  : "var(--color-text-muted)",
+              border: "1px solid var(--color-border)",
+              cursor:
+                voiceRecordingState === "uploading" || loading
+                  ? "not-allowed"
+                  : "pointer",
+              opacity: voiceRecordingState === "uploading" || loading ? 0.5 : 1,
+              transition: "all 180ms var(--praxis-ease-out-quart)",
+            }}
+          >
+            <Mic2 size={16} />
+          </button>
+        )
+      )}
 
       <button
         type="submit"

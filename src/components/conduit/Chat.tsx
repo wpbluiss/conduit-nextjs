@@ -13,6 +13,7 @@ import {
 } from "./EmployeeBadge";
 import { PaywallModal, type PaywallPayload } from "./PaywallModal";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { useVoiceRecorder } from "@/hooks/useVoiceRecorder";
 import { PraxisAvatar } from "./praxis/PraxisAvatar";
 import { PraxisSuggestionTile } from "./praxis/PraxisSuggestionTile";
 import { PraxisHandoffBaton } from "./praxis/PraxisHandoffBaton";
@@ -210,6 +211,47 @@ export function Chat({
     setInput(speech.transcript);
     lastTranscriptRef.current = speech.transcript;
   }, [speech.transcript, speech.listening]);
+
+  // Voice message recording (MediaRecorder → Supabase Storage)
+  const sendVoiceMessage = useCallback(
+    async (blob: Blob, mimeType: string) => {
+      const form = new FormData();
+      form.append("audio", blob, `voice.${mimeType.split("/")[1]?.split(";")[0] ?? "webm"}`);
+      form.append("mime_type", mimeType);
+      if (conversationId) form.append("conversation_id", conversationId);
+
+      const resp = await fetch("/api/conduit/voice/message", {
+        method: "POST",
+        body: form,
+      });
+      if (!resp.ok) throw new Error("upload_failed");
+
+      const json = (await resp.json()) as {
+        message_id: string;
+        conversation_id: string;
+        url: string;
+      };
+
+      if (!conversationId && json.conversation_id) {
+        setConversationId(json.conversation_id);
+        window.history.replaceState({}, "", `/app?c=${json.conversation_id}`);
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: json.message_id,
+          role: "user" as const,
+          content: "[Voice message]",
+          metadata: { type: "voice", attachment_url: json.url },
+        },
+      ]);
+
+      router.refresh();
+    },
+    [conversationId, router],
+  );
+  const voiceRecorder = useVoiceRecorder(sendVoiceMessage);
 
   // Voice output (TTS)
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -833,6 +875,12 @@ export function Chat({
             loading={loading}
             streamingEmployee={streamingEmployee as EmployeeId | null}
             placeholder={speech.listening ? "Listening…" : "Talk to your team…"}
+            voiceMessageSupported={voiceRecorder.supported}
+            voiceRecordingState={voiceRecorder.state}
+            voiceRecordingSeconds={voiceRecorder.elapsedSeconds}
+            onVoiceRecordStart={() => void voiceRecorder.start()}
+            onVoiceRecordStop={() => voiceRecorder.stop()}
+            onVoiceRecordCancel={() => voiceRecorder.cancel()}
           />
           <div
             className="mt-2 h-4 text-center"
@@ -984,6 +1032,10 @@ const MessageBubble = memo(function MessageBubble({
   onReplayAudio?: () => void;
 }) {
   if (message.role === "user") {
+    const meta = (message.metadata ?? {}) as Record<string, unknown>;
+    const isVoice = meta.type === "voice";
+    const voiceUrl = (meta.attachment_url as string | undefined) ?? null;
+
     return (
       <motion.div
         className="flex justify-end"
@@ -991,8 +1043,17 @@ const MessageBubble = memo(function MessageBubble({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
       >
-        <div className="max-w-[85%] conduit-bubble-user px-4 py-3 text-[var(--color-text)] whitespace-pre-wrap">
-          {message.content}
+        <div className="max-w-[85%] conduit-bubble-user px-4 py-3 text-[var(--color-text)]">
+          {isVoice && voiceUrl ? (
+            <audio
+              controls
+              src={voiceUrl}
+              aria-label="Voice message"
+              style={{ maxWidth: "260px", outline: "none" }}
+            />
+          ) : (
+            <span className="whitespace-pre-wrap">{message.content}</span>
+          )}
         </div>
       </motion.div>
     );
