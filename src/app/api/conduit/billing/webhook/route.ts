@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { phCapture } from "@/lib/analytics/posthog-server";
 import {
   getStripe,
   getWebhookSecret,
@@ -163,6 +164,12 @@ async function handleEvent(
             .update({ bonus_tokens: next })
             .eq("id", accountId);
         }
+      }
+      // PostHog: subscription_started — fire-and-forget, never blocks billing processing.
+      if (session.mode === "subscription" && accountId) {
+        phCapture(accountId, "subscription_started", {
+          tier_id: session.metadata?.tier_id,
+        });
       }
       // Send branded payment receipt — fire-and-forget, never blocks billing processing.
       const toEmail = session.customer_details?.email;

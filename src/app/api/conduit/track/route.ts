@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { phCapture } from "@/lib/analytics/posthog-server";
 
 export const runtime = "nodejs";
 
@@ -11,8 +12,11 @@ const ALLOWED_EVENTS = new Set([
   "paywall_viewed",
   "checkout_clicked",
   "upgrade_initiated",
+  "upgrade_intent_clicked",
   "downgrade_clicked",
   "portal_opened",
+  "first_ai_message_sent",
+  "onboarding_completed",
 ]);
 
 export async function POST(req: NextRequest) {
@@ -59,6 +63,13 @@ export async function POST(req: NextRequest) {
     path,
     properties: Object.keys(properties).length > 0 ? properties : null,
   });
+
+  // Forward to PostHog (fire-and-forget; no PII — only opaque account UUID)
+  if (accountId) {
+    phCapture(accountId, event, { ...properties, path: path ?? undefined });
+  } else {
+    phCapture("anonymous", event, { ...properties, path: path ?? undefined });
+  }
 
   return NextResponse.json({ ok: true });
 }

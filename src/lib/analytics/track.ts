@@ -6,8 +6,11 @@ export type AnalyticsEvent =
   | "paywall_viewed"
   | "checkout_clicked"
   | "upgrade_initiated"
+  | "upgrade_intent_clicked"
   | "downgrade_clicked"
-  | "portal_opened";
+  | "portal_opened"
+  | "first_ai_message_sent"
+  | "onboarding_completed";
 
 export function track(
   event: AnalyticsEvent,

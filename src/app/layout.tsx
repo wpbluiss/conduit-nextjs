@@ -8,6 +8,7 @@ import "@/styles/praxis-design-language.css";
 import "@/styles/engineering-cinema.css";
 import "@/styles/memory-canvas.css";
 import { ThemeBoot } from "@/components/conduit/ThemeBoot";
+import { PostHogProvider } from "@/components/PostHogProvider";
 
 // R18 Slice 0: body sans switched from Inter to Geist Sans per the
 // design-language spec (frontend-design skill forbids Inter as generic
@@ -83,7 +84,9 @@ export default function RootLayout({
         <a href="#main-content" className="conduit-skip-link">
           Skip to content
         </a>
-        <div id="main-content">{children}</div>
+        <PostHogProvider>
+          <div id="main-content">{children}</div>
+        </PostHogProvider>
       </body>
     </html>
   );
