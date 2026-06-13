@@ -5,6 +5,7 @@ import { getCurrentAccount } from "@/lib/conduit/account";
 import { Sidebar } from "@/components/conduit/Sidebar";
 import { OnboardingModal } from "@/components/conduit/OnboardingModal";
 import { UpgradeNudge } from "@/components/conduit/UpgradeNudge";
+import { TokenBudgetNudge } from "@/components/conduit/TokenBudgetNudge";
 import { RouteProgress } from "@/components/conduit/RouteProgress";
 import { PraxisCanvasTintProvider } from "@/components/conduit/praxis/PraxisCanvasTintProvider";
 import { ToastProvider } from "@/context/ToastContext";
@@ -82,6 +83,11 @@ export default async function AppLayout({
       : (tierById(account.tier_id).allowedEmployees as EmployeeKey[])
   ) as EmployeeKey[];
 
+  const tier = tierById(account.tier_id);
+  const effectiveAllowance = account.internal_account
+    ? Math.max(tier.monthlyTokenAllowance, account.monthly_token_cap)
+    : tier.monthlyTokenAllowance + (account.bonus_tokens ?? 0);
+
   const userName =
     (user.user_metadata?.full_name as string | undefined) ||
     user.email?.split("@")[0] ||
@@ -115,6 +121,12 @@ export default async function AppLayout({
         />
         <main className="conduit-canvas praxis-canvas-tint flex-1 flex flex-col min-w-0 pt-12 md:pt-0">
           <UpgradeNudge
+            tierId={account.tier_id ?? "free"}
+            internalAccount={Boolean(account.internal_account)}
+          />
+          <TokenBudgetNudge
+            tokensUsed={account.monthly_tokens_used}
+            tokensAllowance={effectiveAllowance}
             tierId={account.tier_id ?? "free"}
             internalAccount={Boolean(account.internal_account)}
           />
