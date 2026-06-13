@@ -21,6 +21,16 @@ new Claude Code session can pick up seamlessly. (Names of secrets only — never
 - Daily spend cap: `praxis_config.daily_spend_cap_usd` = $5 (Haiku layer). Agents run on
   Luis's Claude **Max plan ($0)** via GitHub Actions, not this cap.
 
+> **⚠️ ARCHITECTURE CHANGE (2026-06-13 eve): the metered Haiku "brain" is DECOMMISSIONED.**
+> The `ANTHROPIC_API_KEY` ran out of prepaid credits (~04:45 UTC) and Luis wants **$0 / no
+> API credits until revenue**. So the coordination brain was moved off the metered API onto
+> the **Max plan ($0)** via GitHub Actions. These pg_cron jobs were **unscheduled** (gone, not
+> paused): `praxis_merger`, `praxis_orchestrator`, `praxis_planner`, `praxis_milestone`,
+> `praxis_atlas_brief`, `praxis_ticks`, `praxis_watchdog`. Still scheduled (all free, no
+> Anthropic API): `praxis_dispatch_flagship`, `praxis_dispatch_fleet`, `praxis_launch_watch`.
+> The merger+planner are replaced by **`praxis-coordinator.yml`** (see Workflows). Do NOT
+> re-enable the metered crons unless Luis explicitly funds API credits again.
+
 ### Edge functions + pg_cron jobs
 - `praxis-orchestrator` (Conductor: merged-PR → downstream `claude-queue` issues) — cron `praxis_orchestrator` */15.
 - `praxis-planner` (refills each repo's queue, low-water 8 → 10) — cron `praxis_planner` :05 hourly.
@@ -53,6 +63,14 @@ Wired with agents (`agents_wired=true`): `conduit-nextjs` (web, **PUBLIC**, live
   `CLAUDE_CODE_OAUTH_TOKEN` = Max $0; `--permission-mode bypassPermissions`; conduit-nextjs:
   8 issues/run, max-turns 160), `post-deploy-qa.yml` (smoke-tests conduitai.io),
   `ui-design-review.yml` (conduit-nextjs: screenshots live pages → Claude vision critique → fixes/issues).
+- **`praxis-coordinator.yml`** (conduit-nextjs only, added 6/13): the merger+planner rebuilt on
+  **Max plan ($0)**. Runs Claude Code every 30 min (cron `*/30`) + `workflow_dispatch`: reviews
+  open PRs, squash-merges the safe ones (same HARD FLOOR), closes dups, refills `claude-queue`.
+  Needs `permissions: id-token: write` (without it, OIDC auth fails). First run 6/13 cleared the
+  flagship backlog **27 → 6 open PRs** in 13 min, $0. Trigger manually via the dispatcher:
+  `POST praxis-dispatcher {action:"dispatch", workflow:"praxis-coordinator.yml", repos:["wpbluiss/conduit-nextjs"]}`.
+  PHASE 2 (not done): extend to private repos — costs Actions minutes (capped by the $0 budget),
+  so deferred until web launch is done or revenue exists.
 - **`auto-review-merge.yml` is DISABLED everywhere** (redundant — `praxis-merger` does merging).
 - Standards the agents follow: `CLAUDE.md`, `AGENTS.md`, `DESIGN.md` (world-class UI bar),
   `ORCHESTRATOR.md`, `AGENT_REPLICATION.md`. Labels: `claude-queue` (work), `[LAUNCH-BLOCKER]`, `[UI]`.
@@ -64,6 +82,13 @@ Wired with agents (`agents_wired=true`): `conduit-nextjs` (web, **PUBLIC**, live
   but interrupted on background noise, so reverted). 11 tools wired (above). Accuracy-locked
   prompt (never invent; only state tool/`{{status}}` data). Trigger a call:
   `POST praxis-atlas-call {action:"call", message:"..."}` with `x-praxis-secret`.
+- **Atlas VOICE confirmed working 6/13** even with the API key drained — Vapi uses its own LLM
+  provider, NOT the dead `ANTHROPIC_API_KEY`. A scripted `{action:"call", message}` is delivered
+  verbatim and accurately.
+- **⚠️ Atlas ACCURACY bug (open, 6/13):** on a live free-form call, his tool-backed numbers were
+  inflated/misleading (e.g. "963 shipped", "213 queued", "23 PRs open") and he stalled ("just a
+  sec" x many). The `praxis-atlas-tools` metrics need auditing/tightening so live calls state real
+  counts (the scripted-message path is fine). Until fixed, prefer scripted-message calls.
 
 ## Current status (as of 2026-06-13, ~02:30 UTC — major gates cleared)
 - **conduitai.io is LIVE again.** It was 402/DEPLOYMENT_DISABLED for ~12h (Vercel paused ALL
@@ -73,10 +98,24 @@ Wired with agents (`agents_wired=true`): `conduit-nextjs` (web, **PUBLIC**, live
   product budgets). ② Stripe live keys + 5 price IDs + webhook secret in Vercel (since May 6;
   prices confirmed live-mode; existing webhook endpoint kept — do NOT create duplicates, each
   endpoint has its own signing secret). ③ e2e CI workflow (`.github/workflows/e2e.yml`) created.
-  ④ Twilio SMS LIVE — secrets `TWILIO_ACCOUNT_SID` (must be the `AC…` Account SID, NOT an
-  API key SID), `TWILIO_AUTH_TOKEN`, `TWILIO_SMS_FROM` in Edge Function secrets; test returns
-  channel:sms / 201. ⑤ Lunaro (`jonathan-demo`) autopilot was failing every hour (missing
-  `CLAUDE_CODE_OAUTH_TOKEN`); token added, workflow re-enabled, run green.
+  ④ Twilio SMS CONFIGURED correctly — secrets `TWILIO_ACCOUNT_SID` (the `AC…` Account SID, NOT
+  an API key SID), `TWILIO_AUTH_TOKEN`, `TWILIO_SMS_FROM` in Edge Function secrets; notify returns
+  channel:sms / 201. **BUT texts are NOT delivering — Twilio error 30034 (US A2P 10DLC not
+  registered).** Carriers block the messages post-accept. FIX (Luis, ~10 min, not done): register
+  A2P 10DLC in Twilio Console → Messaging → Regulatory Compliance (Sole Proprietor path). Until
+  then SMS is dead; use Atlas calls (work) + the `pending_alert` ledger. ⑤ Lunaro (`jonathan-demo`)
+  autopilot was failing every hour (missing `CLAUDE_CODE_OAUTH_TOKEN`); token added, re-enabled, green.
+
+## Update 2026-06-13 ~20:00 UTC — coordination moved to Max ($0)
+- Metered API credits ran dry overnight → ALL Supabase Haiku agents errored "credit balance too
+  low" from ~04:45. Per Luis ($0 until revenue), moved the brain to GitHub Actions on Max (see the
+  ARCHITECTURE CHANGE banner + `praxis-coordinator.yml`). Metered crons unscheduled.
+- **Coordinator first run: success, 27 → 6 flagship PRs in 13 min, $0.** The 6 held are correct:
+  #192/#155 (auth — want review), #146 (needs DB migration), #127/#128 (stale base, rebase needed).
+- `praxis-notify` is v9 (always logs a durable `pending_alert` even when SMS attempted, so nothing
+  is lost while 10DLC blocks texts). Atlas voice verified working (Vapi ≠ dead key).
+- NOT done: confirm billing w/ a real purchase; A2P 10DLC; Phase-2 coordinator for private repos;
+  fix Atlas live-call metrics (see Atlas accuracy bug).
 - **Build ~70%+ and climbing.** Big 6/12 dedupe: ~20 duplicate PRs closed across repos; merged
   auth UI (#104), e2e suite (#98), backend signup (#25), hero parallax, FAQ anim, a11y rings +
   reduced-motion. Dedupe guards deployed: dispatcher v4 `queueSync` (parks `claude-queue`→`in-flight`
