@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { captureServerEvent, hashUserId } from "@/lib/analytics/posthog";
 import {
   getStripe,
   getWebhookSecret,
@@ -124,6 +125,20 @@ async function handleEvent(
             billing_cycle_start: new Date().toISOString(),
           })
           .eq("id", accountId);
+
+        // Fire subscription_started analytics event
+        const { data: ownerAcc } = await sb
+          .from("conduit_accounts")
+          .select("owner_user_id")
+          .eq("id", accountId)
+          .maybeSingle();
+        if (ownerAcc?.owner_user_id) {
+          captureServerEvent(
+            hashUserId(ownerAcc.owner_user_id as string),
+            "subscription_started",
+            { tier: tierId },
+          ).catch(() => {});
+        }
       } else if (session.mode === "payment") {
         const tokensGranted = parseInt(
           session.metadata?.tokens_granted ?? "0",

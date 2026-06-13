@@ -4,6 +4,7 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle, ArrowRight, FileText } from "lucide-react";
 import { motion } from "framer-motion";
+import posthog from "posthog-js";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
   DEPT_COLOR,
@@ -356,6 +357,11 @@ export function Chat({
         headers: { "content-type": "application/json" },
         body: JSON.stringify(body),
       });
+
+      if (resp.ok && !localStorage.getItem("praxis.first_msg_sent")) {
+        localStorage.setItem("praxis.first_msg_sent", "1");
+        posthog.capture("first_ai_message_sent");
+      }
 
       if (!resp.ok || !resp.body) {
         setStreamingEmployee(null);

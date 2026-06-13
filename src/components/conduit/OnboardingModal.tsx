@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { PraxisLogo } from "./PraxisLogo";
+import posthog from "posthog-js";
 
 const DISMISS_KEY = "conduit_onboarding_skip_v1";
 
@@ -78,6 +79,7 @@ export function OnboardingModal({
       return;
     }
     const j = await res.json();
+    posthog.capture("onboarding_completed", { business_type: finalType.trim() });
     router.replace(j.conversation_id ? `/app?c=${j.conversation_id}` : "/app");
     router.refresh();
   }

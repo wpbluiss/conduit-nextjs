@@ -11,6 +11,8 @@ import { tierById } from "@/lib/billing/tiers";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { getInFlightBuilds } from "@/lib/engineering/in-flight";
+import { PostHogIdentify } from "@/components/conduit/PostHogIdentify";
+import { hashUserId } from "@/lib/analytics/posthog";
 
 export const dynamic = "force-dynamic";
 
@@ -72,8 +74,11 @@ export default async function AppLayout({
     user.email?.split("@")[0] ||
     "you";
 
+  const hashedUserId = hashUserId(user.id);
+
   return (
     <div className="praxis-root h-screen flex bg-[var(--color-surface)] text-[var(--color-text)]">
+      <PostHogIdentify userId={hashedUserId} />
       <ToastProvider>
       <PraxisCanvasTintProvider>
         <RouteProgress />

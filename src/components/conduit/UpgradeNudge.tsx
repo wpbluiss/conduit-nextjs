@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Sparkles, X } from "lucide-react";
+import posthog from "posthog-js";
 
 const STORAGE_KEY = "conduit_upgrade_nudge_dismissed";
 
@@ -47,7 +48,10 @@ export function UpgradeNudge({
       </span>
       <Link
         href="/app/settings"
-        onClick={close}
+        onClick={() => {
+          posthog.capture("upgrade_intent_clicked", { source: "nudge_bar" });
+          close();
+        }}
         className="ml-auto inline-flex items-center gap-1 text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
       >
         Upgrade →

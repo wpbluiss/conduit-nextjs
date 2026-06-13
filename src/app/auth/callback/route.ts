@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { captureServerEvent, hashUserId } from "@/lib/analytics/posthog";
 
 export const runtime = "nodejs";
 
@@ -16,6 +17,17 @@ export async function GET(request: Request) {
     const supabase = await createSupabaseServerClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const ageMs = Date.now() - new Date(user.created_at).getTime();
+        if (ageMs < 60_000) {
+          await captureServerEvent(hashUserId(user.id), "user_signed_up", {
+            source: rawNext.includes("pricing") ? "pricing-CTA" : "organic",
+          });
+        }
+      }
       return NextResponse.redirect(`${origin}${next}`);
     }
   }
