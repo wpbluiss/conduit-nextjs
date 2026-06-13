@@ -13,6 +13,7 @@ import {
 import { PraxisButton, SpinnerIcon } from "./PraxisButton";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
+import { useToast } from "@/context/ToastContext";
 import { ORDERED_TIERS, TOPUPS, tierById, type TierId } from "@/lib/billing/tiers";
 import { DEFAULT_EMPLOYEE_VOICES, VOICE_NAMES } from "@/lib/voice/defaults";
 import { ThemeToggle } from "./ThemeToggle";
@@ -580,17 +581,16 @@ function ProfileTab({
 
 function BusinessTab({ account }: { account: AccountData }) {
   const router = useRouter();
+  const toast = useToast();
   const [name, setName] = useState(account.name);
   const [businessType, setBusinessType] = useState(account.business_type);
   const [description, setDescription] = useState(account.business_description);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
 
   async function save() {
     setSaving(true);
     setError(null);
-    setSaved(false);
     const res = await fetch("/api/conduit/onboarding", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -606,7 +606,7 @@ function BusinessTab({ account }: { account: AccountData }) {
       setError(j.error || "Save failed.");
       return;
     }
-    setSaved(true);
+    toast.success("Settings saved.");
     router.refresh();
   }
 
@@ -644,7 +644,6 @@ function BusinessTab({ account }: { account: AccountData }) {
         />
       </div>
       {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
-      {saved && <p className="text-sm text-[var(--color-green)]">Saved.</p>}
       <button
         onClick={save}
         disabled={saving}
