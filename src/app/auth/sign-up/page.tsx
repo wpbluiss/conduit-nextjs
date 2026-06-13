@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { PraxisLogo } from "@/components/conduit/PraxisLogo";
+import { OAuthButtons, OAuthDivider } from "@/components/conduit/OAuthButtons";
 import { track } from "@/lib/analytics/track";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
@@ -149,6 +150,12 @@ export default function SignUpPage() {
           <p className="mt-3 text-sm text-[var(--color-ink-on-inverse-soft)]">
             Create your Praxis workspace
           </p>
+        </motion.div>
+
+        {/* OAuth providers */}
+        <motion.div variants={ITEM}>
+          <OAuthButtons />
+          <OAuthDivider />
         </motion.div>
 
         {/* Form card */}
