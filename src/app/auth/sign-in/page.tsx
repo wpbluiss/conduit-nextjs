@@ -68,6 +68,12 @@ function SignInForm() {
       setLoading(false);
       return;
     }
+    // Check if MFA is required (user enrolled TOTP but not yet at AAL2)
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal?.currentLevel === "aal1" && aal?.nextLevel === "aal2") {
+      router.replace(`/auth/mfa?next=${encodeURIComponent(next)}`);
+      return;
+    }
     router.replace(next);
     router.refresh();
   }

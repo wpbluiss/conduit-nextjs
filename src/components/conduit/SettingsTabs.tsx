@@ -19,6 +19,7 @@ import { ORDERED_TIERS, TOPUPS, tierById, type TierId } from "@/lib/billing/tier
 import { DEFAULT_EMPLOYEE_VOICES, VOICE_NAMES } from "@/lib/voice/defaults";
 import { ThemeToggle } from "./ThemeToggle";
 import { track } from "@/lib/analytics/track";
+import { MFASecurity } from "./MFASecurity";
 
 interface UsageData {
   totals: { input: number; output: number; cost: number };
@@ -72,7 +73,8 @@ export type SettingsTabKey =
   | "voice"
   | "team"
   | "usage"
-  | "billing";
+  | "billing"
+  | "security";
 
 export function SettingsTabs({
   email,
@@ -100,6 +102,7 @@ export function SettingsTabs({
             ["team", "Team"],
             ["usage", "Usage"],
             ["billing", "Billing"],
+            ["security", "Security"],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -137,6 +140,7 @@ export function SettingsTabs({
       {tab === "team" && <TeamTab />}
       {tab === "usage" && <UsageTab usage={usage} />}
       {tab === "billing" && <BillingTab account={account} usage={usage} />}
+      {tab === "security" && <MFASecurity />}
     </div>
   );
 }
