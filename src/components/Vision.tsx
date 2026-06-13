@@ -3,10 +3,13 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 
 export default function Vision() {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <section
       id="vision"
@@ -16,15 +19,13 @@ export default function Vision() {
       <div className="conduit-mesh-inverse" aria-hidden />
       <div className="conduit-container relative z-10">
         <motion.div
-          initial="hidden"
+          initial={shouldReduceMotion ? "show" : "hidden"}
           whileInView="show"
           viewport={{ once: true, margin: "-15%" }}
           variants={{
             hidden: {},
             show: {
-              transition: {
-                staggerChildren: 0.1,
-              },
+              transition: shouldReduceMotion ? {} : { staggerChildren: 0.1 },
             },
           }}
           className="conduit-prose"
@@ -35,7 +36,7 @@ export default function Vision() {
               show: {
                 opacity: 1,
                 y: 0,
-                transition: { duration: 0.8, ease: EASE },
+                transition: shouldReduceMotion ? {} : { duration: 0.8, ease: EASE },
               },
             }}
             className="conduit-caption conduit-caption-ember"
@@ -49,7 +50,7 @@ export default function Vision() {
               show: {
                 opacity: 1,
                 y: 0,
-                transition: { duration: 1.0, ease: EASE },
+                transition: shouldReduceMotion ? {} : { duration: 1.0, ease: EASE },
               },
             }}
             className="conduit-display-xl mt-6"
@@ -67,7 +68,7 @@ export default function Vision() {
               show: {
                 opacity: 1,
                 y: 0,
-                transition: { duration: 0.8, ease: EASE },
+                transition: shouldReduceMotion ? {} : { duration: 0.8, ease: EASE },
               },
             }}
             className="space-y-6 mt-12 text-[17px] md:text-[19px] text-[var(--color-ink-on-inverse-soft)] leading-[1.7]"
@@ -94,7 +95,7 @@ export default function Vision() {
               show: {
                 opacity: 1,
                 x: 0,
-                transition: { duration: 0.8, ease: EASE },
+                transition: shouldReduceMotion ? {} : { duration: 0.8, ease: EASE },
               },
             }}
             className="conduit-pullquote my-12 md:my-16"
@@ -108,7 +109,7 @@ export default function Vision() {
               show: {
                 opacity: 1,
                 y: 0,
-                transition: { duration: 0.8, ease: EASE },
+                transition: shouldReduceMotion ? {} : { duration: 0.8, ease: EASE },
               },
             }}
           >

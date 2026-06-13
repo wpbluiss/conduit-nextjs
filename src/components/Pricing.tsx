@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Check } from "@phosphor-icons/react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 
@@ -66,6 +67,8 @@ const TIERS: Tier[] = [
 ];
 
 export default function Pricing() {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <section
       id="pricing"
@@ -82,10 +85,10 @@ export default function Pricing() {
 
       <div className="relative conduit-container">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-15%" }}
-          transition={{ duration: 0.8, ease: EASE }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: EASE }}
           className="text-center max-w-[760px] mx-auto mb-16 md:mb-20"
         >
           <p className="conduit-caption conduit-caption-ember">Pricing</p>
@@ -103,10 +106,10 @@ export default function Pricing() {
           {TIERS.map((t, i) => (
             <motion.div
               key={t.name}
-              initial={{ opacity: 0, y: 32 }}
+              initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 32 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-10%" }}
-              transition={{ duration: 0.8, ease: EASE, delay: i * 0.08 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: EASE, delay: shouldReduceMotion ? 0 : i * 0.08 }}
               className={t.popular ? "md:-my-3 md:scale-[1.02]" : ""}
             >
               <div
@@ -172,10 +175,10 @@ export default function Pricing() {
         </div>
 
         <motion.p
-          initial={{ opacity: 0 }}
+          initial={{ opacity: shouldReduceMotion ? 1 : 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, margin: "-10%" }}
-          transition={{ duration: 0.8, ease: EASE, delay: 0.3 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: EASE, delay: shouldReduceMotion ? 0 : 0.3 }}
           className="text-center mt-14 md:mt-16 text-[14px] text-[var(--color-cream-mute)] max-w-[640px] mx-auto leading-[1.6]"
         >
           Top up tokens any time — $10 / $25 / $50 packs from the{" "}

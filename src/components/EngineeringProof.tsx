@@ -3,10 +3,13 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, GitBranch, Lightning } from "@phosphor-icons/react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 
 export default function EngineeringProof() {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <section className="relative conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)] overflow-hidden">
       {/* Subtle ember radial */}
@@ -23,10 +26,10 @@ export default function EngineeringProof() {
         <div className="grid lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] gap-12 lg:gap-16">
           {/* Left — header */}
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-15%" }}
-            transition={{ duration: 0.8, ease: EASE }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: EASE }}
             className="lg:sticky lg:top-32 lg:self-start"
           >
             <p className="conduit-caption conduit-caption-ember">
@@ -66,10 +69,10 @@ export default function EngineeringProof() {
 
           {/* Right — code preview */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.97 }}
+            initial={{ opacity: shouldReduceMotion ? 1 : 0, scale: shouldReduceMotion ? 1 : 0.97 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-10%" }}
-            transition={{ duration: 1.0, ease: EASE }}
+            transition={{ duration: shouldReduceMotion ? 0 : 1.0, ease: EASE }}
           >
             <CodeBlock />
             <p className="conduit-caption conduit-caption-ember mt-6">
