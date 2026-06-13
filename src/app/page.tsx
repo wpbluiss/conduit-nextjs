@@ -19,6 +19,9 @@ const FinalCTA = dynamic(() => import("@/components/FinalCTA"));
 const Footer = dynamic(() => import("@/components/Footer"));
 
 export const metadata: Metadata = {
+  title: "Conduit AI — Intelligence at work",
+  description:
+    "Conduit AI builds Praxis, the operating system for autonomous AI workforces. Voice, sales, engineering, ops, finance — running 24/7.",
   openGraph: {
     title: "Conduit AI — Intelligence at work",
     description:
@@ -26,7 +29,7 @@ export const metadata: Metadata = {
     url: "https://conduitai.io",
     siteName: "Conduit AI",
     type: "website",
-    images: [{ url: "/praxis-mark.png", width: 632, height: 961, alt: "Praxis" }],
+    images: [{ url: "/praxis-mark.png", width: 1200, height: 630, alt: "Praxis — AI workforce platform" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -40,9 +43,24 @@ export const metadata: Metadata = {
   },
 };
 
+const ORG_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Conduit AI",
+  url: "https://conduitai.io",
+  logo: "https://conduitai.io/praxis-mark.png",
+  sameAs: [],
+  description:
+    "Conduit AI builds Praxis, the operating system for autonomous AI workforces.",
+};
+
 export default function Home() {
   return (
     <main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_JSONLD) }}
+      />
       <AnalyticsPageView />
       <Navbar />
       <Hero />

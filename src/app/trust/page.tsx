@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     url: "https://conduitai.io/trust",
     siteName: "Conduit AI",
     type: "website",
-    images: [{ url: "/praxis-mark.png", width: 632, height: 961, alt: "Praxis" }],
+    images: [{ url: "/praxis-mark.png", width: 1200, height: 630, alt: "Praxis trust and security" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -32,6 +32,9 @@ export const metadata: Metadata = {
     description:
       "How Praxis handles your data. Encryption, retention, access, and what we promise.",
     images: ["/praxis-mark.png"],
+  },
+  alternates: {
+    canonical: "https://conduitai.io/trust",
   },
 };
 

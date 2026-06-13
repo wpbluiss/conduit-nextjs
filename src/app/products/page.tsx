@@ -9,6 +9,25 @@ export const metadata: Metadata = {
   title: "Products — The Praxis family",
   description:
     "Praxis Console (live), Praxis Mobile (TestFlight), and Praxis HQ (Q3 2026). Three surfaces, one autonomous workforce.",
+  openGraph: {
+    title: "Products — The Praxis family",
+    description:
+      "Praxis Console (live), Praxis Mobile (TestFlight), and Praxis HQ (Q3 2026). Three surfaces, one autonomous workforce.",
+    url: "https://conduitai.io/products",
+    siteName: "Conduit AI",
+    type: "website",
+    images: [{ url: "/praxis-mark.png", width: 1200, height: 630, alt: "Praxis products" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Products — The Praxis family",
+    description:
+      "Praxis Console, Praxis Mobile, and Praxis HQ. Three surfaces, one autonomous workforce.",
+    images: ["/praxis-mark.png"],
+  },
+  alternates: {
+    canonical: "https://conduitai.io/products",
+  },
 };
 
 type Status = "live" | "beta" | "soon";
