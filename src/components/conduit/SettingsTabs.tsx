@@ -892,6 +892,13 @@ function BillingTab({
     setBusy(tierId);
     setError(null);
     track("checkout_clicked", { tier_id: tierId });
+    const currentIdx = ORDERED_TIERS.findIndex((t) => t.id === tier.id);
+    const targetIdx = ORDERED_TIERS.findIndex((t) => t.id === tierId);
+    if (targetIdx > currentIdx) {
+      track("upgrade_initiated", { from_tier: tier.id, to_tier: tierId });
+    } else if (targetIdx < currentIdx) {
+      track("downgrade_clicked", { from_tier: tier.id, to_tier: tierId });
+    }
     try {
       const res = await fetch("/api/conduit/billing/checkout", {
         method: "POST",
@@ -953,6 +960,7 @@ function BillingTab({
   const openPortal = async () => {
     setBusy("portal");
     setError(null);
+    track("portal_opened", { tier_id: tier.id });
     try {
       const res = await fetch("/api/conduit/billing/portal", {
         method: "POST",

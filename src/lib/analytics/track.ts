@@ -4,7 +4,10 @@ export type AnalyticsEvent =
   | "signup_started"
   | "signup_completed"
   | "paywall_viewed"
-  | "checkout_clicked";
+  | "checkout_clicked"
+  | "upgrade_initiated"
+  | "downgrade_clicked"
+  | "portal_opened";
 
 export function track(
   event: AnalyticsEvent,

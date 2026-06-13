@@ -10,6 +10,9 @@ const ALLOWED_EVENTS = new Set([
   "signup_completed",
   "paywall_viewed",
   "checkout_clicked",
+  "upgrade_initiated",
+  "downgrade_clicked",
+  "portal_opened",
 ]);
 
 export async function POST(req: NextRequest) {
@@ -28,7 +31,7 @@ export async function POST(req: NextRequest) {
   const path = typeof body.path === "string" ? body.path.slice(0, 200) : null;
 
   // Strip any accidental PII — only allow a safe subset of property keys.
-  const SAFE_PROP_KEYS = new Set(["tier_id", "topup_id", "reason", "employee", "referrer"]);
+  const SAFE_PROP_KEYS = new Set(["tier_id", "topup_id", "from_tier", "to_tier", "reason", "employee", "referrer"]);
   const rawProps = body.properties && typeof body.properties === "object" && !Array.isArray(body.properties)
     ? body.properties as Record<string, unknown>
     : {};
