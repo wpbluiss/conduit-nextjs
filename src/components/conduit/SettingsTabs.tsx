@@ -15,6 +15,7 @@ import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
 import { ORDERED_TIERS, TOPUPS, tierById, type TierId } from "@/lib/billing/tiers";
 import { DEFAULT_EMPLOYEE_VOICES, VOICE_NAMES } from "@/lib/voice/defaults";
 import { ThemeToggle } from "./ThemeToggle";
+import { track } from "@/lib/analytics/track";
 
 interface UsageData {
   totals: { input: number; output: number; cost: number };
@@ -889,6 +890,7 @@ function BillingTab({
   const upgrade = async (tierId: TierId) => {
     setBusy(tierId);
     setError(null);
+    track("checkout_clicked", { tier_id: tierId });
     try {
       const res = await fetch("/api/conduit/billing/checkout", {
         method: "POST",
@@ -920,6 +922,7 @@ function BillingTab({
   const buyTopup = async (topupId: string) => {
     setBusy(topupId);
     setError(null);
+    track("checkout_clicked", { topup_id: topupId });
     try {
       const res = await fetch("/api/conduit/billing/checkout", {
         method: "POST",
