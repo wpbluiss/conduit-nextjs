@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Buildings, ArrowRight } from "@phosphor-icons/react";
 import Link from "next/link";
 
@@ -13,11 +13,13 @@ const CAPTIONS = [
 ];
 
 export default function Cinematic() {
+  const reduced = useReducedMotion();
+
   return (
     <section className="relative conduit-bg-canvas overflow-hidden border-y border-[var(--color-edge-subtle)]">
       {/* Top gradient line */}
       <motion.div
-        initial={{ scaleX: 0 }}
+        initial={{ scaleX: reduced ? 1 : 0 }}
         whileInView={{ scaleX: 1 }}
         viewport={{ once: true, margin: "-10%" }}
         transition={{ duration: 1.6, ease: EASE }}
@@ -32,7 +34,7 @@ export default function Cinematic() {
       <div className="relative conduit-container py-24 md:py-32">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-10%" }}
           transition={{ duration: 0.8, ease: EASE }}
@@ -52,7 +54,7 @@ export default function Cinematic() {
 
         {/* Video container with fallback */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
+          initial={reduced ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.97 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, margin: "-10%" }}
           transition={{ duration: 1.2, ease: EASE }}

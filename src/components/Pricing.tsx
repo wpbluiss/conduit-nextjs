@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Check } from "@phosphor-icons/react";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
@@ -66,6 +66,8 @@ const TIERS: Tier[] = [
 ];
 
 export default function Pricing() {
+  const reduced = useReducedMotion();
+
   return (
     <section
       id="pricing"
@@ -82,7 +84,7 @@ export default function Pricing() {
 
       <div className="relative conduit-container">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-15%" }}
           transition={{ duration: 0.8, ease: EASE }}
@@ -103,10 +105,10 @@ export default function Pricing() {
           {TIERS.map((t, i) => (
             <motion.div
               key={t.name}
-              initial={{ opacity: 0, y: 32 }}
+              initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-10%" }}
-              transition={{ duration: 0.8, ease: EASE, delay: i * 0.08 }}
+              transition={{ duration: 0.8, ease: EASE, delay: reduced ? 0 : i * 0.08 }}
               className={t.popular ? "md:-my-3 md:scale-[1.02]" : ""}
             >
               <div
@@ -172,7 +174,7 @@ export default function Pricing() {
         </div>
 
         <motion.p
-          initial={{ opacity: 0 }}
+          initial={reduced ? { opacity: 1 } : { opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, margin: "-10%" }}
           transition={{ duration: 0.8, ease: EASE, delay: 0.3 }}

@@ -1,18 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Briefcase, Quotes } from "@phosphor-icons/react";
 import { ProofBar } from "@/components/marketing/ProofBar";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 
 export default function Customers() {
+  const reduced = useReducedMotion();
+
   return (
     <section className="relative conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
       <div className="conduit-container">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-15%" }}
           transition={{ duration: 0.8, ease: EASE }}
@@ -33,7 +35,7 @@ export default function Customers() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6">
           {/* Lunaro card */}
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-10%" }}
             transition={{ duration: 0.8, ease: EASE }}
@@ -87,7 +89,7 @@ export default function Customers() {
 
           {/* Ghost cards */}
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-10%" }}
             transition={{ duration: 0.8, ease: EASE, delay: 0.1 }}
@@ -99,7 +101,7 @@ export default function Customers() {
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-10%" }}
           transition={{ duration: 0.8, ease: EASE, delay: 0.2 }}

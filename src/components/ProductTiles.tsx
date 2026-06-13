@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
@@ -255,6 +255,8 @@ function StatusBadge({ status }: { status: Status }) {
 }
 
 export default function ProductTiles() {
+  const reduced = useReducedMotion();
+
   return (
     <section
       id="products"
@@ -263,7 +265,7 @@ export default function ProductTiles() {
       <div className="conduit-container">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-15%" }}
           transition={{ duration: 0.8, ease: EASE }}
@@ -284,10 +286,10 @@ export default function ProductTiles() {
           {CARDS.map((c, i) => (
             <motion.div
               key={c.title}
-              initial={{ opacity: 0, y: 32 }}
+              initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-10%" }}
-              transition={{ duration: 0.8, ease: EASE, delay: i * 0.08 }}
+              transition={{ duration: 0.8, ease: EASE, delay: reduced ? 0 : i * 0.08 }}
             >
               <Link
                 href={c.cta.href}

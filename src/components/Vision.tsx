@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 
 export default function Vision() {
+  const reduced = useReducedMotion();
+
   return (
     <section
       id="vision"
@@ -16,7 +18,7 @@ export default function Vision() {
       <div className="conduit-mesh-inverse" aria-hidden />
       <div className="conduit-container relative z-10">
         <motion.div
-          initial="hidden"
+          initial={reduced ? "show" : "hidden"}
           whileInView="show"
           viewport={{ once: true, margin: "-15%" }}
           variants={{
