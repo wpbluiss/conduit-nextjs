@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { sendEmail } from "@/lib/email/send";
 import { welcomeEmail } from "@/lib/email/templates/welcome";
 import { passwordResetEmail } from "@/lib/email/templates/password-reset";
+import { inviteEmail } from "@/lib/email/templates/invite";
 
 export const runtime = "nodejs";
 
@@ -69,11 +70,21 @@ async function verifyHookJwt(req: Request): Promise<boolean> {
   }
 }
 
-function buildConfirmationUrl(emailData: SupabaseHookEmailData): string {
+function buildConfirmationUrl(
+  emailData: SupabaseHookEmailData,
+  type?: string,
+): string {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  const resolvedType =
+    type ??
+    (emailData.email_action_type === "recovery"
+      ? "recovery"
+      : emailData.email_action_type === "invite"
+        ? "invite"
+        : "signup");
   const params = new URLSearchParams({
     token_hash: emailData.token_hash,
-    type: emailData.email_action_type === "recovery" ? "recovery" : "signup",
+    type: resolvedType,
     redirect_to: emailData.redirect_to,
   });
   return `${supabaseUrl}/auth/v1/verify?${params.toString()}`;
@@ -98,16 +109,23 @@ export async function POST(req: Request): Promise<NextResponse> {
   }
 
   const actionType = email_data.email_action_type;
-  const confirmationUrl = buildConfirmationUrl(email_data);
 
   // Always return 200 — Supabase marks the auth event failed if we return non-2xx,
   // which would block the user. Resend errors are logged but don't break auth.
   try {
     if (actionType === "signup") {
+      const confirmationUrl = buildConfirmationUrl(email_data);
       const { subject, html } = welcomeEmail({ confirmationUrl });
       await sendEmail({ to: user.email, subject, html });
     } else if (actionType === "recovery") {
+      const confirmationUrl = buildConfirmationUrl(email_data);
       const { subject, html } = passwordResetEmail({ resetUrl: confirmationUrl });
+      await sendEmail({ to: user.email, subject, html });
+    } else if (actionType === "invite") {
+      const acceptUrl = buildConfirmationUrl(email_data);
+      const inviterName =
+        (user as { invited_by_name?: string }).invited_by_name ?? "Someone";
+      const { subject, html } = inviteEmail({ inviterName, acceptUrl });
       await sendEmail({ to: user.email, subject, html });
     } else {
       // Unhandled type — log but do not block auth.
