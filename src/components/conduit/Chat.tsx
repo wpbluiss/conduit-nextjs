@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, FileText } from "lucide-react";
+import { ArrowRight, FileText, RotateCcw } from "lucide-react";
 import { motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
@@ -37,6 +37,7 @@ export interface MessageRow {
   content: string;
   metadata?: Record<string, unknown> | null;
   pending?: boolean;
+  failed?: boolean;
   artifacts?: { id: string; title: string; type: string; preview?: string }[];
   handoffTo?: EmployeeKey;
   memories?: { id: string; kind: string; content: string; tags?: string[] }[];
@@ -163,6 +164,7 @@ export function Chat({
   const [input, setInput] = useState("");
   const [pin, setPin] = useState<PinValue>("auto");
   const [loading, setLoading] = useState(false);
+  const retryTextRef = useRef<string>("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const [drawerArtifactId, setDrawerArtifactId] = useState<string | null>(null);
   const [paywall, setPaywall] = useState<PaywallPayload | null>(null);
@@ -307,6 +309,7 @@ export function Chat({
     async (text: string, employeePin?: EmployeeKey) => {
       const trimmed = text.trim();
       if (!trimmed || loading) return;
+      retryTextRef.current = trimmed;
       setLoading(true);
       setInput("");
 
@@ -373,6 +376,7 @@ export function Chat({
           const last = next[next.length - 1];
           if (last && last.pending) {
             last.pending = false;
+            last.failed = true;
             last.content = fallback;
           }
           return next;
@@ -747,6 +751,9 @@ export function Chat({
                   ? () => playTTS(m.content, m.employee as EmployeeKey, i)
                   : undefined
               }
+              onRetry={
+                m.failed ? () => send(retryTextRef.current) : undefined
+              }
             />
           ))}
         </div>
@@ -936,12 +943,14 @@ const MessageBubble = memo(function MessageBubble({
   playing = false,
   onStopAudio,
   onReplayAudio,
+  onRetry,
 }: {
   message: MessageRow;
   onOpenArtifact: (id: string) => void;
   playing?: boolean;
   onStopAudio?: () => void;
   onReplayAudio?: () => void;
+  onRetry?: () => void;
 }) {
   if (message.role === "user") {
     return (
@@ -1087,6 +1096,28 @@ const MessageBubble = memo(function MessageBubble({
             </>
           )}
         </div>
+        {message.failed && onRetry && (
+          <button
+            type="button"
+            onClick={() => {
+              // clear the failed flag before retry so the UI resets
+              onRetry();
+            }}
+            className="mt-2 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] transition-colors"
+            style={{ color: "var(--color-text-muted)" }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLButtonElement).style.color =
+                "var(--color-text)")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLButtonElement).style.color =
+                "var(--color-text-muted)")
+            }
+          >
+            <RotateCcw size={11} />
+            Retry
+          </button>
+        )}
         {message.memories?.map((mem) => (
           <div
             key={mem.id}
