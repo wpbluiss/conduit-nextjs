@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { PraxisLogo } from "@/components/conduit/PraxisLogo";
@@ -21,23 +20,23 @@ const ITEM_STATIC = {
   show: { opacity: 1, y: 0 },
 };
 
-interface Props {
-  error: Error & { digest?: string };
-  unstable_retry: () => void;
-}
-
-export default function RootError({ error, unstable_retry }: Props) {
+export function NotFoundContent() {
   const reduced = useReducedMotion();
   const item = reduced ? ITEM_STATIC : ITEM;
 
-  useEffect(() => {
-    if (error.digest) console.error("RootError digest:", error.digest);
-  }, [error]);
-
   return (
-    <main className="conduit-bg-canvas min-h-[70vh] relative overflow-hidden flex flex-col items-center justify-center px-6 py-24 text-center">
+    <main className="conduit-bg-canvas min-h-screen relative overflow-hidden flex flex-col items-center justify-center px-6 py-16 text-center">
       <div className="conduit-mesh" aria-hidden />
       <div className="conduit-ember-radial" aria-hidden />
+      <div
+        aria-hidden
+        className="absolute left-1/2 bottom-0 -translate-x-1/2 w-[600px] h-[280px] pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse at center bottom, rgba(255,138,61,0.10) 0%, transparent 65%)",
+          filter: "blur(48px)",
+        }}
+      />
 
       <motion.div
         initial="hidden"
@@ -56,11 +55,14 @@ export default function RootError({ error, unstable_retry }: Props) {
           className="text-[11px] uppercase tracking-[0.18em] mb-4"
           style={{ color: "var(--color-ink-tertiary)" }}
         >
-          500
+          404
         </motion.p>
 
-        <motion.h1 variants={item} className="conduit-display-xl mb-4">
-          Something went wrong
+        <motion.h1
+          variants={item}
+          className="conduit-display-xl mb-4"
+        >
+          Page not found
         </motion.h1>
 
         <motion.p
@@ -68,23 +70,21 @@ export default function RootError({ error, unstable_retry }: Props) {
           className="conduit-body-base mb-10 max-w-xs"
           style={{ color: "var(--color-ink-secondary)", lineHeight: 1.6 }}
         >
-          An unexpected error occurred. Your work is safe — try again or return
-          home.
+          The page you&rsquo;re looking for doesn&rsquo;t exist or has moved.
         </motion.p>
 
         <motion.div
           variants={item}
           className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto"
         >
-          <button
-            type="button"
-            onClick={unstable_retry}
-            className="conduit-btn-primary justify-center"
-          >
-            Try again
-          </button>
-          <Link href="/" className="conduit-btn-secondary justify-center">
+          <Link href="/" className="conduit-btn-primary justify-center">
             Back to home
+          </Link>
+          <Link
+            href="/auth/sign-in"
+            className="conduit-btn-secondary justify-center"
+          >
+            Sign in
           </Link>
         </motion.div>
       </motion.div>
