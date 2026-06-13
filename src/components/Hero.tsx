@@ -19,6 +19,9 @@ export default function Hero() {
   const shouldReduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
   const consoleY = useTransform(scrollY, [0, 600], [0, -40]);
+  // Background drifts at ~83% of scroll speed (17% slower) creating depth.
+  // Extended bounds (-120px top/bottom) prevent edge gaps during parallax.
+  const bgY = useTransform(scrollY, [0, 600], [0, 100]);
 
   // Stable dust-mote positions (deterministic per seed)
   const dust = Array.from({ length: 14 }, (_, i) => {
@@ -38,8 +41,25 @@ export default function Hero() {
       id="top"
       className="relative overflow-hidden conduit-bg-canvas min-h-[100vh] pt-32 md:pt-44 pb-24"
     >
-      <div className="conduit-mesh" aria-hidden />
-      <div className="conduit-ember-radial" aria-hidden />
+      {/* Parallax background: extends 120px beyond section bounds so the
+          upward y-offset never reveals a gap. overflow-hidden on the section
+          clips the overhang. Disabled when prefers-reduced-motion is set. */}
+      <motion.div
+        aria-hidden
+        className="pointer-events-none"
+        style={{
+          position: "absolute",
+          top: "-120px",
+          left: 0,
+          right: 0,
+          bottom: "-120px",
+          y: shouldReduceMotion ? 0 : bgY,
+          zIndex: 0,
+        }}
+      >
+        <div className="conduit-mesh" />
+        <div className="conduit-ember-radial" />
+      </motion.div>
       <div
         aria-hidden
         className="absolute inset-0 pointer-events-none overflow-hidden"
