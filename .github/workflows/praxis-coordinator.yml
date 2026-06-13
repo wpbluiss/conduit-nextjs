@@ -1,0 +1,64 @@
+name: Praxis Coordinator
+
+# Self-coordination on the Max plan ($0) — replaces the metered Supabase "merger"
+# + "planner" edge functions. Runs Claude Code to review & merge safe open PRs and
+# keep the work queue stocked, so the company keeps shipping without API credits.
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: praxis-coordinator
+  cancel-in-progress: false
+
+jobs:
+  coordinate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: "--max-turns 120 --permission-mode bypassPermissions"
+          prompt: |
+            You are Praxis's autonomous COORDINATOR for wpbluiss/conduit-nextjs.
+            Founder (Luis) is away; keep the company shipping by REVIEWING and MERGING
+            the safe open PRs and keeping the queue stocked. `gh` is installed and
+            authenticated for this repo. Act only on wpbluiss/conduit-nextjs.
+
+            EACH RUN:
+            1. `gh pr list --repo wpbluiss/conduit-nextjs --state open --limit 100`
+            2. Oldest first, for each PR:
+               - Inspect: `gh pr view <n>`, `gh pr diff <n>`, `gh pr checks <n>`
+               - MERGE (squash) only if ALL of:
+                 * required checks pass (or none required AND the diff is plainly safe)
+                 * single-purpose, sound change
+                 * does NOT hit the HARD FLOOR below
+                 Use: `gh pr merge <n> --squash --delete-branch`
+               - Else leave open + a one-line review comment on what is blocking.
+            3. Close clear duplicates (same scope as another open/merged PR) with a
+               comment naming the winner. Never close something with unique scope.
+            4. If open `claude-queue` issues < 8 after merging, file new high-value
+               tasks toward the goal (world-class UI + web launch, then billing,
+               mobile). Read DESIGN.md / PRODUCT_PLAN.md / specs first. Label them
+               `claude-queue`.
+
+            HARD FLOOR — NEVER merge a PR that:
+              - deletes user/account data or rows
+              - runs destructive DB migrations (DROP / TRUNCATE / irreversible ALTER)
+              - exposes, prints, or commits secrets, keys, or tokens
+              - weakens auth, RLS, or billing without an explicit, reviewed reason
+              - touches src/**/finance/**
+            Flag those with a comment and leave them for Luis.
+
+            SAFETY: never force-push; keep merges small and reversible; prefer holding
+            over a risky merge. End with a one-paragraph summary: merged / held / queued.
