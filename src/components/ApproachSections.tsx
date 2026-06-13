@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 
@@ -15,12 +16,15 @@ export type ApproachSection = {
 function SectionBlock({
   section,
   index,
+  reduced,
 }: {
   section: ApproachSection;
   index: number;
+  reduced: boolean;
 }) {
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: "-12% 0px" });
+  const active = inView || reduced;
 
   return (
     <section
@@ -32,7 +36,7 @@ function SectionBlock({
         <motion.div
           aria-hidden
           initial={{ scaleX: 0 }}
-          animate={inView ? { scaleX: 1 } : {}}
+          animate={active ? { scaleX: 1 } : {}}
           transition={{ duration: 1.4, ease: EASE }}
           className="origin-left h-px mb-16 md:mb-20"
           style={{
@@ -45,7 +49,7 @@ function SectionBlock({
       {/* Number + heading row — staggered entrance */}
       <motion.div
         initial="hidden"
-        animate={inView ? "show" : "hidden"}
+        animate={active ? "show" : "hidden"}
         variants={{
           hidden: {},
           show: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
@@ -76,7 +80,7 @@ function SectionBlock({
       {/* Body paragraphs — each slides up in sequence */}
       <motion.div
         initial="hidden"
-        animate={inView ? "show" : "hidden"}
+        animate={active ? "show" : "hidden"}
         variants={{
           hidden: {},
           show: {
@@ -105,9 +109,9 @@ function SectionBlock({
       {/* Pull-quote — slides in from left */}
       {section.quote && (
         <motion.blockquote
-          initial={{ opacity: 0, x: -16 }}
+          initial={{ opacity: 0, x: reduced ? 0 : -16 }}
           animate={
-            inView ? { opacity: 1, x: 0 } : { opacity: 0, x: -16 }
+            active ? { opacity: 1, x: 0 } : { opacity: 0, x: reduced ? 0 : -16 }
           }
           transition={{ duration: 0.9, ease: EASE, delay: 0.48 }}
           className="conduit-pullquote my-12 md:my-14"
@@ -124,10 +128,11 @@ export function ApproachSections({
 }: {
   sections: ApproachSection[];
 }) {
+  const reduced = useReducedMotion();
   return (
     <div className="conduit-prose">
       {sections.map((s, i) => (
-        <SectionBlock key={s.n} section={s} index={i} />
+        <SectionBlock key={s.n} section={s} index={i} reduced={reduced} />
       ))}
     </div>
   );

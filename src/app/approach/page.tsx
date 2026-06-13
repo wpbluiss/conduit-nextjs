@@ -3,6 +3,8 @@ import Link from "next/link";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { PageHeader } from "@/components/marketing/PageHeader";
+import { ScrollRevealCards, ScrollRevealItem } from "@/components/marketing/ScrollRevealCards";
 import { ApproachSections } from "@/components/ApproachSections";
 import type { ApproachSection } from "@/components/ApproachSections";
 
@@ -89,26 +91,16 @@ export default function ApproachPage() {
     <main className="conduit-bg-canvas">
       <Navbar />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden conduit-hero-section">
-        <div className="conduit-mesh" aria-hidden />
-        <div className="conduit-ember-radial" aria-hidden />
-        <div className="relative conduit-container">
-          <div className="conduit-prose text-center">
-            <p className="conduit-caption conduit-caption-ember">
-              The Conduit AI approach
-            </p>
-            <h1 className="conduit-display-hero mt-6">
-              How we think about{" "}
-              <span className="conduit-ember-text">workforces.</span>
-            </h1>
-            <p className="conduit-body-lg mt-7">
-              Praxis isn&rsquo;t an AI product. It&rsquo;s a position on what
-              work looks like next.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHeader
+        caption="The Conduit AI approach"
+        title={
+          <>
+            How we think about{" "}
+            <span className="conduit-ember-text">workforces.</span>
+          </>
+        }
+        subtitle="Praxis isn't an AI product. It's a position on what work looks like next."
+      />
 
       {/* Sections — animated client component (scroll-reveal per section) */}
       <article className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
@@ -120,26 +112,32 @@ export default function ApproachPage() {
       {/* Closing CTA */}
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
-          <div className="conduit-prose text-center">
-            <h2 className="conduit-display-2xl">
-              Praxis is the operating system for that workforce.
-            </h2>
-            <p className="conduit-body-lg mt-6">
-              Free to start. The Console is the door.
-            </p>
-            <div className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
-              <Link
-                href="/auth/sign-up"
-                className="conduit-btn-primary justify-center"
-              >
-                Open Praxis Console
-                <ArrowRight size={16} weight="bold" />
-              </Link>
-              <Link href="/products" className="conduit-btn-secondary justify-center">
-                See the product family
-              </Link>
-            </div>
-          </div>
+          <ScrollRevealCards className="conduit-prose text-center">
+            <ScrollRevealItem>
+              <h2 className="conduit-display-2xl">
+                Praxis is the operating system for that workforce.
+              </h2>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <p className="conduit-body-lg mt-6">
+                Free to start. The Console is the door.
+              </p>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <div className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
+                <Link
+                  href="/auth/sign-up"
+                  className="conduit-btn-primary justify-center"
+                >
+                  Open Praxis Console
+                  <ArrowRight size={16} weight="bold" />
+                </Link>
+                <Link href="/products" className="conduit-btn-secondary justify-center">
+                  See the product family
+                </Link>
+              </div>
+            </ScrollRevealItem>
+          </ScrollRevealCards>
         </div>
       </section>
 
