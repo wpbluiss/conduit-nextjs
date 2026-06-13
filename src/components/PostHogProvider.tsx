@@ -1,31 +1,48 @@
 "use client";
 
 import posthog from "posthog-js";
-import { PostHogProvider as PHProvider } from "posthog-js/react";
-import { useEffect } from "react";
+import { PostHogProvider as PHProvider, usePostHog } from "posthog-js/react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, Suspense } from "react";
 
-function PostHogInit({ children }: { children: React.ReactNode }) {
+const KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+const HOST =
+  process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com";
+
+if (typeof window !== "undefined" && KEY) {
+  posthog.init(KEY, {
+    api_host: HOST,
+    capture_pageview: false, // manual — fired on route change below
+    capture_pageleave: true,
+    // Never send PII — only opaque UUIDs via posthog.identify()
+    person_profiles: "identified_only",
+  });
+}
+
+function PageViewTracker() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const ph = usePostHog();
+
   useEffect(() => {
-    const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-    if (!key) return;
-    posthog.init(key, {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com",
-      capture_pageview: true,
-      capture_pageleave: true,
-      // Never capture PII — only opaque IDs
-      person_profiles: "identified_only",
-    });
-  }, []);
+    if (!ph) return;
+    const url =
+      pathname +
+      (searchParams?.toString() ? `?${searchParams.toString()}` : "");
+    ph.capture("$pageview", { $current_url: url });
+  }, [pathname, searchParams, ph]);
 
-  return <>{children}</>;
+  return null;
 }
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
-  const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-  if (!key) return <>{children}</>;
+  if (!KEY) return <>{children}</>;
   return (
     <PHProvider client={posthog}>
-      <PostHogInit>{children}</PostHogInit>
+      <Suspense fallback={null}>
+        <PageViewTracker />
+      </Suspense>
+      {children}
     </PHProvider>
   );
 }

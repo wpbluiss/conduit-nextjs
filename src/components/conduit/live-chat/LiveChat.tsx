@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
+import { track } from "@/lib/analytics/track";
 import PraxisLiveRoom from "@/components/conduit/voice/PraxisLiveRoom";
 import type { VoiceTokenResponse } from "@/components/conduit/voice/VoiceRoom";
 
@@ -183,6 +184,9 @@ export function LiveChat({
   const send = React.useCallback(async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
+    if (messages.filter((m) => m.role === "user").length === 0) {
+      track("first_ai_message_sent");
+    }
     setLoading(true); setInput("");
     if (taRef.current) taRef.current.style.height = "auto";
     setMessages((p) => [...p, { role: "user", content: trimmed }, { role: "assistant", employee: pin, content: "", pending: true }]);

@@ -9,13 +9,13 @@ const ALLOWED_EVENTS = new Set([
   "page_view",
   "signup_started",
   "signup_completed",
+  "first_ai_message_sent",
   "paywall_viewed",
   "checkout_clicked",
   "upgrade_initiated",
   "upgrade_intent_clicked",
   "downgrade_clicked",
   "portal_opened",
-  "first_ai_message_sent",
   "onboarding_completed",
 ]);
 
