@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { tierById } from "@/lib/billing/tiers";
 import { EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
 import { LiveChat, type LiveMsg } from "@/components/conduit/live-chat/LiveChat";
+import { UserProvider } from "@/context/UserContext";
 
 const INITIAL_MSG_LIMIT = 50;
 
@@ -70,14 +71,18 @@ export default async function ChatPage({
   }
 
   return (
-    <LiveChat
-      firstName={firstName}
-      conversations={conversations}
-      activeConversationId={activeId}
-      initialMessages={initialMessages}
-      initialHasMore={initialHasMore}
-      allowedEmployees={allowed}
-      initialPin={(sp?.pin as EmployeeId) ?? null}
-    />
+    <UserProvider
+      initialUser={{ id: user.id, email: user.email ?? "", plan: account.tier_id }}
+    >
+      <LiveChat
+        firstName={firstName}
+        conversations={conversations}
+        activeConversationId={activeId}
+        initialMessages={initialMessages}
+        initialHasMore={initialHasMore}
+        allowedEmployees={allowed}
+        initialPin={(sp?.pin as EmployeeId) ?? null}
+      />
+    </UserProvider>
   );
 }
