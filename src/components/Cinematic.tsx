@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Buildings, ArrowRight } from "@phosphor-icons/react";
 import Link from "next/link";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 
@@ -13,14 +14,16 @@ const CAPTIONS = [
 ];
 
 export default function Cinematic() {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <section className="relative conduit-bg-canvas overflow-hidden border-y border-[var(--color-edge-subtle)]">
       {/* Top gradient line */}
       <motion.div
-        initial={{ scaleX: 0 }}
+        initial={{ scaleX: shouldReduceMotion ? 1 : 0 }}
         whileInView={{ scaleX: 1 }}
         viewport={{ once: true, margin: "-10%" }}
-        transition={{ duration: 1.6, ease: EASE }}
+        transition={{ duration: shouldReduceMotion ? 0 : 1.6, ease: EASE }}
         className="origin-left absolute top-0 left-0 right-0 h-px"
         style={{
           background:
@@ -32,10 +35,10 @@ export default function Cinematic() {
       <div className="relative conduit-container py-24 md:py-32">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-10%" }}
-          transition={{ duration: 0.8, ease: EASE }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: EASE }}
           className="text-center max-w-[820px] mx-auto mb-12 md:mb-16"
         >
           <p className="conduit-caption conduit-caption-ember">
@@ -52,10 +55,10 @@ export default function Cinematic() {
 
         {/* Video container with fallback */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
+          initial={{ opacity: shouldReduceMotion ? 1 : 0, scale: shouldReduceMotion ? 1 : 0.97 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, margin: "-10%" }}
-          transition={{ duration: 1.2, ease: EASE }}
+          transition={{ duration: shouldReduceMotion ? 0 : 1.2, ease: EASE }}
           className="relative max-w-[1100px] mx-auto"
         >
           {/* Outer ember aura */}
@@ -93,14 +96,14 @@ export default function Cinematic() {
 
         {/* Mono captions */}
         <motion.div
-          initial="hidden"
+          initial={shouldReduceMotion ? "show" : "hidden"}
           whileInView="show"
           viewport={{ once: true, margin: "-10%" }}
           variants={{
             hidden: { opacity: 0 },
             show: {
               opacity: 1,
-              transition: { staggerChildren: 0.12, delayChildren: 0.4 },
+              transition: shouldReduceMotion ? {} : { staggerChildren: 0.12, delayChildren: 0.4 },
             },
           }}
           className="mt-14 md:mt-16 grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 max-w-[1100px] mx-auto"
@@ -113,7 +116,7 @@ export default function Cinematic() {
                 show: {
                   opacity: 1,
                   y: 0,
-                  transition: { duration: 0.6, ease: EASE },
+                  transition: shouldReduceMotion ? {} : { duration: 0.6, ease: EASE },
                 },
               }}
               className="text-[13px] md:text-[14px] text-[var(--color-cream-soft)] tracking-[-0.005em] py-3 px-4 border-l border-[var(--color-edge)] bg-[var(--color-ink-surface)]/40"
@@ -126,10 +129,10 @@ export default function Cinematic() {
 
         {/* Tertiary CTA */}
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={{ opacity: shouldReduceMotion ? 1 : 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, margin: "-10%" }}
-          transition={{ duration: 0.8, ease: EASE, delay: 0.8 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: EASE, delay: shouldReduceMotion ? 0 : 0.8 }}
           className="text-center mt-12"
         >
           <Link

@@ -4,18 +4,21 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Briefcase, Quotes } from "@phosphor-icons/react";
 import { ProofBar } from "@/components/marketing/ProofBar";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 
 export default function Customers() {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <section className="relative conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
       <div className="conduit-container">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-15%" }}
-          transition={{ duration: 0.8, ease: EASE }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: EASE }}
           className="max-w-[760px] mb-14 md:mb-20"
         >
           <p className="conduit-caption conduit-caption-ember">
@@ -33,10 +36,10 @@ export default function Customers() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6">
           {/* Lunaro card */}
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-10%" }}
-            transition={{ duration: 0.8, ease: EASE }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: EASE }}
           >
             <Link
               href="/customers/lunaro"
@@ -87,10 +90,10 @@ export default function Customers() {
 
           {/* Ghost cards */}
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-10%" }}
-            transition={{ duration: 0.8, ease: EASE, delay: 0.1 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: EASE, delay: shouldReduceMotion ? 0 : 0.1 }}
             className="grid grid-rows-2 gap-5 lg:gap-6"
           >
             <GhostCard caption="Customer story · soon" />
@@ -99,10 +102,10 @@ export default function Customers() {
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-10%" }}
-          transition={{ duration: 0.8, ease: EASE, delay: 0.2 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: EASE, delay: shouldReduceMotion ? 0 : 0.2 }}
           className="mt-12 text-center"
         >
           <Link
