@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { WarningCircle } from "@phosphor-icons/react/dist/ssr";
+import { WarningCircle, Warning } from "@phosphor-icons/react/dist/ssr";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { PageHeader } from "@/components/marketing/PageHeader";
@@ -66,6 +66,19 @@ export default function TermsPage() {
   return (
     <main className="conduit-bg-canvas">
       <Navbar />
+
+      {/* DRAFT banner — remove once legal counsel has reviewed */}
+      <div
+        className="w-full py-3 px-4 flex items-center justify-center gap-3 text-[13px] font-medium"
+        style={{
+          background: "rgba(214, 120, 23, 0.12)",
+          borderBottom: "1px solid rgba(214, 120, 23, 0.3)",
+          color: "#D67817",
+        }}
+      >
+        <Warning size={16} weight="bold" />
+        DRAFT — NOT REVIEWED BY COUNSEL. Do not rely on this document for legal advice.
+      </div>
 
       <PageHeader
         caption="Legal"
