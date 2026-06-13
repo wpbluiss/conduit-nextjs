@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -14,4 +15,22 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+
+  silent: !process.env.CI,
+
+  sourcemaps: {
+    // Only upload source maps when SENTRY_AUTH_TOKEN is set (i.e. in CI/Vercel).
+    // Local builds skip upload to avoid auth errors.
+    disable: !process.env.SENTRY_AUTH_TOKEN,
+    deleteSourcemapsAfterUpload: true,
+  },
+
+  webpack: {
+    // Automatically instrument App Router server components, route handlers, etc.
+    autoInstrumentServerFunctions: true,
+    autoInstrumentAppDirectory: true,
+  },
+});
