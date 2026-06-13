@@ -89,7 +89,6 @@ function SignUpForm() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
   const [pwTouched, setPwTouched] = useState(false);
 
   const strength = checkPassword(password);
@@ -100,7 +99,6 @@ function SignUpForm() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    setInfo(null);
 
     if (strength.score < 3) {
       setError(`Password needs: ${strength.missing.join(", ")}.`);
@@ -135,8 +133,10 @@ function SignUpForm() {
       router.replace(billingDest ?? "/app/workspace");
       router.refresh();
     } else {
-      setInfo("Check your email to confirm your account. Once confirmed, you can sign in.");
-      setLoading(false);
+      // Email confirmation required — redirect to the holding page.
+      router.replace(
+        `/auth/check-your-email?email=${encodeURIComponent(email)}`,
+      );
     }
   }
 
@@ -295,16 +295,6 @@ function SignUpForm() {
                 className="text-sm text-red-400 leading-[1.5]"
               >
                 {error}
-              </motion.p>
-            )}
-
-            {info && (
-              <motion.p
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-sm text-emerald-400 leading-[1.5]"
-              >
-                {info}
               </motion.p>
             )}
 

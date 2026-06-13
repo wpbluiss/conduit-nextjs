@@ -30,6 +30,15 @@ export default async function AppLayout({
     redirect("/auth/sign-in?next=/app");
   }
   const { account, user } = current;
+
+  // Email verification guard — only active when Supabase email confirmation
+  // is enabled. If email_confirmed_at is null the user has not yet verified
+  // their email; send them to the holding page so they can resend the link.
+  if (user.email && !user.email_confirmed_at) {
+    redirect(
+      `/auth/check-your-email?email=${encodeURIComponent(user.email)}`,
+    );
+  }
   const supabase = await createSupabaseServerClient();
   const onboarded = Boolean(
     account.business_type && account.business_description,
