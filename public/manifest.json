@@ -1,0 +1,25 @@
+{
+  "name": "Praxis",
+  "short_name": "Praxis",
+  "description": "The operating system for autonomous AI workforces.",
+  "start_url": "/app/workspace",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0A0908",
+  "background_color": "#0A0908",
+  "icons": [
+    {
+      "src": "/praxis-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/praxis-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
