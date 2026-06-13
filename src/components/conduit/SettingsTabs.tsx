@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { PraxisButton, SpinnerIcon } from "./PraxisButton";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
 import { useToast } from "@/context/ToastContext";
@@ -481,6 +482,49 @@ function ToggleRow({
   );
 }
 
+/* ─── Password strength helper ───────────────────────────────────────────── */
+
+interface PwStrength { score: number; missing: string[] }
+
+function checkPasswordStrength(pw: string): PwStrength {
+  const checks = [
+    { test: pw.length >= 8, label: "8+ characters" },
+    { test: /[a-z]/.test(pw), label: "lowercase letter" },
+    { test: /[A-Z]/.test(pw), label: "uppercase letter" },
+    { test: /[0-9]/.test(pw), label: "number" },
+  ];
+  const missing = checks.filter((c) => !c.test).map((c) => c.label);
+  return { score: 4 - missing.length, missing };
+}
+
+const STRENGTH_COLORS = [
+  "",
+  "var(--color-pink)",
+  "var(--color-yellow, #f59e0b)",
+  "var(--color-green)",
+  "var(--color-green)",
+] as const;
+
+function PwMeter({ pw }: { pw: string }) {
+  if (!pw) return null;
+  const { score } = checkPasswordStrength(pw);
+  return (
+    <div className="flex gap-1 mt-2" aria-hidden>
+      {[1, 2, 3, 4].map((n) => (
+        <div
+          key={n}
+          className="h-1 flex-1 rounded-full transition-colors"
+          style={{
+            background: score >= n ? STRENGTH_COLORS[score] : "var(--color-border)",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ─── Profile tab ─────────────────────────────────────────────────────────── */
+
 function ProfileTab({
   email,
   fullName,
@@ -497,84 +541,243 @@ function ProfileTab({
   themePref: "system" | "light" | "dark";
 }) {
   const [tz, setTz] = useState(timezone);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [tzSaving, setTzSaving] = useState(false);
+  const [tzSaved, setTzSaved] = useState(false);
   const router = useRouter();
+  const toast = useToast();
 
-  const save = async (next: string) => {
+  // Email change state
+  const [newEmail, setNewEmail] = useState("");
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailError, setEmailError] = useState("");
+
+  // Password change state
+  const [currentPw, setCurrentPw] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [pwSaving, setPwSaving] = useState(false);
+  const [pwError, setPwError] = useState("");
+
+  const saveTz = async (next: string) => {
     setTz(next);
-    setSaving(true);
-    setSaved(false);
+    setTzSaving(true);
+    setTzSaved(false);
     const r = await fetch("/api/conduit/account/prefs", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ timezone: next }),
     });
-    setSaving(false);
+    setTzSaving(false);
     if (r.ok) {
-      setSaved(true);
+      setTzSaved(true);
       router.refresh();
     }
   };
 
+  const submitEmailChange = async (e: FormEvent) => {
+    e.preventDefault();
+    const trimmed = newEmail.trim();
+    if (!trimmed || trimmed === email) return;
+    setEmailSaving(true);
+    setEmailError("");
+    setEmailSent(false);
+    const supabase = createSupabaseBrowserClient();
+    const { error } = await supabase.auth.updateUser({ email: trimmed });
+    setEmailSaving(false);
+    if (error) {
+      setEmailError(error.message);
+    } else {
+      setEmailSent(true);
+      setNewEmail("");
+    }
+  };
+
+  const submitPasswordChange = async (e: FormEvent) => {
+    e.preventDefault();
+    setPwError("");
+    if (newPw !== confirmPw) { setPwError("Passwords don't match."); return; }
+    const strength = checkPasswordStrength(newPw);
+    if (strength.score < 3) {
+      setPwError(`Password needs: ${strength.missing.join(", ")}.`);
+      return;
+    }
+    setPwSaving(true);
+    const supabase = createSupabaseBrowserClient();
+    // Verify current password before updating
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password: currentPw,
+    });
+    if (authError) {
+      setPwError("Current password is incorrect.");
+      setPwSaving(false);
+      return;
+    }
+    const { error: updateError } = await supabase.auth.updateUser({ password: newPw });
+    setPwSaving(false);
+    if (updateError) {
+      setPwError(updateError.message);
+    } else {
+      setCurrentPw("");
+      setNewPw("");
+      setConfirmPw("");
+      toast.success("Password updated.");
+    }
+  };
+
   return (
-    <div className="space-y-4 text-sm">
-      <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
-          Name
-        </div>
-        <div>{fullName || "—"}</div>
-      </div>
-      <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
-          Email
-        </div>
-        <div>{email}</div>
-      </div>
-      <ThemeToggle initialPref={themePref} />
-      <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2">
-          Timezone
-        </div>
-        <select
-          value={tz}
-          onChange={(e) => save(e.target.value)}
-          className="w-full max-w-sm bg-[var(--color-surface-elevated)] hairline px-3 py-2 outline-none focus:border-[var(--color-accent)] rounded-lg"
-        >
-          {[...new Set([tz, ...COMMON_TIMEZONES])].map((z) => (
-            <option key={z} value={z}>
-              {z}
-            </option>
-          ))}
-        </select>
-        <p className="mt-1 text-[10px] text-[var(--color-text-muted)]">
-          {saving ? "Saving…" : saved ? "Saved" : "Used so the team knows what time of day it is for you."}
-        </p>
-      </div>
-      {creatorMode && (
+    <div className="space-y-8 text-sm">
+      {/* ── Account info ── */}
+      <div className="space-y-4">
         <div>
           <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
-            Mode
+            Name
           </div>
-          <span
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs"
-            style={{
-              borderColor: "var(--color-accent)",
-              color: "var(--color-accent-hi)",
-              background:
-                "color-mix(in srgb, var(--color-accent) 8%, transparent)",
-            }}
-          >
-            <span
-              aria-hidden
-              className="inline-block w-1.5 h-1.5 rounded-full"
-              style={{ background: "var(--color-accent)" }}
-            />
-            Creator Mode v{creatorModeVersion}
-            {creatorModeVersion >= 2 ? " — premium routing" : ""}
-          </span>
+          <div>{fullName || "—"}</div>
         </div>
-      )}
+        <div>
+          <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
+            Email
+          </div>
+          <div>{email}</div>
+        </div>
+        <ThemeToggle initialPref={themePref} />
+        <div>
+          <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2">
+            Timezone
+          </div>
+          <select
+            value={tz}
+            onChange={(e) => saveTz(e.target.value)}
+            className="w-full max-w-sm bg-[var(--color-surface-elevated)] hairline px-3 py-2 outline-none focus:border-[var(--color-accent)] rounded-lg"
+          >
+            {[...new Set([tz, ...COMMON_TIMEZONES])].map((z) => (
+              <option key={z} value={z}>
+                {z}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-[10px] text-[var(--color-text-muted)]">
+            {tzSaving ? "Saving…" : tzSaved ? "Saved" : "Used so the team knows what time of day it is for you."}
+          </p>
+        </div>
+        {creatorMode && (
+          <div>
+            <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
+              Mode
+            </div>
+            <span
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs"
+              style={{
+                borderColor: "var(--color-accent)",
+                color: "var(--color-accent-hi)",
+                background:
+                  "color-mix(in srgb, var(--color-accent) 8%, transparent)",
+              }}
+            >
+              <span
+                aria-hidden
+                className="inline-block w-1.5 h-1.5 rounded-full"
+                style={{ background: "var(--color-accent)" }}
+              />
+              Creator Mode v{creatorModeVersion}
+              {creatorModeVersion >= 2 ? " — premium routing" : ""}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* ── Change email ── */}
+      <div>
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+          Update email
+        </div>
+        {emailSent ? (
+          <p className="text-xs text-[var(--color-green)]">
+            Confirmation email sent to {newEmail || "your new address"} — check your inbox to confirm the change.
+          </p>
+        ) : (
+          <form onSubmit={submitEmailChange} className="space-y-3 max-w-sm">
+            <input
+              type="email"
+              placeholder="New email address"
+              value={newEmail}
+              onChange={(e) => { setNewEmail(e.target.value); setEmailError(""); }}
+              autoComplete="email"
+              required
+              className="w-full conduit-card px-4 py-2.5 outline-none focus:border-[var(--color-accent)] text-sm"
+            />
+            {emailError && (
+              <p className="text-xs text-[var(--color-pink)]">{emailError}</p>
+            )}
+            <PraxisButton
+              type="submit"
+              isLoading={emailSaving}
+              isDisabled={!newEmail.trim() || newEmail.trim() === email}
+              variant="secondary"
+              className="!text-xs"
+            >
+              Send confirmation
+            </PraxisButton>
+          </form>
+        )}
+      </div>
+
+      {/* ── Change password ── */}
+      <div>
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+          Change password
+        </div>
+        <form onSubmit={submitPasswordChange} className="space-y-3 max-w-sm">
+          <div>
+            <input
+              type="password"
+              placeholder="Current password"
+              value={currentPw}
+              onChange={(e) => { setCurrentPw(e.target.value); setPwError(""); }}
+              autoComplete="current-password"
+              required
+              className="w-full conduit-card px-4 py-2.5 outline-none focus:border-[var(--color-accent)] text-sm"
+            />
+          </div>
+          <div>
+            <input
+              type="password"
+              placeholder="New password"
+              value={newPw}
+              onChange={(e) => { setNewPw(e.target.value); setPwError(""); }}
+              autoComplete="new-password"
+              required
+              className="w-full conduit-card px-4 py-2.5 outline-none focus:border-[var(--color-accent)] text-sm"
+            />
+            <PwMeter pw={newPw} />
+          </div>
+          <div>
+            <input
+              type="password"
+              placeholder="Confirm new password"
+              value={confirmPw}
+              onChange={(e) => { setConfirmPw(e.target.value); setPwError(""); }}
+              autoComplete="new-password"
+              required
+              className="w-full conduit-card px-4 py-2.5 outline-none focus:border-[var(--color-accent)] text-sm"
+            />
+          </div>
+          {pwError && (
+            <p className="text-xs text-[var(--color-pink)]">{pwError}</p>
+          )}
+          <PraxisButton
+            type="submit"
+            isLoading={pwSaving}
+            isDisabled={!currentPw || !newPw || !confirmPw}
+            variant="secondary"
+            className="!text-xs"
+          >
+            Update password
+          </PraxisButton>
+        </form>
+      </div>
     </div>
   );
 }
