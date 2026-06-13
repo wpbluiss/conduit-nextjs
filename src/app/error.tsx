@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -27,7 +28,7 @@ export default function RootError({ error, unstable_retry, reset }: Props) {
   const reduced = useReducedMotion();
 
   useEffect(() => {
-    if (error.digest) console.error("RootError digest:", error.digest);
+    Sentry.captureException(error);
   }, [error]);
 
   return (
