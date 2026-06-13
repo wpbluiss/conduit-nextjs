@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowRight, Check, ExternalLink } from "lucide-react";
 import { ORDERED_TIERS, TOPUPS, tierById, type TierId } from "@/lib/billing/tiers";
 import { track } from "@/lib/analytics/track";
+import { PraxisButton } from "./PraxisButton";
 
 interface UsageData {
   totals: { input: number; output: number; cost: number };
@@ -169,14 +170,18 @@ export function BillingDashboard({
           </div>
         </div>
         {account.has_stripe_customer && (
-          <button
+          <PraxisButton
+            variant="secondary"
+            size="sm"
             onClick={openPortal}
-            disabled={busy !== null}
-            className="btn-secondary !text-xs disabled:opacity-50 shrink-0"
+            isLoading={busy === "portal"}
+            loadingText="Opening…"
+            isDisabled={busy !== null && busy !== "portal"}
+            className="shrink-0"
           >
-            {busy === "portal" ? "Opening…" : "Manage in Stripe"}
+            Manage in Stripe
             <ExternalLink size={12} />
-          </button>
+          </PraxisButton>
         )}
       </div>
 
@@ -255,14 +260,17 @@ export function BillingDashboard({
                   )}
                 </ul>
                 {isUpgrade && t.id !== "free" && (
-                  <button
+                  <PraxisButton
+                    size="sm"
                     onClick={() => upgrade(t.id as TierId)}
-                    disabled={busy !== null}
-                    className="mt-4 btn-primary w-full justify-center !text-xs !py-2.5 disabled:opacity-50"
+                    isLoading={busy === t.id}
+                    loadingText="Opening Stripe…"
+                    isDisabled={busy !== null && busy !== t.id}
+                    className="mt-4 w-full justify-center"
                   >
-                    {busy === t.id ? "Opening Stripe…" : `Upgrade to ${t.name}`}
+                    {`Upgrade to ${t.name}`}
                     <ArrowRight size={12} />
-                  </button>
+                  </PraxisButton>
                 )}
               </div>
             );
