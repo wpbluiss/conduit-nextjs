@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   BarChart3,
   Brain,
@@ -65,8 +66,56 @@ export function Sidebar({
   const activeId = params.get("c");
   const [open, setOpen] = useState(false);
   const [teamExpanded, setTeamExpanded] = useState(true);
+  const sidebarRef = useRef<HTMLElement>(null);
+  const openBtnRef = useRef<HTMLButtonElement>(null);
 
   const close = () => setOpen(false);
+
+  // ESC key to close on mobile
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  // Focus trap + focus management: mobile only (when drawer is open as dialog)
+  useEffect(() => {
+    // Only trap on mobile viewports where the sidebar is a modal drawer
+    if (!open || typeof window === "undefined" || window.innerWidth >= 768) return;
+    if (!sidebarRef.current) return;
+    const sidebar = sidebarRef.current;
+    const focusable = sidebar.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    );
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    first?.focus();
+    const trap = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
+      }
+    };
+    window.addEventListener("keydown", trap);
+    return () => window.removeEventListener("keydown", trap);
+  }, [open]);
+
+  // Return focus to the hamburger button when the mobile drawer closes
+  useEffect(() => {
+    if (open || typeof window === "undefined" || window.innerWidth >= 768) return;
+    openBtnRef.current?.focus();
+  }, [open]);
 
   // Streaming employee: pulsed strong + steady while a Chat is streaming.
   const [streamingEmployee, setStreamingEmployee] =
@@ -92,27 +141,42 @@ export function Sidebar({
   return (
     <>
       <button
+        ref={openBtnRef}
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Open menu"
+        aria-label="Open navigation menu"
+        aria-expanded={open}
+        aria-controls="app-sidebar"
         className="md:hidden fixed top-3 left-3 z-30 conduit-card p-2"
       >
         <Menu size={18} />
       </button>
 
-      {/* Mobile backdrop — closes the sidebar on outside tap */}
-      {open && (
-        <div
-          className="md:hidden fixed inset-0 z-30 bg-black/50"
-          aria-hidden
-          onClick={close}
-        />
-      )}
+      {/* Mobile backdrop — framer-motion fade, closes on outside tap */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            key="sidebar-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="md:hidden fixed inset-0 z-30 bg-black/60"
+            aria-hidden="true"
+            onClick={close}
+          />
+        )}
+      </AnimatePresence>
 
       <aside
-        className={`fixed md:static z-40 inset-y-0 left-0 w-64 bg-[var(--color-surface)] border-r border-[var(--color-border)] flex flex-col transform ${
+        id="app-sidebar"
+        ref={sidebarRef}
+        role="dialog"
+        aria-modal={open ? "true" : undefined}
+        aria-label="Navigation"
+        className={`fixed md:static z-40 inset-y-0 left-0 w-64 bg-[var(--color-surface)] border-r border-[var(--color-border)] flex flex-col transform transition-transform duration-200 ease-in-out ${
           open ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 transition-transform duration-200`}
+        } md:translate-x-0`}
       >
         {/* Header — Praxis wordmark + workspace name */}
         <div className="px-5 py-4 flex items-center justify-between border-b border-[var(--color-border)]">
@@ -393,7 +457,11 @@ export function Sidebar({
         </nav>
 
         {/* Bottom — settings, billing, sign out, email, tier */}
-        <div className="px-2 pt-2 pb-3 border-t border-[var(--color-border)] space-y-0.5">
+        {/* pb-safe: env(safe-area-inset-bottom) respects iOS home-bar notch */}
+        <div
+          className="px-2 pt-2 pb-3 border-t border-[var(--color-border)] space-y-0.5"
+          style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0.75rem))" }}
+        >
           <NavLink
             href="/app/settings"
             icon={<Settings size={14} />}
@@ -431,13 +499,6 @@ export function Sidebar({
         </div>
       </aside>
 
-      {open && (
-        <div
-          onClick={close}
-          className="fixed inset-0 z-30 bg-black/60 md:hidden"
-          aria-hidden
-        />
-      )}
     </>
   );
 }
