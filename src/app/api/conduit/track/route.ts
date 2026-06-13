@@ -8,6 +8,7 @@ const ALLOWED_EVENTS = new Set([
   "page_view",
   "signup_started",
   "signup_completed",
+  "first_ai_message_sent",
   "paywall_viewed",
   "checkout_clicked",
   "upgrade_initiated",
