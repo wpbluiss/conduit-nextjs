@@ -6,6 +6,7 @@ import { OnboardingModal } from "@/components/conduit/OnboardingModal";
 import { UpgradeNudge } from "@/components/conduit/UpgradeNudge";
 import { RouteProgress } from "@/components/conduit/RouteProgress";
 import { PraxisCanvasTintProvider } from "@/components/conduit/praxis/PraxisCanvasTintProvider";
+import { ToastProvider } from "@/context/ToastContext";
 import { tierById } from "@/lib/billing/tiers";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import type { EmployeeKey } from "@/lib/ai/provider";
@@ -73,6 +74,7 @@ export default async function AppLayout({
 
   return (
     <div className="praxis-root h-screen flex bg-[var(--color-surface)] text-[var(--color-text)]">
+      <ToastProvider>
       <PraxisCanvasTintProvider>
         <RouteProgress />
         <Sidebar
@@ -98,6 +100,7 @@ export default async function AppLayout({
         </main>
         {!onboarded && <OnboardingModal defaultName={userName} />}
       </PraxisCanvasTintProvider>
+      </ToastProvider>
     </div>
   );
 }
