@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { PraxisButton, SpinnerIcon } from "./PraxisButton";
+import { PraxisDangerZone } from "./PraxisDangerZone";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
 import { ORDERED_TIERS, TOPUPS, tierById, type TierId } from "@/lib/billing/tiers";
@@ -240,7 +241,28 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
 
   if (!prefs) {
     return (
-      <p className="text-sm text-[var(--color-text-muted)]">Loading…</p>
+      <div className="space-y-4 animate-pulse" aria-busy aria-live="polite">
+        <div className="conduit-card p-5 space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex items-center justify-between gap-4">
+              <div className="space-y-1.5 flex-1">
+                <div className="h-3 w-32 rounded-full bg-[var(--color-border)] opacity-60" />
+                <div className="h-2 w-48 rounded-full bg-[var(--color-border)] opacity-35" />
+              </div>
+              <div className="h-6 w-11 rounded-full bg-[var(--color-border)] opacity-40 shrink-0" />
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="conduit-card p-4 space-y-2">
+              <div className="h-3 w-20 rounded-full bg-[var(--color-border)] opacity-60" />
+              <div className="h-8 w-full rounded-lg bg-[var(--color-border)] opacity-30" />
+            </div>
+          ))}
+        </div>
+        <span className="sr-only">Loading voice settings…</span>
+      </div>
     );
   }
 
@@ -574,6 +596,7 @@ function ProfileTab({
           </span>
         </div>
       )}
+      <PraxisDangerZone />
     </div>
   );
 }
@@ -608,6 +631,7 @@ function BusinessTab({ account }: { account: AccountData }) {
     }
     setSaved(true);
     router.refresh();
+    setTimeout(() => setSaved(false), 3000);
   }
 
   return (
@@ -644,7 +668,12 @@ function BusinessTab({ account }: { account: AccountData }) {
         />
       </div>
       {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
-      {saved && <p className="text-sm text-[var(--color-green)]">Saved.</p>}
+      {saved && (
+        <p className="flex items-center gap-1.5 text-sm" style={{ color: "var(--color-green, #4ade80)" }}>
+          <Check size={14} className="shrink-0" />
+          Saved
+        </p>
+      )}
       <button
         onClick={save}
         disabled={saving}
@@ -994,8 +1023,41 @@ function BillingTab({
       ).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
     : null;
 
+  const isFreeWithNoActivity = tier.id === "free" && !account.has_stripe_customer;
+
   return (
     <div className="space-y-6 text-sm">
+      {/* Upgrade prompt for new free-tier users */}
+      {isFreeWithNoActivity && (
+        <div
+          className="conduit-card p-6"
+          style={{
+            background:
+              "linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 8%, var(--color-surface-elevated)), var(--color-surface-elevated))",
+            borderColor: "color-mix(in srgb, var(--color-accent) 25%, var(--color-border))",
+          }}
+        >
+          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
+            Upgrade your plan
+          </div>
+          <p className="serif text-2xl">Unlock your full team</p>
+          <p className="mt-2 text-[var(--color-text-muted)]">
+            Free accounts get one employee and a token cap. Upgrading gives you
+            the full nine-person team, higher token limits, and voice mode.
+          </p>
+          <PraxisButton
+            onClick={() => upgrade(ORDERED_TIERS[1]?.id as TierId ?? "pro")}
+            isLoading={busy === (ORDERED_TIERS[1]?.id ?? "pro")}
+            isDisabled={busy !== null}
+            variant="primary"
+            className="mt-5 !text-sm"
+          >
+            See plans
+            <ArrowRight size={14} />
+          </PraxisButton>
+        </div>
+      )}
+
       {/* Current plan */}
       <div className="conduit-card p-6 flex items-center justify-between gap-4">
         <div>
