@@ -6,6 +6,7 @@ import { OnboardingModal } from "@/components/conduit/OnboardingModal";
 import { UpgradeNudge } from "@/components/conduit/UpgradeNudge";
 import { RouteProgress } from "@/components/conduit/RouteProgress";
 import { PraxisCanvasTintProvider } from "@/components/conduit/praxis/PraxisCanvasTintProvider";
+import { UserProvider } from "@/context/UserContext";
 import { tierById } from "@/lib/billing/tiers";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import type { EmployeeKey } from "@/lib/ai/provider";
@@ -72,6 +73,7 @@ export default async function AppLayout({
     "you";
 
   return (
+    <UserProvider user={{ id: user.id, email: user.email ?? "", plan: account.tier_id }}>
     <div className="praxis-root h-screen flex bg-[var(--color-surface)] text-[var(--color-text)]">
       <PraxisCanvasTintProvider>
         <RouteProgress />
@@ -99,5 +101,6 @@ export default async function AppLayout({
         {!onboarded && <OnboardingModal defaultName={userName} />}
       </PraxisCanvasTintProvider>
     </div>
+    </UserProvider>
   );
 }

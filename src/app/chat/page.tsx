@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { tierById } from "@/lib/billing/tiers";
 import { EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
 import { LiveChat, type LiveMsg } from "@/components/conduit/live-chat/LiveChat";
+import { UserProvider } from "@/context/UserContext";
 
 // Wired-live chat in the new ember identity. Additive route (the existing
 // /app chat is untouched); reuses the real /api/conduit/chat SSE engine +
@@ -59,13 +60,15 @@ export default async function ChatPage({
   }
 
   return (
-    <LiveChat
-      firstName={firstName}
-      conversations={conversations}
-      activeConversationId={activeId}
-      initialMessages={initialMessages}
-      allowedEmployees={allowed}
-      initialPin={(sp?.pin as EmployeeId) ?? null}
-    />
+    <UserProvider user={{ id: account.owner_user_id, email: user.email ?? "", plan: account.tier_id }}>
+      <LiveChat
+        firstName={firstName}
+        conversations={conversations}
+        activeConversationId={activeId}
+        initialMessages={initialMessages}
+        allowedEmployees={allowed}
+        initialPin={(sp?.pin as EmployeeId) ?? null}
+      />
+    </UserProvider>
   );
 }
