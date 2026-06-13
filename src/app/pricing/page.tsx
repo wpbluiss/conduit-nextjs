@@ -160,10 +160,19 @@ export default function PricingPage() {
                   <th
                     className="text-center p-5 w-[20%] relative"
                     style={{
-                      background: "rgba(91, 99, 232,0.04)",
+                      background: "rgba(91, 99, 232, 0.08)",
                       borderRadius: "12px 12px 0 0",
                     }}
                   >
+                    {/* Top accent bar — visual anchor for the recommended column */}
+                    <div
+                      aria-hidden
+                      className="absolute top-0 left-0 right-0 h-[2px]"
+                      style={{
+                        background: "var(--color-indigo-500)",
+                        borderRadius: "12px 12px 0 0",
+                      }}
+                    />
                     <span className="conduit-caption text-[var(--color-indigo-500)]">
                       Pro
                     </span>
@@ -176,6 +185,11 @@ export default function PricingPage() {
                     >
                       $29/mo
                     </p>
+                    <div className="mt-2 flex justify-center">
+                      <span className="conduit-badge conduit-badge-popular">
+                        Most popular
+                      </span>
+                    </div>
                   </th>
                   <th className="text-center p-5 w-[27%]">
                     <span className="conduit-caption text-[var(--color-cream-mute)]">
@@ -207,7 +221,7 @@ export default function PricingPage() {
                     </td>
                     <td
                       className="p-5 text-center align-top"
-                      style={{ background: "rgba(91, 99, 232,0.04)" }}
+                      style={{ background: "rgba(91, 99, 232, 0.07)" }}
                     >
                       <CellRender value={row.values[1]} popular />
                     </td>
