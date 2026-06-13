@@ -1,5 +1,10 @@
 "use client";
 
+// Root-level layout error fallback. Replaces <html>+<body> so it CANNOT
+// import global CSS, next/font, or anything that depends on the normal
+// document structure. Inline styles only. No next/image (requires Image
+// optimization infra that may be broken when this fires).
+
 export default function GlobalError({
   reset,
 }: {
@@ -18,18 +23,27 @@ export default function GlobalError({
           justifyContent: "center",
           background: "#0A0908",
           color: "#F5F1EA",
-          fontFamily: "ui-sans-serif, system-ui, sans-serif",
+          fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif",
           textAlign: "center",
           padding: "24px",
         }}
       >
+        {/* Ember mark — inline img avoids next/image dependency */}
+        <img
+          src="/praxis-mark.png"
+          alt="Praxis"
+          width={22}
+          height={33}
+          style={{ marginBottom: "32px", opacity: 0.9 }}
+        />
+
         <p
           style={{
             fontSize: "11px",
             letterSpacing: "0.18em",
             textTransform: "uppercase",
             color: "#8C8884",
-            marginBottom: "16px",
+            marginBottom: "12px",
           }}
         >
           Something went wrong
@@ -37,9 +51,11 @@ export default function GlobalError({
         <h1
           style={{
             fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
+            fontFamily: "Georgia, 'Times New Roman', serif",
             fontWeight: 400,
             letterSpacing: "-0.02em",
             lineHeight: 1.1,
+            color: "#F5F1EA",
             marginBottom: "12px",
           }}
         >
@@ -59,14 +75,17 @@ export default function GlobalError({
         <button
           onClick={reset}
           style={{
-            background: "#FF8A3D",
-            color: "#0A0908",
+            background: "#5B63E8",
+            color: "#FFFFFF",
             border: "none",
             borderRadius: "12px",
             padding: "12px 28px",
             fontSize: "14px",
             fontWeight: 500,
             cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
           }}
         >
           Reload
