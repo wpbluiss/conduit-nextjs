@@ -39,6 +39,7 @@ interface AccountData {
   bonus_tokens?: number;
   internal_account?: boolean;
   has_stripe_customer?: boolean;
+  billing_cycle_start?: string;
   timezone?: string;
   theme_preference?: "system" | "light" | "dark" | null;
 }
@@ -977,6 +978,13 @@ function BillingTab({
 
   const allowance = tier.monthlyTokenAllowance + (account.bonus_tokens ?? 0);
 
+  const cycleResetDate = account.billing_cycle_start
+    ? new Date(
+        new Date(account.billing_cycle_start).getTime() +
+          30 * 24 * 60 * 60 * 1000,
+      ).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
+    : null;
+
   return (
     <div className="space-y-6 text-sm">
       {/* Current plan */}
@@ -999,6 +1007,11 @@ function BillingTab({
               ? ` · +${account.bonus_tokens.toLocaleString()} bonus`
               : ""}
           </div>
+          {cycleResetDate && (
+            <div className="text-[var(--color-text-muted)] text-[11px] mt-1">
+              Cycle resets {cycleResetDate}
+            </div>
+          )}
         </div>
         {account.has_stripe_customer && (
           <button
