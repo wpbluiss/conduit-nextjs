@@ -10,9 +10,11 @@ export default function Vision() {
   return (
     <section
       id="vision"
-      className="relative conduit-section conduit-bg-canvas"
+      className="relative conduit-section conduit-bg-inverse overflow-hidden"
     >
-      <div className="conduit-container">
+      <div className="conduit-ember-radial" aria-hidden />
+      <div className="conduit-mesh-inverse" aria-hidden />
+      <div className="conduit-container relative z-10">
         <motion.div
           initial="hidden"
           whileInView="show"
@@ -54,7 +56,7 @@ export default function Vision() {
           >
             The next decade doesn&rsquo;t belong to companies that hire faster.
             It belongs to{" "}
-            <span className="conduit-ember-text">
+            <span className="conduit-text-gradient-inverse">
               companies that don&rsquo;t hire at all.
             </span>
           </motion.h2>
@@ -68,7 +70,7 @@ export default function Vision() {
                 transition: { duration: 0.8, ease: EASE },
               },
             }}
-            className="space-y-6 mt-12 text-[17px] md:text-[19px] text-[var(--color-cream-soft)] leading-[1.7]"
+            className="space-y-6 mt-12 text-[17px] md:text-[19px] text-[var(--color-ink-on-inverse-soft)] leading-[1.7]"
           >
             <p>
               The default for running a business is still a payroll system, an
@@ -112,7 +114,7 @@ export default function Vision() {
           >
             <Link
               href="/approach"
-              className="inline-flex items-center gap-2 text-[15px] text-[var(--color-indigo-500)] hover:gap-3 transition-[gap] font-medium"
+              className="inline-flex items-center gap-2 text-[15px] text-[var(--color-indigo-300)] hover:gap-3 transition-[gap] font-medium"
             >
               Read the full thesis
               <ArrowRight size={14} weight="bold" />
