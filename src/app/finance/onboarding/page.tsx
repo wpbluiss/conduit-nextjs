@@ -10,9 +10,14 @@ export default async function OnboardingPage() {
   if (!user) redirect("/finance/sign-in");
   const hh = await getUserHouseholdId();
   if (hh) redirect("/finance");
+  const firstName =
+    (user.user_metadata?.full_name as string | undefined)?.split(" ")[0] ||
+    (user.user_metadata?.name as string | undefined)?.split(" ")[0] ||
+    user.email?.split("@")[0] ||
+    "there";
   return (
     <main className="min-h-screen flex items-center justify-center p-6">
-      <OnboardingFlow />
+      <OnboardingFlow firstName={firstName} />
     </main>
   );
 }

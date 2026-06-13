@@ -24,6 +24,58 @@ export async function onboardJoinHousehold(form: FormData): Promise<Result> {
   return res;
 }
 
+export async function onboardComplete(data: {
+  name: string;
+  savingsGoal: number;
+  monthlyTarget: number;
+  targetDate: string | null;
+  accountName: string | null;
+  accountBalance: number | null;
+  partnerEmail: string | null;
+}): Promise<Result> {
+  const res = await createHousehold({
+    name: data.name || "My Household",
+    savingsGoal: data.savingsGoal || 10000,
+    monthlyTarget: data.monthlyTarget || 1000,
+    targetDate: data.targetDate,
+  });
+  if (!res.ok) return res;
+
+  const supabase = await createSupabaseServerClient();
+  const householdId = res.id!;
+
+  if (data.accountName) {
+    await supabase.from("fin_accounts").insert({
+      household_id: householdId,
+      name: data.accountName,
+      type: "checking",
+      balance: data.accountBalance ?? 0,
+      owner_tag: "shared",
+    });
+  }
+
+  if (data.partnerEmail) {
+    const { data: hh } = await supabase
+      .from("fin_household")
+      .select("join_code, name")
+      .eq("id", householdId)
+      .single();
+    if (hh?.join_code) {
+      const { sendEmail } = await import("@/lib/email/send");
+      await sendEmail({
+        to: data.partnerEmail,
+        subject: `You're invited to join ${hh.name} on Cadence`,
+        html: `<p>You've been invited to share a household on Cadence.</p>
+<p>Use this code to join: <strong>${hh.join_code}</strong></p>
+<p>Go to <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.conduitai.io"}/finance/onboarding">cadence setup</a> and choose "Join a partner" to enter your code.</p>`,
+      });
+    }
+  }
+
+  refresh();
+  return { ok: true };
+}
+
 async function db() {
   await getUserHouseholdId();
   return createSupabaseServerClient();
