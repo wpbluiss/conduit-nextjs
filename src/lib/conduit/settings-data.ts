@@ -92,6 +92,7 @@ export async function loadSettingsData(
       bonus_tokens: account.bonus_tokens,
       internal_account: account.internal_account,
       has_stripe_customer: Boolean(account.stripe_customer_id),
+      billing_cycle_start: account.billing_cycle_start,
       timezone: account.timezone,
       theme_preference: account.theme_preference ?? "system",
     },
