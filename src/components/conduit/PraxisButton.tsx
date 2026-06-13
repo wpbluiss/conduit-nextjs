@@ -2,12 +2,22 @@
 
 import { type ButtonHTMLAttributes, type ReactNode } from "react";
 
+export type PraxisButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+
 interface PraxisButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   isLoading?: boolean;
+  loadingText?: string;
   isDisabled?: boolean;
-  variant?: "primary" | "secondary";
+  variant?: PraxisButtonVariant;
 }
+
+const VARIANT_CLASS: Record<PraxisButtonVariant, string> = {
+  primary: "btn-primary",
+  secondary: "btn-secondary",
+  ghost: "btn-ghost",
+  danger: "btn-danger",
+};
 
 export function SpinnerIcon({ size = 14 }: { size?: number }) {
   return (
@@ -35,6 +45,7 @@ export function SpinnerIcon({ size = 14 }: { size?: number }) {
 export function PraxisButton({
   children,
   isLoading = false,
+  loadingText,
   isDisabled = false,
   variant = "primary",
   className = "",
@@ -42,7 +53,7 @@ export function PraxisButton({
   type = "button",
   ...props
 }: PraxisButtonProps) {
-  const variantClass = variant === "primary" ? "btn-primary" : "btn-secondary";
+  const variantClass = VARIANT_CLASS[variant];
   const isActuallyDisabled = isDisabled || isLoading || disabled;
 
   return (
@@ -59,11 +70,11 @@ export function PraxisButton({
           display: "inline-flex",
           alignItems: "center",
           gap: "8px",
-          opacity: isLoading ? 0.55 : 1,
-          transition: "opacity 0.3s ease-out",
+          opacity: isLoading ? 0.65 : 1,
+          transition: "opacity 0.2s ease-out",
         }}
       >
-        {children}
+        {isLoading && loadingText ? loadingText : children}
       </span>
     </button>
   );
