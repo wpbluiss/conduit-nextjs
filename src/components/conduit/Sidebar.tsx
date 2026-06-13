@@ -388,6 +388,15 @@ export function Sidebar({
                   );
                 })}
               </div>
+              {conversations.length > 8 && (
+                <Link
+                  href="/app/conversations"
+                  onClick={close}
+                  className="mt-1 flex items-center px-3 py-1.5 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+                >
+                  See all ({conversations.length})
+                </Link>
+              )}
             </div>
           )}
         </nav>
