@@ -49,17 +49,19 @@ export type LiveMsg = {
   content: string;
   pending?: boolean;
   artifacts?: { id: string; title: string; type: string; by: EmployeeId }[];
+  created_at?: string;
 };
 type Convo = { id: string; title: string; updated_at: string };
 type OpenArt = { id: string; title: string; type: string; by: EmployeeId };
 
 export function LiveChat({
-  firstName, conversations, activeConversationId, initialMessages, allowedEmployees, initialPin,
+  firstName, conversations, activeConversationId, initialMessages, initialHasMore, allowedEmployees, initialPin,
 }: {
   firstName: string;
   conversations: Convo[];
   activeConversationId: string | null;
   initialMessages: LiveMsg[];
+  initialHasMore?: boolean;
   allowedEmployees: EmployeeId[];
   initialPin: EmployeeId | null;
 }) {
@@ -76,6 +78,9 @@ export function LiveChat({
   const [input, setInput] = React.useState("");
   const [drawer, setDrawer] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [hasOlderMessages, setHasOlderMessages] = React.useState(Boolean(initialHasMore));
+  const [loadingOlder, setLoadingOlder] = React.useState(false);
+  const skipAutoScroll = React.useRef(false);
   const [palette, setPalette] = React.useState(false);
   const [paletteQ, setPaletteQ] = React.useState("");
   const [reactions, setReactions] = React.useState<Record<string, string>>({});
@@ -98,7 +103,8 @@ export function LiveChat({
   React.useEffect(() => {
     setMessages(initialMessages);
     setConvoId(activeConversationId);
-  }, [activeConversationId, initialMessages]);
+    setHasOlderMessages(Boolean(initialHasMore));
+  }, [activeConversationId, initialMessages, initialHasMore]);
 
   const slashOpen = input.startsWith("/") && !input.includes(" ");
   const mentionMatch = input.match(/(^|\s)@(\w*)$/);
@@ -115,6 +121,10 @@ export function LiveChat({
     return () => window.removeEventListener("keydown", onKey);
   }, []);
   React.useEffect(() => {
+    if (skipAutoScroll.current) {
+      skipAutoScroll.current = false;
+      return;
+    }
     const t = setTimeout(() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }), 60);
     return () => clearTimeout(t);
   }, [messages, loading]);
@@ -136,6 +146,39 @@ export function LiveChat({
   function copyArt() { if (!artContent) return; navigator.clipboard?.writeText(artContent).catch(() => {}); setArtCopied(true); setTimeout(() => setArtCopied(false), 1400); }
   function downloadArt() { if (!openArtifact || !artContent) return; const blob = new Blob([artContent], { type: "text/plain;charset=utf-8" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `${slugify(openArtifact.title)}.${extFor(openArtifact.type)}`; a.click(); URL.revokeObjectURL(url); }
   function pdfArt() { if (!openArtifact || !artContent) return; const w = window.open("", "_blank"); if (!w) return; w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(openArtifact.title)}</title><style>body{font-family:Georgia,serif;max-width:680px;margin:48px auto;padding:0 24px;color:#111;line-height:1.6}.k{color:#888;text-transform:uppercase;letter-spacing:.14em;font-size:11px;font-family:system-ui,sans-serif}h1{font-family:system-ui,sans-serif;font-size:22px;margin:.2em 0 1em}pre{white-space:pre-wrap;font-family:inherit;margin:0}</style></head><body><div class="k">${escapeHtml(openArtifact.type)} · by ${escapeHtml(EMPLOYEES[openArtifact.by]?.name ?? "Praxis")} · Praxis</div><h1>${escapeHtml(openArtifact.title)}</h1><pre>${escapeHtml(artContent)}</pre></body></html>`); w.document.close(); w.focus(); setTimeout(() => { try { w.print(); } catch { /* ignore */ } }, 350); }
+
+  const loadOlderMessages = React.useCallback(async () => {
+    if (!convoId || loadingOlder || !hasOlderMessages) return;
+    const oldestMsg = messages.find((m) => m.created_at);
+    if (!oldestMsg?.created_at) return;
+    setLoadingOlder(true);
+    skipAutoScroll.current = true;
+    try {
+      const res = await fetch(
+        `/api/conduit/conversations/${convoId}?before=${encodeURIComponent(oldestMsg.created_at)}&limit=50`,
+      );
+      if (!res.ok) return;
+      const j = (await res.json()) as {
+        messages: Array<{ id: string; role: string; employee: string | null; content: string; created_at: string }>;
+        hasMore: boolean;
+      };
+      const older: LiveMsg[] = j.messages
+        .filter((m) => m.role === "user" || m.role === "assistant")
+        .map((m) => ({
+          id: m.id,
+          role: m.role as LiveMsg["role"],
+          employee: (m.employee as EmployeeId | null) ?? null,
+          content: m.content ?? "",
+          created_at: m.created_at,
+        }));
+      if (older.length > 0) {
+        setMessages((prev) => [...older, ...prev]);
+      }
+      setHasOlderMessages(j.hasMore);
+    } finally {
+      setLoadingOlder(false);
+    }
+  }, [convoId, loadingOlder, hasOlderMessages, messages]);
 
   const send = React.useCallback(async (text: string) => {
     const trimmed = text.trim();
@@ -306,6 +349,20 @@ export function LiveChat({
 
         <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
           <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-7">
+            {hasOlderMessages && (
+              <div className="flex justify-center">
+                <button
+                  onClick={loadOlderMessages}
+                  disabled={loadingOlder}
+                  className="flex items-center gap-2 rounded-full border border-white/10 bg-secondary/50 px-4 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-secondary disabled:opacity-50"
+                >
+                  {loadingOlder ? (
+                    <span className="animate-spin inline-block size-3 rounded-full border border-current border-t-transparent" />
+                  ) : null}
+                  {loadingOlder ? "Loading…" : "Load older messages"}
+                </button>
+              </div>
+            )}
             {messages.length === 0 && (
               <div className="flex flex-col items-center gap-4 py-16 text-center">
                 <span className="grid size-14 place-items-center rounded-2xl bg-secondary text-primary"><EmpIcon className="size-7" /></span>
