@@ -7,7 +7,8 @@ export type AnalyticsEvent =
   | "checkout_clicked"
   | "upgrade_initiated"
   | "downgrade_clicked"
-  | "portal_opened";
+  | "portal_opened"
+  | "upgrade_intent_clicked";
 
 export function track(
   event: AnalyticsEvent,

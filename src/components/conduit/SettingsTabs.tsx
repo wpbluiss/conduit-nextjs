@@ -43,6 +43,7 @@ interface AccountData {
   internal_account?: boolean;
   has_stripe_customer?: boolean;
   billing_cycle_start?: string;
+  account_created_at?: string;
   timezone?: string;
   theme_preference?: "system" | "light" | "dark" | null;
 }
@@ -1189,6 +1190,18 @@ function BillingTab({
 
   const allowance = tier.monthlyTokenAllowance + (account.bonus_tokens ?? 0);
 
+  const trialDaysLeft =
+    (account.tier_id ?? "free") === "free" && account.account_created_at
+      ? Math.max(
+          0,
+          30 -
+            Math.floor(
+              (Date.now() - new Date(account.account_created_at).getTime()) /
+                (1000 * 60 * 60 * 24),
+            ),
+        )
+      : null;
+
   const cycleResetDate = account.billing_cycle_start
     ? new Date(
         new Date(account.billing_cycle_start).getTime() +
@@ -1221,6 +1234,18 @@ function BillingTab({
           {cycleResetDate && (
             <div className="text-[var(--color-text-muted)] text-[11px] mt-1">
               Cycle resets {cycleResetDate}
+            </div>
+          )}
+          {trialDaysLeft !== null && trialDaysLeft > 0 && (
+            <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium"
+              style={{
+                background: "color-mix(in srgb, var(--color-amber) 12%, transparent)",
+                color: "var(--color-amber)",
+                border: "1px solid color-mix(in srgb, var(--color-amber) 30%, transparent)",
+              }}
+            >
+              <span aria-hidden className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-amber)" }} />
+              {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} of free period left
             </div>
           )}
         </div>

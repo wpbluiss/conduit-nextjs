@@ -78,6 +78,7 @@ export function OnboardingModal({
       return;
     }
     const j = await res.json();
+    try { localStorage.setItem("conduit_post_onboarding_nudge_v1", "1"); } catch { /* ignore */ }
     router.replace(j.conversation_id ? `/app?c=${j.conversation_id}` : "/app");
     router.refresh();
   }

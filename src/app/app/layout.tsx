@@ -14,6 +14,7 @@ import { tierById } from "@/lib/billing/tiers";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { getInFlightBuilds } from "@/lib/engineering/in-flight";
+import { PostOnboardingNudge } from "@/components/conduit/PostOnboardingNudge";
 
 export const dynamic = "force-dynamic";
 
@@ -133,6 +134,7 @@ export default async function AppLayout({
           {children}
         </main>
         {!onboarded && <OnboardingModal defaultName={userName} />}
+        <PostOnboardingNudge />
       </PraxisCanvasTintProvider>
       </ToastProvider>
       </UserProvider>
