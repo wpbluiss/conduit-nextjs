@@ -74,7 +74,7 @@ export default function Cinematic() {
             className="relative conduit-inverse aspect-[16/9] rounded-2xl overflow-hidden bg-[var(--color-ink-surface)]"
             style={{
               boxShadow:
-                "inset 0 0 0 1px rgba(214, 120, 23, 0.28), 0 0 80px rgba(214, 120, 23, 0.18), 0 32px 80px rgba(15, 17, 21, 0.16)",
+                "inset 0 0 0 1px rgba(91, 99, 232, 0.28), 0 0 80px rgba(91, 99, 232, 0.18), 0 32px 80px rgba(15, 17, 21, 0.16)",
             }}
           >
             <CinematicFallback />
