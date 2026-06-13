@@ -1,9 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle, X, Info } from "lucide-react";
+import { CheckCircle, X, Info, Sparkles } from "lucide-react";
 
-type BannerType = "checkout_success" | "checkout_canceled" | "topup_success";
+type BannerType =
+  | "checkout_success"
+  | "checkout_canceled"
+  | "topup_success"
+  | "upgrade_intent_pro"
+  | "upgrade_intent_enterprise";
 
 const MESSAGES: Record<BannerType, { icon: typeof CheckCircle; text: string; color: string }> = {
   checkout_success: {
@@ -20,6 +25,16 @@ const MESSAGES: Record<BannerType, { icon: typeof CheckCircle; text: string; col
     icon: Info,
     text: "Checkout canceled — no charge was made.",
     color: "var(--color-text-muted)",
+  },
+  upgrade_intent_pro: {
+    icon: Sparkles,
+    text: "You're one step from Pro — upgrade below to unlock 1M tokens/month, adaptive routing, and 4 employees.",
+    color: "var(--color-accent)",
+  },
+  upgrade_intent_enterprise: {
+    icon: Sparkles,
+    text: "You're one step from Enterprise — upgrade below to unlock your full AI workforce.",
+    color: "var(--color-accent)",
   },
 };
 
