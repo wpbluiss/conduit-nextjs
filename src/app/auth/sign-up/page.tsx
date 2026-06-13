@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { PraxisLogo } from "@/components/conduit/PraxisLogo";
+import { OAuthButtons } from "@/components/conduit/OAuthButtons";
 import { track } from "@/lib/analytics/track";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
@@ -161,6 +162,7 @@ export default function SignUpPage() {
               "inset 0 0 0 1px rgba(255,138,61,0.07), 0 24px 64px rgba(10,9,8,0.55)",
           }}
         >
+          <OAuthButtons redirectTo="/app/workspace" />
           <form onSubmit={onSubmit} className="space-y-5">
             <motion.div variants={ITEM}>
               <label
