@@ -136,7 +136,7 @@ export default function PricingPage() {
             </h2>
           </div>
 
-          <div className="overflow-x-auto -mx-6 md:mx-0">
+          <div className="overflow-x-auto -mx-5 sm:-mx-6 md:mx-0">
             <table className="w-full min-w-[720px]">
               <thead>
                 <tr className="border-b border-[var(--color-edge)]">
