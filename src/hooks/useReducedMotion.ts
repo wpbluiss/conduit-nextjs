@@ -11,6 +11,10 @@ function subscribe(callback: () => void): () => void {
 }
 
 function getSnapshot(): boolean {
+  // Treat missing IntersectionObserver identically to prefers-reduced-motion:
+  // without IO, whileInView elements never leave their initial hidden state in
+  // screenshot/headless contexts, so we skip the animation entirely.
+  if (!('IntersectionObserver' in window)) return true;
   return window.matchMedia(QUERY).matches;
 }
 
