@@ -1,0 +1,26 @@
+{
+  "name": "Praxis — AI Workforce",
+  "short_name": "Praxis",
+  "description": "The operating system for autonomous AI workforces. Nine specialists, one shared brain.",
+  "start_url": "/app/workspace",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0E0D0C",
+  "background_color": "#0E0D0C",
+  "icons": [
+    {
+      "src": "/praxis-mark.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/praxis-mark.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "en"
+}

@@ -43,6 +43,12 @@ export const metadata: Metadata = {
   title: "Conduit AI — Intelligence at work",
   description:
     "Conduit AI builds Praxis, the operating system for autonomous AI workforces. Voice, sales, engineering, ops, finance — running 24/7.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Praxis",
+  },
   icons: {
     icon: "/praxis-mark.png",
     apple: "/praxis-mark.png",
