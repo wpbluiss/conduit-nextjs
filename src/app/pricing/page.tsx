@@ -92,7 +92,7 @@ function CellRender({ value, popular }: { value: Cell; popular?: boolean }) {
       <Check
         size={18}
         weight="bold"
-        color={popular ? "#5B63E8" : "#9DD8B1"}
+        color={popular ? "#5B63E8" : "#16A34A"}
       />
     );
   }
