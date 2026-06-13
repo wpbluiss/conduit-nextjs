@@ -1463,3 +1463,8 @@ body {
   z-index: -1;
 }
 .conduit-indigo-bloom:hover::after { opacity: 1; }
+
+@keyframes voiceRecordPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
