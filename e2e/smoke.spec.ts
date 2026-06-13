@@ -56,6 +56,14 @@ test.describe("Public page smoke tests", () => {
       ).toBeVisible();
     });
   });
+
+  test("sign-up page renders with email input", async ({ page }) => {
+    await smokeCheck(page, "/auth/sign-up", async (p) => {
+      await expect(
+        p.locator("input[type='email'], input[name='email']").first(),
+      ).toBeVisible();
+    });
+  });
 });
 
 test.describe("API health checks", () => {
