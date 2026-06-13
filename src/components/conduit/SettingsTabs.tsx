@@ -500,6 +500,7 @@ function ProfileTab({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const router = useRouter();
+  const toast = useToast();
 
   const save = async (next: string) => {
     setTz(next);
@@ -575,7 +576,158 @@ function ProfileTab({
           </span>
         </div>
       )}
+
+      <div className="pt-2 border-t border-[var(--color-border)]">
+        <EmailChangeForm currentEmail={email} onSuccess={() => toast.success("Confirmation email sent — check your inbox.")} />
+      </div>
+
+      <div className="pt-2 border-t border-[var(--color-border)]">
+        <PasswordChangeForm onSuccess={() => toast.success("Password updated.")} />
+      </div>
     </div>
+  );
+}
+
+function EmailChangeForm({ currentEmail, onSuccess }: { currentEmail: string; onSuccess: () => void }) {
+  const [newEmail, setNewEmail] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newEmail || newEmail === currentEmail) return;
+    setSaving(true);
+    setError(null);
+    const { createSupabaseBrowserClient } = await import("@/lib/supabase/browser");
+    const supabase = createSupabaseBrowserClient();
+    const { error: err } = await supabase.auth.updateUser({ email: newEmail });
+    setSaving(false);
+    if (err) { setError(err.message); return; }
+    setSent(true);
+    setNewEmail("");
+    onSuccess();
+  }
+
+  return (
+    <form onSubmit={submit} className="space-y-3">
+      <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2">
+        Change email
+      </div>
+      {sent ? (
+        <p className="text-sm text-[var(--color-text-muted)]">
+          Confirmation sent to your new address. Current email stays active until confirmed.
+        </p>
+      ) : (
+        <>
+          <input
+            type="email"
+            value={newEmail}
+            onChange={(e) => setNewEmail(e.target.value)}
+            placeholder={currentEmail}
+            className="w-full max-w-sm conduit-card px-4 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
+          />
+          {error && <p className="text-xs text-[var(--color-pink)]">{error}</p>}
+          <button
+            type="submit"
+            disabled={saving || !newEmail || newEmail === currentEmail}
+            className="btn-secondary text-sm disabled:opacity-40"
+          >
+            {saving ? "Sending…" : "Send confirmation"}
+          </button>
+        </>
+      )}
+    </form>
+  );
+}
+
+function PasswordChangeForm({ onSuccess }: { onSuccess: () => void }) {
+  const [current, setCurrent] = useState("");
+  const [next, setNext] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const strong = next.length >= 8 && /[A-Z]/.test(next) && /[0-9]/.test(next);
+  const match = next === confirm;
+
+  function strength(): { label: string; color: string; width: string } {
+    if (!next) return { label: "", color: "transparent", width: "0%" };
+    const score = (next.length >= 8 ? 1 : 0) + (/[A-Z]/.test(next) ? 1 : 0) + (/[0-9]/.test(next) ? 1 : 0) + (/[^A-Za-z0-9]/.test(next) ? 1 : 0);
+    if (score <= 1) return { label: "Weak", color: "#F87171", width: "25%" };
+    if (score === 2) return { label: "Fair", color: "#FBBF24", width: "50%" };
+    if (score === 3) return { label: "Good", color: "#34D399", width: "75%" };
+    return { label: "Strong", color: "#10B981", width: "100%" };
+  }
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!strong || !match) return;
+    setSaving(true);
+    setError(null);
+    const { createSupabaseBrowserClient } = await import("@/lib/supabase/browser");
+    const supabase = createSupabaseBrowserClient();
+    // Re-auth to verify current password before changing.
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) { setError("Session error — please reload."); setSaving(false); return; }
+    const { error: reAuthErr } = await supabase.auth.signInWithPassword({ email: user.email, password: current });
+    if (reAuthErr) { setError("Current password is incorrect."); setSaving(false); return; }
+    const { error: err } = await supabase.auth.updateUser({ password: next });
+    setSaving(false);
+    if (err) { setError(err.message); return; }
+    setCurrent(""); setNext(""); setConfirm("");
+    onSuccess();
+  }
+
+  const { label: sLabel, color: sColor, width: sWidth } = strength();
+
+  return (
+    <form onSubmit={submit} className="space-y-3">
+      <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2">
+        Change password
+      </div>
+      <input
+        type="password"
+        value={current}
+        onChange={(e) => setCurrent(e.target.value)}
+        placeholder="Current password"
+        autoComplete="current-password"
+        className="w-full max-w-sm conduit-card px-4 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
+      />
+      <input
+        type="password"
+        value={next}
+        onChange={(e) => setNext(e.target.value)}
+        placeholder="New password"
+        autoComplete="new-password"
+        className="w-full max-w-sm conduit-card px-4 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
+      />
+      {next && (
+        <div className="max-w-sm">
+          <div className="h-1 rounded-full bg-[var(--color-border)] overflow-hidden">
+            <div className="h-full rounded-full transition-all duration-300" style={{ width: sWidth, background: sColor }} />
+          </div>
+          <p className="text-[10px] mt-1" style={{ color: sColor }}>{sLabel}</p>
+        </div>
+      )}
+      <input
+        type="password"
+        value={confirm}
+        onChange={(e) => setConfirm(e.target.value)}
+        placeholder="Confirm new password"
+        autoComplete="new-password"
+        className="w-full max-w-sm conduit-card px-4 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
+      />
+      {confirm && !match && <p className="text-xs text-[var(--color-pink)]">Passwords don&apos;t match.</p>}
+      {error && <p className="text-xs text-[var(--color-pink)]">{error}</p>}
+      <button
+        type="submit"
+        disabled={saving || !current || !strong || !match}
+        className="btn-secondary text-sm disabled:opacity-40"
+      >
+        {saving ? "Updating…" : "Update password"}
+      </button>
+    </form>
   );
 }
 
