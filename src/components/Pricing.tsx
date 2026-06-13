@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Check } from "@phosphor-icons/react";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
+const HOVER_TRANSITION = { duration: 0.2, ease: EASE };
 
 type Tier = {
   name: string;
@@ -107,6 +108,9 @@ export default function Pricing() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-10%" }}
               transition={{ duration: 0.8, ease: EASE, delay: i * 0.08 }}
+              whileHover={{ y: -4, boxShadow: t.popular ? "0 16px 48px rgba(91,99,232,0.28)" : "0 10px 36px rgba(91,99,232,0.12)", transition: HOVER_TRANSITION }}
+              whileTap={{ scale: 0.99, transition: HOVER_TRANSITION }}
+              style={{ originX: 0.5, originY: 0 }}
               className={t.popular ? "md:-my-3 md:scale-[1.02]" : ""}
             >
               <div

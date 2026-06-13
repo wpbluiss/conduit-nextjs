@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import { AnalyticsPageView } from "@/components/conduit/AnalyticsPageView";
+import { MarketingMotionProvider } from "@/components/MarketingMotionProvider";
 
 // Code-split below-fold sections so the browser doesn't parse their JS
 // before the LCP element (Hero) is painted. Each section is still
@@ -42,18 +43,20 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <main>
-      <AnalyticsPageView />
-      <Navbar />
-      <Hero />
-      <ProductTiles />
-      <Cinematic />
-      <Vision />
-      <Customers />
-      <EngineeringProof />
-      <Pricing />
-      <FinalCTA />
-      <Footer />
-    </main>
+    <MarketingMotionProvider>
+      <main>
+        <AnalyticsPageView />
+        <Navbar />
+        <Hero />
+        <ProductTiles />
+        <Cinematic />
+        <Vision />
+        <Customers />
+        <EngineeringProof />
+        <Pricing />
+        <FinalCTA />
+        <Footer />
+      </main>
+    </MarketingMotionProvider>
   );
 }

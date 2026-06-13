@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
+const HOVER_TRANSITION = { duration: 0.2, ease: EASE };
+const MotionLink = motion(Link);
 
 type Status = "live" | "beta" | "soon";
 
@@ -289,9 +291,12 @@ export default function ProductTiles() {
               viewport={{ once: true, margin: "-10%" }}
               transition={{ duration: 0.8, ease: EASE, delay: i * 0.08 }}
             >
-              <Link
+              <MotionLink
                 href={c.cta.href}
                 className="conduit-card group block p-7 md:p-8 h-full min-h-[480px] flex flex-col"
+                whileHover={{ y: -4, boxShadow: "0 12px 40px rgba(91,99,232,0.18)" }}
+                whileTap={{ scale: 0.985 }}
+                transition={HOVER_TRANSITION}
               >
                 <div className="flex items-start justify-between mb-8">
                   <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)] group-hover:border-[rgba(91, 99, 232,0.35)] transition-colors">
@@ -316,7 +321,7 @@ export default function ProductTiles() {
                   {c.cta.label}
                   <ArrowRight size={14} weight="bold" />
                 </div>
-              </Link>
+              </MotionLink>
             </motion.div>
           ))}
         </div>
