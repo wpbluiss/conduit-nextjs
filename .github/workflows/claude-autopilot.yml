@@ -16,6 +16,12 @@ on:
     - cron: "25 */6 * * *"   # backstop only; the Supabase dispatcher drives this repo every 15 min
   workflow_dispatch: {}     # manual trigger + dispatcher target
 
+# Only one builder at a time — prevents two concurrent runs picking the same
+# top issues and producing duplicate PRs. Queued runs wait, they don't cancel.
+concurrency:
+  group: praxis-autopilot
+  cancel-in-progress: false
+
 jobs:
   autopilot:
     runs-on: ubuntu-latest
@@ -33,10 +39,15 @@ jobs:
             Founder (Luis) is away from his computer; you carry the build. Follow these
             rules EXACTLY — they are what make autonomous work safe:
 
-            1. SCOPE — Work through the top 8 highest-priority OPEN issues labeled
-               "claude-queue", EACH on its own branch + its own PR. Fully finish and
-               open the PR for one before starting the next. If fewer than 3 exist, do
-               what's there; if none, exit immediately without changes.
+            1. SCOPE & DEDUP — First run `gh pr list --state open --limit 100`. Then look
+               at the top OPEN issues labeled "claude-queue". SKIP any issue that already
+               has an open PR referencing it (e.g. "Closes #N" / "#N" in a PR title or
+               body) — NEVER rebuild work that is already in flight; that is the #1 cause
+               of wasted duplicate PRs. From the issues that have NO open PR, take up to
+               the top 6, EACH on its own branch + its own PR. The MOMENT you choose an
+               issue, post a one-line comment on it ("🤖 building now") so any parallel
+               run sees it's claimed and skips it. Fully finish and open the PR for one
+               before starting the next. If none are unclaimed, exit immediately.
 
             2. PREMORTEM — Before writing any code, post a brief comment on the issue:
                "How could this break the live app, leak secrets, cost money, or weaken
