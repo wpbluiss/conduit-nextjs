@@ -21,8 +21,24 @@ export default function GlobalError({
           fontFamily: "ui-sans-serif, system-ui, sans-serif",
           textAlign: "center",
           padding: "24px",
+          /* Soft ember gradient to maintain brand identity without image assets */
+          backgroundImage:
+            "radial-gradient(ellipse 60% 40% at 50% 100%, rgba(255,138,61,0.12), transparent 70%)",
         }}
       >
+        {/* Wordmark — inline text since next/image is unavailable at this level */}
+        <p
+          style={{
+            fontSize: "15px",
+            fontWeight: 600,
+            letterSpacing: "0.01em",
+            color: "#FF8A3D",
+            marginBottom: "32px",
+          }}
+        >
+          Praxis
+        </p>
+
         <p
           style={{
             fontSize: "11px",
@@ -34,6 +50,7 @@ export default function GlobalError({
         >
           Something went wrong
         </p>
+
         <h1
           style={{
             fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
@@ -45,6 +62,7 @@ export default function GlobalError({
         >
           Unexpected error
         </h1>
+
         <p
           style={{
             fontSize: "14px",
@@ -54,8 +72,10 @@ export default function GlobalError({
             marginBottom: "32px",
           }}
         >
-          An unexpected error occurred. Reload to try again — your work is safe.
+          An unexpected error occurred. Reload to try again — your work is
+          safe.
         </p>
+
         <button
           onClick={reset}
           style={{

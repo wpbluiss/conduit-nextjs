@@ -1,11 +1,21 @@
 "use client";
 
-// Root-level error boundary for the marketing site. Next.js 16 mounts this
-// when any page outside /app throws during render. Keeps the header/footer
-// layout visible and gives the visitor a path back to the homepage.
-
 import { useEffect } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { PraxisLogo } from "@/components/conduit/PraxisLogo";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+
+const EASE = [0.25, 1, 0.5, 1] as const;
+
+const CONTAINER = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
+};
+const ITEM = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } },
+};
 
 interface Props {
   error: Error & { digest?: string };
@@ -15,73 +25,83 @@ interface Props {
 
 export default function RootError({ error, unstable_retry, reset }: Props) {
   const retry = unstable_retry ?? reset;
+  const reduced = useReducedMotion();
+  const variants = reduced ? undefined : ITEM;
 
   useEffect(() => {
     if (error.digest) console.error("RootError digest:", error.digest);
   }, [error]);
 
   return (
-    <main className="min-h-[60vh] flex items-center justify-center px-6 py-24 text-center">
-      <div className="max-w-md">
-        <p
-          style={{
-            fontSize: "0.625rem",
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            color: "var(--color-text-muted, #888)",
-            marginBottom: "1rem",
-          }}
+    <main className="conduit-bg-inverse min-h-screen relative overflow-hidden flex flex-col items-center justify-center px-6 py-16 text-center">
+      <div className="conduit-mesh" aria-hidden />
+      <div className="conduit-ember-radial" aria-hidden />
+
+      <motion.div
+        initial={reduced ? false : "hidden"}
+        animate="show"
+        variants={reduced ? undefined : CONTAINER}
+        className="relative z-10 max-w-sm w-full"
+      >
+        <motion.div variants={variants} className="mb-8 flex justify-center">
+          <PraxisLogo size={36} glow />
+        </motion.div>
+
+        <motion.p
+          variants={variants}
+          className="text-[11px] uppercase tracking-[0.18em] mb-4"
+          style={{ color: "var(--color-ink-on-inverse-soft)" }}
         >
           500
-        </p>
-        <h1
+        </motion.p>
+
+        <motion.h1
+          variants={variants}
           style={{
-            fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
-            fontWeight: 600,
-            lineHeight: 1.15,
-            color: "var(--color-text, #fff)",
+            fontFamily: "var(--font-serif)",
+            fontWeight: 400,
+            fontSize: "clamp(1.75rem, 5vw, 2.5rem)",
+            letterSpacing: "-0.02em",
+            lineHeight: 1.1,
+            color: "var(--color-ink-on-inverse)",
             marginBottom: "1rem",
           }}
         >
           Something went wrong
-        </h1>
-        <p
-          style={{
-            color: "var(--color-text-muted, #888)",
-            marginBottom: "2rem",
-            lineHeight: 1.6,
-          }}
+        </motion.h1>
+
+        <motion.p
+          variants={variants}
+          className="conduit-body-md mb-10"
+          style={{ color: "var(--color-ink-on-inverse-soft)" }}
         >
           An unexpected error occurred. Please try again or return to the
           homepage.
-        </p>
-        <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", flexWrap: "wrap" }}>
+        </motion.p>
+
+        <motion.div
+          variants={variants}
+          className="flex flex-col sm:flex-row items-center justify-center gap-3"
+        >
           {retry && (
             <button
               type="button"
               onClick={retry}
-              className="btn-primary"
+              className="conduit-btn-primary justify-center"
+              style={{ padding: "12px 24px", fontSize: "14px" }}
             >
               Try again
             </button>
           )}
           <Link
             href="/"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              padding: "0.5rem 1rem",
-              borderRadius: "0.375rem",
-              border: "1px solid var(--color-border, #333)",
-              fontSize: "0.875rem",
-              color: "var(--color-text, #fff)",
-              textDecoration: "none",
-            }}
+            className="text-sm transition-colors"
+            style={{ color: "var(--color-ink-on-inverse-soft)" }}
           >
-            Back to homepage
+            Back to home →
           </Link>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </main>
   );
 }
