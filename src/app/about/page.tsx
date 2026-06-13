@@ -40,16 +40,31 @@ const APPROACH = [
     Icon: Wrench,
     title: "Specialist over generalist",
     body: "Each employee is purpose-built with a real domain. Sales has pipelines. Engineering has builds. Marketing has its own briefs. Generality is a recipe for shallowness.",
+    iconColor: "#5B63E8",
+    iconBg: "rgba(91,99,232,0.10)",
+    iconBorder: "rgba(91,99,232,0.24)",
+    iconGlow: "rgba(91,99,232,0.18)",
+    radial: "radial-gradient(ellipse 80% 70% at 0% 0%, rgba(91,99,232,0.08) 0%, transparent 70%)",
   },
   {
     Icon: Brain,
     title: "Memory over context",
     body: "Atlas remembers what was said three weeks ago — across conversations, across employees. The compounding effect of memory is what separates a workforce from a chat product.",
+    iconColor: "#A855F7",
+    iconBg: "rgba(168,85,247,0.10)",
+    iconBorder: "rgba(168,85,247,0.24)",
+    iconGlow: "rgba(168,85,247,0.18)",
+    radial: "radial-gradient(ellipse 80% 70% at 0% 0%, rgba(168,85,247,0.08) 0%, transparent 70%)",
   },
   {
     Icon: Lightning,
     title: "Execution over advice",
     body: "Praxis ships work, not summaries of work that should be done. Engineering deploys, Sales touches the lead, Marketing publishes the draft. Output is the only thing that matters.",
+    iconColor: "#D67817",
+    iconBg: "rgba(214,120,23,0.10)",
+    iconBorder: "rgba(214,120,23,0.24)",
+    iconGlow: "rgba(214,120,23,0.18)",
+    radial: "radial-gradient(ellipse 80% 70% at 0% 0%, rgba(214,120,23,0.08) 0%, transparent 70%)",
   },
 ];
 
@@ -119,17 +134,30 @@ export default function AboutPage() {
           <ScrollRevealCards className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {APPROACH.map((a) => (
               <ScrollRevealItem key={a.title}>
-                <div className="conduit-card p-7 md:p-8 h-full">
-                  <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)] mb-6">
-                    <a.Icon size={22} weight="regular" color="#5B63E8" />
+                <div className="conduit-card relative overflow-hidden p-7 md:p-8 h-full">
+                  {/* Per-principle corner radial accent */}
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ background: a.radial }}
+                  />
+                  <div
+                    className="relative w-12 h-12 flex items-center justify-center rounded-xl mb-6"
+                    style={{
+                      background: a.iconBg,
+                      border: `1px solid ${a.iconBorder}`,
+                      boxShadow: `0 0 16px ${a.iconGlow}`,
+                    }}
+                  >
+                    <a.Icon size={22} weight="duotone" color={a.iconColor} />
                   </div>
                   <h3
-                    className="text-[22px] leading-[1.15] tracking-[-0.015em] text-[var(--color-cream)]"
+                    className="relative text-[22px] leading-[1.15] tracking-[-0.015em] text-[var(--color-cream)]"
                     style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
                   >
                     {a.title}
                   </h3>
-                  <p className="text-[14px] mt-3 text-[var(--color-cream-soft)] leading-[1.65]">
+                  <p className="relative text-[14px] mt-3 text-[var(--color-cream-soft)] leading-[1.65]">
                     {a.body}
                   </p>
                 </div>
