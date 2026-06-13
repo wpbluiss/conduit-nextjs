@@ -17,6 +17,7 @@ import { ORDERED_TIERS, TOPUPS, tierById, type TierId } from "@/lib/billing/tier
 import { DEFAULT_EMPLOYEE_VOICES, VOICE_NAMES } from "@/lib/voice/defaults";
 import { ThemeToggle } from "./ThemeToggle";
 import { track } from "@/lib/analytics/track";
+import { PraxisDangerZone } from "./PraxisDangerZone";
 
 interface UsageData {
   totals: { input: number; output: number; cost: number };
@@ -547,7 +548,7 @@ function ProfileTab({
           ))}
         </select>
         <p className="mt-1 text-[10px] text-[var(--color-text-muted)]">
-          {saving ? "Saving…" : saved ? "Saved" : "Used so the team knows what time of day it is for you."}
+          {saving ? "Saving…" : saved ? "Saved ✓" : "Used so the team knows what time of day it is for you."}
         </p>
       </div>
       {creatorMode && (
@@ -574,6 +575,7 @@ function ProfileTab({
           </span>
         </div>
       )}
+      <PraxisDangerZone />
     </div>
   );
 }
