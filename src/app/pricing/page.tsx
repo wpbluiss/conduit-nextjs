@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     url: "https://conduitai.io/pricing",
     siteName: "Conduit AI",
     type: "website",
-    images: [{ url: "/praxis-mark.png", width: 632, height: 961, alt: "Praxis" }],
+    images: [{ url: "/praxis-mark.png", width: 1200, height: 630, alt: "Praxis pricing" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -31,6 +31,9 @@ export const metadata: Metadata = {
     description:
       "Free, Pro $29/mo, Enterprise $199/mo. Praxis Flow on every tier; Praxis Depth on Enterprise.",
     images: ["/praxis-mark.png"],
+  },
+  alternates: {
+    canonical: "https://conduitai.io/pricing",
   },
 };
 

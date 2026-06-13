@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     url: "https://conduitai.io/about",
     siteName: "Conduit AI",
     type: "website",
-    images: [{ url: "/praxis-mark.png", width: 632, height: 961, alt: "Praxis" }],
+    images: [{ url: "/praxis-mark.png", width: 1200, height: 630, alt: "Conduit AI — About" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -32,6 +32,9 @@ export const metadata: Metadata = {
     description:
       "Conduit AI is the company. Praxis is the product. Building the OS for businesses that won't be staffed.",
     images: ["/praxis-mark.png"],
+  },
+  alternates: {
+    canonical: "https://conduitai.io/about",
   },
 };
 
