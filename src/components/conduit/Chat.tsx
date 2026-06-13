@@ -22,6 +22,7 @@ import {
 } from "./praxis/PraxisComposerPill";
 import { composeChatEmptyCopy, timeOfDayBucket } from "@/lib/conduit/welcome-copy";
 import type { EmployeeId } from "@/lib/conduit/employees";
+import { track } from "@/lib/analytics/track";
 
 export interface VoicePrefs {
   enabled: boolean;
@@ -164,6 +165,7 @@ export function Chat({
   const [pin, setPin] = useState<PinValue>("auto");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const firstMessageTracked = useRef(false);
   const [drawerArtifactId, setDrawerArtifactId] = useState<string | null>(null);
   const [paywall, setPaywall] = useState<PaywallPayload | null>(null);
   const [streamingEmployee, setStreamingEmployee] =
@@ -346,6 +348,11 @@ export function Chat({
               },
             ] as MessageRow[])),
       ]);
+
+      if (!firstMessageTracked.current) {
+        firstMessageTracked.current = true;
+        track("first_ai_message_sent");
+      }
 
       const body: Record<string, unknown> = { message: trimmed };
       if (conversationId) body.conversation_id = conversationId;
