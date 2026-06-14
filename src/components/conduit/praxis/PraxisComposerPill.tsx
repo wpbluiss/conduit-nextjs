@@ -227,7 +227,8 @@ export function PraxisComposerPill({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
+          // Enter (no shift) OR Cmd/Ctrl+Enter → submit
+          if (e.key === "Enter" && (!e.shiftKey || e.metaKey || e.ctrlKey)) {
             e.preventDefault();
             onSubmit();
           }

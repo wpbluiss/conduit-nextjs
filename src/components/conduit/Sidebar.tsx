@@ -157,6 +157,13 @@ export function Sidebar({
     openBtnRef.current?.focus();
   }, [open]);
 
+  // Keyboard shortcut: Cmd/Ctrl+Shift+S → toggle sidebar collapsed state
+  useEffect(() => {
+    const onToggle = () => toggleCollapsed();
+    window.addEventListener("praxis:sidebar:toggle", onToggle);
+    return () => window.removeEventListener("praxis:sidebar:toggle", onToggle);
+  }, []);
+
   // Streaming employee: pulsed strong + steady while a Chat is streaming.
   const [streamingEmployee, setStreamingEmployee] =
     useState<EmployeeKey | null>(null);
