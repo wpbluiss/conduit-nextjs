@@ -74,12 +74,12 @@ export default function Cinematic() {
             }}
           />
 
-          {/* Frame — ember-glow ring */}
+          {/* Frame — indigo-glow ring */}
           <div
             className="relative conduit-inverse aspect-[16/9] rounded-2xl overflow-hidden bg-[var(--color-ink-surface)]"
             style={{
               boxShadow:
-                "inset 0 0 0 1px rgba(214, 120, 23, 0.28), 0 0 80px rgba(214, 120, 23, 0.18), 0 32px 80px rgba(15, 17, 21, 0.16)",
+                "inset 0 0 0 1px rgba(91, 99, 232, 0.28), 0 0 80px rgba(91, 99, 232, 0.18), 0 32px 80px rgba(15, 17, 21, 0.16)",
             }}
           >
             <CinematicDemo />
@@ -90,7 +90,7 @@ export default function Cinematic() {
               className="absolute inset-0 pointer-events-none"
               style={{
                 background:
-                  "radial-gradient(ellipse 50% 50% at 90% 10%, rgba(214, 120, 23, 0.10) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 10% 90%, rgba(91, 99, 232, 0.08) 0%, transparent 60%)",
+                  "radial-gradient(ellipse 50% 50% at 90% 10%, rgba(91, 99, 232, 0.10) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 10% 90%, rgba(91, 99, 232, 0.08) 0%, transparent 60%)",
               }}
             />
           </div>

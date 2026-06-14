@@ -270,7 +270,7 @@ function SignUpForm() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="First Last"
-                    className="w-full rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-ember-500)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)] placeholder:text-[var(--color-ink-on-inverse-mute)]"
+                    className="w-full rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-indigo-500)] focus:shadow-[0_0_0_3px_rgba(91,99,232,0.12)] placeholder:text-[var(--color-ink-on-inverse-mute)]"
                   />
                 </div>
 
@@ -289,7 +289,7 @@ function SignUpForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@company.com"
-                    className="w-full rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-ember-500)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)] placeholder:text-[var(--color-ink-on-inverse-mute)]"
+                    className="w-full rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-indigo-500)] focus:shadow-[0_0_0_3px_rgba(91,99,232,0.12)] placeholder:text-[var(--color-ink-on-inverse-mute)]"
                   />
                 </div>
 
@@ -309,7 +309,7 @@ function SignUpForm() {
                     onChange={(e) => setPassword(e.target.value)}
                     onFocus={() => setPwTouched(true)}
                     placeholder="Min. 8 characters"
-                    className="w-full rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-ember-500)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)]"
+                    className="w-full rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-indigo-500)] focus:shadow-[0_0_0_3px_rgba(91,99,232,0.12)]"
                   />
 
                   <AnimatePresence>
@@ -448,7 +448,7 @@ function SignUpForm() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="First Last"
-                    className="w-full rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-ember-500)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)] placeholder:text-[var(--color-ink-on-inverse-mute)]"
+                    className="w-full rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-indigo-500)] focus:shadow-[0_0_0_3px_rgba(91,99,232,0.12)] placeholder:text-[var(--color-ink-on-inverse-mute)]"
                   />
                 </div>
                 <div>
@@ -466,7 +466,7 @@ function SignUpForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@company.com"
-                    className="w-full rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-ember-500)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)] placeholder:text-[var(--color-ink-on-inverse-mute)]"
+                    className="w-full rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] text-[15px] outline-none transition-all duration-200 focus:border-[var(--color-indigo-500)] focus:shadow-[0_0_0_3px_rgba(91,99,232,0.12)] placeholder:text-[var(--color-ink-on-inverse-mute)]"
                   />
                 </div>
 
