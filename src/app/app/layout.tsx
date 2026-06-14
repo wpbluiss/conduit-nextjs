@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentAccount } from "@/lib/conduit/account";
 import { Sidebar } from "@/components/conduit/Sidebar";
@@ -100,6 +101,9 @@ export default async function AppLayout({
     plan: account.tier_id,
   };
 
+  const cookieStore = await cookies();
+  const sidebarCollapsed = cookieStore.get("sidebar_collapsed")?.value === "true";
+
   return (
     <div className="praxis-root h-screen flex bg-[var(--color-surface)] text-[var(--color-text)]">
       <UserProvider initialUser={initialUser}>
@@ -119,6 +123,7 @@ export default async function AppLayout({
           }
           accountId={account.id}
           inFlightBuildsInitial={inFlightBuildsInitial}
+          initialCollapsed={sidebarCollapsed}
         />
         <main className="conduit-canvas praxis-canvas-tint flex-1 flex flex-col min-w-0 pt-12 md:pt-0">
           <UpgradeNudge
