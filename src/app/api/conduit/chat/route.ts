@@ -54,6 +54,12 @@ import {
   renderSlackBlock,
 } from "@/lib/connectors/slack";
 import {
+  getHubSpotToken,
+  getRecentContacts,
+  getOpenDeals,
+  renderHubSpotBlock,
+} from "@/lib/connectors/hubspot";
+import {
   prepareChatTts,
   streamForEmployee,
   type ChatTtsConfig,
@@ -249,6 +255,21 @@ export async function POST(request: NextRequest) {
       slackBlock = renderSlackBlock(msgs, channelName);
     } catch {
       // Non-fatal: continue without Slack context.
+    }
+  }
+
+  // Load HubSpot CRM context for Sales specialist when connected.
+  let hubspotBlock = "";
+  const hubspotToken = await getHubSpotToken(supabase, account.id);
+  if (hubspotToken) {
+    try {
+      const [contacts, deals] = await Promise.all([
+        getRecentContacts(supabase, hubspotToken, 10),
+        getOpenDeals(supabase, hubspotToken, 5),
+      ]);
+      hubspotBlock = renderHubSpotBlock(contacts, deals);
+    } catch {
+      // Non-fatal: continue without HubSpot context.
     }
   }
 
@@ -590,8 +611,10 @@ export async function POST(request: NextRequest) {
         // their-scope only.
         // R-561: prepend Google Calendar block for ops + Atlas when connected.
         // R-542: prepend Slack block for all employees when a channel is selected.
+        // #589: prepend HubSpot CRM block for Sales specialist when connected.
         const calendarPrefix = calendarEmployees.has(employee) ? calendarBlock : "";
-        const systemPrompt = slackBlock + calendarPrefix + memoryBlockFor(employee) + withTime;
+        const hubspotPrefix = employee === "sales" ? hubspotBlock : "";
+        const systemPrompt = slackBlock + calendarPrefix + hubspotPrefix + memoryBlockFor(employee) + withTime;
 
         let fullText = "";
         let inputTokens = 0;
