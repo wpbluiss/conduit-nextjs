@@ -112,3 +112,22 @@ export function employeeLabel(employee: EmployeeKey): string {
 export function employeeRole(employee: EmployeeKey): string {
   return EMPLOYEES[employee].role;
 }
+
+/** Pill-shaped chip: dept-tinted icon + name. Use above/beside assistant messages. */
+export function SpecialistChip({ employee }: { employee: EmployeeKey }) {
+  const m = EMPLOYEES[employee];
+  const Icon = EMPLOYEE_ICON[employee];
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium"
+      style={{
+        background: m.colorSoft,
+        color: m.color,
+        border: `1px solid color-mix(in srgb, ${m.color} 28%, transparent)`,
+      }}
+    >
+      <Icon size={10} strokeWidth={2.5} aria-hidden />
+      {m.name}
+    </span>
+  );
+}

@@ -1,7 +1,6 @@
 "use client";
 
-import { EmployeeAvatar } from "./EmployeeBadge";
-import { DEPT_COLOR } from "./EmployeeBadge";
+import { EmployeeAvatar, DEPT_COLOR, SpecialistChip, employeeLabel } from "./EmployeeBadge";
 import type { EmployeeKey } from "@/lib/ai/provider";
 
 export function TypingIndicator({ employee }: { employee: EmployeeKey }) {
@@ -13,11 +12,12 @@ export function TypingIndicator({ employee }: { employee: EmployeeKey }) {
       <div className="pt-1 shrink-0">
         <EmployeeAvatar employee={employee} size={32} active />
       </div>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 space-y-1">
+        <SpecialistChip employee={employee} />
         <div
           role="status"
           aria-live="polite"
-          aria-label="Praxis is responding"
+          aria-label={`${employeeLabel(employee)} is responding`}
           className="conduit-bubble-assistant inline-flex items-center gap-1 px-4 py-3"
         >
           <span className="typing-dot" aria-hidden="true" />

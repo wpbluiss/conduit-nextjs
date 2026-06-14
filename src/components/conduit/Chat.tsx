@@ -10,6 +10,7 @@ import {
   DEPT_COLOR_SOFT,
   EmployeeAvatar,
   employeeLabel,
+  SpecialistChip,
 } from "./EmployeeBadge";
 import { PaywallModal, type PaywallPayload } from "./PaywallModal";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
@@ -1495,12 +1496,7 @@ const MessageBubble = memo(function MessageBubble({
       </div>
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <span
-            className="text-[12px] font-medium"
-            style={{ color: DEPT_COLOR[employee] }}
-          >
-            {employeeLabel(employee)}
-          </span>
+          <SpecialistChip employee={employee} />
           {message.handoffFrom && (
             <motion.span
               initial={{ opacity: 0, x: -6 }}
