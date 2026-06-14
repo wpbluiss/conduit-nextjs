@@ -16,7 +16,12 @@ import { MemoryCanvas } from "@/components/conduit/memory/MemoryCanvas";
 
 export const dynamic = "force-dynamic";
 
-export default async function MemoryPage() {
+interface PageProps {
+  searchParams: Promise<{ q?: string; dept?: string; kind?: string }>;
+}
+
+export default async function MemoryPage({ searchParams }: PageProps) {
+  const params = await searchParams;
   const current = await getCurrentAccount();
   if (!current) redirect("/auth/sign-in?next=/app/memory");
   const { account } = current;
@@ -58,5 +63,13 @@ export default async function MemoryPage() {
       }) as MemoryRecord,
   );
 
-  return <MemoryCanvas initial={initial} cap={cap} />;
+  return (
+    <MemoryCanvas
+      initial={initial}
+      cap={cap}
+      initialQ={params.q ?? ""}
+      initialDept={params.dept ?? "all"}
+      initialKinds={(params.kind ?? "").split(",").filter(Boolean)}
+    />
+  );
 }
