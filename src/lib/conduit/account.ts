@@ -35,6 +35,9 @@ export interface ConduitAccount {
   // Hydrated only after migration 021 runs; falls back to 'system' for
   // older rows that don't have the column yet.
   theme_preference?: "system" | "light" | "dark" | null;
+  // Profile avatar URL — set via the avatar upload endpoint.
+  // Nullable until migration 031 runs + user uploads a photo.
+  avatar_url?: string | null;
   // R20 notification prefs — nullable until migration 030 runs.
   notification_prefs?: { product_updates?: boolean; weekly_digest?: boolean } | null;
   created_at: string;

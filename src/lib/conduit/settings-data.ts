@@ -96,6 +96,7 @@ export async function loadSettingsData(
       account_created_at: account.created_at,
       timezone: account.timezone,
       theme_preference: account.theme_preference ?? "system",
+      avatar_url: account.avatar_url ?? null,
     },
     usage: {
       totals,

@@ -129,6 +129,7 @@ export default async function AppLayout({
         <Sidebar
           userEmail={user.email ?? ""}
           accountName={account.name}
+          avatarUrl={account.avatar_url ?? null}
           conversations={convos ?? []}
           team={team}
           allowedEmployees={allowedEmployees}

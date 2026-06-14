@@ -46,6 +46,7 @@ const TEAM: EmployeeKey[] = EMPLOYEE_ORDER as EmployeeKey[];
 export function Sidebar({
   userEmail,
   accountName,
+  avatarUrl,
   conversations,
   team,
   allowedEmployees,
@@ -55,6 +56,7 @@ export function Sidebar({
 }: {
   userEmail: string;
   accountName: string;
+  avatarUrl?: string | null;
   conversations: ConvoSummary[];
   team: TeamActivity[];
   allowedEmployees: EmployeeKey[];
@@ -515,8 +517,29 @@ export function Sidebar({
               <LogOut size={14} /> Sign out
             </button>
           </form>
-          <div className="px-3 pt-2 text-[10px] text-[var(--color-text-muted)] truncate">
-            {userEmail}
+          <div className="px-3 pt-2 flex items-center gap-2 min-w-0">
+            {avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={avatarUrl}
+                alt=""
+                width={20}
+                height={20}
+                className="w-5 h-5 rounded-full object-cover shrink-0"
+              />
+            ) : (
+              <span
+                aria-hidden
+                className="inline-flex items-center justify-center w-5 h-5 rounded-full shrink-0 text-[9px] font-semibold"
+                style={{
+                  background: "color-mix(in srgb, var(--color-accent) 15%, var(--color-surface-elevated))",
+                  color: "var(--color-accent-hi, var(--color-accent))",
+                }}
+              >
+                {userEmail.charAt(0).toUpperCase()}
+              </span>
+            )}
+            <span className="text-[10px] text-[var(--color-text-muted)] truncate">{userEmail}</span>
           </div>
           <div className="px-3 text-[10px] text-[var(--color-text-muted)]">
             Praxis Flow{tierName ? ` · ${tierName}` : ""}

@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
     timezone?: string;
     notify_voice_room_ready?: boolean;
     theme_preference?: "system" | "light" | "dark";
+    display_name?: string;
   };
   try {
     body = await request.json();
@@ -46,6 +47,12 @@ export async function POST(request: NextRequest) {
     body.theme_preference === "dark"
   ) {
     update.theme_preference = body.theme_preference;
+  }
+  if (typeof body.display_name === "string") {
+    const name = body.display_name.trim();
+    if (name.length > 0 && name.length <= 100) {
+      update.name = name;
+    }
   }
 
   if (Object.keys(update).length === 0) {
