@@ -2034,6 +2034,117 @@ function MessageFeedbackButtons({
   );
 }
 
+function MessageHandoffButton({
+  messageId,
+  conversationId,
+  sourceEmployee,
+}: {
+  messageId: string;
+  conversationId: string;
+  sourceEmployee: EmployeeKey;
+}) {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+  const router = useRouter();
+  const toast = useToast();
+  const { labelFor } = useNicknames();
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside.
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  const handoff = async (targetEmployee: EmployeeKey) => {
+    setOpen(false);
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/conduit/messages/${messageId}/handoff`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetEmployee }),
+      });
+      if (!res.ok) {
+        toast.error("Handoff failed. Please try again.");
+        return;
+      }
+      const { newConversationId } = (await res.json()) as { newConversationId: string };
+      setDone(true);
+      toast.success(`Handed off to ${labelFor(targetEmployee)}.`);
+      router.push(`/app?c=${newConversationId}&pin=${targetEmployee}`);
+    } catch {
+      toast.error("Handoff failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (done) return null;
+
+  const targets = EMPLOYEE_ORDER.filter((e) => e !== sourceEmployee) as EmployeeKey[];
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        aria-label="Hand off to another specialist"
+        title="Hand off to another specialist"
+        disabled={loading}
+        onClick={() => setOpen((o) => !o)}
+        className="p-1 rounded transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
+        style={{ color: "var(--color-text-muted)" }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
+      >
+        <Share2 size={13} />
+      </button>
+      {open && (
+        <div
+          className="absolute left-0 top-full mt-1 z-20 rounded-xl shadow-xl py-1 min-w-[170px]"
+          style={{
+            background: "var(--color-surface-elevated)",
+            border: "1px solid var(--color-border)",
+          }}
+        >
+          <p className="px-3 py-1.5 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+            Hand off to…
+          </p>
+          {targets.map((emp) => (
+            <button
+              key={emp}
+              onClick={() => handoff(emp)}
+              className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 transition-colors"
+              style={{ color: "var(--color-text)" }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "color-mix(in srgb, var(--color-accent) 8%, transparent)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "transparent";
+              }}
+            >
+              <span
+                className="w-5 h-5 rounded-full shrink-0 flex items-center justify-center text-[8px] font-bold uppercase"
+                style={{ background: DEPT_COLOR[emp], color: "#fff" }}
+              >
+                {labelFor(emp).slice(0, 2)}
+              </span>
+              {labelFor(emp)}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const MessageBubble = memo(function MessageBubble({
   message,
   onOpenArtifact,
@@ -2416,6 +2527,13 @@ const MessageBubble = memo(function MessageBubble({
                 specialist={message.employee}
                 conversationId={conversationId ?? undefined}
                 suggestedTitle=""
+              />
+            )}
+            {message.id && message.employee && conversationId && !message.metadata?.handoff && (
+              <MessageHandoffButton
+                messageId={message.id}
+                conversationId={conversationId}
+                sourceEmployee={message.employee as EmployeeKey}
               />
             )}
           </div>
