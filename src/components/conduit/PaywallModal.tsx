@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Sparkles, X } from "lucide-react";
 import { TIERS, TOPUPS, type TierId } from "@/lib/billing/tiers";
@@ -33,10 +33,51 @@ export function PaywallModal({
     payload.reason === "cap_reached",
   );
   const [error, setError] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<Element | null>(null);
 
   useEffect(() => {
     track("paywall_viewed", { reason: payload.reason });
   }, [payload.reason]);
+
+  // Capture the element that had focus before the modal opened, so we can
+  // restore it when the modal closes.
+  useEffect(() => {
+    triggerRef.current = document.activeElement;
+    return () => {
+      (triggerRef.current as HTMLElement | null)?.focus();
+    };
+  }, []);
+
+  // ESC to close + focus trap.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { onClose(); return; }
+      if (e.key !== "Tab") return;
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      const focusable = Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    // Move focus into the modal on open.
+    const first = dialogRef.current?.querySelector<HTMLElement>(
+      'button:not([disabled]), a[href], input',
+    );
+    first?.focus();
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
   const upgrade = async (tierId: TierId) => {
     track("checkout_clicked", { tier_id: tierId, reason: payload.reason });
@@ -106,8 +147,8 @@ export function PaywallModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/70">
-      <div className="w-full max-w-xl conduit-card p-6 md:p-8 relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/70" aria-modal="true" role="dialog" aria-labelledby="paywall-title">
+      <div ref={dialogRef} className="w-full max-w-xl conduit-card p-6 md:p-8 relative">
         <button
           onClick={onClose}
           aria-label="Close"
@@ -125,7 +166,7 @@ export function PaywallModal({
               : "Premium routing"}
         </div>
 
-        <h2 className="serif text-2xl md:text-3xl leading-tight mb-3">
+        <h2 id="paywall-title" className="serif text-2xl md:text-3xl leading-tight mb-3">
           {payload.message}
         </h2>
 
