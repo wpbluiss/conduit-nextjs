@@ -10,26 +10,37 @@ interface ShortcutGroup {
   shortcuts: { keys: string[]; label: string }[];
 }
 
-const SHORTCUT_GROUPS: ShortcutGroup[] = [
-  {
-    title: "Navigation",
-    shortcuts: [
-      { keys: ["N"], label: "New chat" },
-      { keys: ["G", "C"], label: "Go to Conversations" },
-      { keys: ["G", "S"], label: "Go to Settings" },
-      { keys: ["G", "M"], label: "Go to Memory" },
-      { keys: ["G", "B"], label: "Go to Builds" },
-    ],
-  },
-  {
-    title: "General",
-    shortcuts: [
-      { keys: ["⌘K"], label: "Open command palette" },
-      { keys: ["?"], label: "Open keyboard shortcuts" },
-      { keys: ["Esc"], label: "Close overlay / sidebar" },
-    ],
-  },
-];
+function buildShortcutGroups(isMac: boolean): ShortcutGroup[] {
+  const mod = isMac ? "⌘" : "Ctrl";
+  return [
+    {
+      title: "Navigation",
+      shortcuts: [
+        { keys: ["N"], label: "New chat" },
+        { keys: ["G", "C"], label: "Go to Conversations" },
+        { keys: ["G", "S"], label: "Go to Settings" },
+        { keys: ["G", "M"], label: "Go to Memory" },
+        { keys: ["G", "B"], label: "Go to Builds" },
+        { keys: ["/"], label: "Focus conversation search" },
+      ],
+    },
+    {
+      title: "Chat",
+      shortcuts: [
+        { keys: [`${mod}↵`], label: "Send message" },
+      ],
+    },
+    {
+      title: "General",
+      shortcuts: [
+        { keys: [`${mod}K`], label: "Open command palette" },
+        { keys: [`${mod}⇧S`], label: "Toggle sidebar" },
+        { keys: ["?"], label: "Open keyboard shortcuts" },
+        { keys: ["Esc"], label: "Close overlay / sidebar" },
+      ],
+    },
+  ];
+}
 
 function isInputFocused(): boolean {
   const el = document.activeElement;
@@ -42,14 +53,26 @@ function isInputFocused(): boolean {
 
 export function KeyboardShortcutsOverlay() {
   const [open, setOpen] = useState(false);
+  const [isMac, setIsMac] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    setIsMac(navigator.platform.toUpperCase().startsWith("MAC"));
+  }, []);
 
   useEffect(() => {
     let gPressed = false;
     let gTimer: ReturnType<typeof setTimeout> | null = null;
 
     const onKey = (e: KeyboardEvent) => {
-      // Skip if any modifier key is held
+      // Cmd/Ctrl+Shift+S → toggle sidebar (checked before modifier-skip)
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === "s" || e.key === "S")) {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent("praxis:sidebar:toggle"));
+        return;
+      }
+
+      // Skip remaining shortcuts if any modifier key is held
       if (e.ctrlKey || e.metaKey || e.altKey) return;
 
       // Skip if focus is inside an input
@@ -65,6 +88,20 @@ export function KeyboardShortcutsOverlay() {
       // Esc → close overlay
       if (e.key === "Escape" && open) {
         setOpen(false);
+        return;
+      }
+
+      // / → focus conversation search (or navigate to conversations)
+      if (e.key === "/" && !open) {
+        e.preventDefault();
+        const searchInput = document.querySelector<HTMLInputElement>(
+          'input[aria-label="Search conversations"]',
+        );
+        if (searchInput) {
+          searchInput.focus();
+        } else {
+          router.push("/app/conversations");
+        }
         return;
       }
 
@@ -112,6 +149,8 @@ export function KeyboardShortcutsOverlay() {
       if (gTimer) clearTimeout(gTimer);
     };
   }, [open, router]);
+
+  const groups = buildShortcutGroups(isMac);
 
   return (
     <AnimatePresence>
@@ -163,7 +202,7 @@ export function KeyboardShortcutsOverlay() {
 
               {/* Groups */}
               <div className="px-5 py-4 space-y-5 max-h-[60vh] overflow-y-auto">
-                {SHORTCUT_GROUPS.map((group) => (
+                {groups.map((group) => (
                   <div key={group.title}>
                     <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
                       {group.title}
