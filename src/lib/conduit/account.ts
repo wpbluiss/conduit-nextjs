@@ -42,6 +42,9 @@ export interface ConduitAccount {
   // R22 profile — nullable until migration 033 runs.
   display_name?: string | null;
   avatar_url?: string | null;
+  // R461 onboarding goals — nullable until migration 038 runs.
+  onboarding_goals?: string[] | null;
+  onboarding_complete?: boolean;
   created_at: string;
   updated_at: string;
 }

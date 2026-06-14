@@ -231,6 +231,7 @@ export async function POST(request: NextRequest) {
         ]
       : tierById(account.tier_id).allowedEmployees,
     tier_id: account.tier_id,
+    onboarding_goals: account.onboarding_goals ?? null,
   };
 
   const employeeOverride = body.employee_override;

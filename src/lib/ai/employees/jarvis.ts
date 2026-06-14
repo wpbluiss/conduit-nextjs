@@ -14,6 +14,8 @@ export interface AccountContext {
   allowed_employees?: string[];
   /** Tier id for messaging when an employee isn't available. */
   tier_id?: string;
+  /** Top goals the owner selected during onboarding (up to 3). */
+  onboarding_goals?: string[] | null;
 }
 
 export function atlasSystemPrompt(ctx: AccountContext): string {
@@ -47,7 +49,12 @@ export function atlasSystemPrompt(ctx: AccountContext): string {
     ? `\n\nTier awareness — this account currently has access to: ${allowed.join(", ")}. The following employees are NOT yet on this account's plan: ${lockedList}. If a request would best be handled by a locked employee, do NOT emit a [HANDOFF] to them. Handle it yourself with your best thinking and add a single sentence like "${lockedList.split(", ")[0]} would normally take this — they're available on a higher plan." Don't paywall-shame; just mention it once and answer.`
     : "";
 
-  return withTone(`You are Atlas, ${ctx.user_name}'s Chief of Staff at their company ${ctx.account_name}. The user runs a ${ctx.business_type} business: ${ctx.business_description}.
+  const goalsLine =
+    ctx.onboarding_goals && ctx.onboarding_goals.length > 0
+      ? `\nOwner's stated goals: ${ctx.onboarding_goals.join(", ")}.`
+      : "";
+
+  return withTone(`You are Atlas, ${ctx.user_name}'s Chief of Staff at their company ${ctx.account_name}. The user runs a ${ctx.business_type} business: ${ctx.business_description}.${goalsLine}
 
 Your job:
 1. Greet the user warmly. Be conversational, sharp, occasionally funny — like a brilliant COO who's been with the user for years.
