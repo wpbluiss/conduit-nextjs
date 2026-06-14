@@ -129,12 +129,12 @@ function SectionBlock({
           ))}
         </motion.div>
 
-        {/* Pull-quote — slides in from left */}
+        {/* Pull-quote — fades + slides in from left */}
         {section.quote && (
           <motion.blockquote
-            initial={{ opacity: 1, x: reduced ? 0 : -16 }}
+            initial={{ opacity: 0, x: reduced ? 0 : -16 }}
             animate={
-              active ? { opacity: 1, x: 0 } : { opacity: 1, x: reduced ? 0 : -16 }
+              active ? { opacity: 1, x: 0 } : { opacity: 0, x: reduced ? 0 : -16 }
             }
             transition={{ duration: 0.9, ease: EASE, delay: 0.48 }}
             className="conduit-pullquote my-12 md:my-14"

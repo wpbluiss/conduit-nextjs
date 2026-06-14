@@ -141,12 +141,14 @@ export default function AboutPage() {
       {/* Approach */}
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
-          <div className="max-w-[760px] mb-14 md:mb-16">
-            <p className="conduit-caption conduit-caption-ember">Approach</p>
-            <h2 className="conduit-display-2xl mt-5">
-              Three principles we won&rsquo;t bend on.
-            </h2>
-          </div>
+          <ScrollRevealCards margin="25%" className="max-w-[760px] mb-14 md:mb-16">
+            <ScrollRevealItem>
+              <p className="conduit-caption conduit-caption-ember">Approach</p>
+              <h2 className="conduit-display-2xl mt-5">
+                Three principles we won&rsquo;t bend on.
+              </h2>
+            </ScrollRevealItem>
+          </ScrollRevealCards>
 
           <ScrollRevealCards margin="30%" className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {APPROACH.map((a) => (
@@ -197,12 +199,14 @@ export default function AboutPage() {
       {/* Customers */}
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
-          <div className="max-w-[760px] mb-14 md:mb-16">
-            <p className="conduit-caption conduit-caption-ember">Customers</p>
-            <h2 className="conduit-display-2xl mt-5">
-              Currently running on Praxis.
-            </h2>
-          </div>
+          <ScrollRevealCards margin="25%" className="max-w-[760px] mb-14 md:mb-16">
+            <ScrollRevealItem>
+              <p className="conduit-caption conduit-caption-ember">Customers</p>
+              <h2 className="conduit-display-2xl mt-5">
+                Currently running on Praxis.
+              </h2>
+            </ScrollRevealItem>
+          </ScrollRevealCards>
 
           <ScrollRevealCards margin="30%" className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <ScrollRevealItem className="md:col-span-2">
