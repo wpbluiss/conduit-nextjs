@@ -28,6 +28,7 @@ import {
 import { getTemplate } from "@/lib/builds/templates";
 import { complete } from "@/lib/ai/provider";
 import { withTimeAware } from "@/lib/ai/employees/time-aware";
+import { insertNotification } from "@/lib/conduit/notifications";
 import {
   checkRateLimit,
   isTeamQuery,
@@ -454,6 +455,19 @@ export async function POST(request: NextRequest) {
             });
           }
         }
+        // Fire-and-forget notification so it never blocks the stream response.
+        insertNotification(supabase, {
+          accountId,
+          type: result.ok ? "build_complete" : "build_complete",
+          title: result.ok
+            ? `Build live: ${ctx.account_name} ${tmpl.meta.name}`
+            : `Build failed: ${ctx.account_name} ${tmpl.meta.name}`,
+          body: result.ok
+            ? `Deployed at ${result.liveUrl}`
+            : result.error ?? "Unknown error",
+          href: result.ok ? result.liveUrl ?? "/app/builds" : "/app/builds",
+        }).catch(() => {});
+
         send("message_end", { employee: "engineering" });
         return true;
       };
