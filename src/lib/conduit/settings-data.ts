@@ -110,6 +110,7 @@ export async function loadSettingsData(
       display_name: account.display_name ?? null,
       avatar_url: account.avatar_url ?? null,
       accent_preference: account.accent_preference ?? null,
+      company_brief: account.company_brief ?? null,
     },
     usage: {
       totals,

@@ -44,6 +44,8 @@ export interface ConduitAccount {
   avatar_url?: string | null;
   // R-462 accent preference — nullable until migration 037 runs.
   accent_preference?: string | null;
+  // R-463 company brief — nullable until migration 036 runs.
+  company_brief?: string | null;
   created_at: string;
   updated_at: string;
 }
