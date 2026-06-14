@@ -148,7 +148,7 @@ export default function AboutPage() {
             </h2>
           </div>
 
-          <ScrollRevealCards className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <ScrollRevealCards margin="30%" className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {APPROACH.map((a) => (
               <ScrollRevealItem key={a.title}>
                 <div className="conduit-card relative overflow-hidden p-7 md:p-8 h-full">
@@ -204,7 +204,7 @@ export default function AboutPage() {
             </h2>
           </div>
 
-          <ScrollRevealCards className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <ScrollRevealCards margin="30%" className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <ScrollRevealItem className="md:col-span-2">
             <Link
               href="/customers/lunaro"
