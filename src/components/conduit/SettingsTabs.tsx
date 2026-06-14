@@ -1261,7 +1261,7 @@ function BillingTab({
             variant="secondary"
             className="!text-xs"
           >
-            Manage in Stripe
+            Manage subscription
             <ExternalLink size={12} />
           </PraxisButton>
         )}
