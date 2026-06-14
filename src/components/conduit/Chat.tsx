@@ -1394,6 +1394,16 @@ export function Chat({
               onSend={send}
               suggestions={suggestions}
               isFirstRun={isFirstRun}
+              onPinSelect={(emp) => {
+                setPin(emp);
+                requestAnimationFrame(() => {
+                  document
+                    .querySelector<HTMLTextAreaElement>(
+                      ".praxis-composer-pill textarea",
+                    )
+                    ?.focus();
+                });
+              }}
             />
           )}
 
@@ -1776,49 +1786,23 @@ export function Chat({
   );
 }
 
-const FIRST_RUN_SUGGESTIONS: Suggestion[] = [
-  {
-    text: "Write a go-to-market plan for my product",
-    pin: "marketing",
-    dept: "marketing",
-    hint: "Marketing builds the plan",
-  },
-  {
-    text: "Draft an investor update email",
-    dept: "jarvis",
-    hint: "Atlas routes to the right specialist",
-  },
-  {
-    text: "Build a cold outreach sequence for my first 50 leads",
-    pin: "sales",
-    dept: "sales",
-    hint: "Sales builds the play",
-  },
-  {
-    text: "Set up an SOP for client onboarding",
-    pin: "ops",
-    dept: "ops",
-    hint: "Operations documents it",
-  },
-];
-
 function EmptyState({
   firstName,
   onSend,
   suggestions,
   isFirstRun = false,
+  onPinSelect,
 }: {
   firstName: string;
   onSend: (text: string, pin?: EmployeeKey) => void;
   suggestions: Suggestion[];
   isFirstRun?: boolean;
+  onPinSelect?: (emp: EmployeeKey) => void;
 }) {
   const copy = composeChatEmptyCopy({
     firstName,
     timeOfDay: timeOfDayBucket(),
   });
-
-  const activeSuggestions = isFirstRun ? FIRST_RUN_SUGGESTIONS : suggestions;
 
   return (
     <div
@@ -1853,16 +1837,74 @@ function EmptyState({
           >
             <PraxisAvatar employee="jarvis" size="xl" pulse="ambient" />
             <h1 className="praxis-display-1">
-              What should your team work on first?
+              Meet your nine specialists
             </h1>
           </div>
           <p
             className="praxis-body-lg"
             style={{ marginTop: "var(--space-4)", maxWidth: "36rem" }}
           >
-            Pick a task below or type anything — Atlas will route it to the
-            right specialist on your team.
+            Click any specialist to open a conversation with them, or type anything below and Atlas will route it to the right person.
           </p>
+          <div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            style={{
+              marginTop: "var(--space-8)",
+              gap: "var(--space-3)",
+            }}
+          >
+            {EMPLOYEE_ORDER.map((id) => {
+              const emp = EMPLOYEES[id];
+              return (
+                <button
+                  key={emp.id}
+                  type="button"
+                  onClick={() => onPinSelect?.(emp.id as EmployeeKey)}
+                  className="praxis-card praxis-card-team text-left"
+                  data-dept={emp.id}
+                  style={{ cursor: "pointer", width: "100%" }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "var(--space-3)",
+                      marginBottom: "var(--space-2)",
+                    }}
+                  >
+                    <PraxisAvatar employee={emp.id} size="md" pulse="ambient" />
+                    <div>
+                      <p
+                        style={{
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: "var(--color-text)",
+                          lineHeight: 1.3,
+                        }}
+                      >
+                        {emp.name}
+                      </p>
+                      <p
+                        className="praxis-microlabel"
+                        style={{ color: "var(--color-text-muted)" }}
+                      >
+                        {emp.role}
+                      </p>
+                    </div>
+                  </div>
+                  <p
+                    style={{
+                      fontSize: 12,
+                      color: "var(--color-text-muted)",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {emp.tagline}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
         </>
       ) : (
         <>
@@ -1898,26 +1940,26 @@ function EmptyState({
           >
             {copy.subline}
           </p>
+          <div
+            className="grid grid-cols-1 sm:grid-cols-2"
+            style={{
+              marginTop: "var(--space-8)",
+              gap: "var(--space-3)",
+            }}
+          >
+            {suggestions.map((s) => (
+              <PraxisSuggestionTile
+                key={s.text}
+                dept={s.dept}
+                hint={s.hint}
+                prompt={s.text}
+                pin={s.pin}
+                onSelect={(text, pin) => onSend(text, pin)}
+              />
+            ))}
+          </div>
         </>
       )}
-      <div
-        className="grid grid-cols-1 sm:grid-cols-2"
-        style={{
-          marginTop: "var(--space-8)",
-          gap: "var(--space-3)",
-        }}
-      >
-        {activeSuggestions.map((s) => (
-          <PraxisSuggestionTile
-            key={s.text}
-            dept={s.dept}
-            hint={s.hint}
-            prompt={s.text}
-            pin={s.pin}
-            onSelect={(text, pin) => onSend(text, pin)}
-          />
-        ))}
-      </div>
     </div>
   );
 }
