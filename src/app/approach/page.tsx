@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/marketing/PageHeader";
 import { ScrollRevealCards, ScrollRevealItem } from "@/components/marketing/ScrollRevealCards";
 import { ApproachSections } from "@/components/ApproachSections";
 import type { ApproachSection } from "@/components/ApproachSections";
+import { ApproachProgressNav } from "@/components/marketing/ApproachProgressNav";
 
 export const metadata: Metadata = {
   title: "Approach — How we think about workforces",
@@ -102,10 +103,19 @@ export default function ApproachPage() {
         subtitle="Praxis isn't an AI product. It's a position on what work looks like next."
       />
 
-      {/* Sections — animated client component (scroll-reveal per section) */}
+      {/* Sections — 2-column on xl: sticky nav rail + prose */}
       <article className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
-          <ApproachSections sections={SECTIONS} />
+          <div className="flex gap-10 xl:gap-16">
+            {/* Left rail — sticky progress nav, xl+ only */}
+            <ApproachProgressNav
+              sections={SECTIONS.map((s) => ({ n: s.n, title: s.title }))}
+            />
+            {/* Right — prose */}
+            <div className="min-w-0 flex-1">
+              <ApproachSections sections={SECTIONS} hasRail />
+            </div>
+          </div>
         </div>
       </article>
 

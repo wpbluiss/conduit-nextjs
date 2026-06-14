@@ -24,10 +24,12 @@ function SectionBlock({
   section,
   index,
   reduced,
+  hasRail,
 }: {
   section: ApproachSection;
   index: number;
   reduced: boolean;
+  hasRail: boolean;
 }) {
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: "-12% 0px" });
@@ -37,7 +39,7 @@ function SectionBlock({
   const tailParagraphs = section.body.slice(1);
 
   return (
-    <section ref={ref} className={index > 0 ? "mt-24 md:mt-28" : ""}>
+    <section ref={ref} id={`approach-${section.n}`} className={index > 0 ? "mt-24 md:mt-28" : ""}>
       {/* Divider — ember tint, draws in from left */}
       {index > 0 && (
         <motion.div
@@ -54,13 +56,13 @@ function SectionBlock({
       )}
 
       <div className="relative">
-        {/* Section number — Linear-style gutter label, large screens only */}
+        {/* Section number — gutter label. Hidden on xl when rail nav is present. */}
         <motion.span
           aria-hidden
           initial={reduced ? false : { opacity: 0 }}
           animate={active ? { opacity: 1 } : {}}
           transition={{ duration: 0.6, ease: EASE }}
-          className="hidden lg:block absolute top-[0.25rem] -left-14 text-[11px] tracking-[0.2em] uppercase text-[var(--color-accent)] select-none tabular-nums"
+          className={`absolute top-[0.25rem] -left-14 text-[11px] tracking-[0.2em] uppercase text-[var(--color-accent)] select-none tabular-nums ${hasRail ? "hidden lg:block xl:hidden" : "hidden lg:block"}`}
         >
           {section.n}
         </motion.span>
@@ -147,14 +149,16 @@ function SectionBlock({
 
 export function ApproachSections({
   sections,
+  hasRail = false,
 }: {
   sections: ApproachSection[];
+  hasRail?: boolean;
 }) {
   const reduced = useReducedMotion();
   return (
-    <div className="conduit-prose">
+    <div className={hasRail ? "max-w-[720px]" : "conduit-prose"}>
       {sections.map((s, i) => (
-        <SectionBlock key={s.n} section={s} index={i} reduced={reduced} />
+        <SectionBlock key={s.n} section={s} index={i} reduced={reduced} hasRail={hasRail} />
       ))}
     </div>
   );
