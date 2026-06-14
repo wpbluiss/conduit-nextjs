@@ -1,6 +1,6 @@
 "use client";
 
-import { EmployeeAvatar, DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
+import { EmployeeAvatar, DEPT_COLOR, employeeLabel, SpecialistChip } from "./EmployeeBadge";
 import type { EmployeeKey } from "@/lib/ai/provider";
 
 export function TypingIndicator({ employee }: { employee: EmployeeKey }) {
@@ -14,12 +14,7 @@ export function TypingIndicator({ employee }: { employee: EmployeeKey }) {
         <EmployeeAvatar employee={employee} size={32} active />
       </div>
       <div className="min-w-0 flex-1 space-y-1">
-        <span
-          className="text-[12px] font-medium"
-          style={{ color: DEPT_COLOR[employee] }}
-        >
-          {name}
-        </span>
+        <SpecialistChip employee={employee} />
         <div
           role="status"
           aria-live="polite"
