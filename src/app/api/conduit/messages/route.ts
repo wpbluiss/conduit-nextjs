@@ -58,6 +58,7 @@ export async function GET(req: NextRequest) {
     .from("conduit_messages")
     .select("id, role, employee, content, metadata, created_at")
     .eq("conversation_id", conversationId)
+    .is("hidden_at", null)
     .order("created_at", { ascending: false })
     .order("id", { ascending: false })
     .limit(PAGE_SIZE + 1); // fetch one extra to determine hasMore

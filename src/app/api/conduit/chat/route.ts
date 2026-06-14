@@ -160,11 +160,12 @@ export async function POST(request: NextRequest) {
     content: message,
   });
 
-  // Load last 10 messages of context
+  // Load last 10 messages of context (exclude soft-hidden edit branches)
   const { data: history } = await supabase
     .from("conduit_messages")
     .select("role, employee, content, created_at")
     .eq("conversation_id", conversationId)
+    .is("hidden_at", null)
     .order("created_at", { ascending: false })
     .limit(11);
 
