@@ -1,0 +1,185 @@
+"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plus } from "@phosphor-icons/react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+
+const EASE = [0.25, 1, 0.5, 1] as const;
+
+const FAQS = [
+  {
+    q: "How does Praxis pricing work?",
+    a: "Praxis has three tiers — Free, Pro ($29/mo), and Scale ($99/mo). Each tier includes a monthly token allowance. You can also buy one-time token top-ups ($10 / $25 / $50) that stack on top of your allowance and never expire.",
+  },
+  {
+    q: "What can the AI specialists actually do?",
+    a: "Each specialist is a context-aware AI employee tuned for its domain. Atlas (your chief of staff) routes tasks; Marketing drafts copy and campaigns; Sales writes outreach; Engineering reviews code and opens PRs; Finance analyzes numbers; Compliance flags risks; HR drafts policies; Ops coordinates workflows; Legal reviews contracts. All share a unified memory of your business.",
+  },
+  {
+    q: "How is my data kept private and secure?",
+    a: "Your data lives in an isolated Supabase Postgres instance with row-level security — only your account can read your records. Data in transit is encrypted via TLS. We never use your conversations to train models. You can export or delete your data at any time from Settings.",
+  },
+  {
+    q: "Can I cancel my subscription at any time?",
+    a: "Yes. Cancel any time from Settings → Billing → Manage subscription. You keep full access until the end of your billing cycle. We don't do lock-ins or cancellation fees.",
+  },
+  {
+    q: "Is bank sync on the roadmap?",
+    a: "Yes. Praxis Finance already handles budgets, transactions, and household finances. Direct bank sync (via Plaid or a similar connector) is on the roadmap for a future release. You'll be notified in the app when it's live.",
+  },
+  {
+    q: "Which platforms is Praxis available on?",
+    a: "Praxis Console runs in any modern browser (desktop and mobile-responsive). Native iOS and Android apps are in development. All surfaces share the same AI specialists and persistent memory.",
+  },
+  {
+    q: "Can my partner or spouse use Praxis with me?",
+    a: "Yes — Praxis supports household accounts. Invite your partner via a one-time join link from Settings. Once joined, you both see the same household data, shared finances, and AI conversation history.",
+  },
+  {
+    q: "How is Praxis different from a traditional productivity or finance app?",
+    a: "Traditional apps are passive — you do the work, they store the data. Praxis specialists are active agents: they draft, analyze, coordinate, and ship on your behalf. It's the difference between a filing cabinet and an employee.",
+  },
+];
+
+export const FAQ_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQS.map(({ q, a }) => ({
+    "@type": "Question",
+    name: q,
+    acceptedAnswer: { "@type": "Answer", text: a },
+  })),
+};
+
+function AccordionItem({
+  q,
+  a,
+  open,
+  onToggle,
+  reduced,
+  index,
+}: {
+  q: string;
+  a: string;
+  open: boolean;
+  onToggle: () => void;
+  reduced: boolean;
+  index: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: reduced ? 1 : 0, y: reduced ? 0 : 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-6%" }}
+      transition={{ duration: reduced ? 0 : 0.5, ease: EASE, delay: reduced ? 0 : index * 0.05 }}
+      className="border-b border-[var(--color-edge-subtle)]"
+    >
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={onToggle}
+        className="flex w-full items-start justify-between gap-4 py-5 text-left"
+      >
+        <span className="text-[15px] font-medium text-[var(--color-cream)] leading-[1.4]">
+          {q}
+        </span>
+        <motion.span
+          animate={{ rotate: open ? 45 : 0 }}
+          transition={{ duration: reduced ? 0 : 0.2, ease: EASE }}
+          className="mt-0.5 shrink-0 text-[var(--color-indigo-400,#818cf8)]"
+        >
+          <Plus size={18} weight="bold" />
+        </motion.span>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: reduced ? 0 : 0.28, ease: EASE }}
+            style={{ overflow: "hidden" }}
+          >
+            <p className="pb-5 text-[14px] text-[var(--color-cream-mute)] leading-[1.65]">
+              {a}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+export default function FAQ() {
+  const reduced = useReducedMotion();
+  const [open, setOpen] = useState<number | null>(null);
+
+  const toggle = (i: number) => setOpen((prev: number | null) => (prev === i ? null : i));
+
+  return (
+    <section
+      id="faq"
+      className="relative conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)] overflow-hidden"
+    >
+      {/* Subtle ambient glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 40% at 50% 100%, rgba(91,99,232,0.07), transparent 70%)",
+        }}
+      />
+
+      <div className="relative mx-auto max-w-3xl px-6">
+        {/* Section header */}
+        <motion.div
+          initial={{ opacity: reduced ? 1 : 0, y: reduced ? 0 : 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-8%" }}
+          transition={{ duration: reduced ? 0 : 0.6, ease: EASE }}
+          className="mb-12 text-center"
+        >
+          <div className="text-[11px] uppercase tracking-[0.2em] text-[var(--color-indigo-400,#818cf8)] mb-4">
+            FAQ
+          </div>
+          <h2 className="text-[clamp(2rem,5vw,3rem)] font-semibold leading-[1.1] tracking-[-0.02em] text-[var(--color-cream)]">
+            Questions?
+          </h2>
+          <div
+            aria-hidden
+            className="mx-auto mt-4 h-px w-12"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent, var(--color-indigo-400,#818cf8), transparent)",
+            }}
+          />
+        </motion.div>
+
+        {/* Accordion */}
+        <div>
+          {FAQS.map(({ q, a }, i) => (
+            <AccordionItem
+              key={q}
+              q={q}
+              a={a}
+              open={open === i}
+              onToggle={() => toggle(i)}
+              reduced={reduced}
+              index={i}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* JSON-LD structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSONLD) }}
+      />
+    </section>
+  );
+}

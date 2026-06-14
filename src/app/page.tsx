@@ -17,6 +17,7 @@ const Customers = dynamic(() => import("@/components/Customers"));
 const EngineeringProof = dynamic(() => import("@/components/EngineeringProof"));
 const SocialProof = dynamic(() => import("@/components/SocialProof"));
 const Pricing = dynamic(() => import("@/components/Pricing"));
+const FAQ = dynamic(() => import("@/components/FAQ"));
 const FinalCTA = dynamic(() => import("@/components/FinalCTA"));
 const Footer = dynamic(() => import("@/components/Footer"));
 
@@ -72,6 +73,7 @@ export default function Home() {
       <EngineeringProof />
       <SocialProof />
       <Pricing />
+      <FAQ />
       <FinalCTA />
       <Footer />
     </main>
