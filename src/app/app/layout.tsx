@@ -22,6 +22,8 @@ import { FirstRunTour } from "@/components/conduit/FirstRunTour";
 import { KeyboardShortcutsOverlay } from "@/components/conduit/KeyboardShortcutsOverlay";
 import { CommandPalette } from "@/components/conduit/CommandPalette";
 import { WelcomeChecklist } from "@/components/conduit/WelcomeChecklist";
+import { Suspense } from "react";
+import { ReferralClaimer } from "@/components/conduit/ReferralClaimer";
 
 export const dynamic = "force-dynamic";
 
@@ -172,6 +174,9 @@ export default async function AppLayout({
         {onboarded && isNewAccount && !checklistDismissed && (
           <WelcomeChecklist hasConversations={(convos ?? []).length > 0} />
         )}
+        <Suspense>
+          <ReferralClaimer />
+        </Suspense>
       </PraxisCanvasTintProvider>
       </ToastProvider>
       </UserProvider>
