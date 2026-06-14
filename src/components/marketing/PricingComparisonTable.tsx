@@ -38,7 +38,7 @@ const TIERS = [
 function CellRender({ value, popular }: { value: Cell; popular?: boolean }) {
   if (value === true) {
     return (
-      <Check size={18} weight="bold" color={popular ? "#5B63E8" : "#9DD8B1"} />
+      <Check size={18} weight="bold" color={popular ? "#5B63E8" : "#16A34A"} />
     );
   }
   if (value === false) {
