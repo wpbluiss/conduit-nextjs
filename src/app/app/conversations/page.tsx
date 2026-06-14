@@ -7,6 +7,7 @@ import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, EMPLOYEE_ICON } from "@/components/conduit/EmployeeBadge";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import { PinConversationButton } from "@/components/conduit/PinConversationButton";
+import { ConversationSearchBar } from "@/components/conduit/ConversationSearchBar";
 
 export const dynamic = "force-dynamic";
 
@@ -125,6 +126,8 @@ export default async function ConversationsPage() {
           Your full chat history — click any conversation to continue it. Hover
           to star up to {MAX_PINNED}.
         </p>
+
+        <ConversationSearchBar />
 
         {conversations.length === 0 ? (
           <div className="conduit-card p-10 flex flex-col items-center text-center gap-4 max-w-sm mx-auto">
