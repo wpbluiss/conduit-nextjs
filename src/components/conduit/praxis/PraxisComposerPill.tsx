@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Mic, Mic2, MicOff, Send, Square } from "lucide-react";
+import { Bookmark, Mic, Mic2, MicOff, Send, Square } from "lucide-react";
 import { EMPLOYEE_ORDER, EMPLOYEES, type EmployeeId } from "@/lib/conduit/employees";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { useNicknames } from "@/context/NicknameContext";
@@ -9,6 +9,12 @@ import { PraxisAvatar } from "./PraxisAvatar";
 import { useDeptTint } from "./usePraxisTint";
 import type { RecordingState } from "@/hooks/useVoiceRecorder";
 import type { WhisperState } from "@/hooks/useWhisperRecorder";
+
+interface PromptTemplate {
+  id: string;
+  title: string;
+  body: string;
+}
 
 export type PinValue = EmployeeId | "auto" | "team";
 
@@ -92,10 +98,55 @@ export function PraxisComposerPill({
   const [pinOpen, setPinOpen] = useState(false);
   const tint = useDeptTint();
   const composerRef = useRef<HTMLFormElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { labelFor } = useNicknames();
 
   // @-mention state
   const [mentionIndex, setMentionIndex] = useState(0);
+
+  // Template picker state
+  const [templateOpen, setTemplateOpen] = useState(false);
+  const [templates, setTemplates] = useState<PromptTemplate[]>([]);
+  const [templateQuery, setTemplateQuery] = useState("");
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
+
+  useEffect(() => {
+    if (!templateOpen) return;
+    if (templates.length > 0) return;
+    setLoadingTemplates(true);
+    fetch("/api/conduit/templates")
+      .then((r) => r.json())
+      .then((d) => setTemplates(d.templates ?? []))
+      .catch(() => {})
+      .finally(() => setLoadingTemplates(false));
+  }, [templateOpen, templates.length]);
+
+  function insertTemplate(body: string) {
+    onChange(body);
+    setTemplateOpen(false);
+    setTemplateQuery("");
+    // After React updates the textarea value, place the cursor at the first {{…}} slot.
+    requestAnimationFrame(() => {
+      const el = textareaRef.current;
+      if (!el) return;
+      el.focus();
+      const match = /\{\{[^}]+\}\}/.exec(body);
+      if (match) {
+        el.setSelectionRange(match.index, match.index + match[0].length);
+      } else {
+        const len = body.length;
+        el.setSelectionRange(len, len);
+      }
+    });
+  }
+
+  const filteredTemplates = templateQuery
+    ? templates.filter(
+        (t) =>
+          t.title.toLowerCase().includes(templateQuery.toLowerCase()) ||
+          t.body.toLowerCase().includes(templateQuery.toLowerCase()),
+      )
+    : templates;
 
   // Propagate pin to canvas tint engine. "auto" / "team" clear the pin.
   useEffect(() => {
@@ -341,6 +392,7 @@ export function PraxisComposerPill({
         )}
 
         <textarea
+          ref={textareaRef}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => {
@@ -391,6 +443,138 @@ export function PraxisComposerPill({
             fontFamily: "var(--font-sans)",
           }}
         />
+      </div>
+
+      {/* Template picker button */}
+      <div style={{ position: "relative", flexShrink: 0 }}>
+        <button
+          type="button"
+          onClick={() => {
+            setTemplateOpen((v) => !v);
+            setTemplateQuery("");
+          }}
+          aria-label="Insert template"
+          title="Insert a saved template"
+          style={{
+            flexShrink: 0,
+            width: "40px",
+            height: "40px",
+            borderRadius: "9999px",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: templateOpen ? "var(--color-accent)" : "transparent",
+            color: templateOpen ? "var(--color-surface)" : "var(--color-text-muted)",
+            border: templateOpen ? "none" : "1px solid var(--color-border)",
+            cursor: "pointer",
+            transition: "all 180ms var(--praxis-ease-out-quart)",
+          }}
+        >
+          <Bookmark size={16} />
+        </button>
+        {templateOpen && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: "calc(100% + 8px)",
+              right: 0,
+              width: "20rem",
+              borderRadius: "var(--radius-card)",
+              background: "var(--color-surface-elevated)",
+              border: "1px solid var(--color-border)",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+              overflow: "hidden",
+              zIndex: 20,
+            }}
+          >
+            <div style={{ padding: "8px" }}>
+              <input
+                type="text"
+                value={templateQuery}
+                onChange={(e) => setTemplateQuery(e.target.value)}
+                placeholder="Search templates…"
+                autoFocus
+                style={{
+                  width: "100%",
+                  background: "var(--color-surface)",
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "var(--radius-card)",
+                  padding: "6px 10px",
+                  fontSize: "13px",
+                  color: "var(--color-text)",
+                  outline: "none",
+                }}
+              />
+            </div>
+            <div style={{ maxHeight: "240px", overflowY: "auto" }}>
+              {loadingTemplates ? (
+                <p style={{ padding: "12px 14px", fontSize: "13px", color: "var(--color-text-muted)" }}>
+                  Loading…
+                </p>
+              ) : filteredTemplates.length === 0 ? (
+                <p style={{ padding: "12px 14px", fontSize: "13px", color: "var(--color-text-muted)" }}>
+                  {templates.length === 0 ? "No templates yet — create some in Settings → Templates." : "No matches."}
+                </p>
+              ) : (
+                filteredTemplates.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      insertTemplate(t.body);
+                    }}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      width: "100%",
+                      alignItems: "flex-start",
+                      gap: "2px",
+                      padding: "10px 14px",
+                      fontSize: "13px",
+                      textAlign: "left",
+                      background: "transparent",
+                      color: "var(--color-text)",
+                      cursor: "pointer",
+                      border: "none",
+                      borderBottom: "1px solid var(--color-border)",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = "var(--color-surface-raised)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = "transparent";
+                    }}
+                  >
+                    <span style={{ fontWeight: 500 }}>{t.title}</span>
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        color: "var(--color-text-muted)",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        maxWidth: "100%",
+                      }}
+                    >
+                      {t.body}
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+            {templates.length === 0 && !loadingTemplates && (
+              <div style={{ padding: "8px 14px 10px", borderTop: "1px solid var(--color-border)" }}>
+                <a
+                  href="/app/settings?tab=templates"
+                  style={{ fontSize: "12px", color: "var(--color-accent)", textDecoration: "none" }}
+                >
+                  Go to Settings → Templates →
+                </a>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {speechSupported ? (

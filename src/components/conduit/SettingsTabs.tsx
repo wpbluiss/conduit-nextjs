@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, type ChangeEvent, type Compon
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowRight,
+  Bookmark,
   Calendar,
   Check,
   ExternalLink,
@@ -11,7 +12,10 @@ import {
   Link,
   Link2Off,
   Lock,
+  Pencil,
   Play,
+  Plus,
+  Trash2,
   X,
 } from "lucide-react";
 import { PraxisButton, SpinnerIcon } from "./PraxisButton";
@@ -98,7 +102,8 @@ export type SettingsTabKey =
   | "notifications"
   | "integrations"
   | "appearance"
-  | "api";
+  | "api"
+  | "templates";
 
 export function SettingsTabs({
   email,
@@ -132,6 +137,7 @@ export function SettingsTabs({
             ["integrations", "Integrations"],
             ["appearance", "Appearance"],
             ["api", "API"],
+            ["templates", "Templates"],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -188,6 +194,7 @@ export function SettingsTabs({
         />
       )}
       {tab === "api" && <ApiKeysTab />}
+      {tab === "templates" && <TemplatesTab />}
     </div>
   );
 }
@@ -3503,6 +3510,277 @@ function ApiKeysTab() {
         </code>
         <p className="text-xs mt-2">Maximum 20 active keys per account.</p>
       </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// TemplatesTab
+// ---------------------------------------------------------------------------
+
+interface PromptTemplate {
+  id: string;
+  title: string;
+  body: string;
+  created_at: string;
+}
+
+function TemplatesTab() {
+  const toast = useToast();
+  const [templates, setTemplates] = useState<PromptTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Form state (create / edit)
+  const [editId, setEditId] = useState<string | null>(null);
+  const [formTitle, setFormTitle] = useState("");
+  const [formBody, setFormBody] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/conduit/templates")
+      .then((r) => r.json())
+      .then((d) => setTemplates(d.templates ?? []))
+      .catch(() => toast.error("Failed to load templates."))
+      .finally(() => setLoading(false));
+  }, [toast]);
+
+  function openCreate() {
+    setEditId(null);
+    setFormTitle("");
+    setFormBody("");
+    setShowForm(true);
+  }
+
+  function openEdit(t: PromptTemplate) {
+    setEditId(t.id);
+    setFormTitle(t.title);
+    setFormBody(t.body);
+    setShowForm(true);
+  }
+
+  function cancelForm() {
+    setShowForm(false);
+    setEditId(null);
+    setFormTitle("");
+    setFormBody("");
+  }
+
+  async function handleSave(e: FormEvent) {
+    e.preventDefault();
+    if (!formTitle.trim() || !formBody.trim()) return;
+    setSaving(true);
+    try {
+      if (editId) {
+        const res = await fetch(`/api/conduit/templates/${editId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: formTitle, body: formBody }),
+        });
+        if (!res.ok) throw new Error();
+        setTemplates((prev) =>
+          prev.map((t) =>
+            t.id === editId ? { ...t, title: formTitle.trim(), body: formBody.trim() } : t,
+          ),
+        );
+        toast.success("Template updated.");
+      } else {
+        const res = await fetch("/api/conduit/templates", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: formTitle, body: formBody }),
+        });
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({}));
+          if (d.error === "limit_reached") {
+            toast.error("Template limit reached (50 max).");
+            return;
+          }
+          throw new Error();
+        }
+        const d = await res.json();
+        setTemplates((prev) => [d.template, ...prev]);
+        toast.success("Template created.");
+      }
+      cancelForm();
+    } catch {
+      toast.error("Failed to save template.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    setDeleting(id);
+    try {
+      const res = await fetch(`/api/conduit/templates/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      setTemplates((prev) => prev.filter((t) => t.id !== id));
+      toast.success("Template deleted.");
+    } catch {
+      toast.error("Failed to delete template.");
+    } finally {
+      setDeleting(null);
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold text-[var(--color-text)]">Task Templates</h2>
+          <p className="text-sm text-[var(--color-text-muted)] mt-0.5">
+            Save reusable prompts with{" "}
+            <code className="font-mono text-xs bg-[var(--color-surface)] px-1 py-0.5 rounded">
+              {"{{variable}}"}
+            </code>{" "}
+            placeholders. Select them in the chat composer with the bookmark icon.
+          </p>
+        </div>
+        {!showForm && (
+          <button
+            type="button"
+            onClick={openCreate}
+            className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-accent)] text-white px-4 py-2 text-sm font-medium hover:bg-[var(--color-accent-hi)] transition-colors"
+          >
+            <Plus size={14} />
+            New template
+          </button>
+        )}
+      </div>
+
+      {/* Create / Edit form */}
+      {showForm && (
+        <form
+          onSubmit={handleSave}
+          className="conduit-card rounded-xl p-5 space-y-4 border border-[var(--color-accent)]/30"
+        >
+          <p className="text-sm font-semibold text-[var(--color-text)]">
+            {editId ? "Edit template" : "New template"}
+          </p>
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs text-[var(--color-text-muted)] mb-1 block">Title</label>
+              <input
+                type="text"
+                value={formTitle}
+                onChange={(e) => setFormTitle(e.target.value)}
+                placeholder="e.g. Weekly LinkedIn post"
+                maxLength={120}
+                required
+                className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-accent)] placeholder:text-[var(--color-text-muted)] transition-colors"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-[var(--color-text-muted)] mb-1 block">
+                Prompt body — use{" "}
+                <code className="font-mono text-xs">{"{{variable_name}}"}</code> for fill-in slots
+              </label>
+              <textarea
+                value={formBody}
+                onChange={(e) => setFormBody(e.target.value)}
+                placeholder={"Write a LinkedIn post about {{topic}} targeting {{audience}}."}
+                maxLength={4000}
+                required
+                rows={6}
+                className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-accent)] placeholder:text-[var(--color-text-muted)] resize-y transition-colors font-[inherit]"
+              />
+              <p className="text-xs text-[var(--color-text-muted)] mt-1 text-right">
+                {formBody.length}/4000
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={cancelForm}
+              className="px-4 py-2 text-sm rounded-xl border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving || !formTitle.trim() || !formBody.trim()}
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-xl bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hi)] transition-colors disabled:opacity-50"
+            >
+              {saving ? <SpinnerIcon /> : <Check size={14} />}
+              {editId ? "Save changes" : "Create"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Template list */}
+      {loading ? (
+        <div className="text-sm text-[var(--color-text-muted)]">Loading…</div>
+      ) : templates.length === 0 ? (
+        <div className="conduit-card rounded-xl p-8 text-center space-y-2">
+          <Bookmark size={28} className="mx-auto text-[var(--color-text-muted)] opacity-40" />
+          <p className="text-sm text-[var(--color-text-muted)]">No templates yet.</p>
+          {!showForm && (
+            <button
+              type="button"
+              onClick={openCreate}
+              className="text-sm text-[var(--color-accent)] hover:underline"
+            >
+              Create your first template
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {templates.map((t) => (
+            <div
+              key={t.id}
+              className="conduit-card rounded-xl px-5 py-4 flex gap-4 items-start"
+            >
+              <Bookmark
+                size={16}
+                className="shrink-0 mt-0.5 text-[var(--color-accent)]"
+              />
+              <div className="flex-1 min-w-0 space-y-1">
+                <p className="text-sm font-medium text-[var(--color-text)]">{t.title}</p>
+                <p className="text-sm text-[var(--color-text-muted)] line-clamp-2 whitespace-pre-wrap">
+                  {t.body}
+                </p>
+                {/* Highlight placeholder slots */}
+                {t.body.includes("{{") && (
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {Array.from(t.body.matchAll(/\{\{(\w+)\}\}/g)).map((m, i) => (
+                      <span
+                        key={i}
+                        className="inline-block text-xs font-mono px-1.5 py-0.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)]"
+                      >
+                        {m[0]}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="shrink-0 flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => openEdit(t)}
+                  aria-label={`Edit template "${t.title}"`}
+                  className="p-2 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-raised)] transition-colors"
+                >
+                  <Pencil size={14} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(t.id)}
+                  disabled={deleting === t.id}
+                  aria-label={`Delete template "${t.title}"`}
+                  className="p-2 rounded-lg text-red-400 hover:bg-red-400/10 transition-colors disabled:opacity-50"
+                >
+                  {deleting === t.id ? <SpinnerIcon /> : <Trash2 size={14} />}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
