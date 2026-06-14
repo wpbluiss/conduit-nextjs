@@ -17,15 +17,17 @@ const ITEM = {
 export function ScrollRevealCards({
   children,
   className,
+  margin = "-8%",
 }: {
   children: ReactNode;
   className?: string;
+  margin?: string;
 }) {
   return (
     <motion.div
       initial="hidden"
       whileInView="show"
-      viewport={{ once: true, margin: "-8%" }}
+      viewport={{ once: true, margin }}
       variants={CONTAINER}
       className={className}
     >
