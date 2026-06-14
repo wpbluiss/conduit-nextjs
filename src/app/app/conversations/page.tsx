@@ -52,13 +52,30 @@ export default async function ConversationsPage() {
         </p>
 
         {conversations.length === 0 ? (
-          <div className="conduit-card p-8 text-center text-sm text-[var(--color-text-muted)]">
-            No conversations yet.{" "}
+          <div className="conduit-card p-10 flex flex-col items-center text-center gap-4 max-w-sm mx-auto">
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center"
+              style={{
+                background: "rgba(91,99,232,0.08)",
+                border: "1px solid rgba(91,99,232,0.18)",
+              }}
+            >
+              <MessageSquare size={24} style={{ color: "var(--color-accent)" }} />
+            </div>
+            <div>
+              <p className="text-[15px] font-semibold text-[var(--color-text)] mb-1">
+                No conversations yet
+              </p>
+              <p className="text-[13px] text-[var(--color-text-muted)] leading-relaxed">
+                Ask Atlas anything — strategy, execution, or hand it to a
+                specialist. Every exchange lives here.
+              </p>
+            </div>
             <Link
               href="/app"
-              className="text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+              className="conduit-btn-primary text-[13px] px-4 py-2"
             >
-              Start one →
+              Start your first conversation
             </Link>
           </div>
         ) : (
