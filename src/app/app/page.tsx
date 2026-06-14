@@ -93,6 +93,14 @@ export default async function ChatPage({ searchParams }: PageProps) {
       : (tierById(account.tier_id).allowedEmployees as EmployeeKey[])
   ) as EmployeeKey[];
 
+  // Detect first-run: user has no conversations yet.
+  const { count: convCount } = await supabase
+    .from("conduit_conversations")
+    .select("id", { count: "exact", head: true })
+    .eq("account_id", account.id)
+    .limit(1);
+  const isFirstRun = (convCount ?? 0) === 0;
+
   return (
     <Chat
       conversationId={conversationId}
@@ -106,6 +114,7 @@ export default async function ChatPage({ searchParams }: PageProps) {
         ttsAllowed,
       }}
       allowedEmployees={allowedEmployees}
+      isFirstRun={isFirstRun}
     />
   );
 }
