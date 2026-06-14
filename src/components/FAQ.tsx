@@ -10,11 +10,11 @@ const EASE = [0.25, 1, 0.5, 1] as const;
 const FAQS = [
   {
     q: "How does Praxis pricing work?",
-    a: "Praxis has three tiers — Free, Pro ($29/mo), and Scale ($99/mo). Each tier includes a monthly token allowance. You can also buy one-time token top-ups ($10 / $25 / $50) that stack on top of your allowance and never expire.",
+    a: "Praxis has three tiers — Free, Pro, and Enterprise — each with a monthly token allowance that powers your AI specialists. You can also buy one-time token top-ups ($10 / $25 / $50) that stack on top of your allowance and never expire. See the pricing page for current rates.",
   },
   {
     q: "What can the AI specialists actually do?",
-    a: "Each specialist is a context-aware AI employee tuned for its domain. Atlas (your chief of staff) routes tasks; Marketing drafts copy and campaigns; Sales writes outreach; Engineering reviews code and opens PRs; Finance analyzes numbers; Compliance flags risks; HR drafts policies; Ops coordinates workflows; Legal reviews contracts. All share a unified memory of your business.",
+    a: "Each specialist is a context-aware AI employee tuned for its domain. Atlas (your chief of staff) routes tasks; Marketing drafts copy and campaigns; Sales writes outreach; Engineering reviews code and opens PRs; Finance analyzes your business numbers; Compliance flags risks; HR drafts policies; Ops coordinates workflows; Legal reviews contracts. All share a unified memory of your business.",
   },
   {
     q: "How is my data kept private and secure?",
@@ -25,20 +25,20 @@ const FAQS = [
     a: "Yes. Cancel any time from Settings → Billing → Manage subscription. You keep full access until the end of your billing cycle. We don't do lock-ins or cancellation fees.",
   },
   {
-    q: "Is bank sync on the roadmap?",
-    a: "Yes. Praxis Finance already handles budgets, transactions, and household finances. Direct bank sync (via Plaid or a similar connector) is on the roadmap for a future release. You'll be notified in the app when it's live.",
+    q: "Can I invite my team into Praxis?",
+    a: "Yes. Invite teammates to your workspace from Settings. Everyone shares the same specialists, business context, and conversation history, so your AI workforce stays in sync across your whole team.",
   },
   {
     q: "Which platforms is Praxis available on?",
-    a: "Praxis Console runs in any modern browser (desktop and mobile-responsive). Native iOS and Android apps are in development. All surfaces share the same AI specialists and persistent memory.",
+    a: "Praxis runs in any modern browser (desktop and mobile-responsive) and installs to your phone's home screen as an app (PWA). Native iOS and Android apps are in development. All surfaces share the same AI specialists and persistent memory.",
   },
   {
-    q: "Can my partner or spouse use Praxis with me?",
-    a: "Yes — Praxis supports household accounts. Invite your partner via a one-time join link from Settings. Once joined, you both see the same household data, shared finances, and AI conversation history.",
+    q: "Do I need technical skills to use Praxis?",
+    a: "No. You work with your specialists in plain language — describe what you need and they draft, analyze, and ship it. The Engineering specialist handles the code so you don't have to.",
   },
   {
-    q: "How is Praxis different from a traditional productivity or finance app?",
-    a: "Traditional apps are passive — you do the work, they store the data. Praxis specialists are active agents: they draft, analyze, coordinate, and ship on your behalf. It's the difference between a filing cabinet and an employee.",
+    q: "How is Praxis different from a chatbot or a typical SaaS tool?",
+    a: "A chatbot answers questions; a SaaS tool just stores your work. Praxis specialists are active agents — they draft, analyze, coordinate, and ship on your behalf, with shared memory of your business. It's the difference between a tool and an actual team.",
   },
 ];
 
