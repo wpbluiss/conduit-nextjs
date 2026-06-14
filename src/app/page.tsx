@@ -17,6 +17,9 @@ const Vision = dynamic(() => import("@/components/Vision"));
 const Customers = dynamic(() => import("@/components/Customers"));
 const EngineeringProof = dynamic(() => import("@/components/EngineeringProof"));
 const SocialProof = dynamic(() => import("@/components/SocialProof"));
+const WhyPraxisTable = dynamic(() =>
+  import("@/components/marketing/WhyPraxisTable").then((m) => ({ default: m.WhyPraxisTable })),
+);
 const Pricing = dynamic(() => import("@/components/Pricing"));
 const FAQ = dynamic(() => import("@/components/FAQ"));
 const FinalCTA = dynamic(() => import("@/components/FinalCTA"));
@@ -74,6 +77,7 @@ export default function Home() {
       <Customers />
       <EngineeringProof />
       <SocialProof />
+      <WhyPraxisTable />
       <Pricing />
       <FAQ />
       <FinalCTA />
