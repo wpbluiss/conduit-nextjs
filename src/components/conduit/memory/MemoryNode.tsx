@@ -39,6 +39,10 @@ interface Props {
   position: { x: number; y: number };
   /** Recently-added → fires mount pulse. */
   fresh?: boolean;
+  /** Filtered out — fade to 20% opacity. */
+  dimmed?: boolean;
+  /** Active search query — passed to tooltip for highlighting. */
+  searchQuery?: string;
   onPatched: (next: Partial<MemoryRecord> & { id: string }) => void;
   onArchived: (id: string) => void;
   onEdit: () => void;
@@ -55,6 +59,8 @@ export function MemoryNode({
   memory,
   position,
   fresh,
+  dimmed = false,
+  searchQuery = "",
   onPatched,
   onArchived,
   onEdit,
@@ -75,6 +81,8 @@ export function MemoryNode({
   const wrapStyle: CSSProperties = {
     left: position.x,
     top: position.y,
+    opacity: dimmed ? 0.2 : 1,
+    transition: "opacity 0.15s ease",
   };
 
   return (
@@ -114,6 +122,7 @@ export function MemoryNode({
         >
           <MemoryNodeTooltip
             memory={memory}
+            searchQuery={searchQuery}
             onPatched={onPatched}
             onArchived={onArchived}
             onEdit={onEdit}
