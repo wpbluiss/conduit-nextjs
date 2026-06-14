@@ -11,6 +11,7 @@
 import * as React from "react";
 import { useUser } from "@/context/UserContext";
 import { useRouter } from "next/navigation";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, Code2, TrendingUp, Megaphone, DollarSign, Wrench, ShieldCheck,
@@ -49,6 +50,7 @@ export type LiveMsg = {
   employee?: EmployeeId | null;
   content: string;
   pending?: boolean;
+  error?: boolean;
   artifacts?: { id: string; title: string; type: string; by: EmployeeId }[];
   created_at?: string;
 };
@@ -68,6 +70,7 @@ export function LiveChat({
 }) {
   const router = useRouter();
   const ctxUser = useUser();
+  const reducedMotion = useReducedMotion();
   const allowedSet = new Set<EmployeeId>(allowedEmployees);
   const roster = EMPLOYEE_ORDER.filter((id) => id === "jarvis" || allowedSet.has(id));
 
@@ -96,6 +99,7 @@ export function LiveChat({
   const [voiceErr, setVoiceErr] = React.useState<string | null>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const taRef = React.useRef<HTMLTextAreaElement>(null);
+  const lastSentMsg = React.useRef<string>("");
   const emp = EMPLOYEES[pin];
   const EmpIcon = ICON[pin] ?? Sparkles;
 
@@ -185,6 +189,7 @@ export function LiveChat({
   const send = React.useCallback(async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
+    lastSentMsg.current = trimmed;
     setLoading(true); setInput("");
     if (taRef.current) taRef.current.style.height = "auto";
     setMessages((p) => [...p, { role: "user", content: trimmed }, { role: "assistant", employee: pin, content: "", pending: true }]);
@@ -204,7 +209,7 @@ export function LiveChat({
           const j = (await resp.json().catch(() => ({}))) as { message?: string };
           fallback = j.message || "You're sending messages too quickly. Give it a moment and try again.";
         }
-        setMessages((p) => { const n = [...p]; const last = n[n.length - 1]; if (last?.pending) { last.pending = false; last.content = fallback; } return n; });
+        setMessages((p) => { const n = [...p]; const last = n[n.length - 1]; if (last?.pending) { last.pending = false; last.content = fallback; last.error = true; } return n; });
         return;
       }
       const reader = resp.body.getReader(); const dec = new TextDecoder(); let buf = "";
@@ -213,7 +218,7 @@ export function LiveChat({
         else if (event === "handoff") { const to = data.to as EmployeeId; finish(current); setMessages((p) => [...p, { role: "system", content: `→ ${EMPLOYEES[to]?.name ?? to} taking this` }]); current = to; }
         else if (event === "message_end") { finish((data.employee as EmployeeId) || current); }
         else if (event === "done") { const cid = data.conversation_id as string; if (cid && cid !== convoId) { setConvoId(cid); window.history.replaceState({}, "", `/chat?c=${cid}`); } }
-        else if (event === "error") { append((data.employee as EmployeeId) || current, `\n\n${(data.message as string) || "Try again in a moment."}`); finish(current); }
+        else if (event === "error") { const errMsg = (data.message as string) || "Try again in a moment."; setMessages((p) => { const n = [...p]; const last = n[n.length - 1]; if (last && last.role === "assistant" && last.pending) { last.pending = false; last.content = last.content || errMsg; last.error = true; } return n; }); }
         else if (event === "artifact") { const a = { id: data.id as string, title: (data.title as string) || "Untitled", type: (data.type as string) || "doc", by: ((data.employee as EmployeeId) || current) }; setMessages((p) => { const n = [...p]; for (let j = n.length - 1; j >= 0; j--) { if (n[j].role === "assistant" && n[j].employee === a.by) { n[j] = { ...n[j], artifacts: [...(n[j].artifacts ?? []), a] }; break; } } return n; }); }
         else if (event === "paywall_required") { finish(current); setMessages((p) => [...p, { role: "system", content: (data.message as string) || "Upgrade required to continue." }]); }
       };
@@ -384,9 +389,32 @@ export function LiveChat({
                   <div className="min-w-0 flex-1">
                     <p className="mb-1 text-sm font-semibold">{EMPLOYEES[e]?.name ?? "Atlas"}</p>
                     {m.pending && !m.content ? (
-                      <div className="flex items-center gap-1 py-2">{[0, 1, 2].map((j) => (<motion.span key={j} className="size-1.5 rounded-full bg-muted-foreground" animate={{ opacity: [0.3, 1, 0.3], y: [0, -2, 0] }} transition={{ duration: 1, repeat: Infinity, delay: j * 0.18 }} />))}</div>
+                      <div className="flex items-center gap-1 py-2" aria-label="Typing…" aria-live="polite">
+                        {[0, 1, 2].map((j) => (
+                          <motion.span
+                            key={j}
+                            className="size-1.5 rounded-full bg-muted-foreground"
+                            animate={reducedMotion ? {} : { opacity: [0.3, 1, 0.3], y: [0, -2, 0] }}
+                            transition={{ duration: 1, repeat: Infinity, delay: j * 0.18 }}
+                            style={reducedMotion ? { opacity: 0.6 } : undefined}
+                          />
+                        ))}
+                      </div>
+                    ) : m.error ? (
+                      <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3">
+                        <p className="text-[14px] text-destructive/90 leading-relaxed">{m.content}</p>
+                        {lastSentMsg.current && (
+                          <button
+                            onClick={() => send(lastSentMsg.current)}
+                            disabled={loading}
+                            className="mt-2 flex items-center gap-1.5 rounded-lg bg-destructive/15 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/25 transition-colors disabled:opacity-50"
+                          >
+                            <RefreshCw className="size-3" /> Retry
+                          </button>
+                        )}
+                      </div>
                     ) : (
-                      <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">{m.content}{m.pending && <span className="ml-0.5 inline-block h-4 w-[3px] translate-y-0.5 animate-pulse rounded-full bg-primary align-middle" />}</div>
+                      <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">{m.content}{m.pending && <span className={`ml-0.5 inline-block h-4 w-[3px] translate-y-0.5 rounded-full bg-primary align-middle${reducedMotion ? "" : " animate-pulse"}`} />}</div>
                     )}
                     {m.artifacts?.map((a) => (
                       <button key={a.id} onClick={() => setOpenArtifact(a)} className="mt-3 flex w-full max-w-sm items-center gap-3 rounded-xl border border-white/10 bg-secondary/40 p-3 text-left transition-colors hover:border-primary/40 hover:bg-secondary">
