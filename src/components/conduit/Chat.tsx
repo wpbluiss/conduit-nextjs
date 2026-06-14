@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, ArrowRight, Download, FileText } from "lucide-react";
+import { AlertCircle, ArrowRight, Download, FileText, ThumbsDown, ThumbsUp } from "lucide-react";
 import { motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
@@ -1437,6 +1437,64 @@ function EmptyState({
   );
 }
 
+function MessageFeedbackButtons({ messageId }: { messageId: string }) {
+  const [rating, setRating] = useState<1 | -1 | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (value: 1 | -1) => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const res = await fetch("/api/conduit/chat/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message_id: messageId, rating: value }),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { action: string };
+        setRating(data.action === "removed" ? null : value);
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-1 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+      <button
+        type="button"
+        aria-label="Helpful"
+        aria-pressed={rating === 1}
+        onClick={() => void submit(1)}
+        disabled={busy}
+        className="p-1 rounded transition-colors disabled:pointer-events-none"
+        style={{
+          color: rating === 1 ? "var(--color-accent)" : "var(--color-text-muted)",
+        }}
+        onMouseEnter={(e) => { if (rating !== 1) (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
+        onMouseLeave={(e) => { if (rating !== 1) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
+      >
+        <ThumbsUp size={13} fill={rating === 1 ? "currentColor" : "none"} />
+      </button>
+      <button
+        type="button"
+        aria-label="Not helpful"
+        aria-pressed={rating === -1}
+        onClick={() => void submit(-1)}
+        disabled={busy}
+        className="p-1 rounded transition-colors disabled:pointer-events-none"
+        style={{
+          color: rating === -1 ? "#f87171" : "var(--color-text-muted)",
+        }}
+        onMouseEnter={(e) => { if (rating !== -1) (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
+        onMouseLeave={(e) => { if (rating !== -1) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
+      >
+        <ThumbsDown size={13} fill={rating === -1 ? "currentColor" : "none"} />
+      </button>
+    </div>
+  );
+}
+
 const MessageBubble = memo(function MessageBubble({
   message,
   onOpenArtifact,
@@ -1633,7 +1691,7 @@ const MessageBubble = memo(function MessageBubble({
 
   return (
     <motion.div
-      className="flex gap-3"
+      className="flex gap-3 group"
       style={{ ["--dept" as string]: DEPT_COLOR[employee] }}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
@@ -1775,6 +1833,9 @@ const MessageBubble = memo(function MessageBubble({
             </span>
           </button>
         ))}
+        {message.id && !message.pending && (
+          <MessageFeedbackButtons messageId={message.id} />
+        )}
       </div>
     </motion.div>
   );
