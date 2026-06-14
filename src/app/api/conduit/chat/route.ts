@@ -60,6 +60,11 @@ import {
   renderHubSpotBlock,
 } from "@/lib/connectors/hubspot";
 import {
+  getGithubToken,
+  fetchGithubContext,
+  renderGithubBlock,
+} from "@/lib/connectors/github";
+import {
   prepareChatTts,
   streamForEmployee,
   type ChatTtsConfig,
@@ -270,6 +275,22 @@ export async function POST(request: NextRequest) {
       hubspotBlock = renderHubSpotBlock(contacts, deals);
     } catch {
       // Non-fatal: continue without HubSpot context.
+    }
+  }
+
+  // Load GitHub context for Engineering specialist when connected.
+  let githubBlock = "";
+  const githubToken = await getGithubToken(supabase, account.id);
+  if (githubToken) {
+    const meta = githubToken.meta as { repos?: string[] } | null;
+    const repos = meta?.repos ?? [];
+    if (repos.length > 0) {
+      try {
+        const contexts = await fetchGithubContext(githubToken.access_token, repos);
+        githubBlock = renderGithubBlock(contexts);
+      } catch {
+        // Non-fatal: continue without GitHub context.
+      }
     }
   }
 
@@ -612,9 +633,11 @@ export async function POST(request: NextRequest) {
         // R-561: prepend Google Calendar block for ops + Atlas when connected.
         // R-542: prepend Slack block for all employees when a channel is selected.
         // #589: prepend HubSpot CRM block for Sales specialist when connected.
+        // #573: prepend GitHub block for Engineering specialist when connected.
         const calendarPrefix = calendarEmployees.has(employee) ? calendarBlock : "";
         const hubspotPrefix = employee === "sales" ? hubspotBlock : "";
-        const systemPrompt = slackBlock + calendarPrefix + hubspotPrefix + memoryBlockFor(employee) + withTime;
+        const githubPrefix = employee === "engineering" ? githubBlock : "";
+        const systemPrompt = slackBlock + calendarPrefix + hubspotPrefix + githubPrefix + memoryBlockFor(employee) + withTime;
 
         let fullText = "";
         let inputTokens = 0;

@@ -2756,7 +2756,7 @@ function NotificationsTab() {
 
 interface ConnectorStatus {
   connected: string[];
-  available: { google_calendar: boolean; slack: boolean; hubspot: boolean };
+  available: { google_calendar: boolean; slack: boolean; hubspot: boolean; github: boolean };
 }
 
 interface SlackChannel {
@@ -2774,11 +2774,30 @@ function IntegrationsTab() {
   const [slackChannels, setSlackChannels] = useState<SlackChannel[] | null>(null);
   const [selectedChannel, setSelectedChannel] = useState<string>("");
   const [savingChannel, setSavingChannel] = useState(false);
+  // GitHub PAT connector state
+  const [githubPat, setGithubPat] = useState("");
+  const [githubRepos, setGithubRepos] = useState("");
+  const [githubSaving, setGithubSaving] = useState(false);
+  const [githubConnectedMeta, setGithubConnectedMeta] = useState<{ login: string; repos: string[]; last_fetched_at: string | null } | null>(null);
 
   const fetchStatus = useCallback(async () => {
     try {
       const res = await fetch("/api/conduit/connectors");
-      if (res.ok) setStatus(await res.json());
+      if (res.ok) {
+        const data = await res.json();
+        setStatus(data);
+        // If GitHub is connected, load its metadata.
+        if ((data.connected as string[]).includes("github")) {
+          fetch("/api/conduit/connectors/github")
+            .then((r) => r.ok ? r.json() : null)
+            .then((j: { login?: string; repos?: string[]; last_fetched_at?: string | null } | null) => {
+              if (j?.login) setGithubConnectedMeta({ login: j.login, repos: j.repos ?? [], last_fetched_at: j.last_fetched_at ?? null });
+            })
+            .catch(() => {});
+        } else {
+          setGithubConnectedMeta(null);
+        }
+      }
     } catch {
       // Non-fatal — tab still shows "Coming soon" for all.
     }
@@ -2859,6 +2878,35 @@ function IntegrationsTab() {
     }
   };
 
+  const connectGithub = async () => {
+    if (!githubPat.trim()) return;
+    setGithubSaving(true);
+    try {
+      const repos = githubRepos
+        .split(/[\n,]+/)
+        .map((r) => r.trim())
+        .filter(Boolean)
+        .slice(0, 5);
+      const res = await fetch("/api/conduit/connectors/github", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pat: githubPat.trim(), repos }),
+      });
+      const json = await res.json() as { error?: string; login?: string; repos?: string[] };
+      if (!res.ok) {
+        if (json.error === "invalid_pat") toast.error("Invalid GitHub token — check permissions and try again.");
+        else toast.error("Failed to connect GitHub.");
+      } else {
+        toast.success("GitHub connected.");
+        setGithubPat("");
+        setGithubRepos("");
+        fetchStatus();
+      }
+    } finally {
+      setGithubSaving(false);
+    }
+  };
+
   const disconnect = async (provider: string) => {
     setDisconnecting(provider);
     try {
@@ -2870,9 +2918,11 @@ function IntegrationsTab() {
           google_calendar: "Google Calendar",
           slack: "Slack",
           hubspot: "HubSpot",
+          github: "GitHub",
         };
         toast.success(`${labels[provider] ?? provider} disconnected.`);
         if (provider === "slack") setSlackChannels(null);
+        if (provider === "github") setGithubConnectedMeta(null);
         fetchStatus();
       } else {
         toast.error("Failed to disconnect.");
@@ -2892,7 +2942,9 @@ function IntegrationsTab() {
         ? status?.available.slack ?? false
         : provider === "hubspot"
           ? status?.available.hubspot ?? false
-          : false;
+          : provider === "github"
+            ? status?.available.github ?? true
+            : false;
 
   return (
     <div className="space-y-6 text-sm">
@@ -3193,19 +3245,143 @@ function IntegrationsTab() {
         </div>
       </div>
 
-      {/* Coming soon — GitHub, Notion */}
+      {/* GitHub connector */}
+      <div className="conduit-card p-5 flex flex-col gap-4">
+        <div className="flex items-start justify-between gap-3">
+          <div
+            className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+            style={{
+              background: "var(--color-surface-elevated)",
+              border: "1px solid var(--color-border)",
+            }}
+          >
+            <BrandMarkGithub size={20} />
+          </div>
+          {isConnected("github") ? (
+            <span
+              className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+              style={{
+                background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
+                color: "var(--color-success, #22c55e)",
+                border: "1px solid color-mix(in srgb, var(--color-success, #22c55e) 28%, transparent)",
+              }}
+            >
+              Connected
+            </span>
+          ) : (
+            <span
+              className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+              style={{
+                background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
+                color: "var(--color-accent)",
+                border: "1px solid color-mix(in srgb, var(--color-accent) 28%, transparent)",
+              }}
+            >
+              Not connected
+            </span>
+          )}
+        </div>
+        <div>
+          <div className="font-medium text-[var(--color-text)]">GitHub</div>
+          <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
+            Gives your Engineering specialist live awareness of open PRs, issues,
+            and CI status from your repos — no copy-pasting required.
+          </p>
+        </div>
+        {isConnected("github") ? (
+          <div className="space-y-3">
+            {githubConnectedMeta && (
+              <div className="text-xs text-[var(--color-text-muted)] space-y-1">
+                <p>Connected as <span className="font-medium text-[var(--color-text)]">@{githubConnectedMeta.login}</span></p>
+                {githubConnectedMeta.repos.length > 0 && (
+                  <p>Repos: {githubConnectedMeta.repos.join(", ")}</p>
+                )}
+                {githubConnectedMeta.last_fetched_at && (
+                  <p>Last synced: {new Date(githubConnectedMeta.last_fetched_at).toLocaleString()}</p>
+                )}
+              </div>
+            )}
+            <button
+              onClick={() => disconnect("github")}
+              disabled={disconnecting === "github"}
+              className="w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
+              style={{
+                background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
+                color: "var(--color-destructive, #ef4444)",
+              }}
+            >
+              <Link2Off size={12} />
+              {disconnecting === "github" ? "Disconnecting…" : "Disconnect"}
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[11px] text-[var(--color-text-muted)] mb-1.5">
+                GitHub Personal Access Token
+                <span className="ml-1 opacity-70">(classic, <code className="text-[10px]">repo</code> scope)</span>
+              </label>
+              <input
+                type="password"
+                value={githubPat}
+                onChange={(e) => setGithubPat(e.target.value)}
+                placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                className="w-full px-3 py-2 rounded-lg text-xs font-mono"
+                style={{
+                  background: "var(--color-surface)",
+                  border: "1px solid var(--color-border)",
+                  color: "var(--color-text)",
+                  outline: "none",
+                }}
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] text-[var(--color-text-muted)] mb-1.5">
+                Repos to watch <span className="opacity-70">(up to 5, one per line or comma-separated, format: owner/repo)</span>
+              </label>
+              <textarea
+                value={githubRepos}
+                onChange={(e) => setGithubRepos(e.target.value)}
+                placeholder={"acme/backend\nacme/frontend"}
+                rows={3}
+                className="w-full px-3 py-2 rounded-lg text-xs font-mono resize-none"
+                style={{
+                  background: "var(--color-surface)",
+                  border: "1px solid var(--color-border)",
+                  color: "var(--color-text)",
+                  outline: "none",
+                }}
+              />
+            </div>
+            <button
+              onClick={connectGithub}
+              disabled={githubSaving || !githubPat.trim()}
+              className="w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 disabled:opacity-40"
+              style={{
+                background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+                color: "var(--color-accent)",
+              }}
+            >
+              <Link size={12} />
+              {githubSaving ? "Connecting…" : "Connect GitHub"}
+            </button>
+            <p className="text-[10px] text-[var(--color-text-muted)]">
+              Create a token at github.com/settings/tokens. Only read access is
+              used — Praxis never writes to your repositories.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Coming soon — Notion */}
       <div>
         <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-3">
           Coming soon
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
-            {
-              name: "GitHub",
-              description:
-                "Let Praxis Engineering open PRs, push commits, and read repository context directly from your GitHub account.",
-              Icon: BrandMarkGithub,
-            },
             {
               name: "Notion",
               description:
