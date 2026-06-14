@@ -32,6 +32,9 @@ const WhyPraxisTable = dynamic(() =>
 );
 const RoiCalculator = dynamic(() => import("@/components/RoiCalculator"));
 const Pricing = dynamic(() => import("@/components/Pricing"));
+const FounderTestimonials = dynamic(
+  () => import("@/components/FounderTestimonials"),
+);
 const TrustBar = dynamic(() => import("@/components/TrustBar"));
 const FAQ = dynamic(() => import("@/components/FAQ"));
 const FinalCTA = dynamic(() => import("@/components/FinalCTA"));
@@ -98,6 +101,7 @@ export default function Home() {
       <WhyPraxisTable />
       <RoiCalculator />
       <Pricing />
+      <FounderTestimonials />
       <TrustBar />
       <FAQ />
       <FinalCTA />
