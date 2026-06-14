@@ -231,6 +231,53 @@ export function Chat({
   const [showHandoffPicker, setShowHandoffPicker] = useState(false);
   const [handoffLoading, setHandoffLoading] = useState(false);
 
+  // SSE connection resilience: tracks offline / reconnecting / reconnected state.
+  const [connStatus, setConnStatus] = useState<'connected' | 'reconnecting' | 'reconnected' | 'failed'>('connected');
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const clear = () => {
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
+    };
+
+    const scheduleAttempt = (attempt: number) => {
+      if (navigator.onLine) {
+        setConnStatus('reconnected');
+        reconnectTimerRef.current = setTimeout(() => setConnStatus('connected'), 2000);
+        return;
+      }
+      if (attempt >= 5) {
+        setConnStatus('failed');
+        return;
+      }
+      const delay = Math.min(1000 * Math.pow(2, attempt), 30000);
+      reconnectTimerRef.current = setTimeout(() => scheduleAttempt(attempt + 1), delay);
+    };
+
+    const handleOffline = () => {
+      clear();
+      setConnStatus('reconnecting');
+      scheduleAttempt(0);
+    };
+
+    const handleOnline = () => {
+      clear();
+      setConnStatus('reconnected');
+      reconnectTimerRef.current = setTimeout(() => setConnStatus('connected'), 2000);
+    };
+
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+      clear();
+    };
+  }, []);
+
   // Rate-limit countdown: epoch ms when the ban lifts; null = not limited.
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
   const [rateLimitSecondsLeft, setRateLimitSecondsLeft] = useState(0);
@@ -1122,33 +1169,46 @@ export function Chat({
         }
       };
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-        const parts = buf.split("\n\n");
-        buf = parts.pop() ?? "";
-        for (const part of parts) {
-          const lines = part.split("\n");
-          let event = "message";
-          let dataLine = "";
-          for (const line of lines) {
-            if (line.startsWith("event: ")) event = line.slice(7).trim();
-            else if (line.startsWith("data: ")) dataLine = line.slice(6);
-          }
-          if (!dataLine) continue;
-          try {
-            const data = JSON.parse(dataLine);
-            handleEvent(event, data);
-          } catch {
-            // ignore malformed event
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          const parts = buf.split("\n\n");
+          buf = parts.pop() ?? "";
+          for (const part of parts) {
+            const lines = part.split("\n");
+            let event = "message";
+            let dataLine = "";
+            for (const line of lines) {
+              if (line.startsWith("event: ")) event = line.slice(7).trim();
+              else if (line.startsWith("data: ")) dataLine = line.slice(6);
+            }
+            if (!dataLine) continue;
+            try {
+              const data = JSON.parse(dataLine);
+              handleEvent(event, data);
+            } catch {
+              // ignore malformed event
+            }
           }
         }
+      } catch {
+        // Stream dropped mid-response — mark the in-flight message as incomplete.
+        setMessages((prev) => {
+          const next = [...prev];
+          const last = next[next.length - 1];
+          if (last?.pending) {
+            last.pending = false;
+            last.metadata = { ...((last.metadata as Record<string, unknown>) ?? {}), incomplete: true };
+          }
+          return next;
+        });
+      } finally {
+        setStreamingEmployee(null);
+        setLoading(false);
+        router.refresh();
       }
-
-      setStreamingEmployee(null);
-      setLoading(false);
-      router.refresh();
     },
     [conversationId, loading, pin, router],
   );
@@ -1553,6 +1613,59 @@ export function Chat({
           )}
         </div>
       </div>
+
+      {connStatus !== 'connected' && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex items-center justify-between gap-3 px-4 md:px-8 py-2 text-xs"
+          style={{
+            background: connStatus === 'reconnected'
+              ? 'rgba(34, 197, 94, 0.08)'
+              : connStatus === 'failed'
+              ? 'rgba(248, 113, 113, 0.08)'
+              : 'rgba(202, 138, 4, 0.08)',
+            borderTop: `1px solid ${
+              connStatus === 'reconnected'
+                ? 'rgba(34, 197, 94, 0.2)'
+                : connStatus === 'failed'
+                ? 'rgba(248, 113, 113, 0.2)'
+                : 'rgba(202, 138, 4, 0.2)'
+            }`,
+          }}
+        >
+          <div
+            className="flex items-center gap-2"
+            style={{
+              color: connStatus === 'reconnected'
+                ? '#22c55e'
+                : connStatus === 'failed'
+                ? '#f87171'
+                : '#ca8a04',
+            }}
+          >
+            <AlertCircle size={12} aria-hidden />
+            <span>
+              {connStatus === 'reconnecting' && 'Connection lost — reconnecting…'}
+              {connStatus === 'reconnected' && 'Reconnected'}
+              {connStatus === 'failed' && 'Failed to reconnect — refresh the page'}
+            </span>
+          </div>
+          {(connStatus === 'reconnecting' || connStatus === 'reconnected') && (
+            <button
+              type="button"
+              onClick={() => setConnStatus('connected')}
+              aria-label="Dismiss"
+              className="shrink-0 p-0.5 rounded transition-colors"
+              style={{ color: 'var(--color-text-muted)' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--color-text)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'; }}
+            >
+              <X size={11} />
+            </button>
+          )}
+        </div>
+      )}
 
       <div
         className="px-4 md:px-8 py-3 md:py-4"
@@ -2491,6 +2604,16 @@ const MessageBubble = memo(function MessageBubble({
             caretColor={message.pending ? DEPT_COLOR[employee] : undefined}
           />
         </div>
+        {!!(message.metadata as Record<string, unknown>)?.incomplete && (
+          <div
+            className="flex items-center gap-1.5 mt-2 text-[11px]"
+            style={{ color: '#ca8a04' }}
+            aria-label="Response was cut short due to a connection drop"
+          >
+            <AlertCircle size={11} aria-hidden />
+            <span>⚠ Incomplete response</span>
+          </div>
+        )}
         {message.memories?.map((mem) => (
           <div
             key={mem.id}
