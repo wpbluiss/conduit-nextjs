@@ -549,6 +549,35 @@ function ProfileTab({
   const [tzSaving, setTzSaving] = useState(false);
   const [tzSaved, setTzSaved] = useState(false);
   const router = useRouter();
+
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  const downloadExport = async () => {
+    setExporting(true);
+    setExportError(null);
+    try {
+      const res = await fetch("/api/conduit/account/export");
+      if (!res.ok) {
+        setExportError("Export failed. Please try again.");
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const date = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `praxis-export-${date}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      setExportError("Export failed. Please try again.");
+    } finally {
+      setExporting(false);
+    }
+  };
   const toast = useToast();
 
   // Email change state
@@ -782,6 +811,29 @@ function ProfileTab({
             Update password
           </PraxisButton>
         </form>
+      </div>
+
+      {/* ── Data & Privacy ── */}
+      <div>
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+          Data &amp; Privacy
+        </div>
+        <p className="text-xs text-[var(--color-text-muted)] mb-3 max-w-sm">
+          Download a JSON bundle of all your data — profile, conversation
+          history, and AI memory. Your data is yours.
+        </p>
+        <PraxisButton
+          onClick={downloadExport}
+          isLoading={exporting}
+          loadingText="Preparing export…"
+          variant="secondary"
+          className="!text-xs"
+        >
+          Download my data
+        </PraxisButton>
+        {exportError && (
+          <p className="mt-2 text-xs text-[var(--color-pink)]">{exportError}</p>
+        )}
       </div>
     </div>
   );
