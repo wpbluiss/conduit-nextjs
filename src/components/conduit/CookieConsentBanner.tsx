@@ -40,18 +40,17 @@ export function CookieConsentBanner() {
       role="dialog"
       aria-modal="false"
       aria-label="Cookie consent"
-      className="fixed top-0 left-0 right-0 z-[55] px-4 pt-4 md:px-6 md:pt-6"
+      className="fixed bottom-0 left-0 right-0 z-[55] px-4 pb-4 md:top-0 md:bottom-auto md:pt-6 md:pb-0 md:px-6"
     >
       <div
-        className="mx-auto max-w-3xl conduit-card flex flex-col gap-3 p-4 md:flex-row md:items-center md:gap-6"
+        className="mx-auto max-w-3xl conduit-card flex flex-row items-center gap-2 p-3 md:flex-row md:items-center md:gap-6 md:p-4"
         style={{
           background: "var(--color-surface-elevated)",
           boxShadow: "0 4px 32px rgba(10,9,8,0.4)",
         }}
       >
-        <p className="flex-1 text-sm text-[var(--color-text-muted)] leading-relaxed">
-          We use analytics to understand how Praxis is used and improve the
-          product.{" "}
+        <p className="flex-1 text-xs md:text-sm text-[var(--color-text-muted)] leading-relaxed">
+          We use analytics to improve Praxis.{" "}
           <a
             href="/legal/privacy"
             className="text-[var(--color-accent)] hover:underline"
@@ -63,13 +62,13 @@ export function CookieConsentBanner() {
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={decline}
-            className="px-4 py-2 rounded-lg text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors border border-[var(--color-border)] hover:border-[var(--color-accent)]"
+            className="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors border border-[var(--color-border)] hover:border-[var(--color-accent)]"
           >
             Decline
           </button>
           <button
             onClick={accept}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            className="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium transition-colors"
             style={{
               background: "var(--color-accent)",
               color: "#fff",
