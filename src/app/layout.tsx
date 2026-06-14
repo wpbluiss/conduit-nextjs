@@ -9,6 +9,7 @@ import "@/styles/praxis-design-language.css";
 // imported in src/app/app/layout.tsx so marketing pages don't pay the ~36 KB.
 import { ThemeBoot } from "@/components/conduit/ThemeBoot";
 import { PwaInstaller } from "@/components/conduit/PwaInstaller";
+import { CookieConsentBanner } from "@/components/conduit/CookieConsentBanner";
 
 // R18 Slice 0: body sans switched from Inter to Geist Sans per the
 // design-language spec (frontend-design skill forbids Inter as generic
@@ -92,6 +93,7 @@ export default function RootLayout({
         </a>
         <div id="main-content">{children}</div>
         <PwaInstaller />
+        <CookieConsentBanner />
       </body>
     </html>
   );
