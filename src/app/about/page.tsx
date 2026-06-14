@@ -15,24 +15,33 @@ import { PageHeader } from "@/components/marketing/PageHeader";
 import { ScrollRevealCards, ScrollRevealItem } from "@/components/marketing/ScrollRevealCards";
 
 export const metadata: Metadata = {
-  title: "About — Conduit AI",
+  title: "About Praxis — Conduit AI",
   description:
-    "Conduit AI is the company. Praxis is the product. We're building the operating system for businesses that won't be staffed.",
+    "Conduit AI is the company. Praxis is the product — nine AI specialists running 24/7 for businesses that won't be staffed.",
   openGraph: {
-    title: "About — Conduit AI",
+    title: "About Praxis — Conduit AI",
     description:
-      "Conduit AI is the company. Praxis is the product. We're building the operating system for businesses that won't be staffed.",
+      "Conduit AI is the company. Praxis is the product — nine AI specialists running 24/7 for businesses that won't be staffed.",
     url: "https://conduitai.io/about",
-    siteName: "Conduit AI",
+    siteName: "Praxis by Conduit AI",
     type: "website",
-    images: [{ url: "/praxis-mark.png", width: 1200, height: 630, alt: "Conduit AI — About" }],
+    images: [
+      {
+        url: "/api/og?title=About+Praxis+%E2%80%94+Conduit+AI&description=Nine+AI+specialists+for+businesses+that+won%27t+be+staffed.",
+        width: 1200,
+        height: 630,
+        alt: "About Praxis — Conduit AI",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "About — Conduit AI",
+    title: "About Praxis — Conduit AI",
     description:
-      "Conduit AI is the company. Praxis is the product. Building the OS for businesses that won't be staffed.",
-    images: ["/praxis-mark.png"],
+      "Nine AI specialists running 24/7 for businesses that won't be staffed. Conduit AI is the company. Praxis is the product.",
+    images: [
+      "/api/og?title=About+Praxis+%E2%80%94+Conduit+AI&description=Nine+AI+specialists+for+businesses+that+won%27t+be+staffed.",
+    ],
   },
   alternates: {
     canonical: "https://conduitai.io/about",

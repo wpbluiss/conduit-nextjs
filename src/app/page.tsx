@@ -45,22 +45,33 @@ const FinalCTA = dynamic(() => import("@/components/FinalCTA"));
 const Footer = dynamic(() => import("@/components/Footer"));
 
 export const metadata: Metadata = {
-  title: "Conduit AI — Intelligence at work",
+  title: "Praxis — Nine Specialists. Zero Payroll.",
   description:
-    "Conduit AI builds Praxis, the operating system for autonomous AI workforces. Voice, sales, engineering, ops, finance — running 24/7.",
+    "Nine AI specialists covering marketing, sales, engineering, ops, finance, legal, HR, compliance, and voice — deployed in minutes, running 24/7.",
   openGraph: {
-    title: "Conduit AI — Intelligence at work",
+    title: "Praxis — Nine Specialists. Zero Payroll.",
     description:
-      "Conduit AI builds Praxis, the operating system for autonomous AI workforces. Voice, sales, engineering, ops, finance — running 24/7.",
+      "Nine AI specialists covering marketing, sales, engineering, ops, finance, legal, HR, compliance, and voice — deployed in minutes, running 24/7.",
     url: "https://conduitai.io",
-    siteName: "Conduit AI",
+    siteName: "Praxis by Conduit AI",
     type: "website",
+    images: [
+      {
+        url: "/api/og?title=Praxis+%E2%80%94+Nine+Specialists.+Zero+Payroll.&description=Nine+AI+specialists+running+24%2F7+for+your+business.",
+        width: 1200,
+        height: 630,
+        alt: "Praxis — Nine Specialists. Zero Payroll.",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Conduit AI — Intelligence at work",
+    title: "Praxis — Nine Specialists. Zero Payroll.",
     description:
-      "The operating system for autonomous AI workforces. Nine specialists, one shared brain, running 24/7.",
+      "Nine AI specialists — marketing, sales, engineering, ops, finance, and more — running 24/7 for your business.",
+    images: [
+      "/api/og?title=Praxis+%E2%80%94+Nine+Specialists.+Zero+Payroll.&description=Nine+AI+specialists+running+24%2F7+for+your+business.",
+    ],
   },
   alternates: {
     canonical: "https://conduitai.io",
