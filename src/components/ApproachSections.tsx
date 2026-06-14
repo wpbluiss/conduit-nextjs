@@ -109,7 +109,7 @@ function SectionBlock({
           {leadRest && (
             <motion.p
               variants={{
-                hidden: { opacity: 1, y: 14 },
+                hidden: { opacity: 0, y: 14 },
                 show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
               }}
             >
@@ -120,7 +120,7 @@ function SectionBlock({
             <motion.p
               key={pi}
               variants={{
-                hidden: { opacity: 1, y: 14 },
+                hidden: { opacity: 0, y: 14 },
                 show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
               }}
             >

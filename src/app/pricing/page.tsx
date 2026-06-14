@@ -5,9 +5,11 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Pricing from "@/components/Pricing";
 import { AnalyticsPageView } from "@/components/conduit/AnalyticsPageView";
+import { MarketingMotionProvider } from "@/components/MarketingMotionProvider";
 import { PageHeader } from "@/components/marketing/PageHeader";
 import { PricingFAQ } from "@/components/marketing/PricingFAQ";
 import { PricingComparisonTable } from "@/components/marketing/PricingComparisonTable";
+import { ScrollRevealCards, ScrollRevealItem } from "@/components/marketing/ScrollRevealCards";
 
 export const metadata: Metadata = {
   title: "Pricing — Three tiers, one workforce",
@@ -106,6 +108,7 @@ const PRICING_JSONLD = {
 
 export default function PricingPage() {
   return (
+    <MarketingMotionProvider>
     <main className="conduit-bg-canvas">
       <script
         type="application/ld+json"
@@ -131,14 +134,19 @@ export default function PricingPage() {
       {/* Comparison table */}
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
-          <div className="max-w-[760px] mb-12 md:mb-16">
-            <p className="conduit-caption conduit-caption-ember">Compare</p>
-            <h2 className="conduit-display-2xl mt-5">
-              Every line, side by side.
-            </h2>
-          </div>
-
-          <PricingComparisonTable />
+          <ScrollRevealCards>
+            <ScrollRevealItem>
+              <div className="max-w-[760px] mb-12 md:mb-16">
+                <p className="conduit-caption conduit-caption-ember">Compare</p>
+                <h2 className="conduit-display-2xl mt-5">
+                  Every line, side by side.
+                </h2>
+              </div>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <PricingComparisonTable />
+            </ScrollRevealItem>
+          </ScrollRevealCards>
         </div>
       </section>
 
@@ -146,12 +154,17 @@ export default function PricingPage() {
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
           <div className="conduit-prose">
-            <p className="conduit-caption conduit-caption-ember">FAQ</p>
-            <h2 className="conduit-display-2xl mt-5">
-              Common questions, answered straight.
-            </h2>
-
-            <PricingFAQ />
+            <ScrollRevealCards>
+              <ScrollRevealItem>
+                <p className="conduit-caption conduit-caption-ember">FAQ</p>
+                <h2 className="conduit-display-2xl mt-5">
+                  Common questions, answered straight.
+                </h2>
+              </ScrollRevealItem>
+              <ScrollRevealItem>
+                <PricingFAQ />
+              </ScrollRevealItem>
+            </ScrollRevealCards>
           </div>
         </div>
       </section>
@@ -159,29 +172,36 @@ export default function PricingPage() {
       {/* Enterprise CTA */}
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
-          <div className="conduit-prose text-center">
-            <p className="conduit-caption conduit-caption-ember">
-              Need more?
-            </p>
-            <h2 className="conduit-display-xl mt-5">
-              Custom token volumes, isolation, SLAs.
-            </h2>
-            <p className="conduit-body-lg mt-5">
-              For teams replacing whole departments, ask about custom
-              enterprise plans. Direct line, no sales gauntlet.
-            </p>
-            <Link
-              href="mailto:luis@conduitai.io?subject=Praxis%20custom%20enterprise"
-              className="conduit-btn-primary mt-9 inline-flex"
-            >
-              Email luis@conduitai.io
-              <ArrowRight size={16} weight="bold" />
-            </Link>
-          </div>
+          <ScrollRevealCards className="conduit-prose text-center">
+            <ScrollRevealItem>
+              <p className="conduit-caption conduit-caption-ember">
+                Need more?
+              </p>
+              <h2 className="conduit-display-xl mt-5">
+                Custom token volumes, isolation, SLAs.
+              </h2>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <p className="conduit-body-lg mt-5">
+                For teams replacing whole departments, ask about custom
+                enterprise plans. Direct line, no sales gauntlet.
+              </p>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <Link
+                href="mailto:luis@conduitai.io?subject=Praxis%20custom%20enterprise"
+                className="conduit-btn-primary mt-9 inline-flex"
+              >
+                Email luis@conduitai.io
+                <ArrowRight size={16} weight="bold" />
+              </Link>
+            </ScrollRevealItem>
+          </ScrollRevealCards>
         </div>
       </section>
 
       <Footer />
     </main>
+    </MarketingMotionProvider>
   );
 }

@@ -10,6 +10,7 @@ import {
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FinalCTA from "@/components/FinalCTA";
+import { MarketingMotionProvider } from "@/components/MarketingMotionProvider";
 import { PageHeader } from "@/components/marketing/PageHeader";
 import { ScrollRevealCards, ScrollRevealItem } from "@/components/marketing/ScrollRevealCards";
 
@@ -73,6 +74,7 @@ const APPROACH = [
 
 export default function AboutPage() {
   return (
+    <MarketingMotionProvider>
     <main className="conduit-bg-canvas">
       <Navbar />
 
@@ -95,32 +97,36 @@ export default function AboutPage() {
         className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]"
       >
         <div className="conduit-container">
-          <div className="conduit-prose">
-            <p className="conduit-caption conduit-caption-ember">Mission</p>
-            <h2 className="conduit-display-xl mt-5">
-              Replace payroll with software that{" "}
-              <span className="conduit-ember-text">actually works.</span>
-            </h2>
-            <div className="space-y-6 mt-10 text-[17px] md:text-[18px] text-[var(--color-cream-soft)] leading-[1.7]">
-              <p>
-                Most companies treat AI as a tool inside their existing stack.
-                We think that&rsquo;s a category error. AI shouldn&rsquo;t be a
-                tool — it should be the team.
-              </p>
-              <p>
-                Praxis isn&rsquo;t a copilot or a chat product. It&rsquo;s a
-                workforce. Nine specialist employees, one shared brain, voice +
-                text + execution. The same way you&rsquo;d build a team of
-                humans, but the team works 24/7 without payroll, benefits, or
-                coordination overhead.
-              </p>
-              <p>
-                We believe the next decade of business will be defined by the
-                founders who deploy this kind of workforce, not the founders
-                who scale headcount.
-              </p>
-            </div>
-          </div>
+          <ScrollRevealCards className="conduit-prose">
+            <ScrollRevealItem>
+              <p className="conduit-caption conduit-caption-ember">Mission</p>
+              <h2 className="conduit-display-xl mt-5">
+                Replace payroll with software that{" "}
+                <span className="conduit-ember-text">actually works.</span>
+              </h2>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <div className="space-y-6 mt-10 text-[17px] md:text-[18px] text-[var(--color-cream-soft)] leading-[1.7]">
+                <p>
+                  Most companies treat AI as a tool inside their existing stack.
+                  We think that&rsquo;s a category error. AI shouldn&rsquo;t be
+                  a tool — it should be the team.
+                </p>
+                <p>
+                  Praxis isn&rsquo;t a copilot or a chat product. It&rsquo;s a
+                  workforce. Nine specialist employees, one shared brain, voice +
+                  text + execution. The same way you&rsquo;d build a team of
+                  humans, but the team works 24/7 without payroll, benefits, or
+                  coordination overhead.
+                </p>
+                <p>
+                  We believe the next decade of business will be defined by the
+                  founders who deploy this kind of workforce, not the founders
+                  who scale headcount.
+                </p>
+              </div>
+            </ScrollRevealItem>
+          </ScrollRevealCards>
         </div>
       </section>
 
@@ -270,6 +276,7 @@ export default function AboutPage() {
       <FinalCTA />
       <Footer />
     </main>
+    </MarketingMotionProvider>
   );
 }
 
