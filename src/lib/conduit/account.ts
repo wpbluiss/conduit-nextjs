@@ -37,6 +37,8 @@ export interface ConduitAccount {
   theme_preference?: "system" | "light" | "dark" | null;
   // R20 notification prefs — nullable until migration 030 runs.
   notification_prefs?: { product_updates?: boolean; weekly_digest?: boolean } | null;
+  // R21 onboarding checklist — nullable until migration 032 runs.
+  onboarding_checklist?: Record<string, boolean> | null;
   created_at: string;
   updated_at: string;
 }

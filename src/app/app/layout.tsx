@@ -20,6 +20,7 @@ import { getInFlightBuilds } from "@/lib/engineering/in-flight";
 import { PostOnboardingNudge } from "@/components/conduit/PostOnboardingNudge";
 import { FirstRunTour } from "@/components/conduit/FirstRunTour";
 import { KeyboardShortcutsOverlay } from "@/components/conduit/KeyboardShortcutsOverlay";
+import { WelcomeChecklist } from "@/components/conduit/WelcomeChecklist";
 
 export const dynamic = "force-dynamic";
 
@@ -113,6 +114,13 @@ export default async function AppLayout({
     user.email?.split("@")[0] ||
     "you";
 
+  // Show welcome checklist only to accounts created within the last 7 days.
+  const accountAgeMs = Date.now() - new Date(account.created_at).getTime();
+  const isNewAccount = accountAgeMs < 7 * 24 * 60 * 60 * 1000;
+  const checklistDismissed = Boolean(
+    (account.onboarding_checklist as Record<string, boolean> | null)?.dismissed,
+  );
+
   const initialUser = {
     id: user.id,
     email: user.email ?? "",
@@ -157,6 +165,9 @@ export default async function AppLayout({
         <PostOnboardingNudge />
         {onboarded && <FirstRunTour />}
         <KeyboardShortcutsOverlay />
+        {onboarded && isNewAccount && !checklistDismissed && (
+          <WelcomeChecklist hasConversations={(convos ?? []).length > 0} />
+        )}
       </PraxisCanvasTintProvider>
       </ToastProvider>
       </UserProvider>
