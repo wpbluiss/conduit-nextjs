@@ -49,6 +49,13 @@ import {
   renderCalendarBlock,
 } from "@/lib/connectors/google-calendar";
 import {
+  getGitHubToken,
+  getOpenIssues,
+  getOpenPRs,
+  listUserRepos,
+  renderGitHubBlock,
+} from "@/lib/connectors/github";
+import {
   prepareChatTts,
   streamForEmployee,
   type ChatTtsConfig,
@@ -230,6 +237,26 @@ export async function POST(request: NextRequest) {
       calendarBlock = renderCalendarBlock(events);
     } catch {
       // Non-fatal: continue without calendar context.
+    }
+  }
+
+  // Load GitHub context for engineering specialist (and Atlas).
+  const githubEmployees = new Set<EmployeeKey>(["engineering", "jarvis"]);
+  let githubBlock = "";
+  const githubToken = await getGitHubToken(supabase, account.id);
+  if (githubToken) {
+    try {
+      const repos = await listUserRepos(githubToken.access_token, 5);
+      const repoData = await Promise.all(
+        repos.map(async (repo) => ({
+          repo,
+          prs: await getOpenPRs(githubToken.access_token, repo, 10),
+          issues: await getOpenIssues(githubToken.access_token, repo, 10),
+        })),
+      );
+      githubBlock = renderGitHubBlock(repoData);
+    } catch {
+      // Non-fatal: continue without GitHub context.
     }
   }
 
@@ -570,8 +597,10 @@ export async function POST(request: NextRequest) {
         // R17: per-employee filter — Atlas sees all; others see global +
         // their-scope only.
         // R-561: prepend Google Calendar block for ops + Atlas when connected.
+        // R-573: prepend GitHub block for engineering + Atlas when connected.
         const calendarPrefix = calendarEmployees.has(employee) ? calendarBlock : "";
-        const systemPrompt = calendarPrefix + memoryBlockFor(employee) + withTime;
+        const githubPrefix = githubEmployees.has(employee) ? githubBlock : "";
+        const systemPrompt = calendarPrefix + githubPrefix + memoryBlockFor(employee) + withTime;
 
         let fullText = "";
         let inputTokens = 0;

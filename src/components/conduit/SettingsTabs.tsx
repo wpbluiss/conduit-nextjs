@@ -2647,7 +2647,7 @@ function NotificationsTab() {
 
 interface ConnectorStatus {
   connected: string[];
-  available: { google_calendar: boolean; slack: boolean };
+  available: { google_calendar: boolean; slack: boolean; github: boolean };
 }
 
 function IntegrationsTab() {
@@ -2678,6 +2678,7 @@ function IntegrationsTab() {
       const labels: Record<string, string> = {
         google_calendar: "Google Calendar",
         slack: "Slack",
+        github: "GitHub",
       };
       toast.success(`${labels[connected] ?? connected} connected.`);
       fetchStatus();
@@ -2694,6 +2695,10 @@ function IntegrationsTab() {
         slack_csrf: "OAuth state mismatch — please try again.",
         slack_exchange: "Failed to exchange Slack auth code.",
         slack_db: "Failed to save Slack connection.",
+        github_denied: "GitHub access was denied.",
+        github_csrf: "OAuth state mismatch — please try again.",
+        github_exchange: "Failed to exchange GitHub auth code.",
+        github_db: "Failed to save GitHub connection.",
       };
       toast.error(msgs[error] ?? "Connection failed.");
       router.replace("/app/settings?tab=integrations");
@@ -2711,6 +2716,7 @@ function IntegrationsTab() {
         const labels: Record<string, string> = {
           google_calendar: "Google Calendar",
           slack: "Slack",
+          github: "GitHub",
         };
         toast.success(`${labels[provider] ?? provider} disconnected.`);
         fetchStatus();
@@ -2730,7 +2736,9 @@ function IntegrationsTab() {
       ? status?.available.google_calendar ?? false
       : provider === "slack"
         ? status?.available.slack ?? false
-        : false;
+        : provider === "github"
+          ? status?.available.github ?? false
+          : false;
 
   return (
     <div className="space-y-6 text-sm">
@@ -2910,21 +2918,100 @@ function IntegrationsTab() {
             </button>
           )}
         </div>
+
+        {/* GitHub */}
+        <div className="conduit-card p-5 flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-3">
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+              }}
+            >
+              <BrandMarkGithub size={20} />
+            </div>
+            {isConnected("github") ? (
+              <span
+                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                style={{
+                  background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
+                  color: "var(--color-success, #22c55e)",
+                  border: "1px solid color-mix(in srgb, var(--color-success, #22c55e) 28%, transparent)",
+                }}
+              >
+                Connected
+              </span>
+            ) : (
+              <span
+                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                style={{
+                  background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
+                  color: "var(--color-accent)",
+                  border: "1px solid color-mix(in srgb, var(--color-accent) 28%, transparent)",
+                }}
+              >
+                Not connected
+              </span>
+            )}
+          </div>
+          <div>
+            <div className="font-medium text-[var(--color-text)]">GitHub</div>
+            <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
+              Surface open PRs, issues, and CI status as live context for your
+              Engineering specialist — no more copy-pasting from GitHub.
+            </p>
+          </div>
+          {isConnected("github") ? (
+            <button
+              onClick={() => disconnect("github")}
+              disabled={disconnecting === "github"}
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
+              style={{
+                background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
+                color: "var(--color-destructive, #ef4444)",
+              }}
+            >
+              <Link2Off size={12} />
+              {disconnecting === "github" ? "Disconnecting…" : "Disconnect"}
+            </button>
+          ) : isAvailable("github") ? (
+            <a
+              href="/api/conduit/connectors/github/auth"
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
+              style={{
+                background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+                color: "var(--color-accent)",
+              }}
+            >
+              <Link size={12} />
+              Connect GitHub
+            </a>
+          ) : (
+            <button
+              disabled
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text-muted)",
+              }}
+            >
+              Not configured
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Coming soon — GitHub, Notion */}
+      {/* Coming soon — Notion */}
       <div>
         <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-3">
           Coming soon
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
-            {
-              name: "GitHub",
-              description:
-                "Let Praxis Engineering open PRs, push commits, and read repository context directly from your GitHub account.",
-              Icon: BrandMarkGithub,
-            },
             {
               name: "Notion",
               description:
