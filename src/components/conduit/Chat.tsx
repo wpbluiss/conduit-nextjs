@@ -2604,7 +2604,7 @@ const MessageBubble = memo(function MessageBubble({
             caretColor={message.pending ? DEPT_COLOR[employee] : undefined}
           />
         </div>
-        {(message.metadata as Record<string, unknown>)?.incomplete && (
+        {!!(message.metadata as Record<string, unknown>)?.incomplete && (
           <div
             className="flex items-center gap-1.5 mt-2 text-[11px]"
             style={{ color: '#ca8a04' }}
