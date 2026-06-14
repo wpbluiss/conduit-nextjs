@@ -345,27 +345,29 @@ export function Sidebar({
               <PraxisLogo size={28} glow />
             </Link>
           )}
-          {/* Toggle button — desktop only */}
+          {/* Toggle button — desktop only; close button — mobile only */}
           {!collapsed && (
-            <div className="hidden md:flex items-center gap-1">
-              <button
-                type="button"
-                onClick={toggleCollapsed}
-                aria-label="Collapse sidebar"
-                title="Collapse sidebar"
-                className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors p-1 rounded"
-              >
-                <PanelLeftClose size={15} />
-              </button>
+            <>
+              <div className="hidden md:flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={toggleCollapsed}
+                  aria-label="Collapse sidebar"
+                  title="Collapse sidebar"
+                  className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors p-1 rounded"
+                >
+                  <PanelLeftClose size={15} />
+                </button>
+              </div>
               <button
                 type="button"
                 onClick={close}
                 aria-label="Close menu"
-                className="md:hidden text-[var(--color-text-muted)]"
+                className="md:hidden text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors p-1 rounded"
               >
                 <X size={18} />
               </button>
-            </div>
+            </>
           )}
         </div>
 
