@@ -1269,6 +1269,8 @@ function BillingTab({
         bonus={account.bonus_tokens ?? 0}
       />
 
+      <AiUsageSection tierId={account.tier_id ?? "free"} internal={internal} />
+
       {error && (
         <p className="text-sm text-[var(--color-pink)]">{error}</p>
       )}
@@ -1466,6 +1468,77 @@ function Stat({
         <div className="text-[11px] text-[var(--color-text-muted)] mt-0.5">
           {sub}
         </div>
+      )}
+    </div>
+  );
+}
+
+// AI message usage meter for free-tier users; shown in the Billing tab.
+function AiUsageSection({ tierId, internal }: { tierId: string; internal: boolean }) {
+  const [data, setData] = useState<{
+    used: number;
+    cap: number | null;
+    period_end: string;
+    isFree: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/billing/usage")
+      .then((r) => r.json())
+      .then(setData)
+      .catch(() => null);
+  }, []);
+
+  if (internal) return null;
+
+  const isFree = tierId === "free";
+  const cap = isFree ? (data?.cap ?? 10) : null;
+  const used = data?.used ?? 0;
+  const pct = cap ? Math.min(100, Math.round((used / cap) * 100)) : 0;
+  const periodEnd = data?.period_end;
+
+  return (
+    <div className="conduit-card p-5">
+      <div className="flex items-baseline justify-between gap-3 mb-2">
+        <span className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+          AI Usage
+        </span>
+        {isFree && cap !== null ? (
+          <span className="text-sm">
+            {used} / {cap} messages
+          </span>
+        ) : (
+          <span className="text-sm font-medium" style={{ color: "var(--color-accent)" }}>
+            Unlimited
+          </span>
+        )}
+      </div>
+      {isFree && cap !== null ? (
+        <>
+          <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--color-border)" }}>
+            <div
+              className="h-2 rounded-full transition-all"
+              style={{
+                width: `${pct}%`,
+                background: pct >= 90 ? "var(--color-pink)" : pct >= 70 ? "var(--color-amber)" : "var(--color-accent)",
+              }}
+            />
+          </div>
+          <p className="mt-2 text-[11px] text-[var(--color-text-muted)]">
+            Resets on the 1st{periodEnd ? ` (${periodEnd})` : ""}
+          </p>
+          {pct >= 90 && (
+            <p className="mt-1 text-xs" style={{ color: pct >= 100 ? "var(--color-pink)" : "var(--color-amber)" }}>
+              {pct >= 100
+                ? "Message cap reached — upgrade to Pro for unlimited."
+                : `${10 - used} message${10 - used !== 1 ? "s" : ""} remaining this month.`}
+            </p>
+          )}
+        </>
+      ) : (
+        <p className="text-xs text-[var(--color-text-muted)]">
+          Pro plan · No message cap
+        </p>
       )}
     </div>
   );

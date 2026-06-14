@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { AlertCircle, ArrowRight, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
@@ -136,6 +137,8 @@ export function Chat({
   internalAccount = false,
   voice = { enabled: false, autoPlay: true, ttsAllowed: false },
   allowedEmployees,
+  aiMsgUsed = 0,
+  aiMsgCap = null,
 }: {
   conversationId: string | null;
   initialMessages: MessageRow[];
@@ -143,6 +146,8 @@ export function Chat({
   internalAccount?: boolean;
   voice?: VoicePrefs;
   allowedEmployees: EmployeeKey[];
+  aiMsgUsed?: number;
+  aiMsgCap?: number | null;
 }) {
   const allowedSet = new Set(allowedEmployees);
   // "team" requires at least 2 non-Atlas employees on the tier.
@@ -839,66 +844,72 @@ export function Chat({
         style={{ background: "var(--color-surface)" }}
       >
         <div className="mx-auto" style={{ maxWidth: "48rem" }}>
-          <PraxisComposerPill
-            value={input}
-            onChange={(next) => {
-              // R13: any user typing into the chat stops in-flight streaming
-              // audio so the user's attention isn't competing with the
-              // agent's voice.
-              if (
-                next.length > input.length &&
-                (playingMessageIdx !== null || streamingAudioActiveRef.current)
-              ) {
-                stopAudio();
-              }
-              setInput(next);
-            }}
-            onSubmit={() => {
-              if (speech.listening) speech.stop();
-              send(input);
-            }}
-            pin={pin as PraxisPinValue}
-            pinOptions={pinOptions as { value: PraxisPinValue; label: string }[]}
-            onPinChange={(next) => setPin(next as PinValue)}
-            speechSupported={speech.supported}
-            speechListening={speech.listening}
-            onSpeechToggle={() => {
-              if (!speech.supported) return;
-              if (speech.listening) {
-                speech.stop();
-                const t = lastTranscriptRef.current.trim();
-                if (t) setTimeout(() => send(t), 0);
-              } else {
-                speech.start();
-              }
-            }}
-            loading={loading}
-            streamingEmployee={streamingEmployee as EmployeeId | null}
-            placeholder={speech.listening ? "Listening…" : "Talk to your team…"}
-            voiceMessageSupported={voiceRecorder.supported}
-            voiceRecordingState={voiceRecorder.state}
-            voiceRecordingSeconds={voiceRecorder.elapsedSeconds}
-            onVoiceRecordStart={() => void voiceRecorder.start()}
-            onVoiceRecordStop={() => voiceRecorder.stop()}
-            onVoiceRecordCancel={() => voiceRecorder.cancel()}
-          />
-          <div
-            className="mt-2 h-4 text-center"
-            style={{ fontSize: "11px" }}
-          >
-            {streamingEmployee ? (
-              <span
-                className="presence-line"
-                style={{ color: DEPT_COLOR[streamingEmployee] }}
+          {aiMsgCap !== null && aiMsgUsed >= aiMsgCap ? (
+            <AiCapGate used={aiMsgUsed} cap={aiMsgCap} />
+          ) : (
+            <>
+              <PraxisComposerPill
+                value={input}
+                onChange={(next) => {
+                  // R13: any user typing into the chat stops in-flight streaming
+                  // audio so the user's attention isn't competing with the
+                  // agent's voice.
+                  if (
+                    next.length > input.length &&
+                    (playingMessageIdx !== null || streamingAudioActiveRef.current)
+                  ) {
+                    stopAudio();
+                  }
+                  setInput(next);
+                }}
+                onSubmit={() => {
+                  if (speech.listening) speech.stop();
+                  send(input);
+                }}
+                pin={pin as PraxisPinValue}
+                pinOptions={pinOptions as { value: PraxisPinValue; label: string }[]}
+                onPinChange={(next) => setPin(next as PinValue)}
+                speechSupported={speech.supported}
+                speechListening={speech.listening}
+                onSpeechToggle={() => {
+                  if (!speech.supported) return;
+                  if (speech.listening) {
+                    speech.stop();
+                    const t = lastTranscriptRef.current.trim();
+                    if (t) setTimeout(() => send(t), 0);
+                  } else {
+                    speech.start();
+                  }
+                }}
+                loading={loading}
+                streamingEmployee={streamingEmployee as EmployeeId | null}
+                placeholder={speech.listening ? "Listening…" : "Talk to your team…"}
+                voiceMessageSupported={voiceRecorder.supported}
+                voiceRecordingState={voiceRecorder.state}
+                voiceRecordingSeconds={voiceRecorder.elapsedSeconds}
+                onVoiceRecordStart={() => void voiceRecorder.start()}
+                onVoiceRecordStop={() => voiceRecorder.stop()}
+                onVoiceRecordCancel={() => voiceRecorder.cancel()}
+              />
+              <div
+                className="mt-2 h-4 text-center"
+                style={{ fontSize: "11px" }}
               >
-                {employeeLabel(streamingEmployee)} is thinking…
-              </span>
-            ) : (
-              <span style={{ color: "var(--color-text-muted)" }}>
-                Shift+Enter for newline
-              </span>
-            )}
-          </div>
+                {streamingEmployee ? (
+                  <span
+                    className="presence-line"
+                    style={{ color: DEPT_COLOR[streamingEmployee] }}
+                  >
+                    {employeeLabel(streamingEmployee)} is thinking…
+                  </span>
+                ) : (
+                  <span style={{ color: "var(--color-text-muted)" }}>
+                    Shift+Enter for newline
+                  </span>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -1327,6 +1338,36 @@ function ArtifactDrawer({
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+function AiCapGate({ used, cap }: { used: number; cap: number }) {
+  return (
+    <div
+      className="rounded-xl border px-5 py-4 text-sm"
+      style={{
+        background: "var(--color-surface-elevated)",
+        borderColor: "var(--color-border)",
+      }}
+    >
+      <p className="font-medium mb-0.5">
+        You&apos;ve used all {cap} free AI messages this month
+      </p>
+      <p className="text-[var(--color-text-muted)] text-xs mb-3">
+        {used} / {cap} used · resets on the 1st
+      </p>
+      <Link
+        href="/app/settings/billing"
+        className="inline-flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-1.5 transition-colors"
+        style={{
+          background: "var(--color-accent)",
+          color: "var(--color-text-on-accent, #fff)",
+        }}
+      >
+        Upgrade to Pro for unlimited
+        <ArrowRight size={12} />
+      </Link>
     </div>
   );
 }

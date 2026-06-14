@@ -4,6 +4,7 @@ import { Chat, type MessageRow } from "@/components/conduit/Chat";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { tierById } from "@/lib/billing/tiers";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
+import { FREE_TIER_MSG_CAP } from "@/app/api/billing/usage/route";
 
 export const dynamic = "force-dynamic";
 
@@ -84,6 +85,28 @@ export default async function ChatPage({ searchParams }: PageProps) {
       : (tierById(account.tier_id).allowedEmployees as EmployeeKey[])
   ) as EmployeeKey[];
 
+  // Count AI responses this calendar month (free-tier cap gate).
+  const isFree = account.tier_id === "free" && !account.internal_account;
+  let aiMsgUsed = 0;
+  if (isFree) {
+    const now = new Date();
+    const periodStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const { data: convIds } = await supabase
+      .from("conduit_conversations")
+      .select("id")
+      .eq("account_id", account.id);
+    const ids = (convIds ?? []).map((r: { id: string }) => r.id);
+    if (ids.length > 0) {
+      const { count } = await supabase
+        .from("conduit_messages")
+        .select("id", { count: "exact", head: true })
+        .eq("role", "assistant")
+        .gte("created_at", periodStart.toISOString())
+        .in("conversation_id", ids);
+      aiMsgUsed = count ?? 0;
+    }
+  }
+
   return (
     <Chat
       conversationId={conversationId}
@@ -96,6 +119,8 @@ export default async function ChatPage({ searchParams }: PageProps) {
         ttsAllowed,
       }}
       allowedEmployees={allowedEmployees}
+      aiMsgUsed={aiMsgUsed}
+      aiMsgCap={isFree ? FREE_TIER_MSG_CAP : null}
     />
   );
 }
