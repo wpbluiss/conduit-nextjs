@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+
+const LandingWaitlist = dynamic(() => import("@/components/LandingWaitlist"), { ssr: false });
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 /* Institutional pacing — slower than v2's 80ms stagger. Reads as gravitas. */
@@ -134,6 +137,18 @@ export default function Hero() {
               <Link href="/products" className="conduit-btn-secondary">
                 See the product family
               </Link>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: EASE, delay: 1.1 }}
+              className="mt-6 max-w-[440px]"
+            >
+              <p className="text-[12px] uppercase tracking-[0.06em] font-semibold text-[var(--color-cream-mute)]">
+                Not ready to sign up yet?
+              </p>
+              <LandingWaitlist />
             </motion.div>
 
             <motion.div
