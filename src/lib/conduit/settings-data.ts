@@ -79,6 +79,17 @@ export async function loadSettingsData(
       byDay[d] = byDay[d] + (r.input_tokens ?? 0) + (r.output_tokens ?? 0);
   }
 
+  const cycleResetDate = account.billing_cycle_start
+    ? new Date(
+        new Date(account.billing_cycle_start).getTime() +
+          30 * 24 * 60 * 60 * 1000,
+      ).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : null;
+
   return {
     account: {
       id: account.id,
@@ -110,6 +121,7 @@ export async function loadSettingsData(
         limit: account.monthly_token_cap,
       },
       buildsThisCycle: buildsThisCycle ?? 0,
+      cycleResetDate,
     },
     fullName: (user.user_metadata?.full_name as string) ?? "",
     email: user.email ?? "",

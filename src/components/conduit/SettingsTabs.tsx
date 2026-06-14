@@ -14,6 +14,7 @@ import {
 import { PraxisButton, SpinnerIcon } from "./PraxisButton";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { EmployeeKey } from "@/lib/ai/provider";
+import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
 import { useToast } from "@/context/ToastContext";
 import { ORDERED_TIERS, TOPUPS, tierById, type TierId } from "@/lib/billing/tiers";
@@ -33,6 +34,7 @@ interface UsageData {
   thisWeek: { input: number; output: number; cost: number };
   cap: { used: number; limit: number };
   buildsThisCycle?: number;
+  cycleResetDate?: string | null;
 }
 
 interface AccountData {
@@ -1104,7 +1106,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
   const last14 = days.slice(-14);
   const fillByDay = last14.map((d) => ({ d, v: usage.byDay[d] }));
   const max = Math.max(1, ...fillByDay.map((x) => x.v));
-  const empNames: EmployeeKey[] = ["jarvis", "marketing", "sales", "engineering"];
+  const empNames = EMPLOYEE_ORDER as EmployeeKey[];
   const empValues = empNames.map((emp) => ({
     emp,
     val: (usage.byEmployee[emp]?.input ?? 0) + (usage.byEmployee[emp]?.output ?? 0),
@@ -1153,6 +1155,11 @@ function UsageTab({ usage }: { usage: UsageData }) {
             }}
           />
         </div>
+        {usage.cycleResetDate && (
+          <p className="text-[10px] text-[var(--color-text-muted)] mt-2">
+            Resets on {usage.cycleResetDate}
+          </p>
+        )}
       </div>
 
       <div>
