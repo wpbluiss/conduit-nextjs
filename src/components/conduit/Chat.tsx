@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, ArrowRight, Download, FileText, ThumbsDown, ThumbsUp } from "lucide-react";
+import { AlertCircle, ArrowRight, Download, FileText, GitFork, ThumbsDown, ThumbsUp } from "lucide-react";
 import { motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
@@ -257,6 +257,30 @@ export function Chat({
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, [messages]);
+
+  // Fork conversation from a message point.
+  const forkConversation = useCallback(
+    async (messageId: string) => {
+      if (!conversationId) return;
+      try {
+        const res = await fetch(
+          `/api/conduit/conversations/${conversationId}/fork`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ message_id: messageId }),
+          },
+        );
+        if (!res.ok) return;
+        const data = (await res.json()) as { conversation_id: string };
+        router.push(`/app?c=${data.conversation_id}`);
+        router.refresh();
+      } catch {
+        // Fail silently — fork is a convenience feature.
+      }
+    },
+    [conversationId, router],
+  );
 
   // Pagination: infinite-scroll-up for message history.
   const [hasMore, setHasMore] = useState(initialHasMore);
@@ -1134,6 +1158,11 @@ export function Chat({
               onEditSubmit={
                 m.id ? (text) => void submitEdit(m.id!, text) : undefined
               }
+              onFork={
+                m.id && conversationId && !m.pending
+                  ? () => void forkConversation(m.id!)
+                  : undefined
+              }
             />
           ))}
 
@@ -1562,6 +1591,7 @@ const MessageBubble = memo(function MessageBubble({
   onEditStart,
   onEditCancel,
   onEditSubmit,
+  onFork,
 }: {
   message: MessageRow;
   onOpenArtifact: (id: string) => void;
@@ -1572,6 +1602,7 @@ const MessageBubble = memo(function MessageBubble({
   onEditStart?: () => void;
   onEditCancel?: () => void;
   onEditSubmit?: (text: string) => void;
+  onFork?: () => void;
 }) {
   const [editDraft, setEditDraft] = useState(message.content);
   const editRef = useRef<HTMLTextAreaElement>(null);
@@ -1680,16 +1711,33 @@ const MessageBubble = memo(function MessageBubble({
               <span className="whitespace-pre-wrap">{message.content}</span>
             )}
           </div>
-          {onEditStart && !isVoice && (
-            <button
-              type="button"
-              onClick={onEditStart}
-              className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-[11px] px-2 py-0.5 rounded"
-              style={{ color: "var(--color-text-muted)" }}
-              aria-label="Edit message"
-            >
-              Edit
-            </button>
+          {(onEditStart || onFork) && !isVoice && (
+            <div className="flex items-center gap-1">
+              {onEditStart && (
+                <button
+                  type="button"
+                  onClick={onEditStart}
+                  className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-[11px] px-2 py-0.5 rounded"
+                  style={{ color: "var(--color-text-muted)" }}
+                  aria-label="Edit message"
+                >
+                  Edit
+                </button>
+              )}
+              {onFork && (
+                <button
+                  type="button"
+                  onClick={onFork}
+                  title="Fork from here"
+                  aria-label="Fork conversation from this message"
+                  className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity flex items-center gap-1 text-[11px] px-2 py-0.5 rounded"
+                  style={{ color: "var(--color-text-muted)" }}
+                >
+                  <GitFork size={11} />
+                  Fork
+                </button>
+              )}
+            </div>
           )}
         </div>
       </motion.div>
@@ -1886,7 +1934,22 @@ const MessageBubble = memo(function MessageBubble({
           </button>
         ))}
         {message.id && !message.pending && (
-          <MessageFeedbackButtons messageId={message.id} />
+          <div className="flex items-center gap-3">
+            <MessageFeedbackButtons messageId={message.id} />
+            {onFork && (
+              <button
+                type="button"
+                onClick={onFork}
+                title="Fork from here"
+                aria-label="Fork conversation from this message"
+                className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity flex items-center gap-1 text-[11px] px-2 py-0.5 rounded"
+                style={{ color: "var(--color-text-muted)" }}
+              >
+                <GitFork size={11} />
+                Fork
+              </button>
+            )}
+          </div>
         )}
       </div>
     </motion.div>

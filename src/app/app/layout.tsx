@@ -72,7 +72,7 @@ export default async function AppLayout({
   const [{ data: convos }, inFlightBuildsInitial] = await Promise.all([
     supabase
       .from("conduit_conversations")
-      .select("id, title, updated_at, dominant_employee")
+      .select("id, title, updated_at, dominant_employee, forked_from_conversation_id")
       .eq("account_id", account.id)
       .order("updated_at", { ascending: false })
       .limit(50),
