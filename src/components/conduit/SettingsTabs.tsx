@@ -6,6 +6,7 @@ import {
   ArrowRight,
   Calendar,
   Check,
+  Database,
   ExternalLink,
   Info,
   Link,
@@ -1728,7 +1729,9 @@ function UsageTab({ usage }: { usage: UsageData }) {
                   ? "Google Calendar"
                   : stat.provider === "slack"
                     ? "Slack"
-                    : stat.provider;
+                    : stat.provider === "hubspot"
+                      ? "HubSpot"
+                      : stat.provider;
               const lastFetched = stat.last_fetched_at
                 ? new Date(stat.last_fetched_at).toLocaleDateString(undefined, {
                     month: "short",
@@ -2709,7 +2712,7 @@ function NotificationsTab() {
 
 interface ConnectorStatus {
   connected: string[];
-  available: { google_calendar: boolean; slack: boolean };
+  available: { google_calendar: boolean; slack: boolean; hubspot: boolean };
 }
 
 interface SlackChannel {
@@ -2749,6 +2752,7 @@ function IntegrationsTab() {
       const labels: Record<string, string> = {
         google_calendar: "Google Calendar",
         slack: "Slack",
+        hubspot: "HubSpot",
       };
       toast.success(`${labels[connected] ?? connected} connected.`);
       fetchStatus();
@@ -2765,6 +2769,10 @@ function IntegrationsTab() {
         slack_csrf: "OAuth state mismatch — please try again.",
         slack_exchange: "Failed to exchange Slack auth code.",
         slack_db: "Failed to save Slack connection.",
+        hubspot_denied: "HubSpot access was denied.",
+        hubspot_csrf: "OAuth state mismatch — please try again.",
+        hubspot_exchange: "Failed to exchange HubSpot auth code.",
+        hubspot_db: "Failed to save HubSpot connection.",
       };
       toast.error(msgs[error] ?? "Connection failed.");
       router.replace("/app/settings?tab=integrations");
@@ -2817,6 +2825,7 @@ function IntegrationsTab() {
         const labels: Record<string, string> = {
           google_calendar: "Google Calendar",
           slack: "Slack",
+          hubspot: "HubSpot",
         };
         toast.success(`${labels[provider] ?? provider} disconnected.`);
         if (provider === "slack") setSlackChannels(null);
@@ -2837,7 +2846,9 @@ function IntegrationsTab() {
       ? status?.available.google_calendar ?? false
       : provider === "slack"
         ? status?.available.slack ?? false
-        : false;
+        : provider === "hubspot"
+          ? status?.available.hubspot ?? false
+          : false;
 
   return (
     <div className="space-y-6 text-sm">
@@ -3036,6 +3047,91 @@ function IntegrationsTab() {
             >
               <Link size={12} />
               Connect Slack
+            </a>
+          ) : (
+            <button
+              disabled
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text-muted)",
+              }}
+            >
+              Not configured
+            </button>
+          )}
+        </div>
+
+        {/* HubSpot */}
+        <div className="conduit-card p-5 flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-3">
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+              }}
+            >
+              <Database size={20} style={{ color: "#FF7A59" }} />
+            </div>
+            {isConnected("hubspot") ? (
+              <span
+                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                style={{
+                  background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
+                  color: "var(--color-success, #22c55e)",
+                  border: "1px solid color-mix(in srgb, var(--color-success, #22c55e) 28%, transparent)",
+                }}
+              >
+                Connected
+              </span>
+            ) : (
+              <span
+                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                style={{
+                  background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
+                  color: "var(--color-accent)",
+                  border: "1px solid color-mix(in srgb, var(--color-accent) 28%, transparent)",
+                }}
+              >
+                Not connected
+              </span>
+            )}
+          </div>
+          <div>
+            <div className="font-medium text-[var(--color-text)]">HubSpot</div>
+            <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
+              Gives your Sales specialist real-time awareness of recent contacts
+              and open deals so every response reflects your live CRM.
+            </p>
+          </div>
+          {isConnected("hubspot") ? (
+            <button
+              onClick={() => disconnect("hubspot")}
+              disabled={disconnecting === "hubspot"}
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
+              style={{
+                background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
+                color: "var(--color-destructive, #ef4444)",
+              }}
+            >
+              <Link2Off size={12} />
+              {disconnecting === "hubspot" ? "Disconnecting…" : "Disconnect"}
+            </button>
+          ) : isAvailable("hubspot") ? (
+            <a
+              href="/api/conduit/connectors/hubspot/auth"
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
+              style={{
+                background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+                color: "var(--color-accent)",
+              }}
+            >
+              <Link size={12} />
+              Connect HubSpot
             </a>
           ) : (
             <button
