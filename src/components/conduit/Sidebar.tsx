@@ -25,6 +25,7 @@ import { DEPT_COLOR, EMPLOYEE_ICON, employeeLabel } from "./EmployeeBadge";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import { PraxisLogo } from "./PraxisLogo";
 import { SidebarBuildPip } from "./builds/in-flight/SidebarBuildPip";
+import { SidebarBuildsSection } from "./builds/in-flight/SidebarBuildsSection";
 import type { InFlightBuild } from "@/lib/engineering/in-flight";
 
 interface ConvoSummary {
@@ -381,6 +382,14 @@ export function Sidebar({
               onClick={close}
             />
           </div>
+
+          {/* In-flight builds — compact status list */}
+          {allowedEmployees.includes("engineering") && (
+            <SidebarBuildsSection
+              initial={inFlightBuildsInitial}
+              accountId={accountId}
+            />
+          )}
 
           {/* Recent conversations */}
           {conversations.length > 0 && (
