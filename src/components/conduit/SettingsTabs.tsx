@@ -20,6 +20,7 @@ import { DEFAULT_EMPLOYEE_VOICES, VOICE_NAMES } from "@/lib/voice/defaults";
 import { ThemeToggle } from "./ThemeToggle";
 import { track } from "@/lib/analytics/track";
 import { MFASecurity } from "./MFASecurity";
+import { SessionManagement } from "./SessionManagement";
 
 interface UsageData {
   totals: { input: number; output: number; cost: number };
@@ -141,7 +142,13 @@ export function SettingsTabs({
       {tab === "team" && <TeamTab />}
       {tab === "usage" && <UsageTab usage={usage} />}
       {tab === "billing" && <BillingTab account={account} usage={usage} />}
-      {tab === "security" && <MFASecurity />}
+      {tab === "security" && (
+        <div className="space-y-10">
+          <MFASecurity />
+          <div className="border-t border-[var(--color-border)]" />
+          <SessionManagement />
+        </div>
+      )}
     </div>
   );
 }
