@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check } from "lucide-react";
 import { PraxisLogo } from "./PraxisLogo";
+import { track } from "@/lib/analytics/track";
 
 const DISMISS_KEY = "conduit_onboarding_skip_v1";
 
@@ -105,6 +106,7 @@ export function OnboardingModal({
     }
     const j = await res.json();
     try { localStorage.setItem("conduit_post_onboarding_nudge_v1", "1"); } catch { /* ignore */ }
+    track("onboarding_completed", { business_type: finalType.trim() });
     router.replace(j.conversation_id ? `/app?c=${j.conversation_id}` : "/app");
     router.refresh();
   }
