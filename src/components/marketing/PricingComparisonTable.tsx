@@ -38,7 +38,7 @@ const TIERS = [
 function CellRender({ value, popular }: { value: Cell; popular?: boolean }) {
   if (value === true) {
     return (
-      <Check size={18} weight="bold" color={popular ? "#5B63E8" : "#16A34A"} />
+      <Check size={18} weight="bold" color={popular ? "var(--color-accent)" : "#16A34A"} />
     );
   }
   if (value === false) {
@@ -55,7 +55,7 @@ const TIER_CTAS = [
   <Link
     key="free"
     href="/auth/sign-up"
-    className="text-[13px] text-[var(--color-indigo-500)] inline-flex items-center gap-1 hover:gap-2 transition-[gap]"
+    className="text-[13px] text-[var(--color-accent)] inline-flex items-center gap-1 hover:gap-2 transition-[gap]"
   >
     Start free <ArrowRight size={12} weight="bold" />
   </Link>,
@@ -70,7 +70,7 @@ const TIER_CTAS = [
   <Link
     key="enterprise"
     href="mailto:luis@conduitai.io?subject=Praxis%20Enterprise"
-    className="text-[13px] text-[var(--color-indigo-500)] inline-flex items-center gap-1 hover:gap-2 transition-[gap]"
+    className="text-[13px] text-[var(--color-accent)] inline-flex items-center gap-1 hover:gap-2 transition-[gap]"
   >
     Talk to founder <ArrowRight size={12} weight="bold" />
   </Link>,
@@ -101,10 +101,10 @@ export function PricingComparisonTable() {
                 activeTab === t.colIndex
                   ? {
                       background: t.popular
-                        ? "rgba(91, 99, 232, 0.18)"
+                        ? "rgba(255, 138, 61, 0.12)"
                         : "rgba(255,255,255,0.08)",
                       color: t.popular
-                        ? "var(--color-indigo-400, #818CF8)"
+                        ? "var(--color-accent)"
                         : "var(--color-cream)",
                       boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
                     }
@@ -125,10 +125,10 @@ export function PricingComparisonTable() {
             className="mb-4 px-4 py-3 rounded-xl"
             style={{
               background: t.popular
-                ? "rgba(91, 99, 232, 0.08)"
+                ? "rgba(255, 138, 61, 0.08)"
                 : "rgba(255,255,255,0.03)",
               border: t.popular
-                ? "1px solid rgba(91, 99, 232, 0.2)"
+                ? "1px solid rgba(255, 138, 61, 0.2)"
                 : "1px solid var(--color-edge-subtle)",
             }}
           >
@@ -190,14 +190,14 @@ export function PricingComparisonTable() {
               </th>
               <th
                 className="text-center p-5 w-[20%] relative"
-                style={{ background: "rgba(91, 99, 232, 0.08)", borderRadius: "12px 12px 0 0" }}
+                style={{ background: "rgba(255, 138, 61, 0.08)", borderRadius: "12px 12px 0 0" }}
               >
                 <div
                   aria-hidden
                   className="absolute top-0 left-0 right-0 h-[2px]"
-                  style={{ background: "var(--color-indigo-500)", borderRadius: "12px 12px 0 0" }}
+                  style={{ background: "var(--color-accent)", borderRadius: "12px 12px 0 0" }}
                 />
-                <span className="conduit-caption text-[var(--color-indigo-500)]">Pro</span>
+                <span className="conduit-caption text-[var(--color-accent)]">Pro</span>
                 <p
                   className="text-[20px] mt-1 text-[var(--color-cream)]"
                   style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
@@ -228,7 +228,7 @@ export function PricingComparisonTable() {
                 </td>
                 <td
                   className="p-5 text-center align-top"
-                  style={{ background: "rgba(91, 99, 232, 0.07)" }}
+                  style={{ background: "rgba(255, 138, 61, 0.07)" }}
                 >
                   <CellRender value={row.values[1]} popular />
                 </td>
@@ -242,7 +242,7 @@ export function PricingComparisonTable() {
               <td className="p-5 text-center">{TIER_CTAS[0]}</td>
               <td
                 className="p-5 text-center"
-                style={{ background: "rgba(91, 99, 232,0.04)", borderRadius: "0 0 12px 12px" }}
+                style={{ background: "rgba(255, 138, 61, 0.04)", borderRadius: "0 0 12px 12px" }}
               >
                 {TIER_CTAS[1]}
               </td>
