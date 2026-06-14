@@ -97,8 +97,12 @@ export function LiveChat({
   const [roomToken, setRoomToken] = React.useState<VoiceTokenResponse | null>(null);
   const [launching, setLaunching] = React.useState(false);
   const [voiceErr, setVoiceErr] = React.useState<string | null>(null);
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [editText, setEditText] = React.useState("");
+  const [editSaving, setEditSaving] = React.useState(false);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const taRef = React.useRef<HTMLTextAreaElement>(null);
+  const editTaRef = React.useRef<HTMLTextAreaElement>(null);
   const lastSentMsg = React.useRef<string>("");
   const emp = EMPLOYEES[pin];
   const EmpIcon = ICON[pin] ?? Sparkles;
@@ -149,6 +153,44 @@ export function LiveChat({
   function applyMention(id: EmployeeId) { setInput((v) => v.replace(/(^|\s)@\w*$/, (_m, p1) => `${p1}@${EMPLOYEES[id].name} `)); setPin(id); setUserPinned(true); taRef.current?.focus(); }
   function react(id: string, e: string) { setReactions((r) => ({ ...r, [id]: r[id] === e ? "" : e })); }
   function copyMsg(m: LiveMsg) { navigator.clipboard?.writeText(m.content).catch(() => {}); const k = m.id ?? ""; setCopiedId(k); setTimeout(() => setCopiedId((c) => (c === k ? null : c)), 1400); }
+
+  function startEdit(m: LiveMsg) {
+    if (!m.id) return;
+    setEditingId(m.id);
+    setEditText(m.content);
+    setTimeout(() => { editTaRef.current?.focus(); editTaRef.current?.select(); }, 0);
+  }
+
+  function cancelEdit() { setEditingId(null); setEditText(""); }
+
+  async function submitEdit(msgId: string) {
+    const trimmed = editText.trim();
+    if (!trimmed || editSaving) return;
+    setEditSaving(true);
+    try {
+      const r = await fetch(`/api/conduit/messages/${msgId}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "edit", content: trimmed }),
+      });
+      if (!r.ok) { setEditSaving(false); return; }
+      // Optimistically: update message content + strip all subsequent messages
+      setMessages((prev) => {
+        const idx = prev.findIndex((m) => m.id === msgId);
+        if (idx === -1) return prev;
+        const updated = prev.slice(0, idx + 1).map((m, i) =>
+          i === idx ? { ...m, content: trimmed } : m
+        );
+        return updated;
+      });
+      setEditingId(null);
+      setEditText("");
+      // Re-send the edited message to get a fresh reply
+      send(trimmed);
+    } finally {
+      setEditSaving(false);
+    }
+  }
   function copyArt() { if (!artContent) return; navigator.clipboard?.writeText(artContent).catch(() => {}); setArtCopied(true); setTimeout(() => setArtCopied(false), 1400); }
   function downloadArt() { if (!openArtifact || !artContent) return; const blob = new Blob([artContent], { type: "text/plain;charset=utf-8" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `${slugify(openArtifact.title)}.${extFor(openArtifact.type)}`; a.click(); URL.revokeObjectURL(url); }
   function pdfArt() { if (!openArtifact || !artContent) return; const w = window.open("", "_blank"); if (!w) return; w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(openArtifact.title)}</title><style>body{font-family:Georgia,serif;max-width:680px;margin:48px auto;padding:0 24px;color:#111;line-height:1.6}.k{color:#888;text-transform:uppercase;letter-spacing:.14em;font-size:11px;font-family:system-ui,sans-serif}h1{font-family:system-ui,sans-serif;font-size:22px;margin:.2em 0 1em}pre{white-space:pre-wrap;font-family:inherit;margin:0}</style></head><body><div class="k">${escapeHtml(openArtifact.type)} · by ${escapeHtml(EMPLOYEES[openArtifact.by]?.name ?? "Praxis")} · Praxis</div><h1>${escapeHtml(openArtifact.title)}</h1><pre>${escapeHtml(artContent)}</pre></body></html>`); w.document.close(); w.focus(); setTimeout(() => { try { w.print(); } catch { /* ignore */ } }, 350); }
@@ -377,11 +419,58 @@ export function LiveChat({
                 <p className="max-w-sm text-muted-foreground">Pick a teammate above, type <span className="font-mono text-foreground">/</span> for commands, or just start — Atlas routes it to whoever&apos;s right.</p>
               </div>
             )}
-            {messages.map((m, i) => {
+            {(() => {
+              // Last persisted user message — the only one that gets an edit affordance.
+              const lastUserIdx = messages.reduce((acc, m, idx) => m.role === "user" && m.id && !loading ? idx : acc, -1);
+              return messages.map((m, i) => {
               if (m.role === "system") return <div key={m.id ?? i} className="flex items-center gap-3 py-1"><div className="h-px flex-1 bg-white/8" /><span className="wm-label">{m.content}</span><div className="h-px flex-1 bg-white/8" /></div>;
-              if (m.role === "user") return (
-                <motion.div key={m.id ?? i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 28 }} className="flex justify-end"><div className="max-w-[82%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-secondary px-4 py-2.5 text-[15px] leading-relaxed">{m.content}</div></motion.div>
-              );
+              if (m.role === "user") {
+                const isLastUser = i === lastUserIdx;
+                const isEditing = isLastUser && editingId === m.id;
+                return (
+                  <motion.div key={m.id ?? i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 28 }} className="group/user flex justify-end">
+                    {isEditing ? (
+                      <div className="w-full max-w-[82%] space-y-2">
+                        <textarea
+                          ref={editTaRef}
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submitEdit(m.id!); }
+                            if (e.key === "Escape") cancelEdit();
+                          }}
+                          rows={3}
+                          className="w-full resize-none rounded-2xl rounded-br-md bg-secondary px-4 py-2.5 text-[15px] leading-relaxed outline-none ring-1 ring-primary/50 focus:ring-primary"
+                        />
+                        <div className="flex justify-end gap-2">
+                          <button onClick={cancelEdit} className="rounded-lg px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">Cancel</button>
+                          <button
+                            onClick={() => submitEdit(m.id!)}
+                            disabled={editSaving || !editText.trim()}
+                            className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                          >
+                            {editSaving ? <span className="animate-spin inline-block size-3 rounded-full border border-current border-t-transparent" /> : null}
+                            {editSaving ? "Saving…" : "Save & resubmit"}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="relative flex items-start gap-2 max-w-[82%]">
+                        {isLastUser && m.id && (
+                          <button
+                            onClick={() => startEdit(m)}
+                            title="Edit message"
+                            className="mt-1.5 shrink-0 rounded-md p-1 text-muted-foreground opacity-0 transition-opacity group-hover/user:opacity-100 hover:text-foreground hover:bg-secondary"
+                          >
+                            <SquarePen className="size-3.5" />
+                          </button>
+                        )}
+                        <div className="whitespace-pre-wrap rounded-2xl rounded-br-md bg-secondary px-4 py-2.5 text-[15px] leading-relaxed">{m.content}</div>
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              }
               const e = (m.employee as EmployeeId) ?? "jarvis"; const I = ICON[e] ?? Sparkles; const k = m.id ?? String(i);
               return (
                 <motion.div key={m.id ?? i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 28 }} className="group flex gap-3">
@@ -435,7 +524,8 @@ export function LiveChat({
                   </div>
                 </motion.div>
               );
-            })}
+            });
+            })()}
           </div>
         </div>
 
