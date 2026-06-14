@@ -242,7 +242,7 @@ body {
 
 /* Auth pages — ember CTA on dark inverse background */
 .conduit-auth-btn {
-  background: var(--color-indigo-500);
+  background: var(--color-accent);
   color: #FFFFFF;
   padding: 14px 32px;
   font-weight: 500;
@@ -256,13 +256,13 @@ body {
   cursor: pointer;
 }
 .conduit-auth-btn:hover {
-  background: #6F77F0;
-  box-shadow: 0 0 40px rgba(91, 99, 232, 0.35);
+  background: #FFAA6B;
+  box-shadow: 0 0 40px rgba(255, 138, 61, 0.40);
   transform: translateY(-1px);
 }
 .conduit-auth-btn:active { transform: translateY(0); }
 .conduit-auth-btn:focus-visible {
-  outline: 2px solid var(--color-indigo-300);
+  outline: 2px solid var(--color-ember-300);
   outline-offset: 2px;
 }
 
