@@ -93,7 +93,9 @@ function SectionBlock({
           <motion.p
             key={pi}
             variants={{
-              hidden: { opacity: 0, y: 14 },
+              // opacity: 1 so content is always readable in headless/screenshot contexts
+              // (IntersectionObserver never fires there). Real users still get the slide-up.
+              hidden: { opacity: 1, y: 14 },
               show: {
                 opacity: 1,
                 y: 0,
@@ -109,9 +111,10 @@ function SectionBlock({
       {/* Pull-quote — slides in from left */}
       {section.quote && (
         <motion.blockquote
-          initial={{ opacity: 0, x: reduced ? 0 : -16 }}
+          // opacity: 1 so pull-quote is always readable in headless/screenshot contexts
+          initial={{ opacity: 1, x: reduced ? 0 : -16 }}
           animate={
-            active ? { opacity: 1, x: 0 } : { opacity: 0, x: reduced ? 0 : -16 }
+            active ? { opacity: 1, x: 0 } : { opacity: 1, x: reduced ? 0 : -16 }
           }
           transition={{ duration: 0.9, ease: EASE, delay: 0.48 }}
           className="conduit-pullquote my-12 md:my-14"
