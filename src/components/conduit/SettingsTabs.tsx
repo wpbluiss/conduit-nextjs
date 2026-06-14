@@ -1728,7 +1728,9 @@ function UsageTab({ usage }: { usage: UsageData }) {
                   ? "Google Calendar"
                   : stat.provider === "slack"
                     ? "Slack"
-                    : stat.provider;
+                    : stat.provider === "linkedin"
+                      ? "LinkedIn"
+                      : stat.provider;
               const lastFetched = stat.last_fetched_at
                 ? new Date(stat.last_fetched_at).toLocaleDateString(undefined, {
                     month: "short",
@@ -2709,7 +2711,7 @@ function NotificationsTab() {
 
 interface ConnectorStatus {
   connected: string[];
-  available: { google_calendar: boolean; slack: boolean };
+  available: { google_calendar: boolean; slack: boolean; linkedin: boolean };
 }
 
 interface SlackChannel {
@@ -2749,6 +2751,7 @@ function IntegrationsTab() {
       const labels: Record<string, string> = {
         google_calendar: "Google Calendar",
         slack: "Slack",
+        linkedin: "LinkedIn",
       };
       toast.success(`${labels[connected] ?? connected} connected.`);
       fetchStatus();
@@ -2765,6 +2768,10 @@ function IntegrationsTab() {
         slack_csrf: "OAuth state mismatch — please try again.",
         slack_exchange: "Failed to exchange Slack auth code.",
         slack_db: "Failed to save Slack connection.",
+        linkedin_denied: "LinkedIn access was denied.",
+        linkedin_csrf: "OAuth state mismatch — please try again.",
+        linkedin_exchange: "Failed to exchange LinkedIn auth code.",
+        linkedin_db: "Failed to save LinkedIn connection.",
       };
       toast.error(msgs[error] ?? "Connection failed.");
       router.replace("/app/settings?tab=integrations");
@@ -2817,6 +2824,7 @@ function IntegrationsTab() {
         const labels: Record<string, string> = {
           google_calendar: "Google Calendar",
           slack: "Slack",
+          linkedin: "LinkedIn",
         };
         toast.success(`${labels[provider] ?? provider} disconnected.`);
         if (provider === "slack") setSlackChannels(null);
@@ -2837,7 +2845,9 @@ function IntegrationsTab() {
       ? status?.available.google_calendar ?? false
       : provider === "slack"
         ? status?.available.slack ?? false
-        : false;
+        : provider === "linkedin"
+          ? status?.available.linkedin ?? false
+          : false;
 
   return (
     <div className="space-y-6 text-sm">
@@ -3036,6 +3046,94 @@ function IntegrationsTab() {
             >
               <Link size={12} />
               Connect Slack
+            </a>
+          ) : (
+            <button
+              disabled
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text-muted)",
+              }}
+            >
+              Not configured
+            </button>
+          )}
+        </div>
+
+        {/* LinkedIn */}
+        <div className="conduit-card p-5 flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-3">
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <rect width="24" height="24" rx="4" fill="#0A66C2" />
+                <path d="M7.5 9.75H5.25v7.5H7.5v-7.5ZM6.375 8.625a1.125 1.125 0 1 0 0-2.25 1.125 1.125 0 0 0 0 2.25ZM18.75 17.25h-2.25v-3.563c0-.843-.015-1.928-1.174-1.928-1.174 0-1.354.918-1.354 1.865v3.626H11.7v-7.5h2.16v1.023h.03c.3-.568 1.034-1.167 2.13-1.167 2.278 0 2.7 1.5 2.7 3.45v4.194Z" fill="white" />
+              </svg>
+            </div>
+            {isConnected("linkedin") ? (
+              <span
+                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                style={{
+                  background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
+                  color: "var(--color-success, #22c55e)",
+                  border: "1px solid color-mix(in srgb, var(--color-success, #22c55e) 28%, transparent)",
+                }}
+              >
+                Connected
+              </span>
+            ) : (
+              <span
+                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                style={{
+                  background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
+                  color: "var(--color-accent)",
+                  border: "1px solid color-mix(in srgb, var(--color-accent) 28%, transparent)",
+                }}
+              >
+                Not connected
+              </span>
+            )}
+          </div>
+          <div>
+            <div className="font-medium text-[var(--color-text)]">LinkedIn</div>
+            <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
+              Gives your Marketing specialist awareness of your recent posts and
+              company page updates to inform content strategy and brand voice.
+            </p>
+          </div>
+          {isConnected("linkedin") ? (
+            <button
+              onClick={() => disconnect("linkedin")}
+              disabled={disconnecting === "linkedin"}
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
+              style={{
+                background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
+                color: "var(--color-destructive, #ef4444)",
+              }}
+            >
+              <Link2Off size={12} />
+              {disconnecting === "linkedin" ? "Disconnecting…" : "Disconnect"}
+            </button>
+          ) : isAvailable("linkedin") ? (
+            <a
+              href="/api/conduit/connectors/linkedin/auth"
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
+              style={{
+                background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+                color: "var(--color-accent)",
+              }}
+            >
+              <Link size={12} />
+              Connect LinkedIn
             </a>
           ) : (
             <button

@@ -54,6 +54,13 @@ import {
   renderSlackBlock,
 } from "@/lib/connectors/slack";
 import {
+  getLinkedInToken,
+  getLinkedInPersonUrn,
+  getRecentPersonalPosts,
+  getRecentCompanyUpdates,
+  renderLinkedInBlock,
+} from "@/lib/connectors/linkedin";
+import {
   prepareChatTts,
   streamForEmployee,
   type ChatTtsConfig,
@@ -249,6 +256,23 @@ export async function POST(request: NextRequest) {
       slackBlock = renderSlackBlock(msgs, channelName);
     } catch {
       // Non-fatal: continue without Slack context.
+    }
+  }
+
+  // Load LinkedIn context for Marketing specialist when connected.
+  let linkedinBlock = "";
+  const linkedinToken = await getLinkedInToken(supabase, account.id);
+  if (linkedinToken) {
+    try {
+      const personUrn = (linkedinToken.meta as Record<string, unknown>)?.person_urn as string | undefined
+        ?? await getLinkedInPersonUrn(linkedinToken.access_token);
+      const [posts, companyUpdates] = await Promise.all([
+        personUrn ? getRecentPersonalPosts(linkedinToken.access_token, personUrn, 5) : Promise.resolve([]),
+        getRecentCompanyUpdates(supabase, linkedinToken, 5),
+      ]);
+      linkedinBlock = renderLinkedInBlock(posts, companyUpdates);
+    } catch {
+      // Non-fatal: continue without LinkedIn context.
     }
   }
 
@@ -591,7 +615,9 @@ export async function POST(request: NextRequest) {
         // R-561: prepend Google Calendar block for ops + Atlas when connected.
         // R-542: prepend Slack block for all employees when a channel is selected.
         const calendarPrefix = calendarEmployees.has(employee) ? calendarBlock : "";
-        const systemPrompt = slackBlock + calendarPrefix + memoryBlockFor(employee) + withTime;
+        // #592: prepend LinkedIn block for Marketing specialist when connected.
+        const linkedinPrefix = employee === "marketing" ? linkedinBlock : "";
+        const systemPrompt = slackBlock + calendarPrefix + linkedinPrefix + memoryBlockFor(employee) + withTime;
 
         let fullText = "";
         let inputTokens = 0;
