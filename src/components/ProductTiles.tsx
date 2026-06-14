@@ -261,7 +261,7 @@ export default function ProductTiles() {
   return (
     <section
       id="products"
-      className="relative conduit-section conduit-bg-canvas"
+      className="relative conduit-section conduit-bg-surface-subtle"
     >
       <div className="conduit-container">
         {/* Header */}
