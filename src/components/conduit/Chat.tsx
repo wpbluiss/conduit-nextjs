@@ -141,6 +141,7 @@ export function Chat({
   internalAccount = false,
   voice = { enabled: false, autoPlay: true, ttsAllowed: false },
   allowedEmployees,
+  isFirstRun = false,
 }: {
   conversationId: string | null;
   initialMessages: MessageRow[];
@@ -149,6 +150,7 @@ export function Chat({
   internalAccount?: boolean;
   voice?: VoicePrefs;
   allowedEmployees: EmployeeKey[];
+  isFirstRun?: boolean;
 }) {
   const allowedSet = new Set(allowedEmployees);
   // "team" requires at least 2 non-Atlas employees on the tier.
@@ -1006,6 +1008,7 @@ export function Chat({
               firstName={firstName}
               onSend={send}
               suggestions={suggestions}
+              isFirstRun={isFirstRun}
             />
           )}
 
@@ -1215,57 +1218,130 @@ export function Chat({
   );
 }
 
+const FIRST_RUN_SUGGESTIONS: Suggestion[] = [
+  {
+    text: "Write a go-to-market plan for my product",
+    pin: "marketing",
+    dept: "marketing",
+    hint: "Marketing builds the plan",
+  },
+  {
+    text: "Draft an investor update email",
+    dept: "jarvis",
+    hint: "Atlas routes to the right specialist",
+  },
+  {
+    text: "Build a cold outreach sequence for my first 50 leads",
+    pin: "sales",
+    dept: "sales",
+    hint: "Sales builds the play",
+  },
+  {
+    text: "Set up an SOP for client onboarding",
+    pin: "ops",
+    dept: "ops",
+    hint: "Operations documents it",
+  },
+];
+
 function EmptyState({
   firstName,
   onSend,
   suggestions,
+  isFirstRun = false,
 }: {
   firstName: string;
   onSend: (text: string, pin?: EmployeeKey) => void;
   suggestions: Suggestion[];
+  isFirstRun?: boolean;
 }) {
   const copy = composeChatEmptyCopy({
     firstName,
     timeOfDay: timeOfDayBucket(),
   });
+
+  const activeSuggestions = isFirstRun ? FIRST_RUN_SUGGESTIONS : suggestions;
+
   return (
     <div
       style={{
         paddingTop: "var(--space-8)",
       }}
     >
-      <p className="praxis-eyebrow">
-        <span
-          aria-hidden
-          style={{
-            width: 6,
-            height: 6,
-            borderRadius: 9999,
-            background: "var(--color-green)",
-            boxShadow:
-              "0 0 6px color-mix(in srgb, var(--color-green) 70%, transparent)",
-            display: "inline-block",
-          }}
-        />
-        {copy.eyebrow} · {firstName}
-      </p>
-      <div
-        style={{
-          marginTop: "var(--space-4)",
-          display: "flex",
-          alignItems: "flex-start",
-          gap: "var(--space-3)",
-        }}
-      >
-        <PraxisAvatar employee="jarvis" size="xl" pulse="ambient" />
-        <h1 className="praxis-display-1">{copy.headline}</h1>
-      </div>
-      <p
-        className="praxis-body-lg"
-        style={{ marginTop: "var(--space-4)", maxWidth: "36rem" }}
-      >
-        {copy.subline}
-      </p>
+      {isFirstRun ? (
+        <>
+          <p className="praxis-eyebrow">
+            <span
+              aria-hidden
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: 9999,
+                background: "var(--color-green)",
+                boxShadow:
+                  "0 0 6px color-mix(in srgb, var(--color-green) 70%, transparent)",
+                display: "inline-block",
+              }}
+            />
+            Your team is ready · {firstName}
+          </p>
+          <div
+            style={{
+              marginTop: "var(--space-4)",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "var(--space-3)",
+            }}
+          >
+            <PraxisAvatar employee="jarvis" size="xl" pulse="ambient" />
+            <h1 className="praxis-display-1">
+              What should your team work on first?
+            </h1>
+          </div>
+          <p
+            className="praxis-body-lg"
+            style={{ marginTop: "var(--space-4)", maxWidth: "36rem" }}
+          >
+            Pick a task below or type anything — Atlas will route it to the
+            right specialist on your team.
+          </p>
+        </>
+      ) : (
+        <>
+          <p className="praxis-eyebrow">
+            <span
+              aria-hidden
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: 9999,
+                background: "var(--color-green)",
+                boxShadow:
+                  "0 0 6px color-mix(in srgb, var(--color-green) 70%, transparent)",
+                display: "inline-block",
+              }}
+            />
+            {copy.eyebrow} · {firstName}
+          </p>
+          <div
+            style={{
+              marginTop: "var(--space-4)",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "var(--space-3)",
+            }}
+          >
+            <PraxisAvatar employee="jarvis" size="xl" pulse="ambient" />
+            <h1 className="praxis-display-1">{copy.headline}</h1>
+          </div>
+          <p
+            className="praxis-body-lg"
+            style={{ marginTop: "var(--space-4)", maxWidth: "36rem" }}
+          >
+            {copy.subline}
+          </p>
+        </>
+      )}
       <div
         className="grid grid-cols-1 sm:grid-cols-2"
         style={{
@@ -1273,7 +1349,7 @@ function EmptyState({
           gap: "var(--space-3)",
         }}
       >
-        {suggestions.map((s) => (
+        {activeSuggestions.map((s) => (
           <PraxisSuggestionTile
             key={s.text}
             dept={s.dept}
