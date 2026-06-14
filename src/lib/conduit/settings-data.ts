@@ -111,6 +111,8 @@ export async function loadSettingsData(
       avatar_url: account.avatar_url ?? null,
       accent_preference: account.accent_preference ?? null,
       company_brief: account.company_brief ?? null,
+      specialist_nicknames: ((account as unknown as { specialist_nicknames?: Record<string, string> }).specialist_nicknames ?? null),
+      specialist_prefs: account.specialist_prefs ?? null,
     },
     usage: {
       totals,

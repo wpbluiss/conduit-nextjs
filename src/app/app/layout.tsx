@@ -24,6 +24,7 @@ import { CommandPalette } from "@/components/conduit/CommandPalette";
 import { WelcomeChecklist } from "@/components/conduit/WelcomeChecklist";
 import { Suspense } from "react";
 import { ReferralClaimer } from "@/components/conduit/ReferralClaimer";
+import { NicknameProvider } from "@/context/NicknameContext";
 
 export const dynamic = "force-dynamic";
 
@@ -130,10 +131,16 @@ export default async function AppLayout({
     plan: account.tier_id,
   };
 
+  const specialistNicknames = (
+    (account as unknown as { specialist_nicknames?: Record<string, string> })
+      .specialist_nicknames ?? {}
+  ) as Partial<Record<EmployeeKey, string>>;
+
   return (
     <div className="praxis-root h-screen flex bg-[var(--color-surface)] text-[var(--color-text)]">
       <a href="#app-main" className="conduit-skip-link">Skip to main content</a>
       <UserProvider initialUser={initialUser}>
+      <NicknameProvider initialNicknames={specialistNicknames}>
       <ToastProvider>
       <PraxisCanvasTintProvider>
         <RouteProgress />
@@ -179,6 +186,7 @@ export default async function AppLayout({
         </Suspense>
       </PraxisCanvasTintProvider>
       </ToastProvider>
+      </NicknameProvider>
       </UserProvider>
     </div>
   );

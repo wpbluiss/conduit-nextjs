@@ -20,16 +20,20 @@ export default async function ChatPage({ searchParams }: PageProps) {
 
   const PAGE_SIZE = 30;
   let conversationId: string | null = null;
+  let handoffConversationId: string | null = null;
+  let handoffEmployee: string | null = null;
   let messages: MessageRow[] = [];
   let initialHasMore = false;
   if (params.c) {
     const { data: convo } = await supabase
       .from("conduit_conversations")
-      .select("id, account_id")
+      .select("id, account_id, handoff_conversation_id, handoff_employee")
       .eq("id", params.c)
       .maybeSingle();
     if (convo && convo.account_id === account.id) {
       conversationId = convo.id;
+      handoffConversationId = (convo.handoff_conversation_id as string | null) ?? null;
+      handoffEmployee = (convo.handoff_employee as string | null) ?? null;
       // Load only the most recent PAGE_SIZE messages for fast initial render.
       // The client fetches older pages via /api/conduit/messages when scrolling up.
       const { data: rows } = await supabase
@@ -73,6 +77,27 @@ export default async function ChatPage({ searchParams }: PageProps) {
         );
       }
 
+      // Fetch existing feedback reactions for these messages.
+      let feedbackByMsg: Record<string, 1 | -1> = {};
+      if (messageIds.length) {
+        try {
+          const { data: feedbackRows } = await supabase
+            .from("conduit_message_feedback")
+            .select("message_id, rating")
+            .in("message_id", messageIds)
+            .eq("account_id", account.id);
+          feedbackByMsg = (feedbackRows ?? []).reduce(
+            (acc, f) => {
+              acc[f.message_id as string] = f.rating as 1 | -1;
+              return acc;
+            },
+            {} as Record<string, 1 | -1>,
+          );
+        } catch {
+          // Non-fatal: feedback hydration failure doesn't block chat load.
+        }
+      }
+
       messages = page.map((r) => ({
         id: r.id,
         role: r.role as MessageRow["role"],
@@ -80,6 +105,7 @@ export default async function ChatPage({ searchParams }: PageProps) {
         content: r.content,
         metadata: r.metadata,
         artifacts: artifactsByMsg[r.id],
+        feedback: feedbackByMsg[r.id] ?? null,
       }));
     }
   }
@@ -117,6 +143,8 @@ export default async function ChatPage({ searchParams }: PageProps) {
       allowedEmployees={allowedEmployees}
       isFirstRun={isFirstRun}
       companyBrief={account.company_brief ?? null}
+      handoffConversationId={handoffConversationId}
+      handoffEmployee={handoffEmployee}
     />
   );
 }

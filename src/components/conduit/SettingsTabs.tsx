@@ -14,8 +14,9 @@ import {
 import { PraxisButton, SpinnerIcon } from "./PraxisButton";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { EmployeeKey } from "@/lib/ai/provider";
-import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
-import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
+import { EMPLOYEES, EMPLOYEE_ORDER } from "@/lib/conduit/employees";
+import { DEPT_COLOR, EMPLOYEE_ICON, employeeLabel } from "./EmployeeBadge";
+import { useNicknames } from "@/context/NicknameContext";
 import { useToast } from "@/context/ToastContext";
 import { ORDERED_TIERS, TOPUPS, tierById, type TierId } from "@/lib/billing/tiers";
 import { DEFAULT_EMPLOYEE_VOICES, VOICE_NAMES } from "@/lib/voice/defaults";
@@ -58,6 +59,8 @@ interface AccountData {
   avatar_url?: string | null;
   accent_preference?: string | null;
   company_brief?: string | null;
+  specialist_nicknames?: Record<string, string> | null;
+  specialist_prefs?: Record<string, { response_length?: "short" | "balanced" | "detailed" }> | null;
 }
 
 const COMMON_TIMEZONES = [
@@ -82,6 +85,7 @@ const COMMON_TIMEZONES = [
 export type SettingsTabKey =
   | "profile"
   | "business"
+  | "specialists"
   | "voice"
   | "team"
   | "usage"
@@ -114,6 +118,7 @@ export function SettingsTabs({
           [
             ["profile", "Profile"],
             ["business", "Business"],
+            ["specialists", "Specialists"],
             ["voice", "Voice"],
             ["team", "Team"],
             ["usage", "Usage"],
@@ -152,6 +157,12 @@ export function SettingsTabs({
         />
       )}
       {tab === "business" && <BusinessTab account={account} />}
+      {tab === "specialists" && (
+        <SpecialistsTab
+          initialNicknames={account.specialist_nicknames ?? {}}
+          initialPrefs={account.specialist_prefs ?? {}}
+        />
+      )}
       {tab === "voice" && (
         <VoiceTab
           ttsAllowed={Boolean(
@@ -203,6 +214,211 @@ function TeamTab() {
         </p>
       </div>
     </div>
+  );
+}
+
+type ResponseLength = "short" | "balanced" | "detailed";
+
+const RESPONSE_LENGTH_OPTIONS: { value: ResponseLength; label: string; hint: string }[] = [
+  { value: "short", label: "Short", hint: "1–3 sentences" },
+  { value: "balanced", label: "Balanced", hint: "Default" },
+  { value: "detailed", label: "Detailed", hint: "Full explanations" },
+];
+
+function SpecialistsTab({
+  initialNicknames,
+  initialPrefs,
+}: {
+  initialNicknames: Record<string, string>;
+  initialPrefs: Record<string, { response_length?: ResponseLength }>;
+}) {
+  const toast = useToast();
+  const { setNicknames: setCtxNicknames } = useNicknames();
+  const [nicknames, setNicknames] = useState<Record<string, string>>(
+    () => Object.fromEntries(
+      (EMPLOYEE_ORDER as EmployeeKey[]).map((emp) => [emp, initialNicknames[emp] ?? ""])
+    )
+  );
+  const [prefs, setPrefs] = useState<Record<string, ResponseLength>>(
+    () => Object.fromEntries(
+      (EMPLOYEE_ORDER as EmployeeKey[]).map((emp) => [
+        emp,
+        initialPrefs[emp]?.response_length ?? "balanced",
+      ])
+    )
+  );
+  const [busy, setBusy] = useState(false);
+
+  const handleNicknameChange = (emp: EmployeeKey, val: string) => {
+    setNicknames((prev) => ({ ...prev, [emp]: val.slice(0, 32) }));
+  };
+
+  const handleNicknameReset = (emp: EmployeeKey) => {
+    setNicknames((prev) => ({ ...prev, [emp]: "" }));
+  };
+
+  const handleLengthChange = (emp: EmployeeKey, val: ResponseLength) => {
+    setPrefs((prev) => ({ ...prev, [emp]: val }));
+  };
+
+  const handleSave = async (e: FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const nicknamePayload = Object.fromEntries(
+        Object.entries(nicknames).filter(([, v]) => v.trim())
+      );
+      const prefPayload = Object.fromEntries(
+        Object.entries(prefs)
+          .filter(([, v]) => v !== "balanced")
+          .map(([k, v]) => [k, { response_length: v }])
+      );
+      const [nickRes, prefRes] = await Promise.all([
+        fetch("/api/conduit/settings/specialist-nicknames", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nicknames: nicknamePayload }),
+        }),
+        fetch("/api/conduit/settings/specialist-prefs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prefs: prefPayload }),
+        }),
+      ]);
+      if (!nickRes.ok || !prefRes.ok) throw new Error("save_failed");
+      const nickData = (await nickRes.json()) as { nicknames: Record<string, string> };
+      setCtxNicknames(nickData.nicknames as Partial<Record<EmployeeKey, string>>);
+      toast.success("Specialist settings saved");
+    } catch {
+      toast.error("Failed to save — please try again");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSave} className="space-y-8 text-sm">
+      {/* Nicknames */}
+      <div>
+        <h3 className="text-[11px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-3">
+          Custom nicknames
+        </h3>
+        <p className="text-[var(--color-text-muted)] max-w-xl mb-4">
+          Give each specialist a custom nickname. Leave blank to use the default name.
+          Nicknames appear in the sidebar, chat, and specialist picker.
+        </p>
+        <div className="space-y-3">
+          {(EMPLOYEE_ORDER as EmployeeKey[]).map((emp) => {
+            const Icon = EMPLOYEE_ICON[emp];
+            const color = DEPT_COLOR[emp];
+            const canonical = employeeLabel(emp);
+            return (
+              <div key={emp} className="flex items-center gap-3">
+                <span
+                  className="flex items-center justify-center w-8 h-8 rounded-full shrink-0"
+                  style={{
+                    background: `color-mix(in srgb, ${color} 18%, var(--color-surface-elevated))`,
+                    boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 32%, transparent)`,
+                  }}
+                >
+                  <Icon size={14} style={{ color }} strokeWidth={2} />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <label
+                    htmlFor={`nick-${emp}`}
+                    className="block text-[11px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-1"
+                  >
+                    {canonical}
+                    <span className="ml-1 text-[var(--color-text-muted)] normal-case tracking-normal">
+                      · {EMPLOYEES[emp].role}
+                    </span>
+                  </label>
+                  <input
+                    id={`nick-${emp}`}
+                    type="text"
+                    value={nicknames[emp]}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleNicknameChange(emp, e.target.value)}
+                    placeholder={canonical}
+                    maxLength={32}
+                    className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 ring-[var(--color-accent)]"
+                  />
+                </div>
+                {nicknames[emp] && (
+                  <button
+                    type="button"
+                    onClick={() => handleNicknameReset(emp)}
+                    title="Reset to default"
+                    className="shrink-0 p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+                  >
+                    <X size={13} />
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Response length */}
+      <div>
+        <h3 className="text-[11px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-3">
+          Response length
+        </h3>
+        <p className="text-[var(--color-text-muted)] max-w-xl mb-4">
+          Control how verbose each specialist is. Short is best for quick answers; Detailed for research and complex tasks.
+        </p>
+        <div className="space-y-3">
+          {(EMPLOYEE_ORDER as EmployeeKey[]).map((emp) => {
+            const Icon = EMPLOYEE_ICON[emp];
+            const color = DEPT_COLOR[emp];
+            const canonical = employeeLabel(emp);
+            const current = prefs[emp] ?? "balanced";
+            return (
+              <div key={emp} className="flex items-center gap-3">
+                <span
+                  className="flex items-center justify-center w-8 h-8 rounded-full shrink-0"
+                  style={{
+                    background: `color-mix(in srgb, ${color} 18%, var(--color-surface-elevated))`,
+                    boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 32%, transparent)`,
+                  }}
+                >
+                  <Icon size={14} style={{ color }} strokeWidth={2} />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <span className="block text-[11px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-1.5">
+                    {canonical}
+                  </span>
+                  <div className="flex gap-1" role="group" aria-label={`${canonical} response length`}>
+                    {RESPONSE_LENGTH_OPTIONS.map(({ value, label, hint }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => handleLengthChange(emp, value)}
+                        title={hint}
+                        className={`px-3 py-1.5 rounded-md text-[12px] font-medium transition-all ${
+                          current === value
+                            ? "bg-[var(--color-accent)] text-white"
+                            : "border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-text-muted)]"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="flex justify-end pt-2 border-t border-[var(--color-border)]">
+        <PraxisButton type="submit" disabled={busy}>
+          {busy ? <SpinnerIcon /> : <Check size={14} />}
+          Save settings
+        </PraxisButton>
+      </div>
+    </form>
   );
 }
 
@@ -1201,14 +1417,51 @@ function BusinessTab({ account }: { account: AccountData }) {
 }
 
 function UsageTab({ usage }: { usage: UsageData }) {
-  const days = Object.keys(usage.byDay).sort();
-  const last14 = days.slice(-14);
-  const fillByDay = last14.map((d) => ({ d, v: usage.byDay[d] }));
+  // Build 3 month options: current + 2 prior calendar months
+  const now = new Date();
+  const monthOptions = Array.from({ length: 3 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    return {
+      value: d.toISOString().slice(0, 7),
+      label: d.toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+    };
+  });
+
+  const [selectedMonth, setSelectedMonth] = useState(monthOptions[0].value);
+  const [historicalData, setHistoricalData] = useState<{
+    totals: { input: number; output: number; cost: number };
+    byEmployee: Record<string, { input: number; output: number; cost: number }>;
+    byDay: Record<string, number>;
+    messageCount: number;
+  } | null>(null);
+  const [monthLoading, setMonthLoading] = useState(false);
+
+  useEffect(() => {
+    setMonthLoading(true);
+    setHistoricalData(null);
+    fetch(`/api/conduit/usage/monthly?month=${selectedMonth}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setHistoricalData(data);
+        setMonthLoading(false);
+      })
+      .catch(() => setMonthLoading(false));
+  }, [selectedMonth]);
+
+  const displayData = historicalData ?? {
+    totals: usage.totals,
+    byEmployee: usage.byEmployee,
+    byDay: usage.byDay,
+    messageCount: 0,
+  };
+
+  const days = Object.keys(displayData.byDay).sort();
+  const fillByDay = days.map((d) => ({ d, v: displayData.byDay[d] }));
   const max = Math.max(1, ...fillByDay.map((x) => x.v));
   const empNames = EMPLOYEE_ORDER as EmployeeKey[];
   const empValues = empNames.map((emp) => ({
     emp,
-    val: (usage.byEmployee[emp]?.input ?? 0) + (usage.byEmployee[emp]?.output ?? 0),
+    val: (displayData.byEmployee[emp]?.input ?? 0) + (displayData.byEmployee[emp]?.output ?? 0),
   }));
   const empTotal = Math.max(1, empValues.reduce((s, x) => s + x.val, 0));
 
@@ -1219,21 +1472,59 @@ function UsageTab({ usage }: { usage: UsageData }) {
 
   return (
     <div className="space-y-8 text-sm">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Stat label="Today" value={`$${(usage.today.cost / 100).toFixed(2)}`} sub={`${(usage.today.input + usage.today.output).toLocaleString()} tokens`} />
-        <Stat label="This week" value={`$${(usage.thisWeek.cost / 100).toFixed(2)}`} sub={`${(usage.thisWeek.input + usage.thisWeek.output).toLocaleString()} tokens`} />
-        <Stat label="This month" value={`$${(usage.totals.cost / 100).toFixed(2)}`} sub={`${(usage.totals.input + usage.totals.output).toLocaleString()} tokens`} />
+      {/* Month selector */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">Period</span>
+        <div className="flex flex-wrap gap-1.5">
+          {monthOptions.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setSelectedMonth(opt.value)}
+              className="px-3 py-1 rounded-full text-xs transition-colors"
+              style={{
+                background: selectedMonth === opt.value
+                  ? "var(--color-accent)"
+                  : "var(--color-surface-elevated)",
+                color: selectedMonth === opt.value
+                  ? "#fff"
+                  : "var(--color-text-muted)",
+                border: `1px solid ${selectedMonth === opt.value ? "var(--color-accent)" : "var(--color-border)"}`,
+              }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        {monthLoading && (
+          <span className="text-[11px] text-[var(--color-text-muted)] animate-pulse">Loading…</span>
+        )}
+      </div>
+
+      {/* Summary stats for selected month */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <Stat
-          label="Builds"
-          value={String(usage.buildsThisCycle ?? 0)}
-          sub="This cycle"
+          label="AI messages"
+          value={monthLoading ? "—" : String(displayData.messageCount)}
+          sub="This period"
+        />
+        <Stat
+          label="Tokens"
+          value={monthLoading ? "—" : (displayData.totals.input + displayData.totals.output).toLocaleString()}
+          sub="Input + output"
+        />
+        <Stat
+          label="Est. cost"
+          value={monthLoading ? "—" : `$${(displayData.totals.cost / 100).toFixed(2)}`}
+          sub="This period"
         />
       </div>
 
+      {/* Billing cycle cap — always shows current cycle data */}
       <div className="conduit-card px-5 py-4">
         <div className="flex items-baseline justify-between gap-3 mb-2">
           <span className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
-            Token cap (this cycle)
+            Token cap (current cycle)
           </span>
           <span className="text-sm">
             {usage.cap.used.toLocaleString()} /{" "}
@@ -1261,22 +1552,25 @@ function UsageTab({ usage }: { usage: UsageData }) {
         )}
       </div>
 
+      {/* Daily token bar chart */}
       <div>
         <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
-          Tokens · last 14 days
+          Tokens · daily
         </div>
-        {fillByDay.length === 0 ? (
+        {monthLoading ? (
+          <p className="text-[var(--color-text-muted)]">Loading…</p>
+        ) : fillByDay.length === 0 ? (
           <p className="text-[var(--color-text-muted)]">No usage yet.</p>
         ) : (
           <div className="conduit-card p-4">
-            <div className="flex items-end gap-1 h-32">
+            <div className="flex items-end gap-px h-32">
               {fillByDay.map(({ d, v }) => {
                 const h = Math.round((v / max) * 100);
                 return (
                   <div
                     key={d}
                     title={`${d}: ${v.toLocaleString()} tokens`}
-                    className="flex-1 rounded-t-md bg-[var(--color-accent)] opacity-70 hover:opacity-100 transition-opacity"
+                    className="flex-1 rounded-t bg-[var(--color-accent)] opacity-70 hover:opacity-100 transition-opacity"
                     style={{ height: `${Math.max(2, h)}%` }}
                   />
                 );
@@ -1290,13 +1584,16 @@ function UsageTab({ usage }: { usage: UsageData }) {
         )}
       </div>
 
+      {/* Per-employee breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="conduit-card p-5">
           <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
             Share by employee
           </div>
-          {empTotal === 1 ? (
-            <p className="text-[var(--color-text-muted)]">No usage yet.</p>
+          {monthLoading || empTotal === 1 ? (
+            <p className="text-[var(--color-text-muted)]">
+              {monthLoading ? "Loading…" : "No usage yet."}
+            </p>
           ) : (
             <Donut data={empValues} total={empTotal} />
           )}
@@ -1307,13 +1604,10 @@ function UsageTab({ usage }: { usage: UsageData }) {
           </div>
           <div className="space-y-2">
             {empNames.map((emp) => {
-              const v = usage.byEmployee[emp];
+              const v = displayData.byEmployee[emp];
               if (!v) return null;
               return (
-                <div
-                  key={emp}
-                  className="flex items-center justify-between"
-                >
+                <div key={emp} className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <span
                       aria-hidden
@@ -1329,7 +1623,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
                 </div>
               );
             })}
-            {empNames.every((e) => !usage.byEmployee[e]) && (
+            {empNames.every((e) => !displayData.byEmployee[e]) && (
               <p className="text-[var(--color-text-muted)] text-xs">
                 No usage yet.
               </p>

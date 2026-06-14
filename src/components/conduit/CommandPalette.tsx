@@ -247,7 +247,7 @@ export function CommandPalette() {
       label: `Chat with ${employeeLabel(emp)}`,
       sublabel: "Open a conversation",
       icon: <Icon size={ICON_SIZE} style={{ color: DEPT_COLOR[emp] }} />,
-      href: `/app?employee=${emp}`,
+      href: `/app?pin=${emp}`,
       group: "Specialists",
     };
   });

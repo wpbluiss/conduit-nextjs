@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Search, X } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { MessageSquarePlus, Search, X } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, EMPLOYEE_ICON } from "./EmployeeBadge";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
@@ -13,9 +14,22 @@ interface SearchResult {
   conversation_id: string;
   title: string | null;
   dominant_employee: string | null;
+  updated_at: string | null;
   snippet: string;
   role: string;
   employee: string | null;
+}
+
+function relativeDate(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `${days}d ago`;
+  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
 function HighlightSnippet({ text, query }: { text: string; query: string }) {
@@ -45,9 +59,14 @@ function HighlightSnippet({ text, query }: { text: string; query: string }) {
 }
 
 export function ConversationSearchBar() {
-  const [query, setQuery] = useState("");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialQ = searchParams.get("q") ?? "";
+
+  const [query, setQuery] = useState(initialQ);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
   const [focused, setFocused] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -56,6 +75,7 @@ export function ConversationSearchBar() {
     if (q.length < 2) {
       setResults([]);
       setLoading(false);
+      setSearched(false);
       return;
     }
     setLoading(true);
@@ -66,6 +86,7 @@ export function ConversationSearchBar() {
       if (!res.ok) return;
       const json = (await res.json()) as { results: SearchResult[] };
       setResults(json.results ?? []);
+      setSearched(true);
     } catch {
       // swallow — search is best-effort
     } finally {
@@ -73,27 +94,46 @@ export function ConversationSearchBar() {
     }
   }, []);
 
+  // Seed from URL on mount
+  useEffect(() => {
+    if (initialQ.length >= 2) void search(initialQ);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (query.length < 2) {
       setResults([]);
       setLoading(false);
+      setSearched(false);
+      // Clear ?q= param
+      const params = new URLSearchParams(window.location.search);
+      params.delete("q");
+      const newUrl = params.toString() ? `?${params}` : window.location.pathname;
+      router.replace(newUrl, { scroll: false });
       return;
     }
     setLoading(true);
-    debounceRef.current = setTimeout(() => void search(query), 300);
+    debounceRef.current = setTimeout(() => {
+      void search(query);
+      // Persist ?q= in URL
+      const params = new URLSearchParams(window.location.search);
+      params.set("q", query);
+      router.replace(`?${params}`, { scroll: false });
+    }, 300);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [query, search]);
+  }, [query, search, router]);
 
   const clear = () => {
     setQuery("");
     setResults([]);
+    setSearched(false);
     inputRef.current?.focus();
   };
 
-  const showDropdown = focused && (results.length > 0 || (loading && query.length >= 2));
+  const showResults = focused && query.length >= 2;
 
   return (
     <div className="relative w-full max-w-xl mb-6">
@@ -141,14 +181,24 @@ export function ConversationSearchBar() {
       </div>
 
       {/* Results dropdown */}
-      {showDropdown && (
+      {showResults && (
         <div
           className="absolute left-0 right-0 top-full mt-1 z-20 rounded-xl overflow-hidden conduit-card py-1"
           style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}
         >
-          {results.length === 0 && !loading && query.length >= 2 && (
-            <div className="px-4 py-3 text-sm text-[var(--color-text-muted)]">
-              No results for &ldquo;{query}&rdquo;
+          {!loading && searched && results.length === 0 && (
+            <div className="px-4 py-4">
+              <p className="text-sm text-[var(--color-text-muted)] mb-3">
+                No conversations match &ldquo;{query}&rdquo;
+              </p>
+              <Link
+                href="/app"
+                className="inline-flex items-center gap-1.5 text-[13px] font-medium"
+                style={{ color: "var(--color-accent)" }}
+              >
+                <MessageSquarePlus size={13} />
+                Start a new one →
+              </Link>
             </div>
           )}
           {results.map((r) => {
@@ -187,8 +237,15 @@ export function ConversationSearchBar() {
                   </span>
                 )}
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm font-medium text-[var(--color-text)] truncate">
-                    {r.title || "Untitled chat"}
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-sm font-medium text-[var(--color-text)] truncate">
+                      {r.title || "Untitled chat"}
+                    </span>
+                    {r.updated_at && (
+                      <span className="shrink-0 text-[11px] text-[var(--color-text-muted)]">
+                        {relativeDate(r.updated_at)}
+                      </span>
+                    )}
                   </div>
                   <div className="mt-0.5 text-xs text-[var(--color-text-muted)] leading-snug line-clamp-2">
                     <HighlightSnippet text={r.snippet} query={query} />

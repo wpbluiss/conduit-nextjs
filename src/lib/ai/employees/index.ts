@@ -34,6 +34,13 @@ export function systemPromptFor(
     base +=
       `\n\n— Company brief (owner's own words — shared business context) —\n${ctx.company_brief}`;
   }
+  // Inject response-length preference if set (non-balanced).
+  const pref = ctx.specialist_prefs?.[employee]?.response_length;
+  if (pref === "short") {
+    base += "\n\n— Response length preference —\nKeep responses concise: 1–3 sentences unless the task inherently requires more. Omit preamble.";
+  } else if (pref === "detailed") {
+    base += "\n\n— Response length preference —\nProvide detailed, thorough answers. Explain your reasoning, cover edge cases, and include examples where helpful.";
+  }
   return base;
 }
 

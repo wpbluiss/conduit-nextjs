@@ -96,7 +96,7 @@ export default function Pricing() {
         className="absolute -top-40 right-0 w-[700px] h-[700px] pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse at center, rgba(91, 99, 232,0.06) 0%, transparent 60%)",
+            "radial-gradient(ellipse at center, rgba(255, 138, 61, 0.06) 0%, transparent 60%)",
         }}
       />
 
@@ -128,7 +128,7 @@ export default function Pricing() {
               type="button"
               onClick={() => setAnnual(false)}
               aria-pressed={!annual}
-              className={`px-5 py-2 rounded-full text-[13px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-indigo-500)] focus-visible:ring-offset-1 ${
+              className={`px-5 py-2 rounded-full text-[13px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-1 ${
                 !annual
                   ? "bg-[var(--color-bg-surface)] text-[var(--color-cream)] shadow-sm"
                   : "text-[var(--color-cream-mute)] hover:text-[var(--color-cream)]"
@@ -140,7 +140,7 @@ export default function Pricing() {
               type="button"
               onClick={() => setAnnual(true)}
               aria-pressed={annual}
-              className={`relative px-5 py-2 rounded-full text-[13px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-indigo-500)] focus-visible:ring-offset-1 ${
+              className={`relative px-5 py-2 rounded-full text-[13px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-1 ${
                 annual
                   ? "bg-[var(--color-bg-surface)] text-[var(--color-cream)] shadow-sm"
                   : "text-[var(--color-cream-mute)] hover:text-[var(--color-cream)]"
@@ -150,8 +150,8 @@ export default function Pricing() {
               <span
                 className={`ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide transition-opacity duration-150 ${
                   annual
-                    ? "bg-[var(--color-indigo-500)] text-white opacity-100"
-                    : "bg-[var(--color-indigo-500)]/20 text-[var(--color-indigo-300)] opacity-80"
+                    ? "bg-[var(--color-accent)] text-white opacity-100"
+                    : "bg-[var(--color-accent)]/20 text-[var(--color-ember-300)] opacity-80"
                 }`}
               >
                 Save 20%
@@ -205,7 +205,7 @@ export default function Pricing() {
                 <p
                   className={`text-[12px] mb-3 transition-opacity duration-200 ${
                     annual && t.monthlyPrice && t.monthlyPrice > 0
-                      ? "text-[var(--color-indigo-300)] opacity-100"
+                      ? "text-[var(--color-ember-300)] opacity-100"
                       : "opacity-0 pointer-events-none select-none"
                   }`}
                   aria-hidden={!annual || !t.monthlyPrice}
@@ -227,7 +227,7 @@ export default function Pricing() {
                       <Check
                         size={14}
                         weight="bold"
-                        color={t.popular ? "#5B63E8" : "#16A34A"}
+                        color={t.popular ? "var(--color-accent)" : "#16A34A"}
                         className="mt-1 shrink-0"
                       />
                       <span>{f}</span>
@@ -257,7 +257,7 @@ export default function Pricing() {
           Top up tokens any time — $10 / $25 / $50 packs from the{" "}
           <Link
             href="/app/settings/billing"
-            className="text-[var(--color-cream)] hover:text-[var(--color-indigo-500)] underline underline-offset-2 decoration-[var(--color-edge)] hover:decoration-[var(--color-indigo-500)] transition-colors"
+            className="text-[var(--color-cream)] hover:text-[var(--color-accent)] underline underline-offset-2 decoration-[var(--color-edge)] hover:decoration-[var(--color-accent)] transition-colors"
           >
             billing settings
           </Link>{" "}

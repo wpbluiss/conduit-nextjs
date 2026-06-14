@@ -106,7 +106,13 @@ export function EmployeeBadge({
 }
 
 /** Dept-tinted pill showing the specialist name — used in chat message headers. */
-export function SpecialistChip({ employee }: { employee: EmployeeKey }) {
+export function SpecialistChip({
+  employee,
+  label,
+}: {
+  employee: EmployeeKey;
+  label?: string;
+}) {
   const m = EMPLOYEES[employee];
   return (
     <span
@@ -117,7 +123,7 @@ export function SpecialistChip({ employee }: { employee: EmployeeKey }) {
         border: `1px solid color-mix(in srgb, ${m.color} 28%, transparent)`,
       }}
     >
-      {m.name}
+      {label ?? m.name}
     </span>
   );
 }
