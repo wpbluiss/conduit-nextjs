@@ -6,6 +6,7 @@ import {
   ArrowRight,
   Check,
   ExternalLink,
+  Info,
   Lock,
   Play,
   X,
@@ -75,7 +76,8 @@ export type SettingsTabKey =
   | "team"
   | "usage"
   | "billing"
-  | "security";
+  | "security"
+  | "notifications";
 
 export function SettingsTabs({
   email,
@@ -104,6 +106,7 @@ export function SettingsTabs({
             ["usage", "Usage"],
             ["billing", "Billing"],
             ["security", "Security"],
+            ["notifications", "Notifications"],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -142,6 +145,7 @@ export function SettingsTabs({
       {tab === "usage" && <UsageTab usage={usage} />}
       {tab === "billing" && <BillingTab account={account} usage={usage} />}
       {tab === "security" && <MFASecurity />}
+      {tab === "notifications" && <NotificationsTab />}
     </div>
   );
 }
@@ -1471,6 +1475,125 @@ function Stat({
           {sub}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ─── Notifications tab ───────────────────────────────────────────────────── */
+
+interface NotificationPrefs {
+  product_updates: boolean;
+  weekly_digest: boolean;
+}
+
+const NOTIF_DEFAULTS: NotificationPrefs = {
+  product_updates: true,
+  weekly_digest: true,
+};
+
+function NotificationsTab() {
+  const [prefs, setPrefs] = useState<NotificationPrefs | null>(null);
+  const [saving, setSaving] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/conduit/notification-prefs")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (j?.prefs) setPrefs({ ...NOTIF_DEFAULTS, ...j.prefs });
+        else setPrefs(NOTIF_DEFAULTS);
+      })
+      .catch(() => setPrefs(NOTIF_DEFAULTS));
+  }, []);
+
+  const toggle = async (key: keyof NotificationPrefs) => {
+    if (!prefs) return;
+    const next = { ...prefs, [key]: !prefs[key] };
+    setPrefs(next);
+    setSaving(key);
+    setError(null);
+    try {
+      const r = await fetch("/api/conduit/notification-prefs", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ [key]: next[key] }),
+      });
+      if (!r.ok) setError("Couldn't save preference.");
+    } catch {
+      setError("Couldn't save preference.");
+    }
+    setSaving(null);
+  };
+
+  if (!prefs) {
+    return <p className="text-sm text-[var(--color-text-muted)]">Loading…</p>;
+  }
+
+  return (
+    <div className="space-y-6 text-sm">
+      <p className="text-[var(--color-text-muted)]">
+        Choose which emails you receive from Praxis. Billing receipts and
+        security alerts are always sent regardless of these settings.
+      </p>
+
+      <div className="conduit-card p-5 space-y-4">
+        <ToggleRow
+          label="Product updates & new features"
+          desc="Hear about new Praxis capabilities, releases, and tips."
+          value={prefs.product_updates}
+          onChange={() => toggle("product_updates")}
+        />
+        <ToggleRow
+          label="Weekly financial digest"
+          desc="A weekly summary of your spending and AI activity (coming soon)."
+          value={prefs.weekly_digest}
+          onChange={() => toggle("weekly_digest")}
+        />
+
+        {/* Always-on rows — visually disabled with tooltip */}
+        <AlwaysOnRow
+          label="Billing receipts"
+          desc="Receipts for charges to your payment method. Required per Stripe ToS."
+        />
+        <AlwaysOnRow
+          label="Security alerts"
+          desc="Sign-in from new devices, password changes, and 2FA events."
+        />
+      </div>
+
+      {saving && (
+        <p className="text-xs text-[var(--color-text-muted)]">Saving…</p>
+      )}
+      {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
+    </div>
+  );
+}
+
+function AlwaysOnRow({ label, desc }: { label: string; desc: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4 opacity-60">
+      <div>
+        <div className="flex items-center gap-1.5">
+          {label}
+          <span
+            title={desc}
+            className="cursor-help text-[var(--color-text-muted)]"
+          >
+            <Info size={12} />
+          </span>
+        </div>
+        <div className="text-xs text-[var(--color-text-muted)] mt-0.5">
+          {desc}
+        </div>
+      </div>
+      {/* Always-on toggle — locked on */}
+      <div
+        aria-label="Always on — cannot be disabled"
+        title="Cannot be disabled"
+        className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full cursor-not-allowed bg-[var(--color-accent)]"
+      >
+        <span className="inline-block h-5 w-5 transform rounded-full bg-white translate-x-5" />
+      </div>
     </div>
   );
 }
