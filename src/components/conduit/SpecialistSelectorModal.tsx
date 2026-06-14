@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
 import { EmployeeAvatar, DEPT_COLOR, DEPT_COLOR_SOFT } from "./EmployeeBadge";
 import type { EmployeeKey } from "@/lib/ai/provider";
+import { useNicknames } from "@/context/NicknameContext";
 
 const STORAGE_KEY = "conduit_specialist_choice_v1";
 
@@ -43,6 +44,7 @@ export function SpecialistSelectorModal({
 }) {
   const [selected, setSelected] = useState<EmployeeId | null>(null);
   const allowedSet = new Set(allowedEmployees);
+  const { labelFor } = useNicknames();
 
   function confirm() {
     onSelect(selected as EmployeeKey | null);
@@ -117,7 +119,7 @@ export function SpecialistSelectorModal({
                     className="text-[13px] font-medium leading-tight"
                     style={{ color: isSelected ? DEPT_COLOR[id as EmployeeKey] : "var(--color-text)" }}
                   >
-                    {m.name}
+                    {labelFor(id as EmployeeKey)}
                   </div>
                   <div
                     className="text-[10px] uppercase tracking-[0.14em] mt-0.5"
@@ -167,7 +169,7 @@ export function SpecialistSelectorModal({
             }
           >
             {selected
-              ? `Talk to ${EMPLOYEES[selected].name} →`
+              ? `Talk to ${labelFor(selected as EmployeeKey)} →`
               : "Select a specialist first"}
           </button>
         </div>

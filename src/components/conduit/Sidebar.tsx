@@ -25,6 +25,7 @@ import {
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, EMPLOYEE_ICON, employeeLabel } from "./EmployeeBadge";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
+import { useNicknames } from "@/context/NicknameContext";
 import { PraxisLogo } from "./PraxisLogo";
 import { SidebarBuildPip } from "./builds/in-flight/SidebarBuildPip";
 import { SidebarBuildsSection } from "./builds/in-flight/SidebarBuildsSection";
@@ -85,6 +86,7 @@ export function Sidebar({
   const pathname = usePathname();
   const params = useSearchParams();
   const activeId = params.get("c");
+  const { labelFor } = useNicknames();
   const [open, setOpen] = useState(false);
   const [teamExpanded, setTeamExpanded] = useState(true);
   // Desktop collapsed state — lazy init from localStorage, persisted.
@@ -398,7 +400,7 @@ export function Sidebar({
                           <Icon size={11} strokeWidth={2.25} />
                         </span>
                         <span className="text-[var(--color-text)] truncate flex-1">
-                          {employeeLabel(emp)}
+                          {labelFor(emp)}
                         </span>
                         {!allowed ? (
                           <Lock
@@ -490,7 +492,7 @@ export function Sidebar({
                   </span>
                 );
                 return (
-                  <li key={emp} className="list-none flex justify-center" title={employeeLabel(emp)}>
+                  <li key={emp} className="list-none flex justify-center" title={labelFor(emp)}>
                     {allowed ? (
                       <Link href={`/app/team/${emp}`} onClick={close} className="block">
                         {btn}

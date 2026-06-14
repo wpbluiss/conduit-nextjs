@@ -14,8 +14,9 @@ import {
 import { PraxisButton, SpinnerIcon } from "./PraxisButton";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { EmployeeKey } from "@/lib/ai/provider";
-import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
-import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
+import { EMPLOYEES, EMPLOYEE_ORDER } from "@/lib/conduit/employees";
+import { DEPT_COLOR, EMPLOYEE_ICON, employeeLabel } from "./EmployeeBadge";
+import { useNicknames } from "@/context/NicknameContext";
 import { useToast } from "@/context/ToastContext";
 import { ORDERED_TIERS, TOPUPS, tierById, type TierId } from "@/lib/billing/tiers";
 import { DEFAULT_EMPLOYEE_VOICES, VOICE_NAMES } from "@/lib/voice/defaults";
@@ -58,6 +59,7 @@ interface AccountData {
   avatar_url?: string | null;
   accent_preference?: string | null;
   company_brief?: string | null;
+  specialist_nicknames?: Record<string, string> | null;
 }
 
 const COMMON_TIMEZONES = [
@@ -82,6 +84,7 @@ const COMMON_TIMEZONES = [
 export type SettingsTabKey =
   | "profile"
   | "business"
+  | "specialists"
   | "voice"
   | "team"
   | "usage"
@@ -114,6 +117,7 @@ export function SettingsTabs({
           [
             ["profile", "Profile"],
             ["business", "Business"],
+            ["specialists", "Specialists"],
             ["voice", "Voice"],
             ["team", "Team"],
             ["usage", "Usage"],
@@ -152,6 +156,9 @@ export function SettingsTabs({
         />
       )}
       {tab === "business" && <BusinessTab account={account} />}
+      {tab === "specialists" && (
+        <SpecialistsTab initialNicknames={account.specialist_nicknames ?? {}} />
+      )}
       {tab === "voice" && (
         <VoiceTab
           ttsAllowed={Boolean(
@@ -203,6 +210,120 @@ function TeamTab() {
         </p>
       </div>
     </div>
+  );
+}
+
+function SpecialistsTab({
+  initialNicknames,
+}: {
+  initialNicknames: Record<string, string>;
+}) {
+  const toast = useToast();
+  const { setNicknames: setCtxNicknames } = useNicknames();
+  const [values, setValues] = useState<Record<string, string>>(
+    () => Object.fromEntries(
+      (EMPLOYEE_ORDER as EmployeeKey[]).map((emp) => [emp, initialNicknames[emp] ?? ""])
+    )
+  );
+  const [busy, setBusy] = useState(false);
+
+  const handleChange = (emp: EmployeeKey, val: string) => {
+    setValues((prev) => ({ ...prev, [emp]: val.slice(0, 32) }));
+  };
+
+  const handleReset = (emp: EmployeeKey) => {
+    setValues((prev) => ({ ...prev, [emp]: "" }));
+  };
+
+  const handleSave = async (e: FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const nicknames = Object.fromEntries(
+        Object.entries(values).filter(([, v]) => v.trim())
+      );
+      const res = await fetch("/api/conduit/settings/specialist-nicknames", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nicknames }),
+      });
+      if (!res.ok) throw new Error("save_failed");
+      const data = (await res.json()) as { nicknames: Record<string, string> };
+      // Update global nickname context so all UI immediately reflects changes.
+      setCtxNicknames(data.nicknames as Partial<Record<EmployeeKey, string>>);
+      toast.success("Specialist names saved");
+    } catch {
+      toast.error("Failed to save — please try again");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSave} className="space-y-6 text-sm">
+      <div>
+        <p className="text-[var(--color-text-muted)] max-w-xl mb-6">
+          Give each specialist a custom nickname. Leave blank to use the default name.
+          Nicknames appear in the sidebar, chat, and specialist picker.
+        </p>
+        <div className="space-y-3">
+          {(EMPLOYEE_ORDER as EmployeeKey[]).map((emp) => {
+            const Icon = EMPLOYEE_ICON[emp];
+            const color = DEPT_COLOR[emp];
+            const canonical = employeeLabel(emp);
+            return (
+              <div key={emp} className="flex items-center gap-3">
+                <span
+                  className="flex items-center justify-center w-8 h-8 rounded-full shrink-0"
+                  style={{
+                    background: `color-mix(in srgb, ${color} 18%, var(--color-surface-elevated))`,
+                    boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 32%, transparent)`,
+                  }}
+                >
+                  <Icon size={14} style={{ color }} strokeWidth={2} />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <label
+                    htmlFor={`nick-${emp}`}
+                    className="block text-[11px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-1"
+                  >
+                    {canonical}
+                    <span className="ml-1 text-[var(--color-text-muted)] normal-case tracking-normal">
+                      · {EMPLOYEES[emp].role}
+                    </span>
+                  </label>
+                  <input
+                    id={`nick-${emp}`}
+                    type="text"
+                    value={values[emp]}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange(emp, e.target.value)}
+                    placeholder={canonical}
+                    maxLength={32}
+                    className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 ring-[var(--color-accent)]"
+                  />
+                </div>
+                {values[emp] && (
+                  <button
+                    type="button"
+                    onClick={() => handleReset(emp)}
+                    title="Reset to default"
+                    className="shrink-0 p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+                  >
+                    <X size={13} />
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="flex justify-end pt-2 border-t border-[var(--color-border)]">
+        <PraxisButton type="submit" disabled={busy}>
+          {busy ? <SpinnerIcon /> : <Check size={14} />}
+          Save nicknames
+        </PraxisButton>
+      </div>
+    </form>
   );
 }
 

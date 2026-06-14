@@ -113,7 +113,7 @@ function ConversationRow({
 export default async function ConversationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ label?: string }>;
+  searchParams: Promise<{ label?: string; q?: string }>;
 }) {
   const current = await getCurrentAccount();
   if (!current) redirect("/auth/sign-in?next=/app/conversations");
