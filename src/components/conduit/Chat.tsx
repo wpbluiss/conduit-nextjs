@@ -23,6 +23,7 @@ import {
 } from "./praxis/PraxisComposerPill";
 import { composeChatEmptyCopy, timeOfDayBucket } from "@/lib/conduit/welcome-copy";
 import type { EmployeeId } from "@/lib/conduit/employees";
+import { MarkdownRenderer } from "./MarkdownRenderer";
 
 export interface VoicePrefs {
   enabled: boolean;
@@ -1330,24 +1331,27 @@ const MessageBubble = memo(function MessageBubble({
             </button>
           )}
         </div>
-        <div className="conduit-bubble-assistant px-4 py-3 text-[var(--color-text)] whitespace-pre-wrap leading-relaxed">
+        <div className="conduit-bubble-assistant px-4 py-3 text-[var(--color-text)] leading-relaxed">
           {empty ? (
             <span className="inline-flex items-center gap-1 py-1">
               <span className="typing-dot" />
               <span className="typing-dot" />
               <span className="typing-dot" />
             </span>
-          ) : (
-            <>
+          ) : message.pending ? (
+            <span className="whitespace-pre-wrap">
               {message.content}
-              {message.pending && (
-                <span
-                  aria-hidden
-                  className="inline-block w-[2px] h-4 -mb-1 ml-1 caret"
-                  style={{ background: DEPT_COLOR[employee] }}
-                />
-              )}
-            </>
+              <span
+                aria-hidden
+                className="inline-block w-[2px] h-4 -mb-1 ml-1 caret"
+                style={{ background: DEPT_COLOR[employee] }}
+              />
+            </span>
+          ) : (
+            <MarkdownRenderer
+              content={message.content}
+              baseKey={message.id ?? `msg-${employee}`}
+            />
           )}
         </div>
         {message.memories?.map((mem) => (
