@@ -9,6 +9,7 @@ import { AnalyticsPageView } from "@/components/conduit/AnalyticsPageView";
 // server-rendered (ssr: true default) for SEO; only the client bundle
 // is deferred. loading: () => null prevents layout shift while chunks
 // load — these sections are entirely out of the initial viewport.
+const StatsBar = dynamic(() => import("@/components/StatsBar"));
 const DemoStrip = dynamic(() => import("@/components/DemoStrip"));
 const HowItWorks = dynamic(() => import("@/components/HowItWorks"));
 const ProductTiles = dynamic(() => import("@/components/ProductTiles"));
@@ -78,6 +79,7 @@ export default function Home() {
       <AnalyticsPageView />
       <Navbar />
       <Hero />
+      <StatsBar />
       <DemoStrip />
       <HowItWorks />
       <ProductTiles />
