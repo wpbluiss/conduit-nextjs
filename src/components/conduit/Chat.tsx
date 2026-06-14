@@ -577,7 +577,21 @@ export function Chat({
     };
   }, []);
 
+  // Track previous conversation so we can trigger auto-summary on switch.
+  const prevConvIdRef = useRef<string | null>(initialId);
+  const prevMsgLenRef = useRef<number>(initialMessages.length);
+
   useEffect(() => {
+    const prevId = prevConvIdRef.current;
+    const prevLen = prevMsgLenRef.current;
+    // When the user navigates to a different conversation, summarize the one they left.
+    if (prevId && prevId !== initialId && prevLen >= 4) {
+      fetch(`/api/conduit/conversations/${prevId}/summarize`, { method: "POST" }).catch(
+        () => {/* fire-and-forget */},
+      );
+    }
+    prevConvIdRef.current = initialId;
+    prevMsgLenRef.current = initialMessages.length;
     setMessages(initialMessages);
     setConversationId(initialId);
     setHasMore(initialHasMore);
