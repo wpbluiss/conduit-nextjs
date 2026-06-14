@@ -10,6 +10,7 @@ import { AnalyticsPageView } from "@/components/conduit/AnalyticsPageView";
 // is deferred. loading: () => null prevents layout shift while chunks
 // load — these sections are entirely out of the initial viewport.
 const ProductTiles = dynamic(() => import("@/components/ProductTiles"));
+const FeatureGrid = dynamic(() => import("@/components/FeatureGrid"));
 const Cinematic = dynamic(() => import("@/components/Cinematic"));
 const Vision = dynamic(() => import("@/components/Vision"));
 const Customers = dynamic(() => import("@/components/Customers"));
@@ -64,6 +65,7 @@ export default function Home() {
       <Navbar />
       <Hero />
       <ProductTiles />
+      <FeatureGrid />
       <Cinematic />
       <Vision />
       <Customers />
