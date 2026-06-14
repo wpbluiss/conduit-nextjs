@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState, type ChangeEvent, type ComponentType, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type ComponentType, type FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowRight,
+  Calendar,
   Check,
   ExternalLink,
   Info,
+  Link,
+  Link2Off,
   Lock,
   Play,
   X,
@@ -2451,94 +2454,335 @@ function NotificationsTab() {
 
 /* ─── Integrations tab ────────────────────────────────────────────────────── */
 
-type IntegrationDef = {
-  name: string;
-  description: string;
-  Icon: ComponentType<{ size?: number; className?: string }>;
-};
-
-const INTEGRATIONS: IntegrationDef[] = [
-  {
-    name: "GitHub",
-    description:
-      "Let Praxis Engineering open PRs, push commits, and read repository context directly from your GitHub account.",
-    Icon: BrandMarkGithub,
-  },
-  {
-    name: "Slack",
-    description:
-      "Receive build updates, specialist summaries, and workflow notifications in any Slack channel.",
-    Icon: BrandMarkSlack,
-  },
-  {
-    name: "Notion",
-    description:
-      "Sync Praxis outputs — briefs, reports, SOPs — directly to your Notion workspace as formatted pages.",
-    Icon: BrandMarkNotion,
-  },
-];
+interface ConnectorStatus {
+  connected: string[];
+  available: { google_calendar: boolean; slack: boolean };
+}
 
 function IntegrationsTab() {
+  const params = useSearchParams();
+  const router = useRouter();
+  const toast = useToast();
+  const [status, setStatus] = useState<ConnectorStatus | null>(null);
+  const [disconnecting, setDisconnecting] = useState<string | null>(null);
+
+  const fetchStatus = useCallback(async () => {
+    try {
+      const res = await fetch("/api/conduit/connectors");
+      if (res.ok) setStatus(await res.json());
+    } catch {
+      // Non-fatal — tab still shows "Coming soon" for all.
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStatus();
+  }, [fetchStatus]);
+
+  // Surface OAuth success/error from URL params set by the callback route.
+  useEffect(() => {
+    const connected = params.get("connector_connected");
+    const error = params.get("connector_error");
+    if (connected) {
+      const labels: Record<string, string> = {
+        google_calendar: "Google Calendar",
+        slack: "Slack",
+      };
+      toast.success(`${labels[connected] ?? connected} connected.`);
+      fetchStatus();
+      // Clean the URL.
+      router.replace("/app/settings?tab=integrations");
+    }
+    if (error) {
+      const msgs: Record<string, string> = {
+        google_calendar_denied: "Google Calendar access was denied.",
+        google_calendar_csrf: "OAuth state mismatch — please try again.",
+        google_calendar_exchange: "Failed to exchange Google auth code.",
+        google_calendar_db: "Failed to save Google Calendar connection.",
+        slack_denied: "Slack access was denied.",
+        slack_csrf: "OAuth state mismatch — please try again.",
+        slack_exchange: "Failed to exchange Slack auth code.",
+        slack_db: "Failed to save Slack connection.",
+      };
+      toast.error(msgs[error] ?? "Connection failed.");
+      router.replace("/app/settings?tab=integrations");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
+
+  const disconnect = async (provider: string) => {
+    setDisconnecting(provider);
+    try {
+      const res = await fetch(`/api/conduit/connectors/${provider.replace("_", "-")}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        const labels: Record<string, string> = {
+          google_calendar: "Google Calendar",
+          slack: "Slack",
+        };
+        toast.success(`${labels[provider] ?? provider} disconnected.`);
+        fetchStatus();
+      } else {
+        toast.error("Failed to disconnect.");
+      }
+    } finally {
+      setDisconnecting(null);
+    }
+  };
+
+  const isConnected = (provider: string) =>
+    status?.connected.includes(provider) ?? false;
+
+  const isAvailable = (provider: string) =>
+    provider === "google_calendar"
+      ? status?.available.google_calendar ?? false
+      : provider === "slack"
+        ? status?.available.slack ?? false
+        : false;
+
   return (
     <div className="space-y-6 text-sm">
       <p className="text-[var(--color-text-muted)] max-w-xl">
-        Connect your tools so Praxis can act on your behalf — pushing code,
-        sending messages, and syncing outputs without copy-paste.
+        Connect your tools so Praxis specialists can act with full context —
+        aware of your calendar, messages, and data.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {INTEGRATIONS.map(({ name, description, Icon }) => (
-          <div
-            key={name}
-            className="conduit-card p-5 flex flex-col gap-4"
-          >
-            {/* Header row */}
-            <div className="flex items-start justify-between gap-3">
-              <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-                style={{
-                  background: "var(--color-surface-elevated)",
-                  border: "1px solid var(--color-border)",
-                }}
-              >
-                <Icon size={20} />
-              </div>
+      {/* Live connectors */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Google Calendar */}
+        <div className="conduit-card p-5 flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-3">
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+              }}
+            >
+              <Calendar size={20} style={{ color: "#4285F4" }} />
+            </div>
+            {isConnected("google_calendar") ? (
               <span
                 className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                 style={{
-                  background:
-                    "color-mix(in srgb, var(--color-amber) 12%, transparent)",
-                  color: "var(--color-amber)",
-                  border:
-                    "1px solid color-mix(in srgb, var(--color-amber) 28%, transparent)",
+                  background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
+                  color: "var(--color-success, #22c55e)",
+                  border: "1px solid color-mix(in srgb, var(--color-success, #22c55e) 28%, transparent)",
                 }}
               >
-                Coming soon
+                Connected
               </span>
-            </div>
-
-            {/* Name + description */}
-            <div>
-              <div className="font-medium text-[var(--color-text)]">{name}</div>
-              <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
-                {description}
-              </p>
-            </div>
-
-            {/* Placeholder connect button */}
+            ) : (
+              <span
+                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                style={{
+                  background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
+                  color: "var(--color-accent)",
+                  border: "1px solid color-mix(in srgb, var(--color-accent) 28%, transparent)",
+                }}
+              >
+                Not connected
+              </span>
+            )}
+          </div>
+          <div>
+            <div className="font-medium text-[var(--color-text)]">Google Calendar</div>
+            <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
+              Gives your Operations specialist awareness of upcoming meetings and
+              blocked time when answering scheduling questions.
+            </p>
+          </div>
+          {isConnected("google_calendar") ? (
+            <button
+              onClick={() => disconnect("google_calendar")}
+              disabled={disconnecting === "google_calendar"}
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
+              style={{
+                background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
+                color: "var(--color-destructive, #ef4444)",
+              }}
+            >
+              <Link2Off size={12} />
+              {disconnecting === "google_calendar" ? "Disconnecting…" : "Disconnect"}
+            </button>
+          ) : isAvailable("google_calendar") ? (
+            <a
+              href="/api/conduit/connectors/google-calendar/auth"
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
+              style={{
+                background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+                color: "var(--color-accent)",
+              }}
+            >
+              <Link size={12} />
+              Connect Google Calendar
+            </a>
+          ) : (
             <button
               disabled
-              className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40"
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
               style={{
                 background: "var(--color-surface-elevated)",
                 border: "1px solid var(--color-border)",
                 color: "var(--color-text-muted)",
               }}
             >
-              Connect {name}
+              Not configured
             </button>
+          )}
+        </div>
+
+        {/* Slack */}
+        <div className="conduit-card p-5 flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-3">
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+              }}
+            >
+              <BrandMarkSlack size={20} />
+            </div>
+            {isConnected("slack") ? (
+              <span
+                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                style={{
+                  background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
+                  color: "var(--color-success, #22c55e)",
+                  border: "1px solid color-mix(in srgb, var(--color-success, #22c55e) 28%, transparent)",
+                }}
+              >
+                Connected
+              </span>
+            ) : (
+              <span
+                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                style={{
+                  background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
+                  color: "var(--color-accent)",
+                  border: "1px solid color-mix(in srgb, var(--color-accent) 28%, transparent)",
+                }}
+              >
+                Not connected
+              </span>
+            )}
           </div>
-        ))}
+          <div>
+            <div className="font-medium text-[var(--color-text)]">Slack</div>
+            <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
+              Surface recent channel messages as context for all specialists.
+              Pick one channel — your team's activity becomes AI-accessible.
+            </p>
+          </div>
+          {isConnected("slack") ? (
+            <button
+              onClick={() => disconnect("slack")}
+              disabled={disconnecting === "slack"}
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
+              style={{
+                background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
+                color: "var(--color-destructive, #ef4444)",
+              }}
+            >
+              <Link2Off size={12} />
+              {disconnecting === "slack" ? "Disconnecting…" : "Disconnect"}
+            </button>
+          ) : isAvailable("slack") ? (
+            <a
+              href="/api/conduit/connectors/slack/auth"
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
+              style={{
+                background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+                color: "var(--color-accent)",
+              }}
+            >
+              <Link size={12} />
+              Connect Slack
+            </a>
+          ) : (
+            <button
+              disabled
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text-muted)",
+              }}
+            >
+              Not configured
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Coming soon — GitHub, Notion */}
+      <div>
+        <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-3">
+          Coming soon
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[
+            {
+              name: "GitHub",
+              description:
+                "Let Praxis Engineering open PRs, push commits, and read repository context directly from your GitHub account.",
+              Icon: BrandMarkGithub,
+            },
+            {
+              name: "Notion",
+              description:
+                "Sync Praxis outputs — briefs, reports, SOPs — directly to your Notion workspace as formatted pages.",
+              Icon: BrandMarkNotion,
+            },
+          ].map(({ name, description, Icon }) => (
+            <div key={name} className="conduit-card p-5 flex flex-col gap-4 opacity-60">
+              <div className="flex items-start justify-between gap-3">
+                <div
+                  className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                  style={{
+                    background: "var(--color-surface-elevated)",
+                    border: "1px solid var(--color-border)",
+                  }}
+                >
+                  <Icon size={20} />
+                </div>
+                <span
+                  className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                  style={{
+                    background: "color-mix(in srgb, var(--color-amber) 12%, transparent)",
+                    color: "var(--color-amber)",
+                    border: "1px solid color-mix(in srgb, var(--color-amber) 28%, transparent)",
+                  }}
+                >
+                  Coming soon
+                </span>
+              </div>
+              <div>
+                <div className="font-medium text-[var(--color-text)]">{name}</div>
+                <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
+                  {description}
+                </p>
+              </div>
+              <button
+                disabled
+                className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed"
+                style={{
+                  background: "var(--color-surface-elevated)",
+                  border: "1px solid var(--color-border)",
+                  color: "var(--color-text-muted)",
+                }}
+              >
+                Connect {name}
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div

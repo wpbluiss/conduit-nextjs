@@ -44,6 +44,11 @@ import {
   type MemoryRecord,
 } from "@/lib/ai/memory";
 import {
+  getConnectorToken,
+  getUpcomingEvents,
+  renderCalendarBlock,
+} from "@/lib/connectors/google-calendar";
+import {
   prepareChatTts,
   streamForEmployee,
   type ChatTtsConfig,
@@ -213,6 +218,20 @@ export async function POST(request: NextRequest) {
         memoriesForEmployee(allMemoriesWithScope, employeeId),
       ),
     );
+
+  // Load Google Calendar context for ops specialist (and Atlas who routes to ops).
+  // Only fetches if a token exists; silently skips on error.
+  const calendarEmployees = new Set<EmployeeKey>(["ops", "jarvis"]);
+  let calendarBlock = "";
+  const gcalToken = await getConnectorToken(supabase, account.id, "google_calendar");
+  if (gcalToken) {
+    try {
+      const events = await getUpcomingEvents(supabase, gcalToken, 10);
+      calendarBlock = renderCalendarBlock(events);
+    } catch {
+      // Non-fatal: continue without calendar context.
+    }
+  }
 
   const ctx: AccountContext = {
     user_name: userDisplayName(user),
@@ -550,7 +569,9 @@ export async function POST(request: NextRequest) {
         // so the model has context before it sees the user's turn.
         // R17: per-employee filter — Atlas sees all; others see global +
         // their-scope only.
-        const systemPrompt = memoryBlockFor(employee) + withTime;
+        // R-561: prepend Google Calendar block for ops + Atlas when connected.
+        const calendarPrefix = calendarEmployees.has(employee) ? calendarBlock : "";
+        const systemPrompt = calendarPrefix + memoryBlockFor(employee) + withTime;
 
         let fullText = "";
         let inputTokens = 0;
