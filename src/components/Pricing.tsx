@@ -104,7 +104,7 @@ export default function Pricing() {
         <motion.div
           initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-15%" }}
+          viewport={{ once: true, margin: "25%" }}
           transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: EASE }}
           className="text-center max-w-[760px] mx-auto mb-16 md:mb-20"
         >
@@ -166,7 +166,7 @@ export default function Pricing() {
               key={t.name}
               initial={{ opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 32 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-10%" }}
+              viewport={{ once: true, margin: "25%" }}
               transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: EASE, delay: shouldReduceMotion ? 0 : i * 0.08 }}
               className={t.popular ? "md:-my-3 md:scale-[1.02]" : ""}
             >
