@@ -35,7 +35,6 @@ import { useNicknames } from "@/context/NicknameContext";
 import { PraxisLogo } from "./PraxisLogo";
 import { SidebarBuildPip } from "./builds/in-flight/SidebarBuildPip";
 import { SidebarBuildsSection } from "./builds/in-flight/SidebarBuildsSection";
-import { EmptyState, ChatEmptySVG } from "./EmptyState";
 import type { InFlightBuild } from "@/lib/engineering/in-flight";
 import { ChangelogPopover } from "./ChangelogPopover";
 import { NotificationCenter } from "./NotificationCenter";
@@ -727,23 +726,22 @@ export function Sidebar({
 
           {/* Empty state — no conversations yet, not in icon-only mode */}
           {!collapsed && conversations.length === 0 && (
-            <div className="mt-4 px-3">
-              <EmptyState
-                icon={<ChatEmptySVG />}
-                headline="Start a conversation"
-                body="Your AI team is ready. Pick a specialist and say hello."
-                cta={
-                  <Link
-                    href="/app"
-                    onClick={close}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity"
-                  >
-                    <Plus size={12} />
-                    New Chat
-                  </Link>
-                }
-                className="border-dashed"
-              />
+            <div className="mt-8 px-4 flex flex-col items-center text-center gap-3">
+              <PraxisLogo size={28} withWordmark glow />
+              <p className="text-sm font-semibold text-[var(--color-text)] mt-1">
+                Your specialists are ready
+              </p>
+              <p className="text-xs text-[var(--color-text-muted)] max-w-[13rem] leading-relaxed">
+                Nine specialists. Zero payroll. Start a conversation to put your team to work.
+              </p>
+              <Link
+                href="/app"
+                onClick={close}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity mt-1"
+              >
+                <Plus size={12} />
+                Start a conversation
+              </Link>
             </div>
           )}
 
