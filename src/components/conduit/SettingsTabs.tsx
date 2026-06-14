@@ -20,6 +20,7 @@ import { useToast } from "@/context/ToastContext";
 import { ORDERED_TIERS, TOPUPS, tierById, type TierId } from "@/lib/billing/tiers";
 import { DEFAULT_EMPLOYEE_VOICES, VOICE_NAMES } from "@/lib/voice/defaults";
 import { ThemeToggle } from "./ThemeToggle";
+import { ACCENT_PRESETS, ACCENT_STORAGE_KEY } from "@/lib/conduit/accent-presets";
 import { track } from "@/lib/analytics/track";
 import { MFASecurity } from "./MFASecurity";
 import { BrandMarkGithub } from "./brand-marks/BrandMarkGithub";
@@ -55,6 +56,7 @@ interface AccountData {
   theme_preference?: "system" | "light" | "dark" | null;
   display_name?: string | null;
   avatar_url?: string | null;
+  accent_preference?: string | null;
 }
 
 const COMMON_TIMEZONES = [
@@ -161,7 +163,10 @@ export function SettingsTabs({
       {tab === "notifications" && <NotificationsTab />}
       {tab === "integrations" && <IntegrationsTab />}
       {tab === "appearance" && (
-        <AppearanceTab themePref={account.theme_preference ?? "system"} />
+        <AppearanceTab
+          themePref={account.theme_preference ?? "system"}
+          accentPref={account.accent_preference ?? "ember"}
+        />
       )}
     </div>
   );
@@ -2068,14 +2073,121 @@ function IntegrationsTab() {
   );
 }
 
-function AppearanceTab({ themePref }: { themePref: "system" | "light" | "dark" }) {
+function AppearanceTab({
+  themePref,
+  accentPref,
+}: {
+  themePref: "system" | "light" | "dark";
+  accentPref: string;
+}) {
+  const [accent, setAccent] = useState(() => {
+    // Prefer localStorage so the swatch reflects what's actually painted.
+    try { return localStorage.getItem(ACCENT_STORAGE_KEY) || accentPref; } catch { return accentPref; }
+  });
+  const [accentSaving, setAccentSaving] = useState(false);
+  const [accentError, setAccentError] = useState<string | null>(null);
+
+  // On first render: if localStorage is empty but DB has a preference,
+  // sync it so the next page load (and other tabs) pick it up.
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(ACCENT_STORAGE_KEY);
+      if (!stored && accentPref !== "ember") {
+        localStorage.setItem(ACCENT_STORAGE_KEY, accentPref);
+        const preset = ACCENT_PRESETS[accentPref] ?? ACCENT_PRESETS.ember;
+        const s = document.documentElement.style;
+        s.setProperty("--color-accent", preset.accent);
+        s.setProperty("--color-accent-hi", preset.hi);
+        s.setProperty("--color-accent-deep", preset.deep);
+      }
+    } catch { /* ignore */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const applyAccent = (key: string) => {
+    const preset = ACCENT_PRESETS[key] ?? ACCENT_PRESETS.ember;
+    const s = document.documentElement.style;
+    s.setProperty("--color-accent", preset.accent);
+    s.setProperty("--color-accent-hi", preset.hi);
+    s.setProperty("--color-accent-deep", preset.deep);
+    try { localStorage.setItem(ACCENT_STORAGE_KEY, key); } catch { /* ignore */ }
+  };
+
+  const chooseAccent = async (key: string) => {
+    setAccent(key);
+    applyAccent(key);
+    setAccentSaving(true);
+    setAccentError(null);
+    try {
+      const r = await fetch("/api/conduit/account/prefs", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ accent_preference: key }),
+      });
+      if (!r.ok) setAccentError("Couldn't save accent preference.");
+    } catch {
+      setAccentError("Couldn't save accent preference.");
+    }
+    setAccentSaving(false);
+  };
+
   return (
     <div className="space-y-6 text-sm">
       <p className="text-[var(--color-text-muted)] max-w-xl">
-        Choose how Praxis looks on this device. System follows your OS preference.
+        Choose how Praxis looks on this device. Changes apply immediately.
       </p>
+
       <div className="conduit-card p-5">
         <ThemeToggle initialPref={themePref} />
+      </div>
+
+      <div className="conduit-card p-5 space-y-4">
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+          Accent colour
+        </div>
+        <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Accent colour">
+          {Object.entries(ACCENT_PRESETS).map(([key, preset]) => {
+            const active = accent === key;
+            return (
+              <button
+                key={key}
+                role="radio"
+                aria-checked={active}
+                aria-label={preset.label}
+                title={preset.label}
+                onClick={() => chooseAccent(key)}
+                className="flex flex-col items-center gap-1.5 group focus:outline-none"
+              >
+                <span
+                  className="w-8 h-8 rounded-full transition-transform group-hover:scale-110"
+                  style={{
+                    background: preset.accent,
+                    outline: active ? `3px solid ${preset.accent}` : "3px solid transparent",
+                    outlineOffset: "2px",
+                    boxShadow: active
+                      ? `0 0 0 2px var(--color-surface), 0 0 0 4px ${preset.accent}`
+                      : "none",
+                  }}
+                />
+                <span
+                  className="text-[10px] uppercase tracking-[0.1em]"
+                  style={{
+                    color: active ? preset.accent : "var(--color-text-muted)",
+                    fontWeight: active ? 600 : 400,
+                  }}
+                >
+                  {preset.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {accentSaving && (
+          <p className="text-[11px] text-[var(--color-text-muted)]">Saving…</p>
+        )}
+        {accentError && (
+          <p className="text-[11px] text-[var(--color-pink)]">{accentError}</p>
+        )}
       </div>
     </div>
   );

@@ -1,15 +1,17 @@
 /**
- * Pre-paint theme bootstrap.
+ * Pre-paint theme + accent bootstrap.
  *
  * Runs before any DOM renders so the Praxis Console never flashes the
- * wrong palette. Reads localStorage `praxis.theme` (one of system|light|
- * dark, default system), resolves system → matchMedia, and writes
- * `data-praxis-theme` on <html>. CSS in praxis-tokens.css keys off that
- * attribute to flip surface tokens for everything inside .praxis-root.
+ * wrong palette or accent. Reads localStorage `praxis.theme` and
+ * `praxis.accent`, resolves system → matchMedia for theme, and writes
+ * both `data-praxis-theme` on <html> and inline CSS vars for accent.
  *
  * Scoped to .praxis-root (the /app shell) — marketing surfaces are
  * unaffected because they don't carry the praxis-root class.
  */
+
+export { ACCENT_PRESETS, ACCENT_STORAGE_KEY } from "@/lib/conduit/accent-presets";
+
 export function ThemeBoot() {
   const code = `
 (function(){try{
@@ -20,7 +22,17 @@ export function ThemeBoot() {
 }catch(e){
   document.documentElement.setAttribute('data-praxis-theme','dark');
   document.documentElement.setAttribute('data-praxis-theme-pref','system');
-}})();
+}
+try{
+  var ACCENTS={ember:{a:'#FF8A3D',h:'#FFA876',d:'#D9532A'},blue:{a:'#4E8EFF',h:'#7DAEFF',d:'#2563EB'},sage:{a:'#5F9E6E',h:'#7EB88D',d:'#3A6B47'},rose:{a:'#F43F5E',h:'#FB7185',d:'#BE123C'},amber:{a:'#F59E0B',h:'#FCD34D',d:'#D97706'},slate:{a:'#6B7A8D',h:'#8FA0B5',d:'#3D4F63'}};
+  var ak=localStorage.getItem('praxis.accent')||'ember';
+  var ac=ACCENTS[ak]||ACCENTS.ember;
+  var s=document.documentElement.style;
+  s.setProperty('--color-accent',ac.a);
+  s.setProperty('--color-accent-hi',ac.h);
+  s.setProperty('--color-accent-deep',ac.d);
+}catch(e){}
+})();
 `;
   return <script dangerouslySetInnerHTML={{ __html: code }} />;
 }

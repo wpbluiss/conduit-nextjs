@@ -109,6 +109,7 @@ export async function loadSettingsData(
       theme_preference: account.theme_preference ?? "system",
       display_name: account.display_name ?? null,
       avatar_url: account.avatar_url ?? null,
+      accent_preference: account.accent_preference ?? null,
     },
     usage: {
       totals,

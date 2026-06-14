@@ -42,6 +42,8 @@ export interface ConduitAccount {
   // R22 profile — nullable until migration 033 runs.
   display_name?: string | null;
   avatar_url?: string | null;
+  // R-462 accent preference — nullable until migration 037 runs.
+  accent_preference?: string | null;
   created_at: string;
   updated_at: string;
 }
