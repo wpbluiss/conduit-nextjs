@@ -20,6 +20,7 @@ import { Edge } from "@/components/conduit/pdl/Edge";
 import { autoLayout } from "./auto-layout";
 import { MemoryNode } from "./MemoryNode";
 import { MemoryNodeComposer } from "./MemoryNodeComposer";
+import { EmptyState, MemoryEmptySVG } from "@/components/conduit/EmptyState";
 
 interface Props {
   initial: MemoryRecord[];
@@ -183,6 +184,18 @@ export function MemoryCanvas({ initial, cap }: Props) {
             onSubmit={onComposerSubmit}
             existingMemory={editingMemory}
           />
+        )}
+
+        {/* Empty canvas hint */}
+        {memories.length === 0 && !composer.open && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <EmptyState
+              icon={<MemoryEmptySVG />}
+              headline="Praxis learns as you work"
+              body="Memory nodes appear here as your specialists accumulate context about your business — goals, preferences, and decisions. Click anywhere on the canvas to add a node manually."
+              className="max-w-sm pointer-events-auto bg-[var(--color-surface-elevated)]/80 backdrop-blur-sm"
+            />
+          </div>
         )}
       </div>
     </div>
