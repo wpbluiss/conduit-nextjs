@@ -130,7 +130,16 @@ function suggestionsForTier(allowed: Set<EmployeeKey>): Suggestion[] {
   return [...base, ...extras].slice(0, 4);
 }
 
-type PinValue = EmployeeKey | "auto" | "team";
+type PinValue = EmployeeKey | "auto" | "team" | string;
+
+export interface CustomSpecialistRow {
+  id: string;
+  name: string;
+  role: string;
+  color: string;
+  system_prompt: string;
+  created_at: string;
+}
 
 const ALL_PIN_OPTIONS: { value: PinValue; label: string }[] = [
   { value: "auto", label: "Atlas (auto-route)" },
@@ -154,6 +163,7 @@ export function Chat({
   internalAccount = false,
   voice = { enabled: false, autoPlay: true, ttsAllowed: false },
   allowedEmployees,
+  customSpecialists = [],
   isFirstRun = false,
   companyBrief = null,
   handoffConversationId: initialHandoffConvId = null,
@@ -166,6 +176,7 @@ export function Chat({
   internalAccount?: boolean;
   voice?: VoicePrefs;
   allowedEmployees: EmployeeKey[];
+  customSpecialists?: CustomSpecialistRow[];
   isFirstRun?: boolean;
   companyBrief?: string | null;
   handoffConversationId?: string | null;
@@ -175,12 +186,24 @@ export function Chat({
   // "team" requires at least 2 non-Atlas employees on the tier.
   const teamEligible =
     allowedEmployees.filter((e) => e !== "jarvis").length >= 2;
-  const pinOptions = ALL_PIN_OPTIONS.filter(
+  const basePinOptions = ALL_PIN_OPTIONS.filter(
     (o) =>
       o.value === "auto" ||
       (o.value === "team" && teamEligible) ||
       (o.value !== "team" && allowedSet.has(o.value as EmployeeKey)),
   );
+  // Append custom specialists as additional pin options (pro+ accounts only).
+  const customPinOptions = customSpecialists.map((cs) => ({
+    value: `custom:${cs.id}` as PinValue,
+    label: cs.name,
+  }));
+  const pinOptions = [...basePinOptions, ...customPinOptions];
+
+  // Build a lookup map for custom specialists by their "custom:uuid" key.
+  const customSpecialistMap = new Map(
+    customSpecialists.map((cs) => [`custom:${cs.id}`, cs]),
+  );
+
   const suggestions = suggestionsForTier(allowedSet);
   const { labelFor } = useNicknames();
   const router = useRouter();
@@ -714,10 +737,15 @@ export function Chat({
       const explicitPin: PinValue | undefined =
         employeePin ?? (pin === "auto" ? undefined : pin);
       const isTeam = explicitPin === "team";
-      const placeholderEmp: EmployeeKey = isTeam
+      const isCustom = typeof explicitPin === "string" && explicitPin.startsWith("custom:");
+      // Custom specialist uses its own key as the pending employee identifier.
+      // Built-in specialists use the EmployeeKey directly; unknown pins fall back to jarvis.
+      const placeholderEmp: EmployeeKey | string = isTeam
         ? "jarvis"
-        : (explicitPin as EmployeeKey | undefined) ?? "jarvis";
-      setStreamingEmployee(placeholderEmp);
+        : isCustom
+          ? (explicitPin as string)
+          : (explicitPin as EmployeeKey | undefined) ?? "jarvis";
+      setStreamingEmployee(placeholderEmp as EmployeeKey);
 
       setMessages((prev) => [
         ...prev,
@@ -736,7 +764,7 @@ export function Chat({
           : ([
               {
                 role: "assistant" as const,
-                employee: placeholderEmp,
+                employee: placeholderEmp as EmployeeKey,
                 content: "",
                 pending: true,
               },
@@ -786,7 +814,7 @@ export function Chat({
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
       let buf = "";
-      let currentEmployee: EmployeeKey = placeholderEmp;
+      let currentEmployee: EmployeeKey = placeholderEmp as EmployeeKey;
 
       const ensurePendingFor = (employee: EmployeeKey, handoffFrom?: EmployeeKey) => {
         setMessages((prev) => {
@@ -1435,6 +1463,7 @@ export function Chat({
               }
               searchMatch={searchMatchSet.has(i)}
               conversationId={conversationId}
+              customSpecialistMap={customSpecialistMap}
             />
           ))}
 
@@ -2159,6 +2188,7 @@ const MessageBubble = memo(function MessageBubble({
   onPinToggle,
   searchMatch = false,
   conversationId,
+  customSpecialistMap = new Map(),
 }: {
   message: MessageRow;
   onOpenArtifact: (id: string) => void;
@@ -2173,6 +2203,7 @@ const MessageBubble = memo(function MessageBubble({
   onPinToggle?: (shouldPin: boolean) => void;
   searchMatch?: boolean;
   conversationId?: string | null;
+  customSpecialistMap?: Map<string, CustomSpecialistRow>;
 }) {
   const [editDraft, setEditDraft] = useState(message.content);
   const editRef = useRef<HTMLTextAreaElement>(null);
@@ -2334,7 +2365,17 @@ const MessageBubble = memo(function MessageBubble({
     return null;
   }
 
-  const employee = (message.employee as EmployeeKey) ?? "jarvis";
+  const rawEmployee = (message.employee as string) ?? "jarvis";
+  const isCustomEmployee = rawEmployee.startsWith("custom:");
+  const customSpecialistInfo = isCustomEmployee ? customSpecialistMap.get(rawEmployee) : null;
+  const employee = isCustomEmployee ? ("jarvis" as EmployeeKey) : (rawEmployee as EmployeeKey);
+  const employeeColor = isCustomEmployee
+    ? (customSpecialistInfo?.color ?? "#6366f1")
+    : (DEPT_COLOR[employee] ?? "var(--color-accent)");
+  const employeeLabel = isCustomEmployee
+    ? (customSpecialistInfo?.name ?? rawEmployee.slice(7, 15))
+    : null;
+
   const empty = !message.content && message.pending;
 
   // Before any tokens arrive: render a dedicated accessible typing indicator.
@@ -2345,7 +2386,19 @@ const MessageBubble = memo(function MessageBubble({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
       >
-        <TypingIndicator employee={employee} />
+        {isCustomEmployee ? (
+          <div className="flex gap-3 items-center py-1">
+            <span
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold shrink-0"
+              style={{ background: `${employeeColor}22`, color: employeeColor, border: `1px solid ${employeeColor}44` }}
+            >
+              {(customSpecialistInfo?.name ?? "?").slice(0, 1).toUpperCase()}
+            </span>
+            <TypingIndicator employee={employee} />
+          </div>
+        ) : (
+          <TypingIndicator employee={employee} />
+        )}
       </motion.div>
     );
   }
@@ -2356,7 +2409,7 @@ const MessageBubble = memo(function MessageBubble({
       data-search-match={searchMatch || undefined}
       className="flex gap-3 group"
       style={{
-        ["--dept" as string]: DEPT_COLOR[employee],
+        ["--dept" as string]: employeeColor,
         ...(searchMatch
           ? { outline: "2px solid var(--color-accent)", outlineOffset: "3px", borderRadius: "12px" }
           : {}),
@@ -2366,11 +2419,30 @@ const MessageBubble = memo(function MessageBubble({
       transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
     >
       <div className="pt-1 shrink-0">
-        <EmployeeAvatar employee={employee} size={32} active={message.pending} />
+        {isCustomEmployee ? (
+          <span
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold"
+            style={{ background: `${employeeColor}22`, color: employeeColor, border: `1px solid ${employeeColor}44` }}
+          >
+            {(customSpecialistInfo?.name ?? "?").slice(0, 1).toUpperCase()}
+          </span>
+        ) : (
+          <EmployeeAvatar employee={employee} size={32} active={message.pending} />
+        )}
       </div>
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <SpecialistChip employee={employee} label={nickLabelFor(employee)} />
+          {isCustomEmployee ? (
+            <span
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium uppercase tracking-[0.1em]"
+              style={{ background: `${employeeColor}18`, color: employeeColor }}
+            >
+              {employeeLabel}
+              <span className="text-[9px] opacity-60">custom</span>
+            </span>
+          ) : (
+            <SpecialistChip employee={employee} label={nickLabelFor(employee)} />
+          )}
           {message.handoffFrom && (
             <motion.span
               initial={{ opacity: 0, x: -6 }}
@@ -2396,14 +2468,14 @@ const MessageBubble = memo(function MessageBubble({
             <button
               onClick={onStopAudio}
               className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em]"
-              style={{ color: DEPT_COLOR[employee] }}
+              style={{ color: employeeColor }}
               aria-label="Stop audio"
             >
               <span className="inline-flex items-end gap-[2px] h-3">
                 <span
                   className="w-[2px] rounded-sm"
                   style={{
-                    background: DEPT_COLOR[employee],
+                    background: employeeColor,
                     height: "8px",
                     animation: "wave1 1s ease-in-out infinite",
                   }}
@@ -2411,7 +2483,7 @@ const MessageBubble = memo(function MessageBubble({
                 <span
                   className="w-[2px] rounded-sm"
                   style={{
-                    background: DEPT_COLOR[employee],
+                    background: employeeColor,
                     height: "12px",
                     animation: "wave2 1s ease-in-out infinite",
                   }}
@@ -2419,7 +2491,7 @@ const MessageBubble = memo(function MessageBubble({
                 <span
                   className="w-[2px] rounded-sm"
                   style={{
-                    background: DEPT_COLOR[employee],
+                    background: employeeColor,
                     height: "6px",
                     animation: "wave3 1s ease-in-out infinite",
                   }}
@@ -2442,7 +2514,7 @@ const MessageBubble = memo(function MessageBubble({
           <MarkdownRenderer
             content={message.content}
             streaming={message.pending}
-            caretColor={message.pending ? DEPT_COLOR[employee] : undefined}
+            caretColor={message.pending ? employeeColor : undefined}
           />
         </div>
         {message.memories?.map((mem) => (
@@ -2472,15 +2544,15 @@ const MessageBubble = memo(function MessageBubble({
             key={a.id}
             onClick={() => onOpenArtifact(a.id)}
             style={{
-              ["--dept" as string]: DEPT_COLOR[employee],
+              ["--dept" as string]: employeeColor,
             }}
             className="mt-2 group conduit-card border-l-[3px] hover:border-l-[3px] px-4 py-3 text-left flex items-start gap-3 hover:border-[var(--dept)] transition-colors w-full max-w-md"
           >
             <span
               className="mt-0.5 inline-flex items-center justify-center w-9 h-9 rounded-lg shrink-0"
-              style={{ background: DEPT_COLOR_SOFT[employee] }}
+              style={{ background: isCustomEmployee ? `${employeeColor}18` : DEPT_COLOR_SOFT[employee] }}
             >
-              <FileText size={16} style={{ color: DEPT_COLOR[employee] }} />
+              <FileText size={16} style={{ color: employeeColor }} />
             </span>
             <span className="min-w-0 flex-1">
               <span className="block text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">

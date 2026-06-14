@@ -128,6 +128,21 @@ export default async function ChatPage({ searchParams }: PageProps) {
     .limit(1);
   const isFirstRun = (convCount ?? 0) === 0;
 
+  // Load custom specialists for the account (pro+ only but safe to pass empty for free).
+  const { data: customSpecialistsRaw } = await supabase
+    .from("conduit_custom_specialists")
+    .select("id, name, role, color, system_prompt, created_at")
+    .eq("account_id", account.id)
+    .order("created_at", { ascending: true });
+  const customSpecialists = (customSpecialistsRaw ?? []) as {
+    id: string;
+    name: string;
+    role: string;
+    color: string;
+    system_prompt: string;
+    created_at: string;
+  }[];
+
   return (
     <Chat
       conversationId={conversationId}
@@ -141,6 +156,7 @@ export default async function ChatPage({ searchParams }: PageProps) {
         ttsAllowed,
       }}
       allowedEmployees={allowedEmployees}
+      customSpecialists={customSpecialists}
       isFirstRun={isFirstRun}
       companyBrief={account.company_brief ?? null}
       handoffConversationId={handoffConversationId}

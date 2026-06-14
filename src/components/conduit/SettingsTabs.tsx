@@ -176,7 +176,7 @@ export function SettingsTabs({
           )}
         />
       )}
-      {tab === "team" && <TeamTab />}
+      {tab === "team" && <TeamTab tierId={account.tier_id} />}
       {tab === "usage" && <UsageTab usage={usage} />}
       {tab === "billing" && <BillingTab account={account} usage={usage} />}
       {tab === "security" && <MFASecurity />}
@@ -193,32 +193,314 @@ export function SettingsTabs({
   );
 }
 
-function TeamTab() {
+interface CustomSpecialist {
+  id: string;
+  name: string;
+  role: string;
+  color: string;
+  system_prompt: string;
+  created_at: string;
+}
+
+const CUSTOM_COLORS = [
+  "#6366f1", "#8b5cf6", "#a855f7", "#ec4899", "#f43f5e",
+  "#f97316", "#eab308", "#22c55e", "#14b8a6", "#06b6d4",
+];
+
+function CustomSpecialistForm({
+  initial,
+  onSave,
+  onCancel,
+  busy,
+}: {
+  initial?: Partial<CustomSpecialist>;
+  onSave: (data: { name: string; role: string; color: string; system_prompt: string }) => void;
+  onCancel: () => void;
+  busy: boolean;
+}) {
+  const [name, setName] = useState(initial?.name ?? "");
+  const [role, setRole] = useState(initial?.role ?? "");
+  const [color, setColor] = useState(initial?.color ?? CUSTOM_COLORS[0]);
+  const [prompt, setPrompt] = useState(initial?.system_prompt ?? "");
+
+  const canSubmit = name.trim().length > 0 && prompt.trim().length > 0 && !busy;
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!canSubmit) return;
+        onSave({ name: name.trim(), role: role.trim(), color, system_prompt: prompt.trim() });
+      }}
+      className="space-y-4"
+    >
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className="block text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
+            Name <span className="text-red-400">*</span>
+          </label>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value.slice(0, 64))}
+            placeholder="Brand Strategist"
+            required
+            className="conduit-input w-full text-sm"
+          />
+        </div>
+        <div>
+          <label className="block text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
+            Role subtitle
+          </label>
+          <input
+            value={role}
+            onChange={(e) => setRole(e.target.value.slice(0, 128))}
+            placeholder="Creative + Positioning"
+            className="conduit-input w-full text-sm"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2">
+          Accent color
+        </label>
+        <div className="flex gap-2 flex-wrap">
+          {CUSTOM_COLORS.map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => setColor(c)}
+              className="w-7 h-7 rounded-lg transition-all"
+              style={{
+                background: c,
+                outline: color === c ? `2px solid ${c}` : "none",
+                outlineOffset: "2px",
+                opacity: color === c ? 1 : 0.55,
+              }}
+              aria-label={`Color ${c}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
+          System prompt <span className="text-red-400">*</span>
+          <span className="ml-2 normal-case text-[10px]">{prompt.length}/5000</span>
+        </label>
+        <textarea
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value.slice(0, 5000))}
+          placeholder="You are a Brand Strategist for {business_name}. Your role is to…"
+          rows={6}
+          required
+          className="conduit-input w-full text-sm resize-y"
+          style={{ minHeight: "120px" }}
+        />
+        <p className="mt-1 text-[11px] text-[var(--color-text-muted)]">
+          Define the specialist&apos;s persona, goals, and constraints. Keep it focused.
+        </p>
+      </div>
+
+      <div className="flex gap-2 justify-end">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 text-sm rounded-lg border transition-colors"
+          style={{ borderColor: "var(--color-border)", color: "var(--color-text-muted)" }}
+        >
+          Cancel
+        </button>
+        <PraxisButton type="submit" isDisabled={!canSubmit} isLoading={busy} size="sm">
+          {initial?.id ? "Save changes" : "Create specialist"}
+        </PraxisButton>
+      </div>
+    </form>
+  );
+}
+
+function TeamTab({ tierId }: { tierId?: string }) {
+  const toast = useToast();
+  const isPro = tierId === "pro" || tierId === "enterprise";
+  const [specialists, setSpecialists] = useState<CustomSpecialist[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [saveBusy, setSaveBusy] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/conduit/custom-specialists")
+      .then((r) => r.json())
+      .then((d: { specialists?: CustomSpecialist[] }) => setSpecialists(d.specialists ?? []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleCreate = async (data: { name: string; role: string; color: string; system_prompt: string }) => {
+    setSaveBusy(true);
+    try {
+      const res = await fetch("/api/conduit/custom-specialists", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const json = (await res.json()) as { specialist?: CustomSpecialist; message?: string };
+      if (!res.ok) throw new Error(json.message ?? "create_failed");
+      setSpecialists((prev) => [...prev, json.specialist!]);
+      setCreating(false);
+      toast.success(`${data.name} added to your team`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create specialist");
+    } finally {
+      setSaveBusy(false);
+    }
+  };
+
+  const handleEdit = async (id: string, data: { name: string; role: string; color: string; system_prompt: string }) => {
+    setSaveBusy(true);
+    try {
+      const res = await fetch(`/api/conduit/custom-specialists/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const json = (await res.json()) as { specialist?: CustomSpecialist };
+      if (!res.ok) throw new Error("save_failed");
+      setSpecialists((prev) => prev.map((s) => (s.id === id ? json.specialist! : s)));
+      setEditingId(null);
+      toast.success("Specialist updated");
+    } catch {
+      toast.error("Failed to save — please try again");
+    } finally {
+      setSaveBusy(false);
+    }
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Delete "${name}"? This can't be undone.`)) return;
+    setDeletingId(id);
+    try {
+      await fetch(`/api/conduit/custom-specialists/${id}`, { method: "DELETE" });
+      setSpecialists((prev) => prev.filter((s) => s.id !== id));
+      toast.success(`${name} removed`);
+    } catch {
+      toast.error("Failed to delete — please try again");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <div className="space-y-6 text-sm">
       <div>
+        <h2 className="font-semibold text-base mb-1" style={{ color: "var(--color-text)" }}>
+          Custom specialists
+        </h2>
         <p className="text-[var(--color-text-muted)] max-w-xl">
-          Per-employee voice picks live in the <strong>Voice</strong> tab. This
-          tab will also gain personality tuning (tone sliders, custom system
-          prompt overrides) in a future update.
+          Create AI employees beyond the default nine — give each one a name, role, and custom system prompt.
+          They appear in the chat alongside the built-in team.{" "}
+          {!isPro && (
+            <span className="text-[var(--color-accent-hi)]">Requires Pro or Enterprise.</span>
+          )}
         </p>
       </div>
-      <div
-        className="conduit-card p-5"
-        style={{
-          background:
-            "linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-elevated)), var(--color-surface-elevated))",
-        }}
-      >
-        <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
-          Coming soon
+
+      {loading ? (
+        <div className="text-[var(--color-text-muted)] text-sm py-4">Loading…</div>
+      ) : (
+        <div className="space-y-3">
+          {specialists.map((cs) => (
+            <div key={cs.id} className="conduit-card p-4">
+              {editingId === cs.id ? (
+                <CustomSpecialistForm
+                  initial={cs}
+                  onSave={(data) => void handleEdit(cs.id, data)}
+                  onCancel={() => setEditingId(null)}
+                  busy={saveBusy}
+                />
+              ) : (
+                <div className="flex items-start gap-3">
+                  <span
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold shrink-0"
+                    style={{ background: `${cs.color}22`, color: cs.color, border: `1px solid ${cs.color}44` }}
+                  >
+                    {cs.name.slice(0, 1).toUpperCase()}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium" style={{ color: "var(--color-text)" }}>
+                        {cs.name}
+                      </span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full uppercase tracking-[0.12em]"
+                        style={{ background: `${cs.color}18`, color: cs.color }}>
+                        custom
+                      </span>
+                    </div>
+                    {cs.role && (
+                      <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5">{cs.role}</p>
+                    )}
+                    <p className="text-[11px] text-[var(--color-text-muted)] mt-1 line-clamp-2">
+                      {cs.system_prompt}
+                    </p>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={() => setEditingId(cs.id)}
+                      className="text-[11px] px-2.5 py-1 rounded-lg border transition-colors"
+                      style={{ borderColor: "var(--color-border)", color: "var(--color-text-muted)" }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => void handleDelete(cs.id, cs.name)}
+                      disabled={deletingId === cs.id}
+                      className="text-[11px] px-2.5 py-1 rounded-lg border transition-colors disabled:opacity-40"
+                      style={{ borderColor: "color-mix(in srgb, var(--color-error, #ef4444) 40%, var(--color-border))", color: "var(--color-error, #ef4444)" }}
+                    >
+                      {deletingId === cs.id ? "…" : "Delete"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+
+          {specialists.length === 0 && !creating && (
+            <div
+              className="conduit-card p-5 text-center"
+              style={{ borderStyle: "dashed" }}
+            >
+              <p className="text-[var(--color-text-muted)] text-sm">
+                No custom specialists yet.{" "}
+                {isPro ? "Create your first one below." : "Upgrade to Pro to get started."}
+              </p>
+            </div>
+          )}
+
+          {creating ? (
+            <div className="conduit-card p-5">
+              <p className="text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-4">
+                New specialist
+              </p>
+              <CustomSpecialistForm
+                onSave={(data) => void handleCreate(data)}
+                onCancel={() => setCreating(false)}
+                busy={saveBusy}
+              />
+            </div>
+          ) : (
+            isPro && specialists.length < 10 && (
+              <PraxisButton
+                size="sm"
+                onClick={() => setCreating(true)}
+              >
+                + Add specialist
+              </PraxisButton>
+            )
+          )}
         </div>
-        <p className="serif text-2xl">Personality tuning</p>
-        <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-          Dial each employee&apos;s tone, verbosity, and risk appetite. Pin
-          custom system prompt addenda that ride along with every turn.
-        </p>
-      </div>
+      )}
     </div>
   );
 }

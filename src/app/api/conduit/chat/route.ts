@@ -80,6 +80,14 @@ const VALID_EMPLOYEES: EmployeeKey[] = [
   "legal",
 ];
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function parseCustomId(override: string): string | null {
+  if (!override.startsWith("custom:")) return null;
+  const id = override.slice(7);
+  return UUID_RE.test(id) ? id : null;
+}
+
 function sseEvent(event: string, data: unknown): string {
   return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
 }
@@ -298,10 +306,26 @@ export async function POST(request: NextRequest) {
   };
 
   const employeeOverride = body.employee_override;
+
+  // Resolve custom specialist if override is "custom:<uuid>"
+  let customSpecialist: { id: string; name: string; role: string; color: string; system_prompt: string } | null = null;
+  const customId = employeeOverride ? parseCustomId(employeeOverride) : null;
+  if (customId) {
+    const { data: cs } = await supabase
+      .from("conduit_custom_specialists")
+      .select("id, name, role, color, system_prompt")
+      .eq("id", customId)
+      .eq("account_id", account.id)
+      .single();
+    customSpecialist = cs ?? null;
+  }
+
   // Team round-table: explicit pin OR heuristic detection in user message.
   const teamRequested =
-    employeeOverride === "team" || isTeamQuery(message);
+    !customSpecialist &&
+    (employeeOverride === "team" || isTeamQuery(message));
   const initialEmployee: EmployeeKey =
+    !customSpecialist &&
     employeeOverride &&
     employeeOverride !== "team" &&
     VALID_EMPLOYEES.includes(employeeOverride as EmployeeKey)
@@ -1183,8 +1207,121 @@ export async function POST(request: NextRequest) {
         send("round_table_end", {});
       };
 
+      // Runs a custom user-defined specialist. Uses the stored system_prompt
+      // directly; no Atlas routing, no intent classification.
+      const runCustomEmployee = async (cs: NonNullable<typeof customSpecialist>): Promise<void> => {
+        const empKey = `custom:${cs.id}`;
+
+        // Tier gate: custom specialists are pro+ only
+        if (!internalAccount && tier.id === "free") {
+          send("paywall_required", {
+            reason: "employee_locked",
+            employee: empKey,
+            tier_id: tier.id,
+            message: "Custom specialists require a Pro or Enterprise plan.",
+          });
+          return;
+        }
+
+        // Token cap check
+        if (!internalAccount && tokensUsedThisCycle >= effectiveAllowance) {
+          send("paywall_required", {
+            reason: "cap_reached",
+            tier_id: tier.id,
+            tokens_used: tokensUsedThisCycle,
+            tokens_allowance: effectiveAllowance,
+            message: `You've used all ${effectiveAllowance.toLocaleString()} tokens this month.`,
+          });
+          return;
+        }
+
+        const messages: ChatMessage[] = ordered.map((m) => ({
+          role: m.role === "system" ? "system" : m.role === "assistant" ? "assistant" : "user",
+          content:
+            m.role === "assistant" && m.employee
+              ? `[${m.employee.toUpperCase()}]: ${m.content}`
+              : m.content,
+        }));
+
+        const systemPrompt = withTimeAware(cs.system_prompt, {
+          timezone: account.timezone || "America/New_York",
+        });
+
+        let fullText = "";
+        let inputTokens = 0;
+        let outputTokens = 0;
+        let cacheReadTokens = 0;
+        let cacheCreationTokens = 0;
+        let modelUsed = "";
+        let providerUsed = "anthropic";
+
+        try {
+          for await (const chunk of streamComplete({
+            messages,
+            systemPrompt,
+            metadata: {
+              employee: "jarvis",
+              accountId,
+              creatorMode,
+              creatorModeVersion,
+              intent,
+              tierCeiling: tier.modelCeiling,
+              internalAccount,
+            },
+            maxTokens: 1500,
+          })) {
+            if (chunk.delta) {
+              fullText += chunk.delta;
+              send("token", { employee: empKey, delta: chunk.delta });
+            }
+            if (chunk.done) {
+              inputTokens = chunk.inputTokens ?? 0;
+              outputTokens = chunk.outputTokens ?? 0;
+              cacheReadTokens = chunk.cacheReadTokens ?? 0;
+              cacheCreationTokens = chunk.cacheCreationTokens ?? 0;
+              modelUsed = chunk.model ?? "";
+              providerUsed = chunk.provider ?? "anthropic";
+            }
+          }
+        } catch (err) {
+          console.error(`[custom:${cs.id}] stream error`, err);
+          send("error", { employee: empKey, message: "Something went wrong. Please try again." });
+          return;
+        }
+
+        const costCents = estimateCostCents(
+          providerUsed as import("@/lib/ai/provider").ProviderName, modelUsed, inputTokens, outputTokens, cacheReadTokens, cacheCreationTokens,
+        );
+        tokensUsedThisCycle += inputTokens + outputTokens;
+
+        await supabase.from("conduit_messages").insert({
+          conversation_id: finalConvId,
+          role: "assistant",
+          employee: empKey,
+          content: fullText,
+        });
+        await supabase.from("conduit_usage_events").insert({
+          account_id: accountId,
+          employee: empKey,
+          provider: providerUsed,
+          model: modelUsed,
+          input_tokens: inputTokens,
+          output_tokens: outputTokens,
+          estimated_cost_cents: costCents,
+          metadata: { cache_read_input_tokens: cacheReadTokens, cache_creation_input_tokens: cacheCreationTokens },
+        });
+        await supabase
+          .from("conduit_accounts")
+          .update({ monthly_tokens_used: tokensUsedThisCycle })
+          .eq("id", accountId);
+
+        send("message_end", { employee: empKey });
+      };
+
       try {
-        if (teamRequested) {
+        if (customSpecialist) {
+          await runCustomEmployee(customSpecialist);
+        } else if (teamRequested) {
           await runRoundTable();
         } else {
           await runEmployee(initialEmployee);
