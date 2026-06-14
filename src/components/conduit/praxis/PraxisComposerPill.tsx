@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Mic, Mic2, MicOff, Send, Square } from "lucide-react";
-import type { EmployeeId } from "@/lib/conduit/employees";
+import { EMPLOYEE_ORDER, EMPLOYEES, type EmployeeId } from "@/lib/conduit/employees";
+import type { EmployeeKey } from "@/lib/ai/provider";
+import { useNicknames } from "@/context/NicknameContext";
 import { PraxisAvatar } from "./PraxisAvatar";
 import { useDeptTint } from "./usePraxisTint";
 import type { RecordingState } from "@/hooks/useVoiceRecorder";
@@ -90,6 +92,10 @@ export function PraxisComposerPill({
   const [pinOpen, setPinOpen] = useState(false);
   const tint = useDeptTint();
   const composerRef = useRef<HTMLFormElement>(null);
+  const { labelFor } = useNicknames();
+
+  // @-mention state
+  const [mentionIndex, setMentionIndex] = useState(0);
 
   // Propagate pin to canvas tint engine. "auto" / "team" clear the pin.
   useEffect(() => {
@@ -108,12 +114,51 @@ export function PraxisComposerPill({
   // Atlas as the default.
   const composerDept = pinAvatarEmp;
 
+  // Detect trailing @fragment in the textarea value.
+  const mentionMatch = value.match(/(^|\s)@(\w*)$/);
+  const mentionFragment = mentionMatch ? mentionMatch[2].toLowerCase() : null;
+
+  // Only show employees that are in pinOptions (tier-filtered).
+  const allowedEmployeeIds = new Set(
+    pinOptions
+      .map((o) => o.value)
+      .filter((v): v is EmployeeId => v !== "auto" && v !== "team"),
+  );
+
+  // Filter employees by the typed fragment, preserving EMPLOYEE_ORDER.
+  const mentionItems: EmployeeId[] =
+    mentionFragment !== null
+      ? EMPLOYEE_ORDER.filter((id) => {
+          if (!allowedEmployeeIds.has(id)) return false;
+          const canonicalName = EMPLOYEES[id].name.toLowerCase();
+          const nick = labelFor(id as EmployeeKey).toLowerCase();
+          return (
+            id.startsWith(mentionFragment) ||
+            canonicalName.startsWith(mentionFragment) ||
+            nick.startsWith(mentionFragment)
+          );
+        })
+      : [];
+
+  const mentionOpen = mentionItems.length > 0;
+
+  // Reset highlight index when the list changes.
+  useEffect(() => {
+    setMentionIndex(0);
+  }, [mentionFragment]);
+
+  function applyMention(id: EmployeeId) {
+    // Strip the trailing @fragment from the input.
+    onChange(value.replace(/(^|\s)@\w*$/, (m, p1: string) => p1));
+    onPinChange(id);
+  }
+
   return (
     <form
       ref={composerRef}
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit();
+        if (!mentionOpen) onSubmit();
       }}
       className="praxis-composer-pill"
       data-dept={composerDept}
@@ -223,34 +268,130 @@ export function PraxisComposerPill({
         )}
       </button>
 
-      <textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={(e) => {
-          // Enter (no shift) OR Cmd/Ctrl+Enter → submit
-          if (e.key === "Enter" && (!e.shiftKey || e.metaKey || e.ctrlKey)) {
-            e.preventDefault();
-            onSubmit();
+      {/* Textarea wrapped in a relative container for the @-mention popover */}
+      <div style={{ flex: 1, position: "relative" }}>
+        {mentionOpen && (
+          <div
+            role="listbox"
+            aria-label="Specialist suggestions"
+            style={{
+              position: "absolute",
+              bottom: "calc(100% + 8px)",
+              left: 0,
+              right: 0,
+              borderRadius: "var(--radius-card)",
+              background: "var(--color-surface-elevated)",
+              border: "1px solid var(--color-border)",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+              overflow: "hidden",
+              zIndex: 20,
+            }}
+          >
+            {mentionItems.map((id, idx) => {
+              const emp = EMPLOYEES[id];
+              const nick = labelFor(id as EmployeeKey);
+              const highlighted = idx === mentionIndex;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  role="option"
+                  aria-selected={highlighted}
+                  onMouseDown={(e) => {
+                    // onMouseDown fires before textarea blur, keeping the popover open.
+                    e.preventDefault();
+                    applyMention(id);
+                  }}
+                  onMouseEnter={() => setMentionIndex(idx)}
+                  style={{
+                    display: "flex",
+                    width: "100%",
+                    alignItems: "center",
+                    gap: "var(--space-3)",
+                    padding: "var(--space-2) var(--space-3)",
+                    fontSize: "13px",
+                    textAlign: "left",
+                    background: highlighted ? "var(--color-surface-raised)" : "transparent",
+                    color: "var(--color-text)",
+                    cursor: "pointer",
+                    border: "none",
+                  }}
+                >
+                  <PraxisAvatar employee={id} size="sm" />
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ display: "block" }}>{nick}</span>
+                    <span style={{ display: "block", fontSize: "11px", color: "var(--color-text-muted)" }}>
+                      {emp.role}
+                    </span>
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      color: "var(--color-text-muted)",
+                      fontFamily: "var(--font-mono)",
+                      flexShrink: 0,
+                    }}
+                  >
+                    @{id}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        <textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (mentionOpen) {
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setMentionIndex((i) => Math.min(i + 1, mentionItems.length - 1));
+                return;
+              }
+              if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setMentionIndex((i) => Math.max(i - 1, 0));
+                return;
+              }
+              if (e.key === "Enter") {
+                e.preventDefault();
+                applyMention(mentionItems[mentionIndex]);
+                return;
+              }
+              if (e.key === "Escape") {
+                e.preventDefault();
+                // Strip the @fragment and close popover.
+                onChange(value.replace(/(^|\s)@\w*$/, (m, p1: string) => p1));
+                return;
+              }
+            }
+            // Enter (no shift) OR Cmd/Ctrl+Enter → submit
+            if (e.key === "Enter" && (!e.shiftKey || e.metaKey || e.ctrlKey)) {
+              e.preventDefault();
+              onSubmit();
+            }
+          }}
+          rows={1}
+          placeholder={
+            placeholder ?? (speechListening ? "Listening…" : "Talk to your team…")
           }
-        }}
-        rows={1}
-        placeholder={
-          placeholder ?? (speechListening ? "Listening…" : "Talk to your team…")
-        }
-        style={{
-          flex: 1,
-          resize: "none",
-          background: "transparent",
-          border: "none",
-          outline: "none",
-          padding: "var(--space-2)",
-          fontSize: "15px",
-          lineHeight: 1.4,
-          maxHeight: "8rem",
-          color: "var(--color-text)",
-          fontFamily: "var(--font-sans)",
-        }}
-      />
+          style={{
+            width: "100%",
+            resize: "none",
+            background: "transparent",
+            border: "none",
+            outline: "none",
+            padding: "var(--space-2)",
+            fontSize: "15px",
+            lineHeight: 1.4,
+            maxHeight: "8rem",
+            color: "var(--color-text)",
+            fontFamily: "var(--font-sans)",
+          }}
+        />
+      </div>
 
       {speechSupported ? (
         <button
