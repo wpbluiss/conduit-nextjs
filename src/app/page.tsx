@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
+import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import { AnalyticsPageView } from "@/components/conduit/AnalyticsPageView";
+import { AccountDeletedBanner } from "@/components/AccountDeletedBanner";
 
 // Code-split below-fold sections so the browser doesn't parse their JS
 // before the LCP element (Hero) is painted. Each section is still
@@ -61,6 +63,10 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_JSONLD) }}
       />
       <AnalyticsPageView />
+      {/* Deletion confirmation banner — only shown when redirected from account deletion */}
+      <Suspense>
+        <AccountDeletedBanner />
+      </Suspense>
       <Navbar />
       <Hero />
       <ProductTiles />

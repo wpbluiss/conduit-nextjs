@@ -28,7 +28,7 @@ export function PraxisDangerZone() {
         }
         const supabase = createSupabaseBrowserClient();
         await supabase.auth.signOut();
-        router.push("/");
+        router.push("/?deleted=1");
         router.refresh();
       } catch {
         setError("Couldn't delete account. Try again.");
@@ -82,7 +82,14 @@ export function PraxisDangerZone() {
         className="mt-4 rounded-lg px-4 py-2 text-sm font-semibold transition-opacity disabled:opacity-40"
         style={{ background: "#e5484d", color: "#fff" }}
       >
-        {pending ? "Deleting…" : "Delete my account & data"}
+        {pending ? (
+          <span className="flex items-center gap-2">
+            <span className="size-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+            Deleting…
+          </span>
+        ) : (
+          "Delete my account & data"
+        )}
       </button>
     </div>
   );
