@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Pin, ThumbsDown, ThumbsUp } from "lucide-react";
+import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Pin, Share2, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
@@ -24,7 +24,7 @@ import {
   type PinValue as PraxisPinValue,
 } from "./praxis/PraxisComposerPill";
 import { composeChatEmptyCopy, timeOfDayBucket } from "@/lib/conduit/welcome-copy";
-import type { EmployeeId } from "@/lib/conduit/employees";
+import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
 import { TypingIndicator } from "./TypingIndicator";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import {
@@ -153,6 +153,8 @@ export function Chat({
   allowedEmployees,
   isFirstRun = false,
   companyBrief = null,
+  handoffConversationId: initialHandoffConvId = null,
+  handoffEmployee: initialHandoffEmployee = null,
 }: {
   conversationId: string | null;
   initialMessages: MessageRow[];
@@ -163,6 +165,8 @@ export function Chat({
   allowedEmployees: EmployeeKey[];
   isFirstRun?: boolean;
   companyBrief?: string | null;
+  handoffConversationId?: string | null;
+  handoffEmployee?: string | null;
 }) {
   const allowedSet = new Set(allowedEmployees);
   // "team" requires at least 2 non-Atlas employees on the tier.
@@ -189,6 +193,7 @@ export function Chat({
     hasChosen === false && messages.length === 0 && !conversationId;
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const toast = useToast();
   const [drawerArtifactId, setDrawerArtifactId] = useState<string | null>(null);
   const [paywall, setPaywall] = useState<PaywallPayload | null>(null);
   // Message edit: id of the user message currently being edited inline.
@@ -200,6 +205,18 @@ export function Chat({
     retryText: string;
   } | null>(null);
   const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
+
+  // Handoff state
+  const [handoffInfo, setHandoffInfo] = useState<{
+    conversationId: string;
+    employee: string;
+  } | null>(
+    initialHandoffConvId && initialHandoffEmployee
+      ? { conversationId: initialHandoffConvId, employee: initialHandoffEmployee }
+      : null,
+  );
+  const [showHandoffPicker, setShowHandoffPicker] = useState(false);
+  const [handoffLoading, setHandoffLoading] = useState(false);
 
   // Rate-limit countdown: epoch ms when the ban lifts; null = not limited.
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
@@ -280,6 +297,41 @@ export function Chat({
     if (conversationId) void loadPins(conversationId);
     else setPinnedMessages([]);
   }, [conversationId, loadPins]);
+
+  const performHandoff = useCallback(
+    async (targetEmployee: EmployeeKey) => {
+      if (!conversationId || handoffLoading) return;
+      setHandoffLoading(true);
+      setShowHandoffPicker(false);
+      try {
+        const res = await fetch(
+          `/api/conduit/conversations/${conversationId}/handoff`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ targetEmployee }),
+          },
+        );
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          if (err.error === "already_handed_off") {
+            toast.info("This conversation is already handed off.");
+          } else {
+            toast.error("Handoff failed. Please try again.");
+          }
+          return;
+        }
+        const { newConversationId } = await res.json();
+        setHandoffInfo({ conversationId: newConversationId, employee: targetEmployee });
+        router.push(`/app?c=${newConversationId}`);
+      } catch {
+        toast.error("Handoff failed. Please try again.");
+      } finally {
+        setHandoffLoading(false);
+      }
+    },
+    [conversationId, handoffLoading, router, toast],
+  );
 
   const handlePinToggle = useCallback(
     async (messageId: string, shouldPin: boolean) => {
@@ -1174,6 +1226,34 @@ export function Chat({
                       <span className="hidden sm:inline">PDF</span>
                     </button>
                   )}
+                  {/* Handoff button — only when conversation has messages and no existing handoff */}
+                  {conversationId && !handoffInfo && (
+                    <button
+                      type="button"
+                      onClick={() => setShowHandoffPicker(true)}
+                      disabled={handoffLoading}
+                      title="Hand off to another specialist"
+                      aria-label="Hand off to another specialist"
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors disabled:opacity-50"
+                      style={{
+                        color: "var(--color-text-muted)",
+                        border: "1px solid transparent",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
+                        (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
+                        (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                      }}
+                    >
+                      <Share2 size={12} />
+                      <span className="hidden sm:inline">
+                        {handoffLoading ? "Handing off…" : "Handoff"}
+                      </span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -1240,6 +1320,34 @@ export function Chat({
               }
             />
           ))}
+
+          {/* Handoff banner — shown when this conversation was handed off */}
+          {handoffInfo && (
+            <div
+              className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-sm mt-2"
+              style={{
+                background: "color-mix(in srgb, var(--color-accent) 7%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)",
+              }}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <Share2 size={14} style={{ color: "var(--color-accent-hi)", flexShrink: 0 }} />
+                <span style={{ color: "var(--color-text-muted)" }}>
+                  Continued by{" "}
+                  <span style={{ color: "var(--color-accent-hi)", fontWeight: 500 }}>
+                    {EMPLOYEES[handoffInfo.employee as EmployeeId]?.name ?? handoffInfo.employee}
+                  </span>
+                </span>
+              </div>
+              <a
+                href={`/app?c=${handoffInfo.conversationId}`}
+                className="flex items-center gap-1 text-xs font-medium shrink-0 transition-opacity hover:opacity-80"
+                style={{ color: "var(--color-accent-hi)" }}
+              >
+                Open <ArrowRight size={11} />
+              </a>
+            </div>
+          )}
 
           {/* Follow-up suggestion chips — shown after the latest assistant reply */}
           {followUpSuggestions.length > 0 && !loading && (
@@ -1421,6 +1529,117 @@ export function Chat({
           payload={paywall}
           onClose={() => setPaywall(null)}
         />
+      )}
+
+      {/* Handoff specialist picker */}
+      {showHandoffPicker && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            aria-hidden
+            onClick={() => setShowHandoffPicker(false)}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Hand off to a specialist"
+            className="fixed inset-0 z-50 flex items-center justify-center px-4"
+          >
+            <div
+              className="w-full max-w-md rounded-2xl border p-6 shadow-2xl"
+              style={{
+                background: "var(--color-surface-elevated)",
+                borderColor: "var(--color-border)",
+              }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p
+                    className="text-[11px] uppercase tracking-[0.15em] mb-1"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
+                    Hand off to…
+                  </p>
+                  <h2 className="text-base font-semibold" style={{ color: "var(--color-text)" }}>
+                    Choose a specialist
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowHandoffPicker(false)}
+                  aria-label="Close"
+                  className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors"
+                  style={{
+                    color: "var(--color-text-muted)",
+                    background: "var(--color-surface)",
+                  }}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {EMPLOYEE_ORDER.map((empId) => {
+                  const emp = EMPLOYEES[empId];
+                  const isAllowed = allowedSet.has(empId as EmployeeKey);
+                  return (
+                    <button
+                      key={empId}
+                      type="button"
+                      disabled={!isAllowed}
+                      onClick={() => void performHandoff(empId as EmployeeKey)}
+                      className="flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{
+                        background: isAllowed
+                          ? "var(--color-surface)"
+                          : "transparent",
+                        borderColor: "var(--color-border)",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (isAllowed) {
+                          (e.currentTarget as HTMLElement).style.borderColor = emp.color;
+                          (e.currentTarget as HTMLElement).style.background = emp.colorSoft;
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
+                        (e.currentTarget as HTMLElement).style.background = isAllowed ? "var(--color-surface)" : "transparent";
+                      }}
+                    >
+                      <span
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
+                        style={{
+                          background: emp.colorSoft,
+                          color: emp.color,
+                          border: `1px solid ${emp.color}30`,
+                        }}
+                      >
+                        {emp.initial}
+                      </span>
+                      <span
+                        className="text-[11px] font-medium text-center leading-tight"
+                        style={{ color: "var(--color-text)" }}
+                      >
+                        {emp.name}
+                      </span>
+                      <span
+                        className="text-[9px] text-center leading-tight"
+                        style={{ color: "var(--color-text-muted)" }}
+                      >
+                        {emp.role}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] mt-4" style={{ color: "var(--color-text-muted)" }}>
+                A new conversation will open with context from this thread.
+                {allowedEmployees.length < EMPLOYEE_ORDER.length && (
+                  <> Dimmed specialists require a higher plan.</>
+                )}
+              </p>
+            </div>
+          </div>
+        </>
       )}
 
       {playingMessageIdx !== null && (() => {
