@@ -1194,33 +1194,42 @@ body {
   font-weight: 500;
 }
 
-/* Pull-quote — italic Fraunces with indigo accent line + subtle wash */
+/* Pull-quote — italic Fraunces with indigo accent + ember decorative mark */
 .conduit-pullquote {
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: clamp(1.5rem, 2.5vw + 0.5rem, 2rem);
+  font-size: clamp(1.5rem, 2.5vw + 0.5rem, 2.125rem);
   line-height: 1.38;
   letter-spacing: -0.018em;
   color: var(--color-ink-primary);
-  border-left: none;
-  padding: 24px 28px;
+  border-left: 2px solid var(--color-indigo-500);
+  padding: 28px 32px 28px 36px;
   position: relative;
-  background: rgba(91, 99, 232, 0.04);
-  border-radius: 0 8px 8px 0;
-}
-.conduit-pullquote::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  border-radius: 0 2px 2px 0;
   background: linear-gradient(
-    to bottom,
-    var(--color-indigo-500),
-    rgba(91, 99, 232, 0.25)
+    105deg,
+    rgba(91, 99, 232, 0.055) 0%,
+    rgba(91, 99, 232, 0.02) 55%,
+    transparent 100%
   );
+  border-radius: 0 12px 12px 0;
+  overflow: visible;
+}
+/* Large decorative opening mark — ember warmth against the indigo grid */
+.conduit-pullquote::before {
+  content: "\201C";
+  position: absolute;
+  top: -0.2em;
+  left: 22px;
+  font-family: var(--font-serif);
+  font-size: 5em;
+  line-height: 1;
+  font-style: normal;
+  font-weight: 700;
+  color: var(--color-ember-500);
+  opacity: 0.18;
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: normal;
 }
 
 /* Section + container helpers */
