@@ -24,17 +24,19 @@ export async function GET(req: NextRequest) {
 
   const before = req.nextUrl.searchParams.get("before") ?? null;
 
+  // Fetch conversation IDs for this account first (subquery pattern not type-safe with Supabase SDK).
+  const { data: convRows } = await supabase
+    .from("conduit_conversations")
+    .select("id")
+    .eq("account_id", account.id)
+    .limit(200);
+  const convIds = (convRows ?? []).map((r) => r.id as string);
+
   let msgQuery = supabase
     .from("conduit_messages")
     .select("id, conversation_id, employee, content, created_at")
     .eq("role", "assistant")
-    .in(
-      "conversation_id",
-      supabase
-        .from("conduit_conversations")
-        .select("id")
-        .eq("account_id", account.id),
-    )
+    .in("conversation_id", convIds.length > 0 ? convIds : ["__none__"])
     .not("employee", "is", null)
     .order("created_at", { ascending: false })
     .limit(PAGE_SIZE);
