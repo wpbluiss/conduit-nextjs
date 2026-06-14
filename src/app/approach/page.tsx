@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { MarketingMotionProvider } from "@/components/MarketingMotionProvider";
 import { PageHeader } from "@/components/marketing/PageHeader";
 import { ScrollRevealCards, ScrollRevealItem } from "@/components/marketing/ScrollRevealCards";
 import { ApproachSections } from "@/components/ApproachSections";
@@ -89,6 +90,7 @@ const SECTIONS: ApproachSection[] = [
 
 export default function ApproachPage() {
   return (
+    <MarketingMotionProvider>
     <main className="conduit-bg-canvas">
       <Navbar />
 
@@ -153,5 +155,6 @@ export default function ApproachPage() {
 
       <Footer />
     </main>
+    </MarketingMotionProvider>
   );
 }

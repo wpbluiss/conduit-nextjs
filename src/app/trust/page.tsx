@@ -10,6 +10,7 @@ import {
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FinalCTA from "@/components/FinalCTA";
+import { MarketingMotionProvider } from "@/components/MarketingMotionProvider";
 import { PageHeader } from "@/components/marketing/PageHeader";
 import { ScrollRevealCards, ScrollRevealItem } from "@/components/marketing/ScrollRevealCards";
 
@@ -83,6 +84,7 @@ const PILLARS = [
 
 export default function TrustPage() {
   return (
+    <MarketingMotionProvider>
     <main className="conduit-bg-canvas">
       <Navbar />
 
@@ -138,36 +140,43 @@ export default function TrustPage() {
 
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-border-subtle)]">
         <div className="conduit-container">
-          <div className="max-w-[760px]">
-            <p className="conduit-caption conduit-caption-ember">Compliance roadmap</p>
-            <h2 className="conduit-display-xl mt-5">
-              SOC 2 in 2026.
-            </h2>
-            <p className="conduit-body-lg mt-6">
-              We&rsquo;re a small team building something used by paying
-              customers. SOC 2 Type I is on the calendar for late 2026 with a
-              Type II audit window starting Q1 2027. HIPAA is on the table for
-              Praxis verticals that need it (we&rsquo;d love to hear from you
-              if that&rsquo;s a hard requirement).
-            </p>
-            <p className="conduit-body-lg mt-5">
-              Until those certs ship, you can ask us anything. We&rsquo;ll
-              answer honestly, and we&rsquo;ll DPA your team where the
-              relationship justifies it.
-            </p>
-            <Link
-              href="mailto:luis@conduitai.io?subject=Trust%20%2B%20Security%20question"
-              className="conduit-btn-secondary mt-9 inline-flex"
-            >
-              Ask the founder
-              <ArrowRight size={16} weight="bold" />
-            </Link>
-          </div>
+          <ScrollRevealCards className="max-w-[760px]">
+            <ScrollRevealItem>
+              <p className="conduit-caption conduit-caption-ember">Compliance roadmap</p>
+              <h2 className="conduit-display-xl mt-5">
+                SOC 2 in 2026.
+              </h2>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <p className="conduit-body-lg mt-6">
+                We&rsquo;re a small team building something used by paying
+                customers. SOC 2 Type I is on the calendar for late 2026 with a
+                Type II audit window starting Q1 2027. HIPAA is on the table for
+                Praxis verticals that need it (we&rsquo;d love to hear from you
+                if that&rsquo;s a hard requirement).
+              </p>
+              <p className="conduit-body-lg mt-5">
+                Until those certs ship, you can ask us anything. We&rsquo;ll
+                answer honestly, and we&rsquo;ll DPA your team where the
+                relationship justifies it.
+              </p>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <Link
+                href="mailto:luis@conduitai.io?subject=Trust%20%2B%20Security%20question"
+                className="conduit-btn-secondary mt-9 inline-flex"
+              >
+                Ask the founder
+                <ArrowRight size={16} weight="bold" />
+              </Link>
+            </ScrollRevealItem>
+          </ScrollRevealCards>
         </div>
       </section>
 
       <FinalCTA />
       <Footer />
     </main>
+    </MarketingMotionProvider>
   );
 }
