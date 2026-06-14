@@ -18,6 +18,7 @@ import {
   MoreHorizontal, Command, Slash, AtSign, Copy, RefreshCw, Hammer, FileText, Download, Printer, X, AudioLines,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { MarkdownMessage } from "./MarkdownMessage";
 import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
 import PraxisLiveRoom from "@/components/conduit/voice/PraxisLiveRoom";
 import type { VoiceTokenResponse } from "@/components/conduit/voice/VoiceRoom";
@@ -385,8 +386,10 @@ export function LiveChat({
                     <p className="mb-1 text-sm font-semibold">{EMPLOYEES[e]?.name ?? "Atlas"}</p>
                     {m.pending && !m.content ? (
                       <div className="flex items-center gap-1 py-2">{[0, 1, 2].map((j) => (<motion.span key={j} className="size-1.5 rounded-full bg-muted-foreground" animate={{ opacity: [0.3, 1, 0.3], y: [0, -2, 0] }} transition={{ duration: 1, repeat: Infinity, delay: j * 0.18 }} />))}</div>
+                    ) : m.pending ? (
+                      <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">{m.content}<span className="ml-0.5 inline-block h-4 w-[3px] translate-y-0.5 animate-pulse rounded-full bg-primary align-middle" /></div>
                     ) : (
-                      <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">{m.content}{m.pending && <span className="ml-0.5 inline-block h-4 w-[3px] translate-y-0.5 animate-pulse rounded-full bg-primary align-middle" />}</div>
+                      <MarkdownMessage content={m.content} />
                     )}
                     {m.artifacts?.map((a) => (
                       <button key={a.id} onClick={() => setOpenArtifact(a)} className="mt-3 flex w-full max-w-sm items-center gap-3 rounded-xl border border-white/10 bg-secondary/40 p-3 text-left transition-colors hover:border-primary/40 hover:bg-secondary">
