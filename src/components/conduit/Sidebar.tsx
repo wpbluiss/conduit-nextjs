@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BarChart3,
+  Bookmark,
   Brain,
   CreditCard,
   Hammer,
@@ -617,6 +618,14 @@ export function Sidebar({
               collapsed={collapsed}
             />
             </div>
+            <NavLink
+              href="/app/outputs"
+              icon={<Bookmark size={14} />}
+              label="Outputs"
+              active={isActive("/app/outputs")}
+              onClick={close}
+              collapsed={collapsed}
+            />
             {allowedEmployees.includes("engineering") && (
               collapsed ? (
                 <div className="flex justify-center">
