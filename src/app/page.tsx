@@ -25,6 +25,7 @@ const WhyPraxisTable = dynamic(() =>
   import("@/components/marketing/WhyPraxisTable").then((m) => ({ default: m.WhyPraxisTable })),
 );
 const Pricing = dynamic(() => import("@/components/Pricing"));
+const TrustBar = dynamic(() => import("@/components/TrustBar"));
 const FAQ = dynamic(() => import("@/components/FAQ"));
 const FinalCTA = dynamic(() => import("@/components/FinalCTA"));
 const Footer = dynamic(() => import("@/components/Footer"));
@@ -85,6 +86,7 @@ export default function Home() {
       <SpecialistShowcase />
       <WhyPraxisTable />
       <Pricing />
+      <TrustBar />
       <FAQ />
       <FinalCTA />
       <Footer />
