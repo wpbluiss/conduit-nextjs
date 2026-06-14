@@ -156,10 +156,23 @@ export function Sidebar({
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const sidebarRef = useRef<HTMLElement>(null);
   const openBtnRef = useRef<HTMLButtonElement>(null);
+  // Optimistic title overrides — updated when chat fires praxis:title_updated.
+  const [titleOverrides, setTitleOverrides] = useState<Record<string, string>>({});
 
   // Hydrate collapsed state from localStorage after mount (avoids SSR mismatch).
   useEffect(() => {
     setCollapsed(readCollapsed());
+  }, []);
+
+  useEffect(() => {
+    const onTitleUpdated = (e: Event) => {
+      const { conversation_id, title } = (e as CustomEvent<{ conversation_id: string; title: string }>).detail;
+      if (conversation_id && title) {
+        setTitleOverrides((prev) => ({ ...prev, [conversation_id]: title }));
+      }
+    };
+    window.addEventListener("praxis:title_updated", onTitleUpdated);
+    return () => window.removeEventListener("praxis:title_updated", onTitleUpdated);
   }, []);
 
   const toggleCollapsed = () => {
@@ -752,7 +765,7 @@ export function Sidebar({
                         })()
                       )}
                       <span className="truncate">
-                        {c.title || "Untitled chat"}
+                        {titleOverrides[c.id] ?? c.title ?? "Untitled chat"}
                       </span>
                     </Link>
                   );

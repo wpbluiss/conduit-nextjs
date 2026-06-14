@@ -1101,6 +1101,15 @@ export function Chat({
           ) {
             finishCurrent(currentEmployee);
           }
+        } else if (event === "title_updated") {
+          window.dispatchEvent(
+            new CustomEvent("praxis:title_updated", {
+              detail: {
+                conversation_id: data.conversation_id as string,
+                title: data.title as string,
+              },
+            }),
+          );
         } else if (event === "done") {
           const cid = data.conversation_id as string;
           if (cid && cid !== conversationId) {

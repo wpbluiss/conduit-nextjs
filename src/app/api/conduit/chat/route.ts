@@ -132,6 +132,7 @@ export async function POST(request: NextRequest) {
 
   // Get or create conversation
   let conversationId = body.conversation_id;
+  const isNewConversation = !conversationId;
   if (!conversationId) {
     const title = message.slice(0, 60);
     const { data, error } = await supabase
@@ -1128,6 +1129,51 @@ export async function POST(request: NextRequest) {
           .from("conduit_conversations")
           .update({ updated_at: new Date().toISOString() })
           .eq("id", finalConvId);
+
+        // Auto-generate a short title for brand-new conversations.
+        // Runs after the main response so it never delays streaming.
+        if (isNewConversation) {
+          try {
+            const firstAssistantMsg = ordered.find((m) => m.role === "assistant");
+            if (firstAssistantMsg) {
+              const titleRes = await complete({
+                systemPrompt: "You generate short conversation titles. Return ONLY the title — no quotes, no trailing punctuation, no preamble.",
+                messages: [
+                  {
+                    role: "user",
+                    content: `Write a ≤8-word title for this conversation.\n\nUser: ${message.slice(0, 500)}\nAssistant: ${firstAssistantMsg.content.slice(0, 500)}`,
+                  },
+                ],
+                metadata: {
+                  employee: "jarvis",
+                  accountId,
+                  creatorMode: false,
+                  creatorModeVersion: 1,
+                  intent: "routing",
+                  tierCeiling: "haiku",
+                  internalAccount: false,
+                },
+                maxTokens: 20,
+              });
+              const generatedTitle = titleRes.content
+                .trim()
+                .replace(/^["']|["']$/g, "")
+                .slice(0, 60);
+              if (generatedTitle) {
+                await supabase
+                  .from("conduit_conversations")
+                  .update({ title: generatedTitle })
+                  .eq("id", finalConvId);
+                send("title_updated", {
+                  conversation_id: finalConvId,
+                  title: generatedTitle,
+                });
+              }
+            }
+          } catch (titleErr) {
+            console.warn("[chat] title generation failed:", titleErr);
+          }
+        }
 
         send("done", { conversation_id: finalConvId });
         controller.close();
