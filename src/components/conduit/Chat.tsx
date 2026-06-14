@@ -177,6 +177,21 @@ export function Chat({
     retryText: string;
   } | null>(null);
 
+  // Rate-limit countdown: epoch ms when the ban lifts; null = not limited.
+  const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
+  const [rateLimitSecondsLeft, setRateLimitSecondsLeft] = useState(0);
+  useEffect(() => {
+    if (!rateLimitUntil) return;
+    const tick = () => {
+      const left = Math.max(0, Math.ceil((rateLimitUntil - Date.now()) / 1000));
+      setRateLimitSecondsLeft(left);
+      if (left === 0) setRateLimitUntil(null);
+    };
+    tick();
+    const id = setInterval(tick, 250);
+    return () => clearInterval(id);
+  }, [rateLimitUntil]);
+
   // Pagination: infinite-scroll-up for message history.
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loadingOlder, setLoadingOlder] = useState(false);
@@ -480,16 +495,20 @@ export function Chat({
           router.refresh();
           return;
         }
-        let fallback =
-          "Something hiccuped on my end. Try that again in a moment.";
         if (resp.status === 429) {
-          const j = (await resp.json().catch(() => ({}))) as {
-            message?: string;
-          };
-          fallback =
-            j.message ||
-            "You're sending messages too quickly. Give it a moment and try again.";
+          const retryHeader = resp.headers.get("Retry-After");
+          const seconds = retryHeader ? Math.max(1, parseInt(retryHeader, 10)) || 60 : 60;
+          setRateLimitUntil(Date.now() + seconds * 1000);
+          setMessages((prev) => {
+            const next = [...prev];
+            if (next[next.length - 1]?.pending) next.pop();
+            return next;
+          });
+          setLoading(false);
+          return;
         }
+        const fallback =
+          "Something hiccuped on my end. Try that again in a moment.";
         setMessages((prev) => {
           const next = [...prev];
           if (next[next.length - 1]?.pending) next.pop();
@@ -929,6 +948,30 @@ export function Chat({
               </button>
             </div>
           )}
+          {rateLimitUntil && (
+            <motion.div
+              role="status"
+              aria-live="polite"
+              className="conduit-card flex items-center gap-3 p-4"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+              style={{
+                borderColor: "rgba(202, 138, 4, 0.30)",
+                background: "rgba(202, 138, 4, 0.06)",
+              }}
+            >
+              <AlertCircle
+                size={16}
+                className="shrink-0"
+                style={{ color: "var(--color-amber, #ca8a04)" }}
+              />
+              <p className="flex-1 text-sm" style={{ color: "var(--color-text)" }}>
+                Ready again in{" "}
+                <span className="font-medium tabular-nums">{rateLimitSecondsLeft} s</span>
+              </p>
+            </motion.div>
+          )}
         </div>
       </div>
 
@@ -970,7 +1013,7 @@ export function Chat({
                 speech.start();
               }
             }}
-            loading={loading}
+            loading={loading || Boolean(rateLimitUntil)}
             streamingEmployee={streamingEmployee as EmployeeId | null}
             placeholder={speech.listening ? "Listening…" : "Talk to your team…"}
             voiceMessageSupported={voiceRecorder.supported}
