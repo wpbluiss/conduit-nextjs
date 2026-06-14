@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from "react";
 import QRCode from "qrcode";
+import { Copy, Download } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { SpinnerIcon } from "./PraxisButton";
 
@@ -11,7 +12,9 @@ type MFAState =
   | { phase: "idle"; enrolled: true; factorId: string }
   | { phase: "enrolling"; factorId: string; qrDataUrl: string; secret: string; uri: string }
   | { phase: "verifying"; factorId: string; qrDataUrl: string; secret: string }
-  | { phase: "disabling"; factorId: string };
+  | { phase: "disabling"; factorId: string }
+  | { phase: "backup-codes"; factorId: string; codes: string[] }
+  | { phase: "regenerating"; factorId: string };
 
 function CodeInput({
   value,
@@ -52,6 +55,75 @@ function SectionCard({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
+    </div>
+  );
+}
+
+function BackupCodesGrid({ codes }: { codes: string[] }) {
+  const formatted = codes.map((c) => `${c.slice(0, 5)} ${c.slice(5)}`);
+
+  function copyAll() {
+    navigator.clipboard.writeText(formatted.join("\n"));
+  }
+
+  function download() {
+    const text = [
+      "Praxis backup codes — keep these safe, each can only be used once.",
+      "",
+      ...formatted,
+    ].join("\n");
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "praxis-backup-codes.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <div className="mt-4 space-y-3">
+      <div className="grid grid-cols-2 gap-1.5">
+        {formatted.map((c) => (
+          <div
+            key={c}
+            className="rounded-lg px-3 py-2 text-center font-mono text-sm tracking-widest select-all"
+            style={{
+              background: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+              color: "var(--color-text)",
+            }}
+          >
+            {c}
+          </div>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={copyAll}
+          className="flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-opacity hover:opacity-80"
+          style={{
+            background: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+            color: "var(--color-text-muted)",
+          }}
+        >
+          <Copy size={13} /> Copy all
+        </button>
+        <button
+          type="button"
+          onClick={download}
+          className="flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-opacity hover:opacity-80"
+          style={{
+            background: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+            color: "var(--color-text-muted)",
+          }}
+        >
+          <Download size={13} /> Download
+        </button>
+      </div>
     </div>
   );
 }
@@ -128,9 +200,31 @@ export function MFASecurity() {
         setCode("");
         return;
       }
-      setSuccess("Two-factor authentication is now enabled.");
+
+      // Generate backup codes immediately after enrollment
+      const res = await fetch("/api/conduit/auth/backup-codes", { method: "POST" });
+      const json = await res.json();
       setCode("");
-      await loadFactors();
+      if (res.ok && json.codes) {
+        setState({ phase: "backup-codes", factorId: state.factorId, codes: json.codes });
+      } else {
+        setSuccess("Two-factor authentication is now enabled.");
+        await loadFactors();
+      }
+    });
+  }
+
+  async function generateNewCodes() {
+    if (state.phase !== "idle" || !state.enrolled) return;
+    setError(null);
+    startTransition(async () => {
+      const res = await fetch("/api/conduit/auth/backup-codes", { method: "POST" });
+      const json = await res.json();
+      if (res.ok && json.codes) {
+        setState({ phase: "backup-codes", factorId: state.factorId, codes: json.codes });
+      } else {
+        setError("Failed to generate backup codes. Try again.");
+      }
     });
   }
 
@@ -144,6 +238,8 @@ export function MFASecurity() {
         setError(error.message ?? "Failed to disable 2FA. Try again.");
         return;
       }
+      // Clear backup codes when MFA is disabled
+      await fetch("/api/conduit/auth/backup-codes", { method: "DELETE" });
       setSuccess("Two-factor authentication has been disabled.");
       setDisableConfirm("");
       await loadFactors();
@@ -189,31 +285,85 @@ export function MFASecurity() {
 
       {/* ── Enabled state ── */}
       {state.phase === "idle" && state.enrolled && (
-        <SectionCard>
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em]"
-                  style={{ background: "color-mix(in srgb, #30a46c 15%, transparent)", color: "#30a46c" }}
-                >
-                  <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                  Enabled
-                </span>
+        <>
+          <SectionCard>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em]"
+                    style={{ background: "color-mix(in srgb, #30a46c 15%, transparent)", color: "#30a46c" }}
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                    Enabled
+                  </span>
+                </div>
+                <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
+                  Authenticator app — your account is protected with TOTP.
+                </p>
               </div>
-              <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
-                Authenticator app — your account is protected with TOTP.
-              </p>
+              <button
+                type="button"
+                onClick={() => { setError(null); setState({ phase: "disabling", factorId: state.factorId }); }}
+                className="shrink-0 rounded-lg px-3 py-2 text-sm transition-colors hover:opacity-80"
+                style={{ background: "color-mix(in srgb, #e5484d 12%, transparent)", color: "#f0888c", border: "1px solid color-mix(in srgb, #e5484d 30%, transparent)" }}
+              >
+                Disable
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => { setError(null); setState({ phase: "disabling", factorId: state.factorId }); }}
-              className="shrink-0 rounded-lg px-3 py-2 text-sm transition-colors hover:opacity-80"
-              style={{ background: "color-mix(in srgb, #e5484d 12%, transparent)", color: "#f0888c", border: "1px solid color-mix(in srgb, #e5484d 30%, transparent)" }}
-            >
-              Disable
-            </button>
-          </div>
+          </SectionCard>
+
+          {/* Backup codes management */}
+          <SectionCard>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>
+                  Backup codes
+                </p>
+                <p className="mt-1 text-sm" style={{ color: "var(--color-text-muted)" }}>
+                  Use a one-time backup code if you lose access to your authenticator app.
+                  Each code works once.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={generateNewCodes}
+                disabled={isPending}
+                className="shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition-opacity disabled:opacity-50"
+                style={{
+                  background: "var(--color-surface)",
+                  border: "1px solid var(--color-border)",
+                  color: "var(--color-text-muted)",
+                }}
+              >
+                {isPending ? <SpinnerIcon size={14} /> : "Regenerate"}
+              </button>
+            </div>
+            {error && <p className="mt-2 text-xs" style={{ color: "#f0888c" }}>{error}</p>}
+          </SectionCard>
+        </>
+      )}
+
+      {/* ── Backup codes reveal ── */}
+      {state.phase === "backup-codes" && (
+        <SectionCard>
+          <h3 className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
+            Save your backup codes
+          </h3>
+          <p className="mt-1.5 text-sm" style={{ color: "var(--color-text-muted)" }}>
+            Each code can only be used once. Store them somewhere safe — they won't be shown again.
+          </p>
+          <BackupCodesGrid codes={state.codes} />
+          <button
+            type="button"
+            onClick={async () => {
+              setSuccess("Two-factor authentication is now enabled.");
+              await loadFactors();
+            }}
+            className="mt-4 w-full rounded-lg px-4 py-2.5 text-sm font-medium btn-primary"
+          >
+            I've saved my codes — done
+          </button>
         </SectionCard>
       )}
 
@@ -323,12 +473,6 @@ export function MFASecurity() {
             <CodeInput value={code} onChange={setCode} disabled={isPending} />
           </div>
           {error && <p className="mt-2 text-xs" style={{ color: "#f0888c" }}>{error}</p>}
-          <div
-            className="mt-4 rounded-lg px-3 py-2.5 text-xs"
-            style={{ background: "color-mix(in srgb, var(--color-accent) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)", color: "var(--color-text-muted)" }}
-          >
-            <strong style={{ color: "var(--color-text)" }}>Important:</strong> Praxis does not generate backup codes. If you lose access to your authenticator app, you will need to contact support to recover your account.
-          </div>
           <div className="mt-4 flex gap-2">
             <button
               type="button"

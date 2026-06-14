@@ -3,7 +3,7 @@
 import { Suspense, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { PraxisLogo } from "@/components/conduit/PraxisLogo";
 import { SpinnerIcon } from "@/components/conduit/PraxisButton";
@@ -30,22 +30,32 @@ function MFAShell() {
   return <main className="praxis-root conduit-bg-canvas min-h-screen" />;
 }
 
+type Mode = "totp" | "backup";
+
 function MFAForm() {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") || "/app/workspace";
 
+  const [mode, setMode] = useState<Mode>("totp");
   const [code, setCode] = useState("");
+  const [backupCode, setBackupCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  async function onSubmit(e: React.FormEvent) {
+  function switchMode(m: Mode) {
+    setMode(m);
+    setError(null);
+    setCode("");
+    setBackupCode("");
+  }
+
+  async function onTOTPSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     startTransition(async () => {
       const supabase = createSupabaseBrowserClient();
 
-      // List factors to get the verified TOTP factor id
       const { data: factorsData, error: listErr } = await supabase.auth.mfa.listFactors();
       if (listErr || !factorsData) {
         setError("Could not load authenticator factors. Please sign in again.");
@@ -53,7 +63,6 @@ function MFAForm() {
       }
       const factor = factorsData.totp.find((f: { id: string; status: string }) => f.status === "verified");
       if (!factor) {
-        // No MFA factor — just continue (shouldn't normally reach here)
         router.replace(next);
         router.refresh();
         return;
@@ -78,6 +87,35 @@ function MFAForm() {
         return;
       }
 
+      router.replace(next);
+      router.refresh();
+    });
+  }
+
+  async function onBackupSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    startTransition(async () => {
+      const res = await fetch("/api/conduit/auth/backup-codes", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: backupCode }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setError(
+          json.error === "invalid_code"
+            ? "Invalid backup code. Double-check and try again."
+            : json.error === "no_backup_codes"
+              ? "No backup codes on file. Contact support."
+              : "Something went wrong. Try again.",
+        );
+        setBackupCode("");
+        return;
+      }
+      // TOTP factor deleted server-side; refresh session so redirect proceeds.
+      const supabase = createSupabaseBrowserClient();
+      await supabase.auth.refreshSession();
       router.replace(next);
       router.refresh();
     });
@@ -122,63 +160,127 @@ function MFAForm() {
               "inset 0 0 0 1px rgba(255,138,61,0.07), 0 24px 64px rgba(10,9,8,0.55)",
           }}
         >
-          <p className="text-sm text-[var(--color-ink-on-inverse-soft)] mb-6">
-            Enter the 6-digit code from your authenticator app to continue.
-          </p>
-
-          <form onSubmit={onSubmit} className="space-y-5">
-            <input
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              maxLength={6}
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-              placeholder="000000"
-              disabled={isPending}
-              autoFocus
-              className="w-full rounded-lg text-center text-2xl tracking-[0.4em] font-mono bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] outline-none transition-all duration-200 focus:border-[var(--color-ember-500)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)] disabled:opacity-50"
-            />
-
-            {error && (
-              <motion.p
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-sm text-red-400 leading-[1.5]"
-              >
-                {error}
-              </motion.p>
-            )}
-
+          {/* Mode toggle */}
+          <div className="flex rounded-lg overflow-hidden border border-[rgba(255,255,255,0.08)] mb-6">
             <button
-              type="submit"
-              disabled={isPending || code.length !== 6}
-              className="conduit-auth-btn w-full justify-center disabled:opacity-60"
+              type="button"
+              onClick={() => switchMode("totp")}
+              className={`flex-1 py-2 text-[13px] font-medium transition-colors ${
+                mode === "totp"
+                  ? "bg-[rgba(255,255,255,0.06)] text-[var(--color-ink-on-inverse)]"
+                  : "text-[var(--color-ink-on-inverse-mute)] hover:text-[var(--color-ink-on-inverse-soft)]"
+              }`}
             >
-              {isPending ? (
-                <>
-                  <SpinnerIcon size={15} />
-                  Verifying…
-                </>
-              ) : (
-                "Verify"
-              )}
+              Authenticator
             </button>
-          </form>
-        </motion.div>
+            <button
+              type="button"
+              onClick={() => switchMode("backup")}
+              className={`flex-1 py-2 text-[13px] font-medium transition-colors border-l border-[rgba(255,255,255,0.08)] ${
+                mode === "backup"
+                  ? "bg-[rgba(255,255,255,0.06)] text-[var(--color-ink-on-inverse)]"
+                  : "text-[var(--color-ink-on-inverse-mute)] hover:text-[var(--color-ink-on-inverse-soft)]"
+              }`}
+            >
+              Backup code
+            </button>
+          </div>
 
-        <motion.p
-          variants={ITEM}
-          className="mt-6 text-center text-sm text-[var(--color-ink-on-inverse-soft)]"
-        >
-          Lost your authenticator app?{" "}
-          <Link
-            href="/auth/sign-in"
-            className="text-[var(--color-ember-500)] hover:text-[var(--color-ember-300)] transition-colors font-medium"
-          >
-            Contact support
-          </Link>
-        </motion.p>
+          <AnimatePresence mode="wait">
+            {mode === "totp" ? (
+              <motion.div
+                key="totp"
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.18, ease: EASE }}
+              >
+                <p className="text-sm text-[var(--color-ink-on-inverse-soft)] mb-5">
+                  Enter the 6-digit code from your authenticator app to continue.
+                </p>
+                <form onSubmit={onTOTPSubmit} className="space-y-5">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    placeholder="000000"
+                    disabled={isPending}
+                    autoFocus
+                    className="w-full rounded-lg text-center text-2xl tracking-[0.4em] font-mono bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] outline-none transition-all duration-200 focus:border-[var(--color-ember-500)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)] disabled:opacity-50"
+                  />
+                  {error && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-sm text-red-400 leading-[1.5]"
+                    >
+                      {error}
+                    </motion.p>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={isPending || code.length !== 6}
+                    className="conduit-auth-btn w-full justify-center disabled:opacity-60"
+                  >
+                    {isPending ? (
+                      <><SpinnerIcon size={15} />Verifying…</>
+                    ) : (
+                      "Verify"
+                    )}
+                  </button>
+                </form>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="backup"
+                initial={{ opacity: 0, x: 8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 8 }}
+                transition={{ duration: 0.18, ease: EASE }}
+              >
+                <p className="text-sm text-[var(--color-ink-on-inverse-soft)] mb-5">
+                  Enter one of your saved backup codes. Each code can only be used once.
+                  After use, your authenticator will be removed — re-enroll in Settings.
+                </p>
+                <form onSubmit={onBackupSubmit} className="space-y-5">
+                  <input
+                    type="text"
+                    autoComplete="off"
+                    value={backupCode}
+                    onChange={(e) => setBackupCode(e.target.value.replace(/\s/g, "").toLowerCase())}
+                    placeholder="a1b2c3d4e5"
+                    disabled={isPending}
+                    autoFocus
+                    className="w-full rounded-lg text-center text-lg tracking-[0.2em] font-mono bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] outline-none transition-all duration-200 focus:border-[var(--color-ember-500)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.12)] disabled:opacity-50"
+                  />
+                  {error && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-sm text-red-400 leading-[1.5]"
+                    >
+                      {error}
+                    </motion.p>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={isPending || backupCode.length < 8}
+                    className="conduit-auth-btn w-full justify-center disabled:opacity-60"
+                  >
+                    {isPending ? (
+                      <><SpinnerIcon size={15} />Verifying…</>
+                    ) : (
+                      "Use backup code"
+                    )}
+                  </button>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
       </motion.div>
     </main>
   );
