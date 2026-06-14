@@ -1,114 +1,19 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { MessageSquare, Pin } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentAccount } from "@/lib/conduit/account";
-import type { EmployeeKey } from "@/lib/ai/provider";
-import { DEPT_COLOR, EMPLOYEE_ICON } from "@/components/conduit/EmployeeBadge";
-import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
-import { PinConversationButton } from "@/components/conduit/PinConversationButton";
 import { ConversationSearchBar } from "@/components/conduit/ConversationSearchBar";
-import { ConversationLabelsDisplay, ConversationLabelManager } from "@/components/conduit/ConversationLabels";
 import type { ConversationLabel } from "@/components/conduit/ConversationLabels";
 import { ConversationLabelFilter } from "@/components/conduit/ConversationLabelFilter";
+import {
+  ConversationBulkSelect,
+  type ConversationItem,
+} from "@/components/conduit/ConversationBulkSelect";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-const TEAM = new Set<string>(EMPLOYEE_ORDER);
 const MAX_PINNED = 5;
-
-function relativeDate(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-  });
-}
-
-type Conversation = {
-  id: string;
-  title: string | null;
-  updated_at: string;
-  dominant_employee: string | null;
-  pinned: boolean;
-  labels: ConversationLabel[];
-};
-
-function ConversationRow({
-  c,
-  atLimit,
-  allLabels,
-}: {
-  c: Conversation;
-  atLimit: boolean;
-  allLabels: ConversationLabel[];
-}) {
-  const dom = c.dominant_employee as string | null;
-  const isTeam = dom === "team";
-  const empKey = (dom && TEAM.has(dom) ? dom : "jarvis") as EmployeeKey;
-  const RecentIcon = EMPLOYEE_ICON[empKey];
-  const color = DEPT_COLOR[empKey];
-
-  return (
-    <div className="group relative flex flex-col gap-1.5 px-4 py-3 rounded-lg conduit-card hover:border-[var(--color-accent)] transition-colors">
-      <div className="flex items-center gap-3 min-w-0">
-        <Link href={`/app?c=${c.id}`} className="flex items-center gap-3 flex-1 min-w-0">
-          {isTeam ? (
-            <span
-              aria-hidden
-              className="inline-block w-5 h-5 rounded-full shrink-0"
-              style={{
-                background:
-                  "conic-gradient(from 90deg, var(--color-dept-marketing), var(--color-dept-sales), var(--color-dept-engineering), var(--color-dept-jarvis), var(--color-dept-marketing))",
-              }}
-            />
-          ) : (
-            <span
-              aria-hidden
-              className="inline-flex items-center justify-center shrink-0 w-5 h-5 rounded-md"
-              style={{
-                background: `color-mix(in srgb, ${color} 18%, var(--color-surface-elevated))`,
-                color,
-                boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 60%, transparent)`,
-              }}
-            >
-              <RecentIcon size={11} strokeWidth={2.5} />
-            </span>
-          )}
-          <span className="flex-1 truncate text-sm">
-            {c.title || "Untitled chat"}
-          </span>
-          <span className="text-xs text-[var(--color-text-muted)] shrink-0 pr-2">
-            {relativeDate(c.updated_at)}
-          </span>
-        </Link>
-        <div className="shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-          <PinConversationButton
-            conversationId={c.id}
-            pinned={c.pinned}
-            atLimit={atLimit && !c.pinned}
-          />
-        </div>
-      </div>
-      {/* Labels row */}
-      <div className="pl-8">
-        <ConversationLabelManager
-          conversationId={c.id}
-          assignedLabels={c.labels}
-          allLabels={allLabels}
-          onUpdate={() => {}}
-        />
-      </div>
-    </div>
-  );
-}
 
 export default async function ConversationsPage({
   searchParams,
@@ -121,7 +26,6 @@ export default async function ConversationsPage({
   const supabase = await createSupabaseServerClient();
   const { label: activeLabelId } = await searchParams;
 
-  // Fetch all account labels
   const { data: labelRows } = await supabase
     .from("conduit_conversation_labels")
     .select("id, name, color")
@@ -129,19 +33,16 @@ export default async function ConversationsPage({
     .order("created_at", { ascending: true });
   const allLabels: ConversationLabel[] = labelRows ?? [];
 
-  // Fetch conversations with their label assignments
-  const convoQuery = supabase
+  const { data: rows } = await supabase
     .from("conduit_conversations")
-    .select("id, title, updated_at, dominant_employee, pinned")
+    .select("id, title, updated_at, dominant_employee, pinned, archived_at")
     .eq("account_id", account.id)
     .order("pinned", { ascending: false })
     .order("updated_at", { ascending: false })
     .limit(200);
 
-  const { data: rows } = await convoQuery;
   const convoIds = (rows ?? []).map((c) => c.id as string);
 
-  // Fetch label assignments for all fetched conversations
   const { data: assignmentRows } = convoIds.length
     ? await supabase
         .from("conduit_conversation_label_assignments")
@@ -149,7 +50,6 @@ export default async function ConversationsPage({
         .in("conversation_id", convoIds)
     : { data: [] };
 
-  // Build a map: conversationId → label[]
   const labelMap = new Map<string, ConversationLabel[]>();
   const labelById = new Map(allLabels.map((l) => [l.id, l]));
   for (const a of assignmentRows ?? []) {
@@ -160,25 +60,23 @@ export default async function ConversationsPage({
     labelMap.get(cid)!.push(lbl);
   }
 
-  let conversations: Conversation[] = (rows ?? []).map((c) => ({
+  let conversations: ConversationItem[] = (rows ?? []).map((c) => ({
     id: c.id as string,
     title: c.title as string | null,
     updated_at: c.updated_at as string,
     dominant_employee: c.dominant_employee as string | null,
     pinned: Boolean(c.pinned),
+    archived: Boolean((c as Record<string, unknown>).archived_at),
     labels: labelMap.get(c.id as string) ?? [],
   }));
 
-  // Apply label filter if present
   if (activeLabelId) {
     conversations = conversations.filter((c) =>
       c.labels.some((l) => l.id === activeLabelId),
     );
   }
 
-  const pinned = conversations.filter((c) => c.pinned);
-  const unpinned = conversations.filter((c) => !c.pinned);
-  const atLimit = pinned.length >= MAX_PINNED;
+  const hasConversations = conversations.length > 0;
 
   return (
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8">
@@ -193,7 +91,6 @@ export default async function ConversationsPage({
 
         <ConversationSearchBar />
 
-        {/* Label filter chips */}
         {allLabels.length > 0 && (
           <ConversationLabelFilter
             labels={allLabels}
@@ -201,7 +98,7 @@ export default async function ConversationsPage({
           />
         )}
 
-        {conversations.length === 0 ? (
+        {!hasConversations ? (
           <div className="conduit-card p-10 flex flex-col items-center text-center gap-4 max-w-sm mx-auto">
             <div
               className="w-14 h-14 rounded-2xl flex items-center justify-center"
@@ -232,46 +129,11 @@ export default async function ConversationsPage({
             )}
           </div>
         ) : (
-          <div className="space-y-6">
-            {/* Pinned section */}
-            {pinned.length > 0 && (
-              <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Pin
-                    size={11}
-                    className="text-[var(--color-amber)]"
-                    style={{ fill: "currentColor" }}
-                  />
-                  <span className="text-[11px] uppercase tracking-[0.12em] font-medium text-[var(--color-text-muted)]">
-                    Pinned · {pinned.length}/{MAX_PINNED}
-                  </span>
-                </div>
-                <div className="space-y-1">
-                  {pinned.map((c) => (
-                    <ConversationRow key={c.id} c={c} atLimit={atLimit} allLabels={allLabels} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* All conversations */}
-            {unpinned.length > 0 && (
-              <div>
-                {pinned.length > 0 && (
-                  <div className="mb-2">
-                    <span className="text-[11px] uppercase tracking-[0.12em] font-medium text-[var(--color-text-muted)]">
-                      Recent
-                    </span>
-                  </div>
-                )}
-                <div className="space-y-1">
-                  {unpinned.map((c) => (
-                    <ConversationRow key={c.id} c={c} atLimit={atLimit} allLabels={allLabels} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          <ConversationBulkSelect
+            conversations={conversations}
+            allLabels={allLabels}
+            maxPinned={MAX_PINNED}
+          />
         )}
       </div>
     </div>
