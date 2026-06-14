@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentAccount } from "@/lib/conduit/account";
 import { getConnectedProviders, isGoogleCalendarConfigured } from "@/lib/connectors/google-calendar";
 import { isSlackConfigured } from "@/lib/connectors/slack";
+import { isNotionConfigured } from "@/lib/connectors/notion";
 
 export const runtime = "nodejs";
 
@@ -24,6 +25,7 @@ export async function GET() {
     available: {
       google_calendar: isGoogleCalendarConfigured(),
       slack: isSlackConfigured(),
+      notion: isNotionConfigured(),
     },
   });
 }

@@ -2647,8 +2647,10 @@ function NotificationsTab() {
 
 interface ConnectorStatus {
   connected: string[];
-  available: { google_calendar: boolean; slack: boolean };
+  available: { google_calendar: boolean; slack: boolean; notion: boolean };
 }
+
+interface NotionPage { id: string; title: string }
 
 function IntegrationsTab() {
   const params = useSearchParams();
@@ -2656,6 +2658,11 @@ function IntegrationsTab() {
   const toast = useToast();
   const [status, setStatus] = useState<ConnectorStatus | null>(null);
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
+  const [notionPages, setNotionPages] = useState<NotionPage[]>([]);
+  const [notionSelected, setNotionSelected] = useState<NotionPage[]>([]);
+  const [notionLoadingPages, setNotionLoadingPages] = useState(false);
+  const [notionSaving, setNotionSaving] = useState(false);
+  const [notionPickerOpen, setNotionPickerOpen] = useState(false);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -2670,6 +2677,54 @@ function IntegrationsTab() {
     fetchStatus();
   }, [fetchStatus]);
 
+  const openNotionPicker = useCallback(async () => {
+    setNotionPickerOpen(true);
+    setNotionLoadingPages(true);
+    try {
+      const res = await fetch("/api/conduit/connectors/notion/pages");
+      if (res.ok) {
+        const data = (await res.json()) as { pages: NotionPage[]; selected_pages: NotionPage[] };
+        setNotionPages(data.pages);
+        setNotionSelected(data.selected_pages ?? []);
+      }
+    } catch {
+      // Non-fatal.
+    } finally {
+      setNotionLoadingPages(false);
+    }
+  }, []);
+
+  const saveNotionPages = async () => {
+    setNotionSaving(true);
+    try {
+      const res = await fetch("/api/conduit/connectors/notion", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ selected_pages: notionSelected }),
+      });
+      if (res.ok) {
+        toast.success("Notion pages saved.");
+        setNotionPickerOpen(false);
+      } else {
+        toast.error("Failed to save pages.");
+      }
+    } finally {
+      setNotionSaving(false);
+    }
+  };
+
+  const toggleNotionPage = (page: NotionPage) => {
+    setNotionSelected((prev) => {
+      const exists = prev.some((p) => p.id === page.id);
+      if (exists) return prev.filter((p) => p.id !== page.id);
+      if (prev.length >= 5) {
+        toast.error("Maximum 5 pages allowed.");
+        return prev;
+      }
+      return [...prev, page];
+    });
+  };
+
   // Surface OAuth success/error from URL params set by the callback route.
   useEffect(() => {
     const connected = params.get("connector_connected");
@@ -2678,6 +2733,7 @@ function IntegrationsTab() {
       const labels: Record<string, string> = {
         google_calendar: "Google Calendar",
         slack: "Slack",
+        notion: "Notion",
       };
       toast.success(`${labels[connected] ?? connected} connected.`);
       fetchStatus();
@@ -2694,6 +2750,10 @@ function IntegrationsTab() {
         slack_csrf: "OAuth state mismatch — please try again.",
         slack_exchange: "Failed to exchange Slack auth code.",
         slack_db: "Failed to save Slack connection.",
+        notion_denied: "Notion access was denied.",
+        notion_csrf: "OAuth state mismatch — please try again.",
+        notion_exchange: "Failed to exchange Notion auth code.",
+        notion_db: "Failed to save Notion connection.",
       };
       toast.error(msgs[error] ?? "Connection failed.");
       router.replace("/app/settings?tab=integrations");
@@ -2711,6 +2771,7 @@ function IntegrationsTab() {
         const labels: Record<string, string> = {
           google_calendar: "Google Calendar",
           slack: "Slack",
+          notion: "Notion",
         };
         toast.success(`${labels[provider] ?? provider} disconnected.`);
         fetchStatus();
@@ -2730,7 +2791,9 @@ function IntegrationsTab() {
       ? status?.available.google_calendar ?? false
       : provider === "slack"
         ? status?.available.slack ?? false
-        : false;
+        : provider === "notion"
+          ? status?.available.notion ?? false
+          : false;
 
   return (
     <div className="space-y-6 text-sm">
@@ -2910,9 +2973,184 @@ function IntegrationsTab() {
             </button>
           )}
         </div>
+
+        {/* Notion */}
+        <div className="conduit-card p-5 flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-3">
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+              }}
+            >
+              <BrandMarkNotion size={20} />
+            </div>
+            {isConnected("notion") ? (
+              <span
+                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                style={{
+                  background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
+                  color: "var(--color-success, #22c55e)",
+                  border: "1px solid color-mix(in srgb, var(--color-success, #22c55e) 28%, transparent)",
+                }}
+              >
+                Connected
+              </span>
+            ) : (
+              <span
+                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                style={{
+                  background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
+                  color: "var(--color-accent)",
+                  border: "1px solid color-mix(in srgb, var(--color-accent) 28%, transparent)",
+                }}
+              >
+                Not connected
+              </span>
+            )}
+          </div>
+          <div>
+            <div className="font-medium text-[var(--color-text)]">Notion</div>
+            <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
+              Import Notion pages — SOPs, brand guidelines, product specs — as
+              persistent context for all specialists.
+            </p>
+          </div>
+
+          {/* Page picker (shown when connected and picker is open) */}
+          {isConnected("notion") && notionPickerOpen && (
+            <div
+              className="rounded-lg p-3 space-y-2"
+              style={{
+                background: "var(--color-surface)",
+                border: "1px solid var(--color-border)",
+              }}
+            >
+              <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-2">
+                Select up to 5 pages
+              </p>
+              {notionLoadingPages ? (
+                <div className="text-xs text-[var(--color-text-muted)] py-2 text-center">
+                  Loading pages…
+                </div>
+              ) : notionPages.length === 0 ? (
+                <div className="text-xs text-[var(--color-text-muted)] py-2 text-center">
+                  No pages found. Make sure your Notion integration has access to pages.
+                </div>
+              ) : (
+                <div className="space-y-1 max-h-48 overflow-y-auto">
+                  {notionPages.map((page) => {
+                    const isSelected = notionSelected.some((p) => p.id === page.id);
+                    return (
+                      <button
+                        key={page.id}
+                        onClick={() => toggleNotionPage(page)}
+                        className="w-full text-left px-2 py-1.5 rounded text-xs flex items-center gap-2"
+                        style={{
+                          background: isSelected
+                            ? "color-mix(in srgb, var(--color-accent) 12%, var(--color-surface-elevated))"
+                            : "transparent",
+                          color: isSelected ? "var(--color-accent)" : "var(--color-text)",
+                          border: "1px solid",
+                          borderColor: isSelected
+                            ? "color-mix(in srgb, var(--color-accent) 30%, transparent)"
+                            : "transparent",
+                        }}
+                      >
+                        <Check size={11} style={{ opacity: isSelected ? 1 : 0, flexShrink: 0 }} />
+                        <span className="truncate">{page.title}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={saveNotionPages}
+                  disabled={notionSaving}
+                  className="flex-1 py-1.5 rounded text-xs font-medium"
+                  style={{
+                    background: "color-mix(in srgb, var(--color-accent) 15%, var(--color-surface-elevated))",
+                    border: "1px solid color-mix(in srgb, var(--color-accent) 30%, transparent)",
+                    color: "var(--color-accent)",
+                  }}
+                >
+                  {notionSaving ? "Saving…" : `Save (${notionSelected.length}/5)`}
+                </button>
+                <button
+                  onClick={() => setNotionPickerOpen(false)}
+                  className="px-3 py-1.5 rounded text-xs"
+                  style={{
+                    border: "1px solid var(--color-border)",
+                    color: "var(--color-text-muted)",
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-auto flex gap-2">
+            {isConnected("notion") ? (
+              <>
+                <button
+                  onClick={openNotionPicker}
+                  className="flex-1 py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
+                  style={{
+                    background: "color-mix(in srgb, var(--color-accent) 8%, var(--color-surface-elevated))",
+                    border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)",
+                    color: "var(--color-accent)",
+                  }}
+                >
+                  <ExternalLink size={11} />
+                  Configure pages
+                </button>
+                <button
+                  onClick={() => disconnect("notion")}
+                  disabled={disconnecting === "notion"}
+                  className="px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-center"
+                  style={{
+                    background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
+                    border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
+                    color: "var(--color-destructive, #ef4444)",
+                  }}
+                >
+                  <Link2Off size={12} />
+                </button>
+              </>
+            ) : isAvailable("notion") ? (
+              <a
+                href="/api/conduit/connectors/notion/auth"
+                className="w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
+                style={{
+                  background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
+                  border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+                  color: "var(--color-accent)",
+                }}
+              >
+                <Link size={12} />
+                Connect Notion
+              </a>
+            ) : (
+              <button
+                disabled
+                className="w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
+                style={{
+                  background: "var(--color-surface-elevated)",
+                  border: "1px solid var(--color-border)",
+                  color: "var(--color-text-muted)",
+                }}
+              >
+                Not configured
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Coming soon — GitHub, Notion */}
+      {/* Coming soon — GitHub */}
       <div>
         <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-3">
           Coming soon
@@ -2922,14 +3160,8 @@ function IntegrationsTab() {
             {
               name: "GitHub",
               description:
-                "Let Praxis Engineering open PRs, push commits, and read repository context directly from your GitHub account.",
+                "Let Praxis Engineering see open PRs, issues, and CI status directly from your GitHub repositories.",
               Icon: BrandMarkGithub,
-            },
-            {
-              name: "Notion",
-              description:
-                "Sync Praxis outputs — briefs, reports, SOPs — directly to your Notion workspace as formatted pages.",
-              Icon: BrandMarkNotion,
             },
           ].map(({ name, description, Icon }) => (
             <div key={name} className="conduit-card p-5 flex flex-col gap-4 opacity-60">

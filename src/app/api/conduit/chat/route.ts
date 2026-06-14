@@ -49,6 +49,11 @@ import {
   renderCalendarBlock,
 } from "@/lib/connectors/google-calendar";
 import {
+  getNotionToken,
+  getNotionPageContent,
+  renderNotionBlock,
+} from "@/lib/connectors/notion";
+import {
   prepareChatTts,
   streamForEmployee,
   type ChatTtsConfig,
@@ -230,6 +235,28 @@ export async function POST(request: NextRequest) {
       calendarBlock = renderCalendarBlock(events);
     } catch {
       // Non-fatal: continue without calendar context.
+    }
+  }
+
+  // Load Notion context (all specialists — brand guidelines, SOPs, product specs).
+  // Fetches content from user-selected pages stored in the token's meta.
+  let notionBlock = "";
+  const notionToken = await getNotionToken(supabase, account.id);
+  if (notionToken) {
+    try {
+      const meta = (notionToken.meta as Record<string, unknown>) ?? {};
+      const selectedPages = (meta.selected_pages as Array<{ id: string; title: string }>) ?? [];
+      if (selectedPages.length > 0) {
+        const pageContents = await Promise.all(
+          selectedPages.map(async (p) => ({
+            title: p.title,
+            content: await getNotionPageContent(notionToken.access_token, p.id),
+          })),
+        );
+        notionBlock = renderNotionBlock(pageContents);
+      }
+    } catch {
+      // Non-fatal: continue without Notion context.
     }
   }
 
@@ -571,7 +598,8 @@ export async function POST(request: NextRequest) {
         // their-scope only.
         // R-561: prepend Google Calendar block for ops + Atlas when connected.
         const calendarPrefix = calendarEmployees.has(employee) ? calendarBlock : "";
-        const systemPrompt = calendarPrefix + memoryBlockFor(employee) + withTime;
+        // R-576: Notion pages are globally relevant (brand guidelines, SOPs, specs) — inject for all employees.
+        const systemPrompt = calendarPrefix + notionBlock + memoryBlockFor(employee) + withTime;
 
         let fullText = "";
         let inputTokens = 0;
