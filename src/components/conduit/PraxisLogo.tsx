@@ -30,6 +30,7 @@ export function PraxisLogo({
         width={width}
         height={height}
         priority
+        sizes={`${width}px`}
         className={glow ? "praxis-mark" : undefined}
         style={{ display: "block", width, height }}
       />

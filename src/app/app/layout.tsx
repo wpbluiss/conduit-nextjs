@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import "@/styles/engineering-cinema.css";
+import "@/styles/memory-canvas.css";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentAccount } from "@/lib/conduit/account";
