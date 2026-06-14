@@ -8,6 +8,7 @@ import {
   BarChart3,
   Brain,
   CreditCard,
+  GitBranch,
   Hammer,
   LayoutGrid,
   Lock,
@@ -37,6 +38,7 @@ interface ConvoSummary {
   title: string | null;
   updated_at: string;
   dominant_employee: string | null;
+  forked_from_conversation_id?: string | null;
 }
 
 interface TeamActivity {
@@ -656,9 +658,20 @@ export function Sidebar({
                           );
                         })()
                       )}
-                      <span className="truncate">
+                      <span className="truncate flex-1">
                         {c.title || "Untitled chat"}
                       </span>
+                      {c.forked_from_conversation_id && (
+                        <Link
+                          href={`/app?c=${c.forked_from_conversation_id}`}
+                          onClick={(e) => { e.stopPropagation(); close(); }}
+                          aria-label="Go to parent conversation"
+                          title="Go to parent conversation"
+                          className="shrink-0 opacity-50 hover:opacity-100 transition-opacity"
+                        >
+                          <GitBranch size={10} />
+                        </Link>
+                      )}
                     </Link>
                   );
                 })}

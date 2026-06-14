@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, ArrowRight, Download, FileText } from "lucide-react";
+import { AlertCircle, ArrowRight, Download, FileText, GitBranch } from "lucide-react";
 import { motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
@@ -960,6 +960,23 @@ export function Chat({
   );
 
   // Handle edit submit: soft-hide from the edited message onwards, then resend.
+  const forkFrom = useCallback(
+    async (parentConversationId: string, messageId: string) => {
+      const r = await fetch(
+        `/api/conduit/conversations/${parentConversationId}/fork`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ messageId }),
+        },
+      );
+      if (!r.ok) return;
+      const { conversationId: newId } = await r.json() as { conversationId: string };
+      router.push(`/app?c=${newId}`);
+    },
+    [router],
+  );
+
   const submitEdit = useCallback(
     async (messageId: string, newText: string) => {
       if (!newText.trim() || loading) return;
@@ -1132,6 +1149,11 @@ export function Chat({
               onEditCancel={() => setEditingMessageId(null)}
               onEditSubmit={
                 m.id ? (text) => void submitEdit(m.id!, text) : undefined
+              }
+              onFork={
+                m.id && conversationId && !loading
+                  ? () => void forkFrom(conversationId, m.id!)
+                  : undefined
               }
             />
           ))}
@@ -1503,6 +1525,7 @@ const MessageBubble = memo(function MessageBubble({
   onEditStart,
   onEditCancel,
   onEditSubmit,
+  onFork,
 }: {
   message: MessageRow;
   onOpenArtifact: (id: string) => void;
@@ -1513,6 +1536,7 @@ const MessageBubble = memo(function MessageBubble({
   onEditStart?: () => void;
   onEditCancel?: () => void;
   onEditSubmit?: (text: string) => void;
+  onFork?: () => void;
 }) {
   const [editDraft, setEditDraft] = useState(message.content);
   const editRef = useRef<HTMLTextAreaElement>(null);
@@ -1621,16 +1645,32 @@ const MessageBubble = memo(function MessageBubble({
               <span className="whitespace-pre-wrap">{message.content}</span>
             )}
           </div>
-          {onEditStart && !isVoice && (
-            <button
-              type="button"
-              onClick={onEditStart}
-              className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-[11px] px-2 py-0.5 rounded"
-              style={{ color: "var(--color-text-muted)" }}
-              aria-label="Edit message"
-            >
-              Edit
-            </button>
+          {(!isVoice && (onEditStart || onFork)) && (
+            <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center gap-1">
+              {onEditStart && (
+                <button
+                  type="button"
+                  onClick={onEditStart}
+                  className="text-[11px] px-2 py-0.5 rounded hover:text-[var(--color-text)]"
+                  style={{ color: "var(--color-text-muted)" }}
+                  aria-label="Edit message"
+                >
+                  Edit
+                </button>
+              )}
+              {onFork && (
+                <button
+                  type="button"
+                  onClick={onFork}
+                  className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded hover:text-[var(--color-text)]"
+                  style={{ color: "var(--color-text-muted)" }}
+                  aria-label="Fork from here"
+                >
+                  <GitBranch size={11} />
+                  Fork
+                </button>
+              )}
+            </div>
           )}
         </div>
       </motion.div>
@@ -1689,7 +1729,7 @@ const MessageBubble = memo(function MessageBubble({
 
   return (
     <motion.div
-      className="flex gap-3"
+      className="flex gap-3 group"
       style={{ ["--dept" as string]: DEPT_COLOR[employee] }}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
@@ -1831,6 +1871,20 @@ const MessageBubble = memo(function MessageBubble({
             </span>
           </button>
         ))}
+        {onFork && !message.pending && (
+          <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity pt-1">
+            <button
+              type="button"
+              onClick={onFork}
+              className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded hover:text-[var(--color-text)]"
+              style={{ color: "var(--color-text-muted)" }}
+              aria-label="Fork from here"
+            >
+              <GitBranch size={11} />
+              Fork from here
+            </button>
+          </div>
+        )}
       </div>
     </motion.div>
   );
