@@ -209,6 +209,17 @@ function SignUpForm() {
                 ? "Create your Enterprise workspace"
                 : "Create your Praxis workspace"}
           </p>
+          {tierIntent && (
+            <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-medium"
+              style={{
+                background: "rgba(255,138,61,0.10)",
+                border: "1px solid rgba(255,138,61,0.25)",
+                color: "var(--color-accent, #FF8A3D)",
+              }}
+            >
+              {tierIntent === "pro" ? "Pro — $29/mo after setup" : "Enterprise — $199/mo after setup"}
+            </div>
+          )}
         </motion.div>
 
         {/* Form card */}
@@ -221,7 +232,7 @@ function SignUpForm() {
               "inset 0 0 0 1px rgba(255,138,61,0.07), 0 24px 64px rgba(10,9,8,0.55)",
           }}
         >
-          <OAuthButtons redirectTo="/app/workspace" />
+          <OAuthButtons redirectTo={buildAppDest(billingDest ?? "/app/workspace")} />
 
           {/* Mode tabs */}
           <div className="flex rounded-lg overflow-hidden border border-[rgba(255,255,255,0.08)] mb-6 mt-1">
