@@ -127,7 +127,7 @@ export default function Hero() {
               transition={{ duration: PACE.ctas.duration, ease: EASE, delay: PACE.ctas.delay }}
               className="flex flex-col sm:flex-row gap-3 mt-8"
             >
-              <Link href="/auth/sign-up" className="conduit-btn-primary">
+              <Link href="/auth/sign-up" prefetch className="conduit-btn-primary">
                 Open Praxis Console
                 <ArrowRight size={16} weight="bold" />
               </Link>

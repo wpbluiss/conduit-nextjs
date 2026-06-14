@@ -349,6 +349,7 @@ export default function Navbar() {
             </Link>
             <Link
               href="/auth/sign-up"
+              prefetch
               className="conduit-btn-primary text-[14px]"
               style={{ padding: "10px 20px" }}
             >
@@ -521,6 +522,7 @@ export default function Navbar() {
                   </Link>
                   <Link
                     href="/auth/sign-up"
+                    prefetch
                     onClick={() => setMobileOpen(false)}
                     className="conduit-btn-primary justify-center w-full"
                   >

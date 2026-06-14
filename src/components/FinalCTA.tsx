@@ -93,6 +93,7 @@ export default function FinalCTA() {
         >
           <MotionLink
             href="/auth/sign-up"
+            prefetch
             className="conduit-btn-primary justify-center"
             style={{ padding: "16px 32px", fontSize: "15px" }}
             whileHover={reduced ? {} : { y: -2, boxShadow: "0 8px 32px rgba(91,99,232,0.40)" }}
