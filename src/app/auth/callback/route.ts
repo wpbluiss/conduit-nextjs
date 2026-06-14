@@ -10,7 +10,11 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   // Guard against open-redirect: only follow relative next paths.
   const rawNext = searchParams.get("next") ?? "/app";
-  const next = rawNext.startsWith("/") ? rawNext : "/app";
+  // Sanitize: must be relative and not an auth route (prevents open-redirect).
+  const next =
+    rawNext.startsWith("/") && !rawNext.startsWith("/auth")
+      ? rawNext
+      : "/app";
 
   if (code) {
     const supabase = await createSupabaseServerClient();

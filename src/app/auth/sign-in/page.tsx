@@ -42,7 +42,12 @@ const QUERY_ERROR_MESSAGES: Record<string, string> = {
 function SignInForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/app/workspace";
+  const rawNext = params.get("next") ?? "/app";
+  // Sanitize to prevent open-redirect: must be relative and not an auth route.
+  const next =
+    rawNext.startsWith("/") && !rawNext.startsWith("/auth")
+      ? rawNext
+      : "/app";
   const queryError = params.get("error");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

@@ -26,5 +26,10 @@ export async function updateSession(request: NextRequest) {
   );
 
   await supabase.auth.getUser();
+
+  // Forward the request pathname so server components (e.g. app layout)
+  // can construct proper ?next= redirects without access to the raw request.
+  response.headers.set("x-next-pathname", request.nextUrl.pathname);
+
   return response;
 }
