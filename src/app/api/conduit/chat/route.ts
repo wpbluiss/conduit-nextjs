@@ -1217,6 +1217,47 @@ export async function POST(request: NextRequest) {
           .update({ updated_at: new Date().toISOString() })
           .eq("id", finalConvId);
 
+        // Follow-up suggestions: single-specialist turns only (round-table out of scope).
+        if (!teamRequested) {
+          const lastAssistantMsg = ordered.slice().reverse().find(
+            (m) => m.role === "assistant",
+          );
+          if (lastAssistantMsg?.content) {
+            try {
+              const sugRes = await complete({
+                systemPrompt:
+                  "You generate exactly 3 short follow-up prompt suggestions for a business user. Return ONLY a JSON array of 3 strings. Each string is ≤ 10 words. No markdown, no explanation, just the array. Example: [\"Draft a one-pager on this\",\"Build me a template for this\",\"What are the next steps?\"]",
+                messages: [
+                  {
+                    role: "user",
+                    content: `${lastAssistantMsg.employee ?? "Praxis"} just said:\n\n${lastAssistantMsg.content.slice(0, 800)}\n\nGenerate 3 follow-up suggestions.`,
+                  },
+                ],
+                metadata: {
+                  accountId,
+                  intent: "routing",
+                  tierCeiling: "haiku",
+                  internalAccount: false,
+                },
+                maxTokens: 120,
+              });
+              const raw = sugRes.content.trim();
+              const match = raw.match(/\[[\s\S]*\]/);
+              if (match) {
+                const parsed = JSON.parse(match[0]) as unknown[];
+                const suggestions = parsed
+                  .slice(0, 3)
+                  .filter((s): s is string => typeof s === "string");
+                if (suggestions.length > 0) {
+                  send("follow_up_suggestions", { suggestions });
+                }
+              }
+            } catch {
+              // Non-fatal — suggestions are best-effort.
+            }
+          }
+        }
+
         // Auto-generate a short title for brand-new conversations.
         // Runs after the main response so it never delays streaming.
         if (isNewConversation) {

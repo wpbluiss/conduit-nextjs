@@ -940,30 +940,11 @@ export function Chat({
               return prev;
             });
           }
-          // Fetch follow-up suggestions after the message stream ends.
-          // Uses the same closure-safe pattern to read the latest content.
-          setMessages((prev: MessageRow[]) => {
-            for (let i = prev.length - 1; i >= 0; i--) {
-              const m: MessageRow = prev[i];
-              if (m.role === "assistant" && m.employee === employee && m.content) {
-                const content = m.content;
-                void fetch("/api/conduit/suggestions", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ employee, lastMessage: content }),
-                })
-                  .then((r) => r.json())
-                  .then((d: { suggestions?: string[] }) => {
-                    if (Array.isArray(d.suggestions) && d.suggestions.length > 0) {
-                      setFollowUpSuggestions(d.suggestions as string[]);
-                    }
-                  })
-                  .catch(() => {});
-                break;
-              }
-            }
-            return prev;
-          });
+        } else if (event === "follow_up_suggestions") {
+          const sugs = data.suggestions as string[] | undefined;
+          if (Array.isArray(sugs) && sugs.length > 0) {
+            setFollowUpSuggestions(sugs);
+          }
         } else if (event === "artifact") {
           recordArtifact(
             (data.employee as EmployeeKey) || currentEmployee,
@@ -1486,12 +1467,8 @@ export function Chat({
                     key={s}
                     type="button"
                     onClick={() => {
-                      setInput(s);
                       setFollowUpSuggestions([]);
-                      // Focus the composer textarea via query (single textarea in page)
-                      requestAnimationFrame(() => {
-                        (document.querySelector("textarea") as HTMLTextAreaElement | null)?.focus();
-                      });
+                      void send(s);
                     }}
                     className="px-3 py-1.5 text-xs rounded-full border transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
                     style={{
