@@ -28,6 +28,7 @@ import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import { PraxisLogo } from "./PraxisLogo";
 import { SidebarBuildPip } from "./builds/in-flight/SidebarBuildPip";
 import { SidebarBuildsSection } from "./builds/in-flight/SidebarBuildsSection";
+import { EmptyState, ChatEmptySVG } from "./EmptyState";
 import type { InFlightBuild } from "@/lib/engineering/in-flight";
 import { ChangelogPopover } from "./ChangelogPopover";
 
@@ -590,6 +591,28 @@ export function Sidebar({
               initial={inFlightBuildsInitial}
               accountId={accountId}
             />
+          )}
+
+          {/* Empty state — no conversations yet, not in icon-only mode */}
+          {!collapsed && conversations.length === 0 && (
+            <div className="mt-4 px-3">
+              <EmptyState
+                icon={<ChatEmptySVG />}
+                headline="Start a conversation"
+                body="Your AI team is ready. Pick a specialist and say hello."
+                cta={
+                  <Link
+                    href="/app"
+                    onClick={close}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity"
+                  >
+                    <Plus size={12} />
+                    New Chat
+                  </Link>
+                }
+                className="border-dashed"
+              />
+            </div>
           )}
 
           {/* Recent conversations — hidden in icon-only mode */}

@@ -5,11 +5,11 @@ import { FileText } from "lucide-react";
 import {
   DEPT_COLOR,
   DEPT_COLOR_SOFT,
-  EmployeeAvatar,
   employeeLabel,
 } from "@/components/conduit/EmployeeBadge";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { ArtifactShareButton } from "@/components/conduit/ArtifactShareButton";
+import { EmptyState, ArtifactsEmptySVG } from "@/components/conduit/EmptyState";
 
 export const dynamic = "force-dynamic";
 
@@ -51,20 +51,20 @@ export default async function ArtifactsPage() {
           Everything your team has produced.
         </p>
         {empty ? (
-          <div className="conduit-card p-8 flex items-center gap-4 max-w-md">
-            <EmployeeAvatar employee="marketing" size={42} />
-            <div>
-              <p className="text-[var(--color-text)]">
-                Nothing here yet. Marketing&apos;s ready when you are.
-              </p>
+          <EmptyState
+            icon={<ArtifactsEmptySVG />}
+            headline="Your AI team's output lands here"
+            body="Praxis saves every doc, plan, and report your specialists generate — ask any specialist to draft something and it will appear here."
+            cta={
               <Link
                 href="/app"
-                className="inline-flex items-center gap-1 mt-2 text-sm text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity"
               >
-                Start a conversation →
+                Chat with a specialist →
               </Link>
-            </div>
-          </div>
+            }
+            className="max-w-md"
+          />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {(artifacts ?? []).map((a) => {
