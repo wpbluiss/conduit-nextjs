@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Check, X } from "@phosphor-icons/react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 import {
@@ -153,6 +154,7 @@ function CostCell({
 export function WhyPraxisTable() {
   const sectionRef = useRef<HTMLElement>(null);
   const [inView, setInView] = useState(false);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -192,16 +194,14 @@ export function WhyPraxisTable() {
         </motion.div>
 
         {/* Mobile: stacked card per row */}
-        <motion.div
-          className="md:hidden space-y-3"
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.6, ease: EASE, delay: 0.15 }}
-        >
-          {ROWS.map((row) => (
-            <div
+        <div className="md:hidden space-y-3">
+          {ROWS.map((row, index) => (
+            <motion.div
               key={row.label}
+              initial={reduced ? false : { opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-30px" }}
+              transition={{ duration: 0.5, ease: EASE, delay: reduced ? 0 : index * 0.06 }}
               className="rounded-2xl overflow-hidden"
               style={{ border: "1px solid var(--color-edge-subtle)" }}
             >
@@ -239,21 +239,21 @@ export function WhyPraxisTable() {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </motion.div>
+        </div>
 
         {/* Desktop: proper table */}
-        <motion.div
-          className="hidden md:block overflow-x-auto"
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.6, ease: EASE, delay: 0.15 }}
-        >
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full min-w-[680px]">
             <thead>
-              <tr className="border-b border-[var(--color-edge)]">
+              <motion.tr
+                className="border-b border-[var(--color-edge)]"
+                initial={reduced ? false : { opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.5, ease: EASE, delay: 0.1 }}
+              >
                 <th className="text-left p-5 text-[12px] uppercase tracking-[0.08em] text-[var(--color-cream-mute)] font-semibold w-1/4">
                   Area
                 </th>
@@ -305,11 +305,19 @@ export function WhyPraxisTable() {
                     Nine specialists, one subscription
                   </p>
                 </th>
-              </tr>
+              </motion.tr>
             </thead>
             <tbody>
-              {ROWS.map((row) => (
-                <tr key={row.label} className="border-b border-[var(--color-edge-subtle)]">
+              {ROWS.map((row, index) => (
+                <motion.tr
+                  key={row.label}
+                  className="border-b border-[var(--color-edge-subtle)]"
+                  initial={reduced ? false : { opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-20px" }}
+                  transition={{ duration: 0.45, ease: EASE, delay: reduced ? 0 : index * 0.07 }}
+                  whileHover={reduced ? undefined : { backgroundColor: "rgba(255,255,255,0.025)" }}
+                >
                   <td className="p-5 text-[13px] font-semibold text-[var(--color-cream)] align-top">
                     {row.label}
                   </td>
@@ -326,11 +334,11 @@ export function WhyPraxisTable() {
                       <span className="whitespace-pre-line">{row.praxis}</span>
                     )}
                   </td>
-                </tr>
+                </motion.tr>
               ))}
             </tbody>
           </table>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

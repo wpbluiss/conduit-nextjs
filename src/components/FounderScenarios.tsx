@@ -169,7 +169,7 @@ export default function FounderScenarios() {
           transition={{ duration: reduced ? 0 : 0.7, ease: EASE }}
           className="mb-12"
         >
-          <p className="conduit-caption conduit-caption-indigo">
+          <p className="conduit-caption conduit-caption-ember">
             How founders use Praxis
           </p>
           <h2 className="conduit-display-xl mt-4 max-w-2xl">
@@ -189,13 +189,20 @@ export default function FounderScenarios() {
           aria-label="Founder archetypes"
         >
           {ARCHETYPES.map((a, idx) => (
-            <button
+            <motion.button
               key={a.id}
               role="tab"
               aria-selected={active === idx}
               aria-controls={`scenario-panel-${a.id}`}
               onClick={() => select(idx)}
-              className="relative overflow-hidden px-4 py-2 rounded-full text-[13px] font-medium transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-indigo-500)]"
+              whileHover={
+                reduced || active === idx
+                  ? {}
+                  : { scale: 1.04, backgroundColor: "rgba(255,255,255,0.12)" }
+              }
+              whileTap={reduced ? {} : { scale: 0.96 }}
+              transition={{ duration: 0.15, ease: EASE }}
+              className="relative overflow-hidden px-4 py-2 rounded-full text-[13px] font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-indigo-500)]"
               style={{
                 background:
                   active === idx
@@ -208,7 +215,7 @@ export default function FounderScenarios() {
               }}
             >
               {a.label}
-            </button>
+            </motion.button>
           ))}
         </motion.div>
 
