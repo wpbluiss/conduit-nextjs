@@ -1498,6 +1498,19 @@ function UsageTab({ usage }: { usage: UsageData }) {
     messageCount: number;
   } | null>(null);
   const [monthLoading, setMonthLoading] = useState(false);
+  const [connectorStats, setConnectorStats] = useState<Array<{
+    provider: string;
+    fetch_count: number;
+    last_fetched_at: string | null;
+    connected_since: string;
+  }>>([]);
+
+  useEffect(() => {
+    fetch("/api/conduit/connectors")
+      .then((r) => r.json())
+      .then((data) => setConnectorStats(data.stats ?? []))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     setMonthLoading(true);
@@ -1693,6 +1706,55 @@ function UsageTab({ usage }: { usage: UsageData }) {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Connector call totals */}
+      <div>
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+          Connector context fetches (all time)
+        </div>
+        {connectorStats.length === 0 ? (
+          <div className="conduit-card p-5 text-[var(--color-text-muted)] text-xs">
+            No connectors connected.{" "}
+            <a href="/app/settings?tab=integrations" className="underline hover:text-[var(--color-accent)]">
+              Connect one in Integrations →
+            </a>
+          </div>
+        ) : (
+          <div className="conduit-card divide-y divide-[var(--color-border)]">
+            {connectorStats.map((stat) => {
+              const label =
+                stat.provider === "google_calendar"
+                  ? "Google Calendar"
+                  : stat.provider === "slack"
+                    ? "Slack"
+                    : stat.provider;
+              const lastFetched = stat.last_fetched_at
+                ? new Date(stat.last_fetched_at).toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })
+                : "Never";
+              return (
+                <div key={stat.provider} className="flex items-center justify-between px-5 py-3.5 gap-4">
+                  <div>
+                    <p className="text-[var(--color-text)] text-[13px]">{label}</p>
+                    <p className="text-[var(--color-text-muted)] text-[11px] mt-0.5">
+                      Last fetched: {lastFetched}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-[var(--color-text)] text-[13px] font-medium tabular-nums">
+                      {stat.fetch_count.toLocaleString()}
+                    </p>
+                    <p className="text-[var(--color-text-muted)] text-[11px]">fetches</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

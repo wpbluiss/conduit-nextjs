@@ -9,6 +9,10 @@ export interface ConnectorToken {
   expires_at: string | null;
   scope: string | null;
   meta: Record<string, unknown>;
+  fetch_count: number;
+  last_fetched_at: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface CalendarEvent {
@@ -165,13 +169,19 @@ export async function getUpcomingEvents(
       end?: { dateTime?: string; date?: string };
     }>;
   };
-  return (json.items ?? []).map((e) => ({
+  const events = (json.items ?? []).map((e) => ({
     id: e.id,
     summary: e.summary ?? "(no title)",
     start: e.start?.dateTime ?? e.start?.date ?? "",
     end: e.end?.dateTime ?? e.end?.date ?? "",
     isAllDay: Boolean(e.start?.date && !e.start?.dateTime),
   }));
+  // Fire-and-forget: increment usage counter (non-blocking, never breaks chat on failure).
+  void supabase
+    .from("conduit_connector_tokens")
+    .update({ fetch_count: (token.fetch_count ?? 0) + 1, last_fetched_at: new Date().toISOString() })
+    .eq("id", token.id);
+  return events;
 }
 
 export function renderCalendarBlock(events: CalendarEvent[]): string {
