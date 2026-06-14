@@ -5,8 +5,8 @@ import "./globals.css";
 import "@/styles/praxis-tokens.css";
 import "@/styles/praxis-system.css";
 import "@/styles/praxis-design-language.css";
-import "@/styles/engineering-cinema.css";
-import "@/styles/memory-canvas.css";
+// engineering-cinema.css and memory-canvas.css are app-console-only —
+// imported in src/app/app/layout.tsx so marketing pages don't pay the ~36 KB.
 import { ThemeBoot } from "@/components/conduit/ThemeBoot";
 import { PwaInstaller } from "@/components/conduit/PwaInstaller";
 
