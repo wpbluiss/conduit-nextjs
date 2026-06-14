@@ -11,6 +11,7 @@ import { AnalyticsPageView } from "@/components/conduit/AnalyticsPageView";
 // load — these sections are entirely out of the initial viewport.
 const DemoStrip = dynamic(() => import("@/components/DemoStrip"));
 const ProductTiles = dynamic(() => import("@/components/ProductTiles"));
+const FeatureGrid = dynamic(() => import("@/components/FeatureGrid"));
 const Cinematic = dynamic(() => import("@/components/Cinematic"));
 const Vision = dynamic(() => import("@/components/Vision"));
 const Customers = dynamic(() => import("@/components/Customers"));
@@ -67,6 +68,7 @@ export default function Home() {
       <Hero />
       <DemoStrip />
       <ProductTiles />
+      <FeatureGrid />
       <Cinematic />
       <Vision />
       <Customers />
