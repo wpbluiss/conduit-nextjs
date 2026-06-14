@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, ArrowRight, Download, FileText, ThumbsDown, ThumbsUp } from "lucide-react";
+import { AlertCircle, ArrowRight, Download, FileText, Pin, ThumbsDown, ThumbsUp } from "lucide-react";
 import { motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
@@ -31,6 +31,10 @@ import {
   SpecialistSelectorModal,
   useSpecialistChoice,
 } from "./SpecialistSelectorModal";
+import {
+  PinnedMessagesBanner,
+  type PinnedMessage,
+} from "./PinnedMessagesBanner";
 
 export interface VoicePrefs {
   enabled: boolean;
@@ -178,6 +182,7 @@ export function Chat({
   const [messages, setMessages] = useState<MessageRow[]>(initialMessages);
   const [input, setInput] = useState("");
   const [pin, setPin] = useState<PinValue>("auto");
+  const [pinnedMessages, setPinnedMessages] = useState<PinnedMessage[]>([]);
   const { hasChosen, persist: persistSpecialistChoice } = useSpecialistChoice();
   const showSpecialistSelector =
     hasChosen === false && messages.length === 0 && !conversationId;
@@ -257,6 +262,90 @@ export function Chat({
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, [messages]);
+
+  // Load pinned messages when conversation is available.
+  const loadPins = useCallback(async (convId: string) => {
+    try {
+      const res = await fetch(`/api/conduit/conversations/${convId}/pins`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setPinnedMessages(data.pins ?? []);
+    } catch {
+      // Network error — silently ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    if (conversationId) void loadPins(conversationId);
+    else setPinnedMessages([]);
+  }, [conversationId, loadPins]);
+
+  const handlePinToggle = useCallback(
+    async (messageId: string, shouldPin: boolean) => {
+      if (!conversationId) return;
+      if (shouldPin) {
+        // Optimistic: fetch the message content for the preview
+        const msg = messages.find((m) => m.id === messageId);
+        if (msg) {
+          const tempPin: PinnedMessage = {
+            id: `temp-${messageId}`,
+            message_id: messageId,
+            content: msg.content,
+            role: msg.role,
+            employee: msg.employee ?? null,
+            pinned_at: new Date().toISOString(),
+          };
+          setPinnedMessages((prev) => [...prev, tempPin]);
+        }
+        const res = await fetch(
+          `/api/conduit/conversations/${conversationId}/pins`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message_id: messageId }),
+          },
+        );
+        if (res.ok) {
+          void loadPins(conversationId); // refresh with real data
+        } else if (res.status === 422) {
+          // Revert optimistic + show limit
+          setPinnedMessages((prev) =>
+            prev.filter((p) => p.message_id !== messageId),
+          );
+        } else {
+          setPinnedMessages((prev) =>
+            prev.filter((p) => p.message_id !== messageId),
+          );
+        }
+      } else {
+        // Optimistic unpin
+        setPinnedMessages((prev) =>
+          prev.filter((p) => p.message_id !== messageId),
+        );
+        const res = await fetch(
+          `/api/conduit/conversations/${conversationId}/pins/${messageId}`,
+          { method: "DELETE" },
+        );
+        if (!res.ok) {
+          void loadPins(conversationId); // revert by reloading
+        }
+      }
+    },
+    [conversationId, messages, loadPins],
+  );
+
+  const handleScrollToMessage = useCallback((messageId: string) => {
+    const el = document.querySelector(`[data-message-id="${messageId}"]`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      // Brief highlight
+      (el as HTMLElement).style.transition = "background 0.3s";
+      (el as HTMLElement).style.background = "var(--color-surface-raised)";
+      setTimeout(() => {
+        (el as HTMLElement).style.background = "";
+      }, 1200);
+    }
+  }, []);
 
   // Pagination: infinite-scroll-up for message history.
   const [hasMore, setHasMore] = useState(initialHasMore);
@@ -1003,6 +1092,14 @@ export function Chat({
         className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-8"
       >
         <div className="mx-auto max-w-3xl space-y-6">
+          {/* Pinned messages banner */}
+          {pinnedMessages.length > 0 && (
+            <PinnedMessagesBanner
+              pins={pinnedMessages}
+              onUnpin={(msgId) => void handlePinToggle(msgId, false)}
+              onJumpTo={handleScrollToMessage}
+            />
+          )}
           {/* Top sentinel + pagination state — only shown when a conversation is loaded */}
           {conversationId && (
             <div className="flex items-center justify-between pb-2">
@@ -1133,6 +1230,12 @@ export function Chat({
               onEditCancel={() => setEditingMessageId(null)}
               onEditSubmit={
                 m.id ? (text) => void submitEdit(m.id!, text) : undefined
+              }
+              pinned={m.id ? pinnedMessages.some((p) => p.message_id === m.id) : false}
+              onPinToggle={
+                m.role === "assistant" && m.id && conversationId
+                  ? (shouldPin) => void handlePinToggle(m.id!, shouldPin)
+                  : undefined
               }
             />
           ))}
@@ -1562,6 +1665,8 @@ const MessageBubble = memo(function MessageBubble({
   onEditStart,
   onEditCancel,
   onEditSubmit,
+  pinned = false,
+  onPinToggle,
 }: {
   message: MessageRow;
   onOpenArtifact: (id: string) => void;
@@ -1572,6 +1677,8 @@ const MessageBubble = memo(function MessageBubble({
   onEditStart?: () => void;
   onEditCancel?: () => void;
   onEditSubmit?: (text: string) => void;
+  pinned?: boolean;
+  onPinToggle?: (shouldPin: boolean) => void;
 }) {
   const [editDraft, setEditDraft] = useState(message.content);
   const editRef = useRef<HTMLTextAreaElement>(null);
@@ -1748,6 +1855,7 @@ const MessageBubble = memo(function MessageBubble({
 
   return (
     <motion.div
+      data-message-id={message.id}
       className="flex gap-3 group"
       style={{ ["--dept" as string]: DEPT_COLOR[employee] }}
       initial={{ opacity: 0, y: 8 }}
@@ -1886,7 +1994,29 @@ const MessageBubble = memo(function MessageBubble({
           </button>
         ))}
         {message.id && !message.pending && (
-          <MessageFeedbackButtons messageId={message.id} />
+          <div className="flex items-center gap-2">
+            <MessageFeedbackButtons messageId={message.id} />
+            {onPinToggle && (
+              <button
+                type="button"
+                aria-label={pinned ? "Unpin message" : "Pin message"}
+                title={pinned ? "Unpin" : "Pin message (max 5)"}
+                onClick={() => onPinToggle(!pinned)}
+                className="p-1 rounded transition-colors opacity-0 group-hover:opacity-100"
+                style={{
+                  color: pinned ? "var(--color-accent)" : "var(--color-text-muted)",
+                }}
+                onMouseEnter={(e) => {
+                  if (!pinned) (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
+                }}
+                onMouseLeave={(e) => {
+                  if (!pinned) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
+                }}
+              >
+                <Pin size={13} fill={pinned ? "currentColor" : "none"} />
+              </button>
+            )}
+          </div>
         )}
       </div>
     </motion.div>
