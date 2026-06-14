@@ -20,6 +20,7 @@ export default async function ChatPage({ searchParams }: PageProps) {
 
   const PAGE_SIZE = 30;
   let conversationId: string | null = null;
+  let conversationTitle: string | null = null;
   let handoffConversationId: string | null = null;
   let handoffEmployee: string | null = null;
   let messages: MessageRow[] = [];
@@ -27,11 +28,12 @@ export default async function ChatPage({ searchParams }: PageProps) {
   if (params.c) {
     const { data: convo } = await supabase
       .from("conduit_conversations")
-      .select("id, account_id, handoff_conversation_id, handoff_employee")
+      .select("id, account_id, title, handoff_conversation_id, handoff_employee")
       .eq("id", params.c)
       .maybeSingle();
     if (convo && convo.account_id === account.id) {
       conversationId = convo.id;
+      conversationTitle = (convo.title as string | null) ?? null;
       handoffConversationId = (convo.handoff_conversation_id as string | null) ?? null;
       handoffEmployee = (convo.handoff_employee as string | null) ?? null;
       // Load only the most recent PAGE_SIZE messages for fast initial render.
@@ -131,6 +133,7 @@ export default async function ChatPage({ searchParams }: PageProps) {
   return (
     <Chat
       conversationId={conversationId}
+      conversationTitle={conversationTitle}
       initialMessages={messages}
       initialHasMore={initialHasMore}
       firstName={firstName}
