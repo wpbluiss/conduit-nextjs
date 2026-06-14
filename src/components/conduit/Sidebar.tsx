@@ -9,6 +9,7 @@ import {
   BarChart3,
   Bookmark,
   Brain,
+  CircleHelp,
   CreditCard,
   Hammer,
   LayoutGrid,
@@ -893,6 +894,15 @@ export function Sidebar({
             <div className="flex flex-col items-center gap-1 px-2">
               <div className="flex justify-center"><ChangelogPopover /></div>
               <div className="flex justify-center"><NotificationCenter /></div>
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("praxis:shortcuts:open"))}
+                title="Keyboard shortcuts"
+                aria-label="Keyboard shortcuts"
+                className="flex items-center justify-center w-8 h-8 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors duration-100"
+              >
+                <CircleHelp size={14} />
+              </button>
               <SidebarThemeButton collapsed />
               <Link href="/app/settings" title="Settings" aria-label="Settings" onClick={close} data-tour-target="settings"
                 className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-100 ${isActive("/app/settings") ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"}`}>
@@ -927,6 +937,13 @@ export function Sidebar({
             <div className="px-2 space-y-0.5">
               <ChangelogPopover />
               <div className="px-1"><NotificationCenter /></div>
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("praxis:shortcuts:open"))}
+                className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] rounded-lg transition-colors duration-100"
+              >
+                <CircleHelp size={14} /> Shortcuts
+              </button>
               <SidebarThemeButton />
               <div data-tour-target="settings">
               <NavLink
