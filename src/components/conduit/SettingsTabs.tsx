@@ -100,7 +100,8 @@ export type SettingsTabKey =
   | "notifications"
   | "integrations"
   | "appearance"
-  | "api";
+  | "api"
+  | "referrals";
 
 export function SettingsTabs({
   email,
@@ -134,6 +135,7 @@ export function SettingsTabs({
             ["integrations", "Integrations"],
             ["appearance", "Appearance"],
             ["api", "API"],
+            ["referrals", "Referrals"],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -190,6 +192,7 @@ export function SettingsTabs({
         />
       )}
       {tab === "api" && <ApiKeysTab />}
+      {tab === "referrals" && <ReferralsTab />}
     </div>
   );
 }
@@ -4149,6 +4152,137 @@ function ApiKeysTab() {
           Authorization: Bearer prx_…
         </code>
         <p className="text-xs mt-2">Maximum 20 active keys per account.</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Referrals Tab ────────────────────────────────────────────────────────────
+
+interface ReferralData {
+  referral_code: string | null;
+  referral_count: number;
+  total_earned: number;
+}
+
+function ReferralsTab() {
+  const [data, setData] = useState<ReferralData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const [origin, setOrigin] = useState("");
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+    fetch("/api/conduit/referrals")
+      .then((r) => r.json())
+      .then((d) => setData(d as ReferralData))
+      .catch(() => setData({ referral_code: null, referral_count: 0, total_earned: 0 }))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const referralUrl = data?.referral_code ? `${origin}/r/${data.referral_code}` : null;
+
+  const copyLink = async () => {
+    if (!referralUrl) return;
+    try {
+      await navigator.clipboard.writeText(referralUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.prompt("Copy your referral link:", referralUrl);
+    }
+  };
+
+  if (loading) {
+    return <p className="text-sm text-[var(--color-text-muted)]">Loading…</p>;
+  }
+
+  return (
+    <div className="space-y-8 text-sm">
+      <div>
+        <h2 className="text-lg font-semibold mb-1">Refer &amp; Earn</h2>
+        <p className="text-[var(--color-text-muted)] max-w-xl">
+          Share your personal link. When someone signs up and starts using Praxis,
+          you both get bonus tokens.
+        </p>
+      </div>
+
+      {/* Referral link */}
+      <div className="conduit-card p-5 space-y-3">
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+          Your referral link
+        </div>
+        {referralUrl ? (
+          <div className="flex items-center gap-2">
+            <input
+              readOnly
+              value={referralUrl}
+              aria-label="Your referral link"
+              className="flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] outline-none select-all cursor-text"
+              onFocus={(e) => e.currentTarget.select()}
+            />
+            <button
+              type="button"
+              onClick={copyLink}
+              className="shrink-0 inline-flex items-center gap-1.5 text-xs rounded-lg px-4 py-2 font-medium transition-colors"
+              style={{
+                background: copied ? "color-mix(in srgb, var(--color-accent) 15%, transparent)" : "var(--color-accent)",
+                color: copied ? "var(--color-accent)" : "#fff",
+                border: copied ? "1px solid var(--color-accent)" : "none",
+              }}
+            >
+              {copied ? <><Check size={12} /> Copied!</> : <><Link size={12} /> Copy link</>}
+            </button>
+          </div>
+        ) : (
+          <p className="text-[var(--color-text-muted)] text-xs">
+            Your referral code is being generated — refresh in a moment.
+          </p>
+        )}
+        <p className="text-[11px] text-[var(--color-text-muted)]">
+          Share this link with founders and operators. They get bonus tokens on their first session; you get bonus tokens once they&apos;re active.
+        </p>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="conduit-card p-5">
+          <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
+            Successful referrals
+          </div>
+          <div className="text-3xl font-semibold tabular-nums" style={{ color: "var(--color-accent)" }}>
+            {data?.referral_count ?? 0}
+          </div>
+        </div>
+        <div className="conduit-card p-5">
+          <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
+            Bonus tokens earned
+          </div>
+          <div className="text-3xl font-semibold tabular-nums" style={{ color: "var(--color-accent)" }}>
+            {(data?.total_earned ?? 0).toLocaleString()}
+          </div>
+        </div>
+      </div>
+
+      {/* How it works */}
+      <div className="conduit-card p-5 space-y-3">
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+          How it works
+        </div>
+        <ol className="space-y-2 text-[var(--color-text-muted)]">
+          <li className="flex gap-3">
+            <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: "color-mix(in srgb, var(--color-accent) 15%, transparent)", color: "var(--color-accent)" }}>1</span>
+            Share your link with another founder or operator.
+          </li>
+          <li className="flex gap-3">
+            <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: "color-mix(in srgb, var(--color-accent) 15%, transparent)", color: "var(--color-accent)" }}>2</span>
+            They sign up and activate their workspace.
+          </li>
+          <li className="flex gap-3">
+            <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: "color-mix(in srgb, var(--color-accent) 15%, transparent)", color: "var(--color-accent)" }}>3</span>
+            You both receive bonus tokens — added to your allowance automatically.
+          </li>
+        </ol>
       </div>
     </div>
   );
