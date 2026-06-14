@@ -16,6 +16,8 @@ export interface AccountContext {
   allowed_employees?: string[];
   /** Tier id for messaging when an employee isn't available. */
   tier_id?: string;
+  /** Top goals the owner selected during onboarding (up to 3). */
+  onboarding_goals?: string[] | null;
 }
 
 export function atlasSystemPrompt(ctx: AccountContext): string {
@@ -53,7 +55,12 @@ export function atlasSystemPrompt(ctx: AccountContext): string {
     ? `\nCompany brief (owner's own words): ${ctx.company_brief}`
     : "";
 
-  return withTone(`You are Atlas, ${ctx.user_name}'s Chief of Staff at their company ${ctx.account_name}. The user runs a ${ctx.business_type} business: ${ctx.business_description}.${briefLine}
+  const goalsLine =
+    ctx.onboarding_goals && ctx.onboarding_goals.length > 0
+      ? `\nOwner's stated goals: ${ctx.onboarding_goals.join(", ")}.`
+      : "";
+
+  return withTone(`You are Atlas, ${ctx.user_name}'s Chief of Staff at their company ${ctx.account_name}. The user runs a ${ctx.business_type} business: ${ctx.business_description}.${briefLine}${goalsLine}
 
 Your job:
 1. Greet the user warmly. Be conversational, sharp, occasionally funny — like a brilliant COO who's been with the user for years.

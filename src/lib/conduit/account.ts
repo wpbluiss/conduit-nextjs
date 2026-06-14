@@ -46,6 +46,9 @@ export interface ConduitAccount {
   accent_preference?: string | null;
   // R-463 company brief — nullable until migration 036 runs.
   company_brief?: string | null;
+  // R461 onboarding goals — nullable until migration 038 runs.
+  onboarding_goals?: string[] | null;
+  onboarding_complete?: boolean;
   created_at: string;
   updated_at: string;
 }
