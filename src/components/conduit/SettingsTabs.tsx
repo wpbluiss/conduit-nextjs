@@ -1696,6 +1696,145 @@ const NOTIF_DEFAULTS: NotificationPrefs = {
   weekly_digest: true,
 };
 
+type PushState = "unsupported" | "prompt" | "granted" | "denied" | "subscribing" | "unsubscribing";
+
+function usePushNotifications() {
+  const [pushState, setPushState] = useState<PushState>("prompt");
+  const [pushError, setPushError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+      setPushState("unsupported");
+      return;
+    }
+    const perm = Notification.permission;
+    if (perm === "denied") { setPushState("denied"); return; }
+    if (perm !== "granted") { setPushState("prompt"); return; }
+
+    // Already granted — check if we have an active subscription
+    navigator.serviceWorker.ready.then((reg) =>
+      reg.pushManager.getSubscription()
+    ).then((sub) => {
+      setPushState(sub ? "granted" : "prompt");
+    }).catch(() => setPushState("prompt"));
+  }, []);
+
+  const subscribe = async () => {
+    setPushError(null);
+    setPushState("subscribing");
+    try {
+      const vapidRes = await fetch("/api/conduit/push/vapid-key");
+      if (!vapidRes.ok) throw new Error("Push not configured on server.");
+      const { publicKey } = await vapidRes.json() as { publicKey: string };
+
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey),
+      });
+      const json = sub.toJSON();
+      const res = await fetch("/api/conduit/push/subscribe", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys }),
+      });
+      if (!res.ok) throw new Error("Failed to save subscription.");
+      setPushState("granted");
+    } catch (err) {
+      setPushError((err as Error).message || "Couldn't enable notifications.");
+      setPushState(Notification.permission === "denied" ? "denied" : "prompt");
+    }
+  };
+
+  const unsubscribe = async () => {
+    setPushError(null);
+    setPushState("unsubscribing");
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if (sub) {
+        await fetch("/api/conduit/push/subscribe", {
+          method: "DELETE",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ endpoint: sub.endpoint }),
+        });
+        await sub.unsubscribe();
+      }
+      setPushState("prompt");
+    } catch {
+      setPushError("Couldn't disable notifications.");
+      setPushState("granted");
+    }
+  };
+
+  return { pushState, pushError, subscribe, unsubscribe };
+}
+
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(base64);
+  return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
+}
+
+function PushToggleRow() {
+  const { pushState, pushError, subscribe, unsubscribe } = usePushNotifications();
+
+  if (pushState === "unsupported") {
+    return (
+      <div className="flex items-start justify-between gap-4 opacity-50 select-none">
+        <div>
+          <p className="font-medium text-[var(--color-text)]">Build notifications</p>
+          <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+            Browser push notifications aren&apos;t supported in this browser.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const isOn = pushState === "granted";
+  const busy = pushState === "subscribing" || pushState === "unsubscribing";
+
+  return (
+    <div className="flex items-start justify-between gap-4">
+      <div>
+        <p className="font-medium text-[var(--color-text)]">Build notifications</p>
+        <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+          Get a browser notification when an engineering build finishes or fails.
+        </p>
+        {pushState === "denied" && (
+          <p className="text-xs text-[var(--color-pink)] mt-1">
+            Notifications are blocked in your browser settings. Enable them for this site to continue.
+          </p>
+        )}
+        {pushError && (
+          <p className="text-xs text-[var(--color-pink)] mt-1">{pushError}</p>
+        )}
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={isOn}
+        disabled={busy || pushState === "denied"}
+        onClick={isOn ? unsubscribe : subscribe}
+        className={[
+          "relative flex-shrink-0 w-9 h-5 rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]",
+          isOn ? "bg-[var(--color-accent)]" : "bg-[var(--color-border)]",
+          (busy || pushState === "denied") ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+        ].join(" ")}
+      >
+        <span
+          className={[
+            "absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200",
+            isOn ? "translate-x-4" : "translate-x-0",
+          ].join(" ")}
+        />
+      </button>
+    </div>
+  );
+}
+
 function NotificationsTab() {
   const [prefs, setPrefs] = useState<NotificationPrefs | null>(null);
   const [saving, setSaving] = useState<string | null>(null);
@@ -1742,6 +1881,10 @@ function NotificationsTab() {
       </p>
 
       <div className="conduit-card p-5 space-y-4">
+        <PushToggleRow />
+
+        <div className="border-t border-[var(--color-border)]" />
+
         <ToggleRow
           label="Product updates & new features"
           desc="Hear about new Praxis capabilities, releases, and tips."
@@ -1749,8 +1892,8 @@ function NotificationsTab() {
           onChange={() => toggle("product_updates")}
         />
         <ToggleRow
-          label="Weekly financial digest"
-          desc="A weekly summary of your spending and AI activity (coming soon)."
+          label="Weekly digest"
+          desc="A weekly summary of your AI activity (coming soon)."
           value={prefs.weekly_digest}
           onChange={() => toggle("weekly_digest")}
         />

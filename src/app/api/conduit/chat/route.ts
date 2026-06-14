@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { sendPushToAccount } from "@/lib/push/send";
 import {
   getOrCreateAccount,
   rollBillingCycleIfDue,
@@ -405,6 +406,15 @@ export async function POST(request: NextRequest) {
           .from("conduit_builds")
           .update(updates)
           .eq("id", buildId);
+
+        // Fire-and-forget push notification for build completion.
+        sendPushToAccount(accountId, {
+          title: result.ok ? "Build complete" : "Build failed",
+          body: result.ok
+            ? `${ctx.account_name} ${tmpl.meta.name} is live.`
+            : `${ctx.account_name} ${tmpl.meta.name} hit an error.`,
+          url: "/app/builds",
+        }).catch((err) => console.error("push send failed", err));
 
         const finalContent = result.ok
           ? `Done. Live at ${result.liveUrl}. Repo at ${result.repoUrl}. Want me to add anything?`
