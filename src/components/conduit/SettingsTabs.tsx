@@ -1201,14 +1201,51 @@ function BusinessTab({ account }: { account: AccountData }) {
 }
 
 function UsageTab({ usage }: { usage: UsageData }) {
-  const days = Object.keys(usage.byDay).sort();
-  const last14 = days.slice(-14);
-  const fillByDay = last14.map((d) => ({ d, v: usage.byDay[d] }));
+  // Build 3 month options: current + 2 prior calendar months
+  const now = new Date();
+  const monthOptions = Array.from({ length: 3 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    return {
+      value: d.toISOString().slice(0, 7),
+      label: d.toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+    };
+  });
+
+  const [selectedMonth, setSelectedMonth] = useState(monthOptions[0].value);
+  const [historicalData, setHistoricalData] = useState<{
+    totals: { input: number; output: number; cost: number };
+    byEmployee: Record<string, { input: number; output: number; cost: number }>;
+    byDay: Record<string, number>;
+    messageCount: number;
+  } | null>(null);
+  const [monthLoading, setMonthLoading] = useState(false);
+
+  useEffect(() => {
+    setMonthLoading(true);
+    setHistoricalData(null);
+    fetch(`/api/conduit/usage/monthly?month=${selectedMonth}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setHistoricalData(data);
+        setMonthLoading(false);
+      })
+      .catch(() => setMonthLoading(false));
+  }, [selectedMonth]);
+
+  const displayData = historicalData ?? {
+    totals: usage.totals,
+    byEmployee: usage.byEmployee,
+    byDay: usage.byDay,
+    messageCount: 0,
+  };
+
+  const days = Object.keys(displayData.byDay).sort();
+  const fillByDay = days.map((d) => ({ d, v: displayData.byDay[d] }));
   const max = Math.max(1, ...fillByDay.map((x) => x.v));
   const empNames = EMPLOYEE_ORDER as EmployeeKey[];
   const empValues = empNames.map((emp) => ({
     emp,
-    val: (usage.byEmployee[emp]?.input ?? 0) + (usage.byEmployee[emp]?.output ?? 0),
+    val: (displayData.byEmployee[emp]?.input ?? 0) + (displayData.byEmployee[emp]?.output ?? 0),
   }));
   const empTotal = Math.max(1, empValues.reduce((s, x) => s + x.val, 0));
 
@@ -1219,21 +1256,59 @@ function UsageTab({ usage }: { usage: UsageData }) {
 
   return (
     <div className="space-y-8 text-sm">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Stat label="Today" value={`$${(usage.today.cost / 100).toFixed(2)}`} sub={`${(usage.today.input + usage.today.output).toLocaleString()} tokens`} />
-        <Stat label="This week" value={`$${(usage.thisWeek.cost / 100).toFixed(2)}`} sub={`${(usage.thisWeek.input + usage.thisWeek.output).toLocaleString()} tokens`} />
-        <Stat label="This month" value={`$${(usage.totals.cost / 100).toFixed(2)}`} sub={`${(usage.totals.input + usage.totals.output).toLocaleString()} tokens`} />
+      {/* Month selector */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">Period</span>
+        <div className="flex flex-wrap gap-1.5">
+          {monthOptions.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setSelectedMonth(opt.value)}
+              className="px-3 py-1 rounded-full text-xs transition-colors"
+              style={{
+                background: selectedMonth === opt.value
+                  ? "var(--color-accent)"
+                  : "var(--color-surface-elevated)",
+                color: selectedMonth === opt.value
+                  ? "#fff"
+                  : "var(--color-text-muted)",
+                border: `1px solid ${selectedMonth === opt.value ? "var(--color-accent)" : "var(--color-border)"}`,
+              }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        {monthLoading && (
+          <span className="text-[11px] text-[var(--color-text-muted)] animate-pulse">Loading…</span>
+        )}
+      </div>
+
+      {/* Summary stats for selected month */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <Stat
-          label="Builds"
-          value={String(usage.buildsThisCycle ?? 0)}
-          sub="This cycle"
+          label="AI messages"
+          value={monthLoading ? "—" : String(displayData.messageCount)}
+          sub="This period"
+        />
+        <Stat
+          label="Tokens"
+          value={monthLoading ? "—" : (displayData.totals.input + displayData.totals.output).toLocaleString()}
+          sub="Input + output"
+        />
+        <Stat
+          label="Est. cost"
+          value={monthLoading ? "—" : `$${(displayData.totals.cost / 100).toFixed(2)}`}
+          sub="This period"
         />
       </div>
 
+      {/* Billing cycle cap — always shows current cycle data */}
       <div className="conduit-card px-5 py-4">
         <div className="flex items-baseline justify-between gap-3 mb-2">
           <span className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
-            Token cap (this cycle)
+            Token cap (current cycle)
           </span>
           <span className="text-sm">
             {usage.cap.used.toLocaleString()} /{" "}
@@ -1261,22 +1336,25 @@ function UsageTab({ usage }: { usage: UsageData }) {
         )}
       </div>
 
+      {/* Daily token bar chart */}
       <div>
         <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
-          Tokens · last 14 days
+          Tokens · daily
         </div>
-        {fillByDay.length === 0 ? (
+        {monthLoading ? (
+          <p className="text-[var(--color-text-muted)]">Loading…</p>
+        ) : fillByDay.length === 0 ? (
           <p className="text-[var(--color-text-muted)]">No usage yet.</p>
         ) : (
           <div className="conduit-card p-4">
-            <div className="flex items-end gap-1 h-32">
+            <div className="flex items-end gap-px h-32">
               {fillByDay.map(({ d, v }) => {
                 const h = Math.round((v / max) * 100);
                 return (
                   <div
                     key={d}
                     title={`${d}: ${v.toLocaleString()} tokens`}
-                    className="flex-1 rounded-t-md bg-[var(--color-accent)] opacity-70 hover:opacity-100 transition-opacity"
+                    className="flex-1 rounded-t bg-[var(--color-accent)] opacity-70 hover:opacity-100 transition-opacity"
                     style={{ height: `${Math.max(2, h)}%` }}
                   />
                 );
@@ -1290,13 +1368,16 @@ function UsageTab({ usage }: { usage: UsageData }) {
         )}
       </div>
 
+      {/* Per-employee breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="conduit-card p-5">
           <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
             Share by employee
           </div>
-          {empTotal === 1 ? (
-            <p className="text-[var(--color-text-muted)]">No usage yet.</p>
+          {monthLoading || empTotal === 1 ? (
+            <p className="text-[var(--color-text-muted)]">
+              {monthLoading ? "Loading…" : "No usage yet."}
+            </p>
           ) : (
             <Donut data={empValues} total={empTotal} />
           )}
@@ -1307,13 +1388,10 @@ function UsageTab({ usage }: { usage: UsageData }) {
           </div>
           <div className="space-y-2">
             {empNames.map((emp) => {
-              const v = usage.byEmployee[emp];
+              const v = displayData.byEmployee[emp];
               if (!v) return null;
               return (
-                <div
-                  key={emp}
-                  className="flex items-center justify-between"
-                >
+                <div key={emp} className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <span
                       aria-hidden
@@ -1329,7 +1407,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
                 </div>
               );
             })}
-            {empNames.every((e) => !usage.byEmployee[e]) && (
+            {empNames.every((e) => !displayData.byEmployee[e]) && (
               <p className="text-[var(--color-text-muted)] text-xs">
                 No usage yet.
               </p>
