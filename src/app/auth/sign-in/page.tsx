@@ -142,7 +142,10 @@ function SignInForm() {
             <PraxisLogo size={48} withWordmark glow />
           </Link>
           <p className="mt-3 text-sm text-[var(--color-ink-on-inverse-soft)]">
-            Sign in to your workspace
+            Sign in to your Praxis workspace{" "}
+            <span className="text-[var(--color-ink-on-inverse-mute)] text-xs">
+              — by Conduit AI
+            </span>
           </p>
         </motion.div>
 
