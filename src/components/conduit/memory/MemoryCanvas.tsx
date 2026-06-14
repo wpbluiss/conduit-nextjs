@@ -15,7 +15,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, X } from "lucide-react";
+import { Download, Search, X } from "lucide-react";
 import type { MemoryRecord, MemoryKind } from "@/lib/ai/memory";
 import { Canvas } from "@/components/conduit/pdl/Canvas";
 import { Edge } from "@/components/conduit/pdl/Edge";
@@ -114,6 +114,34 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
   }, [router]);
 
   const hasFilters = query.trim() !== "" || deptFilter !== "all" || kindFilter.size > 0;
+
+  const [exportingMemories, setExportingMemories] = useState(false);
+  const exportMemories = useCallback(() => {
+    if (exportingMemories || memories.length === 0) return;
+    setExportingMemories(true);
+    try {
+      const rows = memories.map(({ kind, scope, content, tags, created_at }) => ({
+        kind,
+        dept: scope.length > 0 ? scope[0] : "global",
+        content,
+        tags,
+        created_at,
+      }));
+      const json = JSON.stringify(rows, null, 2);
+      const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const date = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `praxis-memory-${date}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } finally {
+      setExportingMemories(false);
+    }
+  }, [memories, exportingMemories]);
 
   // Compute matching IDs for dimming
   const matchingIds = useMemo<Set<string> | null>(() => {
@@ -283,6 +311,32 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
               }}
             >
               Clear
+            </button>
+          )}
+          {memories.length > 0 && (
+            <button
+              type="button"
+              onClick={exportMemories}
+              disabled={exportingMemories}
+              title={`Export all ${memories.length} memories as JSON`}
+              aria-label="Export memories as JSON"
+              className="ml-auto flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg transition-colors shrink-0"
+              style={{
+                color: "var(--pdl-text-muted, var(--color-text-muted))",
+                border: "1px solid var(--pdl-border-hairline, var(--color-border))",
+                opacity: exportingMemories ? 0.5 : 1,
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "var(--pdl-text, var(--color-text))";
+                (e.currentTarget as HTMLElement).style.borderColor = "var(--pdl-border, var(--color-border))";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "var(--pdl-text-muted, var(--color-text-muted))";
+                (e.currentTarget as HTMLElement).style.borderColor = "var(--pdl-border-hairline, var(--color-border))";
+              }}
+            >
+              <Download size={12} />
+              <span className="hidden sm:inline">Export</span>
             </button>
           )}
         </div>
