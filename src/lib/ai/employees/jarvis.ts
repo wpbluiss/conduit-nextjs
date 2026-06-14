@@ -18,6 +18,8 @@ export interface AccountContext {
   tier_id?: string;
   /** Top goals the owner selected during onboarding (up to 3). */
   onboarding_goals?: string[] | null;
+  /** Per-specialist preferences keyed by employee id. */
+  specialist_prefs?: Record<string, { response_length?: "short" | "balanced" | "detailed" }> | null;
 }
 
 export function atlasSystemPrompt(ctx: AccountContext): string {
