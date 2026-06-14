@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ComponentType, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -21,6 +21,9 @@ import { DEFAULT_EMPLOYEE_VOICES, VOICE_NAMES } from "@/lib/voice/defaults";
 import { ThemeToggle } from "./ThemeToggle";
 import { track } from "@/lib/analytics/track";
 import { MFASecurity } from "./MFASecurity";
+import { BrandMarkGithub } from "./brand-marks/BrandMarkGithub";
+import { BrandMarkSlack } from "./brand-marks/BrandMarkSlack";
+import { BrandMarkNotion } from "./brand-marks/BrandMarkNotion";
 
 interface UsageData {
   totals: { input: number; output: number; cost: number };
@@ -77,7 +80,8 @@ export type SettingsTabKey =
   | "usage"
   | "billing"
   | "security"
-  | "notifications";
+  | "notifications"
+  | "integrations";
 
 export function SettingsTabs({
   email,
@@ -107,6 +111,7 @@ export function SettingsTabs({
             ["billing", "Billing"],
             ["security", "Security"],
             ["notifications", "Notifications"],
+            ["integrations", "Integrations"],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -146,6 +151,7 @@ export function SettingsTabs({
       {tab === "billing" && <BillingTab account={account} usage={usage} />}
       {tab === "security" && <MFASecurity />}
       {tab === "notifications" && <NotificationsTab />}
+      {tab === "integrations" && <IntegrationsTab />}
     </div>
   );
 }
@@ -1733,6 +1739,124 @@ function NotificationsTab() {
         <p className="text-xs text-[var(--color-text-muted)]">Saving…</p>
       )}
       {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
+    </div>
+  );
+}
+
+/* ─── Integrations tab ────────────────────────────────────────────────────── */
+
+type IntegrationDef = {
+  name: string;
+  description: string;
+  Icon: ComponentType<{ size?: number; className?: string }>;
+};
+
+const INTEGRATIONS: IntegrationDef[] = [
+  {
+    name: "GitHub",
+    description:
+      "Let Praxis Engineering open PRs, push commits, and read repository context directly from your GitHub account.",
+    Icon: BrandMarkGithub,
+  },
+  {
+    name: "Slack",
+    description:
+      "Receive build updates, specialist summaries, and workflow notifications in any Slack channel.",
+    Icon: BrandMarkSlack,
+  },
+  {
+    name: "Notion",
+    description:
+      "Sync Praxis outputs — briefs, reports, SOPs — directly to your Notion workspace as formatted pages.",
+    Icon: BrandMarkNotion,
+  },
+];
+
+function IntegrationsTab() {
+  return (
+    <div className="space-y-6 text-sm">
+      <p className="text-[var(--color-text-muted)] max-w-xl">
+        Connect your tools so Praxis can act on your behalf — pushing code,
+        sending messages, and syncing outputs without copy-paste.
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {INTEGRATIONS.map(({ name, description, Icon }) => (
+          <div
+            key={name}
+            className="conduit-card p-5 flex flex-col gap-4"
+          >
+            {/* Header row */}
+            <div className="flex items-start justify-between gap-3">
+              <div
+                className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                style={{
+                  background: "var(--color-surface-elevated)",
+                  border: "1px solid var(--color-border)",
+                }}
+              >
+                <Icon size={20} />
+              </div>
+              <span
+                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                style={{
+                  background:
+                    "color-mix(in srgb, var(--color-amber) 12%, transparent)",
+                  color: "var(--color-amber)",
+                  border:
+                    "1px solid color-mix(in srgb, var(--color-amber) 28%, transparent)",
+                }}
+              >
+                Coming soon
+              </span>
+            </div>
+
+            {/* Name + description */}
+            <div>
+              <div className="font-medium text-[var(--color-text)]">{name}</div>
+              <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
+                {description}
+              </p>
+            </div>
+
+            {/* Placeholder connect button */}
+            <button
+              disabled
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text-muted)",
+              }}
+            >
+              Connect {name}
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <div
+        className="conduit-card p-5"
+        style={{
+          background:
+            "linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-elevated)), var(--color-surface-elevated))",
+        }}
+      >
+        <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
+          More coming
+        </div>
+        <p className="serif text-xl">Zapier, Airtable, Linear, and more.</p>
+        <p className="mt-2 text-xs text-[var(--color-text-muted)]">
+          Every integration ships with native Praxis actions — not generic
+          webhooks. Want one prioritized?{" "}
+          <a
+            href="mailto:hello@conduitai.io"
+            className="text-[var(--color-accent)] hover:underline"
+          >
+            Let us know.
+          </a>
+        </p>
+      </div>
     </div>
   );
 }

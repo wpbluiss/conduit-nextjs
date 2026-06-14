@@ -5,7 +5,7 @@ import { loadSettingsData } from "@/lib/conduit/settings-data";
 
 export const dynamic = "force-dynamic";
 
-const VALID_TABS: SettingsTabKey[] = ["profile", "business", "voice", "team", "usage", "billing", "security", "notifications"];
+const VALID_TABS: SettingsTabKey[] = ["profile", "business", "voice", "team", "usage", "billing", "security", "notifications", "integrations"];
 
 export default async function SettingsPage({
   searchParams,
