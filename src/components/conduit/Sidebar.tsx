@@ -27,6 +27,7 @@ import { PraxisLogo } from "./PraxisLogo";
 import { SidebarBuildPip } from "./builds/in-flight/SidebarBuildPip";
 import { SidebarBuildsSection } from "./builds/in-flight/SidebarBuildsSection";
 import type { InFlightBuild } from "@/lib/engineering/in-flight";
+import { ChangelogPopover } from "./ChangelogPopover";
 
 interface ConvoSummary {
   id: string;
@@ -485,6 +486,7 @@ export function Sidebar({
           className="px-2 pt-2 pb-3 border-t border-[var(--color-border)] space-y-0.5"
           style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0.75rem))" }}
         >
+          <ChangelogPopover />
           <NavLink
             href="/app/settings"
             icon={<Settings size={14} />}
