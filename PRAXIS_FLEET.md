@@ -1,84 +1,79 @@
 # PRAXIS FLEET — operating state & handoff
 
-Read this first. It's the live state of Luis Garcia's autonomous AI engineering fleet so a
-new Claude Code session can pick up seamlessly. (Names of secrets only — never values.)
+Read this first. Live state of Luis Garcia's autonomous AI engineering fleet so a new
+Claude Code session can pick up seamlessly. (Names of secrets only — never values.)
 
 ## Who / what
-- Founder: **Luis Garcia**. Company: **Conduit AI** (parent). Flagship: **Praxis** — a chat
-  platform where an autonomous agent fleet builds his businesses. Live: **conduitai.io**.
-- Other products/repos: **Lunaro** (white-label insurance CRM = `jonathan-demo` repo +
-  `lunaro_*` Supabase tables), a trading bot, a Unity 3D "Conduit HQ" (paused).
-- Goal: ship Praxis web + iOS App Store, revenue via organic marketing. Solo founder, busy
-  at a day job, mostly on phone. **Full autonomy granted** (agents merge after review).
+- Founder: **Luis Garcia**. Company: **Conduit AI**. Flagship: **Praxis** — an autonomous
+  AI SPECIALIST TEAM for businesses ("Nine specialists. Zero payroll."). Live: **conduitai.io**.
+- Praxis is NOT a personal/household-finance app. The `/finance` area in conduit-nextjs is a
+  SEPARATE product ("Cadence", household finance) — OFF-LIMITS to the fleet. Never let Cadence
+  concepts (household/budget/cash-flow) bleed onto Praxis surfaces.
+- Goal: ship Praxis web + revenue. Solo founder, mostly on phone. Full autonomy granted.
 
-## Supabase (the fleet brain)
-- Project id: **`mvuslmfjkkuizixjpkgl`**. Fleet edge functions use custom auth:
-  header **`x-praxis-secret` == conduit_secrets.PRAXIS_CRON_SECRET** (verify_jwt off).
-- Secrets present (names): `ANTHROPIC_API_KEY`, `ELEVENLABS_API_KEY`, `PRAXIS_CRON_SECRET`,
-  `OWNER_PHONE` (in `conduit_secrets`); `GITHUB_ORCHESTRATOR_TOKEN`, `VAPI_API_KEY`,
-  `VAPI_ATLAS_ASSISTANT_ID`, `VAPI_PHONE_NUMBER_ID` (Edge Function env). Telegram removed.
-  NOT yet added: `TWILIO_ACCOUNT_SID/AUTH_TOKEN/SMS_FROM` (for SMS alerts).
-- Daily spend cap: `praxis_config.daily_spend_cap_usd` = $5 (Haiku layer). Agents run on
-  Luis's Claude **Max plan ($0)** via GitHub Actions, not this cap.
+## ⚠️ LIVE ARCHITECTURE & GUARDS (updated 2026-06-14) — READ THIS, supersedes older notes
+**Coordination runs on the Max plan ($0), NOT the metered API.** The Anthropic API credits
+ran dry 6/13; per Luis ($0 until revenue) the brain was moved onto GitHub Actions (Max OAuth).
+- **`claude-autopilot.yml`** (conduit-nextjs): SINGLE lane, one issue per run, exits cleanly
+  (running to the 160-turn ceiling = a FAILED run + email, so it's scoped to finish early).
+  Driven by Supabase `praxis_dispatch_flagship` (*/15).
+- **`praxis-coordinator.yml`** (conduit-nextjs): the merger+planner on Max. Refills the
+  claude-queue (keeps ~20-30) then merges safe PRs. Driven by Supabase cron
+  `praxis_dispatch_coordinator` (*/12) — GitHub's own schedule gets DROPPED under Actions load.
+- **DECOMMISSIONED metered crons** (do NOT re-enable without funding API credits):
+  `praxis_merger, praxis_orchestrator, praxis_planner, praxis_milestone, praxis_atlas_brief,
+  praxis_ticks, praxis_watchdog`. Still active (free, no API): the dispatch crons + launch-watch.
 
-### Edge functions + pg_cron jobs
-- `praxis-orchestrator` (Conductor: merged-PR → downstream `claude-queue` issues) — cron `praxis_orchestrator` */15.
-- `praxis-planner` (refills each repo's queue, low-water 8 → 10) — cron `praxis_planner` :05 hourly.
-- `praxis-dispatcher` (fires/enables/disables repo `claude-autopilot.yml` via token; actions: dispatch|enable_workflow|disable_workflow; body.repos optional) — crons `praxis_dispatch_flagship` */15 (conduit-nextjs), `praxis_dispatch_fleet` hourly (private repos).
-- `praxis-merger` (reviewed auto-merge across repos; HARD FLOOR: never merges data-deletes, destructive DB migrations, or secret exposure — those it flags) — cron `praxis_merger` */30.
-- `praxis-milestone` (web launch %, capped 90; calls Atlas on +20% milestones) — cron `praxis_milestone` :10 hourly.
-- `praxis-launch-watch` (alerts when a PR needs Luis) — cron `praxis_launch_watch` */20. Uses `praxis-notify`.
-- `praxis-notify` (sends to Luis: **Twilio SMS** when configured, else logs to `praxis_runs` event `pending_alert`; Telegram intentionally removed).
-- `praxis-atlas-brief` (daily status text/call) — cron `praxis_atlas_brief` 13:00 UTC.
-- `praxis-atlas-call` (Vapi: inspect | configure | call; injects live `{{status}}`).
-- `praxis-atlas-tools` (Vapi voice-tool server — Atlas's hands: `fleet_status, repo_status,
-  pending_prs, read_pr, recent_ships, queue_work, dispatch_now, remember, recall, think_hard
-  (reason + web search), text_me`). SAFE: voice can read/queue/dispatch, never merge prod/secrets.
-- `praxis-call-transcripts` (read recent Vapi call transcripts).
+**The 4 reliability guards (these fixed the recurring "something broke overnight"):**
+1. **1 build lane** — 3 parallel lanes saturated Actions and starved the merger (2h stall). One lane ships more.
+2. **Product-identity guard** (coordinator) — stops Cadence/finance bleeding into Praxis; closes wrong-product PRs.
+3. **Migration hold** — coordinator/autopilot NEVER merge or write `supabase/migrations/**`. The pipeline
+   has NO migration-apply step; schema must be applied to the live DB by hand (see below).
+4. **One-issue / clean-exit autopilot** — prevents max-turns failures + duplicate PRs.
 
-### Key tables
-`praxis_config`, `praxis_repos` (full_name, enabled, agents_wired), `praxis_repo_edges`,
-`praxis_cross_repo_dispatches` (issue/merge outbox+log), `praxis_orchestrator_state`
-(company_goal, launch_pct_last), `praxis_atlas_memory`, `praxis_notified_prs`,
-`praxis_briefs`, `praxis_runs` (ledger).
+**DB state:** live DB was ~18 migrations behind code (features dark); reconciled 6/14 — applied
+030–048 (additive, idempotent) so schema matches code. If new migration files appear, apply them
+manually via Supabase MCP `execute_sql` before their feature works (the pipeline won't).
 
-## Repos (org: wpbluiss)
-Wired with agents (`agents_wired=true`): `conduit-nextjs` (web, **PUBLIC**, live),
+## Supabase (project `mvuslmfjkkuizixjpkgl`)
+- Edge fns use custom auth: header `x-praxis-secret` == `conduit_secrets.PRAXIS_CRON_SECRET`.
+- Secrets present: `ANTHROPIC_API_KEY` (OUT OF CREDITS — metered layer off), `ELEVENLABS_API_KEY`,
+  `PRAXIS_CRON_SECRET`, `OWNER_PHONE`, `TWILIO_ACCOUNT_SID/AUTH_TOKEN/SMS_FROM` (in conduit_secrets/
+  edge env); `GITHUB_ORCHESTRATOR_TOKEN`, `VAPI_*`.
+- Still-used edge fns: `praxis-dispatcher` (fires repo workflows incl. coordinator), `praxis-notify`
+  (Twilio SMS — see below), `praxis-launch-watch` (PR alerts + conduitai.io uptime probe),
+  `praxis-atlas-call`/`-tools`/`-call-transcripts` (Atlas phone).
+
+## Repos (org wpbluiss)
+Wired: `conduit-nextjs` (web, PUBLIC, the launch priority + only one with the Max coordinator),
 `conduit-mobile`, `conduit-backend`, `conduit-marketing-worker`, `conduit-engineering-worker`,
-`jonathan-demo` (Lunaro). Not wired: `conduit-hq-unity-scripts`, `conduit-trading-bot`.
-**conduit-nextjs is public (free Actions); the rest are private (cost Actions minutes).**
+`jonathan-demo` (Lunaro). Private repos cost Actions minutes (Luis set Actions budget $0).
 
-### Workflows per wired repo
-- `claude.yml` (interactive @claude), `claude-autopilot.yml` (autonomous build — auth via
-  `CLAUDE_CODE_OAUTH_TOKEN` = Max $0; `--permission-mode bypassPermissions`; conduit-nextjs:
-  8 issues/run, max-turns 160), `post-deploy-qa.yml` (smoke-tests conduitai.io),
-  `ui-design-review.yml` (conduit-nextjs: screenshots live pages → Claude vision critique → fixes/issues).
-- **`auto-review-merge.yml` is DISABLED everywhere** (redundant — `praxis-merger` does merging).
-- Standards the agents follow: `CLAUDE.md`, `AGENTS.md`, `DESIGN.md` (world-class UI bar),
-  `ORCHESTRATOR.md`, `AGENT_REPLICATION.md`. Labels: `claude-queue` (work), `[LAUNCH-BLOCKER]`, `[UI]`.
+## Atlas (phone chief of staff, via Vapi)
+- Calls from 561-678-3691 → OWNER_PHONE. Brain `claude-sonnet-4` via Vapi (its OWN provider, NOT
+  the dead ANTHROPIC_API_KEY — so calls WORK). Trigger: `POST praxis-atlas-call {action:"call",
+  message:"..."}` with x-praxis-secret. Scripted-message calls are accurate.
+- ⚠️ Atlas ACCURACY BUG (open): on free-form live calls his tool-backed numbers inflate/hallucinate
+  ("963 shipped" etc.). `praxis-atlas-tools` metrics need auditing. Prefer scripted-message calls.
 
-## Atlas (phone chief of staff)
-- Calls **from 561-678-3691 → to OWNER_PHONE (+1 561-446-4520)** via **Vapi**.
-- Assistant "Atlas — Chief of Staff": brain `claude-sonnet-4-20250514`, voice ElevenLabs
-  `JBFqnCBsd6RMkjVDRZzb`, transcriber Deepgram nova-2 (cascade — true S2S realtime was tried
-  but interrupted on background noise, so reverted). 11 tools wired (above). Accuracy-locked
-  prompt (never invent; only state tool/`{{status}}` data). Trigger a call:
-  `POST praxis-atlas-call {action:"call", message:"..."}` with `x-praxis-secret`.
+## Current status (2026-06-14)
+- Site LIVE & healthy, shipping continuously on the stable config. DB reconciled. Funnel pages
+  (home/pricing) clean; FAQ Cadence-bleed scrubbed (PR #401). Build green.
+- Honest readiness: features ~high, but VERIFIED launch-readiness gated on the items below. The
+  product is feature-rich; "ready to take a paying customer" is unproven until the test purchase.
 
-## Current status (as of 2026-06-12)
-- **Web Praxis ~70% launch-ready (build).** Done: legal, SEO, account deletion, rate-limit,
-  analytics, onboarding, polish. Remaining: auth flow, billing/Stripe, tests/CI. ~2 days code.
-- All 6 wired repos sprinting. ~17+ PRs merged 6/12. UI loop + DESIGN.md just added.
-
-## Pending HUMAN gates (only Luis — agents can't do these)
-1. **Set GitHub Actions spending limit to $0** (Billing) — URGENT, private repos are running.
-2. **Add live Stripe keys** when the billing PR is ready (revenue gate).
-3. (Optional) add Twilio secrets for SMS alerts; or make mobile/marketing/engineering public
-   for free minutes (keep `conduit-backend` + `jonathan-demo` PRIVATE — secrets/client data).
-4. App Store submission; final smoke test + go-live; his eye on deployed UI (top design signal).
+## Pending HUMAN gates (only Luis)
+1. **$10 test purchase** — billing code + webhook are live but NO real purchase has succeeded.
+   This is the money switch; a Claude session can verify webhook→account upgrade live in real time.
+2. **SMS is configured but BLOCKED** — Twilio returns error 30034 (US A2P 10DLC not registered).
+   Register A2P 10DLC in Twilio Console (Messaging → Regulatory Compliance, Sole Proprietor path).
+   Until then alerts log to `praxis_runs` (event pending_alert); Atlas CALLS work as the channel.
+3. Walk the live funnel on a phone (sign up → use a specialist → upgrade) and report breakage.
+4. App Store (native) = separate, days-long, Apple-account-gated track. The PWA (installable) is
+   the "downloadable app" for now.
 
 ## House rules
-- Never put secret VALUES in chat — they go to Supabase Edge Function secrets / GitHub secrets.
-- Be honest, no hype; give real %/projections (the milestone scorer is capped at 90 on purpose).
-- Hard floor stays: agents never auto-merge data-deletes, destructive migrations, or secret exposure.
-- Keep `/finance` untouched (separate product/workstream).
+- Never put secret VALUES in chat. Be honest, no hype, real %/projections.
+- Hard floor: agents never merge data-deletes, destructive migrations, secret exposure, or
+  `supabase/migrations/**` (pipeline can't apply migrations); never touch `/finance` (Cadence).
+- Reliability over raw throughput: keep 1 lane + the guards. More builders ≠ more shipped.
