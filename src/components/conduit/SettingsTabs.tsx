@@ -1212,7 +1212,7 @@ function BillingTab({
   return (
     <div className="space-y-6 text-sm">
       {/* Current plan */}
-      <div className="conduit-card p-6 flex items-center justify-between gap-4">
+      <div className="conduit-card p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
             Current plan ·{" "}

@@ -147,7 +147,7 @@ export function PraxisComposerPill({
               : undefined
           }
         />
-        <span>{pinLabel}</span>
+        <span className="hidden sm:inline">{pinLabel}</span>
         <span aria-hidden>▾</span>
         {pinOpen && (
           <div

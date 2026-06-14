@@ -894,9 +894,14 @@ export function Chat({
                 {employeeLabel(streamingEmployee)} is thinking…
               </span>
             ) : (
-              <span style={{ color: "var(--color-text-muted)" }}>
-                Shift+Enter for newline
-              </span>
+              <>
+                <span className="hidden sm:inline" style={{ color: "var(--color-text-muted)" }}>
+                  Shift+Enter for newline
+                </span>
+                <span className="sm:hidden" style={{ color: "var(--color-text-muted)" }}>
+                  Tap send to submit
+                </span>
+              </>
             )}
           </div>
         </div>
