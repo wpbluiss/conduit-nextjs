@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, ArrowRight, FileText } from "lucide-react";
+import { AlertCircle, ArrowRight, Download, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
@@ -191,6 +191,54 @@ export function Chat({
     const id = setInterval(tick, 250);
     return () => clearInterval(id);
   }, [rateLimitUntil]);
+
+  // Export conversation as Markdown — client-side, no backend needed.
+  const exportConversation = useCallback(() => {
+    const visibleMessages = messages.filter(
+      (m) => m.role === "user" || m.role === "assistant",
+    );
+    if (visibleMessages.length === 0) return;
+
+    const today = new Date().toISOString().slice(0, 10);
+    const dominant = visibleMessages
+      .filter((m) => m.role === "assistant" && m.employee)
+      .reduce<Record<string, number>>((acc, m) => {
+        const emp = m.employee as string;
+        acc[emp] = (acc[emp] ?? 0) + 1;
+        return acc;
+      }, {});
+    const specialist =
+      Object.entries(dominant).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "praxis";
+
+    const lines: string[] = [
+      "---",
+      `title: Praxis Conversation`,
+      `date: ${today}`,
+      `specialist: ${specialist}`,
+      "---",
+      "",
+    ];
+
+    for (const msg of visibleMessages) {
+      if (msg.role === "user") {
+        lines.push(`**You:** ${msg.content.trim()}`, "");
+      } else if (msg.role === "assistant" && msg.employee) {
+        const label = employeeLabel(msg.employee as EmployeeKey);
+        lines.push(`**${label}:** ${msg.content.trim()}`, "");
+      }
+    }
+
+    const md = lines.join("\n");
+    const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `praxis-conversation-${today}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [messages]);
 
   // Pagination: infinite-scroll-up for message history.
   const [hasMore, setHasMore] = useState(initialHasMore);
@@ -873,22 +921,48 @@ export function Chat({
         <div className="mx-auto max-w-3xl space-y-6">
           {/* Top sentinel + pagination state — only shown when a conversation is loaded */}
           {conversationId && (
-            <div ref={topSentinelRef} className="flex justify-center pb-2">
-              {loadingOlder ? (
-                <span
-                  className="text-[11px] uppercase tracking-wider"
-                  style={{ color: "var(--color-text-muted)" }}
+            <div className="flex items-center justify-between pb-2">
+              <div ref={topSentinelRef} className="flex-1 flex justify-center">
+                {loadingOlder ? (
+                  <span
+                    className="text-[11px] uppercase tracking-wider"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
+                    Loading older messages…
+                  </span>
+                ) : !hasMore && messages.length > 0 ? (
+                  <span
+                    className="text-[11px] uppercase tracking-wider"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
+                    All messages loaded
+                  </span>
+                ) : null}
+              </div>
+              {messages.length > 0 && (
+                <button
+                  type="button"
+                  onClick={exportConversation}
+                  title="Export conversation as Markdown"
+                  aria-label="Export conversation as Markdown"
+                  className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
+                  style={{
+                    color: "var(--color-text-muted)",
+                    border: "1px solid transparent",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                  }}
                 >
-                  Loading older messages…
-                </span>
-              ) : !hasMore && messages.length > 0 ? (
-                <span
-                  className="text-[11px] uppercase tracking-wider"
-                  style={{ color: "var(--color-text-muted)" }}
-                >
-                  All messages loaded
-                </span>
-              ) : null}
+                  <Download size={12} />
+                  <span className="hidden sm:inline">Export</span>
+                </button>
+              )}
             </div>
           )}
 
