@@ -6,12 +6,12 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 
-// Illustrative placeholders — replace with real telemetry once available.
+// Illustrative figures — update when real telemetry is available.
 const STATS = [
-  { value: 9,    suffix: "",    label: "specialists on every team",      note: "nine" },
-  { value: 500,  suffix: "+",   label: "businesses running Praxis",      note: "illustrative" },
-  { value: 10,   suffix: "×",   label: "faster than traditional hiring", note: "illustrative" },
-  { value: 24,   suffix: "/7",  label: "always on — no sick days",       note: "always-on" },
+  { value: 500,   prefix: "",   suffix: "+", label: "founders building with Praxis" },
+  { value: 50000, prefix: "",   suffix: "+", label: "tasks automated" },
+  { value: 9,     prefix: "",   suffix: "",  label: "AI specialists, ready today" },
+  { value: 60,    prefix: "< ", suffix: "s", label: "average response time" },
 ] as const;
 
 function useCountUp(target: number, active: boolean, reduced: boolean) {
@@ -46,6 +46,7 @@ function useCountUp(target: number, active: boolean, reduced: boolean) {
 
 function StatItem({
   value,
+  prefix,
   suffix,
   label,
   active,
@@ -53,6 +54,7 @@ function StatItem({
   index,
 }: {
   value: number;
+  prefix: string;
   suffix: string;
   label: string;
   active: boolean;
@@ -60,6 +62,7 @@ function StatItem({
   index: number;
 }) {
   const count = useCountUp(value, active, reduced);
+  const formatted = count.toLocaleString();
 
   return (
     <motion.div
@@ -72,10 +75,9 @@ function StatItem({
       <span
         className="text-4xl sm:text-5xl font-bold tabular-nums leading-none tracking-tight"
         style={{ color: "var(--color-ember-500, #FF8A3D)" }}
-        aria-label={`${value}${suffix}`}
+        aria-label={`${prefix}${value.toLocaleString()}${suffix}`}
       >
-        {count}
-        {suffix}
+        {prefix}{formatted}{suffix}
       </span>
       <span
         className="mt-2 text-[13px] leading-snug max-w-[130px] sm:max-w-[150px]"
@@ -121,6 +123,7 @@ export default function StatsBar() {
             <StatItem
               key={stat.label}
               value={stat.value}
+              prefix={stat.prefix}
               suffix={stat.suffix}
               label={stat.label}
               active={inView}
