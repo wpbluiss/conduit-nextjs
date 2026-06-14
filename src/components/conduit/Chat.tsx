@@ -1927,13 +1927,28 @@ function CopyButton({ content }: { content: string }) {
   const toast = useToast();
 
   const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(content);
+    const succeed = () => {
       setCopied(true);
       toast.success("Copied!");
       setTimeout(() => setCopied(false), 1500);
+    };
+    try {
+      await navigator.clipboard.writeText(content);
+      succeed();
     } catch {
-      toast.error("Copy failed");
+      // execCommand fallback for older browsers / non-HTTPS contexts
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = content;
+        ta.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        succeed();
+      } catch {
+        toast.error("Copy failed");
+      }
     }
   }, [content, toast]);
 
@@ -1943,6 +1958,7 @@ function CopyButton({ content }: { content: string }) {
       type="button"
       onClick={handleCopy}
       aria-label={copied ? "Copied!" : "Copy message"}
+      title={copied ? "Copied!" : "Copy message"}
       className="flex items-center gap-1 p-1 rounded transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100"
       style={{ color: copied ? "var(--color-accent)" : "var(--color-text-muted)" }}
       onMouseEnter={(e) => {
