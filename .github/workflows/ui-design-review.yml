@@ -4,7 +4,8 @@ name: UI Design Review
 # them against world-class product design and either fix the worst gaps directly (PR)
 # or file [UI] issues. Runs on conduit-nextjs (public = free Actions minutes).
 # Screenshots are uploaded as an artifact ("ui-screenshots") so Luis can SEE them from
-# the Actions tab (run → Artifacts → download).
+# the Actions tab (run → Artifacts → download). NOTE: .ui-review is a hidden dir, so the
+# upload needs include-hidden-files: true or it silently uploads nothing.
 
 permissions:
   contents: write
@@ -36,6 +37,7 @@ jobs:
         with:
           name: ui-screenshots
           path: .ui-review/*.png
+          include-hidden-files: true
           retention-days: 14
           if-no-files-found: warn
       - uses: anthropics/claude-code-action@v1
@@ -47,7 +49,9 @@ jobs:
             first — that's the bar (Linear/Vercel/Stripe/Arc tier; ember/PDL identity).
 
             1. LOOK at every screenshot in `.ui-review/*.png` using the Read tool (they are
-               real captures of the live site at desktop + mobile). Actually view them.
+               real captures of the live site at desktop + mobile). Actually view them. If the
+               directory is empty, STOP and open an issue titled "[UI] screenshot capture
+               broken" instead of pretending to review.
             2. For each page, critique HONESTLY against world-class design: hierarchy,
                spacing/rhythm, typography, color/contrast, motion (is there tasteful
                framer-motion / parallax or is it static and flat?), CTA quality, mobile
