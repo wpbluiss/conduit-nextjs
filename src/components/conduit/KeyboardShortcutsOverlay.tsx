@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Keyboard, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -55,10 +55,44 @@ export function KeyboardShortcutsOverlay() {
   const [open, setOpen] = useState(false);
   const [isMac, setIsMac] = useState(false);
   const router = useRouter();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     setIsMac(navigator.platform.toUpperCase().startsWith("MAC"));
   }, []);
+
+  // External trigger — sidebar ? button dispatches this event
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener("praxis:shortcuts:open", handler);
+    return () => window.removeEventListener("praxis:shortcuts:open", handler);
+  }, []);
+
+  // Focus management + trap
+  useEffect(() => {
+    if (!open) return;
+    closeButtonRef.current?.focus();
+    const panel = panelRef.current;
+    if (!panel) return;
+    const onTab = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const focusable = Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey ? document.activeElement === first : document.activeElement === last) {
+        e.preventDefault();
+        (e.shiftKey ? last : first).focus();
+      }
+    };
+    window.addEventListener("keydown", onTab);
+    return () => window.removeEventListener("keydown", onTab);
+  }, [open]);
 
   useEffect(() => {
     let gPressed = false;
@@ -181,6 +215,7 @@ export function KeyboardShortcutsOverlay() {
             className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none"
           >
             <div
+              ref={panelRef}
               className="pointer-events-auto w-full max-w-sm rounded-2xl border border-[var(--color-border)] shadow-2xl overflow-hidden"
               style={{ background: "var(--color-surface-elevated)" }}
             >
@@ -191,6 +226,7 @@ export function KeyboardShortcutsOverlay() {
                   <span className="text-sm font-medium">Keyboard shortcuts</span>
                 </div>
                 <button
+                  ref={closeButtonRef}
                   type="button"
                   onClick={() => setOpen(false)}
                   aria-label="Close"
