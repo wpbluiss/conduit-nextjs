@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, ArrowRight, Download, FileText, Pin, ThumbsDown, ThumbsUp } from "lucide-react";
+import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Pin, ThumbsDown, ThumbsUp } from "lucide-react";
 import { motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
@@ -35,6 +35,7 @@ import {
   PinnedMessagesBanner,
   type PinnedMessage,
 } from "./PinnedMessagesBanner";
+import { useToast } from "@/context/ToastContext";
 
 export interface VoicePrefs {
   enabled: boolean;
@@ -1597,6 +1598,42 @@ function EmptyState({
   );
 }
 
+function CopyButton({ content }: { content: string }) {
+  const [copied, setCopied] = useState(false);
+  const toast = useToast();
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      toast.success("Copied!");
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      toast.error("Copy failed");
+    }
+  }, [content, toast]);
+
+  const Icon = copied ? Check : Copy;
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      aria-label="Copy message"
+      className="flex items-center gap-1 p-1 rounded transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100"
+      style={{ color: copied ? "var(--color-accent)" : "var(--color-text-muted)" }}
+      onMouseEnter={(e) => {
+        if (!copied) (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
+      }}
+      onMouseLeave={(e) => {
+        if (!copied) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
+      }}
+    >
+      <Icon size={13} />
+      <span className="hidden md:inline text-[11px]">{copied ? "Copied" : "Copy"}</span>
+    </button>
+  );
+}
+
 function MessageFeedbackButtons({ messageId }: { messageId: string }) {
   const [rating, setRating] = useState<1 | -1 | null>(null);
   const [busy, setBusy] = useState(false);
@@ -1995,6 +2032,7 @@ const MessageBubble = memo(function MessageBubble({
         ))}
         {message.id && !message.pending && (
           <div className="flex items-center gap-2">
+            <CopyButton content={message.content} />
             <MessageFeedbackButtons messageId={message.id} />
             {onPinToggle && (
               <button
