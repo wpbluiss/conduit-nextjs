@@ -20,6 +20,7 @@ import { useToast } from "@/context/ToastContext";
 import { ORDERED_TIERS, TOPUPS, tierById, type TierId } from "@/lib/billing/tiers";
 import { DEFAULT_EMPLOYEE_VOICES, VOICE_NAMES } from "@/lib/voice/defaults";
 import { ThemeToggle } from "./ThemeToggle";
+import { ACCENT_PRESETS, ACCENT_STORAGE_KEY } from "@/lib/conduit/accent-presets";
 import { track } from "@/lib/analytics/track";
 import { MFASecurity } from "./MFASecurity";
 import { BrandMarkGithub } from "./brand-marks/BrandMarkGithub";
@@ -55,6 +56,8 @@ interface AccountData {
   theme_preference?: "system" | "light" | "dark" | null;
   display_name?: string | null;
   avatar_url?: string | null;
+  accent_preference?: string | null;
+  company_brief?: string | null;
 }
 
 const COMMON_TIMEZONES = [
@@ -86,7 +89,8 @@ export type SettingsTabKey =
   | "security"
   | "notifications"
   | "integrations"
-  | "appearance";
+  | "appearance"
+  | "api";
 
 export function SettingsTabs({
   email,
@@ -118,6 +122,7 @@ export function SettingsTabs({
             ["notifications", "Notifications"],
             ["integrations", "Integrations"],
             ["appearance", "Appearance"],
+            ["api", "API"],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -161,8 +166,12 @@ export function SettingsTabs({
       {tab === "notifications" && <NotificationsTab />}
       {tab === "integrations" && <IntegrationsTab />}
       {tab === "appearance" && (
-        <AppearanceTab themePref={account.theme_preference ?? "system"} />
+        <AppearanceTab
+          themePref={account.theme_preference ?? "system"}
+          accentPref={account.accent_preference ?? "ember"}
+        />
       )}
+      {tab === "api" && <ApiKeysTab />}
     </div>
   );
 }
@@ -1025,6 +1034,8 @@ function ProfileTab({
   );
 }
 
+const COMPANY_BRIEF_MAX = 500;
+
 function BusinessTab({ account }: { account: AccountData }) {
   const router = useRouter();
   const toast = useToast();
@@ -1033,6 +1044,11 @@ function BusinessTab({ account }: { account: AccountData }) {
   const [description, setDescription] = useState(account.business_description);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [brief, setBrief] = useState(account.company_brief ?? "");
+  const [briefSaving, setBriefSaving] = useState(false);
+  const [briefSaved, setBriefSaved] = useState(false);
+  const [briefError, setBriefError] = useState<string | null>(null);
 
   async function save() {
     setSaving(true);
@@ -1056,47 +1072,130 @@ function BusinessTab({ account }: { account: AccountData }) {
     router.refresh();
   }
 
+  async function saveBrief(e: FormEvent) {
+    e.preventDefault();
+    const trimmed = brief.trim().slice(0, COMPANY_BRIEF_MAX);
+    setBriefSaving(true);
+    setBriefError(null);
+    setBriefSaved(false);
+    const r = await fetch("/api/conduit/account/prefs", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ company_brief: trimmed || null }),
+    });
+    setBriefSaving(false);
+    if (r.ok) {
+      setBriefSaved(true);
+      toast.success("Company brief saved.");
+      router.refresh();
+    } else {
+      setBriefError("Couldn't save brief. Try again.");
+    }
+  }
+
   return (
-    <div className="space-y-4">
-      <div>
-        <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block mb-2">
-          Business name
-        </label>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)]"
-        />
+    <div className="space-y-8">
+      <div className="space-y-4">
+        <div>
+          <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block mb-2">
+            Business name
+          </label>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)]"
+          />
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block mb-2">
+            Business type
+          </label>
+          <input
+            value={businessType}
+            onChange={(e) => setBusinessType(e.target.value)}
+            className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)]"
+          />
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block mb-2">
+            What you&apos;re working on
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={4}
+            className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)] resize-none"
+          />
+        </div>
+        {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
+        <PraxisButton
+          onClick={save}
+          isLoading={saving}
+          loadingText="Saving…"
+        >
+          Save
+        </PraxisButton>
       </div>
-      <div>
-        <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block mb-2">
-          Business type
-        </label>
-        <input
-          value={businessType}
-          onChange={(e) => setBusinessType(e.target.value)}
-          className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)]"
-        />
+
+      {/* Company brief */}
+      <div className="conduit-card p-5">
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
+          Company brief
+        </div>
+        <p className="text-xs text-[var(--color-text-muted)] mb-3">
+          A short context block Atlas shares with your whole team. All 9 specialists
+          read this on every turn — no more repeating yourself.
+        </p>
+        <form onSubmit={saveBrief} className="space-y-3">
+          <div className="relative">
+            <textarea
+              value={brief}
+              onChange={(e) => {
+                setBrief(e.target.value.slice(0, COMPANY_BRIEF_MAX));
+                setBriefSaved(false);
+              }}
+              rows={4}
+              maxLength={COMPANY_BRIEF_MAX}
+              placeholder="e.g. Acme builds B2B SaaS for HR teams in the US mid-market. We're pre-revenue, 2 founders, focused on getting our first 10 design partners this quarter."
+              className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)] resize-none text-sm"
+            />
+            <span
+              className="absolute bottom-3 right-3 text-[10px] tabular-nums"
+              style={{
+                color:
+                  brief.length >= COMPANY_BRIEF_MAX
+                    ? "var(--color-pink)"
+                    : "var(--color-text-muted)",
+              }}
+            >
+              {brief.length}/{COMPANY_BRIEF_MAX}
+            </span>
+          </div>
+          {briefError && (
+            <p className="text-xs text-[var(--color-pink)]">{briefError}</p>
+          )}
+          <div className="flex items-center gap-3">
+            <PraxisButton
+              type="submit"
+              isLoading={briefSaving}
+              isDisabled={briefSaving}
+              variant="secondary"
+              className="!text-xs"
+            >
+              {briefSaved ? <><Check size={12} /> Saved</> : "Save brief"}
+            </PraxisButton>
+            {brief && (
+              <button
+                type="button"
+                onClick={() => { setBrief(""); setBriefSaved(false); }}
+                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </form>
       </div>
-      <div>
-        <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block mb-2">
-          What you&apos;re working on
-        </label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={4}
-          className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)] resize-none"
-        />
-      </div>
-      {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
-      <PraxisButton
-        onClick={save}
-        isLoading={saving}
-        loadingText="Saving…"
-      >
-        Save
-      </PraxisButton>
     </div>
   );
 }
@@ -1767,6 +1866,91 @@ function BillingTab({
       <p className="text-[10px] text-[var(--color-text-muted)]">
         Allowance: {allowance.toLocaleString()} this cycle.
       </p>
+
+      <ReferralSection />
+    </div>
+  );
+}
+
+function ReferralSection() {
+  const [data, setData] = useState<{
+    referral_code: string | null;
+    referral_count: number;
+    total_earned: number;
+  } | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/conduit/referrals")
+      .then((r) => r.json())
+      .then(setData)
+      .catch(() => {});
+  }, []);
+
+  const link =
+    typeof window !== "undefined" && data?.referral_code
+      ? `${window.location.origin}/join/${data.referral_code}`
+      : null;
+
+  async function copyLink() {
+    if (!link) return;
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.prompt("Copy your referral link:", link);
+    }
+  }
+
+  return (
+    <div className="conduit-card p-5 space-y-4">
+      <div>
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
+          Refer & Earn
+        </div>
+        <p className="text-sm text-[var(--color-text-muted)]">
+          Share your link. When a friend signs up,{" "}
+          <strong className="text-[var(--color-text)]">both of you get 50 bonus tokens</strong>.
+        </p>
+      </div>
+
+      {data?.referral_code ? (
+        <div className="flex items-center gap-2">
+          <code className="flex-1 text-xs font-mono bg-[var(--color-surface)] rounded-lg px-3 py-2 text-[var(--color-text)] truncate">
+            {link}
+          </code>
+          <button
+            type="button"
+            onClick={copyLink}
+            className="shrink-0 inline-flex items-center gap-1.5 text-xs rounded-lg px-3 py-2 bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hi)] transition-colors"
+          >
+            {copied ? <Check size={12} /> : <ExternalLink size={12} />}
+            {copied ? "Copied!" : "Copy link"}
+          </button>
+        </div>
+      ) : (
+        <div className="h-8 rounded-lg animate-pulse bg-[var(--color-border)] w-48" />
+      )}
+
+      {data && data.referral_count > 0 && (
+        <div className="flex items-center gap-6 text-sm pt-2 border-t border-[var(--color-border)]">
+          <div>
+            <span className="font-semibold text-[var(--color-text)]">
+              {data.referral_count}
+            </span>
+            <span className="text-[var(--color-text-muted)] ml-1">
+              {data.referral_count === 1 ? "referral" : "referrals"}
+            </span>
+          </div>
+          <div>
+            <span className="font-semibold text-[var(--color-text)]">
+              +{data.total_earned}
+            </span>
+            <span className="text-[var(--color-text-muted)] ml-1">bonus tokens earned</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -2068,14 +2252,121 @@ function IntegrationsTab() {
   );
 }
 
-function AppearanceTab({ themePref }: { themePref: "system" | "light" | "dark" }) {
+function AppearanceTab({
+  themePref,
+  accentPref,
+}: {
+  themePref: "system" | "light" | "dark";
+  accentPref: string;
+}) {
+  const [accent, setAccent] = useState(() => {
+    // Prefer localStorage so the swatch reflects what's actually painted.
+    try { return localStorage.getItem(ACCENT_STORAGE_KEY) || accentPref; } catch { return accentPref; }
+  });
+  const [accentSaving, setAccentSaving] = useState(false);
+  const [accentError, setAccentError] = useState<string | null>(null);
+
+  // On first render: if localStorage is empty but DB has a preference,
+  // sync it so the next page load (and other tabs) pick it up.
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(ACCENT_STORAGE_KEY);
+      if (!stored && accentPref !== "ember") {
+        localStorage.setItem(ACCENT_STORAGE_KEY, accentPref);
+        const preset = ACCENT_PRESETS[accentPref] ?? ACCENT_PRESETS.ember;
+        const s = document.documentElement.style;
+        s.setProperty("--color-accent", preset.accent);
+        s.setProperty("--color-accent-hi", preset.hi);
+        s.setProperty("--color-accent-deep", preset.deep);
+      }
+    } catch { /* ignore */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const applyAccent = (key: string) => {
+    const preset = ACCENT_PRESETS[key] ?? ACCENT_PRESETS.ember;
+    const s = document.documentElement.style;
+    s.setProperty("--color-accent", preset.accent);
+    s.setProperty("--color-accent-hi", preset.hi);
+    s.setProperty("--color-accent-deep", preset.deep);
+    try { localStorage.setItem(ACCENT_STORAGE_KEY, key); } catch { /* ignore */ }
+  };
+
+  const chooseAccent = async (key: string) => {
+    setAccent(key);
+    applyAccent(key);
+    setAccentSaving(true);
+    setAccentError(null);
+    try {
+      const r = await fetch("/api/conduit/account/prefs", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ accent_preference: key }),
+      });
+      if (!r.ok) setAccentError("Couldn't save accent preference.");
+    } catch {
+      setAccentError("Couldn't save accent preference.");
+    }
+    setAccentSaving(false);
+  };
+
   return (
     <div className="space-y-6 text-sm">
       <p className="text-[var(--color-text-muted)] max-w-xl">
-        Choose how Praxis looks on this device. System follows your OS preference.
+        Choose how Praxis looks on this device. Changes apply immediately.
       </p>
+
       <div className="conduit-card p-5">
         <ThemeToggle initialPref={themePref} />
+      </div>
+
+      <div className="conduit-card p-5 space-y-4">
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+          Accent colour
+        </div>
+        <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Accent colour">
+          {Object.entries(ACCENT_PRESETS).map(([key, preset]) => {
+            const active = accent === key;
+            return (
+              <button
+                key={key}
+                role="radio"
+                aria-checked={active}
+                aria-label={preset.label}
+                title={preset.label}
+                onClick={() => chooseAccent(key)}
+                className="flex flex-col items-center gap-1.5 group focus:outline-none"
+              >
+                <span
+                  className="w-8 h-8 rounded-full transition-transform group-hover:scale-110"
+                  style={{
+                    background: preset.accent,
+                    outline: active ? `3px solid ${preset.accent}` : "3px solid transparent",
+                    outlineOffset: "2px",
+                    boxShadow: active
+                      ? `0 0 0 2px var(--color-surface), 0 0 0 4px ${preset.accent}`
+                      : "none",
+                  }}
+                />
+                <span
+                  className="text-[10px] uppercase tracking-[0.1em]"
+                  style={{
+                    color: active ? preset.accent : "var(--color-text-muted)",
+                    fontWeight: active ? 600 : 400,
+                  }}
+                >
+                  {preset.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {accentSaving && (
+          <p className="text-[11px] text-[var(--color-text-muted)]">Saving…</p>
+        )}
+        {accentError && (
+          <p className="text-[11px] text-[var(--color-pink)]">{accentError}</p>
+        )}
       </div>
     </div>
   );
@@ -2105,6 +2396,221 @@ function AlwaysOnRow({ label, desc }: { label: string; desc: string }) {
         className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full cursor-not-allowed bg-[var(--color-accent)]"
       >
         <span className="inline-block h-5 w-5 transform rounded-full bg-white translate-x-5" />
+      </div>
+    </div>
+  );
+}
+
+// ─── API Keys Tab ────────────────────────────────────────────────────────────
+
+interface ApiKey {
+  id: string;
+  name: string;
+  key_preview: string;
+  last_used_at: string | null;
+  created_at: string;
+  revoked_at: string | null;
+}
+
+function ApiKeysTab() {
+  const [keys, setKeys] = useState<ApiKey[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newName, setNewName] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [revealedKey, setRevealedKey] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [revoking, setRevoking] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/conduit/api-keys")
+      .then((r) => r.json())
+      .then((d) => setKeys(d.keys ?? []))
+      .catch(() => setKeys([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    if (creating || !newName.trim()) return;
+    setCreating(true);
+    try {
+      const res = await fetch("/api/conduit/api-keys", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName.trim() }),
+      });
+      if (!res.ok) throw new Error("create_failed");
+      const data = await res.json() as { key: string; meta: ApiKey };
+      setRevealedKey(data.key);
+      setKeys((prev) => [data.meta, ...prev]);
+      setNewName("");
+    } catch {
+      // silent — user retries
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  async function handleRevoke(id: string) {
+    if (revoking) return;
+    if (!confirm("Revoke this API key? It will stop working immediately.")) return;
+    setRevoking(id);
+    try {
+      await fetch(`/api/conduit/api-keys/${id}`, { method: "DELETE" });
+      setKeys((prev) =>
+        prev.map((k) => (k.id === id ? { ...k, revoked_at: new Date().toISOString() } : k)),
+      );
+    } catch {
+      // silent
+    } finally {
+      setRevoking(null);
+    }
+  }
+
+  async function copyKey() {
+    if (!revealedKey) return;
+    try {
+      await navigator.clipboard.writeText(revealedKey);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.prompt("Copy your API key:", revealedKey);
+    }
+  }
+
+  const activeKeys = keys.filter((k) => !k.revoked_at);
+  const revokedKeys = keys.filter((k) => k.revoked_at);
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-lg font-semibold mb-1">API Keys</h2>
+        <p className="text-sm text-[var(--color-text-muted)]">
+          Generate keys to access Praxis programmatically. Keys are shown once — store them securely.
+        </p>
+      </div>
+
+      {/* New key banner (shown once after creation) */}
+      {revealedKey && (
+        <div className="conduit-card p-4 border border-[var(--color-accent)] rounded-xl">
+          <p className="text-xs uppercase tracking-[0.12em] text-[var(--color-accent)] mb-2 font-semibold">
+            New API key — copy it now
+          </p>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 text-xs font-mono bg-[var(--color-surface)] rounded-lg px-3 py-2 text-[var(--color-text)] break-all">
+              {revealedKey}
+            </code>
+            <button
+              type="button"
+              onClick={copyKey}
+              className="shrink-0 inline-flex items-center gap-1.5 text-xs rounded-lg px-3 py-2 bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hi)] transition-colors"
+            >
+              {copied ? <Check size={12} /> : <Lock size={12} />}
+              {copied ? "Copied!" : "Copy"}
+            </button>
+          </div>
+          <p className="text-xs text-[var(--color-text-muted)] mt-2">
+            This key will not be shown again. Dismiss by creating another key or refreshing.
+          </p>
+        </div>
+      )}
+
+      {/* Create form */}
+      <form onSubmit={handleCreate} className="flex gap-3">
+        <input
+          type="text"
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          placeholder="Key name (e.g. CI/CD Pipeline)"
+          maxLength={80}
+          required
+          className="flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-accent)] placeholder:text-[var(--color-text-muted)] transition-colors"
+        />
+        <button
+          type="submit"
+          disabled={creating || !newName.trim()}
+          className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-accent)] text-white px-4 py-2.5 text-sm font-medium hover:bg-[var(--color-accent-hi)] transition-colors disabled:opacity-50"
+        >
+          {creating ? <SpinnerIcon /> : <ArrowRight size={14} />}
+          Generate
+        </button>
+      </form>
+
+      {/* Active keys */}
+      {loading ? (
+        <div className="text-sm text-[var(--color-text-muted)]">Loading…</div>
+      ) : activeKeys.length === 0 ? (
+        <p className="text-sm text-[var(--color-text-muted)]">No active API keys.</p>
+      ) : (
+        <div className="space-y-2">
+          <p className="text-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)] font-semibold">
+            Active keys
+          </p>
+          {activeKeys.map((k) => (
+            <div
+              key={k.id}
+              className="conduit-card flex items-center gap-4 px-4 py-3 rounded-xl"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-[var(--color-text)] truncate">{k.name}</p>
+                <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+                  <code className="font-mono">{k.key_preview}</code>
+                  {" · Created "}
+                  {new Date(k.created_at).toLocaleDateString()}
+                  {k.last_used_at && (
+                    <> · Last used {new Date(k.last_used_at).toLocaleDateString()}</>
+                  )}
+                  {!k.last_used_at && " · Never used"}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleRevoke(k.id)}
+                disabled={revoking === k.id}
+                aria-label={`Revoke key ${k.name}`}
+                className="shrink-0 inline-flex items-center gap-1 text-xs rounded-lg px-3 py-1.5 text-red-400 border border-red-400/20 hover:bg-red-400/10 transition-colors disabled:opacity-50"
+              >
+                <X size={12} />
+                Revoke
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Revoked keys */}
+      {revokedKeys.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)] font-semibold">
+            Revoked keys
+          </p>
+          {revokedKeys.map((k) => (
+            <div
+              key={k.id}
+              className="conduit-card flex items-center gap-4 px-4 py-3 rounded-xl opacity-50"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-[var(--color-text)] truncate line-through">
+                  {k.name}
+                </p>
+                <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+                  <code className="font-mono">{k.key_preview}</code>
+                  {" · Revoked "}
+                  {k.revoked_at ? new Date(k.revoked_at).toLocaleDateString() : ""}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="conduit-card p-4 rounded-xl text-sm text-[var(--color-text-muted)] space-y-1">
+        <p className="font-medium text-[var(--color-text)]">Using API keys</p>
+        <p>Include your key in the <code className="font-mono text-xs">Authorization</code> header:</p>
+        <code className="block text-xs font-mono bg-[var(--color-surface)] rounded-lg px-3 py-2 mt-1">
+          Authorization: Bearer prx_…
+        </code>
+        <p className="text-xs mt-2">Maximum 20 active keys per account.</p>
       </div>
     </div>
   );

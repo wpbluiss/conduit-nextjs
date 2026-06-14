@@ -15,11 +15,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
+  const VALID_ACCENTS = new Set(["ember", "blue", "sage", "rose", "amber", "slate"]);
+
   let body: {
     timezone?: string;
     notify_voice_room_ready?: boolean;
     theme_preference?: "system" | "light" | "dark";
     display_name?: string;
+    accent_preference?: string | null;
+    company_brief?: string | null;
   };
   try {
     body = await request.json();
@@ -28,6 +32,14 @@ export async function POST(request: NextRequest) {
   }
 
   const update: Record<string, unknown> = {};
+  if (body.accent_preference !== undefined) {
+    const ak = body.accent_preference;
+    update.accent_preference = (ak && VALID_ACCENTS.has(ak)) ? ak : null;
+  }
+  if (body.company_brief !== undefined) {
+    const brief = body.company_brief === null ? null : String(body.company_brief).slice(0, 500);
+    update.company_brief = brief || null;
+  }
   if (body.display_name !== undefined) {
     const name = body.display_name.trim().slice(0, 100);
     update.display_name = name || null;

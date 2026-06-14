@@ -116,6 +116,7 @@ export default async function ChatPage({ searchParams }: PageProps) {
       }}
       allowedEmployees={allowedEmployees}
       isFirstRun={isFirstRun}
+      companyBrief={account.company_brief ?? null}
     />
   );
 }
