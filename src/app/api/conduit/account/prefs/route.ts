@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
     display_name?: string;
     accent_preference?: string | null;
     company_brief?: string | null;
+    workspace_name?: string | null;
   };
   try {
     body = await request.json();
@@ -43,6 +44,10 @@ export async function POST(request: NextRequest) {
   if (body.display_name !== undefined) {
     const name = body.display_name.trim().slice(0, 100);
     update.display_name = name || null;
+  }
+  if (body.workspace_name !== undefined) {
+    const wn = body.workspace_name === null ? null : String(body.workspace_name).trim().slice(0, 100);
+    update.workspace_name = wn || null;
   }
   if (body.timezone !== undefined) {
     const tz = body.timezone.trim();

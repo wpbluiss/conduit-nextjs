@@ -60,6 +60,7 @@ interface AccountData {
   accent_preference?: string | null;
   company_brief?: string | null;
   specialist_nicknames?: Record<string, string> | null;
+  workspace_name?: string | null;
 }
 
 const COMMON_TIMEZONES = [
@@ -153,6 +154,7 @@ export function SettingsTabs({
           themePref={account.theme_preference ?? "system"}
           displayName={account.display_name ?? null}
           avatarUrl={account.avatar_url ?? null}
+          workspaceName={account.workspace_name ?? null}
         />
       )}
       {tab === "business" && <BusinessTab account={account} />}
@@ -690,6 +692,7 @@ function ProfileTab({
   themePref,
   displayName,
   avatarUrl,
+  workspaceName,
 }: {
   email: string;
   fullName: string;
@@ -699,6 +702,7 @@ function ProfileTab({
   themePref: "system" | "light" | "dark";
   displayName: string | null;
   avatarUrl: string | null;
+  workspaceName?: string | null;
 }) {
   const [tz, setTz] = useState(timezone);
   const [tzSaving, setTzSaving] = useState(false);
@@ -710,6 +714,12 @@ function ProfileTab({
   const [nameSaving, setNameSaving] = useState(false);
   const [nameSaved, setNameSaved] = useState(false);
   const [nameError, setNameError] = useState("");
+
+  // Workspace name
+  const [workspaceNameValue, setWorkspaceNameValue] = useState(workspaceName ?? "");
+  const [workspaceNameSaving, setWorkspaceNameSaving] = useState(false);
+  const [workspaceNameSaved, setWorkspaceNameSaved] = useState(false);
+  const [workspaceNameError, setWorkspaceNameError] = useState("");
 
   // Avatar
   const [avatarPreview, setAvatarPreview] = useState<string | null>(avatarUrl);
@@ -766,6 +776,27 @@ function ProfileTab({
       router.refresh();
     } else {
       setNameError("Couldn't save name. Try again.");
+    }
+  };
+
+  const saveWorkspaceName = async (e: FormEvent) => {
+    e.preventDefault();
+    const trimmed = workspaceNameValue.trim();
+    setWorkspaceNameSaving(true);
+    setWorkspaceNameError("");
+    setWorkspaceNameSaved(false);
+    const r = await fetch("/api/conduit/account/prefs", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ workspace_name: trimmed || null }),
+    });
+    setWorkspaceNameSaving(false);
+    if (r.ok) {
+      setWorkspaceNameSaved(true);
+      toast.success("Workspace name updated.");
+      router.refresh();
+    } else {
+      setWorkspaceNameError("Couldn't save workspace name. Try again.");
     }
   };
 
@@ -982,6 +1013,35 @@ function ProfileTab({
           </PraxisButton>
         </div>
         {nameError && <p className="text-[11px] text-[var(--color-pink)]">{nameError}</p>}
+      </form>
+
+      {/* ── Workspace name ── */}
+      <form onSubmit={saveWorkspaceName} className="space-y-2 max-w-sm">
+        <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block">
+          Workspace name
+        </label>
+        <div className="flex gap-2">
+          <input
+            value={workspaceNameValue}
+            onChange={(e) => { setWorkspaceNameValue(e.target.value); setWorkspaceNameSaved(false); setWorkspaceNameError(""); }}
+            maxLength={100}
+            placeholder="My Workspace"
+            className="flex-1 conduit-card px-4 py-2.5 outline-none focus:border-[var(--color-accent)] text-sm"
+          />
+          <PraxisButton
+            type="submit"
+            isLoading={workspaceNameSaving}
+            isDisabled={workspaceNameSaving}
+            variant="secondary"
+            className="!text-xs shrink-0"
+          >
+            {workspaceNameSaved ? <><Check size={12} /> Saved</> : "Save"}
+          </PraxisButton>
+        </div>
+        <p className="text-[10px] text-[var(--color-text-muted)]">
+          Shown in the sidebar header. Leave blank to use your business name.
+        </p>
+        {workspaceNameError && <p className="text-[11px] text-[var(--color-pink)]">{workspaceNameError}</p>}
       </form>
 
       {/* ── Account info ── */}

@@ -133,6 +133,7 @@ export function Sidebar({
   inFlightBuildsInitial,
   avatarUrl,
   displayName,
+  workspaceName,
 }: {
   userEmail: string;
   accountName: string;
@@ -144,6 +145,7 @@ export function Sidebar({
   inFlightBuildsInitial: InFlightBuild[];
   avatarUrl?: string | null;
   displayName?: string | null;
+  workspaceName?: string | null;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -363,7 +365,7 @@ export function Sidebar({
             <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
               Workspace
             </div>
-            <div className="mt-1 text-sm font-medium truncate">{accountName}</div>
+            <div className="mt-1 text-sm font-medium truncate">{workspaceName || accountName}</div>
             <div className="mt-1.5 flex items-center gap-1 w-fit px-2 py-0.5 rounded-full" style={{ background: "color-mix(in srgb, var(--color-accent) 10%, transparent)", border: "1px solid color-mix(in srgb, var(--color-accent) 22%, transparent)" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/praxis-mark.png" alt="" width={9} height={14} style={{ display: "block", width: 9, height: 14, opacity: 0.8 }} />

@@ -49,6 +49,8 @@ export interface ConduitAccount {
   // R461 onboarding goals — nullable until migration 038 runs.
   onboarding_goals?: string[] | null;
   onboarding_complete?: boolean;
+  // R536 workspace name — nullable until migration 044 runs.
+  workspace_name?: string | null;
   created_at: string;
   updated_at: string;
 }
