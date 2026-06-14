@@ -1965,7 +1965,7 @@ function CopyButton({ content }: { content: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      aria-label="Copy message"
+      aria-label={copied ? "Copied!" : "Copy message"}
       className="flex items-center gap-1 p-1 rounded transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100"
       style={{ color: copied ? "var(--color-accent)" : "var(--color-text-muted)" }}
       onMouseEnter={(e) => {
