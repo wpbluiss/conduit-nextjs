@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentAccount } from "@/lib/conduit/account";
 import { Sidebar } from "@/components/conduit/Sidebar";
@@ -42,7 +43,9 @@ export default async function AppLayout({
 }) {
   const current = await getCurrentAccount();
   if (!current) {
-    redirect("/auth/sign-in?next=/app");
+    const reqHeaders = await headers();
+    const pathname = reqHeaders.get("x-next-pathname") ?? "/app";
+    redirect(`/auth/sign-in?next=${encodeURIComponent(pathname)}`);
   }
   const { account, user } = current;
 

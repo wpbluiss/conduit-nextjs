@@ -44,7 +44,12 @@ type Mode = "password" | "magic-link";
 function SignInForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/app/workspace";
+  const rawNext = params.get("next") ?? "/app";
+  // Sanitize to prevent open-redirect: must be relative and not an auth route.
+  const next =
+    rawNext.startsWith("/") && !rawNext.startsWith("/auth")
+      ? rawNext
+      : "/app";
   const queryError = params.get("error");
 
   const [mode, setMode] = useState<Mode>("password");
