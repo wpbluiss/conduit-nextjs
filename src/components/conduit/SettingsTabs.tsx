@@ -86,7 +86,8 @@ export type SettingsTabKey =
   | "security"
   | "notifications"
   | "integrations"
-  | "appearance";
+  | "appearance"
+  | "api";
 
 export function SettingsTabs({
   email,
@@ -118,6 +119,7 @@ export function SettingsTabs({
             ["notifications", "Notifications"],
             ["integrations", "Integrations"],
             ["appearance", "Appearance"],
+            ["api", "API"],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -163,6 +165,7 @@ export function SettingsTabs({
       {tab === "appearance" && (
         <AppearanceTab themePref={account.theme_preference ?? "system"} />
       )}
+      {tab === "api" && <ApiKeysTab />}
     </div>
   );
 }
@@ -2105,6 +2108,221 @@ function AlwaysOnRow({ label, desc }: { label: string; desc: string }) {
         className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full cursor-not-allowed bg-[var(--color-accent)]"
       >
         <span className="inline-block h-5 w-5 transform rounded-full bg-white translate-x-5" />
+      </div>
+    </div>
+  );
+}
+
+// ─── API Keys Tab ────────────────────────────────────────────────────────────
+
+interface ApiKey {
+  id: string;
+  name: string;
+  key_preview: string;
+  last_used_at: string | null;
+  created_at: string;
+  revoked_at: string | null;
+}
+
+function ApiKeysTab() {
+  const [keys, setKeys] = useState<ApiKey[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newName, setNewName] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [revealedKey, setRevealedKey] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [revoking, setRevoking] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/conduit/api-keys")
+      .then((r) => r.json())
+      .then((d) => setKeys(d.keys ?? []))
+      .catch(() => setKeys([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    if (creating || !newName.trim()) return;
+    setCreating(true);
+    try {
+      const res = await fetch("/api/conduit/api-keys", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName.trim() }),
+      });
+      if (!res.ok) throw new Error("create_failed");
+      const data = await res.json() as { key: string; meta: ApiKey };
+      setRevealedKey(data.key);
+      setKeys((prev) => [data.meta, ...prev]);
+      setNewName("");
+    } catch {
+      // silent — user retries
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  async function handleRevoke(id: string) {
+    if (revoking) return;
+    if (!confirm("Revoke this API key? It will stop working immediately.")) return;
+    setRevoking(id);
+    try {
+      await fetch(`/api/conduit/api-keys/${id}`, { method: "DELETE" });
+      setKeys((prev) =>
+        prev.map((k) => (k.id === id ? { ...k, revoked_at: new Date().toISOString() } : k)),
+      );
+    } catch {
+      // silent
+    } finally {
+      setRevoking(null);
+    }
+  }
+
+  async function copyKey() {
+    if (!revealedKey) return;
+    try {
+      await navigator.clipboard.writeText(revealedKey);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.prompt("Copy your API key:", revealedKey);
+    }
+  }
+
+  const activeKeys = keys.filter((k) => !k.revoked_at);
+  const revokedKeys = keys.filter((k) => k.revoked_at);
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-lg font-semibold mb-1">API Keys</h2>
+        <p className="text-sm text-[var(--color-text-muted)]">
+          Generate keys to access Praxis programmatically. Keys are shown once — store them securely.
+        </p>
+      </div>
+
+      {/* New key banner (shown once after creation) */}
+      {revealedKey && (
+        <div className="conduit-card p-4 border border-[var(--color-accent)] rounded-xl">
+          <p className="text-xs uppercase tracking-[0.12em] text-[var(--color-accent)] mb-2 font-semibold">
+            New API key — copy it now
+          </p>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 text-xs font-mono bg-[var(--color-surface)] rounded-lg px-3 py-2 text-[var(--color-text)] break-all">
+              {revealedKey}
+            </code>
+            <button
+              type="button"
+              onClick={copyKey}
+              className="shrink-0 inline-flex items-center gap-1.5 text-xs rounded-lg px-3 py-2 bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hi)] transition-colors"
+            >
+              {copied ? <Check size={12} /> : <Lock size={12} />}
+              {copied ? "Copied!" : "Copy"}
+            </button>
+          </div>
+          <p className="text-xs text-[var(--color-text-muted)] mt-2">
+            This key will not be shown again. Dismiss by creating another key or refreshing.
+          </p>
+        </div>
+      )}
+
+      {/* Create form */}
+      <form onSubmit={handleCreate} className="flex gap-3">
+        <input
+          type="text"
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          placeholder="Key name (e.g. CI/CD Pipeline)"
+          maxLength={80}
+          required
+          className="flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-accent)] placeholder:text-[var(--color-text-muted)] transition-colors"
+        />
+        <button
+          type="submit"
+          disabled={creating || !newName.trim()}
+          className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-accent)] text-white px-4 py-2.5 text-sm font-medium hover:bg-[var(--color-accent-hi)] transition-colors disabled:opacity-50"
+        >
+          {creating ? <SpinnerIcon /> : <ArrowRight size={14} />}
+          Generate
+        </button>
+      </form>
+
+      {/* Active keys */}
+      {loading ? (
+        <div className="text-sm text-[var(--color-text-muted)]">Loading…</div>
+      ) : activeKeys.length === 0 ? (
+        <p className="text-sm text-[var(--color-text-muted)]">No active API keys.</p>
+      ) : (
+        <div className="space-y-2">
+          <p className="text-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)] font-semibold">
+            Active keys
+          </p>
+          {activeKeys.map((k) => (
+            <div
+              key={k.id}
+              className="conduit-card flex items-center gap-4 px-4 py-3 rounded-xl"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-[var(--color-text)] truncate">{k.name}</p>
+                <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+                  <code className="font-mono">{k.key_preview}</code>
+                  {" · Created "}
+                  {new Date(k.created_at).toLocaleDateString()}
+                  {k.last_used_at && (
+                    <> · Last used {new Date(k.last_used_at).toLocaleDateString()}</>
+                  )}
+                  {!k.last_used_at && " · Never used"}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleRevoke(k.id)}
+                disabled={revoking === k.id}
+                aria-label={`Revoke key ${k.name}`}
+                className="shrink-0 inline-flex items-center gap-1 text-xs rounded-lg px-3 py-1.5 text-red-400 border border-red-400/20 hover:bg-red-400/10 transition-colors disabled:opacity-50"
+              >
+                <X size={12} />
+                Revoke
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Revoked keys */}
+      {revokedKeys.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)] font-semibold">
+            Revoked keys
+          </p>
+          {revokedKeys.map((k) => (
+            <div
+              key={k.id}
+              className="conduit-card flex items-center gap-4 px-4 py-3 rounded-xl opacity-50"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-[var(--color-text)] truncate line-through">
+                  {k.name}
+                </p>
+                <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+                  <code className="font-mono">{k.key_preview}</code>
+                  {" · Revoked "}
+                  {k.revoked_at ? new Date(k.revoked_at).toLocaleDateString() : ""}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="conduit-card p-4 rounded-xl text-sm text-[var(--color-text-muted)] space-y-1">
+        <p className="font-medium text-[var(--color-text)]">Using API keys</p>
+        <p>Include your key in the <code className="font-mono text-xs">Authorization</code> header:</p>
+        <code className="block text-xs font-mono bg-[var(--color-surface)] rounded-lg px-3 py-2 mt-1">
+          Authorization: Bearer prx_…
+        </code>
+        <p className="text-xs mt-2">Maximum 20 active keys per account.</p>
       </div>
     </div>
   );
