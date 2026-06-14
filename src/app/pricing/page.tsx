@@ -20,12 +20,23 @@ export const metadata: Metadata = {
     url: "https://conduitai.io/pricing",
     siteName: "Conduit AI",
     type: "website",
+    images: [
+      {
+        url: "/api/og?title=Pricing+%E2%80%94+Three+tiers%2C+one+workforce&description=Free%2C+Pro+%2429%2Fmo%2C+Enterprise+%24199%2Fmo.+Top+up+tokens+any+time.",
+        width: 1200,
+        height: 630,
+        alt: "Pricing — Three tiers, one workforce",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Pricing — Three tiers, one workforce",
     description:
       "Free, Pro $29/mo, Enterprise $199/mo. Praxis Flow on every tier; Praxis Depth on Enterprise.",
+    images: [
+      "/api/og?title=Pricing+%E2%80%94+Three+tiers%2C+one+workforce&description=Free%2C+Pro+%2429%2Fmo%2C+Enterprise+%24199%2Fmo.+Top+up+tokens+any+time.",
+    ],
   },
   alternates: {
     canonical: "https://conduitai.io/pricing",
