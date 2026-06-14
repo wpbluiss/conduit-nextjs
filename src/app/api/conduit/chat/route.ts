@@ -65,6 +65,11 @@ import {
   renderGithubBlock,
 } from "@/lib/connectors/github";
 import {
+  getGoogleDriveToken,
+  getSelectedFiles,
+  renderGoogleDriveBlock,
+} from "@/lib/connectors/google-drive";
+import {
   prepareChatTts,
   streamForEmployee,
   type ChatTtsConfig,
@@ -291,6 +296,19 @@ export async function POST(request: NextRequest) {
       } catch {
         // Non-fatal: continue without GitHub context.
       }
+    }
+  }
+
+  // Load Google Drive context for all specialists when connected + files are selected.
+  // Serves cached text — no live fetch on each turn.
+  let googleDriveBlock = "";
+  const googleDriveToken = await getGoogleDriveToken(supabase, account.id);
+  if (googleDriveToken) {
+    try {
+      const driveFiles = getSelectedFiles(googleDriveToken);
+      googleDriveBlock = renderGoogleDriveBlock(driveFiles);
+    } catch {
+      // Non-fatal: continue without Drive context.
     }
   }
 
@@ -634,10 +652,11 @@ export async function POST(request: NextRequest) {
         // R-542: prepend Slack block for all employees when a channel is selected.
         // #589: prepend HubSpot CRM block for Sales specialist when connected.
         // #573: prepend GitHub block for Engineering specialist when connected.
+        // #613: prepend Google Drive block for all employees (brand guides, specs).
         const calendarPrefix = calendarEmployees.has(employee) ? calendarBlock : "";
         const hubspotPrefix = employee === "sales" ? hubspotBlock : "";
         const githubPrefix = employee === "engineering" ? githubBlock : "";
-        const systemPrompt = slackBlock + calendarPrefix + hubspotPrefix + githubPrefix + memoryBlockFor(employee) + withTime;
+        const systemPrompt = googleDriveBlock + slackBlock + calendarPrefix + hubspotPrefix + githubPrefix + memoryBlockFor(employee) + withTime;
 
         let fullText = "";
         let inputTokens = 0;

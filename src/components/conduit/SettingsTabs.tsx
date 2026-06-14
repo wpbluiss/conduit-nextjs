@@ -31,6 +31,7 @@ import { MFASecurity } from "./MFASecurity";
 import { BrandMarkGithub } from "./brand-marks/BrandMarkGithub";
 import { BrandMarkSlack } from "./brand-marks/BrandMarkSlack";
 import { BrandMarkNotion } from "./brand-marks/BrandMarkNotion";
+import { BrandMarkDrive } from "./brand-marks/BrandMarkDrive";
 
 interface UsageData {
   totals: { input: number; output: number; cost: number };
@@ -1775,7 +1776,9 @@ function UsageTab({ usage }: { usage: UsageData }) {
                     ? "Slack"
                     : stat.provider === "hubspot"
                       ? "HubSpot"
-                      : stat.provider;
+                      : stat.provider === "google_drive"
+                        ? "Google Drive"
+                        : stat.provider;
               const lastFetched = stat.last_fetched_at
                 ? new Date(stat.last_fetched_at).toLocaleDateString(undefined, {
                     month: "short",
@@ -2756,7 +2759,14 @@ function NotificationsTab() {
 
 interface ConnectorStatus {
   connected: string[];
-  available: { google_calendar: boolean; slack: boolean; hubspot: boolean; github: boolean };
+  available: { google_calendar: boolean; slack: boolean; hubspot: boolean; github: boolean; google_drive: boolean };
+}
+
+interface GoogleDriveFileInfo {
+  id: string;
+  name: string;
+  mimeType: string;
+  cachedAt: string | null;
 }
 
 interface SlackChannel {
@@ -2779,6 +2789,13 @@ function IntegrationsTab() {
   const [githubRepos, setGithubRepos] = useState("");
   const [githubSaving, setGithubSaving] = useState(false);
   const [githubConnectedMeta, setGithubConnectedMeta] = useState<{ login: string; repos: string[]; last_fetched_at: string | null } | null>(null);
+  // Google Drive connector state
+  const [driveSelectedFiles, setDriveSelectedFiles] = useState<GoogleDriveFileInfo[]>([]);
+  const [driveSearchQuery, setDriveSearchQuery] = useState("");
+  const [driveSearchResults, setDriveSearchResults] = useState<Array<{ id: string; name: string; mimeType: string }> | null>(null);
+  const [driveSearching, setDriveSearching] = useState(false);
+  const [driveSaving, setDriveSaving] = useState(false);
+  const [driveRefreshing, setDriveRefreshing] = useState(false);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -2796,6 +2813,17 @@ function IntegrationsTab() {
             .catch(() => {});
         } else {
           setGithubConnectedMeta(null);
+        }
+        // If Google Drive is connected, load its selected files.
+        if ((data.connected as string[]).includes("google_drive")) {
+          fetch("/api/conduit/connectors/google-drive")
+            .then((r) => r.ok ? r.json() : null)
+            .then((j: { files?: GoogleDriveFileInfo[] } | null) => {
+              if (j?.files) setDriveSelectedFiles(j.files);
+            })
+            .catch(() => {});
+        } else {
+          setDriveSelectedFiles([]);
         }
       }
     } catch {
@@ -2816,6 +2844,7 @@ function IntegrationsTab() {
         google_calendar: "Google Calendar",
         slack: "Slack",
         hubspot: "HubSpot",
+        google_drive: "Google Drive",
       };
       toast.success(`${labels[connected] ?? connected} connected.`);
       fetchStatus();
@@ -2836,6 +2865,10 @@ function IntegrationsTab() {
         hubspot_csrf: "OAuth state mismatch — please try again.",
         hubspot_exchange: "Failed to exchange HubSpot auth code.",
         hubspot_db: "Failed to save HubSpot connection.",
+        google_drive_denied: "Google Drive access was denied.",
+        google_drive_csrf: "OAuth state mismatch — please try again.",
+        google_drive_exchange: "Failed to exchange Google Drive auth code.",
+        google_drive_db: "Failed to save Google Drive connection.",
       };
       toast.error(msgs[error] ?? "Connection failed.");
       router.replace("/app/settings?tab=integrations");
@@ -2910,7 +2943,9 @@ function IntegrationsTab() {
   const disconnect = async (provider: string) => {
     setDisconnecting(provider);
     try {
-      const res = await fetch(`/api/conduit/connectors/${provider.replace("_", "-")}`, {
+      // For providers with underscores, convert to hyphens for the URL.
+      const urlProvider = provider.replace(/_/g, "-");
+      const res = await fetch(`/api/conduit/connectors/${urlProvider}`, {
         method: "DELETE",
       });
       if (res.ok) {
@@ -2919,16 +2954,80 @@ function IntegrationsTab() {
           slack: "Slack",
           hubspot: "HubSpot",
           github: "GitHub",
+          google_drive: "Google Drive",
         };
         toast.success(`${labels[provider] ?? provider} disconnected.`);
         if (provider === "slack") setSlackChannels(null);
         if (provider === "github") setGithubConnectedMeta(null);
+        if (provider === "google_drive") {
+          setDriveSelectedFiles([]);
+          setDriveSearchResults(null);
+          setDriveSearchQuery("");
+        }
         fetchStatus();
       } else {
         toast.error("Failed to disconnect.");
       }
     } finally {
       setDisconnecting(null);
+    }
+  };
+
+  const searchDriveFiles = async () => {
+    setDriveSearching(true);
+    try {
+      const q = encodeURIComponent(driveSearchQuery);
+      const res = await fetch(`/api/conduit/connectors/google-drive/files?q=${q}`);
+      if (res.ok) {
+        const j = await res.json() as { files?: Array<{ id: string; name: string; mimeType: string }> };
+        setDriveSearchResults(j.files ?? []);
+      } else {
+        toast.error("Drive search failed.");
+      }
+    } finally {
+      setDriveSearching(false);
+    }
+  };
+
+  const saveDriveFiles = async (fileIds: string[]) => {
+    setDriveSaving(true);
+    try {
+      const res = await fetch("/api/conduit/connectors/google-drive/files", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ file_ids: fileIds }),
+      });
+      const j = await res.json() as { ok?: boolean; files?: GoogleDriveFileInfo[]; error?: string };
+      if (res.ok && j.ok) {
+        setDriveSelectedFiles(j.files ?? []);
+        setDriveSearchResults(null);
+        setDriveSearchQuery("");
+        toast.success("Google Drive files saved.");
+      } else {
+        toast.error("Failed to save Drive files.");
+      }
+    } finally {
+      setDriveSaving(false);
+    }
+  };
+
+  const refreshDriveFiles = async () => {
+    setDriveRefreshing(true);
+    try {
+      const res = await fetch("/api/conduit/connectors/google-drive", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const j = await res.json() as { ok?: boolean; files?: GoogleDriveFileInfo[]; error?: string };
+      if (res.ok && j.ok) {
+        setDriveSelectedFiles(j.files ?? []);
+        toast.success("Google Drive synced.");
+      } else {
+        toast.error("Sync failed. Try again.");
+      }
+    } finally {
+      setDriveRefreshing(false);
     }
   };
 
@@ -2944,7 +3043,9 @@ function IntegrationsTab() {
           ? status?.available.hubspot ?? false
           : provider === "github"
             ? status?.available.github ?? true
-            : false;
+            : provider === "google_drive"
+              ? status?.available.google_drive ?? false
+              : false;
 
   return (
     <div className="space-y-6 text-sm">
@@ -3244,6 +3345,236 @@ function IntegrationsTab() {
           )}
         </div>
       </div>
+
+        {/* Google Drive */}
+        <div className="conduit-card p-5 flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-3">
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+              }}
+            >
+              <BrandMarkDrive size={20} />
+            </div>
+            {isConnected("google_drive") ? (
+              <span
+                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                style={{
+                  background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
+                  color: "var(--color-success, #22c55e)",
+                  border: "1px solid color-mix(in srgb, var(--color-success, #22c55e) 28%, transparent)",
+                }}
+              >
+                Connected
+              </span>
+            ) : (
+              <span
+                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                style={{
+                  background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
+                  color: "var(--color-accent)",
+                  border: "1px solid color-mix(in srgb, var(--color-accent) 28%, transparent)",
+                }}
+              >
+                Not connected
+              </span>
+            )}
+          </div>
+          <div>
+            <div className="font-medium text-[var(--color-text)]">Google Drive</div>
+            <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
+              Select up to 5 Docs or Sheets — brand guides, product specs, customer
+              lists — and every specialist references them automatically.
+            </p>
+          </div>
+          {isConnected("google_drive") ? (
+            <div className="mt-auto flex flex-col gap-3">
+              {/* Selected files list */}
+              {driveSelectedFiles.length > 0 && (
+                <div className="flex flex-col gap-1.5">
+                  <p className="text-[11px] text-[var(--color-text-muted)]">
+                    Synced files ({driveSelectedFiles.length}/5):
+                  </p>
+                  {driveSelectedFiles.map((f) => (
+                    <div key={f.id} className="flex items-center justify-between gap-2 text-xs">
+                      <span className="truncate text-[var(--color-text)]">{f.name}</span>
+                      <span className="shrink-0 text-[10px] text-[var(--color-text-muted)]">
+                        {f.mimeType === "application/vnd.google-apps.spreadsheet" ? "Sheet" : "Doc"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {/* File picker */}
+              {driveSearchResults === null ? (
+                <button
+                  onClick={() => { setDriveSearchResults([]); }}
+                  className="w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
+                  style={{
+                    background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
+                    border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+                    color: "var(--color-accent)",
+                  }}
+                >
+                  <Link size={12} />
+                  {driveSelectedFiles.length > 0 ? "Change files" : "Pick files"}
+                </button>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={driveSearchQuery}
+                      onChange={(e) => setDriveSearchQuery(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") searchDriveFiles(); }}
+                      placeholder="Search Docs & Sheets…"
+                      className="flex-1 text-xs rounded-lg px-2 py-2"
+                      style={{
+                        background: "var(--color-surface-elevated)",
+                        border: "1px solid var(--color-border)",
+                        color: "var(--color-text)",
+                        outline: "none",
+                      }}
+                    />
+                    <button
+                      onClick={searchDriveFiles}
+                      disabled={driveSearching}
+                      className="px-3 py-2 rounded-lg text-xs font-medium shrink-0"
+                      style={{
+                        background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
+                        border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+                        color: "var(--color-accent)",
+                      }}
+                    >
+                      {driveSearching ? "…" : "Search"}
+                    </button>
+                  </div>
+                  {driveSearchResults.length > 0 && (
+                    <div className="flex flex-col gap-1 max-h-40 overflow-y-auto rounded-lg" style={{ border: "1px solid var(--color-border)" }}>
+                      {driveSearchResults.map((f) => {
+                        const isSelected = driveSelectedFiles.some((s) => s.id === f.id);
+                        return (
+                          <button
+                            key={f.id}
+                            onClick={() => {
+                              if (isSelected) return;
+                              if (driveSelectedFiles.length >= 5) {
+                                toast.error("Maximum 5 files. Remove one first.");
+                                return;
+                              }
+                              const updated = [...driveSelectedFiles.map((s) => s.id), f.id];
+                              saveDriveFiles(updated);
+                            }}
+                            disabled={isSelected || driveSaving}
+                            className="text-left px-3 py-2 text-xs flex items-center gap-2"
+                            style={{
+                              background: isSelected ? "color-mix(in srgb, var(--color-success, #22c55e) 8%, transparent)" : "transparent",
+                              color: isSelected ? "var(--color-success, #22c55e)" : "var(--color-text)",
+                              borderBottom: "1px solid var(--color-border)",
+                            }}
+                          >
+                            <span className="shrink-0 text-[10px] opacity-60">
+                              {f.mimeType === "application/vnd.google-apps.spreadsheet" ? "Sheet" : "Doc"}
+                            </span>
+                            <span className="truncate">{f.name}</span>
+                            {isSelected && <Check size={10} className="shrink-0 ml-auto" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {driveSearchResults.length === 0 && !driveSearching && driveSearchQuery && (
+                    <p className="text-[11px] text-[var(--color-text-muted)] text-center py-2">No Docs or Sheets found.</p>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setDriveSearchResults(null)}
+                      className="flex-1 py-2 rounded-lg text-xs font-medium"
+                      style={{
+                        background: "var(--color-surface-elevated)",
+                        border: "1px solid var(--color-border)",
+                        color: "var(--color-text-muted)",
+                      }}
+                    >
+                      Done
+                    </button>
+                    {driveSelectedFiles.length > 0 && (
+                      <button
+                        onClick={() => saveDriveFiles([])}
+                        disabled={driveSaving}
+                        className="flex-1 py-2 rounded-lg text-xs font-medium"
+                        style={{
+                          background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
+                          border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
+                          color: "var(--color-destructive, #ef4444)",
+                        }}
+                      >
+                        Clear all
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+              {/* Refresh + Disconnect */}
+              <div className="flex gap-2">
+                {driveSelectedFiles.length > 0 && (
+                  <button
+                    onClick={refreshDriveFiles}
+                    disabled={driveRefreshing}
+                    className="flex-1 py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
+                    style={{
+                      background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
+                      border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+                      color: "var(--color-accent)",
+                    }}
+                  >
+                    {driveRefreshing ? "Syncing…" : "Refresh"}
+                  </button>
+                )}
+                <button
+                  onClick={() => disconnect("google_drive")}
+                  disabled={disconnecting === "google_drive"}
+                  className="flex-1 py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
+                  style={{
+                    background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
+                    border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
+                    color: "var(--color-destructive, #ef4444)",
+                  }}
+                >
+                  <Link2Off size={12} />
+                  {disconnecting === "google_drive" ? "Disconnecting…" : "Disconnect"}
+                </button>
+              </div>
+            </div>
+          ) : isAvailable("google_drive") ? (
+            <a
+              href="/api/conduit/connectors/google-drive/auth"
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
+              style={{
+                background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+                color: "var(--color-accent)",
+              }}
+            >
+              <Link size={12} />
+              Connect Google Drive
+            </a>
+          ) : (
+            <button
+              disabled
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text-muted)",
+              }}
+            >
+              Not configured
+            </button>
+          )}
+        </div>
 
       {/* GitHub connector */}
       <div className="conduit-card p-5 flex flex-col gap-4">
