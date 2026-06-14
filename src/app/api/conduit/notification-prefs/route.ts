@@ -7,11 +7,15 @@ export const runtime = "nodejs";
 export interface NotificationPrefs {
   product_updates: boolean;
   weekly_digest: boolean;
+  build_completion_alerts: boolean;
+  low_balance_warning: boolean;
 }
 
 const DEFAULTS: NotificationPrefs = {
   product_updates: true,
   weekly_digest: true,
+  build_completion_alerts: true,
+  low_balance_warning: true,
 };
 
 export async function GET() {
@@ -44,6 +48,8 @@ export async function PATCH(request: NextRequest) {
   const patch: Partial<NotificationPrefs> = {};
   if (typeof body.product_updates === "boolean") patch.product_updates = body.product_updates;
   if (typeof body.weekly_digest === "boolean") patch.weekly_digest = body.weekly_digest;
+  if (typeof body.build_completion_alerts === "boolean") patch.build_completion_alerts = body.build_completion_alerts;
+  if (typeof body.low_balance_warning === "boolean") patch.low_balance_warning = body.low_balance_warning;
 
   if (Object.keys(patch).length === 0) {
     return NextResponse.json({ error: "no_op" }, { status: 400 });

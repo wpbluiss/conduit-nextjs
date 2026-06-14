@@ -2049,11 +2049,15 @@ function Stat({
 interface NotificationPrefs {
   product_updates: boolean;
   weekly_digest: boolean;
+  build_completion_alerts: boolean;
+  low_balance_warning: boolean;
 }
 
 const NOTIF_DEFAULTS: NotificationPrefs = {
   product_updates: true,
   weekly_digest: true,
+  build_completion_alerts: true,
+  low_balance_warning: true,
 };
 
 function NotificationsTab() {
@@ -2073,6 +2077,7 @@ function NotificationsTab() {
 
   const toggle = async (key: keyof NotificationPrefs) => {
     if (!prefs) return;
+    const prev = prefs;
     const next = { ...prefs, [key]: !prefs[key] };
     setPrefs(next);
     setSaving(key);
@@ -2083,8 +2088,12 @@ function NotificationsTab() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ [key]: next[key] }),
       });
-      if (!r.ok) setError("Couldn't save preference.");
+      if (!r.ok) {
+        setPrefs(prev);
+        setError("Couldn't save preference.");
+      }
     } catch {
+      setPrefs(prev);
       setError("Couldn't save preference.");
     }
     setSaving(null);
@@ -2109,10 +2118,22 @@ function NotificationsTab() {
           onChange={() => toggle("product_updates")}
         />
         <ToggleRow
-          label="Weekly financial digest"
-          desc="A weekly summary of your spending and AI activity (coming soon)."
+          label="Weekly digest"
+          desc="Monday morning summary of each specialist's activity from the past week."
           value={prefs.weekly_digest}
           onChange={() => toggle("weekly_digest")}
+        />
+        <ToggleRow
+          label="Build completion alerts"
+          desc="Email when an Engineering build finishes (success or failure)."
+          value={prefs.build_completion_alerts}
+          onChange={() => toggle("build_completion_alerts")}
+        />
+        <ToggleRow
+          label="Low token balance warning"
+          desc="Alert when your monthly token balance falls below 10%."
+          value={prefs.low_balance_warning}
+          onChange={() => toggle("low_balance_warning")}
         />
 
         {/* Always-on rows — visually disabled with tooltip */}
