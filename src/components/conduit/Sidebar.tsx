@@ -13,11 +13,13 @@ import {
   Lock,
   LogOut,
   Mic,
+  Moon,
   PanelLeftClose,
   PanelLeftOpen,
   Plus,
   Settings,
   Sparkles,
+  Sun,
   Users2,
   Menu,
   X,
@@ -57,6 +59,67 @@ function readCollapsed(): boolean {
   } catch {
     return false;
   }
+}
+
+const THEME_KEY = "praxis.theme";
+
+function SidebarThemeButton({ collapsed = false }: { collapsed?: boolean }) {
+  const [dark, setDark] = useState<boolean>(() => {
+    if (typeof document === "undefined") return true;
+    return document.documentElement.getAttribute("data-praxis-theme") === "dark";
+  });
+
+  useEffect(() => {
+    const stored = typeof localStorage !== "undefined"
+      ? (localStorage.getItem(THEME_KEY) ?? "system")
+      : "system";
+    const resolved = stored === "system"
+      ? (typeof window !== "undefined" && window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+      : stored;
+    setDark(resolved === "dark");
+  }, []);
+
+  function toggle() {
+    const next = dark ? "light" : "dark";
+    setDark(!dark);
+    if (typeof document !== "undefined") {
+      document.documentElement.setAttribute("data-praxis-theme", next);
+      document.documentElement.setAttribute("data-praxis-theme-pref", next);
+    }
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(THEME_KEY, next);
+    }
+    fetch("/api/conduit/account/prefs", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ theme_preference: next }),
+    }).catch(() => {});
+  }
+
+  if (collapsed) {
+    return (
+      <button
+        type="button"
+        onClick={toggle}
+        title={dark ? "Switch to light theme" : "Switch to dark theme"}
+        aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
+        className="flex items-center justify-center w-8 h-8 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors duration-100"
+      >
+        {dark ? <Sun size={14} /> : <Moon size={14} />}
+      </button>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] rounded-lg transition-colors duration-100"
+    >
+      {dark ? <Sun size={14} /> : <Moon size={14} />}
+      {dark ? "Light" : "Dark"}
+    </button>
+  );
 }
 
 export function Sidebar({
@@ -718,6 +781,7 @@ export function Sidebar({
             <div className="flex flex-col items-center gap-1 px-2">
               <div className="flex justify-center"><ChangelogPopover /></div>
               <div className="flex justify-center"><NotificationCenter /></div>
+              <SidebarThemeButton collapsed />
               <Link href="/app/settings" title="Settings" aria-label="Settings" onClick={close}
                 className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-100 ${isActive("/app/settings") ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"}`}>
                 <Settings size={14} />
@@ -751,6 +815,7 @@ export function Sidebar({
             <div className="px-2 space-y-0.5">
               <ChangelogPopover />
               <div className="px-1"><NotificationCenter /></div>
+              <SidebarThemeButton />
               <NavLink
                 href="/app/settings"
                 icon={<Settings size={14} />}
