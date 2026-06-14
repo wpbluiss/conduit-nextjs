@@ -11,6 +11,7 @@ import { ConversationSearchBar } from "@/components/conduit/ConversationSearchBa
 import { ConversationLabelsDisplay, ConversationLabelManager } from "@/components/conduit/ConversationLabels";
 import type { ConversationLabel } from "@/components/conduit/ConversationLabels";
 import { ConversationLabelFilter } from "@/components/conduit/ConversationLabelFilter";
+import { ConversationTitleEditor } from "@/components/conduit/ConversationTitleEditor";
 
 export const dynamic = "force-dynamic";
 
@@ -59,7 +60,7 @@ function ConversationRow({
   return (
     <div className="group relative flex flex-col gap-1.5 px-4 py-3 rounded-lg conduit-card hover:border-[var(--color-accent)] transition-colors">
       <div className="flex items-center gap-3 min-w-0">
-        <Link href={`/app?c=${c.id}`} className="flex items-center gap-3 flex-1 min-w-0">
+        <Link href={`/app?c=${c.id}`} className="flex items-center shrink-0" tabIndex={-1} aria-hidden>
           {isTeam ? (
             <span
               aria-hidden
@@ -82,12 +83,14 @@ function ConversationRow({
               <RecentIcon size={11} strokeWidth={2.5} />
             </span>
           )}
-          <span className="flex-1 truncate text-sm">
-            {c.title || "Untitled chat"}
-          </span>
-          <span className="text-xs text-[var(--color-text-muted)] shrink-0 pr-2">
-            {relativeDate(c.updated_at)}
-          </span>
+        </Link>
+        <ConversationTitleEditor conversationId={c.id} initialTitle={c.title} />
+        <Link
+          href={`/app?c=${c.id}`}
+          aria-label={`Open ${c.title || "Untitled chat"}`}
+          className="text-xs text-[var(--color-text-muted)] shrink-0 pr-2 hover:text-[var(--color-text)] transition-colors"
+        >
+          {relativeDate(c.updated_at)}
         </Link>
         <div className="shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
           <PinConversationButton

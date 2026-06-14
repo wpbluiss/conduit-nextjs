@@ -75,8 +75,13 @@ export async function PATCH(request: NextRequest, ctx: RouteCtx) {
   const account = await getOrCreateAccount(supabase, user);
 
   const body = await request.json().catch(() => ({}));
-  if (typeof body.pinned !== "boolean") {
-    return NextResponse.json({ error: "pinned must be a boolean" }, { status: 400 });
+  const hasPinned = typeof body.pinned === "boolean";
+  const hasTitle = typeof body.title === "string";
+  if (!hasPinned && !hasTitle) {
+    return NextResponse.json({ error: "must provide pinned or title" }, { status: 400 });
+  }
+  if (hasTitle && body.title.trim().length === 0) {
+    return NextResponse.json({ error: "title must not be empty" }, { status: 400 });
   }
 
   // Verify ownership before any write
@@ -87,6 +92,18 @@ export async function PATCH(request: NextRequest, ctx: RouteCtx) {
     .maybeSingle();
   if (!convo || convo.account_id !== account.id) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
+  }
+
+  if (hasTitle) {
+    const { error } = await supabase
+      .from("conduit_conversations")
+      .update({ title: body.title.trim() })
+      .eq("id", id)
+      .eq("account_id", account.id);
+    if (error) {
+      return NextResponse.json({ error: "db_error" }, { status: 500 });
+    }
+    return NextResponse.json({ ok: true, title: body.title.trim() });
   }
 
   // Enforce max 5 pinned per account when pinning
