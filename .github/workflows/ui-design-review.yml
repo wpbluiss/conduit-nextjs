@@ -3,6 +3,8 @@ name: UI Design Review
 # Visual design-review loop: screenshots the LIVE pages, then has Claude (vision) judge
 # them against world-class product design and either fix the worst gaps directly (PR)
 # or file [UI] issues. Runs on conduit-nextjs (public = free Actions minutes).
+# Screenshots are uploaded as an artifact ("ui-screenshots") so Luis can SEE them from
+# the Actions tab (run → Artifacts → download).
 
 permissions:
   contents: write
@@ -28,6 +30,14 @@ jobs:
           npm i -D playwright@latest
           npx playwright install --with-deps chromium
           node scripts/ui-screenshots.mjs || echo "screenshot step soft-failed"
+      - name: Upload screenshots (so Luis can view them from the Actions tab)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-screenshots
+          path: .ui-review/*.png
+          retention-days: 14
+          if-no-files-found: warn
       - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
