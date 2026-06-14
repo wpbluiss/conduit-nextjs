@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
   // Fetch account's conversation IDs for scoping the message search.
   const { data: convos } = await supabase
     .from("conduit_conversations")
-    .select("id, title, dominant_employee")
+    .select("id, title, dominant_employee, updated_at")
     .eq("account_id", account.id);
 
   if (!convos || convos.length === 0) {
@@ -77,6 +77,7 @@ export async function GET(req: NextRequest) {
       conversation_id: cid,
       title: convo?.title ?? null,
       dominant_employee: convo?.dominant_employee ?? null,
+      updated_at: convo?.updated_at ?? null,
       snippet: extractSnippet(msg.content as string, q),
       role: msg.role,
       employee: msg.employee,
