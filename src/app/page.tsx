@@ -18,6 +18,9 @@ const Customers = dynamic(() => import("@/components/Customers"));
 const EngineeringProof = dynamic(() => import("@/components/EngineeringProof"));
 const SocialProof = dynamic(() => import("@/components/SocialProof"));
 const FounderScenarios = dynamic(() => import("@/components/FounderScenarios"));
+const TestimonialsCarousel = dynamic(
+  () => import("@/components/TestimonialsCarousel"),
+);
 const SpecialistShowcase = dynamic(
   () => import("@/components/SpecialistShowcase"),
 );
@@ -83,6 +86,7 @@ export default function Home() {
       <EngineeringProof />
       <SocialProof />
       <FounderScenarios />
+      <TestimonialsCarousel />
       <SpecialistShowcase />
       <WhyPraxisTable />
       <Pricing />
