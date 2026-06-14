@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Pin, ThumbsDown, ThumbsUp } from "lucide-react";
+import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Pin, Search, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
@@ -204,6 +204,11 @@ export function Chat({
   } | null>(null);
   const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
 
+  // In-conversation message search
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
   // Rate-limit countdown: epoch ms when the ban lifts; null = not limited.
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
   const [rateLimitSecondsLeft, setRateLimitSecondsLeft] = useState(0);
@@ -266,6 +271,18 @@ export function Chat({
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }, [messages]);
+
+  // Focus search input when search opens; scroll to first match when query changes.
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
+  useEffect(() => {
+    if (!searchQuery.trim()) return;
+    requestAnimationFrame(() => {
+      const el = document.querySelector("[data-search-match='true']");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }, [searchQuery]);
 
   // Load pinned messages when conversation is available.
   const loadPins = useCallback(async (convId: string) => {
@@ -462,10 +479,13 @@ export function Chat({
     streamingAudioActiveRef.current = false;
   }, []);
 
-  // Global ESC + window event lets any other component cancel playback.
+  // Global ESC: cancel audio playback or close in-conversation search.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && playingMessageIdx !== null) stopAudio();
+      if (e.key === "Escape") {
+        if (playingMessageIdx !== null) stopAudio();
+        if (searchOpen) { setSearchOpen(false); setSearchQuery(""); }
+      }
     };
     const onStop = () => stopAudio();
     window.addEventListener("keydown", onKey);
@@ -474,7 +494,7 @@ export function Chat({
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("conduit:stopAudio", onStop);
     };
-  }, [playingMessageIdx, stopAudio]);
+  }, [playingMessageIdx, stopAudio, searchOpen]);
   const playTTS = useCallback(
     async (text: string, employee: EmployeeKey, idx: number) => {
       if (!voice.ttsAllowed || !text.trim()) return;
@@ -1128,6 +1148,36 @@ export function Chat({
                 <div className="shrink-0 flex items-center gap-1">
                   <button
                     type="button"
+                    onClick={() => {
+                      setSearchOpen((o) => !o);
+                      if (searchOpen) setSearchQuery("");
+                    }}
+                    title="Search messages (⌘F)"
+                    aria-label="Search messages"
+                    aria-pressed={searchOpen}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
+                    style={{
+                      color: searchOpen ? "var(--color-accent)" : "var(--color-text-muted)",
+                      border: searchOpen ? "1px solid var(--color-accent)" : "1px solid transparent",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!searchOpen) {
+                        (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
+                        (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!searchOpen) {
+                        (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
+                        (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                      }
+                    }}
+                  >
+                    <Search size={12} />
+                    <span className="hidden sm:inline">Search</span>
+                  </button>
+                  <button
+                    type="button"
                     onClick={exportConversation}
                     title="Download as Markdown"
                     aria-label="Download conversation as Markdown"
@@ -1182,6 +1232,51 @@ export function Chat({
             </div>
           )}
 
+          {/* Inline message search bar */}
+          {searchOpen && (
+            <div
+              className="flex items-center gap-2 px-3 py-2 rounded-xl mb-2"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+              }}
+            >
+              <Search size={14} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} />
+              <input
+                ref={searchInputRef}
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search messages…"
+                aria-label="Search messages in this conversation"
+                className="flex-1 bg-transparent outline-none text-[13px] min-w-0"
+                style={{ color: "var(--color-text)" }}
+              />
+              {searchQuery && (
+                <span className="text-[11px] shrink-0" style={{ color: "var(--color-text-muted)" }}>
+                  {messages.filter(
+                    (m) => (m.role === "user" || m.role === "assistant") &&
+                      m.content.toLowerCase().includes(searchQuery.toLowerCase())
+                  ).length} match{messages.filter(
+                    (m) => (m.role === "user" || m.role === "assistant") &&
+                      m.content.toLowerCase().includes(searchQuery.toLowerCase())
+                  ).length !== 1 ? "es" : ""}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+                aria-label="Close search"
+                className="p-0.5 rounded transition-colors shrink-0"
+                style={{ color: "var(--color-text-muted)" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
+              >
+                <X size={14} />
+              </button>
+            </div>
+          )}
+
           {companyBrief && messages.length === 0 && (
             <div
               className="flex items-start gap-2 px-3 py-2 rounded-lg text-xs"
@@ -1217,6 +1312,7 @@ export function Chat({
             <MessageBubble
               key={m.id ?? i}
               message={m}
+              searchQuery={searchQuery}
               onOpenArtifact={(id) => setDrawerArtifactId(id)}
               playing={playingMessageIdx === i}
               onStopAudio={stopAudio}
@@ -1601,6 +1697,33 @@ function EmptyState({
   );
 }
 
+function HighlightText({ text, query }: { text: string; query: string }) {
+  if (!query) return <span className="whitespace-pre-wrap">{text}</span>;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = text.split(new RegExp(`(${escaped})`, "gi"));
+  return (
+    <span className="whitespace-pre-wrap">
+      {parts.map((part, i) =>
+        part.toLowerCase() === query.toLowerCase() ? (
+          <mark
+            key={i}
+            style={{
+              background: "color-mix(in srgb, var(--color-accent) 28%, transparent)",
+              color: "var(--color-accent-hi, var(--color-accent))",
+              borderRadius: "2px",
+              padding: "0 1px",
+            }}
+          >
+            {part}
+          </mark>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
+      )}
+    </span>
+  );
+}
+
 function CopyButton({ content }: { content: string }) {
   const [copied, setCopied] = useState(false);
   const toast = useToast();
@@ -1703,6 +1826,7 @@ function MessageFeedbackButtons({
 
 const MessageBubble = memo(function MessageBubble({
   message,
+  searchQuery = "",
   onOpenArtifact,
   playing = false,
   onStopAudio,
@@ -1715,6 +1839,7 @@ const MessageBubble = memo(function MessageBubble({
   onPinToggle,
 }: {
   message: MessageRow;
+  searchQuery?: string;
   onOpenArtifact: (id: string) => void;
   playing?: boolean;
   onStopAudio?: () => void;
@@ -1729,6 +1854,10 @@ const MessageBubble = memo(function MessageBubble({
   const [editDraft, setEditDraft] = useState(message.content);
   const editRef = useRef<HTMLTextAreaElement>(null);
   const { labelFor: nickLabelFor } = useNicknames();
+
+  const isMatch =
+    !!searchQuery &&
+    message.content.toLowerCase().includes(searchQuery.toLowerCase());
 
   // Reset draft to current content when entering edit mode.
   useEffect(() => {
@@ -1816,6 +1945,7 @@ const MessageBubble = memo(function MessageBubble({
 
     return (
       <motion.div
+        data-search-match={isMatch ? "true" : undefined}
         className="flex justify-end group"
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
@@ -1831,7 +1961,7 @@ const MessageBubble = memo(function MessageBubble({
                 style={{ maxWidth: "260px", outline: "none" }}
               />
             ) : (
-              <span className="whitespace-pre-wrap">{message.content}</span>
+              <HighlightText text={message.content} query={searchQuery} />
             )}
           </div>
           {onEditStart && !isVoice && (
@@ -1903,8 +2033,12 @@ const MessageBubble = memo(function MessageBubble({
   return (
     <motion.div
       data-message-id={message.id}
+      data-search-match={isMatch ? "true" : undefined}
       className="flex gap-3 group"
-      style={{ ["--dept" as string]: DEPT_COLOR[employee] }}
+      style={{
+        ["--dept" as string]: DEPT_COLOR[employee],
+        ...(isMatch ? { outline: "1px solid color-mix(in srgb, var(--color-accent) 40%, transparent)", borderRadius: "12px", padding: "4px" } : {}),
+      }}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
