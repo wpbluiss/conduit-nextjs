@@ -37,6 +37,7 @@ import {
 } from "./PinnedMessagesBanner";
 import { useToast } from "@/context/ToastContext";
 import { useNicknames } from "@/context/NicknameContext";
+import { SaveOutputButton } from "./SaveOutputButton";
 
 export interface VoicePrefs {
   enabled: boolean;
@@ -1433,6 +1434,7 @@ export function Chat({
                   : undefined
               }
               searchMatch={searchMatchSet.has(i)}
+              conversationId={conversationId}
             />
           ))}
 
@@ -2045,6 +2047,7 @@ const MessageBubble = memo(function MessageBubble({
   pinned = false,
   onPinToggle,
   searchMatch = false,
+  conversationId,
 }: {
   message: MessageRow;
   onOpenArtifact: (id: string) => void;
@@ -2058,6 +2061,7 @@ const MessageBubble = memo(function MessageBubble({
   pinned?: boolean;
   onPinToggle?: (shouldPin: boolean) => void;
   searchMatch?: boolean;
+  conversationId?: string | null;
 }) {
   const [editDraft, setEditDraft] = useState(message.content);
   const editRef = useRef<HTMLTextAreaElement>(null);
@@ -2404,6 +2408,15 @@ const MessageBubble = memo(function MessageBubble({
               >
                 <Pin size={13} fill={pinned ? "currentColor" : "none"} />
               </button>
+            )}
+            {message.employee && message.content && (
+              <SaveOutputButton
+                messageId={message.id}
+                content={message.content}
+                specialist={message.employee}
+                conversationId={conversationId ?? undefined}
+                suggestedTitle=""
+              />
             )}
           </div>
         )}
