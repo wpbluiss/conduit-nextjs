@@ -25,6 +25,7 @@ import { WelcomeChecklist } from "@/components/conduit/WelcomeChecklist";
 import { Suspense } from "react";
 import { ReferralClaimer } from "@/components/conduit/ReferralClaimer";
 import { NicknameProvider } from "@/context/NicknameContext";
+import { PostHogIdentify } from "@/components/PostHogIdentify";
 
 export const dynamic = "force-dynamic";
 
@@ -181,6 +182,7 @@ export default async function AppLayout({
             isFirstRun={(account as unknown as { onboarded_at?: string | null }).onboarded_at == null}
           />
         )}
+        <PostHogIdentify userId={user.id} />
         <KeyboardShortcutsOverlay />
         <CommandPalette />
         {onboarded && isNewAccount && !checklistDismissed && (

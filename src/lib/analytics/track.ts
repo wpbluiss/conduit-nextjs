@@ -3,6 +3,8 @@ export type AnalyticsEvent =
   | "page_view"
   | "signup_started"
   | "signup_completed"
+  | "onboarding_completed"
+  | "first_ai_message_sent"
   | "paywall_viewed"
   | "checkout_clicked"
   | "upgrade_initiated"
@@ -25,4 +27,11 @@ export function track(
   }).catch(() => {
     // fire-and-forget — never surfaces errors to the user
   });
+
+  // Mirror to PostHog if configured — import is dynamic to keep server bundles clean.
+  if (typeof window !== "undefined") {
+    import("@/lib/analytics/posthog")
+      .then(({ phCapture }) => phCapture(event, properties))
+      .catch(() => {});
+  }
 }

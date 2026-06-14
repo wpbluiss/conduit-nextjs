@@ -38,6 +38,7 @@ import {
 import { useToast } from "@/context/ToastContext";
 import { useNicknames } from "@/context/NicknameContext";
 import { SaveOutputButton } from "./SaveOutputButton";
+import { track } from "@/lib/analytics/track";
 
 export interface VoicePrefs {
   enabled: boolean;
@@ -710,6 +711,15 @@ export function Chat({
       setFollowUpSuggestions([]);
       setLoading(true);
       setInput("");
+
+      // Track the first AI message ever sent — localStorage guards against repeat fires.
+      try {
+        const key = "praxis_first_ai_msg_v1";
+        if (!localStorage.getItem(key)) {
+          localStorage.setItem(key, "1");
+          track("first_ai_message_sent");
+        }
+      } catch { /* ignore — storage may be unavailable */ }
 
       const explicitPin: PinValue | undefined =
         employeePin ?? (pin === "auto" ? undefined : pin);
