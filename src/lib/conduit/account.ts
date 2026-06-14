@@ -49,6 +49,8 @@ export interface ConduitAccount {
   // R461 onboarding goals — nullable until migration 038 runs.
   onboarding_goals?: string[] | null;
   onboarding_complete?: boolean;
+  // R539 coach-mark tour — nullable until migration 045 runs.
+  onboarded_at?: string | null;
   created_at: string;
   updated_at: string;
 }

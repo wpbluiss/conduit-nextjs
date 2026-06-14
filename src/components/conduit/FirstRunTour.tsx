@@ -67,21 +67,33 @@ function cardPosition(anchor: Step["anchor"]): React.CSSProperties {
   }
 }
 
-export function FirstRunTour() {
+async function markOnboarded() {
+  try {
+    await fetch("/api/conduit/account/onboarded", { method: "PATCH" });
+  } catch {
+    // fire-and-forget
+  }
+}
+
+export function FirstRunTour({ tourDone = false }: { tourDone?: boolean }) {
   const reduced = useReducedMotion();
   const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // Only read localStorage on the client
+    // Server says tour is already done — skip immediately.
+    if (tourDone) return;
+    // Belt-and-suspenders: also check localStorage so tour doesn't show
+    // on the same device twice if the PATCH hasn't propagated yet.
     if (typeof window === "undefined") return;
     const done = localStorage.getItem(STORAGE_KEY);
     if (!done) setVisible(true);
-  }, []);
+  }, [tourDone]);
 
   const dismiss = useCallback(() => {
     localStorage.setItem(STORAGE_KEY, "1");
     setVisible(false);
+    void markOnboarded();
   }, []);
 
   const next = useCallback(() => {
