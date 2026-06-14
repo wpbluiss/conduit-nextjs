@@ -225,6 +225,13 @@ export function Chat({
   );
   const [showHandoffPicker, setShowHandoffPicker] = useState(false);
   const [handoffLoading, setHandoffLoading] = useState(false);
+  // Per-message handoff: stores the message to forward when picker is open
+  const [messageHandoffSource, setMessageHandoffSource] = useState<{
+    content: string;
+    sourceEmployee: EmployeeKey;
+  } | null>(null);
+  // Ref holding handoff origin metadata (set from URL params, cleared after first send)
+  const handoffOriginRef = useRef<{ source_conversation_id: string; source_specialist: string } | null>(null);
 
   // Rate-limit countdown: epoch ms when the ban lifts; null = not limited.
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
@@ -368,6 +375,27 @@ export function Chat({
     [conversationId, handoffLoading, router, toast],
   );
 
+  const performMessageHandoff = useCallback(
+    (targetEmployee: EmployeeKey) => {
+      if (!messageHandoffSource) return;
+      const { content, sourceEmployee } = messageHandoffSource;
+      const sourceName = labelFor(sourceEmployee);
+      const targetName = labelFor(targetEmployee);
+      // Build a quoted prompt that gives the target specialist context.
+      const truncated = content.length > 1200 ? content.slice(0, 1200) + "…" : content;
+      const quoted = `[Forwarded from ${sourceName} → ${targetName}]\n\n${truncated}`;
+      const params = new URLSearchParams({
+        pin: targetEmployee,
+        prompt: quoted,
+        ...(conversationId ? { handoff_src_conv: conversationId } : {}),
+        handoff_src_emp: sourceEmployee,
+      });
+      setMessageHandoffSource(null);
+      router.push(`/app?${params.toString()}`);
+    },
+    [messageHandoffSource, conversationId, router, labelFor],
+  );
+
   const handlePinToggle = useCallback(
     async (messageId: string, shouldPin: boolean) => {
       if (!conversationId) return;
@@ -442,9 +470,12 @@ export function Chat({
 
   // R8: workspace handoff. ?pin=<employee>&prompt=<text> from /app/team/* —
   // apply once on mount, then strip from URL so refresh doesn't re-trigger.
+  // Also reads ?handoff_src_conv + ?handoff_src_emp for per-message handoff metadata.
   useEffect(() => {
     const pinParam = searchParams.get("pin");
     const promptParam = searchParams.get("prompt");
+    const handoffSrcConv = searchParams.get("handoff_src_conv");
+    const handoffSrcEmp = searchParams.get("handoff_src_emp");
     let touched = false;
     if (pinParam === "team" && teamEligible) {
       setPin("team");
@@ -455,6 +486,13 @@ export function Chat({
     }
     if (promptParam) {
       setInput(promptParam);
+      touched = true;
+    }
+    if (handoffSrcConv && handoffSrcEmp) {
+      handoffOriginRef.current = {
+        source_conversation_id: handoffSrcConv,
+        source_specialist: handoffSrcEmp,
+      };
       touched = true;
     }
     if (touched) {
@@ -745,6 +783,11 @@ export function Chat({
       const body: Record<string, unknown> = { message: trimmed };
       if (conversationId) body.conversation_id = conversationId;
       if (explicitPin) body.employee_override = explicitPin;
+      // Attach handoff origin metadata on the first send of a forwarded conversation.
+      if (handoffOriginRef.current) {
+        body.message_metadata = handoffOriginRef.current;
+        handoffOriginRef.current = null;
+      }
 
       const resp = await fetch("/api/conduit/chat", {
         method: "POST",
@@ -1432,6 +1475,14 @@ export function Chat({
                   ? (shouldPin) => void handlePinToggle(m.id!, shouldPin)
                   : undefined
               }
+              onHandoff={
+                m.role === "assistant" && m.id && !m.pending
+                  ? () => setMessageHandoffSource({
+                      content: m.content,
+                      sourceEmployee: (m.employee as EmployeeKey) ?? "jarvis",
+                    })
+                  : undefined
+              }
               searchMatch={searchMatchSet.has(i)}
             />
           ))}
@@ -1757,6 +1808,117 @@ export function Chat({
         </>
       )}
 
+      {/* Per-message handoff specialist picker */}
+      {messageHandoffSource && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            aria-hidden
+            onClick={() => setMessageHandoffSource(null)}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Forward this response to a specialist"
+            className="fixed inset-0 z-50 flex items-center justify-center px-4"
+          >
+            <div
+              className="w-full max-w-md rounded-2xl border p-6 shadow-2xl"
+              style={{
+                background: "var(--color-surface-elevated)",
+                borderColor: "var(--color-border)",
+              }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p
+                    className="text-[11px] uppercase tracking-[0.15em] mb-1"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
+                    Forward to…
+                  </p>
+                  <h2 className="text-base font-semibold" style={{ color: "var(--color-text)" }}>
+                    Choose a specialist
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMessageHandoffSource(null)}
+                  aria-label="Close"
+                  className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors"
+                  style={{
+                    color: "var(--color-text-muted)",
+                    background: "var(--color-surface)",
+                  }}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {EMPLOYEE_ORDER.map((empId) => {
+                  const emp = EMPLOYEES[empId];
+                  const isAllowed = allowedSet.has(empId as EmployeeKey);
+                  const isSelf = empId === messageHandoffSource.sourceEmployee;
+                  return (
+                    <button
+                      key={empId}
+                      type="button"
+                      disabled={!isAllowed || isSelf}
+                      onClick={() => performMessageHandoff(empId as EmployeeKey)}
+                      title={isSelf ? "Already from this specialist" : undefined}
+                      className="flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{
+                        background: isAllowed && !isSelf ? "var(--color-surface)" : "transparent",
+                        borderColor: "var(--color-border)",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (isAllowed && !isSelf) {
+                          (e.currentTarget as HTMLElement).style.borderColor = emp.color;
+                          (e.currentTarget as HTMLElement).style.background = emp.colorSoft;
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
+                        (e.currentTarget as HTMLElement).style.background = isAllowed && !isSelf ? "var(--color-surface)" : "transparent";
+                      }}
+                    >
+                      <span
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
+                        style={{
+                          background: emp.colorSoft,
+                          color: emp.color,
+                          border: `1px solid ${emp.color}30`,
+                        }}
+                      >
+                        {emp.initial}
+                      </span>
+                      <span
+                        className="text-[11px] font-medium text-center leading-tight"
+                        style={{ color: "var(--color-text)" }}
+                      >
+                        {emp.name}
+                      </span>
+                      <span
+                        className="text-[9px] text-center leading-tight"
+                        style={{ color: "var(--color-text-muted)" }}
+                      >
+                        {emp.role}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] mt-4" style={{ color: "var(--color-text-muted)" }}>
+                Opens a new conversation with this response quoted.
+                {allowedEmployees.length < EMPLOYEE_ORDER.length && (
+                  <> Dimmed specialists require a higher plan.</>
+                )}
+              </p>
+            </div>
+          </div>
+        </>
+      )}
+
       {playingMessageIdx !== null && (() => {
         const speakingEmp =
           (messages[playingMessageIdx]?.employee as EmployeeKey | null) ?? null;
@@ -2044,6 +2206,7 @@ const MessageBubble = memo(function MessageBubble({
   onEditSubmit,
   pinned = false,
   onPinToggle,
+  onHandoff,
   searchMatch = false,
 }: {
   message: MessageRow;
@@ -2057,6 +2220,7 @@ const MessageBubble = memo(function MessageBubble({
   onEditSubmit?: (text: string) => void;
   pinned?: boolean;
   onPinToggle?: (shouldPin: boolean) => void;
+  onHandoff?: () => void;
   searchMatch?: boolean;
 }) {
   const [editDraft, setEditDraft] = useState(message.content);
@@ -2403,6 +2567,24 @@ const MessageBubble = memo(function MessageBubble({
                 }}
               >
                 <Pin size={13} fill={pinned ? "currentColor" : "none"} />
+              </button>
+            )}
+            {onHandoff && (
+              <button
+                type="button"
+                onClick={onHandoff}
+                aria-label="Hand off to another specialist"
+                title="Hand off to another specialist"
+                className="p-1 rounded transition-colors opacity-0 group-hover:opacity-100"
+                style={{ color: "var(--color-text-muted)" }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
+                }}
+              >
+                <Share2 size={13} />
               </button>
             )}
           </div>

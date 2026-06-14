@@ -86,6 +86,7 @@ export async function POST(request: NextRequest) {
     conversation_id?: string;
     message?: string;
     employee_override?: EmployeeKey | "team";
+    message_metadata?: { source_conversation_id?: string; source_specialist?: string };
   };
   try {
     body = await request.json();
@@ -161,11 +162,15 @@ export async function POST(request: NextRequest) {
   }
 
   // Insert user message
-  await supabase.from("conduit_messages").insert({
+  const userMsgPayload: Record<string, unknown> = {
     conversation_id: conversationId,
     role: "user",
     content: message,
-  });
+  };
+  if (body.message_metadata && Object.keys(body.message_metadata).length > 0) {
+    userMsgPayload.metadata = body.message_metadata;
+  }
+  await supabase.from("conduit_messages").insert(userMsgPayload);
 
   // Load last 10 messages of context (exclude soft-hidden edit branches)
   const { data: history } = await supabase
