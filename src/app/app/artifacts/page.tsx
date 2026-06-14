@@ -9,6 +9,7 @@ import {
   employeeLabel,
 } from "@/components/conduit/EmployeeBadge";
 import type { EmployeeKey } from "@/lib/ai/provider";
+import { ArtifactShareButton } from "@/components/conduit/ArtifactShareButton";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +35,7 @@ export default async function ArtifactsPage() {
   const { data: artifacts } = await supabase
     .from("conduit_artifacts")
     .select(
-      "id, type, title, produced_by, created_at, conversation_id, content",
+      "id, type, title, produced_by, created_at, conversation_id, content, share_token",
     )
     .eq("account_id", account.id)
     .order("created_at", { ascending: false })
@@ -70,9 +71,8 @@ export default async function ArtifactsPage() {
               const emp = asEmployee(a.produced_by);
               const preview = (a.content as string).slice(0, 100);
               return (
-                <Link
+                <div
                   key={a.id}
-                  href={`/app?c=${a.conversation_id}`}
                   style={{
                     ["--dept" as string]: DEPT_COLOR[emp],
                     borderLeftColor: DEPT_COLOR[emp],
@@ -86,21 +86,32 @@ export default async function ArtifactsPage() {
                     >
                       <FileText size={13} style={{ color: DEPT_COLOR[emp] }} />
                     </span>
-                    <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                    <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] flex-1 min-w-0">
                       {(a.type as string).replace("_", " ")} ·{" "}
                       <span style={{ color: DEPT_COLOR[emp] }}>
                         {employeeLabel(emp)}
                       </span>
                     </span>
+                    <ArtifactShareButton
+                      artifactId={a.id}
+                      initialShareToken={(a as { share_token?: string | null }).share_token ?? null}
+                    />
                   </div>
-                  <div className="serif text-lg leading-snug">{a.title}</div>
-                  <p className="text-xs text-[var(--color-text-muted)] line-clamp-2">
-                    {preview}…
-                  </p>
-                  <div className="text-[10px] text-[var(--color-text-muted)] mt-auto pt-2">
-                    {new Date(a.created_at).toLocaleString()}
-                  </div>
-                </Link>
+                  <Link
+                    href={`/app?c=${a.conversation_id}`}
+                    className="flex flex-col gap-2 group"
+                  >
+                    <div className="serif text-lg leading-snug group-hover:text-[var(--color-accent)] transition-colors">
+                      {a.title}
+                    </div>
+                    <p className="text-xs text-[var(--color-text-muted)] line-clamp-2">
+                      {preview}…
+                    </p>
+                    <div className="text-[10px] text-[var(--color-text-muted)] mt-auto pt-2">
+                      {new Date(a.created_at).toLocaleString()}
+                    </div>
+                  </Link>
+                </div>
               );
             })}
           </div>
