@@ -240,18 +240,25 @@ export function Sidebar({
 
           {/* Team header (collapsible) */}
           <div className="mt-3">
-            <button
-              type="button"
-              onClick={() => setTeamExpanded((v) => !v)}
-              className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-            >
-              <span className="inline-flex items-center gap-1.5">
+            <div className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+              <Link
+                href="/app/team"
+                onClick={close}
+                className="inline-flex items-center gap-1.5 hover:text-[var(--color-text)] transition-colors"
+              >
                 <Users2 size={11} /> Team
-              </span>
-              <span aria-hidden className="text-[10px]">
-                {teamExpanded ? "−" : "+"}
-              </span>
-            </button>
+              </Link>
+              <button
+                type="button"
+                onClick={() => setTeamExpanded((v) => !v)}
+                className="hover:text-[var(--color-text)] transition-colors"
+                aria-label={teamExpanded ? "Collapse team list" : "Expand team list"}
+              >
+                <span aria-hidden className="text-[10px]">
+                  {teamExpanded ? "−" : "+"}
+                </span>
+              </button>
+            </div>
             {teamExpanded && (
               <ul className="space-y-0.5 mt-1">
                 {TEAM.map((emp) => {
