@@ -331,13 +331,15 @@ function renderSegments(segments: Segment[], key: string) {
 // ---------------------------------------------------------------------------
 
 interface Block {
-  type: "paragraph" | "heading" | "code" | "list" | "hr";
+  type: "paragraph" | "heading" | "code" | "list" | "hr" | "table";
   level?: number;       // heading
   lang?: string;        // code fence
   content?: string;     // paragraph/heading
   items?: string[];     // list
   code?: string;        // code block
   ordered?: boolean;
+  headers?: string[];   // table
+  rows?: string[][];    // table
 }
 
 function parseBlocks(text: string): Block[] {
@@ -404,6 +406,27 @@ function parseBlocks(text: string): Block[] {
       continue;
     }
 
+    // GFM table: header row followed by separator row (| --- | ... |)
+    if (
+      line.includes("|") &&
+      i + 1 < lines.length &&
+      /^[\s|:\-]+$/.test(lines[i + 1]) &&
+      lines[i + 1].includes("|") &&
+      lines[i + 1].includes("-")
+    ) {
+      const splitCells = (l: string) =>
+        l.trim().replace(/^\||\|$/g, "").split("|").map((s) => s.trim());
+      const headers = splitCells(line);
+      i += 2; // skip header + separator
+      const rows: string[][] = [];
+      while (i < lines.length && lines[i].includes("|") && lines[i].trim() !== "") {
+        rows.push(splitCells(lines[i]));
+        i++;
+      }
+      blocks.push({ type: "table", headers, rows });
+      continue;
+    }
+
     // Skip blank lines
     if (line.trim() === "") {
       i++;
@@ -419,7 +442,8 @@ function parseBlocks(text: string): Block[] {
       !/^[-*+]\s/.test(lines[i]) &&
       !/^\d+\.\s/.test(lines[i]) &&
       !/^```/.test(lines[i]) &&
-      !/^(---+|\*\*\*+|___+)\s*$/.test(lines[i])
+      !/^(---+|\*\*\*+|___+)\s*$/.test(lines[i]) &&
+      !(lines[i].includes("|") && i + 1 < lines.length && /^[\s|:\-]+$/.test(lines[i + 1]) && lines[i + 1].includes("-"))
     ) {
       paraLines.push(lines[i]);
       i++;
@@ -520,6 +544,63 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
                 );
               })}
             </Tag>
+          );
+        }
+
+        if (block.type === "table") {
+          return (
+            <div key={bi} className="overflow-x-auto my-3">
+              <table
+                className="w-full text-sm border-collapse"
+                style={{ borderColor: "var(--color-border, #1F1C19)" }}
+              >
+                <thead>
+                  <tr>
+                    {(block.headers ?? []).map((h, ci) => (
+                      <th
+                        key={ci}
+                        className="px-4 py-2 text-left text-[11px] uppercase tracking-[0.12em] font-semibold"
+                        style={{
+                          background: "var(--color-surface-elevated, #14110F)",
+                          borderBottom: "2px solid var(--color-border, #1F1C19)",
+                          borderRight: ci < (block.headers ?? []).length - 1
+                            ? "1px solid var(--color-border, #1F1C19)"
+                            : "none",
+                          color: "var(--color-text-muted, #8C8884)",
+                        }}
+                      >
+                        {renderSegments(parseInline(h), `th${bi}-${ci}`)}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {(block.rows ?? []).map((row, ri) => (
+                    <tr
+                      key={ri}
+                      style={{
+                        background: ri % 2 === 0
+                          ? "transparent"
+                          : "color-mix(in srgb, var(--color-surface-elevated, #14110F) 50%, transparent)",
+                      }}
+                    >
+                      {row.map((cell, ci) => (
+                        <td
+                          key={ci}
+                          className="px-4 py-2"
+                          style={{
+                            border: "1px solid var(--color-border, #1F1C19)",
+                            color: "var(--color-text, #F5F1EA)",
+                          }}
+                        >
+                          {renderSegments(parseInline(cell), `td${bi}-${ri}-${ci}`)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           );
         }
 
