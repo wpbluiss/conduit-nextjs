@@ -12,6 +12,7 @@ import {
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  Activity,
   Brain,
   Clock,
   CreditCard,
@@ -100,6 +101,14 @@ const NAV_ITEMS: Omit<PaletteItem, "action">[] = [
     sublabel: "Browse conversation history",
     icon: <MessageSquare size={ICON_SIZE} />,
     href: "/app/conversations",
+    group: "Navigation",
+  },
+  {
+    id: "nav-activity",
+    label: "Activity",
+    sublabel: "Recent specialist activity timeline",
+    icon: <Activity size={ICON_SIZE} />,
+    href: "/app/activity",
     group: "Navigation",
   },
   {

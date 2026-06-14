@@ -5,6 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  Activity,
   BarChart3,
   Brain,
   CreditCard,
@@ -608,6 +609,14 @@ export function Sidebar({
               />
             )}
             <div data-tour-target="memory">
+            <NavLink
+              href="/app/activity"
+              icon={<Activity size={14} />}
+              label="Activity"
+              active={isActive("/app/activity")}
+              onClick={close}
+              collapsed={collapsed}
+            />
             <NavLink
               href="/app/memory"
               icon={<Brain size={14} />}
