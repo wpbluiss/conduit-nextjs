@@ -134,7 +134,7 @@ export default function PricingPage() {
       {/* Comparison table */}
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
-          <ScrollRevealCards>
+          <ScrollRevealCards margin="30%">
             <ScrollRevealItem>
               <div className="max-w-[760px] mb-12 md:mb-16">
                 <p className="conduit-caption conduit-caption-ember">Compare</p>
@@ -154,7 +154,7 @@ export default function PricingPage() {
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
           <div className="conduit-prose">
-            <ScrollRevealCards>
+            <ScrollRevealCards margin="30%">
               <ScrollRevealItem>
                 <p className="conduit-caption conduit-caption-ember">FAQ</p>
                 <h2 className="conduit-display-2xl mt-5">
@@ -172,7 +172,7 @@ export default function PricingPage() {
       {/* Enterprise CTA */}
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
-          <ScrollRevealCards className="conduit-prose text-center">
+          <ScrollRevealCards margin="30%" className="conduit-prose text-center">
             <ScrollRevealItem>
               <p className="conduit-caption conduit-caption-ember">
                 Need more?
