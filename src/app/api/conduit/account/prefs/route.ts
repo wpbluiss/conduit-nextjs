@@ -20,6 +20,7 @@ export async function POST(request: NextRequest) {
     notify_voice_room_ready?: boolean;
     theme_preference?: "system" | "light" | "dark";
     display_name?: string;
+    company_brief?: string | null;
   };
   try {
     body = await request.json();
@@ -28,6 +29,10 @@ export async function POST(request: NextRequest) {
   }
 
   const update: Record<string, unknown> = {};
+  if (body.company_brief !== undefined) {
+    const brief = body.company_brief === null ? null : String(body.company_brief).slice(0, 500);
+    update.company_brief = brief || null;
+  }
   if (body.display_name !== undefined) {
     const name = body.display_name.trim().slice(0, 100);
     update.display_name = name || null;

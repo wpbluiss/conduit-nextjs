@@ -217,6 +217,7 @@ export async function POST(request: NextRequest) {
     account_name: account.name,
     business_type: businessType,
     business_description: businessDescription,
+    company_brief: account.company_brief ?? null,
     allowed_employees: account.internal_account
       ? [
           "jarvis",

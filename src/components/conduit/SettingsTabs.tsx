@@ -55,6 +55,7 @@ interface AccountData {
   theme_preference?: "system" | "light" | "dark" | null;
   display_name?: string | null;
   avatar_url?: string | null;
+  company_brief?: string | null;
 }
 
 const COMMON_TIMEZONES = [
@@ -1028,6 +1029,8 @@ function ProfileTab({
   );
 }
 
+const COMPANY_BRIEF_MAX = 500;
+
 function BusinessTab({ account }: { account: AccountData }) {
   const router = useRouter();
   const toast = useToast();
@@ -1036,6 +1039,11 @@ function BusinessTab({ account }: { account: AccountData }) {
   const [description, setDescription] = useState(account.business_description);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [brief, setBrief] = useState(account.company_brief ?? "");
+  const [briefSaving, setBriefSaving] = useState(false);
+  const [briefSaved, setBriefSaved] = useState(false);
+  const [briefError, setBriefError] = useState<string | null>(null);
 
   async function save() {
     setSaving(true);
@@ -1059,47 +1067,130 @@ function BusinessTab({ account }: { account: AccountData }) {
     router.refresh();
   }
 
+  async function saveBrief(e: FormEvent) {
+    e.preventDefault();
+    const trimmed = brief.trim().slice(0, COMPANY_BRIEF_MAX);
+    setBriefSaving(true);
+    setBriefError(null);
+    setBriefSaved(false);
+    const r = await fetch("/api/conduit/account/prefs", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ company_brief: trimmed || null }),
+    });
+    setBriefSaving(false);
+    if (r.ok) {
+      setBriefSaved(true);
+      toast.success("Company brief saved.");
+      router.refresh();
+    } else {
+      setBriefError("Couldn't save brief. Try again.");
+    }
+  }
+
   return (
-    <div className="space-y-4">
-      <div>
-        <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block mb-2">
-          Business name
-        </label>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)]"
-        />
+    <div className="space-y-8">
+      <div className="space-y-4">
+        <div>
+          <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block mb-2">
+            Business name
+          </label>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)]"
+          />
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block mb-2">
+            Business type
+          </label>
+          <input
+            value={businessType}
+            onChange={(e) => setBusinessType(e.target.value)}
+            className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)]"
+          />
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block mb-2">
+            What you&apos;re working on
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={4}
+            className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)] resize-none"
+          />
+        </div>
+        {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
+        <PraxisButton
+          onClick={save}
+          isLoading={saving}
+          loadingText="Saving…"
+        >
+          Save
+        </PraxisButton>
       </div>
-      <div>
-        <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block mb-2">
-          Business type
-        </label>
-        <input
-          value={businessType}
-          onChange={(e) => setBusinessType(e.target.value)}
-          className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)]"
-        />
+
+      {/* Company brief */}
+      <div className="conduit-card p-5">
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
+          Company brief
+        </div>
+        <p className="text-xs text-[var(--color-text-muted)] mb-3">
+          A short context block Atlas shares with your whole team. All 9 specialists
+          read this on every turn — no more repeating yourself.
+        </p>
+        <form onSubmit={saveBrief} className="space-y-3">
+          <div className="relative">
+            <textarea
+              value={brief}
+              onChange={(e) => {
+                setBrief(e.target.value.slice(0, COMPANY_BRIEF_MAX));
+                setBriefSaved(false);
+              }}
+              rows={4}
+              maxLength={COMPANY_BRIEF_MAX}
+              placeholder="e.g. Acme builds B2B SaaS for HR teams in the US mid-market. We're pre-revenue, 2 founders, focused on getting our first 10 design partners this quarter."
+              className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)] resize-none text-sm"
+            />
+            <span
+              className="absolute bottom-3 right-3 text-[10px] tabular-nums"
+              style={{
+                color:
+                  brief.length >= COMPANY_BRIEF_MAX
+                    ? "var(--color-pink)"
+                    : "var(--color-text-muted)",
+              }}
+            >
+              {brief.length}/{COMPANY_BRIEF_MAX}
+            </span>
+          </div>
+          {briefError && (
+            <p className="text-xs text-[var(--color-pink)]">{briefError}</p>
+          )}
+          <div className="flex items-center gap-3">
+            <PraxisButton
+              type="submit"
+              isLoading={briefSaving}
+              isDisabled={briefSaving}
+              variant="secondary"
+              className="!text-xs"
+            >
+              {briefSaved ? <><Check size={12} /> Saved</> : "Save brief"}
+            </PraxisButton>
+            {brief && (
+              <button
+                type="button"
+                onClick={() => { setBrief(""); setBriefSaved(false); }}
+                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </form>
       </div>
-      <div>
-        <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block mb-2">
-          What you&apos;re working on
-        </label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={4}
-          className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)] resize-none"
-        />
-      </div>
-      {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
-      <PraxisButton
-        onClick={save}
-        isLoading={saving}
-        loadingText="Saving…"
-      >
-        Save
-      </PraxisButton>
     </div>
   );
 }
