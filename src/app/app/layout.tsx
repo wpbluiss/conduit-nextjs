@@ -184,7 +184,7 @@ export default async function AppLayout({
         )}
         <PostHogIdentify userId={user.id} />
         <KeyboardShortcutsOverlay />
-        <CommandPalette />
+        <CommandPalette recentConvos={(convos ?? []).slice(0, 5)} />
         {onboarded && isNewAccount && !checklistDismissed && (
           <WelcomeChecklist hasConversations={(convos ?? []).length > 0} />
         )}
