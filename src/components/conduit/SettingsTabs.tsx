@@ -2709,13 +2709,20 @@ function NotificationsTab() {
 
 interface ConnectorStatus {
   connected: string[];
-  available: { google_calendar: boolean; slack: boolean };
+  available: { google_calendar: boolean; slack: boolean; notion: boolean };
 }
 
 interface SlackChannel {
   id: string;
   name: string;
   is_member: boolean;
+}
+
+interface NotionPage {
+  id: string;
+  title: string;
+  url: string;
+  last_edited_time: string;
 }
 
 function IntegrationsTab() {
@@ -2727,6 +2734,12 @@ function IntegrationsTab() {
   const [slackChannels, setSlackChannels] = useState<SlackChannel[] | null>(null);
   const [selectedChannel, setSelectedChannel] = useState<string>("");
   const [savingChannel, setSavingChannel] = useState(false);
+
+  // Notion state
+  const [notionPages, setNotionPages] = useState<NotionPage[] | null>(null);
+  const [notionSelectedIds, setNotionSelectedIds] = useState<string[]>([]);
+  const [notionQuery, setNotionQuery] = useState("");
+  const [savingNotion, setSavingNotion] = useState(false);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -2749,6 +2762,7 @@ function IntegrationsTab() {
       const labels: Record<string, string> = {
         google_calendar: "Google Calendar",
         slack: "Slack",
+        notion: "Notion",
       };
       toast.success(`${labels[connected] ?? connected} connected.`);
       fetchStatus();
@@ -2765,6 +2779,10 @@ function IntegrationsTab() {
         slack_csrf: "OAuth state mismatch — please try again.",
         slack_exchange: "Failed to exchange Slack auth code.",
         slack_db: "Failed to save Slack connection.",
+        notion_denied: "Notion access was denied.",
+        notion_csrf: "OAuth state mismatch — please try again.",
+        notion_exchange: "Failed to exchange Notion auth code.",
+        notion_db: "Failed to save Notion connection.",
       };
       toast.error(msgs[error] ?? "Connection failed.");
       router.replace("/app/settings?tab=integrations");
@@ -2807,6 +2825,39 @@ function IntegrationsTab() {
     }
   };
 
+  // Fetch Notion pages when Notion becomes connected.
+  useEffect(() => {
+    if (!status?.connected.includes("notion") || notionPages !== null) return;
+    fetch(`/api/conduit/connectors/notion/pages?q=${encodeURIComponent(notionQuery)}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((j) => {
+        if (j?.pages) {
+          setNotionPages(j.pages);
+          setNotionSelectedIds(j.selectedIds ?? []);
+        }
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
+
+  const saveNotionPages = async () => {
+    setSavingNotion(true);
+    try {
+      const res = await fetch("/api/conduit/connectors/notion/pages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ page_ids: notionSelectedIds }),
+      });
+      if (res.ok) {
+        toast.success("Notion pages saved and syncing.");
+      } else {
+        toast.error("Failed to save Notion pages.");
+      }
+    } finally {
+      setSavingNotion(false);
+    }
+  };
+
   const disconnect = async (provider: string) => {
     setDisconnecting(provider);
     try {
@@ -2817,9 +2868,11 @@ function IntegrationsTab() {
         const labels: Record<string, string> = {
           google_calendar: "Google Calendar",
           slack: "Slack",
+          notion: "Notion",
         };
         toast.success(`${labels[provider] ?? provider} disconnected.`);
         if (provider === "slack") setSlackChannels(null);
+        if (provider === "notion") { setNotionPages(null); setNotionSelectedIds([]); }
         fetchStatus();
       } else {
         toast.error("Failed to disconnect.");
@@ -2837,7 +2890,9 @@ function IntegrationsTab() {
       ? status?.available.google_calendar ?? false
       : provider === "slack"
         ? status?.available.slack ?? false
-        : false;
+        : provider === "notion"
+          ? status?.available.notion ?? false
+          : false;
 
   return (
     <div className="space-y-6 text-sm">
@@ -3051,69 +3106,219 @@ function IntegrationsTab() {
             </button>
           )}
         </div>
+
+        {/* Notion */}
+        <div className="conduit-card p-5 flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-3">
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+              }}
+            >
+              <BrandMarkNotion size={20} />
+            </div>
+            {isConnected("notion") ? (
+              <span
+                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                style={{
+                  background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
+                  color: "var(--color-success, #22c55e)",
+                  border: "1px solid color-mix(in srgb, var(--color-success, #22c55e) 28%, transparent)",
+                }}
+              >
+                Connected
+              </span>
+            ) : (
+              <span
+                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                style={{
+                  background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
+                  color: "var(--color-accent)",
+                  border: "1px solid color-mix(in srgb, var(--color-accent) 28%, transparent)",
+                }}
+              >
+                Not connected
+              </span>
+            )}
+          </div>
+          <div>
+            <div className="font-medium text-[var(--color-text)]">Notion</div>
+            <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
+              Sync your SOPs, brand guidelines, and product docs so all specialists
+              can reference them — without copy-paste. Select up to 5 pages.
+            </p>
+          </div>
+          {isConnected("notion") ? (
+            <div className="mt-auto flex flex-col gap-3">
+              {/* Page picker */}
+              {notionPages !== null && (
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={notionQuery}
+                    onChange={(e) => setNotionQuery(e.target.value)}
+                    placeholder="Search pages…"
+                    className="w-full text-xs rounded-lg px-3 py-2"
+                    style={{
+                      background: "var(--color-surface-elevated)",
+                      border: "1px solid var(--color-border)",
+                      color: "var(--color-text)",
+                      outline: "none",
+                    }}
+                  />
+                  <div className="max-h-48 overflow-y-auto space-y-1 rounded-lg border border-[var(--color-border)] p-1" style={{ background: "var(--color-surface-elevated)" }}>
+                    {notionPages
+                      .filter((p) =>
+                        !notionQuery ||
+                        p.title.toLowerCase().includes(notionQuery.toLowerCase()),
+                      )
+                      .map((page) => {
+                        const selected = notionSelectedIds.includes(page.id);
+                        const atCap = notionSelectedIds.length >= 5 && !selected;
+                        return (
+                          <label
+                            key={page.id}
+                            className="flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer text-xs"
+                            style={{
+                              background: selected ? "color-mix(in srgb, var(--color-accent) 10%, transparent)" : "transparent",
+                              color: atCap ? "var(--color-text-muted)" : "var(--color-text)",
+                              opacity: atCap ? 0.5 : 1,
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selected}
+                              disabled={atCap}
+                              onChange={() => {
+                                if (selected) {
+                                  setNotionSelectedIds((ids) => ids.filter((id) => id !== page.id));
+                                } else if (!atCap) {
+                                  setNotionSelectedIds((ids) => [...ids, page.id]);
+                                }
+                              }}
+                              className="shrink-0"
+                            />
+                            <span className="truncate">{page.title}</span>
+                          </label>
+                        );
+                      })}
+                    {notionPages.length === 0 && (
+                      <p className="px-2 py-2 text-xs text-[var(--color-text-muted)]">
+                        No pages accessible — share pages with the Praxis integration in Notion.
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs text-[var(--color-text-muted)]">
+                      {notionSelectedIds.length}/5 selected
+                    </span>
+                    <button
+                      onClick={saveNotionPages}
+                      disabled={savingNotion}
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium"
+                      style={{
+                        background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
+                        border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+                        color: "var(--color-accent)",
+                      }}
+                    >
+                      {savingNotion ? "Saving…" : "Save selection"}
+                    </button>
+                  </div>
+                </div>
+              )}
+              <button
+                onClick={() => disconnect("notion")}
+                disabled={disconnecting === "notion"}
+                className="w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
+                style={{
+                  background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
+                  border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
+                  color: "var(--color-destructive, #ef4444)",
+                }}
+              >
+                <Link2Off size={12} />
+                {disconnecting === "notion" ? "Disconnecting…" : "Disconnect"}
+              </button>
+            </div>
+          ) : isAvailable("notion") ? (
+            <a
+              href="/api/conduit/connectors/notion/auth"
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
+              style={{
+                background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+                color: "var(--color-accent)",
+              }}
+            >
+              <Link size={12} />
+              Connect Notion
+            </a>
+          ) : (
+            <button
+              disabled
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text-muted)",
+              }}
+            >
+              Not configured
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Coming soon — GitHub, Notion */}
+      {/* Coming soon — GitHub */}
       <div>
         <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-3">
           Coming soon
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[
-            {
-              name: "GitHub",
-              description:
-                "Let Praxis Engineering open PRs, push commits, and read repository context directly from your GitHub account.",
-              Icon: BrandMarkGithub,
-            },
-            {
-              name: "Notion",
-              description:
-                "Sync Praxis outputs — briefs, reports, SOPs — directly to your Notion workspace as formatted pages.",
-              Icon: BrandMarkNotion,
-            },
-          ].map(({ name, description, Icon }) => (
-            <div key={name} className="conduit-card p-5 flex flex-col gap-4 opacity-60">
-              <div className="flex items-start justify-between gap-3">
-                <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-                  style={{
-                    background: "var(--color-surface-elevated)",
-                    border: "1px solid var(--color-border)",
-                  }}
-                >
-                  <Icon size={20} />
-                </div>
-                <span
-                  className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
-                  style={{
-                    background: "color-mix(in srgb, var(--color-amber) 12%, transparent)",
-                    color: "var(--color-amber)",
-                    border: "1px solid color-mix(in srgb, var(--color-amber) 28%, transparent)",
-                  }}
-                >
-                  Coming soon
-                </span>
-              </div>
-              <div>
-                <div className="font-medium text-[var(--color-text)]">{name}</div>
-                <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
-                  {description}
-                </p>
-              </div>
-              <button
-                disabled
-                className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed"
+          <div className="conduit-card p-5 flex flex-col gap-4 opacity-60">
+            <div className="flex items-start justify-between gap-3">
+              <div
+                className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
                 style={{
                   background: "var(--color-surface-elevated)",
                   border: "1px solid var(--color-border)",
-                  color: "var(--color-text-muted)",
                 }}
               >
-                Connect {name}
-              </button>
+                <BrandMarkGithub size={20} />
+              </div>
+              <span
+                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                style={{
+                  background: "color-mix(in srgb, var(--color-amber) 12%, transparent)",
+                  color: "var(--color-amber)",
+                  border: "1px solid color-mix(in srgb, var(--color-amber) 28%, transparent)",
+                }}
+              >
+                Coming soon
+              </span>
             </div>
-          ))}
+            <div>
+              <div className="font-medium text-[var(--color-text)]">GitHub</div>
+              <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
+                Let Praxis Engineering open PRs, push commits, and read repository context
+                directly from your GitHub account.
+              </p>
+            </div>
+            <button
+              disabled
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text-muted)",
+              }}
+            >
+              Connect GitHub
+            </button>
+          </div>
         </div>
       </div>
 

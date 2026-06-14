@@ -54,6 +54,11 @@ import {
   renderSlackBlock,
 } from "@/lib/connectors/slack";
 import {
+  getNotionToken,
+  getNotionCachedPages,
+  renderNotionBlock,
+} from "@/lib/connectors/notion";
+import {
   prepareChatTts,
   streamForEmployee,
   type ChatTtsConfig,
@@ -249,6 +254,18 @@ export async function POST(request: NextRequest) {
       slackBlock = renderSlackBlock(msgs, channelName);
     } catch {
       // Non-fatal: continue without Slack context.
+    }
+  }
+
+  // Load Notion page context for all specialists when connected + pages are synced.
+  let notionBlock = "";
+  const notionToken = await getNotionToken(supabase, account.id);
+  if (notionToken) {
+    try {
+      const pages = await getNotionCachedPages(supabase, account.id);
+      notionBlock = renderNotionBlock(pages);
+    } catch {
+      // Non-fatal: continue without Notion context.
     }
   }
 
@@ -591,7 +608,7 @@ export async function POST(request: NextRequest) {
         // R-561: prepend Google Calendar block for ops + Atlas when connected.
         // R-542: prepend Slack block for all employees when a channel is selected.
         const calendarPrefix = calendarEmployees.has(employee) ? calendarBlock : "";
-        const systemPrompt = slackBlock + calendarPrefix + memoryBlockFor(employee) + withTime;
+        const systemPrompt = notionBlock + slackBlock + calendarPrefix + memoryBlockFor(employee) + withTime;
 
         let fullText = "";
         let inputTokens = 0;
@@ -994,6 +1011,8 @@ export async function POST(request: NextRequest) {
             try {
               const baseSystem = systemPromptFor(emp, ctx);
               const systemPrompt =
+                notionBlock +
+                slackBlock +
                 memoryBlockFor(emp) +
                 withTimeAware(baseSystem, {
                   timezone: account.timezone || "America/New_York",
@@ -1089,6 +1108,8 @@ export async function POST(request: NextRequest) {
           send("round_table_synthesis_start", {});
           const baseSystem = systemPromptFor("jarvis", ctx);
           const systemPrompt =
+            notionBlock +
+            slackBlock +
             memoryBlockFor("jarvis") +
             withTimeAware(baseSystem, {
               timezone: account.timezone || "America/New_York",
