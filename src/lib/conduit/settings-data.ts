@@ -113,6 +113,7 @@ export async function loadSettingsData(
       company_brief: account.company_brief ?? null,
       specialist_nicknames: ((account as unknown as { specialist_nicknames?: Record<string, string> }).specialist_nicknames ?? null),
       specialist_prefs: account.specialist_prefs ?? null,
+      workspace_name: (account as unknown as { workspace_name?: string | null }).workspace_name ?? null,
     },
     usage: {
       totals,
