@@ -1,9 +1,9 @@
 name: Praxis Autopilot
 
-# Autonomous engineering agent. Runs on a schedule (and on-demand from the
-# Actions tab → "Run workflow", which works from your phone browser) to pull
-# the highest-priority queued task, implement it on a branch, and open a PR
-# you approve from your phone. It NEVER pushes to production directly.
+# Autonomous engineering agents. 3 PARALLEL LANES split the claude-queue so they
+# build different issues simultaneously (≈3x throughput) without colliding. Auth via
+# the Max-plan OAuth token ($0). Drivers: Supabase dispatcher (every 15 min) + the
+# schedule backstop below. NEVER pushes to production directly — opens PRs only.
 
 permissions:
   contents: write
@@ -16,14 +16,16 @@ on:
     - cron: "25 */6 * * *"   # backstop only; the Supabase dispatcher drives this repo every 15 min
   workflow_dispatch: {}     # manual trigger + dispatcher target
 
-# Only one builder at a time — prevents two concurrent runs picking the same
-# top issues and producing duplicate PRs. Queued runs wait, they don't cancel.
-concurrency:
-  group: praxis-autopilot
-  cancel-in-progress: false
-
 jobs:
   autopilot:
+    strategy:
+      fail-fast: false
+      matrix:
+        lane: [1, 2, 3]
+    # One run per lane at a time (lanes run in parallel with each other).
+    concurrency:
+      group: praxis-autopilot-lane-${{ matrix.lane }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,43 +37,42 @@ jobs:
           claude_args: "--max-turns 160 --permission-mode bypassPermissions"
           show_full_output: true
           prompt: |
-            You are Praxis's autonomous engineering agent for the conduit-nextjs repo.
-            Founder (Luis) is away from his computer; you carry the build. Follow these
-            rules EXACTLY — they are what make autonomous work safe:
+            You are Praxis BUILD LANE ${{ matrix.lane }} of 3 parallel builder agents for
+            the conduit-nextjs repo. Founder (Luis) is away; you carry the build. There are
+            TWO other lanes running at the same time — the rules below keep you from
+            colliding with them. Follow EXACTLY:
 
-            1. SCOPE & DEDUP — First run `gh pr list --state open --limit 100`. Then look
-               at the top OPEN issues labeled "claude-queue". SKIP any issue that already
-               has an open PR referencing it (e.g. "Closes #N" / "#N" in a PR title or
-               body) — NEVER rebuild work that is already in flight; that is the #1 cause
-               of wasted duplicate PRs. From the issues that have NO open PR, take up to
-               the top 6, EACH on its own branch + its own PR. The MOMENT you choose an
-               issue, post a one-line comment on it ("🤖 building now") so any parallel
-               run sees it's claimed and skips it. Fully finish and open the PR for one
-               before starting the next. If none are unclaimed, exit immediately.
+            1. PICK YOUR SLICE (avoid collisions) —
+               a) Run `gh pr list --state open --limit 100` and
+                  `gh issue list --label claude-queue --state open --limit 100`.
+               b) Build the list of claude-queue issues that have NO open PR referencing
+                  them ("Closes #N"/"#N" in a PR) and no recent "🤖 lane" claim comment.
+                  Sort that list by issue number ascending and rank them 1,2,3,...
+               c) YOUR SLICE by lane: lane 1 → ranks 1-4, lane 2 → ranks 5-8,
+                  lane 3 → ranks 9-12. Work ONLY your slice. If your slice is empty
+                  (short queue), exit immediately — do NOT poach another lane's ranks.
+               d) Before starting EACH issue, re-check it still has no open PR, then
+                  immediately post a comment "🤖 lane ${{ matrix.lane }} building now" to
+                  claim it. If a PR or another lane's claim already exists, SKIP it.
 
-            2. PREMORTEM — Before writing any code, post a brief comment on the issue:
-               "How could this break the live app, leak secrets, cost money, or weaken
-               security?" Then plan around those risks. If the honest answer is "this is
-               risky or ambiguous," DO NOT implement — comment your questions and stop.
+            2. PREMORTEM — Before writing code, comment on the issue: "How could this break
+               the live app, leak secrets, cost money, or weaken security?" Plan around it.
+               If the honest answer is "risky/ambiguous," do NOT implement — ask and stop.
 
-            3. SAFETY — Work on a NEW branch and open a Pull Request. NEVER push to main.
-               Do NOT touch auth, billing, RLS, secrets, or env config unless the issue
-               explicitly says so (and then call it out loudly in the PR). Do NOT modify
-               anything under src/**/finance/** — that is a separate workstream.
+            3. SAFETY — New branch + Pull Request. NEVER push to main. Do NOT touch auth,
+               billing, RLS, secrets, or env config unless the issue explicitly says so (and
+               call it out loudly in the PR). NEVER modify anything under src/**/finance/**.
 
-            4. VERIFY — `npm run build` and `npx tsc --noEmit` must pass before you open
-               the PR. If you can't get green within your turn budget, open it as a DRAFT
-               and comment exactly what's blocked.
+            4. VERIFY — `npm run build` and `npx tsc --noEmit` MUST pass before opening the
+               PR. Production-level quality only: match existing patterns, handle empty/
+               loading/error states, responsive at 375/768/1280. If you can't get green in
+               budget, open a DRAFT and comment what's blocked.
 
-            5. CONTEXT — Read CLAUDE.md, AGENTS.md, and specs/ as your knowledge base;
-               match the existing patterns. This repo is the founder's life's work — treat
-               it with that care.
+            5. CONTEXT — Read CLAUDE.md, AGENTS.md, DESIGN.md, specs/ as your knowledge base.
+               This is the founder's life's work and it's about to take real paying customers
+               — treat every change with that care.
 
-            6. HANDOFF — You MUST open the Pull Request yourself, do not stop at pushing
-               a branch. After committing, run:
-               `git push -u origin <your-branch>` then
-               `gh pr create --base main --head <your-branch> --title "<concise>" --body "<summary + premortem + what to verify>"`
-               (the `gh` CLI is installed and authenticated via GITHUB_TOKEN). In the PR:
-               link the issue, summarize the change, paste your premortem, and list exactly
-               what Luis should check before merging. Keep PRs small and single-purpose so
-               they're easy to approve from a phone. Then comment the PR link on the issue.
+            6. HANDOFF — Open the PR yourself: `git push -u origin <branch>` then
+               `gh pr create --base main --head <branch> --title "<concise>" --body "<summary + premortem + what to verify>"`.
+               Link the issue, keep PRs small/single-purpose, then comment the PR link on
+               the issue. Then move to the next issue in YOUR slice.
