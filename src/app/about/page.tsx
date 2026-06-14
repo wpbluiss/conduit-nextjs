@@ -94,8 +94,16 @@ export default function AboutPage() {
       {/* Mission */}
       <section
         id="vision"
-        className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]"
+        className="relative overflow-hidden conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]"
       >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 60% 50% at 100% 0%, rgba(214,120,23,0.07) 0%, transparent 65%)",
+          }}
+        />
         <div className="conduit-container">
           <ScrollRevealCards className="conduit-prose">
             <ScrollRevealItem>
@@ -241,35 +249,38 @@ export default function AboutPage() {
       {/* Contact */}
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
-          <div className="conduit-prose">
-            <p className="conduit-caption conduit-caption-ember">Contact</p>
-            <h2 className="conduit-display-xl mt-5">
-              Where to reach us.
-            </h2>
-
-            <div className="mt-10 space-y-1">
-              <ContactRow
-                label="Partnership inquiries"
-                value="luis@conduitai.io"
-                href="mailto:luis@conduitai.io?subject=Partnership%20inquiry"
-                live
-              />
-              <ContactRow
-                label="Press"
-                value="press@conduitai.io"
-                href="mailto:press@conduitai.io"
-                live
-              />
-              <ContactRow
-                label="Headquarters"
-                value="West Palm Beach, FL"
-              />
-              <ContactRow
-                label="Working hours"
-                value="Always — Praxis runs 24/7. Humans respond M-F."
-              />
-            </div>
-          </div>
+          <ScrollRevealCards className="conduit-prose">
+            <ScrollRevealItem>
+              <p className="conduit-caption conduit-caption-ember">Contact</p>
+              <h2 className="conduit-display-xl mt-5">
+                Where to reach us.
+              </h2>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <div className="mt-10 space-y-1">
+                <ContactRow
+                  label="Partnership inquiries"
+                  value="luis@conduitai.io"
+                  href="mailto:luis@conduitai.io?subject=Partnership%20inquiry"
+                  live
+                />
+                <ContactRow
+                  label="Press"
+                  value="press@conduitai.io"
+                  href="mailto:press@conduitai.io"
+                  live
+                />
+                <ContactRow
+                  label="Headquarters"
+                  value="West Palm Beach, FL"
+                />
+                <ContactRow
+                  label="Working hours"
+                  value="Always — Praxis runs 24/7. Humans respond M-F."
+                />
+              </div>
+            </ScrollRevealItem>
+          </ScrollRevealCards>
         </div>
       </section>
 
