@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import { AnalyticsPageView } from "@/components/conduit/AnalyticsPageView";
+import { MarketingMotionProvider } from "@/components/MarketingMotionProvider";
 
 // Code-split below-fold sections so the browser doesn't parse their JS
 // before the LCP element (Hero) is painted. Each section is still
@@ -72,6 +73,7 @@ const ORG_JSONLD = {
 
 export default function Home() {
   return (
+    <MarketingMotionProvider>
     <main>
       <script
         type="application/ld+json"
@@ -101,5 +103,6 @@ export default function Home() {
       <FinalCTA />
       <Footer />
     </main>
+    </MarketingMotionProvider>
   );
 }

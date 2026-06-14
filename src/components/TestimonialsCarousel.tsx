@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+
+const EASE = [0.25, 1, 0.5, 1] as const;
 
 const TESTIMONIALS = [
   {
@@ -95,7 +98,13 @@ export default function TestimonialsCarousel() {
 
       <div className="relative conduit-container">
         {/* Heading */}
-        <div className="text-center mb-12">
+        <motion.div
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.7, ease: EASE }}
+        >
           <p className="conduit-caption conduit-caption-indigo mb-4">
             Social proof
           </p>
@@ -103,7 +112,7 @@ export default function TestimonialsCarousel() {
             What founders are{" "}
             <span className="conduit-ember-text">saying</span>
           </h2>
-        </div>
+        </motion.div>
 
         {/* Carousel */}
         <div

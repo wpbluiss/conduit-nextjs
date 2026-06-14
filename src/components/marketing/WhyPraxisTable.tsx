@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { Check, X } from "@phosphor-icons/react";
+
+const EASE = [0.25, 1, 0.5, 1] as const;
 import {
   Code2,
   Compass,
@@ -169,7 +172,13 @@ export function WhyPraxisTable() {
     >
       <div className="conduit-container">
         {/* Header */}
-        <div className="max-w-[640px] mb-12 md:mb-16">
+        <motion.div
+          className="max-w-[640px] mb-12 md:mb-16"
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.8, ease: EASE }}
+        >
           <p className="conduit-caption conduit-caption-ember">Why Praxis</p>
           <h2 className="conduit-display-2xl mt-5">
             Nine specialists. Zero payroll.
@@ -180,10 +189,16 @@ export function WhyPraxisTable() {
             dollar. Praxis gives you the same depth for the price of a Spotify
             subscription.
           </p>
-        </div>
+        </motion.div>
 
         {/* Mobile: stacked card per row */}
-        <div className="md:hidden space-y-3">
+        <motion.div
+          className="md:hidden space-y-3"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.6, ease: EASE, delay: 0.15 }}
+        >
           {ROWS.map((row) => (
             <div
               key={row.label}
@@ -226,10 +241,16 @@ export function WhyPraxisTable() {
               </div>
             </div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Desktop: proper table */}
-        <div className="hidden md:block overflow-x-auto">
+        <motion.div
+          className="hidden md:block overflow-x-auto"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.6, ease: EASE, delay: 0.15 }}
+        >
           <table className="w-full min-w-[680px]">
             <thead>
               <tr className="border-b border-[var(--color-edge)]">
@@ -309,7 +330,7 @@ export function WhyPraxisTable() {
               ))}
             </tbody>
           </table>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
