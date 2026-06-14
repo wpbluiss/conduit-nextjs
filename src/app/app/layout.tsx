@@ -15,6 +15,7 @@ import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { getInFlightBuilds } from "@/lib/engineering/in-flight";
 import { PostOnboardingNudge } from "@/components/conduit/PostOnboardingNudge";
+import { CommandPalette } from "@/components/conduit/CommandPalette";
 
 export const dynamic = "force-dynamic";
 
@@ -135,6 +136,7 @@ export default async function AppLayout({
         </main>
         {!onboarded && <OnboardingModal defaultName={userName} />}
         <PostOnboardingNudge />
+        <CommandPalette accountId={account.id} />
       </PraxisCanvasTintProvider>
       </ToastProvider>
       </UserProvider>
