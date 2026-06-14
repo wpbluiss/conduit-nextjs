@@ -18,8 +18,10 @@ export default async function ChatPage({ searchParams }: PageProps) {
   const { account, user } = current;
   const supabase = await createSupabaseServerClient();
 
+  const PAGE_SIZE = 30;
   let conversationId: string | null = null;
   let messages: MessageRow[] = [];
+  let initialHasMore = false;
   if (params.c) {
     const { data: convo } = await supabase
       .from("conduit_conversations")
@@ -28,14 +30,21 @@ export default async function ChatPage({ searchParams }: PageProps) {
       .maybeSingle();
     if (convo && convo.account_id === account.id) {
       conversationId = convo.id;
+      // Load only the most recent PAGE_SIZE messages for fast initial render.
+      // The client fetches older pages via /api/conduit/messages when scrolling up.
       const { data: rows } = await supabase
         .from("conduit_messages")
         .select("id, role, employee, content, metadata, created_at")
         .eq("conversation_id", convo.id)
-        .order("created_at", { ascending: true });
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false })
+        .limit(PAGE_SIZE + 1);
+
+      initialHasMore = (rows?.length ?? 0) > PAGE_SIZE;
+      const page = (rows ?? []).slice(0, PAGE_SIZE).reverse();
 
       // Fetch artifacts referenced by these messages so they show up after refresh
-      const messageIds = (rows ?? []).map((r) => r.id);
+      const messageIds = page.map((r) => r.id);
       let artifactsByMsg: Record<
         string,
         { id: string; title: string; type: string }[]
@@ -63,7 +72,7 @@ export default async function ChatPage({ searchParams }: PageProps) {
         );
       }
 
-      messages = (rows ?? []).map((r) => ({
+      messages = page.map((r) => ({
         id: r.id,
         role: r.role as MessageRow["role"],
         employee: r.employee as EmployeeKey | null,
@@ -88,6 +97,7 @@ export default async function ChatPage({ searchParams }: PageProps) {
     <Chat
       conversationId={conversationId}
       initialMessages={messages}
+      initialHasMore={initialHasMore}
       firstName={firstName}
       internalAccount={Boolean(account.internal_account)}
       voice={{

@@ -132,6 +132,7 @@ const ALL_PIN_OPTIONS: { value: PinValue; label: string }[] = [
 export function Chat({
   conversationId: initialId,
   initialMessages,
+  initialHasMore = false,
   firstName,
   internalAccount = false,
   voice = { enabled: false, autoPlay: true, ttsAllowed: false },
@@ -139,6 +140,7 @@ export function Chat({
 }: {
   conversationId: string | null;
   initialMessages: MessageRow[];
+  initialHasMore?: boolean;
   firstName: string;
   internalAccount?: boolean;
   voice?: VoicePrefs;
@@ -173,6 +175,11 @@ export function Chat({
     text: string;
     retryText: string;
   } | null>(null);
+
+  // Pagination: infinite-scroll-up for message history.
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const topSentinelRef = useRef<HTMLDivElement>(null);
 
   // R8: workspace handoff. ?pin=<employee>&prompt=<text> from /app/team/* —
   // apply once on mount, then strip from URL so refresh doesn't re-trigger.
@@ -341,13 +348,80 @@ export function Chat({
   useEffect(() => {
     setMessages(initialMessages);
     setConversationId(initialId);
-  }, [initialId, initialMessages]);
+    setHasMore(initialHasMore);
+  }, [initialId, initialMessages, initialHasMore]);
 
+  // Scroll to bottom when new messages arrive at the bottom (not when prepending older ones).
+  const prevMsgCountRef = useRef(initialMessages.length);
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    const el = scrollRef.current;
+    if (!el) return;
+    const prev = prevMsgCountRef.current;
+    const curr = messages.length;
+    // Only auto-scroll when messages were appended (new turn), not prepended (older history).
+    if (curr > prev && !loadingOlder) {
+      el.scrollTop = el.scrollHeight;
     }
-  }, [messages]);
+    prevMsgCountRef.current = curr;
+  }, [messages, loadingOlder]);
+
+  const loadOlderMessages = useCallback(async () => {
+    if (!conversationId || loadingOlder || !hasMore) return;
+    const oldestId = messages.find((m) => m.id)?.id;
+    if (!oldestId) return;
+
+    setLoadingOlder(true);
+    try {
+      const params = new URLSearchParams({
+        conversation_id: conversationId,
+        before_id: oldestId,
+      });
+      const res = await fetch(`/api/conduit/messages?${params.toString()}`);
+      if (!res.ok) return;
+      const json = (await res.json()) as {
+        messages: MessageRow[];
+        hasMore: boolean;
+      };
+
+      if (json.messages.length === 0) {
+        setHasMore(false);
+        return;
+      }
+
+      // Preserve scroll position: capture height before prepend, restore after.
+      const el = scrollRef.current;
+      const prevHeight = el?.scrollHeight ?? 0;
+
+      setMessages((prev) => [...json.messages, ...prev]);
+      setHasMore(json.hasMore);
+
+      // After React has flushed the DOM update, restore the scroll offset.
+      requestAnimationFrame(() => {
+        if (el) {
+          el.scrollTop = el.scrollHeight - prevHeight;
+        }
+      });
+    } finally {
+      setLoadingOlder(false);
+    }
+  }, [conversationId, hasMore, loadingOlder, messages]);
+
+  // Watch the top sentinel; fire loadOlderMessages when it enters the viewport.
+  useEffect(() => {
+    const sentinel = topSentinelRef.current;
+    if (!sentinel || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          void loadOlderMessages();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, loadOlderMessages]);
 
   const send = useCallback(
     async (text: string, employeePin?: EmployeeKey) => {
@@ -775,6 +849,27 @@ export function Chat({
         className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-8"
       >
         <div className="mx-auto max-w-3xl space-y-6">
+          {/* Top sentinel + pagination state — only shown when a conversation is loaded */}
+          {conversationId && (
+            <div ref={topSentinelRef} className="flex justify-center pb-2">
+              {loadingOlder ? (
+                <span
+                  className="text-[11px] uppercase tracking-wider"
+                  style={{ color: "var(--color-text-muted)" }}
+                >
+                  Loading older messages…
+                </span>
+              ) : !hasMore && messages.length > 0 ? (
+                <span
+                  className="text-[11px] uppercase tracking-wider"
+                  style={{ color: "var(--color-text-muted)" }}
+                >
+                  All messages loaded
+                </span>
+              ) : null}
+            </div>
+          )}
+
           {messages.length === 0 && (
             <EmptyState
               firstName={firstName}
