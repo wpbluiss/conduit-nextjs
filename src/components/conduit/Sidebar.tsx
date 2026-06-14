@@ -52,6 +52,8 @@ export function Sidebar({
   tierName,
   accountId,
   inFlightBuildsInitial,
+  avatarUrl,
+  displayName,
 }: {
   userEmail: string;
   accountName: string;
@@ -61,6 +63,8 @@ export function Sidebar({
   tierName?: string;
   accountId: string;
   inFlightBuildsInitial: InFlightBuild[];
+  avatarUrl?: string | null;
+  displayName?: string | null;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -515,8 +519,23 @@ export function Sidebar({
               <LogOut size={14} /> Sign out
             </button>
           </form>
-          <div className="px-3 pt-2 text-[10px] text-[var(--color-text-muted)] truncate">
-            {userEmail}
+          <div className="px-3 pt-2 flex items-center gap-2">
+            <div
+              className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-semibold shrink-0 overflow-hidden border border-[var(--color-border)]"
+              style={{ background: "var(--color-surface-elevated)" }}
+            >
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <span style={{ color: "var(--color-accent-hi)" }}>
+                  {(displayName || userEmail)[0]?.toUpperCase() ?? "?"}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] text-[var(--color-text-muted)] truncate min-w-0">
+              {displayName || userEmail}
+            </span>
           </div>
           <div className="px-3 text-[10px] text-[var(--color-text-muted)]">
             Praxis Flow{tierName ? ` · ${tierName}` : ""}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ComponentType, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type ComponentType, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -51,6 +51,8 @@ interface AccountData {
   account_created_at?: string;
   timezone?: string;
   theme_preference?: "system" | "light" | "dark" | null;
+  display_name?: string | null;
+  avatar_url?: string | null;
 }
 
 const COMMON_TIMEZONES = [
@@ -138,6 +140,8 @@ export function SettingsTabs({
           creatorModeVersion={account.creator_mode_version ?? 1}
           timezone={account.timezone ?? "America/New_York"}
           themePref={account.theme_preference ?? "system"}
+          displayName={account.display_name ?? null}
+          avatarUrl={account.avatar_url ?? null}
         />
       )}
       {tab === "business" && <BusinessTab account={account} />}
@@ -552,6 +556,8 @@ function ProfileTab({
   creatorModeVersion,
   timezone,
   themePref,
+  displayName,
+  avatarUrl,
 }: {
   email: string;
   fullName: string;
@@ -559,11 +565,25 @@ function ProfileTab({
   creatorModeVersion: number;
   timezone: string;
   themePref: "system" | "light" | "dark";
+  displayName: string | null;
+  avatarUrl: string | null;
 }) {
   const [tz, setTz] = useState(timezone);
   const [tzSaving, setTzSaving] = useState(false);
   const [tzSaved, setTzSaved] = useState(false);
   const router = useRouter();
+
+  // Display name editing
+  const [nameValue, setNameValue] = useState(displayName ?? fullName ?? "");
+  const [nameSaving, setNameSaving] = useState(false);
+  const [nameSaved, setNameSaved] = useState(false);
+  const [nameError, setNameError] = useState("");
+
+  // Avatar
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(avatarUrl);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -594,6 +614,67 @@ function ProfileTab({
     }
   };
   const toast = useToast();
+
+  const saveName = async (e: FormEvent) => {
+    e.preventDefault();
+    const trimmed = nameValue.trim();
+    if (!trimmed) return;
+    setNameSaving(true);
+    setNameError("");
+    setNameSaved(false);
+    const r = await fetch("/api/conduit/account/prefs", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ display_name: trimmed }),
+    });
+    setNameSaving(false);
+    if (r.ok) {
+      setNameSaved(true);
+      toast.success("Display name updated.");
+      router.refresh();
+    } else {
+      setNameError("Couldn't save name. Try again.");
+    }
+  };
+
+  const handleAvatarChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarError(null);
+    // Immediate local preview
+    const objectUrl = URL.createObjectURL(file);
+    setAvatarPreview(objectUrl);
+    setAvatarUploading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const r = await fetch("/api/conduit/account/avatar", { method: "POST", body: fd });
+      const j = await r.json().catch(() => ({})) as { avatar_url?: string; error?: string };
+      if (!r.ok) {
+        const msg =
+          j.error === "file_too_large"
+            ? "Image must be under 5 MB."
+            : j.error === "invalid_file_type"
+              ? "Only JPEG, PNG, WebP, or GIF images are allowed."
+              : "Upload failed. Try again.";
+        setAvatarError(msg);
+        setAvatarPreview(avatarUrl);
+        URL.revokeObjectURL(objectUrl);
+      } else if (j.avatar_url) {
+        setAvatarPreview(j.avatar_url);
+        URL.revokeObjectURL(objectUrl);
+        toast.success("Avatar updated.");
+        router.refresh();
+      }
+    } catch {
+      setAvatarError("Upload failed. Try again.");
+      setAvatarPreview(avatarUrl);
+      URL.revokeObjectURL(objectUrl);
+    } finally {
+      setAvatarUploading(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
+    }
+  };
 
   // Email change state
   const [newEmail, setNewEmail] = useState("");
@@ -675,16 +756,104 @@ function ProfileTab({
     }
   };
 
+  const initials = (nameValue || fullName || email)
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join("") || "?";
+
   return (
     <div className="space-y-8 text-sm">
+      {/* ── Avatar ── */}
+      <div className="flex items-center gap-5">
+        <button
+          type="button"
+          onClick={() => avatarInputRef.current?.click()}
+          disabled={avatarUploading}
+          className="relative group shrink-0"
+          aria-label="Upload avatar"
+        >
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-semibold overflow-hidden border-2 border-[var(--color-border)] group-hover:border-[var(--color-accent)] transition-colors"
+            style={{ background: "var(--color-surface-elevated)" }}
+          >
+            {avatarPreview ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={avatarPreview}
+                alt="Your avatar"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span style={{ color: "var(--color-accent-hi)" }}>{initials}</span>
+            )}
+          </div>
+          {avatarUploading && (
+            <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
+              <SpinnerIcon size={18} />
+            </div>
+          )}
+          <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[var(--color-accent)] flex items-center justify-center shadow">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="white">
+              <path d="M5 2v6M2 5h6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </div>
+        </button>
+        <div>
+          <button
+            type="button"
+            onClick={() => avatarInputRef.current?.click()}
+            disabled={avatarUploading}
+            className="text-xs text-[var(--color-accent)] hover:underline disabled:opacity-50"
+          >
+            {avatarUploading ? "Uploading…" : "Choose photo"}
+          </button>
+          <p className="mt-0.5 text-[10px] text-[var(--color-text-muted)]">
+            JPEG, PNG, WebP or GIF · max 5 MB
+          </p>
+          {avatarError && (
+            <p className="mt-1 text-[11px] text-[var(--color-pink)]">{avatarError}</p>
+          )}
+        </div>
+        <input
+          ref={avatarInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          className="hidden"
+          onChange={handleAvatarChange}
+          aria-hidden
+        />
+      </div>
+
+      {/* ── Display name ── */}
+      <form onSubmit={saveName} className="space-y-2 max-w-sm">
+        <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block">
+          Display name
+        </label>
+        <div className="flex gap-2">
+          <input
+            value={nameValue}
+            onChange={(e) => { setNameValue(e.target.value); setNameSaved(false); setNameError(""); }}
+            maxLength={100}
+            placeholder={fullName || "Your name"}
+            className="flex-1 conduit-card px-4 py-2.5 outline-none focus:border-[var(--color-accent)] text-sm"
+          />
+          <PraxisButton
+            type="submit"
+            isLoading={nameSaving}
+            isDisabled={!nameValue.trim() || nameSaving}
+            variant="secondary"
+            className="!text-xs shrink-0"
+          >
+            {nameSaved ? <><Check size={12} /> Saved</> : "Save"}
+          </PraxisButton>
+        </div>
+        {nameError && <p className="text-[11px] text-[var(--color-pink)]">{nameError}</p>}
+      </form>
+
       {/* ── Account info ── */}
       <div className="space-y-4">
-        <div>
-          <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
-            Name
-          </div>
-          <div>{fullName || "—"}</div>
-        </div>
         <div>
           <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
             Email

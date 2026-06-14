@@ -147,6 +147,8 @@ export default async function AppLayout({
           }
           accountId={account.id}
           inFlightBuildsInitial={inFlightBuildsInitial}
+          avatarUrl={account.avatar_url ?? null}
+          displayName={account.display_name ?? null}
         />
         <main id="app-main" className="conduit-canvas praxis-canvas-tint flex-1 flex flex-col min-w-0 pt-12 md:pt-0">
           <UpgradeNudge
