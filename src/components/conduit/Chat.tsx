@@ -997,28 +997,59 @@ export function Chat({
                 ) : null}
               </div>
               {messages.length > 0 && (
-                <button
-                  type="button"
-                  onClick={exportConversation}
-                  title="Export conversation as Markdown"
-                  aria-label="Export conversation as Markdown"
-                  className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
-                  style={{
-                    color: "var(--color-text-muted)",
-                    border: "1px solid transparent",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "transparent";
-                  }}
-                >
-                  <Download size={12} />
-                  <span className="hidden sm:inline">Export</span>
-                </button>
+                <div className="shrink-0 flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={exportConversation}
+                    title="Download as Markdown"
+                    aria-label="Download conversation as Markdown"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
+                    style={{
+                      color: "var(--color-text-muted)",
+                      border: "1px solid transparent",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
+                      (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
+                      (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                    }}
+                  >
+                    <Download size={12} />
+                    <span className="hidden sm:inline">Markdown</span>
+                  </button>
+                  {conversationId && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        window.open(
+                          `/api/conduit/conversations/${conversationId}/export`,
+                          "_blank",
+                        )
+                      }
+                      title="Print / Save as PDF"
+                      aria-label="Print conversation or save as PDF"
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
+                      style={{
+                        color: "var(--color-text-muted)",
+                        border: "1px solid transparent",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
+                        (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
+                        (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                      }}
+                    >
+                      <FileText size={12} />
+                      <span className="hidden sm:inline">PDF</span>
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           )}
