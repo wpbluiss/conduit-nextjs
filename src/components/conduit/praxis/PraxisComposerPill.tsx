@@ -94,6 +94,17 @@ export function PraxisComposerPill({
   const composerRef = useRef<HTMLFormElement>(null);
   const { labelFor } = useNicknames();
 
+  const CHAR_LIMIT = 4000;
+  const COUNTER_THRESHOLD = 200;
+  const charCount = value.length;
+  const tokenEstimate = Math.ceil(charCount / 4);
+  const counterColor =
+    charCount >= CHAR_LIMIT * 0.95
+      ? "var(--color-conduit-danger)"
+      : charCount >= CHAR_LIMIT * 0.80
+        ? "var(--color-amber)"
+        : "var(--color-text-muted)";
+
   // @-mention state
   const [mentionIndex, setMentionIndex] = useState(0);
 
@@ -684,6 +695,24 @@ export function PraxisComposerPill({
             )}
           </button>
         )
+      )}
+
+      {charCount >= COUNTER_THRESHOLD && (
+        <span
+          aria-live="polite"
+          aria-label={`${charCount} characters, approximately ${tokenEstimate} tokens`}
+          style={{
+            flexShrink: 0,
+            fontSize: "11px",
+            fontFamily: "var(--font-mono)",
+            color: counterColor,
+            whiteSpace: "nowrap",
+            lineHeight: 1,
+            userSelect: "none",
+          }}
+        >
+          {charCount} chars · ~{tokenEstimate} tokens
+        </span>
       )}
 
       <button
