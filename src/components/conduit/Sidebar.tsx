@@ -18,6 +18,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Plus,
+  Search,
   Settings,
   Sparkles,
   Sun,
@@ -159,6 +160,9 @@ export function Sidebar({
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const sidebarRef = useRef<HTMLElement>(null);
   const openBtnRef = useRef<HTMLButtonElement>(null);
+  // Conversation list search
+  const [convSearch, setConvSearch] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   // Optimistic title overrides — updated when chat fires praxis:title_updated.
   const [titleOverrides, setTitleOverrides] = useState<Record<string, string>>({});
 
@@ -192,15 +196,21 @@ export function Sidebar({
 
   const close = () => setOpen(false);
 
-  // ESC key to close on mobile
+  // ESC key: clear search if active, otherwise close sidebar on mobile
   useEffect(() => {
-    if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
+      if (e.key === "Escape") {
+        if (convSearch) {
+          setConvSearch("");
+          searchInputRef.current?.focus();
+        } else if (open) {
+          close();
+        }
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, convSearch]);
 
   // Focus trap + focus management: mobile only (when drawer is open as dialog)
   useEffect(() => {
@@ -722,79 +732,142 @@ export function Sidebar({
               <div className="px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                 Recent
               </div>
-              <div className="space-y-0.5">
-                {conversations.slice(0, 8).map((c) => {
-                  const active = isChat && activeId === c.id;
-                  const dom = c.dominant_employee;
-                  const isTeam = dom === "team";
-                  const empKey = (
-                    dom && (TEAM as string[]).includes(dom) ? dom : "jarvis"
-                  ) as EmployeeKey;
-                  return (
-                    <Link
-                      key={c.id}
-                      href={`/app?c=${c.id}`}
-                      onClick={close}
-                      className={`relative flex items-center gap-2 pl-3 pr-3 py-1.5 text-xs rounded-lg transition-colors duration-100 ${
-                        active
-                          ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
-                          : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
-                      }`}
-                    >
-                      {active && (
-                        <span
-                          aria-hidden
-                          className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full"
-                          style={{
-                            background: isTeam
-                              ? "var(--color-accent)"
-                              : DEPT_COLOR[empKey],
-                          }}
-                        />
-                      )}
-                      {isTeam ? (
-                        <span
-                          aria-hidden
-                          className="inline-block w-3 h-3 rounded-full shrink-0"
-                          style={{
-                            background:
-                              "conic-gradient(from 90deg, var(--color-dept-marketing), var(--color-dept-sales), var(--color-dept-engineering), var(--color-dept-jarvis), var(--color-dept-marketing))",
-                          }}
-                        />
-                      ) : (
-                        (() => {
-                          const RecentIcon = EMPLOYEE_ICON[empKey];
-                          return (
-                            <span
-                              aria-hidden
-                              className="inline-flex items-center justify-center shrink-0 w-3.5 h-3.5 rounded-[4px]"
-                              style={{
-                                background: `color-mix(in srgb, ${DEPT_COLOR[empKey]} 18%, var(--color-surface-elevated))`,
-                                color: DEPT_COLOR[empKey],
-                                boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[empKey]} 60%, transparent)`,
-                              }}
-                            >
-                              <RecentIcon size={9} strokeWidth={2.5} />
-                            </span>
-                          );
-                        })()
-                      )}
-                      <span className="truncate">
-                        {titleOverrides[c.id] ?? c.title ?? "Untitled chat"}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
-              {conversations.length > 8 && (
-                <Link
-                  href="/app/conversations"
-                  onClick={close}
-                  className="mt-1 flex items-center px-3 py-1.5 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+
+              {/* Search input */}
+              <div className="px-2 pb-1">
+                <div
+                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg"
+                  style={{
+                    background: "var(--color-surface-elevated)",
+                    border: "1px solid var(--color-border)",
+                  }}
                 >
-                  See all ({conversations.length})
-                </Link>
-              )}
+                  <Search
+                    size={11}
+                    className="shrink-0"
+                    style={{ color: "var(--color-text-muted)" }}
+                  />
+                  <input
+                    ref={searchInputRef}
+                    type="search"
+                    value={convSearch}
+                    onChange={(e) => setConvSearch(e.target.value)}
+                    placeholder="Search conversations…"
+                    aria-label="Search conversations"
+                    autoComplete="off"
+                    className="flex-1 min-w-0 bg-transparent text-xs outline-none placeholder:text-[var(--color-text-muted)]"
+                    style={{ color: "var(--color-text)" }}
+                  />
+                  {convSearch && (
+                    <button
+                      type="button"
+                      onClick={() => { setConvSearch(""); searchInputRef.current?.focus(); }}
+                      aria-label="Clear search"
+                      className="shrink-0"
+                      style={{ color: "var(--color-text-muted)" }}
+                    >
+                      <X size={11} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Filtered list */}
+              {(() => {
+                const q = convSearch.trim().toLowerCase();
+                const filtered = q
+                  ? conversations.filter((c) =>
+                      (titleOverrides[c.id] ?? c.title ?? "").toLowerCase().includes(q)
+                    )
+                  : conversations.slice(0, 8);
+                return (
+                  <>
+                    <div className="space-y-0.5">
+                      {filtered.slice(0, 8).map((c) => {
+                        const active = isChat && activeId === c.id;
+                        const dom = c.dominant_employee;
+                        const isTeam = dom === "team";
+                        const empKey = (
+                          dom && (TEAM as string[]).includes(dom) ? dom : "jarvis"
+                        ) as EmployeeKey;
+                        return (
+                          <Link
+                            key={c.id}
+                            href={`/app?c=${c.id}`}
+                            onClick={close}
+                            className={`relative flex items-center gap-2 pl-3 pr-3 py-1.5 text-xs rounded-lg transition-colors duration-100 ${
+                              active
+                                ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
+                                : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
+                            }`}
+                          >
+                            {active && (
+                              <span
+                                aria-hidden
+                                className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full"
+                                style={{
+                                  background: isTeam
+                                    ? "var(--color-accent)"
+                                    : DEPT_COLOR[empKey],
+                                }}
+                              />
+                            )}
+                            {isTeam ? (
+                              <span
+                                aria-hidden
+                                className="inline-block w-3 h-3 rounded-full shrink-0"
+                                style={{
+                                  background:
+                                    "conic-gradient(from 90deg, var(--color-dept-marketing), var(--color-dept-sales), var(--color-dept-engineering), var(--color-dept-jarvis), var(--color-dept-marketing))",
+                                }}
+                              />
+                            ) : (
+                              (() => {
+                                const RecentIcon = EMPLOYEE_ICON[empKey];
+                                return (
+                                  <span
+                                    aria-hidden
+                                    className="inline-flex items-center justify-center shrink-0 w-3.5 h-3.5 rounded-[4px]"
+                                    style={{
+                                      background: `color-mix(in srgb, ${DEPT_COLOR[empKey]} 18%, var(--color-surface-elevated))`,
+                                      color: DEPT_COLOR[empKey],
+                                      boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[empKey]} 60%, transparent)`,
+                                    }}
+                                  >
+                                    <RecentIcon size={9} strokeWidth={2.5} />
+                                  </span>
+                                );
+                              })()
+                            )}
+                            <span className="truncate">
+                              {titleOverrides[c.id] ?? c.title ?? "Untitled chat"}
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                    {q && filtered.length === 0 && (
+                      <p className="px-3 py-2 text-[11px]" style={{ color: "var(--color-text-muted)" }}>
+                        No conversations match
+                      </p>
+                    )}
+                    {!q && conversations.length > 8 && (
+                      <Link
+                        href="/app/conversations"
+                        onClick={close}
+                        className="mt-1 flex items-center px-3 py-1.5 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+                      >
+                        See all ({conversations.length})
+                      </Link>
+                    )}
+                    {q && filtered.length > 8 && (
+                      <p className="px-3 py-1 text-[10px]" style={{ color: "var(--color-text-muted)" }}>
+                        Showing 8 of {filtered.length} matches
+                      </p>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           )}
         </nav>
