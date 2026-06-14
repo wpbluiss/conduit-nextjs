@@ -52,6 +52,7 @@ export async function GET() {
       google_calendar: isGoogleCalendarConfigured(),
       slack: isSlackConfigured(),
       hubspot: isHubSpotConfigured(),
+      github: true, // PAT-based — always available, no env vars required
     },
   });
 }
