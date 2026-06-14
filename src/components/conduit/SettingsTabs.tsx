@@ -1780,6 +1780,11 @@ function BillingTab({
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [invoices, setInvoices] = useState<InvoiceItem[] | null>(null);
+  const [cancelAt, setCancelAt] = useState<number | null>(null);
+  const [isCanceling, setIsCanceling] = useState(
+    account.subscription_status === "canceling",
+  );
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const tier = tierById(account.tier_id ?? "free");
   const internal = Boolean(account.internal_account);
 
@@ -1790,6 +1795,19 @@ function BillingTab({
       .then((j) => j && setInvoices(j.invoices ?? []))
       .catch(() => setInvoices([]));
   }, [account.has_stripe_customer]);
+
+  useEffect(() => {
+    if (!account.has_stripe_customer) return;
+    if (account.subscription_status !== "active" && account.subscription_status !== "canceling") return;
+    fetch("/api/conduit/billing/subscription")
+      .then((r) => r.ok ? r.json() : null)
+      .then((j) => {
+        if (!j?.subscription) return;
+        setCancelAt(j.subscription.cancel_at ?? null);
+        setIsCanceling(j.subscription.cancel_at_period_end ?? false);
+      })
+      .catch(() => undefined);
+  }, [account.has_stripe_customer, account.subscription_status]);
 
   if (internal) {
     return (
@@ -1906,6 +1924,31 @@ function BillingTab({
     }
   };
 
+  const handleCancelOrReactivate = async (action: "cancel" | "reactivate") => {
+    setBusy(action);
+    setError(null);
+    setShowCancelModal(false);
+    try {
+      const res = await fetch("/api/conduit/billing/cancel", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(j.error === "billing_not_configured" ? "Billing isn't live yet." : "Couldn't update subscription. Try again.");
+        setBusy(null);
+        return;
+      }
+      setIsCanceling(j.cancel_at_period_end ?? action === "cancel");
+      if (j.cancel_at) setCancelAt(j.cancel_at);
+    } catch {
+      setError("Couldn't update subscription. Try again.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const allowance = tier.monthlyTokenAllowance + (account.bonus_tokens ?? 0);
 
   const trialDaysLeft =
@@ -1934,10 +1977,9 @@ function BillingTab({
         <div>
           <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
             Current plan ·{" "}
-            {(account.subscription_status ?? "inactive").replace(
-              "_",
-              " ",
-            )}
+            {isCanceling
+              ? "cancels at period end"
+              : (account.subscription_status ?? "inactive").replace("_", " ")}
           </div>
           <div className="serif text-2xl mt-1">{tier.name}</div>
           <div className="text-[var(--color-text-muted)] text-xs mt-1">
@@ -1966,20 +2008,109 @@ function BillingTab({
               {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} of free period left
             </div>
           )}
+          {isCanceling && (
+            <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium"
+              style={{
+                background: "color-mix(in srgb, var(--color-destructive, #ef4444) 10%, transparent)",
+                color: "var(--color-destructive, #ef4444)",
+                border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 30%, transparent)",
+              }}
+            >
+              <span aria-hidden className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-destructive, #ef4444)" }} />
+              {cancelAt
+                ? `Cancels ${new Date(cancelAt * 1000).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`
+                : "Cancels at end of billing period"}
+            </div>
+          )}
         </div>
-        {account.has_stripe_customer && (
-          <PraxisButton
-            onClick={openPortal}
-            isLoading={busy === "portal"}
-            isDisabled={busy !== null && busy !== "portal"}
-            variant="secondary"
-            className="!text-xs"
-          >
-            Manage subscription
-            <ExternalLink size={12} />
-          </PraxisButton>
-        )}
+        <div className="flex flex-col gap-2 items-stretch sm:items-end shrink-0">
+          {account.has_stripe_customer && (
+            <PraxisButton
+              onClick={openPortal}
+              isLoading={busy === "portal"}
+              isDisabled={busy !== null && busy !== "portal"}
+              variant="secondary"
+              className="!text-xs"
+            >
+              Manage subscription
+              <ExternalLink size={12} />
+            </PraxisButton>
+          )}
+          {account.has_stripe_customer && tier.monthlyPriceCents > 0 && (
+            isCanceling ? (
+              <button
+                type="button"
+                onClick={() => handleCancelOrReactivate("reactivate")}
+                disabled={busy !== null}
+                className="text-[11px] underline underline-offset-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors disabled:opacity-40 text-center"
+              >
+                {busy === "reactivate" ? "Reactivating…" : "Reactivate plan"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowCancelModal(true)}
+                disabled={busy !== null}
+                className="text-[11px] underline underline-offset-2 text-[var(--color-text-muted)] hover:text-[var(--color-destructive,#ef4444)] transition-colors disabled:opacity-40 text-center"
+              >
+                Cancel subscription
+              </button>
+            )
+          )}
+        </div>
       </div>
+
+      {/* Cancel subscription confirmation modal */}
+      {showCancelModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.5)" }}
+          onClick={(e) => e.target === e.currentTarget && setShowCancelModal(false)}
+        >
+          <div
+            className="conduit-card p-6 max-w-sm w-full space-y-4"
+            style={{ background: "var(--color-surface-elevated)" }}
+          >
+            <div>
+              <div className="serif text-xl mb-1">Cancel subscription?</div>
+              <p className="text-sm text-[var(--color-text-muted)]">
+                You&apos;ll keep full access to Praxis until{" "}
+                {cancelAt
+                  ? new Date(cancelAt * 1000).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })
+                  : "the end of your billing period"}
+                . After that, your workspace reverts to the free tier.
+              </p>
+            </div>
+            <ul className="text-[11px] text-[var(--color-text-muted)] space-y-1 list-disc list-inside">
+              <li>All 9 specialists become read-only after downgrade</li>
+              <li>Memory, conversations, and integrations are preserved</li>
+              <li>You can reactivate any time before the period ends</li>
+            </ul>
+            <div className="flex gap-2 justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setShowCancelModal(false)}
+                className="px-4 py-2 text-sm rounded-lg border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors"
+              >
+                Keep my plan
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCancelOrReactivate("cancel")}
+                disabled={busy === "cancel"}
+                className="px-4 py-2 text-sm rounded-lg transition-colors disabled:opacity-40"
+                style={{
+                  background: "color-mix(in srgb, var(--color-destructive, #ef4444) 12%, transparent)",
+                  color: "var(--color-destructive, #ef4444)",
+                  border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 35%, transparent)",
+                }}
+              >
+                {busy === "cancel" ? "Cancelling…" : "Yes, cancel"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <UsageSummary
         usage={usage}
