@@ -36,6 +36,7 @@ import {
   type PinnedMessage,
 } from "./PinnedMessagesBanner";
 import { useToast } from "@/context/ToastContext";
+import { useNicknames } from "@/context/NicknameContext";
 
 export interface VoicePrefs {
   enabled: boolean;
@@ -176,6 +177,7 @@ export function Chat({
       (o.value !== "team" && allowedSet.has(o.value as EmployeeKey)),
   );
   const suggestions = suggestionsForTier(allowedSet);
+  const { labelFor } = useNicknames();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [conversationId, setConversationId] = useState<string | null>(
@@ -1394,7 +1396,7 @@ export function Chat({
                 className="presence-line"
                 style={{ color: DEPT_COLOR[streamingEmployee] }}
               >
-                {employeeLabel(streamingEmployee)} is thinking…
+                {labelFor(streamingEmployee)} is thinking…
               </span>
             ) : (
               <>
@@ -1726,6 +1728,7 @@ const MessageBubble = memo(function MessageBubble({
 }) {
   const [editDraft, setEditDraft] = useState(message.content);
   const editRef = useRef<HTMLTextAreaElement>(null);
+  const { labelFor: nickLabelFor } = useNicknames();
 
   // Reset draft to current content when entering edit mode.
   useEffect(() => {
@@ -1859,7 +1862,7 @@ const MessageBubble = memo(function MessageBubble({
         <PraxisHandoffBaton
           from={from}
           to={message.handoffTo as EmployeeId}
-          label={`${employeeLabel("jarvis" as EmployeeKey)} → ${employeeLabel(message.handoffTo)}`}
+          label={`${nickLabelFor("jarvis" as EmployeeKey)} → ${nickLabelFor(message.handoffTo)}`}
         />
       </motion.div>
     );
@@ -1911,13 +1914,13 @@ const MessageBubble = memo(function MessageBubble({
       </div>
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <SpecialistChip employee={employee} />
+          <SpecialistChip employee={employee} label={nickLabelFor(employee)} />
           {message.handoffFrom && (
             <motion.span
               initial={{ opacity: 0, x: -6 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
-              aria-label={`Handed off from ${employeeLabel(message.handoffFrom as EmployeeKey)}`}
+              aria-label={`Handed off from ${nickLabelFor(message.handoffFrom as EmployeeKey)}`}
               className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] uppercase tracking-[0.1em]"
               style={{
                 background: `color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 12%, var(--color-surface-elevated))`,
@@ -1925,7 +1928,7 @@ const MessageBubble = memo(function MessageBubble({
                 border: `1px solid color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 28%, transparent)`,
               }}
             >
-              ← {employeeLabel(message.handoffFrom as EmployeeKey)}
+              ← {nickLabelFor(message.handoffFrom as EmployeeKey)}
             </motion.span>
           )}
           {message.pending && (
@@ -2025,7 +2028,7 @@ const MessageBubble = memo(function MessageBubble({
             </span>
             <span className="min-w-0 flex-1">
               <span className="block text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-                {a.type.replace("_", " ")} · by {employeeLabel(employee)}
+                {a.type.replace("_", " ")} · by {nickLabelFor(employee)}
               </span>
               <span className="block text-sm text-[var(--color-text)] mt-0.5 truncate">
                 {a.title}
