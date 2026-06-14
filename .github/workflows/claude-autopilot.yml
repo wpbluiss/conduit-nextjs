@@ -1,9 +1,9 @@
 name: Praxis Autopilot
 
-# Autonomous engineering agents. 3 PARALLEL LANES split the claude-queue so they
-# build different issues simultaneously (≈3x throughput) without colliding. Auth via
-# the Max-plan OAuth token ($0). Drivers: Supabase dispatcher (every 15 min) + the
-# schedule backstop below. NEVER pushes to production directly — opens PRs only.
+# Autonomous engineering agent (SINGLE lane). One builder so it doesn't saturate the
+# repo's Actions runners — when builders flood CI, GitHub starves the Coordinator's
+# scheduled runs and nothing merges. Auth via the Max-plan OAuth token ($0). Driver:
+# the Supabase dispatcher. NEVER pushes to production directly — opens PRs only.
 
 permissions:
   contents: write
@@ -13,19 +13,15 @@ permissions:
 
 on:
   schedule:
-    - cron: "25 */6 * * *"   # backstop only; the Supabase dispatcher drives this repo every 15 min
-  workflow_dispatch: {}     # manual trigger + dispatcher target
+    - cron: "25 */6 * * *"   # backstop; the Supabase dispatcher drives this repo
+  workflow_dispatch: {}
+
+concurrency:
+  group: praxis-autopilot
+  cancel-in-progress: false
 
 jobs:
   autopilot:
-    strategy:
-      fail-fast: false
-      matrix:
-        lane: [1, 2, 3]
-    # One run per lane at a time (lanes run in parallel with each other).
-    concurrency:
-      group: praxis-autopilot-lane-${{ matrix.lane }}
-      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -37,42 +33,35 @@ jobs:
           claude_args: "--max-turns 160 --permission-mode bypassPermissions"
           show_full_output: true
           prompt: |
-            You are Praxis BUILD LANE ${{ matrix.lane }} of 3 parallel builder agents for
-            the conduit-nextjs repo. Founder (Luis) is away; you carry the build. There are
-            TWO other lanes running at the same time — the rules below keep you from
-            colliding with them. Follow EXACTLY:
+            You are Praxis's autonomous engineering agent for conduit-nextjs. Founder (Luis)
+            is away; you carry the build. Follow these rules EXACTLY.
 
-            1. PICK YOUR SLICE (avoid collisions) —
-               a) Run `gh pr list --state open --limit 100` and
-                  `gh issue list --label claude-queue --state open --limit 100`.
-               b) Build the list of claude-queue issues that have NO open PR referencing
-                  them ("Closes #N"/"#N" in a PR) and no recent "🤖 lane" claim comment.
-                  Sort that list by issue number ascending and rank them 1,2,3,...
-               c) YOUR SLICE by lane: lane 1 → ranks 1-4, lane 2 → ranks 5-8,
-                  lane 3 → ranks 9-12. Work ONLY your slice. If your slice is empty
-                  (short queue), exit immediately — do NOT poach another lane's ranks.
-               d) Before starting EACH issue, re-check it still has no open PR, then
-                  immediately post a comment "🤖 lane ${{ matrix.lane }} building now" to
-                  claim it. If a PR or another lane's claim already exists, SKIP it.
+            PRODUCT: conduit-nextjs is PRAXIS — an autonomous AI specialist team for businesses
+            ("Nine specialists. Zero payroll."), conduitai.io. It is NOT a household-finance app.
+            NEVER use household/cash-flow/budgeting/"fin_*" concepts on Praxis surfaces, and
+            NEVER modify anything under src/**/finance/** (that's the separate Cadence product).
 
-            2. PREMORTEM — Before writing code, comment on the issue: "How could this break
-               the live app, leak secrets, cost money, or weaken security?" Plan around it.
-               If the honest answer is "risky/ambiguous," do NOT implement — ask and stop.
+            1. SCOPE & DEDUP — Run `gh pr list --state open --limit 100` and
+               `gh issue list --label claude-queue --state open --limit 100`. Work the top 3-4
+               OPEN claude-queue issues that do NOT already have an open PR (skip in-flight
+               work — that's the #1 cause of duplicate PRs). Before each, post "🤖 building now"
+               on the issue to claim it. Each issue → its own branch + PR; finish one before
+               the next. If none are unclaimed, exit immediately.
 
-            3. SAFETY — New branch + Pull Request. NEVER push to main. Do NOT touch auth,
-               billing, RLS, secrets, or env config unless the issue explicitly says so (and
-               call it out loudly in the PR). NEVER modify anything under src/**/finance/**.
+            2. PREMORTEM — Before coding, comment on the issue: "How could this break the live
+               app, leak secrets, cost money, or weaken security?" If risky/ambiguous, ask and stop.
 
-            4. VERIFY — `npm run build` and `npx tsc --noEmit` MUST pass before opening the
-               PR. Production-level quality only: match existing patterns, handle empty/
-               loading/error states, responsive at 375/768/1280. If you can't get green in
-               budget, open a DRAFT and comment what's blocked.
+            3. SAFETY — New branch + PR. NEVER push to main. Don't touch auth, billing, RLS,
+               secrets, or env config unless the issue explicitly says so (call it out loudly).
+               Never touch src/**/finance/**.
 
-            5. CONTEXT — Read CLAUDE.md, AGENTS.md, DESIGN.md, specs/ as your knowledge base.
-               This is the founder's life's work and it's about to take real paying customers
-               — treat every change with that care.
+            4. VERIFY — `npm run build` and `npx tsc --noEmit` MUST pass before opening the PR.
+               Production-level quality: match patterns, handle empty/loading/error states,
+               responsive 375/768/1280. Can't get green in budget → open DRAFT + comment blocker.
+
+            5. CONTEXT — Read CLAUDE.md, AGENTS.md, DESIGN.md, specs/. This is the founder's
+               life's work, about to take paying customers — treat it with that care.
 
             6. HANDOFF — Open the PR yourself: `git push -u origin <branch>` then
                `gh pr create --base main --head <branch> --title "<concise>" --body "<summary + premortem + what to verify>"`.
-               Link the issue, keep PRs small/single-purpose, then comment the PR link on
-               the issue. Then move to the next issue in YOUR slice.
+               Link the issue, keep PRs small/single-purpose, comment the PR link on the issue.
