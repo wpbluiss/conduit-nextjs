@@ -2712,12 +2712,21 @@ interface ConnectorStatus {
   available: { google_calendar: boolean; slack: boolean };
 }
 
+interface SlackChannel {
+  id: string;
+  name: string;
+  is_member: boolean;
+}
+
 function IntegrationsTab() {
   const params = useSearchParams();
   const router = useRouter();
   const toast = useToast();
   const [status, setStatus] = useState<ConnectorStatus | null>(null);
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
+  const [slackChannels, setSlackChannels] = useState<SlackChannel[] | null>(null);
+  const [selectedChannel, setSelectedChannel] = useState<string>("");
+  const [savingChannel, setSavingChannel] = useState(false);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -2763,6 +2772,41 @@ function IntegrationsTab() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
 
+  // Fetch Slack channels when Slack becomes connected.
+  useEffect(() => {
+    if (!status?.connected.includes("slack") || slackChannels !== null) return;
+    fetch("/api/conduit/connectors/slack/channels")
+      .then((r) => r.ok ? r.json() : null)
+      .then((j) => {
+        if (j?.channels) setSlackChannels(j.channels);
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
+
+  const saveSlackChannel = async () => {
+    if (!selectedChannel) return;
+    setSavingChannel(true);
+    try {
+      const channel = slackChannels?.find((c) => c.id === selectedChannel);
+      const res = await fetch("/api/conduit/connectors/slack", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          channel_id: selectedChannel,
+          channel_name: channel?.name ?? selectedChannel,
+        }),
+      });
+      if (res.ok) {
+        toast.success("Slack channel saved.");
+      } else {
+        toast.error("Failed to save channel.");
+      }
+    } finally {
+      setSavingChannel(false);
+    }
+  };
+
   const disconnect = async (provider: string) => {
     setDisconnecting(provider);
     try {
@@ -2775,6 +2819,7 @@ function IntegrationsTab() {
           slack: "Slack",
         };
         toast.success(`${labels[provider] ?? provider} disconnected.`);
+        if (provider === "slack") setSlackChannels(null);
         fetchStatus();
       } else {
         toast.error("Failed to disconnect.");
@@ -2932,19 +2977,53 @@ function IntegrationsTab() {
             </p>
           </div>
           {isConnected("slack") ? (
-            <button
-              onClick={() => disconnect("slack")}
-              disabled={disconnecting === "slack"}
-              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
-              style={{
-                background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
-                border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
-                color: "var(--color-destructive, #ef4444)",
-              }}
-            >
-              <Link2Off size={12} />
-              {disconnecting === "slack" ? "Disconnecting…" : "Disconnect"}
-            </button>
+            <div className="mt-auto flex flex-col gap-2">
+              {/* Channel picker */}
+              {slackChannels !== null && slackChannels.length > 0 && (
+                <div className="flex gap-2">
+                  <select
+                    value={selectedChannel}
+                    onChange={(e) => setSelectedChannel(e.target.value)}
+                    className="flex-1 text-xs rounded-lg px-2 py-2"
+                    style={{
+                      background: "var(--color-surface-elevated)",
+                      border: "1px solid var(--color-border)",
+                      color: "var(--color-text)",
+                    }}
+                  >
+                    <option value="">Pick a channel…</option>
+                    {slackChannels.map((c) => (
+                      <option key={c.id} value={c.id}>#{c.name}</option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={saveSlackChannel}
+                    disabled={!selectedChannel || savingChannel}
+                    className="px-3 py-2 rounded-lg text-xs font-medium"
+                    style={{
+                      background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
+                      border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+                      color: "var(--color-accent)",
+                    }}
+                  >
+                    {savingChannel ? "…" : "Save"}
+                  </button>
+                </div>
+              )}
+              <button
+                onClick={() => disconnect("slack")}
+                disabled={disconnecting === "slack"}
+                className="w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
+                style={{
+                  background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
+                  border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
+                  color: "var(--color-destructive, #ef4444)",
+                }}
+              >
+                <Link2Off size={12} />
+                {disconnecting === "slack" ? "Disconnecting…" : "Disconnect"}
+              </button>
+            </div>
           ) : isAvailable("slack") ? (
             <a
               href="/api/conduit/connectors/slack/auth"

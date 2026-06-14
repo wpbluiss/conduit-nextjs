@@ -49,6 +49,11 @@ import {
   renderCalendarBlock,
 } from "@/lib/connectors/google-calendar";
 import {
+  getSlackToken,
+  getRecentMessages,
+  renderSlackBlock,
+} from "@/lib/connectors/slack";
+import {
   prepareChatTts,
   streamForEmployee,
   type ChatTtsConfig,
@@ -230,6 +235,20 @@ export async function POST(request: NextRequest) {
       calendarBlock = renderCalendarBlock(events);
     } catch {
       // Non-fatal: continue without calendar context.
+    }
+  }
+
+  // Load Slack channel context for all specialists when connected + channel is configured.
+  let slackBlock = "";
+  const slackToken = await getSlackToken(supabase, account.id);
+  if (slackToken && slackToken.meta && (slackToken.meta as Record<string, unknown>).channel_id) {
+    const channelId = (slackToken.meta as Record<string, unknown>).channel_id as string;
+    const channelName = ((slackToken.meta as Record<string, unknown>).channel_name as string | undefined) ?? channelId;
+    try {
+      const msgs = await getRecentMessages(slackToken.access_token, channelId, 20);
+      slackBlock = renderSlackBlock(msgs, channelName);
+    } catch {
+      // Non-fatal: continue without Slack context.
     }
   }
 
@@ -570,8 +589,9 @@ export async function POST(request: NextRequest) {
         // R17: per-employee filter — Atlas sees all; others see global +
         // their-scope only.
         // R-561: prepend Google Calendar block for ops + Atlas when connected.
+        // R-542: prepend Slack block for all employees when a channel is selected.
         const calendarPrefix = calendarEmployees.has(employee) ? calendarBlock : "";
-        const systemPrompt = calendarPrefix + memoryBlockFor(employee) + withTime;
+        const systemPrompt = slackBlock + calendarPrefix + memoryBlockFor(employee) + withTime;
 
         let fullText = "";
         let inputTokens = 0;
