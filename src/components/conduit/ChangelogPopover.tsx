@@ -122,7 +122,7 @@ export function ChangelogPopover() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -8 }}
             transition={{ duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
-            className="absolute bottom-full left-0 mb-2 w-80 rounded-xl border border-[var(--color-border)] shadow-xl z-50 overflow-hidden"
+            className="absolute bottom-full left-0 mb-2 w-64 rounded-xl border border-[var(--color-border)] shadow-xl z-50 overflow-hidden"
             style={{ background: "var(--color-surface-elevated)" }}
             role="dialog"
             aria-label="What's new"
