@@ -46,6 +46,10 @@ interface SearchResult {
   artifacts: { id: string; title: string; type: string; created_at: string; conversation_id: string | null }[];
 }
 
+interface CommandPaletteProps {
+  recentConvos?: { id: string; title: string | null; dominant_employee: string | null }[];
+}
+
 const RECENT_KEY = "praxis:palette:recent";
 const MAX_RECENT = 5;
 
@@ -163,7 +167,7 @@ const NAV_ITEMS: Omit<PaletteItem, "action">[] = [
 
 const TEAM = EMPLOYEE_ORDER as EmployeeKey[];
 
-export function CommandPalette() {
+export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIdx, setActiveIdx] = useState(0);
@@ -255,7 +259,7 @@ export function CommandPalette() {
   const allStaticItems: PaletteItem[] = [...NAV_ITEMS, ...teamItems];
 
   // When there's a query: filter static items + append search results
-  // When query is empty: show recent searches + static items
+  // When query is empty: show recent convos + recent searches + static items
   const hasQuery = query.trim().length >= 2;
 
   const filteredStatic = query.trim()
@@ -265,6 +269,20 @@ export function CommandPalette() {
           item.sublabel?.toLowerCase().includes(query.toLowerCase()),
       )
     : allStaticItems;
+
+  // Recent conversations (shown when query is empty)
+  const recentConvoItems: PaletteItem[] = recentConvos.slice(0, 5).map((c) => {
+    const emp = (c.dominant_employee ?? null) as EmployeeKey | null;
+    const Icon = emp && EMPLOYEE_ICON[emp] ? EMPLOYEE_ICON[emp] : MessageSquare;
+    return {
+      id: `recent-convo-${c.id}`,
+      label: c.title || "Untitled chat",
+      sublabel: emp ? `Chat with ${employeeLabel(emp)}` : "Conversation",
+      icon: <Icon size={ICON_SIZE} style={emp ? { color: DEPT_COLOR[emp] } : undefined} />,
+      href: `/app?c=${c.id}`,
+      group: "Recent conversations",
+    };
+  });
 
   // Build dynamic search result items
   type ChatResult = SearchResult["chats"][number];
@@ -300,9 +318,10 @@ export function CommandPalette() {
     : [];
 
   // Merge: search results first, then static (filtered)
+  // When empty: recent conversations first, then all static items
   const allItems: PaletteItem[] = hasQuery
     ? [...dynamicItems, ...filteredStatic]
-    : filteredStatic;
+    : [...recentConvoItems, ...filteredStatic];
 
   // Group
   const groups: { name: string; items: PaletteItem[] }[] = [];
