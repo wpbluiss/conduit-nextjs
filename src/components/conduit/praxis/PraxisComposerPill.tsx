@@ -24,6 +24,9 @@ interface Props {
   pin: PinValue;
   pinOptions: PinOption[];
   onPinChange(next: PinValue): void;
+  /** One-off specialist override from @mention — routes this single message only, does not change the pin. */
+  mentionOverride?: EmployeeId | null;
+  onMentionOverrideChange?(id: EmployeeId | null): void;
   /** Whether voice input is supported in this browser. */
   speechSupported: boolean;
   /** Whether voice capture is currently listening. */
@@ -71,6 +74,8 @@ export function PraxisComposerPill({
   pin,
   pinOptions,
   onPinChange,
+  mentionOverride = null,
+  onMentionOverrideChange,
   speechSupported,
   speechListening,
   onSpeechToggle,
@@ -126,7 +131,8 @@ export function PraxisComposerPill({
   const composerDept = pinAvatarEmp;
 
   // Detect trailing @fragment in the textarea value.
-  const mentionMatch = value.match(/(^|\s)@(\w*)$/);
+  // Suppressed when a mentionOverride chip is already set (one @mention per message).
+  const mentionMatch = !mentionOverride ? value.match(/(^|\s)@(\w*)$/) : null;
   const mentionFragment = mentionMatch ? mentionMatch[2].toLowerCase() : null;
 
   // Only show employees that are in pinOptions (tier-filtered).
@@ -159,9 +165,10 @@ export function PraxisComposerPill({
   }, [mentionFragment]);
 
   function applyMention(id: EmployeeId) {
-    // Strip the trailing @fragment from the input.
+    // Strip the trailing @fragment from the input and set a one-off routing override.
+    // Does NOT change the persistent pin — this routes only the current message.
     onChange(value.replace(/(^|\s)@\w*$/, (m, p1: string) => p1));
-    onPinChange(id);
+    onMentionOverrideChange?.(id);
   }
 
   return (
@@ -351,45 +358,100 @@ export function PraxisComposerPill({
           </div>
         )}
 
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyDown={(e) => {
-            if (mentionOpen) {
-              if (e.key === "ArrowDown") {
+        {/* @mention chip — shown after a specialist is selected; Backspace on empty input removes it */}
+        <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "nowrap" }}>
+          {mentionOverride && (
+            <span
+              aria-label={`Routing to ${labelFor(mentionOverride as EmployeeKey)} — press Backspace to remove`}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                padding: "2px 4px 2px 4px",
+                borderRadius: "var(--radius-pill)",
+                background: EMPLOYEES[mentionOverride].colorSoft,
+                border: `1px solid ${EMPLOYEES[mentionOverride].color}`,
+                fontSize: "12px",
+                color: EMPLOYEES[mentionOverride].color,
+                flexShrink: 0,
+                lineHeight: 1,
+                whiteSpace: "nowrap",
+                userSelect: "none",
+              }}
+            >
+              <PraxisAvatar employee={mentionOverride} size="sm" />
+              <span>@{labelFor(mentionOverride as EmployeeKey)}</span>
+              <button
+                type="button"
+                onClick={() => onMentionOverrideChange?.(null)}
+                aria-label="Remove @mention"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "14px",
+                  height: "14px",
+                  borderRadius: "50%",
+                  background: "transparent",
+                  border: "none",
+                  color: "inherit",
+                  cursor: "pointer",
+                  fontSize: "11px",
+                  lineHeight: 1,
+                  padding: 0,
+                  opacity: 0.7,
+                }}
+              >
+                ×
+              </button>
+            </span>
+          )}
+          <textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onKeyDown={(e) => {
+              // Backspace on empty input clears the @mention chip.
+              if (!mentionOpen && e.key === "Backspace" && value === "" && mentionOverride) {
                 e.preventDefault();
-                setMentionIndex((i) => Math.min(i + 1, mentionItems.length - 1));
+                onMentionOverrideChange?.(null);
                 return;
               }
-              if (e.key === "ArrowUp") {
-                e.preventDefault();
-                setMentionIndex((i) => Math.max(i - 1, 0));
-                return;
+              if (mentionOpen) {
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  setMentionIndex((i) => Math.min(i + 1, mentionItems.length - 1));
+                  return;
+                }
+                if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  setMentionIndex((i) => Math.max(i - 1, 0));
+                  return;
+                }
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  applyMention(mentionItems[mentionIndex]);
+                  return;
+                }
+                if (e.key === "Escape") {
+                  e.preventDefault();
+                  // Strip the @fragment and close popover.
+                  onChange(value.replace(/(^|\s)@\w*$/, (m, p1: string) => p1));
+                  return;
+                }
               }
-              if (e.key === "Enter") {
+              // Enter (no shift) OR Cmd/Ctrl+Enter → submit
+              if (e.key === "Enter" && (!e.shiftKey || e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
-                applyMention(mentionItems[mentionIndex]);
-                return;
+                onSubmit();
               }
-              if (e.key === "Escape") {
-                e.preventDefault();
-                // Strip the @fragment and close popover.
-                onChange(value.replace(/(^|\s)@\w*$/, (m, p1: string) => p1));
-                return;
-              }
-            }
-            // Enter (no shift) OR Cmd/Ctrl+Enter → submit
-            if (e.key === "Enter" && (!e.shiftKey || e.metaKey || e.ctrlKey)) {
-              e.preventDefault();
-              onSubmit();
-            }
-          }}
+            }}
           rows={1}
           placeholder={
             placeholder ?? (speechListening ? "Listening…" : "Talk to your team…")
           }
           style={{
-            width: "100%",
+            flex: 1,
+            minWidth: 0,
             resize: "none",
             background: "transparent",
             border: "none",
@@ -402,6 +464,7 @@ export function PraxisComposerPill({
             fontFamily: "var(--font-sans)",
           }}
         />
+        </div>
       </div>
 
       {speechSupported ? (

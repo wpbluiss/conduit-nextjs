@@ -195,6 +195,7 @@ export function Chat({
   const [messages, setMessages] = useState<MessageRow[]>(initialMessages);
   const [input, setInput] = useState("");
   const [pin, setPin] = useState<PinValue>("auto");
+  const [mentionOverride, setMentionOverride] = useState<EmployeeKey | null>(null);
   const [pinnedMessages, setPinnedMessages] = useState<PinnedMessage[]>([]);
   const { hasChosen, persist: persistSpecialistChoice } = useSpecialistChoice();
   const showSpecialistSelector =
@@ -759,6 +760,9 @@ export function Chat({
       setFollowUpSuggestions([]);
       setLoading(true);
       setInput("");
+      // Capture and clear the one-off @mention override before the async send.
+      const capturedMentionOverride = mentionOverride;
+      setMentionOverride(null);
 
       // Track the first AI message ever sent — localStorage guards against repeat fires.
       try {
@@ -769,8 +773,9 @@ export function Chat({
         }
       } catch { /* ignore — storage may be unavailable */ }
 
+      // @mention override takes priority over the parameter pin and the persistent pin.
       const explicitPin: PinValue | undefined =
-        employeePin ?? (pin === "auto" ? undefined : pin);
+        capturedMentionOverride ?? (employeePin ?? (pin === "auto" ? undefined : pin));
       const isTeam = explicitPin === "team";
       const placeholderEmp: EmployeeKey = isTeam
         ? "jarvis"
@@ -1210,7 +1215,7 @@ export function Chat({
         router.refresh();
       }
     },
-    [conversationId, loading, pin, router],
+    [conversationId, loading, mentionOverride, pin, router],
   );
 
   // Handle edit submit: soft-hide from the edited message onwards, then resend.
@@ -1693,6 +1698,8 @@ export function Chat({
             pin={pin as PraxisPinValue}
             pinOptions={pinOptions as { value: PraxisPinValue; label: string }[]}
             onPinChange={(next) => setPin(next as PinValue)}
+            mentionOverride={mentionOverride}
+            onMentionOverrideChange={(id) => setMentionOverride(id as EmployeeKey | null)}
             speechSupported={speech.supported}
             speechListening={speech.listening}
             onSpeechToggle={() => {
