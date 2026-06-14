@@ -92,35 +92,50 @@ export default function AboutPage() {
       {/* Mission */}
       <section
         id="vision"
-        className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]"
+        className="relative conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)] overflow-hidden"
       >
-        <div className="conduit-container">
-          <div className="conduit-prose">
-            <p className="conduit-caption conduit-caption-ember">Mission</p>
-            <h2 className="conduit-display-xl mt-5">
-              Replace payroll with software that{" "}
-              <span className="conduit-ember-text">actually works.</span>
-            </h2>
-            <div className="space-y-6 mt-10 text-[17px] md:text-[18px] text-[var(--color-cream-soft)] leading-[1.7]">
-              <p>
-                Most companies treat AI as a tool inside their existing stack.
-                We think that&rsquo;s a category error. AI shouldn&rsquo;t be a
-                tool — it should be the team.
-              </p>
-              <p>
-                Praxis isn&rsquo;t a copilot or a chat product. It&rsquo;s a
-                workforce. Nine specialist employees, one shared brain, voice +
-                text + execution. The same way you&rsquo;d build a team of
-                humans, but the team works 24/7 without payroll, benefits, or
-                coordination overhead.
-              </p>
-              <p>
-                We believe the next decade of business will be defined by the
-                founders who deploy this kind of workforce, not the founders
-                who scale headcount.
-              </p>
-            </div>
-          </div>
+        {/* Subtle ember radial — anchored top-right, keeps the section from reading as a blank white wall */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-32 right-0 w-[640px] h-[640px]"
+          style={{
+            background:
+              "radial-gradient(ellipse at top right, rgba(255,138,61,0.07) 0%, transparent 65%)",
+          }}
+        />
+        <div className="conduit-container relative">
+          <ScrollRevealCards className="conduit-prose">
+            <ScrollRevealItem>
+              <p className="conduit-caption conduit-caption-ember">Mission</p>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <h2 className="conduit-display-xl mt-5">
+                Replace payroll with software that{" "}
+                <span className="conduit-ember-text">actually works.</span>
+              </h2>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <div className="space-y-6 mt-10 text-[17px] md:text-[18px] text-[var(--color-cream-soft)] leading-[1.7]">
+                <p>
+                  Most companies treat AI as a tool inside their existing stack.
+                  We think that&rsquo;s a category error. AI shouldn&rsquo;t be a
+                  tool — it should be the team.
+                </p>
+                <p>
+                  Praxis isn&rsquo;t a copilot or a chat product. It&rsquo;s a
+                  workforce. Nine specialist employees, one shared brain, voice +
+                  text + execution. The same way you&rsquo;d build a team of
+                  humans, but the team works 24/7 without payroll, benefits, or
+                  coordination overhead.
+                </p>
+                <p>
+                  We believe the next decade of business will be defined by the
+                  founders who deploy this kind of workforce, not the founders
+                  who scale headcount.
+                </p>
+              </div>
+            </ScrollRevealItem>
+          </ScrollRevealCards>
         </div>
       </section>
 
@@ -235,35 +250,38 @@ export default function AboutPage() {
       {/* Contact */}
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
-          <div className="conduit-prose">
-            <p className="conduit-caption conduit-caption-ember">Contact</p>
-            <h2 className="conduit-display-xl mt-5">
-              Where to reach us.
-            </h2>
-
-            <div className="mt-10 space-y-1">
-              <ContactRow
-                label="Partnership inquiries"
-                value="luis@conduitai.io"
-                href="mailto:luis@conduitai.io?subject=Partnership%20inquiry"
-                live
-              />
-              <ContactRow
-                label="Press"
-                value="press@conduitai.io"
-                href="mailto:press@conduitai.io"
-                live
-              />
-              <ContactRow
-                label="Headquarters"
-                value="West Palm Beach, FL"
-              />
-              <ContactRow
-                label="Working hours"
-                value="Always — Praxis runs 24/7. Humans respond M-F."
-              />
-            </div>
-          </div>
+          <ScrollRevealCards className="conduit-prose">
+            <ScrollRevealItem>
+              <p className="conduit-caption conduit-caption-ember">Contact</p>
+              <h2 className="conduit-display-xl mt-5">
+                Where to reach us.
+              </h2>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <div className="mt-10 space-y-1">
+                <ContactRow
+                  label="Partnership inquiries"
+                  value="luis@conduitai.io"
+                  href="mailto:luis@conduitai.io?subject=Partnership%20inquiry"
+                  live
+                />
+                <ContactRow
+                  label="Press"
+                  value="press@conduitai.io"
+                  href="mailto:press@conduitai.io"
+                  live
+                />
+                <ContactRow
+                  label="Headquarters"
+                  value="West Palm Beach, FL"
+                />
+                <ContactRow
+                  label="Working hours"
+                  value="Always — Praxis runs 24/7. Humans respond M-F."
+                />
+              </div>
+            </ScrollRevealItem>
+          </ScrollRevealCards>
         </div>
       </section>
 
