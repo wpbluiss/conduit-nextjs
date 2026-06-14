@@ -2,12 +2,13 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Pin, Share2, ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { AlertCircle, ArrowRight, AtSign, Check, Copy, Download, FileText, Pin, Share2, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
   DEPT_COLOR,
   DEPT_COLOR_SOFT,
+  EMPLOYEE_ICON,
   EmployeeAvatar,
   employeeLabel,
   SpecialistChip,
@@ -208,6 +209,9 @@ export function Chat({
     retryText: string;
   } | null>(null);
   const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
+
+  // @mention autocomplete — keyboard navigation index
+  const [mentionIdx, setMentionIdx] = useState(0);
 
   // Handoff state
   const [handoffInfo, setHandoffInfo] = useState<{
@@ -1144,6 +1148,32 @@ export function Chat({
     [loading, send],
   );
 
+  // @mention: strip the trailing @fragment from input and set pin to the chosen employee.
+  const applyMention = useCallback(
+    (emp: EmployeeKey) => {
+      const stripped = input.replace(/(^|\s)@\w*$/, (m, space) => space ?? "").trimEnd();
+      setInput(stripped);
+      setPin(emp);
+      setMentionIdx(0);
+    },
+    [input],
+  );
+
+  // Derived @mention state — computed each render (9-item filter is trivially cheap)
+  const mentionMatch = input.match(/(^|\s)@(\w*)$/);
+  const mentionFragment = mentionMatch ? mentionMatch[2] : null;
+  const mentionItems: EmployeeKey[] =
+    mentionFragment !== null
+      ? (EMPLOYEE_ORDER as EmployeeKey[]).filter((id) => {
+          if (!allowedSet.has(id)) return false;
+          const q = mentionFragment.toLowerCase();
+          const canonical = EMPLOYEES[id as EmployeeId]?.name.toLowerCase() ?? "";
+          const nick = labelFor(id).toLowerCase();
+          return canonical.startsWith(q) || nick.startsWith(q) || id.toLowerCase().startsWith(q);
+        })
+      : [];
+  const mentionOpen = mentionFragment !== null && mentionItems.length > 0;
+
   return (
     <>
       {showSpecialistSelector && (
@@ -1459,8 +1489,89 @@ export function Chat({
       <div
         className="px-4 md:px-8 py-3 md:py-4"
         style={{ background: "var(--color-surface)" }}
+        onKeyDown={(e) => {
+          if (!mentionOpen) return;
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setMentionIdx((prev) => Math.min(prev + 1, mentionItems.length - 1));
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            setMentionIdx((prev) => Math.max(prev - 1, 0));
+          } else if (e.key === "Escape") {
+            e.preventDefault();
+            const stripped = input.replace(/(^|\s)@\w*$/, (m, space) => space ?? "").trimEnd();
+            setInput(stripped);
+          }
+        }}
       >
         <div className="mx-auto" style={{ maxWidth: "48rem" }}>
+          {/* @mention autocomplete popover — rendered above the composer */}
+          {mentionOpen && (
+            <div
+              role="listbox"
+              aria-label="Specialist suggestions"
+              className="mb-2 rounded-xl border overflow-hidden"
+              style={{
+                background: "var(--color-surface-elevated)",
+                borderColor: "var(--color-border)",
+                boxShadow: "0 -8px 24px rgba(0,0,0,0.35)",
+              }}
+            >
+              {mentionItems.map((empId, i) => {
+                const Icon = EMPLOYEE_ICON[empId as EmployeeId];
+                const color = DEPT_COLOR[empId];
+                const soft = DEPT_COLOR_SOFT[empId];
+                const isHighlighted = i === mentionIdx;
+                return (
+                  <button
+                    key={empId}
+                    type="button"
+                    role="option"
+                    aria-selected={isHighlighted}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      applyMention(empId);
+                    }}
+                    onMouseEnter={() => setMentionIdx(i)}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm transition-colors"
+                    style={{
+                      background: isHighlighted ? soft : "transparent",
+                      borderBottom:
+                        i < mentionItems.length - 1
+                          ? "1px solid var(--color-border)"
+                          : "none",
+                    }}
+                  >
+                    <span
+                      aria-hidden
+                      className="inline-flex items-center justify-center w-6 h-6 rounded-lg shrink-0"
+                      style={{
+                        background: soft,
+                        color,
+                        border: `1px solid color-mix(in srgb, ${color} 40%, transparent)`,
+                      }}
+                    >
+                      <Icon size={12} strokeWidth={2.25} />
+                    </span>
+                    <span
+                      className="font-medium"
+                      style={{ color: isHighlighted ? color : "var(--color-text)" }}
+                    >
+                      {labelFor(empId)}
+                    </span>
+                    <span
+                      className="ml-auto text-[11px] inline-flex items-center gap-1"
+                      style={{ color: "var(--color-text-muted)" }}
+                    >
+                      <AtSign size={10} />
+                      {EMPLOYEES[empId as EmployeeId]?.name.toLowerCase().replace(/\s+/g, "")}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           <PraxisComposerPill
             value={input}
             onChange={(next) => {
@@ -1473,9 +1584,14 @@ export function Chat({
               ) {
                 stopAudio();
               }
+              setMentionIdx(0);
               setInput(next);
             }}
             onSubmit={() => {
+              if (mentionOpen) {
+                applyMention(mentionItems[mentionIdx] ?? mentionItems[0]);
+                return;
+              }
               if (speech.listening) speech.stop();
               send(input);
             }}
