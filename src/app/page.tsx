@@ -29,6 +29,7 @@ const SpecialistShowcase = dynamic(
 const WhyPraxisTable = dynamic(() =>
   import("@/components/marketing/WhyPraxisTable").then((m) => ({ default: m.WhyPraxisTable })),
 );
+const RoiCalculator = dynamic(() => import("@/components/RoiCalculator"));
 const Pricing = dynamic(() => import("@/components/Pricing"));
 const TrustBar = dynamic(() => import("@/components/TrustBar"));
 const FAQ = dynamic(() => import("@/components/FAQ"));
@@ -93,6 +94,7 @@ export default function Home() {
       <TestimonialsCarousel />
       <SpecialistShowcase />
       <WhyPraxisTable />
+      <RoiCalculator />
       <Pricing />
       <TrustBar />
       <FAQ />
