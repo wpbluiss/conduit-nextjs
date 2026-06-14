@@ -146,6 +146,7 @@ export function Chat({
   voice = { enabled: false, autoPlay: true, ttsAllowed: false },
   allowedEmployees,
   isFirstRun = false,
+  companyBrief = null,
 }: {
   conversationId: string | null;
   initialMessages: MessageRow[];
@@ -155,6 +156,7 @@ export function Chat({
   voice?: VoicePrefs;
   allowedEmployees: EmployeeKey[];
   isFirstRun?: boolean;
+  companyBrief?: string | null;
 }) {
   const allowedSet = new Set(allowedEmployees);
   // "team" requires at least 2 non-Atlas employees on the tier.
@@ -1018,6 +1020,28 @@ export function Chat({
                   <span className="hidden sm:inline">Export</span>
                 </button>
               )}
+            </div>
+          )}
+
+          {companyBrief && messages.length === 0 && (
+            <div
+              className="flex items-start gap-2 px-3 py-2 rounded-lg text-xs"
+              style={{
+                background: "color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)",
+                color: "var(--color-text-muted)",
+              }}
+            >
+              <span
+                aria-hidden
+                className="mt-0.5 inline-block w-1.5 h-1.5 rounded-full shrink-0"
+                style={{ background: "var(--color-accent)" }}
+              />
+              <span>
+                <span style={{ color: "var(--color-accent-hi)", fontWeight: 500 }}>Brief active</span>
+                {" — "}
+                {companyBrief.length > 80 ? companyBrief.slice(0, 80) + "…" : companyBrief}
+              </span>
             </div>
           )}
 
