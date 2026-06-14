@@ -19,6 +19,7 @@ import type { EmployeeKey } from "@/lib/ai/provider";
 import { getInFlightBuilds } from "@/lib/engineering/in-flight";
 import { PostOnboardingNudge } from "@/components/conduit/PostOnboardingNudge";
 import { FirstRunTour } from "@/components/conduit/FirstRunTour";
+import { KeyboardShortcutsOverlay } from "@/components/conduit/KeyboardShortcutsOverlay";
 
 export const dynamic = "force-dynamic";
 
@@ -155,6 +156,7 @@ export default async function AppLayout({
         {!onboarded && <OnboardingModal defaultName={userName} />}
         <PostOnboardingNudge />
         {onboarded && <FirstRunTour />}
+        <KeyboardShortcutsOverlay />
       </PraxisCanvasTintProvider>
       </ToastProvider>
       </UserProvider>
