@@ -76,6 +76,7 @@ export default async function AppLayout({
       .from("conduit_conversations")
       .select("id, title, updated_at, dominant_employee")
       .eq("account_id", account.id)
+      .is("archived_at", null)
       .order("updated_at", { ascending: false })
       .limit(50),
     getInFlightBuilds(supabase, account.id),
