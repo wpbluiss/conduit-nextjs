@@ -6,7 +6,7 @@ name: Praxis Coordinator
 
 on:
   schedule:
-    - cron: "*/20 * * * *"
+    - cron: "*/10 * * * *"
   workflow_dispatch: {}
 
 permissions:
@@ -49,18 +49,18 @@ jobs:
             and NEVER queue `/finance` (Cadence) work at all. If a PR applies Cadence/finance
             framing to a Praxis surface, treat it as wrong-product and close it with a note.
 
-            STEP 1 — REFILL THE QUEUE FIRST (every run, before merging — 3 lanes starve fast):
-            - Count open `claude-queue` issues with NO open PR:
-              `gh issue list --repo wpbluiss/conduit-nextjs --label claude-queue --state open --limit 100`
-            - If FEWER THAN 20 such issues, file NEW high-value, single-session **Praxis**
-              tasks until there are ~30. Each must move the goal: world-class Praxis UI + web
-              launch, then conversion/revenue, then mobile. Read DESIGN.md / PRODUCT_PLAN.md /
-              specs. Each issue = a crisp brief (goal, concrete scope, acceptance criteria) and
-              must be unmistakably PRAXIS (AI-specialist-team) in framing. Label `claude-queue`
-              (+ `[UI]` when UI). DO NOT duplicate an existing open issue OR anything that
-              already has an open PR. NEVER queue `/finance`/Cadence or household-finance work.
+            MERGING IS THE PRIORITY THIS PHASE: build lanes are producing PRs faster than they
+            land, so they pile up. Spend MOST of your turns reviewing and merging/closing open
+            PRs (Step 2) — getting work to main is what ships. Do Step 1 (refill) quickly first
+            so lanes don't starve, then pour the rest into Step 2.
 
-            STEP 2 — MERGE & DEDUPE:
+            STEP 1 — REFILL (quick, so lanes don't starve): count open `claude-queue` issues
+            with NO open PR (`gh issue list --label claude-queue --state open --limit 100`). If
+            FEWER THAN 20, file new high-value single-session **Praxis** tasks until ~30 (crisp
+            brief; unmistakably Praxis; label `claude-queue` + `[UI]` when UI; no dup of an open
+            issue/PR; never `/finance`/Cadence/household-finance).
+
+            STEP 2 — MERGE & DEDUPE (spend most of the run here):
             - `gh pr list --repo wpbluiss/conduit-nextjs --state open --limit 100`, oldest first.
             - For each PR: inspect `gh pr view <n>`, `gh pr diff <n>`, `gh pr checks <n>`.
               MERGE (squash, `--delete-branch`) only if required checks pass (or none required
@@ -69,7 +69,8 @@ jobs:
               one-line blocking comment.
             - Close clear duplicates (same scope as another open/merged PR) and wrong-product
               PRs (Cadence/finance framing on Praxis) with a comment. Never close unique,
-              on-identity work.
+              on-identity work. If a PR has gone stale/conflicted against main, close it with a
+              note so the issue re-queues clean rather than letting conflicts pile up.
 
             HARD FLOOR — NEVER merge a PR that:
               - deletes user/account data or rows
