@@ -1,0 +1,295 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Plus, Tag, X } from "lucide-react";
+
+export interface ConversationLabel {
+  id: string;
+  name: string;
+  color: string;
+}
+
+const PRESET_COLORS = [
+  "#ef4444", // red
+  "#f97316", // orange
+  "#eab308", // yellow
+  "#22c55e", // green
+  "#14b8a6", // teal
+  "#3b82f6", // blue
+  "#6366f1", // indigo
+  "#a855f7", // purple
+  "#ec4899", // pink
+  "#6b7280", // gray
+];
+
+function LabelChip({
+  label,
+  removable,
+  onRemove,
+}: {
+  label: ConversationLabel;
+  removable?: boolean;
+  onRemove?: () => void;
+}) {
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium"
+      style={{
+        background: `color-mix(in srgb, ${label.color} 15%, var(--color-surface-elevated))`,
+        color: label.color,
+        border: `1px solid color-mix(in srgb, ${label.color} 40%, transparent)`,
+      }}
+    >
+      {label.name}
+      {removable && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); e.preventDefault(); onRemove?.(); }}
+          aria-label={`Remove label ${label.name}`}
+          className="opacity-70 hover:opacity-100 ml-0.5"
+        >
+          <X size={9} strokeWidth={2.5} />
+        </button>
+      )}
+    </span>
+  );
+}
+
+export function ConversationLabelsDisplay({
+  labels,
+}: {
+  labels: ConversationLabel[];
+}) {
+  if (labels.length === 0) return null;
+  return (
+    <div className="flex items-center gap-1 flex-wrap">
+      {labels.map((l) => (
+        <LabelChip key={l.id} label={l} />
+      ))}
+    </div>
+  );
+}
+
+export function ConversationLabelManager({
+  conversationId,
+  assignedLabels,
+  allLabels,
+  onUpdate,
+}: {
+  conversationId: string;
+  assignedLabels: ConversationLabel[];
+  allLabels: ConversationLabel[];
+  onUpdate: (labels: ConversationLabel[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [assigned, setAssigned] = useState<ConversationLabel[]>(assignedLabels);
+  const [all, setAll] = useState<ConversationLabel[]>(allLabels);
+  const [creating, setCreating] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newColor, setNewColor] = useState(PRESET_COLORS[6]);
+  const [busy, setBusy] = useState(false);
+  const popRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onOutside = (e: MouseEvent) => {
+      if (popRef.current && !popRef.current.contains(e.target as Node)) {
+        setOpen(false);
+        setCreating(false);
+      }
+    };
+    document.addEventListener("mousedown", onOutside);
+    return () => document.removeEventListener("mousedown", onOutside);
+  }, [open]);
+
+  const toggle = useCallback(async (label: ConversationLabel) => {
+    const isAssigned = assigned.some((l) => l.id === label.id);
+    const next = isAssigned
+      ? assigned.filter((l) => l.id !== label.id)
+      : [...assigned, label];
+    setAssigned(next);
+    onUpdate(next);
+
+    if (isAssigned) {
+      await fetch(`/api/conduit/conversations/${conversationId}/labels/${label.id}`, {
+        method: "DELETE",
+      });
+    } else {
+      await fetch(`/api/conduit/conversations/${conversationId}/labels`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ labelId: label.id }),
+      });
+    }
+  }, [assigned, conversationId, onUpdate]);
+
+  const createLabel = useCallback(async () => {
+    const name = newName.trim();
+    if (!name || busy) return;
+    setBusy(true);
+    const r = await fetch("/api/conduit/labels", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name, color: newColor }),
+    });
+    if (r.ok) {
+      const { label } = await r.json() as { label: ConversationLabel };
+      const nextAll = [...all, label];
+      const nextAssigned = [...assigned, label];
+      setAll(nextAll);
+      setAssigned(nextAssigned);
+      onUpdate(nextAssigned);
+      // Assign to conversation
+      await fetch(`/api/conduit/conversations/${conversationId}/labels`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ labelId: label.id }),
+      });
+      setNewName("");
+      setCreating(false);
+    }
+    setBusy(false);
+  }, [all, assigned, busy, conversationId, newColor, newName, onUpdate]);
+
+  const removeLabel = useCallback(async (label: ConversationLabel) => {
+    const next = assigned.filter((l) => l.id !== label.id);
+    setAssigned(next);
+    onUpdate(next);
+    await fetch(`/api/conduit/conversations/${conversationId}/labels/${label.id}`, {
+      method: "DELETE",
+    });
+  }, [assigned, conversationId, onUpdate]);
+
+  return (
+    <div className="relative inline-flex flex-wrap items-center gap-1">
+      {assigned.map((l) => (
+        <LabelChip key={l.id} label={l} removable onRemove={() => void removeLabel(l)} />
+      ))}
+      <div className="relative" ref={popRef}>
+        <button
+          type="button"
+          onClick={() => { setOpen((v) => !v); setCreating(false); }}
+          aria-label="Add or manage labels"
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] transition-colors"
+          style={{
+            color: "var(--color-text-muted)",
+            border: "1px dashed var(--color-border)",
+          }}
+        >
+          <Tag size={10} />
+          {assigned.length === 0 ? "Add label" : ""}
+        </button>
+
+        {open && (
+          <div
+            className="absolute top-full left-0 mt-1.5 z-50 rounded-xl border shadow-xl overflow-hidden"
+            style={{
+              minWidth: "200px",
+              background: "var(--color-surface-elevated)",
+              borderColor: "var(--color-border)",
+            }}
+          >
+            {/* Existing labels */}
+            {all.length > 0 && (
+              <div className="p-2 space-y-0.5 max-h-48 overflow-y-auto">
+                {all.map((label) => {
+                  const isOn = assigned.some((l) => l.id === label.id);
+                  return (
+                    <button
+                      key={label.id}
+                      type="button"
+                      onClick={() => void toggle(label)}
+                      className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm hover:bg-[var(--color-surface)] transition-colors"
+                    >
+                      <span
+                        className="w-3 h-3 rounded-full shrink-0"
+                        style={{
+                          background: label.color,
+                          outline: isOn ? `2px solid ${label.color}` : "none",
+                          outlineOffset: "2px",
+                        }}
+                      />
+                      <span className="flex-1 truncate text-left text-[var(--color-text)]">
+                        {label.name}
+                      </span>
+                      {isOn && (
+                        <span className="text-[10px]" style={{ color: label.color }}>✓</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Create new label */}
+            {!creating ? (
+              <button
+                type="button"
+                onClick={() => setCreating(true)}
+                disabled={all.length >= 10}
+                className="w-full flex items-center gap-1.5 px-3 py-2 text-[12px] border-t transition-colors hover:bg-[var(--color-surface)] disabled:opacity-40"
+                style={{ borderColor: "var(--color-border)", color: "var(--color-text-muted)" }}
+              >
+                <Plus size={12} />
+                {all.length >= 10 ? "Label limit reached (10)" : "Create new label"}
+              </button>
+            ) : (
+              <div className="p-2 border-t space-y-2" style={{ borderColor: "var(--color-border)" }}>
+                <input
+                  autoFocus
+                  type="text"
+                  placeholder="Label name"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value.slice(0, 32))}
+                  onKeyDown={(e) => { if (e.key === "Enter") void createLabel(); if (e.key === "Escape") setCreating(false); }}
+                  maxLength={32}
+                  className="w-full px-2 py-1 text-[12px] rounded-lg border outline-none"
+                  style={{
+                    background: "var(--color-surface)",
+                    borderColor: "var(--color-border)",
+                    color: "var(--color-text)",
+                  }}
+                />
+                <div className="flex flex-wrap gap-1">
+                  {PRESET_COLORS.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setNewColor(c)}
+                      aria-label={`Color ${c}`}
+                      className="w-5 h-5 rounded-full transition-transform hover:scale-110"
+                      style={{
+                        background: c,
+                        outline: newColor === c ? `2px solid ${c}` : "none",
+                        outlineOffset: "2px",
+                      }}
+                    />
+                  ))}
+                </div>
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => void createLabel()}
+                    disabled={!newName.trim() || busy}
+                    className="flex-1 px-2 py-1 rounded-lg text-[11px] font-medium text-white transition-opacity disabled:opacity-50"
+                    style={{ background: newColor }}
+                  >
+                    {busy ? "Creating…" : "Create"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCreating(false)}
+                    className="px-2 py-1 rounded-lg text-[11px]"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
