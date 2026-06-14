@@ -15,6 +15,7 @@ import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { getInFlightBuilds } from "@/lib/engineering/in-flight";
 import { PostOnboardingNudge } from "@/components/conduit/PostOnboardingNudge";
+import { getUserHouseholdId } from "@/lib/finance/data";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,17 @@ export default async function AppLayout({
       `/auth/check-your-email?email=${encodeURIComponent(user.email)}`,
     );
   }
+
+  // Household guard — soft check (DB error → let user through to avoid lockout).
+  // New users without a fin_household are sent to the onboarding wizard.
+  try {
+    const householdId = await getUserHouseholdId();
+    if (householdId === null) redirect("/onboarding");
+  } catch {
+    // Intentionally swallowed: if the household check fails, the user can still
+    // access the AI features. The wizard can be triggered again from the profile.
+  }
+
   const supabase = await createSupabaseServerClient();
   const onboarded = Boolean(
     account.business_type && account.business_description,
