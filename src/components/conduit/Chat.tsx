@@ -25,6 +25,7 @@ import {
 import { composeChatEmptyCopy, timeOfDayBucket } from "@/lib/conduit/welcome-copy";
 import type { EmployeeId } from "@/lib/conduit/employees";
 import { TypingIndicator } from "./TypingIndicator";
+import { MarkdownRenderer } from "./MarkdownRenderer";
 
 export interface VoicePrefs {
   enabled: boolean;
@@ -1427,15 +1428,12 @@ const MessageBubble = memo(function MessageBubble({
             </button>
           )}
         </div>
-        <div className="conduit-bubble-assistant px-4 py-3 text-[var(--color-text)] whitespace-pre-wrap leading-relaxed">
-          {message.content}
-          {message.pending && (
-            <span
-              aria-hidden
-              className="inline-block w-[2px] h-4 -mb-1 ml-1 caret"
-              style={{ background: DEPT_COLOR[employee] }}
-            />
-          )}
+        <div className="conduit-bubble-assistant px-4 py-3 text-[var(--color-text)]">
+          <MarkdownRenderer
+            content={message.content}
+            streaming={message.pending}
+            caretColor={message.pending ? DEPT_COLOR[employee] : undefined}
+          />
         </div>
         {message.memories?.map((mem) => (
           <div
