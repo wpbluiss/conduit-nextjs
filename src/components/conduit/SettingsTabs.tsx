@@ -81,7 +81,8 @@ export type SettingsTabKey =
   | "billing"
   | "security"
   | "notifications"
-  | "integrations";
+  | "integrations"
+  | "appearance";
 
 export function SettingsTabs({
   email,
@@ -112,6 +113,7 @@ export function SettingsTabs({
             ["security", "Security"],
             ["notifications", "Notifications"],
             ["integrations", "Integrations"],
+            ["appearance", "Appearance"],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -152,6 +154,9 @@ export function SettingsTabs({
       {tab === "security" && <MFASecurity />}
       {tab === "notifications" && <NotificationsTab />}
       {tab === "integrations" && <IntegrationsTab />}
+      {tab === "appearance" && (
+        <AppearanceTab themePref={account.theme_preference ?? "system"} />
+      )}
     </div>
   );
 }
@@ -1856,6 +1861,19 @@ function IntegrationsTab() {
             Let us know.
           </a>
         </p>
+      </div>
+    </div>
+  );
+}
+
+function AppearanceTab({ themePref }: { themePref: "system" | "light" | "dark" }) {
+  return (
+    <div className="space-y-6 text-sm">
+      <p className="text-[var(--color-text-muted)] max-w-xl">
+        Choose how Praxis looks on this device. System follows your OS preference.
+      </p>
+      <div className="conduit-card p-5">
+        <ThemeToggle initialPref={themePref} />
       </div>
     </div>
   );
