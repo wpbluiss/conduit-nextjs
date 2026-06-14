@@ -5,13 +5,17 @@ import {
   useEffect,
   useRef,
   useState,
+  type ChangeEvent,
   type KeyboardEvent,
+  type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Brain,
+  Clock,
   CreditCard,
+  FileText,
   Hammer,
   LayoutGrid,
   MessageSquare,
@@ -29,10 +33,37 @@ interface PaletteItem {
   id: string;
   label: string;
   sublabel?: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   href?: string;
   action?: () => void;
   group: string;
+}
+
+interface SearchResult {
+  chats: { id: string; title: string | null; updated_at: string; dominant_employee: string | null }[];
+  memory: { id: string; content: string; kind: string; created_at: string }[];
+  artifacts: { id: string; title: string; type: string; created_at: string; conversation_id: string | null }[];
+}
+
+const RECENT_KEY = "praxis:palette:recent";
+const MAX_RECENT = 5;
+
+function readRecent(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]") as string[];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecent(q: string) {
+  try {
+    const prev = readRecent().filter((s) => s !== q);
+    localStorage.setItem(RECENT_KEY, JSON.stringify([q, ...prev].slice(0, MAX_RECENT)));
+  } catch {
+    // localStorage blocked
+  }
 }
 
 function isInputFocused(): boolean {
@@ -127,14 +158,19 @@ export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIdx, setActiveIdx] = useState(0);
+  const [recent, setRecent] = useState<string[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
+  const [searching, setSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
 
   const close = useCallback(() => {
     setOpen(false);
     setQuery("");
     setActiveIdx(0);
+    setSearchResults(null);
   }, []);
 
   // Cmd+K / Ctrl+K to open
@@ -144,8 +180,8 @@ export function CommandPalette() {
       const trigger = isMac ? e.metaKey : e.ctrlKey;
       if (trigger && e.key === "k") {
         e.preventDefault();
-        setOpen((v) => {
-          if (v) { setQuery(""); setActiveIdx(0); }
+        setOpen((v: boolean) => {
+          if (v) { setQuery(""); setActiveIdx(0); setSearchResults(null); }
           return !v;
         });
         return;
@@ -159,12 +195,40 @@ export function CommandPalette() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, close]);
 
-  // Focus input when opened
+  // Focus input when opened + load recent searches
   useEffect(() => {
     if (open) {
+      setRecent(readRecent());
       setTimeout(() => inputRef.current?.focus(), 30);
     }
   }, [open]);
+
+  // Debounced search
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (query.trim().length < 2) {
+      setSearchResults(null);
+      setSearching(false);
+      return;
+    }
+    setSearching(true);
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/conduit/search?q=${encodeURIComponent(query.trim())}`);
+        if (res.ok) {
+          const data = await res.json() as SearchResult;
+          setSearchResults(data);
+        }
+      } catch {
+        // ignore
+      } finally {
+        setSearching(false);
+      }
+    }, 200);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query]);
 
   // Build team items
   const teamItems: PaletteItem[] = TEAM.map((emp) => {
@@ -179,19 +243,61 @@ export function CommandPalette() {
     };
   });
 
-  const allItems: PaletteItem[] = [...NAV_ITEMS, ...teamItems];
+  const allStaticItems: PaletteItem[] = [...NAV_ITEMS, ...teamItems];
 
-  const filtered = query.trim()
-    ? allItems.filter(
+  // When there's a query: filter static items + append search results
+  // When query is empty: show recent searches + static items
+  const hasQuery = query.trim().length >= 2;
+
+  const filteredStatic = query.trim()
+    ? allStaticItems.filter(
         (item) =>
           item.label.toLowerCase().includes(query.toLowerCase()) ||
           item.sublabel?.toLowerCase().includes(query.toLowerCase()),
       )
-    : allItems;
+    : allStaticItems;
 
-  // Group filtered items
+  // Build dynamic search result items
+  type ChatResult = SearchResult["chats"][number];
+  type MemResult = SearchResult["memory"][number];
+  type ArtResult = SearchResult["artifacts"][number];
+  const dynamicItems: PaletteItem[] = hasQuery && searchResults
+    ? [
+        ...(searchResults.chats ?? []).map((c: ChatResult) => ({
+          id: `chat-result-${c.id}`,
+          label: c.title || "Untitled chat",
+          sublabel: "Conversation",
+          icon: <MessageSquare size={ICON_SIZE} />,
+          href: `/app?c=${c.id}`,
+          group: "Chats",
+        })),
+        ...(searchResults.memory ?? []).map((m: MemResult) => ({
+          id: `mem-result-${m.id}`,
+          label: m.content.slice(0, 60) + (m.content.length > 60 ? "…" : ""),
+          sublabel: `Memory · ${m.kind}`,
+          icon: <Brain size={ICON_SIZE} />,
+          href: "/app/memory",
+          group: "Memory",
+        })),
+        ...(searchResults.artifacts ?? []).map((a: ArtResult) => ({
+          id: `art-result-${a.id}`,
+          label: a.title || "Untitled artifact",
+          sublabel: `Artifact · ${a.type}`,
+          icon: a.type === "build" ? <Hammer size={ICON_SIZE} /> : <FileText size={ICON_SIZE} />,
+          href: a.conversation_id ? `/app?c=${a.conversation_id}` : "/app/artifacts",
+          group: "Artifacts",
+        })),
+      ]
+    : [];
+
+  // Merge: search results first, then static (filtered)
+  const allItems: PaletteItem[] = hasQuery
+    ? [...dynamicItems, ...filteredStatic]
+    : filteredStatic;
+
+  // Group
   const groups: { name: string; items: PaletteItem[] }[] = [];
-  for (const item of filtered) {
+  for (const item of allItems) {
     const existing = groups.find((g) => g.name === item.group);
     if (existing) {
       existing.items.push(item);
@@ -200,10 +306,10 @@ export function CommandPalette() {
     }
   }
 
-  // Flat index for keyboard nav
-  const flatItems = filtered;
+  const flatItems = allItems;
 
   const activate = (item: PaletteItem) => {
+    if (query.trim().length >= 2) saveRecent(query.trim());
     close();
     if (item.action) {
       item.action();
@@ -217,13 +323,22 @@ export function CommandPalette() {
     }
   };
 
+  const activateRecent = (term: string) => {
+    close();
+    setQuery(term);
+    setTimeout(() => {
+      setOpen(true);
+      setQuery(term);
+    }, 50);
+  };
+
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActiveIdx((i) => Math.min(i + 1, flatItems.length - 1));
+      setActiveIdx((i: number) => Math.min(i + 1, flatItems.length - 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setActiveIdx((i) => Math.max(i - 1, 0));
+      setActiveIdx((i: number) => Math.max(i - 1, 0));
     } else if (e.key === "Enter") {
       e.preventDefault();
       const item = flatItems[activeIdx];
@@ -242,7 +357,6 @@ export function CommandPalette() {
     el?.scrollIntoView({ block: "nearest" });
   }, [activeIdx]);
 
-  // Reset active idx when query changes
   useEffect(() => {
     setActiveIdx(0);
   }, [query]);
@@ -284,16 +398,16 @@ export function CommandPalette() {
               <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[var(--color-border)]">
                 <Search
                   size={15}
-                  className="shrink-0"
+                  className={`shrink-0 transition-opacity ${searching ? "animate-pulse" : ""}`}
                   style={{ color: "var(--color-text-muted)" }}
                 />
                 <input
                   ref={inputRef}
                   type="text"
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
                   onKeyDown={onKeyDown}
-                  placeholder="Search actions and navigation…"
+                  placeholder="Search chats, memory, artifacts, actions…"
                   autoComplete="off"
                   spellCheck={false}
                   className="flex-1 bg-transparent outline-none text-sm placeholder:text-[var(--color-text-muted)]"
@@ -315,6 +429,33 @@ export function CommandPalette() {
                 </kbd>
               </div>
 
+              {/* Recent searches (shown when query is empty) */}
+              {!query && recent.length > 0 && (
+                <div className="py-2 border-b border-[var(--color-border)]">
+                  <div className="px-4 pt-1 pb-1 text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] flex items-center gap-1">
+                    <Clock size={10} />
+                    Recent
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 px-4 pb-2 pt-1">
+                    {recent.map((term: string) => (
+                      <button
+                        key={term}
+                        type="button"
+                        onClick={() => activateRecent(term)}
+                        className="text-[11px] px-2 py-0.5 rounded-full border transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+                        style={{
+                          borderColor: "var(--color-border)",
+                          background: "var(--color-surface)",
+                          color: "var(--color-text-muted)",
+                        }}
+                      >
+                        {term}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Results */}
               <div
                 id="palette-list"
@@ -323,7 +464,7 @@ export function CommandPalette() {
                 className="max-h-[52vh] overflow-y-auto py-2"
                 aria-label="Results"
               >
-                {filtered.length === 0 ? (
+                {flatItems.length === 0 && !searching && query.trim().length >= 2 ? (
                   <div className="px-4 py-8 text-center text-sm text-[var(--color-text-muted)]">
                     No results for &ldquo;{query}&rdquo;
                   </div>
