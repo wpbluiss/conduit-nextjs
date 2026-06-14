@@ -55,6 +55,7 @@ export interface MessageRow {
   handoffTo?: EmployeeKey;
   handoffFrom?: EmployeeKey;
   memories?: { id: string; kind: string; content: string; tags?: string[] }[];
+  feedback?: 1 | -1 | null;
 }
 
 interface Suggestion {
@@ -1634,8 +1635,14 @@ function CopyButton({ content }: { content: string }) {
   );
 }
 
-function MessageFeedbackButtons({ messageId }: { messageId: string }) {
-  const [rating, setRating] = useState<1 | -1 | null>(null);
+function MessageFeedbackButtons({
+  messageId,
+  initialRating = null,
+}: {
+  messageId: string;
+  initialRating?: 1 | -1 | null;
+}) {
+  const [rating, setRating] = useState<1 | -1 | null>(initialRating);
   const [busy, setBusy] = useState(false);
 
   const submit = async (value: 1 | -1) => {
@@ -1657,14 +1664,14 @@ function MessageFeedbackButtons({ messageId }: { messageId: string }) {
   };
 
   return (
-    <div className="flex items-center gap-1 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+    <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-150">
       <button
         type="button"
         aria-label="Helpful"
         aria-pressed={rating === 1}
         onClick={() => void submit(1)}
         disabled={busy}
-        className="p-1 rounded transition-colors disabled:pointer-events-none"
+        className="min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center p-1 rounded transition-colors disabled:pointer-events-none"
         style={{
           color: rating === 1 ? "var(--color-accent)" : "var(--color-text-muted)",
         }}
@@ -1679,7 +1686,7 @@ function MessageFeedbackButtons({ messageId }: { messageId: string }) {
         aria-pressed={rating === -1}
         onClick={() => void submit(-1)}
         disabled={busy}
-        className="p-1 rounded transition-colors disabled:pointer-events-none"
+        className="min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center p-1 rounded transition-colors disabled:pointer-events-none"
         style={{
           color: rating === -1 ? "#f87171" : "var(--color-text-muted)",
         }}
@@ -2033,7 +2040,7 @@ const MessageBubble = memo(function MessageBubble({
         {message.id && !message.pending && (
           <div className="flex items-center gap-2">
             <CopyButton content={message.content} />
-            <MessageFeedbackButtons messageId={message.id} />
+            <MessageFeedbackButtons messageId={message.id} initialRating={message.feedback ?? null} />
             {onPinToggle && (
               <button
                 type="button"
