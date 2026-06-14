@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Pin, Share2, ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Pin, Search, Share2, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
@@ -209,6 +209,11 @@ export function Chat({
   } | null>(null);
   const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
 
+  // In-conversation message search
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
   // Handoff state
   const [handoffInfo, setHandoffInfo] = useState<{
     conversationId: string;
@@ -235,6 +240,33 @@ export function Chat({
     const id = setInterval(tick, 250);
     return () => clearInterval(id);
   }, [rateLimitUntil]);
+
+  // Focus search input when opened; close on Escape.
+  useEffect(() => {
+    if (searchOpen) {
+      searchInputRef.current?.focus();
+    } else {
+      setSearchQuery("");
+    }
+  }, [searchOpen]);
+
+  // Scroll to first search match when query changes.
+  useEffect(() => {
+    if (!searchQuery.trim()) return;
+    const el = document.querySelector<HTMLElement>("[data-search-match='true']");
+    el?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [searchQuery]);
+
+  // Derive matching message indices — recalculated on query or messages change.
+  const searchNeedle = searchQuery.trim().toLowerCase();
+  const searchMatchSet = new Set<number>(
+    searchNeedle
+      ? messages.reduce<number[]>((acc, m, i) => {
+          if (m.content.toLowerCase().includes(searchNeedle)) acc.push(i);
+          return acc;
+        }, [])
+      : [],
+  );
 
   // Export conversation as Markdown — client-side, no backend needed.
   const exportConversation = useCallback(() => {
@@ -1194,6 +1226,21 @@ export function Chat({
                 <div className="shrink-0 flex items-center gap-1">
                   <button
                     type="button"
+                    onClick={() => setSearchOpen((v) => !v)}
+                    title="Search messages"
+                    aria-label="Search messages"
+                    aria-pressed={searchOpen}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
+                    style={{
+                      color: searchOpen ? "var(--color-text)" : "var(--color-text-muted)",
+                      border: searchOpen ? "1px solid var(--color-border)" : "1px solid transparent",
+                    }}
+                  >
+                    <Search size={12} />
+                    <span className="hidden sm:inline">Search</span>
+                  </button>
+                  <button
+                    type="button"
                     onClick={exportConversation}
                     title="Download as Markdown"
                     aria-label="Download conversation as Markdown"
@@ -1276,6 +1323,47 @@ export function Chat({
             </div>
           )}
 
+          {/* Inline search bar — shown when searchOpen is true */}
+          {searchOpen && conversationId && (
+            <div
+              className="flex items-center gap-2 px-2 py-2 mb-2 rounded-xl border"
+              style={{
+                background: "var(--color-surface-elevated)",
+                borderColor: "var(--color-border)",
+              }}
+            >
+              <Search size={13} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} aria-hidden />
+              <input
+                ref={searchInputRef}
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") { setSearchOpen(false); }
+                }}
+                placeholder="Search messages…"
+                aria-label="Search messages in this conversation"
+                className="flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--color-text-muted)]"
+              />
+              {searchQuery && (
+                <span className="text-[11px] shrink-0" style={{ color: "var(--color-text-muted)" }}>
+                  {searchMatchSet.size} match{searchMatchSet.size !== 1 ? "es" : ""}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => setSearchOpen(false)}
+                aria-label="Close search"
+                className="shrink-0 p-0.5 rounded transition-colors"
+                style={{ color: "var(--color-text-muted)" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
+              >
+                <X size={13} />
+              </button>
+            </div>
+          )}
+
           {companyBrief && messages.length === 0 && (
             <div
               className="flex items-start gap-2 px-3 py-2 rounded-lg text-xs"
@@ -1335,6 +1423,7 @@ export function Chat({
                   ? (shouldPin) => void handlePinToggle(m.id!, shouldPin)
                   : undefined
               }
+              searchMatch={searchMatchSet.has(i)}
             />
           ))}
 
@@ -1946,6 +2035,7 @@ const MessageBubble = memo(function MessageBubble({
   onEditSubmit,
   pinned = false,
   onPinToggle,
+  searchMatch = false,
 }: {
   message: MessageRow;
   onOpenArtifact: (id: string) => void;
@@ -1958,6 +2048,7 @@ const MessageBubble = memo(function MessageBubble({
   onEditSubmit?: (text: string) => void;
   pinned?: boolean;
   onPinToggle?: (shouldPin: boolean) => void;
+  searchMatch?: boolean;
 }) {
   const [editDraft, setEditDraft] = useState(message.content);
   const editRef = useRef<HTMLTextAreaElement>(null);
@@ -2049,10 +2140,12 @@ const MessageBubble = memo(function MessageBubble({
 
     return (
       <motion.div
+        data-search-match={searchMatch || undefined}
         className="flex justify-end group"
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+        style={searchMatch ? { outline: "2px solid var(--color-accent)", outlineOffset: "3px", borderRadius: "12px" } : undefined}
       >
         <div className="flex flex-col items-end gap-1 max-w-[85%]">
           <div className="conduit-bubble-user px-4 py-3 text-[var(--color-text)]">
@@ -2136,8 +2229,14 @@ const MessageBubble = memo(function MessageBubble({
   return (
     <motion.div
       data-message-id={message.id}
+      data-search-match={searchMatch || undefined}
       className="flex gap-3 group"
-      style={{ ["--dept" as string]: DEPT_COLOR[employee] }}
+      style={{
+        ["--dept" as string]: DEPT_COLOR[employee],
+        ...(searchMatch
+          ? { outline: "2px solid var(--color-accent)", outlineOffset: "3px", borderRadius: "12px" }
+          : {}),
+      }}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
