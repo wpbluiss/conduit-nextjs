@@ -1287,6 +1287,17 @@ function ProfileTab({
         </form>
       </div>
 
+      {/* ── Guided Tour ── */}
+      <div>
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+          Guided Tour
+        </div>
+        <p className="text-xs text-[var(--color-text-muted)] mb-3 max-w-sm">
+          Replay the step-by-step walkthrough of Praxis specialists and key features.
+        </p>
+        <RestartTourButton />
+      </div>
+
       {/* ── Data & Privacy ── */}
       <div>
         <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
@@ -1310,6 +1321,39 @@ function ProfileTab({
         )}
       </div>
     </div>
+  );
+}
+
+function RestartTourButton() {
+  const router = useRouter();
+  const toast = useToast();
+  const [restarting, setRestarting] = useState(false);
+
+  const handleRestart = async () => {
+    setRestarting(true);
+    try {
+      await fetch("/api/conduit/account/onboarded", { method: "DELETE" });
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("praxis_tour_v1_done");
+      }
+      toast.success("Tour reset — redirecting…");
+      router.push("/app");
+    } catch {
+      toast.error("Couldn't reset tour. Please try again.");
+      setRestarting(false);
+    }
+  };
+
+  return (
+    <PraxisButton
+      onClick={handleRestart}
+      isLoading={restarting}
+      loadingText="Resetting…"
+      variant="secondary"
+      className="!text-xs"
+    >
+      Restart guided tour
+    </PraxisButton>
   );
 }
 
