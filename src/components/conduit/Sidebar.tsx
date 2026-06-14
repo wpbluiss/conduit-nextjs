@@ -165,6 +165,8 @@ export function Sidebar({
   // Conversation list search
   const [convSearch, setConvSearch] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
+  // Mobile: search expands from icon on tap; desktop always shows the full input.
+  const [searchExpanded, setSearchExpanded] = useState(false);
   // Optimistic title overrides — updated when chat fires praxis:title_updated.
   const [titleOverrides, setTitleOverrides] = useState<Record<string, string>>({});
 
@@ -198,13 +200,15 @@ export function Sidebar({
 
   const close = () => setOpen(false);
 
-  // ESC key: clear search if active, otherwise close sidebar on mobile
+  // ESC key: clear search if active, collapse mobile search if expanded, otherwise close sidebar on mobile
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         if (convSearch) {
           setConvSearch("");
           searchInputRef.current?.focus();
+        } else if (searchExpanded) {
+          setSearchExpanded(false);
         } else if (open) {
           close();
         }
@@ -212,7 +216,12 @@ export function Sidebar({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, convSearch]);
+  }, [open, convSearch, searchExpanded]);
+
+  // Reset mobile search expansion when the drawer closes
+  useEffect(() => {
+    if (!open) setSearchExpanded(false);
+  }, [open]);
 
   // Focus trap + focus management: mobile only (when drawer is open as dialog)
   useEffect(() => {
@@ -747,8 +756,22 @@ export function Sidebar({
 
               {/* Search input */}
               <div className="px-2 pb-1">
+                {/* Mobile: icon-only trigger — collapses the search to a single tap target */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchExpanded(true);
+                    requestAnimationFrame(() => searchInputRef.current?.focus());
+                  }}
+                  aria-label="Search conversations"
+                  className={`${searchExpanded ? "hidden" : "md:hidden"} flex items-center justify-center w-7 h-7 rounded-lg transition-colors duration-100`}
+                  style={{ color: "var(--color-text-muted)" }}
+                >
+                  <Search size={13} />
+                </button>
+                {/* Full input: always on desktop; on mobile only when expanded */}
                 <div
-                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg"
+                  className={`${searchExpanded ? "flex" : "hidden md:flex"} items-center gap-1.5 px-2 py-1.5 rounded-lg`}
                   style={{
                     background: "var(--color-surface-elevated)",
                     border: "1px solid var(--color-border)",
