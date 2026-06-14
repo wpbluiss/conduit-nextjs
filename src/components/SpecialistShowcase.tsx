@@ -1,7 +1,11 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { ALL_EMPLOYEES } from "@/lib/conduit/employees";
 import { EMPLOYEE_ICON } from "@/components/conduit/EmployeeBadge";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+
+const EASE = [0.25, 1, 0.5, 1] as const;
 
 const BIOS: Record<string, string> = {
   jarvis:
@@ -24,78 +28,77 @@ const BIOS: Record<string, string> = {
     "First-drafts NDAs, contractor agreements, and basic licensing terms ready for attorney review. Legal removes the blank-page problem from every contract negotiation.",
 };
 
+const CONTAINER = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } },
+};
+
+const CARD_ITEM = {
+  hidden: { opacity: 0, y: 28, scale: 0.97 },
+  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.65, ease: EASE } },
+};
+
 export default function SpecialistShowcase() {
+  const reduced = useReducedMotion();
+
   return (
     <section
       id="meet-the-team"
-      style={{
-        background: "var(--color-surface, #0a0a0f)",
-        borderTop: "1px solid var(--color-border, rgba(255,255,255,0.07))",
-        padding: "80px 24px",
-      }}
+      className="conduit-section conduit-bg-inverse relative overflow-hidden border-t border-[var(--color-border-on-inverse)]"
     >
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <p
-            style={{
-              fontSize: 11,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "var(--color-accent-hi, var(--color-accent, #6366f1))",
-              marginBottom: 12,
-            }}
-          >
+      <div className="conduit-mesh-inverse" aria-hidden />
+
+      <div className="relative conduit-container">
+        {/* Section header */}
+        <motion.div
+          initial={reduced ? false : { opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-12%" }}
+          transition={{ duration: 0.85, ease: EASE }}
+          className="text-center mb-14 md:mb-18"
+        >
+          <p className="conduit-caption conduit-caption-ember">
             Nine specialists. Zero payroll.
           </p>
-          <h2
-            className="serif"
-            style={{
-              fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
-              fontWeight: 400,
-              color: "var(--color-text, #f5f5f5)",
-              lineHeight: 1.15,
-            }}
-          >
-            Meet your team
+          <h2 className="conduit-display-2xl mt-5">
+            Meet your{" "}
+            <span className="conduit-text-gradient-inverse">team.</span>
           </h2>
-          <p
-            style={{
-              marginTop: 12,
-              maxWidth: 480,
-              marginInline: "auto",
-              fontSize: 15,
-              color: "var(--color-text-muted, rgba(245,245,245,0.55))",
-              lineHeight: 1.6,
-            }}
-          >
+          <p className="conduit-body-lg mt-5 max-w-[520px] mx-auto">
             Each specialist runs autonomously, hands off seamlessly, and shares
             one unified memory of your business.
           </p>
-        </div>
+        </motion.div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-            gap: 16,
-          }}
+        {/* Cards grid */}
+        <motion.div
+          initial={reduced ? false : "hidden"}
+          whileInView="show"
+          viewport={{ once: true, margin: "-5%" }}
+          variants={reduced ? undefined : CONTAINER}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
         >
           {ALL_EMPLOYEES.map((emp) => {
             const Icon = EMPLOYEE_ICON[emp.id];
             const bio = BIOS[emp.id] ?? emp.tagline;
             return (
-              <SpecialistCard
+              <motion.div
                 key={emp.id}
-                icon={<Icon size={20} strokeWidth={1.75} />}
-                name={emp.name}
-                role={emp.role}
-                bio={bio}
-                color={emp.color}
-                colorSoft={emp.colorSoft}
-              />
+                variants={reduced ? undefined : CARD_ITEM}
+              >
+                <SpecialistCard
+                  icon={<Icon size={20} strokeWidth={1.75} />}
+                  name={emp.name}
+                  role={emp.role}
+                  bio={bio}
+                  color={emp.color}
+                  colorSoft={emp.colorSoft}
+                  reduced={reduced}
+                />
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -108,6 +111,7 @@ function SpecialistCard({
   bio,
   color,
   colorSoft,
+  reduced,
 }: {
   icon: React.ReactNode;
   name: string;
@@ -115,71 +119,58 @@ function SpecialistCard({
   bio: string;
   color: string;
   colorSoft: string;
+  reduced: boolean;
 }) {
   return (
-    <div
-      className="specialist-card"
-      style={
-        {
-          "--dept-color": color,
-          "--dept-color-soft": colorSoft,
-        } as React.CSSProperties
+    <motion.div
+      className="conduit-card-inverse relative overflow-hidden h-full p-5 flex flex-col gap-3 cursor-default"
+      whileHover={
+        reduced
+          ? {}
+          : {
+              y: -4,
+              boxShadow: `0 0 0 1px ${color}40, 0 8px 28px ${color}26, 0 16px 48px rgba(0,0,0,0.35)`,
+              borderColor: `${color}55`,
+            }
       }
+      transition={{ duration: 0.22, ease: EASE }}
     >
-      <div className="specialist-card-icon-wrap">{icon}</div>
-      <div>
-        <div className="specialist-card-name">{name}</div>
-        <div className="specialist-card-role">{role}</div>
+      {/* Per-dept corner radial accent */}
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `radial-gradient(ellipse 90% 70% at 0% 0%, ${color}12 0%, transparent 65%)`,
+        }}
+      />
+
+      {/* Icon + name/role row */}
+      <div className="relative flex items-center gap-3">
+        <div
+          className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
+          style={{ background: colorSoft, color }}
+        >
+          {icon}
+        </div>
+        <div>
+          <div
+            className="text-[15px] font-semibold leading-[1.2] text-[var(--color-ink-on-inverse)]"
+          >
+            {name}
+          </div>
+          <div
+            className="text-[11px] uppercase tracking-[0.12em] mt-0.5 font-medium"
+            style={{ color }}
+          >
+            {role}
+          </div>
+        </div>
       </div>
-      <p className="specialist-card-bio">{bio}</p>
-      <style>{`
-        .specialist-card {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          padding: 20px;
-          border-radius: 12px;
-          border: 1px solid var(--color-border, rgba(255,255,255,0.07));
-          background: var(--color-surface-elevated, rgba(255,255,255,0.03));
-          transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
-          cursor: default;
-        }
-        .specialist-card:hover {
-          border-color: var(--dept-color);
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px color-mix(in srgb, var(--dept-color) 18%, transparent);
-        }
-        .specialist-card-icon-wrap {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 40px;
-          height: 40px;
-          border-radius: 10px;
-          background: var(--dept-color-soft);
-          color: var(--dept-color);
-          flex-shrink: 0;
-        }
-        .specialist-card-name {
-          font-size: 15px;
-          font-weight: 600;
-          color: var(--color-text, #f5f5f5);
-          line-height: 1.2;
-        }
-        .specialist-card-role {
-          font-size: 11px;
-          text-transform: uppercase;
-          letter-spacing: 0.12em;
-          color: var(--dept-color);
-          margin-top: 2px;
-        }
-        .specialist-card-bio {
-          font-size: 13px;
-          color: var(--color-text-muted, rgba(245,245,245,0.55));
-          line-height: 1.6;
-          margin: 0;
-        }
-      `}</style>
-    </div>
+
+      {/* Bio */}
+      <p className="relative text-[13px] text-[var(--color-ink-on-inverse-soft)] leading-[1.65] flex-1">
+        {bio}
+      </p>
+    </motion.div>
   );
 }

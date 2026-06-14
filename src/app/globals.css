@@ -1004,6 +1004,7 @@ body {
   border: 1px solid var(--color-border-subtle);
   border-radius: 16px;
   position: relative;
+  box-shadow: 0 1px 3px rgba(15, 17, 21, 0.04), 0 0 0 1px rgba(15, 17, 21, 0.03);
   transition:
     border-color 400ms var(--conduit-ease-out-quart),
     box-shadow 400ms var(--conduit-ease-out-quart),
