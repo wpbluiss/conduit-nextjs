@@ -26,6 +26,10 @@ import { composeChatEmptyCopy, timeOfDayBucket } from "@/lib/conduit/welcome-cop
 import type { EmployeeId } from "@/lib/conduit/employees";
 import { TypingIndicator } from "./TypingIndicator";
 import { MarkdownRenderer } from "./MarkdownRenderer";
+import {
+  SpecialistSelectorModal,
+  useSpecialistChoice,
+} from "./SpecialistSelectorModal";
 
 export interface VoicePrefs {
   enabled: boolean;
@@ -169,6 +173,9 @@ export function Chat({
   const [messages, setMessages] = useState<MessageRow[]>(initialMessages);
   const [input, setInput] = useState("");
   const [pin, setPin] = useState<PinValue>("auto");
+  const { hasChosen, persist: persistSpecialistChoice } = useSpecialistChoice();
+  const showSpecialistSelector =
+    hasChosen === false && messages.length === 0 && !conversationId;
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [drawerArtifactId, setDrawerArtifactId] = useState<string | null>(null);
@@ -949,6 +956,17 @@ export function Chat({
 
   return (
     <>
+      {showSpecialistSelector && (
+        <SpecialistSelectorModal
+          allowedEmployees={allowedEmployees}
+          onSelect={(specialist) => {
+            persistSpecialistChoice(
+              (specialist as EmployeeId | null) ?? "auto",
+            );
+            if (specialist) setPin(specialist as PinValue);
+          }}
+        />
+      )}
       <div
         ref={scrollRef}
         className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-8"
