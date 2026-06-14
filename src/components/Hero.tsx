@@ -220,21 +220,21 @@ function ConsolePreview() {
         }}
       />
       <div
-        className="relative bg-[var(--color-ink-surface)] border border-[var(--color-edge)] rounded-2xl overflow-hidden"
+        className="relative bg-[var(--color-bg-inverse)] border border-[var(--color-border-on-inverse-strong)] rounded-2xl overflow-hidden"
         style={{
           boxShadow:
             "inset 0 0 0 1px rgba(91, 99, 232, 0.14), 0 0 60px rgba(91, 99, 232, 0.20), 0 24px 64px rgba(15, 17, 21, 0.20)",
         }}
       >
         {/* Window chrome */}
-        <div className="px-4 py-3 border-b border-[var(--color-edge-subtle)] flex items-center gap-3 bg-[var(--color-ink-surface-elevated)]">
+        <div className="px-4 py-3 border-b border-[var(--color-border-on-inverse)] flex items-center gap-3 bg-[var(--color-bg-inverse-elevated)]">
           <div className="flex gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-[#FF6058]/60" />
             <span className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]/60" />
             <span className="w-2.5 h-2.5 rounded-full bg-[#28C940]/60" />
           </div>
           <span
-            className="text-[11px] text-[var(--color-cream-mute)] truncate"
+            className="text-[11px] text-[var(--color-ink-on-inverse-mute)] truncate"
             style={{ fontFamily: "var(--font-mono)" }}
           >
             conduitai.io/app/workspace
@@ -248,8 +248,8 @@ function ConsolePreview() {
         {/* Body */}
         <div className="flex h-[460px]">
           {/* Sidebar */}
-          <div className="w-[148px] border-r border-[var(--color-edge-subtle)] bg-[var(--color-ink-surface)] py-4 px-2.5">
-            <p className="text-[10px] uppercase tracking-wider text-[var(--color-cream-mute)] mb-2.5 px-2 font-semibold">
+          <div className="w-[148px] border-r border-[var(--color-border-on-inverse)] bg-[var(--color-bg-inverse-elevated)] py-4 px-2.5">
+            <p className="text-[10px] uppercase tracking-wider text-[var(--color-ink-on-inverse-mute)] mb-2.5 px-2 font-semibold">
               Team
             </p>
             <div className="space-y-0.5">
@@ -262,8 +262,8 @@ function ConsolePreview() {
                       ? "rgba(91, 99, 232,0.07)"
                       : "transparent",
                     color: e.active
-                      ? "var(--color-cream)"
-                      : "var(--color-cream-soft)",
+                      ? "var(--color-ink-on-inverse)"
+                      : "var(--color-ink-on-inverse-soft)",
                   }}
                 >
                   <span
@@ -277,7 +277,7 @@ function ConsolePreview() {
                 </div>
               ))}
             </div>
-            <p className="text-[10px] uppercase tracking-wider text-[var(--color-cream-mute)] mt-5 mb-2 px-2 font-semibold">
+            <p className="text-[10px] uppercase tracking-wider text-[var(--color-ink-on-inverse-mute)] mt-5 mb-2 px-2 font-semibold">
               Recent
             </p>
             <div className="space-y-1.5 px-2">
@@ -288,7 +288,7 @@ function ConsolePreview() {
               ].map((t) => (
                 <p
                   key={t}
-                  className="text-[11px] text-[var(--color-cream-mute)] truncate"
+                  className="text-[11px] text-[var(--color-ink-on-inverse-mute)] truncate"
                 >
                   {t}
                 </p>
@@ -297,11 +297,11 @@ function ConsolePreview() {
           </div>
 
           {/* Chat */}
-          <div className="flex-1 flex flex-col bg-[var(--color-ink-canvas)]">
+          <div className="flex-1 flex flex-col bg-[var(--color-bg-inverse)]">
             <div className="flex-1 px-5 py-4 overflow-hidden space-y-4">
               <div className="flex justify-end">
                 <div
-                  className="max-w-[78%] px-3.5 py-2 text-[13px] text-[var(--color-cream)]"
+                  className="max-w-[78%] px-3.5 py-2 text-[13px] text-[var(--color-ink-on-inverse)]"
                   style={{
                     background: "rgba(91, 99, 232, 0.12)",
                     border: "1px solid rgba(91, 99, 232, 0.28)",
@@ -318,21 +318,21 @@ function ConsolePreview() {
                     className="w-1.5 h-1.5 rounded-full"
                     style={{ background: "#C8C5BD" }}
                   />
-                  <span className="text-[10px] uppercase tracking-wider text-[var(--color-cream-mute)]">
+                  <span className="text-[10px] uppercase tracking-wider text-[var(--color-ink-on-inverse-mute)]">
                     Atlas · Chief of Staff
                   </span>
                 </div>
                 <div
-                  className="text-[13px] text-[var(--color-cream)] px-3.5 py-2.5 max-w-[88%] leading-[1.6]"
+                  className="text-[13px] text-[var(--color-ink-on-inverse)] px-3.5 py-2.5 max-w-[88%] leading-[1.6]"
                   style={{
-                    background: "var(--color-ink-surface-elevated)",
+                    background: "var(--color-bg-inverse-elevated)",
                     borderLeft: "2px solid #C8C5BD",
                     borderRadius: "0 16px 16px 16px",
                   }}
                 >
                   Here&apos;s where everyone is right now —
                   <br />
-                  <span className="text-[var(--color-cream-soft)]">
+                  <span className="text-[var(--color-ink-on-inverse-soft)]">
                     Marketing has three drafts staged. Sales pipeline is up 12%
                     week-over-week. Engineering is mid-build on lunaro-v3,
                     deploy ETA seven minutes.
@@ -341,7 +341,7 @@ function ConsolePreview() {
               </div>
 
               <div
-                className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-[var(--color-cream-mute)] py-1.5 px-3 rounded-md w-fit"
+                className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-[var(--color-ink-on-inverse-mute)] py-1.5 px-3 rounded-md w-fit"
                 style={{
                   background: "rgba(96, 165, 250, 0.05)",
                   border: "1px solid rgba(96, 165, 250, 0.15)",
@@ -355,12 +355,12 @@ function ConsolePreview() {
               </div>
             </div>
 
-            <div className="px-5 py-3 border-t border-[var(--color-edge-subtle)] bg-[var(--color-ink-surface)]">
+            <div className="px-5 py-3 border-t border-[var(--color-border-on-inverse)] bg-[var(--color-bg-inverse-elevated)]">
               <div
-                className="flex items-center gap-2 px-4 py-2 rounded-full border bg-[var(--color-ink-canvas)]"
-                style={{ borderColor: "var(--color-edge)" }}
+                className="flex items-center gap-2 px-4 py-2 rounded-full border bg-[var(--color-bg-inverse)]"
+                style={{ borderColor: "var(--color-border-on-inverse)" }}
               >
-                <span className="text-[12px] text-[var(--color-cream-mute)] flex-1">
+                <span className="text-[12px] text-[var(--color-ink-on-inverse-mute)] flex-1">
                   Talk to your team…
                 </span>
                 <span
