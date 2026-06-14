@@ -149,6 +149,7 @@ const ALL_PIN_OPTIONS: { value: PinValue; label: string }[] = [
 
 export function Chat({
   conversationId: initialId,
+  conversationTitle: initialTitle = null,
   initialMessages,
   initialHasMore = false,
   firstName,
@@ -161,6 +162,7 @@ export function Chat({
   handoffEmployee: initialHandoffEmployee = null,
 }: {
   conversationId: string | null;
+  conversationTitle?: string | null;
   initialMessages: MessageRow[];
   initialHasMore?: boolean;
   firstName: string;
@@ -189,6 +191,7 @@ export function Chat({
   const [conversationId, setConversationId] = useState<string | null>(
     initialId,
   );
+  const [currentTitle, setCurrentTitle] = useState<string | null>(initialTitle);
   const [messages, setMessages] = useState<MessageRow[]>(initialMessages);
   const [input, setInput] = useState("");
   const [pin, setPin] = useState<PinValue>("auto");
@@ -243,6 +246,18 @@ export function Chat({
     return () => clearInterval(id);
   }, [rateLimitUntil]);
 
+  // Track conversation title — updated by auto-generation and manual renames.
+  useEffect(() => {
+    const onTitleUpdated = (e: Event) => {
+      const { conversation_id, title } = (e as CustomEvent<{ conversation_id: string; title: string }>).detail;
+      if (conversation_id === conversationId && title) {
+        setCurrentTitle(title);
+      }
+    };
+    window.addEventListener("praxis:title_updated", onTitleUpdated);
+    return () => window.removeEventListener("praxis:title_updated", onTitleUpdated);
+  }, [conversationId]);
+
   // Focus search input when opened; close on Escape.
   useEffect(() => {
     if (searchOpen) {
@@ -278,24 +293,8 @@ export function Chat({
     if (visibleMessages.length === 0) return;
 
     const today = new Date().toISOString().slice(0, 10);
-    const dominant = visibleMessages
-      .filter((m) => m.role === "assistant" && m.employee)
-      .reduce<Record<string, number>>((acc, m) => {
-        const emp = m.employee as string;
-        acc[emp] = (acc[emp] ?? 0) + 1;
-        return acc;
-      }, {});
-    const specialist =
-      Object.entries(dominant).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "praxis";
-
-    const lines: string[] = [
-      "---",
-      `title: Praxis Conversation`,
-      `date: ${today}`,
-      `specialist: ${specialist}`,
-      "---",
-      "",
-    ];
+    const title = currentTitle || "Praxis Conversation";
+    const lines: string[] = [`# ${title}`, ""];
 
     for (const msg of visibleMessages) {
       if (msg.role === "user") {
@@ -306,17 +305,19 @@ export function Chat({
       }
     }
 
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 50);
     const md = lines.join("\n");
     const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `praxis-conversation-${today}.md`;
+    a.download = `${slug || "praxis-conversation"}-${today}.md`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }, [messages]);
+    toast.success("Conversation downloaded");
+  }, [messages, currentTitle, toast]);
 
   // Load pinned messages when conversation is available.
   const loadPins = useCallback(async (convId: string) => {
