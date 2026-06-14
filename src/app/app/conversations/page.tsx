@@ -8,6 +8,9 @@ import { DEPT_COLOR, EMPLOYEE_ICON } from "@/components/conduit/EmployeeBadge";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import { PinConversationButton } from "@/components/conduit/PinConversationButton";
 import { ConversationSearchBar } from "@/components/conduit/ConversationSearchBar";
+import { ConversationLabelsDisplay, ConversationLabelManager } from "@/components/conduit/ConversationLabels";
+import type { ConversationLabel } from "@/components/conduit/ConversationLabels";
+import { ConversationLabelFilter } from "@/components/conduit/ConversationLabelFilter";
 
 export const dynamic = "force-dynamic";
 
@@ -35,14 +38,17 @@ type Conversation = {
   updated_at: string;
   dominant_employee: string | null;
   pinned: boolean;
+  labels: ConversationLabel[];
 };
 
 function ConversationRow({
   c,
   atLimit,
+  allLabels,
 }: {
   c: Conversation;
   atLimit: boolean;
+  allLabels: ConversationLabel[];
 }) {
   const dom = c.dominant_employee as string | null;
   const isTeam = dom === "team";
@@ -51,59 +57,80 @@ function ConversationRow({
   const color = DEPT_COLOR[empKey];
 
   return (
-    <div className="group relative flex items-center">
-      <Link
-        href={`/app?c=${c.id}`}
-        className="flex flex-1 items-center gap-3 px-4 py-3 rounded-lg conduit-card hover:border-[var(--color-accent)] transition-colors min-w-0"
-      >
-        {isTeam ? (
-          <span
-            aria-hidden
-            className="inline-block w-5 h-5 rounded-full shrink-0"
-            style={{
-              background:
-                "conic-gradient(from 90deg, var(--color-dept-marketing), var(--color-dept-sales), var(--color-dept-engineering), var(--color-dept-jarvis), var(--color-dept-marketing))",
-            }}
-          />
-        ) : (
-          <span
-            aria-hidden
-            className="inline-flex items-center justify-center shrink-0 w-5 h-5 rounded-md"
-            style={{
-              background: `color-mix(in srgb, ${color} 18%, var(--color-surface-elevated))`,
-              color,
-              boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 60%, transparent)`,
-            }}
-          >
-            <RecentIcon size={11} strokeWidth={2.5} />
+    <div className="group relative flex flex-col gap-1.5 px-4 py-3 rounded-lg conduit-card hover:border-[var(--color-accent)] transition-colors">
+      <div className="flex items-center gap-3 min-w-0">
+        <Link href={`/app?c=${c.id}`} className="flex items-center gap-3 flex-1 min-w-0">
+          {isTeam ? (
+            <span
+              aria-hidden
+              className="inline-block w-5 h-5 rounded-full shrink-0"
+              style={{
+                background:
+                  "conic-gradient(from 90deg, var(--color-dept-marketing), var(--color-dept-sales), var(--color-dept-engineering), var(--color-dept-jarvis), var(--color-dept-marketing))",
+              }}
+            />
+          ) : (
+            <span
+              aria-hidden
+              className="inline-flex items-center justify-center shrink-0 w-5 h-5 rounded-md"
+              style={{
+                background: `color-mix(in srgb, ${color} 18%, var(--color-surface-elevated))`,
+                color,
+                boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 60%, transparent)`,
+              }}
+            >
+              <RecentIcon size={11} strokeWidth={2.5} />
+            </span>
+          )}
+          <span className="flex-1 truncate text-sm">
+            {c.title || "Untitled chat"}
           </span>
-        )}
-        <span className="flex-1 truncate text-sm">
-          {c.title || "Untitled chat"}
-        </span>
-        <span className="text-xs text-[var(--color-text-muted)] shrink-0 pr-2">
-          {relativeDate(c.updated_at)}
-        </span>
-      </Link>
-      {/* Pin button sits outside the Link to avoid nested <a> */}
-      <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-        <PinConversationButton
+          <span className="text-xs text-[var(--color-text-muted)] shrink-0 pr-2">
+            {relativeDate(c.updated_at)}
+          </span>
+        </Link>
+        <div className="shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+          <PinConversationButton
+            conversationId={c.id}
+            pinned={c.pinned}
+            atLimit={atLimit && !c.pinned}
+          />
+        </div>
+      </div>
+      {/* Labels row */}
+      <div className="pl-8">
+        <ConversationLabelManager
           conversationId={c.id}
-          pinned={c.pinned}
-          atLimit={atLimit && !c.pinned}
+          assignedLabels={c.labels}
+          allLabels={allLabels}
+          onUpdate={() => {}}
         />
       </div>
     </div>
   );
 }
 
-export default async function ConversationsPage() {
+export default async function ConversationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ label?: string }>;
+}) {
   const current = await getCurrentAccount();
   if (!current) redirect("/auth/sign-in?next=/app/conversations");
   const { account } = current;
   const supabase = await createSupabaseServerClient();
+  const { label: activeLabelId } = await searchParams;
 
-  const { data: rows } = await supabase
+  // Fetch all account labels
+  const { data: labelRows } = await supabase
+    .from("conduit_conversation_labels")
+    .select("id, name, color")
+    .eq("account_id", account.id)
+    .order("created_at", { ascending: true });
+  const allLabels: ConversationLabel[] = labelRows ?? [];
+
+  // Fetch conversations with their label assignments
+  const convoQuery = supabase
     .from("conduit_conversations")
     .select("id, title, updated_at, dominant_employee, pinned")
     .eq("account_id", account.id)
@@ -111,7 +138,44 @@ export default async function ConversationsPage() {
     .order("updated_at", { ascending: false })
     .limit(200);
 
-  const conversations: Conversation[] = rows ?? [];
+  const { data: rows } = await convoQuery;
+  const convoIds = (rows ?? []).map((c) => c.id as string);
+
+  // Fetch label assignments for all fetched conversations
+  const { data: assignmentRows } = convoIds.length
+    ? await supabase
+        .from("conduit_conversation_label_assignments")
+        .select("conversation_id, label_id")
+        .in("conversation_id", convoIds)
+    : { data: [] };
+
+  // Build a map: conversationId → label[]
+  const labelMap = new Map<string, ConversationLabel[]>();
+  const labelById = new Map(allLabels.map((l) => [l.id, l]));
+  for (const a of assignmentRows ?? []) {
+    const cid = a.conversation_id as string;
+    const lbl = labelById.get(a.label_id as string);
+    if (!lbl) continue;
+    if (!labelMap.has(cid)) labelMap.set(cid, []);
+    labelMap.get(cid)!.push(lbl);
+  }
+
+  let conversations: Conversation[] = (rows ?? []).map((c) => ({
+    id: c.id as string,
+    title: c.title as string | null,
+    updated_at: c.updated_at as string,
+    dominant_employee: c.dominant_employee as string | null,
+    pinned: Boolean(c.pinned),
+    labels: labelMap.get(c.id as string) ?? [],
+  }));
+
+  // Apply label filter if present
+  if (activeLabelId) {
+    conversations = conversations.filter((c) =>
+      c.labels.some((l) => l.id === activeLabelId),
+    );
+  }
+
   const pinned = conversations.filter((c) => c.pinned);
   const unpinned = conversations.filter((c) => !c.pinned);
   const atLimit = pinned.length >= MAX_PINNED;
@@ -129,6 +193,14 @@ export default async function ConversationsPage() {
 
         <ConversationSearchBar />
 
+        {/* Label filter chips */}
+        {allLabels.length > 0 && (
+          <ConversationLabelFilter
+            labels={allLabels}
+            activeLabelId={activeLabelId ?? null}
+          />
+        )}
+
         {conversations.length === 0 ? (
           <div className="conduit-card p-10 flex flex-col items-center text-center gap-4 max-w-sm mx-auto">
             <div
@@ -142,19 +214,22 @@ export default async function ConversationsPage() {
             </div>
             <div>
               <p className="text-[15px] font-semibold text-[var(--color-text)] mb-1">
-                No conversations yet
+                {activeLabelId ? "No conversations with this label" : "No conversations yet"}
               </p>
               <p className="text-[13px] text-[var(--color-text-muted)] leading-relaxed">
-                Ask Atlas anything — strategy, execution, or hand it to a
-                specialist. Every exchange lives here.
+                {activeLabelId
+                  ? "Try a different label filter or start a new conversation."
+                  : "Ask Atlas anything — strategy, execution, or hand it to a specialist. Every exchange lives here."}
               </p>
             </div>
-            <Link
-              href="/app"
-              className="conduit-btn-primary text-[13px] px-4 py-2"
-            >
-              Start your first conversation
-            </Link>
+            {!activeLabelId && (
+              <Link
+                href="/app"
+                className="conduit-btn-primary text-[13px] px-4 py-2"
+              >
+                Start your first conversation
+              </Link>
+            )}
           </div>
         ) : (
           <div className="space-y-6">
@@ -173,7 +248,7 @@ export default async function ConversationsPage() {
                 </div>
                 <div className="space-y-1">
                   {pinned.map((c) => (
-                    <ConversationRow key={c.id} c={c} atLimit={atLimit} />
+                    <ConversationRow key={c.id} c={c} atLimit={atLimit} allLabels={allLabels} />
                   ))}
                 </div>
               </div>
@@ -191,7 +266,7 @@ export default async function ConversationsPage() {
                 )}
                 <div className="space-y-1">
                   {unpinned.map((c) => (
-                    <ConversationRow key={c.id} c={c} atLimit={atLimit} />
+                    <ConversationRow key={c.id} c={c} atLimit={atLimit} allLabels={allLabels} />
                   ))}
                 </div>
               </div>
