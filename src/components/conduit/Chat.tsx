@@ -1982,9 +1982,11 @@ function CopyButton({ content }: { content: string }) {
 
 function MessageFeedbackButtons({
   messageId,
+  conversationId,
   initialRating = null,
 }: {
   messageId: string;
+  conversationId?: string | null;
   initialRating?: 1 | -1 | null;
 }) {
   const [rating, setRating] = useState<1 | -1 | null>(initialRating);
@@ -1997,7 +1999,11 @@ function MessageFeedbackButtons({
       const res = await fetch("/api/conduit/chat/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message_id: messageId, rating: value }),
+        body: JSON.stringify({
+          message_id: messageId,
+          ...(conversationId ? { conversation_id: conversationId } : {}),
+          rating: value,
+        }),
       });
       if (res.ok) {
         const data = (await res.json()) as { action: string };
@@ -2509,7 +2515,11 @@ const MessageBubble = memo(function MessageBubble({
         {message.id && !message.pending && (
           <div className="flex items-center gap-2">
             <CopyButton content={message.content} />
-            <MessageFeedbackButtons messageId={message.id} initialRating={message.feedback ?? null} />
+            <MessageFeedbackButtons
+              messageId={message.id}
+              conversationId={conversationId}
+              initialRating={message.feedback ?? null}
+            />
             {onPinToggle && (
               <button
                 type="button"

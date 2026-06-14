@@ -5,7 +5,7 @@ import { getCurrentAccount } from "@/lib/conduit/account";
 export const runtime = "nodejs";
 
 // POST /api/conduit/chat/feedback
-// Body: { message_id: string; rating: 1 | -1 }
+// Body: { message_id: string; conversation_id?: string; rating: 1 | -1 }
 // Upserts a feedback row for the authenticated account.
 // Sending the same rating a second time acts as a toggle (removes it).
 export async function POST(request: NextRequest) {
@@ -22,7 +22,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "invalid_json" }, { status: 400 });
   }
 
-  const { message_id, rating } = body as { message_id?: unknown; rating?: unknown };
+  const { message_id, conversation_id, rating } = body as {
+    message_id?: unknown;
+    conversation_id?: unknown;
+    rating?: unknown;
+  };
 
   if (typeof message_id !== "string" || !message_id) {
     return NextResponse.json({ error: "missing_message_id" }, { status: 400 });
@@ -53,13 +57,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ action: "removed" });
   }
 
+  const row: Record<string, unknown> = { message_id, account_id: account.id, rating };
+  if (typeof conversation_id === "string" && conversation_id) {
+    row.conversation_id = conversation_id;
+  }
+
   // Upsert: insert or update to the new rating.
   const { error } = await supabase
     .from("conduit_message_feedback")
-    .upsert(
-      { message_id, account_id: account.id, rating },
-      { onConflict: "message_id,account_id" },
-    );
+    .upsert(row, { onConflict: "message_id,account_id" });
 
   if (error) {
     return NextResponse.json({ error: "db_error" }, { status: 500 });
