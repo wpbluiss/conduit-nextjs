@@ -36,6 +36,7 @@ export default async function ChatPage({ searchParams }: PageProps) {
         .from("conduit_messages")
         .select("id, role, employee, content, metadata, created_at")
         .eq("conversation_id", convo.id)
+        .is("hidden_at", null)
         .order("created_at", { ascending: false })
         .order("id", { ascending: false })
         .limit(PAGE_SIZE + 1);

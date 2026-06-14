@@ -173,6 +173,8 @@ export function Chat({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [drawerArtifactId, setDrawerArtifactId] = useState<string | null>(null);
   const [paywall, setPaywall] = useState<PaywallPayload | null>(null);
+  // Message edit: id of the user message currently being edited inline.
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [streamingEmployee, setStreamingEmployee] =
     useState<EmployeeKey | null>(null);
   const [sendError, setSendError] = useState<{
@@ -920,6 +922,31 @@ export function Chat({
     [conversationId, loading, pin, router],
   );
 
+  // Handle edit submit: soft-hide from the edited message onwards, then resend.
+  const submitEdit = useCallback(
+    async (messageId: string, newText: string) => {
+      if (!newText.trim() || loading) return;
+      setEditingMessageId(null);
+
+      // Optimistically remove messages from the edit point in the local state.
+      setMessages((prev) => {
+        const idx = prev.findIndex((m) => m.id === messageId);
+        if (idx === -1) return prev;
+        return prev.slice(0, idx);
+      });
+
+      // Soft-hide on the server (fire-and-forget; chat will rehydrate on refresh).
+      void fetch(`/api/conduit/messages/${messageId}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "hide_from" }),
+      });
+
+      await send(newText);
+    },
+    [loading, send],
+  );
+
   return (
     <>
       <div
@@ -993,6 +1020,16 @@ export function Chat({
                 voice.ttsAllowed && m.role === "assistant" && m.employee
                   ? () => playTTS(m.content, m.employee as EmployeeKey, i)
                   : undefined
+              }
+              isEditing={editingMessageId === m.id}
+              onEditStart={
+                m.role === "user" && m.id && !loading
+                  ? () => setEditingMessageId(m.id!)
+                  : undefined
+              }
+              onEditCancel={() => setEditingMessageId(null)}
+              onEditSubmit={
+                m.id ? (text) => void submitEdit(m.id!, text) : undefined
               }
             />
           ))}
@@ -1257,35 +1294,138 @@ const MessageBubble = memo(function MessageBubble({
   playing = false,
   onStopAudio,
   onReplayAudio,
+  isEditing = false,
+  onEditStart,
+  onEditCancel,
+  onEditSubmit,
 }: {
   message: MessageRow;
   onOpenArtifact: (id: string) => void;
   playing?: boolean;
   onStopAudio?: () => void;
   onReplayAudio?: () => void;
+  isEditing?: boolean;
+  onEditStart?: () => void;
+  onEditCancel?: () => void;
+  onEditSubmit?: (text: string) => void;
 }) {
+  const [editDraft, setEditDraft] = useState(message.content);
+  const editRef = useRef<HTMLTextAreaElement>(null);
+
+  // Reset draft to current content when entering edit mode.
+  useEffect(() => {
+    if (isEditing) {
+      setEditDraft(message.content);
+    }
+  }, [isEditing, message.content]);
+
+  // Focus the textarea when entering edit mode.
+  useEffect(() => {
+    if (isEditing && editRef.current) {
+      editRef.current.focus();
+      const len = editRef.current.value.length;
+      editRef.current.setSelectionRange(len, len);
+    }
+  }, [isEditing]);
+
   if (message.role === "user") {
     const meta = (message.metadata ?? {}) as Record<string, unknown>;
     const isVoice = meta.type === "voice";
     const voiceUrl = (meta.attachment_url as string | undefined) ?? null;
 
+    if (isEditing && !isVoice) {
+      return (
+        <motion.div
+          className="flex justify-end"
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+        >
+          <div className="w-full max-w-[85%] space-y-2">
+            <textarea
+              ref={editRef}
+              value={editDraft}
+              onChange={(e) => setEditDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  if (editDraft.trim()) onEditSubmit?.(editDraft.trim());
+                }
+                if (e.key === "Escape") onEditCancel?.();
+              }}
+              rows={Math.max(2, editDraft.split("\n").length)}
+              className="w-full px-4 py-3 rounded-xl text-sm leading-relaxed resize-none outline-none"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-accent)",
+                color: "var(--color-text)",
+                fontFamily: "inherit",
+              }}
+              aria-label="Edit message"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={onEditCancel}
+                className="px-3 py-1.5 text-xs rounded-lg transition-colors"
+                style={{
+                  color: "var(--color-text-muted)",
+                  border: "1px solid var(--color-border)",
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!editDraft.trim()}
+                onClick={() => { if (editDraft.trim()) onEditSubmit?.(editDraft.trim()); }}
+                className="px-3 py-1.5 text-xs rounded-lg transition-colors disabled:opacity-40"
+                style={{
+                  background: "var(--color-accent)",
+                  color: "#0A0908",
+                  fontWeight: 600,
+                }}
+              >
+                Save &amp; resend
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      );
+    }
+
     return (
       <motion.div
-        className="flex justify-end"
+        className="flex justify-end group"
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
       >
-        <div className="max-w-[85%] conduit-bubble-user px-4 py-3 text-[var(--color-text)]">
-          {isVoice && voiceUrl ? (
-            <audio
-              controls
-              src={voiceUrl}
-              aria-label="Voice message"
-              style={{ maxWidth: "260px", outline: "none" }}
-            />
-          ) : (
-            <span className="whitespace-pre-wrap">{message.content}</span>
+        <div className="flex flex-col items-end gap-1 max-w-[85%]">
+          <div className="conduit-bubble-user px-4 py-3 text-[var(--color-text)]">
+            {isVoice && voiceUrl ? (
+              <audio
+                controls
+                src={voiceUrl}
+                aria-label="Voice message"
+                style={{ maxWidth: "260px", outline: "none" }}
+              />
+            ) : (
+              <span className="whitespace-pre-wrap">{message.content}</span>
+            )}
+          </div>
+          {onEditStart && !isVoice && (
+            <button
+              type="button"
+              onClick={onEditStart}
+              className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-[11px] px-2 py-0.5 rounded"
+              style={{ color: "var(--color-text-muted)" }}
+              aria-label="Edit message"
+            >
+              Edit
+            </button>
           )}
         </div>
       </motion.div>
