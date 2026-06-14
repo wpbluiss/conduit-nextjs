@@ -60,6 +60,7 @@ interface AccountData {
   accent_preference?: string | null;
   company_brief?: string | null;
   specialist_nicknames?: Record<string, string> | null;
+  specialist_prefs?: Record<string, { response_length?: "short" | "balanced" | "detailed" }> | null;
 }
 
 const COMMON_TIMEZONES = [
@@ -157,7 +158,10 @@ export function SettingsTabs({
       )}
       {tab === "business" && <BusinessTab account={account} />}
       {tab === "specialists" && (
-        <SpecialistsTab initialNicknames={account.specialist_nicknames ?? {}} />
+        <SpecialistsTab
+          initialNicknames={account.specialist_nicknames ?? {}}
+          initialPrefs={account.specialist_prefs ?? {}}
+        />
       )}
       {tab === "voice" && (
         <VoiceTab
@@ -213,45 +217,78 @@ function TeamTab() {
   );
 }
 
+type ResponseLength = "short" | "balanced" | "detailed";
+
+const RESPONSE_LENGTH_OPTIONS: { value: ResponseLength; label: string; hint: string }[] = [
+  { value: "short", label: "Short", hint: "1–3 sentences" },
+  { value: "balanced", label: "Balanced", hint: "Default" },
+  { value: "detailed", label: "Detailed", hint: "Full explanations" },
+];
+
 function SpecialistsTab({
   initialNicknames,
+  initialPrefs,
 }: {
   initialNicknames: Record<string, string>;
+  initialPrefs: Record<string, { response_length?: ResponseLength }>;
 }) {
   const toast = useToast();
   const { setNicknames: setCtxNicknames } = useNicknames();
-  const [values, setValues] = useState<Record<string, string>>(
+  const [nicknames, setNicknames] = useState<Record<string, string>>(
     () => Object.fromEntries(
       (EMPLOYEE_ORDER as EmployeeKey[]).map((emp) => [emp, initialNicknames[emp] ?? ""])
     )
   );
+  const [prefs, setPrefs] = useState<Record<string, ResponseLength>>(
+    () => Object.fromEntries(
+      (EMPLOYEE_ORDER as EmployeeKey[]).map((emp) => [
+        emp,
+        initialPrefs[emp]?.response_length ?? "balanced",
+      ])
+    )
+  );
   const [busy, setBusy] = useState(false);
 
-  const handleChange = (emp: EmployeeKey, val: string) => {
-    setValues((prev) => ({ ...prev, [emp]: val.slice(0, 32) }));
+  const handleNicknameChange = (emp: EmployeeKey, val: string) => {
+    setNicknames((prev) => ({ ...prev, [emp]: val.slice(0, 32) }));
   };
 
-  const handleReset = (emp: EmployeeKey) => {
-    setValues((prev) => ({ ...prev, [emp]: "" }));
+  const handleNicknameReset = (emp: EmployeeKey) => {
+    setNicknames((prev) => ({ ...prev, [emp]: "" }));
+  };
+
+  const handleLengthChange = (emp: EmployeeKey, val: ResponseLength) => {
+    setPrefs((prev) => ({ ...prev, [emp]: val }));
   };
 
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
     setBusy(true);
     try {
-      const nicknames = Object.fromEntries(
-        Object.entries(values).filter(([, v]) => v.trim())
+      const nicknamePayload = Object.fromEntries(
+        Object.entries(nicknames).filter(([, v]) => v.trim())
       );
-      const res = await fetch("/api/conduit/settings/specialist-nicknames", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nicknames }),
-      });
-      if (!res.ok) throw new Error("save_failed");
-      const data = (await res.json()) as { nicknames: Record<string, string> };
-      // Update global nickname context so all UI immediately reflects changes.
-      setCtxNicknames(data.nicknames as Partial<Record<EmployeeKey, string>>);
-      toast.success("Specialist names saved");
+      const prefPayload = Object.fromEntries(
+        Object.entries(prefs)
+          .filter(([, v]) => v !== "balanced")
+          .map(([k, v]) => [k, { response_length: v }])
+      );
+      const [nickRes, prefRes] = await Promise.all([
+        fetch("/api/conduit/settings/specialist-nicknames", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nicknames: nicknamePayload }),
+        }),
+        fetch("/api/conduit/settings/specialist-prefs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prefs: prefPayload }),
+        }),
+      ]);
+      if (!nickRes.ok || !prefRes.ok) throw new Error("save_failed");
+      const nickData = (await nickRes.json()) as { nicknames: Record<string, string> };
+      setCtxNicknames(nickData.nicknames as Partial<Record<EmployeeKey, string>>);
+      toast.success("Specialist settings saved");
     } catch {
       toast.error("Failed to save — please try again");
     } finally {
@@ -260,9 +297,13 @@ function SpecialistsTab({
   };
 
   return (
-    <form onSubmit={handleSave} className="space-y-6 text-sm">
+    <form onSubmit={handleSave} className="space-y-8 text-sm">
+      {/* Nicknames */}
       <div>
-        <p className="text-[var(--color-text-muted)] max-w-xl mb-6">
+        <h3 className="text-[11px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-3">
+          Custom nicknames
+        </h3>
+        <p className="text-[var(--color-text-muted)] max-w-xl mb-4">
           Give each specialist a custom nickname. Leave blank to use the default name.
           Nicknames appear in the sidebar, chat, and specialist picker.
         </p>
@@ -295,17 +336,17 @@ function SpecialistsTab({
                   <input
                     id={`nick-${emp}`}
                     type="text"
-                    value={values[emp]}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange(emp, e.target.value)}
+                    value={nicknames[emp]}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleNicknameChange(emp, e.target.value)}
                     placeholder={canonical}
                     maxLength={32}
                     className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 ring-[var(--color-accent)]"
                   />
                 </div>
-                {values[emp] && (
+                {nicknames[emp] && (
                   <button
                     type="button"
-                    onClick={() => handleReset(emp)}
+                    onClick={() => handleNicknameReset(emp)}
                     title="Reset to default"
                     className="shrink-0 p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
                   >
@@ -317,10 +358,64 @@ function SpecialistsTab({
           })}
         </div>
       </div>
+
+      {/* Response length */}
+      <div>
+        <h3 className="text-[11px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-3">
+          Response length
+        </h3>
+        <p className="text-[var(--color-text-muted)] max-w-xl mb-4">
+          Control how verbose each specialist is. Short is best for quick answers; Detailed for research and complex tasks.
+        </p>
+        <div className="space-y-3">
+          {(EMPLOYEE_ORDER as EmployeeKey[]).map((emp) => {
+            const Icon = EMPLOYEE_ICON[emp];
+            const color = DEPT_COLOR[emp];
+            const canonical = employeeLabel(emp);
+            const current = prefs[emp] ?? "balanced";
+            return (
+              <div key={emp} className="flex items-center gap-3">
+                <span
+                  className="flex items-center justify-center w-8 h-8 rounded-full shrink-0"
+                  style={{
+                    background: `color-mix(in srgb, ${color} 18%, var(--color-surface-elevated))`,
+                    boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 32%, transparent)`,
+                  }}
+                >
+                  <Icon size={14} style={{ color }} strokeWidth={2} />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <span className="block text-[11px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-1.5">
+                    {canonical}
+                  </span>
+                  <div className="flex gap-1" role="group" aria-label={`${canonical} response length`}>
+                    {RESPONSE_LENGTH_OPTIONS.map(({ value, label, hint }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => handleLengthChange(emp, value)}
+                        title={hint}
+                        className={`px-3 py-1.5 rounded-md text-[12px] font-medium transition-all ${
+                          current === value
+                            ? "bg-[var(--color-accent)] text-white"
+                            : "border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-text-muted)]"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="flex justify-end pt-2 border-t border-[var(--color-border)]">
         <PraxisButton type="submit" disabled={busy}>
           {busy ? <SpinnerIcon /> : <Check size={14} />}
-          Save nicknames
+          Save settings
         </PraxisButton>
       </div>
     </form>

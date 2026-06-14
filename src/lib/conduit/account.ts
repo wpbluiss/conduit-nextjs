@@ -49,6 +49,8 @@ export interface ConduitAccount {
   // R461 onboarding goals — nullable until migration 038 runs.
   onboarding_goals?: string[] | null;
   onboarding_complete?: boolean;
+  // R544 specialist prefs — nullable until migration 044 runs.
+  specialist_prefs?: Record<string, { response_length?: "short" | "balanced" | "detailed" }> | null;
   created_at: string;
   updated_at: string;
 }
