@@ -147,6 +147,7 @@ export default async function AppLayout({
         <Sidebar
           userEmail={user.email ?? ""}
           accountName={account.name}
+          workspaceName={(account as unknown as { workspace_name?: string | null }).workspace_name ?? null}
           conversations={convos ?? []}
           team={team}
           allowedEmployees={allowedEmployees}

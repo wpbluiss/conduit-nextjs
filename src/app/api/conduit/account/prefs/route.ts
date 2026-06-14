@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
     notify_voice_room_ready?: boolean;
     theme_preference?: "system" | "light" | "dark";
     display_name?: string;
+    workspace_name?: string | null;
     accent_preference?: string | null;
     company_brief?: string | null;
   };
@@ -35,6 +36,10 @@ export async function POST(request: NextRequest) {
   if (body.accent_preference !== undefined) {
     const ak = body.accent_preference;
     update.accent_preference = (ak && VALID_ACCENTS.has(ak)) ? ak : null;
+  }
+  if (body.workspace_name !== undefined) {
+    const wn = body.workspace_name === null ? null : String(body.workspace_name).slice(0, 80);
+    update.workspace_name = wn || null;
   }
   if (body.company_brief !== undefined) {
     const brief = body.company_brief === null ? null : String(body.company_brief).slice(0, 500);
