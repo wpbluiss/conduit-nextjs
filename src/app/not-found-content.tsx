@@ -62,7 +62,7 @@ export function NotFoundContent() {
             color: "var(--color-ink-on-inverse)",
           }}
         >
-          Page not found
+          This page doesn&rsquo;t exist
         </motion.h1>
 
         <motion.p
@@ -78,18 +78,18 @@ export function NotFoundContent() {
           className="flex flex-col sm:flex-row items-center gap-3"
         >
           <Link
-            href="/"
+            href="/app"
             className="conduit-btn-primary-inverse"
             style={{ padding: "12px 24px", fontSize: "14px" }}
           >
-            Back to home
+            Back to app
           </Link>
           <Link
-            href="/auth/sign-in"
+            href="/"
             className="text-sm"
             style={{ color: "var(--color-ink-on-inverse-mute)" }}
           >
-            Sign in →
+            Go home →
           </Link>
         </motion.div>
       </motion.div>

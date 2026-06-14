@@ -107,7 +107,7 @@ export default function RootError({ error, unstable_retry, reset }: Props) {
             className="text-sm"
             style={{ color: "var(--color-ink-on-inverse-mute)" }}
           >
-            Back to home →
+            Go home →
           </Link>
         </motion.div>
       </motion.div>
