@@ -175,7 +175,11 @@ export default async function AppLayout({
         </main>
         {!onboarded && <OnboardingModal defaultName={userName} />}
         <PostOnboardingNudge />
-        {onboarded && <FirstRunTour />}
+        {onboarded && (
+          <FirstRunTour
+            isFirstRun={(account as unknown as { onboarded_at?: string | null }).onboarded_at == null}
+          />
+        )}
         <KeyboardShortcutsOverlay />
         <CommandPalette />
         {onboarded && isNewAccount && !checklistDismissed && (

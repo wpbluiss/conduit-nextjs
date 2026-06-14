@@ -424,6 +424,7 @@ export function Sidebar({
             onClick={close}
             collapsed={collapsed}
           />
+          <div data-tour-target="specialists">
           <NavLink
             href="/app/team"
             icon={<Users2 size={14} />}
@@ -432,6 +433,7 @@ export function Sidebar({
             onClick={close}
             collapsed={collapsed}
           />
+          </div>
 
           {/* Team header (collapsible) — hidden in icon-only mode */}
           {!collapsed && (
@@ -603,6 +605,7 @@ export function Sidebar({
                 collapsed={collapsed}
               />
             )}
+            <div data-tour-target="memory">
             <NavLink
               href="/app/memory"
               icon={<Brain size={14} />}
@@ -611,6 +614,7 @@ export function Sidebar({
               onClick={close}
               collapsed={collapsed}
             />
+            </div>
             {allowedEmployees.includes("engineering") && (
               collapsed ? (
                 <div className="flex justify-center">
@@ -795,7 +799,7 @@ export function Sidebar({
               <div className="flex justify-center"><ChangelogPopover /></div>
               <div className="flex justify-center"><NotificationCenter /></div>
               <SidebarThemeButton collapsed />
-              <Link href="/app/settings" title="Settings" aria-label="Settings" onClick={close}
+              <Link href="/app/settings" title="Settings" aria-label="Settings" onClick={close} data-tour-target="settings"
                 className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-100 ${isActive("/app/settings") ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"}`}>
                 <Settings size={14} />
               </Link>
@@ -829,6 +833,7 @@ export function Sidebar({
               <ChangelogPopover />
               <div className="px-1"><NotificationCenter /></div>
               <SidebarThemeButton />
+              <div data-tour-target="settings">
               <NavLink
                 href="/app/settings"
                 icon={<Settings size={14} />}
@@ -841,6 +846,7 @@ export function Sidebar({
                 onClick={close}
                 small
               />
+              </div>
               <NavLink
                 href="/app/settings/billing"
                 icon={<CreditCard size={14} />}

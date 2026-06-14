@@ -10,30 +10,36 @@ const STORAGE_KEY = "praxis_tour_v1_done";
 type Step = {
   title: string;
   body: string;
-  /** Where to anchor the card: quadrant of the screen */
+  /** Where to anchor the card relative to the highlighted UI element */
   anchor: "center" | "bottom" | "left" | "bottom-left";
+  /** data-tour-target value to highlight (optional) */
+  target?: string;
 };
 
 const STEPS: Step[] = [
   {
-    title: "Welcome to Praxis",
-    body: "Your AI workforce is live and ready. Atlas is your Chief of Staff — ask anything and it will route to the right specialist.",
-    anchor: "center",
-  },
-  {
-    title: "Start a conversation",
-    body: "Type or speak to your team. Atlas handles strategy; specialists like Engineering, Sales, and Marketing execute autonomously.",
+    title: "Chat with your team",
+    body: "Type a message below to start. Atlas is your Chief of Staff — it routes tasks to the right specialist automatically.",
     anchor: "bottom",
+    target: "chat-input",
   },
   {
-    title: "Your team of 9",
-    body: "Every specialist is here in the sidebar. Click one to go straight to them, or let Atlas decide who picks up the task.",
+    title: "Your 9 specialists",
+    body: "Engineering, Sales, Marketing, Finance and more — click any specialist in the sidebar to go straight to them, or let Atlas decide.",
     anchor: "left",
+    target: "specialists",
   },
   {
-    title: "Settings & billing",
-    body: "Your workspace, preferences, and plan live in Settings. Upgrade any time — your team gets more specialists and token budget.",
+    title: "Memory",
+    body: "Praxis remembers context across conversations. Add business facts, brand voice, and goals so your team always has the right context.",
+    anchor: "left",
+    target: "memory",
+  },
+  {
+    title: "Connectors",
+    body: "Connect Slack, Google Calendar, Notion and more in Settings → Integrations. Your specialists pull live context from the tools you already use.",
     anchor: "bottom-left",
+    target: "settings",
   },
 ];
 
@@ -55,7 +61,7 @@ function cardPosition(anchor: Step["anchor"]): React.CSSProperties {
       };
     case "left":
       return {
-        top: "50%",
+        top: "40%",
         left: "calc(var(--sidebar-width, 256px) + 24px)",
         transform: "translateY(-50%)",
       };
@@ -67,22 +73,28 @@ function cardPosition(anchor: Step["anchor"]): React.CSSProperties {
   }
 }
 
-export function FirstRunTour() {
+export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
   const reduced = useReducedMotion();
   const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // Only read localStorage on the client
+    if (!isFirstRun) return;
     if (typeof window === "undefined") return;
     const done = localStorage.getItem(STORAGE_KEY);
     if (!done) setVisible(true);
+  }, [isFirstRun]);
+
+  const markDone = useCallback(() => {
+    localStorage.setItem(STORAGE_KEY, "1");
+    // Best-effort DB mark — fire-and-forget; failure is non-blocking.
+    fetch("/api/conduit/account/onboarded", { method: "PATCH" }).catch(() => {});
   }, []);
 
   const dismiss = useCallback(() => {
-    localStorage.setItem(STORAGE_KEY, "1");
+    markDone();
     setVisible(false);
-  }, []);
+  }, [markDone]);
 
   const next = useCallback(() => {
     if (step < STEPS.length - 1) {
@@ -101,6 +113,17 @@ export function FirstRunTour() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [visible, dismiss]);
+
+  // Highlight the current step's target element
+  useEffect(() => {
+    if (!visible) return;
+    const target = STEPS[step]?.target;
+    if (!target) return;
+    const el = document.querySelector<HTMLElement>(`[data-tour-target="${target}"]`);
+    if (!el) return;
+    el.setAttribute("data-tour-active", "true");
+    return () => { el.removeAttribute("data-tour-active"); };
+  }, [visible, step]);
 
   if (!visible) return null;
 
@@ -134,7 +157,7 @@ export function FirstRunTour() {
         />
       </AnimatePresence>
 
-      {/* Coachmark card */}
+      {/* Coach mark card */}
       <AnimatePresence mode="wait">
         <motion.div
           key={step}
@@ -216,7 +239,7 @@ export function FirstRunTour() {
                 className="conduit-btn-primary text-[13px] px-4 py-2 gap-1.5"
                 autoFocus
               >
-                {isLast ? "Get started" : "Next"}
+                {isLast ? "Get started" : "Next →"}
                 <ArrowRight size={13} weight="bold" />
               </button>
             </div>
