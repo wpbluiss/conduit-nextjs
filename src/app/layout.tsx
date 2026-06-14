@@ -57,7 +57,12 @@ export const metadata: Metadata = {
     siteName: "Conduit AI",
     type: "website",
     images: [
-      { url: "/praxis-mark.png", width: 632, height: 961, alt: "Praxis" },
+      {
+        url: "/api/og",
+        width: 1200,
+        height: 630,
+        alt: "Praxis — Your AI-powered business team",
+      },
     ],
   },
   twitter: {
@@ -65,7 +70,7 @@ export const metadata: Metadata = {
     title: "Conduit AI — Intelligence at work",
     description:
       "Conduit AI builds Praxis, the operating system for autonomous AI workforces.",
-    images: ["/praxis-mark.png"],
+    images: ["/api/og"],
   },
 };
 

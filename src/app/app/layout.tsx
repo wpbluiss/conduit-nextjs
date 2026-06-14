@@ -20,6 +20,18 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
+  openGraph: {
+    title: "Praxis Workspace",
+    description: "Your AI-powered business team — voice, sales, engineering, ops, finance.",
+    images: [
+      {
+        url: "/api/og?title=Praxis+Workspace&description=Your+AI-powered+business+team",
+        width: 1200,
+        height: 630,
+        alt: "Praxis Workspace",
+      },
+    ],
+  },
 };
 
 export default async function AppLayout({
