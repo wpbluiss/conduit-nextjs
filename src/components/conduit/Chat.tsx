@@ -23,6 +23,7 @@ import {
 } from "./praxis/PraxisComposerPill";
 import { composeChatEmptyCopy, timeOfDayBucket } from "@/lib/conduit/welcome-copy";
 import type { EmployeeId } from "@/lib/conduit/employees";
+import { TypingIndicator } from "./TypingIndicator";
 
 export interface VoicePrefs {
   enabled: boolean;
@@ -1242,6 +1243,19 @@ const MessageBubble = memo(function MessageBubble({
   const employee = (message.employee as EmployeeKey) ?? "jarvis";
   const empty = !message.content && message.pending;
 
+  // Before any tokens arrive: render a dedicated accessible typing indicator.
+  if (empty) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
+      >
+        <TypingIndicator employee={employee} />
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       className="flex gap-3"
@@ -1279,9 +1293,7 @@ const MessageBubble = memo(function MessageBubble({
           )}
           {message.pending && (
             <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-              {empty
-                ? `${employeeLabel(employee)} is thinking…`
-                : "writing…"}
+              writing…
             </span>
           )}
           {playing && (
@@ -1331,23 +1343,13 @@ const MessageBubble = memo(function MessageBubble({
           )}
         </div>
         <div className="conduit-bubble-assistant px-4 py-3 text-[var(--color-text)] whitespace-pre-wrap leading-relaxed">
-          {empty ? (
-            <span className="inline-flex items-center gap-1 py-1">
-              <span className="typing-dot" />
-              <span className="typing-dot" />
-              <span className="typing-dot" />
-            </span>
-          ) : (
-            <>
-              {message.content}
-              {message.pending && (
-                <span
-                  aria-hidden
-                  className="inline-block w-[2px] h-4 -mb-1 ml-1 caret"
-                  style={{ background: DEPT_COLOR[employee] }}
-                />
-              )}
-            </>
+          {message.content}
+          {message.pending && (
+            <span
+              aria-hidden
+              className="inline-block w-[2px] h-4 -mb-1 ml-1 caret"
+              style={{ background: DEPT_COLOR[employee] }}
+            />
           )}
         </div>
         {message.memories?.map((mem) => (
