@@ -73,6 +73,27 @@ export default async function ChatPage({ searchParams }: PageProps) {
         );
       }
 
+      // Fetch existing feedback reactions for these messages.
+      let feedbackByMsg: Record<string, 1 | -1> = {};
+      if (messageIds.length) {
+        try {
+          const { data: feedbackRows } = await supabase
+            .from("conduit_message_feedback")
+            .select("message_id, rating")
+            .in("message_id", messageIds)
+            .eq("account_id", account.id);
+          feedbackByMsg = (feedbackRows ?? []).reduce(
+            (acc, f) => {
+              acc[f.message_id as string] = f.rating as 1 | -1;
+              return acc;
+            },
+            {} as Record<string, 1 | -1>,
+          );
+        } catch {
+          // Non-fatal: feedback hydration failure doesn't block chat load.
+        }
+      }
+
       messages = page.map((r) => ({
         id: r.id,
         role: r.role as MessageRow["role"],
@@ -80,6 +101,7 @@ export default async function ChatPage({ searchParams }: PageProps) {
         content: r.content,
         metadata: r.metadata,
         artifacts: artifactsByMsg[r.id],
+        feedback: feedbackByMsg[r.id] ?? null,
       }));
     }
   }
