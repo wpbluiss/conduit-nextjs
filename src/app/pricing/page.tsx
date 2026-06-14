@@ -44,9 +44,73 @@ export const metadata: Metadata = {
 };
 
 
+const PRICING_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: "Praxis — AI specialist team",
+  description:
+    "Nine AI specialists covering marketing, sales, engineering, ops, finance, legal, HR, compliance, and voice — running 24/7 for your business.",
+  url: "https://conduitai.io/pricing",
+  brand: { "@type": "Brand", name: "Conduit AI" },
+  offers: [
+    {
+      "@type": "Offer",
+      name: "Free",
+      price: "0",
+      priceCurrency: "USD",
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: "0",
+        priceCurrency: "USD",
+        billingDuration: "P1M",
+      },
+      availability: "https://schema.org/InStock",
+      url: "https://conduitai.io/auth/sign-up",
+      description:
+        "Get started free — Marketing specialist, 50k monthly tokens, voice input, 100 memory rows.",
+    },
+    {
+      "@type": "Offer",
+      name: "Pro",
+      price: "29",
+      priceCurrency: "USD",
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: "29",
+        priceCurrency: "USD",
+        billingDuration: "P1M",
+      },
+      availability: "https://schema.org/InStock",
+      url: "https://conduitai.io/auth/sign-up?tier=pro",
+      description:
+        "Solo founders running a real business — Marketing, Sales, Engineering, 1M tokens/mo, real builds, real leads.",
+    },
+    {
+      "@type": "Offer",
+      name: "Enterprise",
+      price: "199",
+      priceCurrency: "USD",
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: "199",
+        priceCurrency: "USD",
+        billingDuration: "P1M",
+      },
+      availability: "https://schema.org/InStock",
+      url: "https://conduitai.io/auth/sign-up?tier=enterprise",
+      description:
+        "Teams replacing whole departments — all 9 specialists including Finance, Compliance, HR, Ops, Legal, 5M tokens/mo, Praxis Depth, multi-user workspace.",
+    },
+  ],
+};
+
 export default function PricingPage() {
   return (
     <main className="conduit-bg-canvas">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(PRICING_JSONLD) }}
+      />
       <AnalyticsPageView />
       <Navbar />
 
