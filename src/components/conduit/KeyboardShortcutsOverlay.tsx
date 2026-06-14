@@ -24,6 +24,7 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
   {
     title: "General",
     shortcuts: [
+      { keys: ["⌘K"], label: "Open command palette" },
       { keys: ["?"], label: "Open keyboard shortcuts" },
       { keys: ["Esc"], label: "Close overlay / sidebar" },
     ],

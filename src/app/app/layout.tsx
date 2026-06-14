@@ -20,6 +20,7 @@ import { getInFlightBuilds } from "@/lib/engineering/in-flight";
 import { PostOnboardingNudge } from "@/components/conduit/PostOnboardingNudge";
 import { FirstRunTour } from "@/components/conduit/FirstRunTour";
 import { KeyboardShortcutsOverlay } from "@/components/conduit/KeyboardShortcutsOverlay";
+import { CommandPalette } from "@/components/conduit/CommandPalette";
 import { WelcomeChecklist } from "@/components/conduit/WelcomeChecklist";
 
 export const dynamic = "force-dynamic";
@@ -165,6 +166,7 @@ export default async function AppLayout({
         <PostOnboardingNudge />
         {onboarded && <FirstRunTour />}
         <KeyboardShortcutsOverlay />
+        <CommandPalette />
         {onboarded && isNewAccount && !checklistDismissed && (
           <WelcomeChecklist hasConversations={(convos ?? []).length > 0} />
         )}
