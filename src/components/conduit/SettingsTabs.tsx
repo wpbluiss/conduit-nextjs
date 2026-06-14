@@ -1121,6 +1121,15 @@ function Donut({
   );
 }
 
+interface InvoiceItem {
+  id: string;
+  date: number;
+  amount: number;
+  currency: string;
+  status: string;
+  pdf_url: string | null;
+}
+
 function BillingTab({
   account,
   usage,
@@ -1130,8 +1139,17 @@ function BillingTab({
 }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [invoices, setInvoices] = useState<InvoiceItem[] | null>(null);
   const tier = tierById(account.tier_id ?? "free");
   const internal = Boolean(account.internal_account);
+
+  useEffect(() => {
+    if (!account.has_stripe_customer) return;
+    fetch("/api/conduit/billing/invoices")
+      .then((r) => r.ok ? r.json() : null)
+      .then((j) => j && setInvoices(j.invoices ?? []))
+      .catch(() => setInvoices([]));
+  }, [account.has_stripe_customer]);
 
   if (internal) {
     return (
@@ -1328,6 +1346,104 @@ function BillingTab({
         cap={tier.monthlyTokenAllowance}
         bonus={account.bonus_tokens ?? 0}
       />
+
+      {/* Invoice history — only shown on paid accounts with a Stripe customer */}
+      {account.has_stripe_customer && (
+        <div>
+          <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+            Invoice history
+          </div>
+          {invoices === null ? (
+            <div className="conduit-card p-4 space-y-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center justify-between gap-4">
+                  <div className="h-3 rounded w-24 animate-pulse bg-[var(--color-border)]" />
+                  <div className="h-3 rounded w-16 animate-pulse bg-[var(--color-border)]" />
+                  <div className="h-3 rounded w-12 animate-pulse bg-[var(--color-border)]" />
+                  <div className="h-3 rounded w-20 animate-pulse bg-[var(--color-border)]" />
+                </div>
+              ))}
+            </div>
+          ) : invoices.length === 0 ? (
+            <div className="conduit-card p-5 text-center text-sm text-[var(--color-text-muted)]">
+              No invoices yet
+            </div>
+          ) : (
+            <div className="conduit-card overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--color-border)]">
+                    {["Date", "Amount", "Status", ""].map((h) => (
+                      <th
+                        key={h}
+                        className="px-4 py-2.5 text-left text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] font-normal"
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoices.map((inv, i) => (
+                    <tr
+                      key={inv.id}
+                      className={
+                        i < invoices.length - 1
+                          ? "border-b border-[var(--color-border)]"
+                          : ""
+                      }
+                    >
+                      <td className="px-4 py-3 text-[var(--color-text-muted)]">
+                        {new Date(inv.date * 1000).toLocaleDateString(undefined, {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="px-4 py-3 font-medium">
+                        {(inv.amount / 100).toLocaleString(undefined, {
+                          style: "currency",
+                          currency: inv.currency.toUpperCase(),
+                        })}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] uppercase tracking-[0.1em]"
+                          style={{
+                            background:
+                              inv.status === "paid"
+                                ? "color-mix(in srgb, var(--color-accent) 12%, transparent)"
+                                : "color-mix(in srgb, var(--color-text-muted) 15%, transparent)",
+                            color:
+                              inv.status === "paid"
+                                ? "var(--color-accent)"
+                                : "var(--color-text-muted)",
+                          }}
+                        >
+                          {inv.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        {inv.pdf_url && (
+                          <a
+                            href={inv.pdf_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-[var(--color-accent)] hover:underline"
+                          >
+                            Download PDF
+                            <ExternalLink size={11} />
+                          </a>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {error && (
         <p className="text-sm text-[var(--color-pink)]">{error}</p>
