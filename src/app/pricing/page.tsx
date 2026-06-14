@@ -12,32 +12,32 @@ import { PricingComparisonTable } from "@/components/marketing/PricingComparison
 import { ScrollRevealCards, ScrollRevealItem } from "@/components/marketing/ScrollRevealCards";
 
 export const metadata: Metadata = {
-  title: "Pricing — Three tiers, one workforce",
+  title: "Praxis Pricing — One flat subscription, nine AI specialists",
   description:
-    "Free, Pro $29/mo, Enterprise $199/mo. Praxis Flow on every tier; Praxis Depth on Enterprise. Top up tokens any time.",
+    "Free to start. Pro $29/mo. Enterprise $199/mo. One subscription replaces a marketing manager, sales rep, engineer, ops lead, and more — running 24/7.",
   openGraph: {
-    title: "Pricing — Three tiers, one workforce",
+    title: "Praxis Pricing — One flat subscription, nine AI specialists",
     description:
-      "Free, Pro $29/mo, Enterprise $199/mo. Praxis Flow on every tier; Praxis Depth on Enterprise. Top up tokens any time.",
+      "Free to start. Pro $29/mo. Enterprise $199/mo. One subscription replaces a marketing manager, sales rep, engineer, ops lead, and more — running 24/7.",
     url: "https://conduitai.io/pricing",
-    siteName: "Conduit AI",
+    siteName: "Praxis by Conduit AI",
     type: "website",
     images: [
       {
-        url: "/api/og?title=Pricing+%E2%80%94+Three+tiers%2C+one+workforce&description=Free%2C+Pro+%2429%2Fmo%2C+Enterprise+%24199%2Fmo.+Top+up+tokens+any+time.",
+        url: "/api/og?title=Praxis+Pricing+%E2%80%94+One+flat+subscription%2C+nine+AI+specialists&description=Free%2C+Pro+%2429%2Fmo%2C+Enterprise+%24199%2Fmo.+Nine+specialists+running+24%2F7.",
         width: 1200,
         height: 630,
-        alt: "Pricing — Three tiers, one workforce",
+        alt: "Praxis Pricing — One flat subscription, nine AI specialists",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pricing — Three tiers, one workforce",
+    title: "Praxis Pricing — One flat subscription, nine AI specialists",
     description:
-      "Free, Pro $29/mo, Enterprise $199/mo. Praxis Flow on every tier; Praxis Depth on Enterprise.",
+      "Free to start. Pro $29/mo. Enterprise $199/mo. One subscription, nine AI specialists running 24/7.",
     images: [
-      "/api/og?title=Pricing+%E2%80%94+Three+tiers%2C+one+workforce&description=Free%2C+Pro+%2429%2Fmo%2C+Enterprise+%24199%2Fmo.+Top+up+tokens+any+time.",
+      "/api/og?title=Praxis+Pricing+%E2%80%94+One+flat+subscription%2C+nine+AI+specialists&description=Free%2C+Pro+%2429%2Fmo%2C+Enterprise+%24199%2Fmo.+Nine+specialists+running+24%2F7.",
     ],
   },
   alternates: {
