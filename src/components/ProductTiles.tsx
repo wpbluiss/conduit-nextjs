@@ -39,7 +39,8 @@ function ConsoleMark() {
         strokeWidth="1"
         opacity="0.55"
       />
-      <circle cx="11" cy="17" r="1.2" fill="#5B63E8" />
+      {/* title-bar dots: first is ember (active), rest fade indigo */}
+      <circle cx="11" cy="17" r="1.2" fill="#FF8A3D" />
       <circle cx="15" cy="17" r="1.2" fill="#5B63E8" opacity="0.6" />
       <circle cx="19" cy="17" r="1.2" fill="#5B63E8" opacity="0.4" />
       <line
@@ -62,25 +63,26 @@ function ConsoleMark() {
         strokeLinecap="round"
         opacity="0.45"
       />
+      {/* ember accent: active output lines bottom-right */}
       <line
         x1="34"
         y1="40"
         x2="50"
         y2="40"
-        stroke="#5B63E8"
+        stroke="#FF8A3D"
         strokeWidth="1.5"
         strokeLinecap="round"
-        opacity="0.85"
+        opacity="0.9"
       />
       <line
         x1="38"
         y1="44"
         x2="50"
         y2="44"
-        stroke="#5B63E8"
+        stroke="#FF8A3D"
         strokeWidth="1.5"
         strokeLinecap="round"
-        opacity="0.85"
+        opacity="0.6"
       />
       <line
         x1="22"
@@ -117,14 +119,15 @@ function MobileMark() {
         strokeLinecap="round"
       />
       <circle cx="32" cy="14" r="1" fill="#5B63E8" opacity="0.6" />
-      <circle cx="32" cy="30" r="3" fill="#5B63E8" />
+      {/* ember accent: the focal app icon on screen */}
+      <circle cx="32" cy="30" r="3" fill="#FF8A3D" />
       <circle
         cx="32"
         cy="30"
         r="6"
-        stroke="#5B63E8"
+        stroke="#FF8A3D"
         strokeWidth="1"
-        opacity="0.5"
+        opacity="0.35"
         fill="none"
       />
       <path
@@ -201,7 +204,8 @@ function HqMark() {
       />
       <rect x="14" y="29" width="5" height="5" fill="#5B63E8" opacity="0.85" />
       <rect x="22" y="29" width="5" height="5" fill="#5B63E8" opacity="0.4" />
-      <rect x="37" y="29" width="5" height="5" fill="#5B63E8" opacity="0.85" />
+      {/* ember accent: one lit window — the active office */}
+      <rect x="37" y="29" width="5" height="5" fill="#FF8A3D" opacity="0.9" />
       <rect x="45" y="29" width="5" height="5" fill="#5B63E8" opacity="0.4" />
       <rect x="14" y="46" width="5" height="5" fill="#5B63E8" opacity="0.4" />
       <rect x="22" y="46" width="5" height="5" fill="#5B63E8" opacity="0.85" />
@@ -297,7 +301,7 @@ export default function ProductTiles() {
                 className="conduit-card group block p-7 md:p-8 h-full min-h-[480px] flex flex-col"
               >
                 <div className="flex items-start justify-between mb-8">
-                  <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)] group-hover:border-[rgba(91, 99, 232,0.35)] transition-colors">
+                  <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)] group-hover:border-[rgba(91,99,232,0.35)] group-hover:bg-[rgba(91,99,232,0.05)] transition-colors">
                     <c.Mark />
                   </div>
                   <StatusBadge status={c.status} />
