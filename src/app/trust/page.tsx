@@ -138,7 +138,16 @@ export default function TrustPage() {
         </div>
       </section>
 
-      <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-border-subtle)]">
+      <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-border-subtle)] relative overflow-hidden">
+        {/* Faint teal radial anchored top-right, matching the Auth + access control pillar tint */}
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse 60% 70% at 100% 0%, rgba(52,211,153,0.07) 0%, transparent 70%)",
+          }}
+        />
         <div className="conduit-container">
           <ScrollRevealCards className="max-w-[760px]">
             <ScrollRevealItem>
