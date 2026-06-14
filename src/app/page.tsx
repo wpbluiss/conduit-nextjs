@@ -10,6 +10,7 @@ import { MarketingMotionProvider } from "@/components/MarketingMotionProvider";
 // server-rendered (ssr: true default) for SEO; only the client bundle
 // is deferred. loading: () => null prevents layout shift while chunks
 // load — these sections are entirely out of the initial viewport.
+const SocialProofBar = dynamic(() => import("@/components/landing/TrustBar"));
 const StatsBar = dynamic(() => import("@/components/StatsBar"));
 const DemoStrip = dynamic(() => import("@/components/DemoStrip"));
 const HowItWorks = dynamic(() => import("@/components/HowItWorks"));
@@ -88,6 +89,7 @@ export default function Home() {
       <AnalyticsPageView />
       <Navbar />
       <Hero />
+      <SocialProofBar />
       <StatsBar />
       <DemoStrip />
       <HowItWorks />
