@@ -337,6 +337,14 @@ export function Sidebar({
             onClick={close}
             collapsed={collapsed}
           />
+          <NavLink
+            href="/app/team"
+            icon={<Users2 size={14} />}
+            label="Team"
+            active={pathname === "/app/team"}
+            onClick={close}
+            collapsed={collapsed}
+          />
 
           {/* Team header (collapsible) — hidden in icon-only mode */}
           {!collapsed && (
