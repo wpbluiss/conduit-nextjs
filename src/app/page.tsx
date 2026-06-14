@@ -15,6 +15,9 @@ const DemoStrip = dynamic(() => import("@/components/DemoStrip"));
 const HowItWorks = dynamic(() => import("@/components/HowItWorks"));
 const ProductTiles = dynamic(() => import("@/components/ProductTiles"));
 const FeatureGrid = dynamic(() => import("@/components/FeatureGrid"));
+const SpecialistSpotlight = dynamic(
+  () => import("@/components/SpecialistSpotlight"),
+);
 const Cinematic = dynamic(() => import("@/components/Cinematic"));
 const Vision = dynamic(() => import("@/components/Vision"));
 const Customers = dynamic(() => import("@/components/Customers"));
@@ -90,6 +93,7 @@ export default function Home() {
       <HowItWorks />
       <ProductTiles />
       <FeatureGrid />
+      <SpecialistSpotlight />
       <Cinematic />
       <Vision />
       <Customers />
