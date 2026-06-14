@@ -71,6 +71,11 @@ function OAuthButton({
         background: "rgba(255,255,255,0.04)",
         border: "1px solid rgba(255,255,255,0.10)",
         color: "var(--color-ink-on-inverse)",
+        // Apple HIG: use system font for the Apple button
+        fontFamily:
+          provider === "apple"
+            ? "-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif"
+            : undefined,
       }}
       onMouseEnter={(e) => {
         (e.currentTarget as HTMLButtonElement).style.background =
@@ -99,7 +104,7 @@ export function OAuthButtons({ redirectTo = "/app/workspace" }: { redirectTo?: s
         <OAuthButton provider="apple" redirectTo={redirectTo} />
       </div>
 
-      <div className="relative flex items-center gap-3 my-1">
+      <div className="relative flex items-center gap-3 my-5">
         <div
           className="flex-1 h-px"
           style={{ background: "rgba(255,255,255,0.08)" }}
