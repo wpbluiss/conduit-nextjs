@@ -121,18 +121,31 @@ function SpecialistCard({
   colorSoft: string;
   reduced: boolean;
 }) {
+  const cardVariants = reduced
+    ? undefined
+    : {
+        rest: { y: 0 },
+        hover: {
+          y: -4,
+          boxShadow: `0 0 0 1px ${color}40, 0 8px 28px ${color}26, 0 16px 48px rgba(0,0,0,0.35)`,
+          borderColor: `${color}55`,
+        },
+      };
+
+  const iconVariants = reduced
+    ? undefined
+    : {
+        rest: { scale: 1, rotate: 0 },
+        hover: { scale: 1.12, rotate: 6 },
+      };
+
   return (
     <motion.div
       className="conduit-card-inverse relative overflow-hidden h-full p-5 flex flex-col gap-3 cursor-default"
-      whileHover={
-        reduced
-          ? {}
-          : {
-              y: -4,
-              boxShadow: `0 0 0 1px ${color}40, 0 8px 28px ${color}26, 0 16px 48px rgba(0,0,0,0.35)`,
-              borderColor: `${color}55`,
-            }
-      }
+      variants={cardVariants}
+      initial="rest"
+      animate="rest"
+      whileHover={reduced ? undefined : "hover"}
       transition={{ duration: 0.22, ease: EASE }}
     >
       {/* Per-dept corner radial accent */}
@@ -146,12 +159,14 @@ function SpecialistCard({
 
       {/* Icon + name/role row */}
       <div className="relative flex items-center gap-3">
-        <div
+        <motion.div
+          variants={iconVariants}
+          transition={{ duration: 0.22, ease: EASE }}
           className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
           style={{ background: colorSoft, color }}
         >
           {icon}
-        </div>
+        </motion.div>
         <div>
           <div
             className="text-[15px] font-semibold leading-[1.2] text-[var(--color-ink-on-inverse)]"
