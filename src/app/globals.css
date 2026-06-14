@@ -493,6 +493,12 @@ body {
 @keyframes wave2 { 0%,100% { height:12px; } 50% { height:6px; } }
 @keyframes wave3 { 0%,100% { height:6px; } 50% { height:13px; } }
 
+/* Whisper recording waveform — 3 phases for 5 bars */
+@keyframes whisperWave1 { 0%,100% { height:4px; } 50% { height:12px; } }
+@keyframes whisperWave2 { 0%,100% { height:8px; } 50% { height:4px; } }
+@keyframes whisperWave3 { 0%,100% { height:6px; } 50% { height:14px; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
 @keyframes presenceFade {
   0% { opacity: 0; transform: translateY(2px); }
   20%, 80% { opacity: 1; transform: translateY(0); }

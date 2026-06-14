@@ -14,6 +14,7 @@ import {
 import { PaywallModal, type PaywallPayload } from "./PaywallModal";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useVoiceRecorder } from "@/hooks/useVoiceRecorder";
+import { useWhisperRecorder } from "@/hooks/useWhisperRecorder";
 import { PraxisAvatar } from "./praxis/PraxisAvatar";
 import { PraxisSuggestionTile } from "./praxis/PraxisSuggestionTile";
 import { PraxisHandoffBaton } from "./praxis/PraxisHandoffBaton";
@@ -275,6 +276,11 @@ export function Chat({
     [conversationId, router],
   );
   const voiceRecorder = useVoiceRecorder(sendVoiceMessage);
+
+  // Whisper STT — fills the text input from server-side transcription.
+  const whisperRecorder = useWhisperRecorder(useCallback((text: string) => {
+    setInput((prev) => (prev ? `${prev} ${text}` : text));
+  }, []));
 
   // Voice output (TTS)
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -1022,6 +1028,11 @@ export function Chat({
             onVoiceRecordStart={() => void voiceRecorder.start()}
             onVoiceRecordStop={() => voiceRecorder.stop()}
             onVoiceRecordCancel={() => voiceRecorder.cancel()}
+            whisperSupported={whisperRecorder.supported}
+            whisperState={whisperRecorder.state}
+            onWhisperStart={() => void whisperRecorder.start()}
+            onWhisperStop={() => whisperRecorder.stop()}
+            onWhisperCancel={() => whisperRecorder.cancel()}
           />
           <div
             className="mt-2 h-4 text-center"

@@ -6,6 +6,7 @@ import type { EmployeeId } from "@/lib/conduit/employees";
 import { PraxisAvatar } from "./PraxisAvatar";
 import { useDeptTint } from "./usePraxisTint";
 import type { RecordingState } from "@/hooks/useVoiceRecorder";
+import type { WhisperState } from "@/hooks/useWhisperRecorder";
 
 export type PinValue = EmployeeId | "auto" | "team";
 
@@ -38,6 +39,13 @@ interface Props {
   onVoiceRecordStart?(): void;
   onVoiceRecordStop?(): void;
   onVoiceRecordCancel?(): void;
+  /** Whether MediaRecorder-based Whisper transcription is available. */
+  whisperSupported?: boolean;
+  /** Current state of the Whisper recorder. */
+  whisperState?: WhisperState;
+  onWhisperStart?(): void;
+  onWhisperStop?(): void;
+  onWhisperCancel?(): void;
 }
 
 /**
@@ -73,6 +81,11 @@ export function PraxisComposerPill({
   onVoiceRecordStart,
   onVoiceRecordStop,
   onVoiceRecordCancel,
+  whisperSupported = false,
+  whisperState = "idle",
+  onWhisperStart,
+  onWhisperStop,
+  onWhisperCancel,
 }: Props) {
   const [pinOpen, setPinOpen] = useState(false);
   const tint = useDeptTint();
@@ -238,48 +251,53 @@ export function PraxisComposerPill({
         }}
       />
 
-      <button
-        type="button"
-        onClick={onSpeechToggle}
-        disabled={!speechSupported}
-        aria-label={
-          !speechSupported
-            ? "Voice input not supported in this browser"
-            : speechListening
-            ? "Stop listening"
-            : "Start voice input"
-        }
-        title={
-          !speechSupported
-            ? "Voice input not supported — try Chrome"
-            : speechListening
-            ? "Stop and send"
-            : "Hold or click to talk"
-        }
-        style={{
-          flexShrink: 0,
-          width: "40px",
-          height: "40px",
-          borderRadius: "9999px",
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: speechListening
-            ? "var(--color-accent)"
-            : "transparent",
-          color: speechListening
-            ? "var(--color-surface)"
-            : "var(--color-text-muted)",
-          border: speechListening
-            ? "none"
-            : "1px solid var(--color-border)",
-          cursor: speechSupported ? "pointer" : "not-allowed",
-          opacity: speechSupported ? 1 : 0.4,
-          transition: "all 180ms var(--praxis-ease-out-quart)",
-        }}
-      >
-        {speechSupported ? <Mic size={16} /> : <MicOff size={16} />}
-      </button>
+      {speechSupported ? (
+        <button
+          type="button"
+          onClick={onSpeechToggle}
+          aria-label={speechListening ? "Stop listening" : "Start voice input"}
+          title={speechListening ? "Stop and send" : "Click to talk"}
+          style={{
+            flexShrink: 0,
+            width: "40px",
+            height: "40px",
+            borderRadius: "9999px",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: speechListening ? "var(--color-accent)" : "transparent",
+            color: speechListening ? "var(--color-surface)" : "var(--color-text-muted)",
+            border: speechListening ? "none" : "1px solid var(--color-border)",
+            cursor: "pointer",
+            transition: "all 180ms var(--praxis-ease-out-quart)",
+          }}
+        >
+          <Mic size={16} />
+        </button>
+      ) : !whisperSupported ? (
+        <button
+          type="button"
+          disabled
+          aria-label="Voice input not supported in this browser"
+          title="Voice input not supported — try Chrome or enable Whisper"
+          style={{
+            flexShrink: 0,
+            width: "40px",
+            height: "40px",
+            borderRadius: "9999px",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "transparent",
+            color: "var(--color-text-muted)",
+            border: "1px solid var(--color-border)",
+            cursor: "not-allowed",
+            opacity: 0.4,
+          }}
+        >
+          <MicOff size={16} />
+        </button>
+      ) : null}
 
       {/* Voice message recording — distinct from STT above */}
       {voiceMessageSupported && (
@@ -397,6 +415,131 @@ export function PraxisComposerPill({
             }}
           >
             <Mic2 size={16} />
+          </button>
+        )
+      )}
+
+      {/* Whisper (press-to-talk) — shown when browser STT isn't available; hidden during voice message recording */}
+      {whisperSupported && !speechSupported && voiceRecordingState === "idle" && (
+        whisperState === "recording" ? (
+          <div
+            style={{
+              flexShrink: 0,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "var(--space-2)",
+            }}
+          >
+            {/* Waveform animation */}
+            <span
+              aria-hidden
+              style={{ display: "inline-flex", alignItems: "flex-end", gap: "2px", height: "16px" }}
+            >
+              {[1, 2, 3, 2, 1].map((h, i) => (
+                <span
+                  key={i}
+                  style={{
+                    width: "2px",
+                    borderRadius: "1px",
+                    background: "var(--color-accent)",
+                    height: `${h * 4}px`,
+                    animation: `whisperWave${(i % 3) + 1} 0.8s ease-in-out infinite`,
+                    animationDelay: `${i * 0.1}s`,
+                  }}
+                />
+              ))}
+            </span>
+            <button
+              type="button"
+              onClick={onWhisperStop}
+              aria-label="Transcribe recording"
+              title="Release to transcribe"
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "9999px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "var(--color-accent)",
+                color: "var(--color-surface)",
+                border: "none",
+                cursor: "pointer",
+                flexShrink: 0,
+              }}
+            >
+              <Square size={12} fill="currentColor" />
+            </button>
+            <button
+              type="button"
+              onClick={onWhisperCancel}
+              aria-label="Cancel transcription"
+              title="Cancel"
+              style={{
+                width: "28px",
+                height: "28px",
+                borderRadius: "9999px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "transparent",
+                color: "var(--color-text-muted)",
+                border: "1px solid var(--color-border)",
+                cursor: "pointer",
+                fontSize: "11px",
+                flexShrink: 0,
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onMouseDown={(e) => { e.preventDefault(); onWhisperStart?.(); }}
+            onTouchStart={(e) => { e.preventDefault(); onWhisperStart?.(); }}
+            disabled={whisperState === "transcribing" || loading}
+            aria-label={
+              whisperState === "transcribing"
+                ? "Transcribing…"
+                : "Hold to record and transcribe"
+            }
+            title={
+              whisperState === "transcribing"
+                ? "Transcribing…"
+                : "Hold to record · release to transcribe"
+            }
+            style={{
+              flexShrink: 0,
+              width: "40px",
+              height: "40px",
+              borderRadius: "9999px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: whisperState === "transcribing" ? "var(--color-accent)" : "transparent",
+              color: whisperState === "transcribing" ? "var(--color-surface)" : "var(--color-text-muted)",
+              border: whisperState === "transcribing" ? "none" : "1px solid var(--color-border)",
+              cursor: whisperState === "transcribing" || loading ? "not-allowed" : "pointer",
+              opacity: whisperState === "transcribing" || loading ? 0.6 : 1,
+              transition: "all 180ms var(--praxis-ease-out-quart)",
+            }}
+          >
+            {whisperState === "transcribing" ? (
+              <span
+                style={{
+                  width: "14px",
+                  height: "14px",
+                  border: "2px solid currentColor",
+                  borderTopColor: "transparent",
+                  borderRadius: "50%",
+                  animation: "spin 0.7s linear infinite",
+                  display: "inline-block",
+                }}
+              />
+            ) : (
+              <Mic size={16} />
+            )}
           </button>
         )
       )}
