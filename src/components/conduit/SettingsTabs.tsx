@@ -1345,6 +1345,7 @@ function BillingTab({
         usage={usage}
         cap={tier.monthlyTokenAllowance}
         bonus={account.bonus_tokens ?? 0}
+        resetDate={cycleResetDate}
       />
 
       {/* Invoice history — only shown on paid accounts with a Stripe customer */}
@@ -1587,37 +1588,62 @@ function UsageSummary({
   usage,
   cap,
   bonus,
+  resetDate,
 }: {
   usage: UsageData;
   cap: number;
   bonus: number;
+  resetDate?: string | null;
 }) {
   const used = usage.cap.used;
   const total = cap + bonus;
+  const remaining = Math.max(0, total - used);
   const pct = Math.min(100, Math.round((used / Math.max(1, total)) * 100));
+
+  const barColor =
+    pct >= 100
+      ? "var(--color-pink)"
+      : pct >= 80
+        ? "var(--color-amber)"
+        : "var(--color-accent)";
+
   return (
-    <div className="conduit-card p-5">
-      <div className="flex items-baseline justify-between gap-3 mb-2">
+    <div className="conduit-card p-5 space-y-3">
+      <div className="flex items-center justify-between gap-3">
         <span className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
-          Tokens this cycle
+          Usage this cycle
         </span>
-        <span className="text-sm">
-          {used.toLocaleString()} / {total.toLocaleString()}
+        <span
+          className="text-xs font-medium tabular-nums"
+          style={{ color: barColor }}
+        >
+          {pct}%
         </span>
       </div>
-      <div className="h-2 rounded-full bg-[var(--color-border)] overflow-hidden">
-        <div
-          className="h-2 rounded-full transition-all"
-          style={{
-            width: `${pct}%`,
-            background:
-              pct >= 100
-                ? "var(--color-pink)"
-                : pct >= 80
-                  ? "var(--color-amber)"
-                  : "var(--color-accent)",
-          }}
-        />
+
+      <div>
+        <div className="h-2 rounded-full bg-[var(--color-border)] overflow-hidden">
+          <div
+            className="h-2 rounded-full transition-all duration-500"
+            style={{ width: `${pct}%`, background: barColor }}
+          />
+        </div>
+        <div className="mt-1.5 flex items-baseline justify-between text-[11px] text-[var(--color-text-muted)] tabular-nums">
+          <span>{used.toLocaleString()} used</span>
+          <span>{total.toLocaleString()} total</span>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between text-[12px]">
+        <span
+          className="font-medium"
+          style={{ color: remaining === 0 ? "var(--color-pink)" : "var(--color-text)" }}
+        >
+          {remaining.toLocaleString()} tokens remaining
+        </span>
+        {resetDate && (
+          <span className="text-[var(--color-text-muted)]">Resets {resetDate}</span>
+        )}
       </div>
     </div>
   );
