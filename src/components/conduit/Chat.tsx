@@ -192,6 +192,7 @@ export function Chat({
     text: string;
     retryText: string;
   } | null>(null);
+  const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
 
   // Rate-limit countdown: epoch ms when the ban lifts; null = not limited.
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
@@ -513,6 +514,7 @@ export function Chat({
       const trimmed = text.trim();
       if (!trimmed || loading) return;
       setSendError(null);
+      setFollowUpSuggestions([]);
       setLoading(true);
       setInput("");
 
@@ -734,6 +736,30 @@ export function Chat({
               return prev;
             });
           }
+          // Fetch follow-up suggestions after the message stream ends.
+          // Uses the same closure-safe pattern to read the latest content.
+          setMessages((prev: MessageRow[]) => {
+            for (let i = prev.length - 1; i >= 0; i--) {
+              const m: MessageRow = prev[i];
+              if (m.role === "assistant" && m.employee === employee && m.content) {
+                const content = m.content;
+                void fetch("/api/conduit/suggestions", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ employee, lastMessage: content }),
+                })
+                  .then((r) => r.json())
+                  .then((d: { suggestions?: string[] }) => {
+                    if (Array.isArray(d.suggestions) && d.suggestions.length > 0) {
+                      setFollowUpSuggestions(d.suggestions as string[]);
+                    }
+                  })
+                  .catch(() => {});
+                break;
+              }
+            }
+            return prev;
+          });
         } else if (event === "artifact") {
           recordArtifact(
             (data.employee as EmployeeKey) || currentEmployee,
@@ -1109,6 +1135,36 @@ export function Chat({
               }
             />
           ))}
+
+          {/* Follow-up suggestion chips — shown after the latest assistant reply */}
+          {followUpSuggestions.length > 0 && !loading && (
+            <div className="mx-auto px-2 pb-1" style={{ maxWidth: "48rem" }}>
+              <div className="flex flex-wrap gap-2 pt-1">
+                {followUpSuggestions.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => {
+                      setInput(s);
+                      setFollowUpSuggestions([]);
+                      // Focus the composer textarea via query (single textarea in page)
+                      requestAnimationFrame(() => {
+                        (document.querySelector("textarea") as HTMLTextAreaElement | null)?.focus();
+                      });
+                    }}
+                    className="px-3 py-1.5 text-xs rounded-full border transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+                    style={{
+                      borderColor: "var(--color-border)",
+                      background: "var(--color-surface-elevated)",
+                      color: "var(--color-text-muted)",
+                    }}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {sendError && (
             <div
