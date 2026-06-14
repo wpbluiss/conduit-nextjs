@@ -83,6 +83,8 @@ function SignUpForm() {
   const params = useSearchParams();
   const rawTier = params.get("tier");
   const tierIntent = rawTier === "pro" || rawTier === "enterprise" ? rawTier : null;
+  const rawRef = params.get("ref") ?? "";
+  const refCode = /^[A-Z0-9]{8}$/.test(rawRef.toUpperCase()) ? rawRef.toUpperCase() : null;
 
   const [mode, setMode] = useState<"password" | "magic-link">("password");
   const [email, setEmail] = useState("");
@@ -98,6 +100,10 @@ function SignUpForm() {
 
   const billingDest = tierIntent ? `/app/billing?upgrade=${tierIntent}` : null;
 
+  function buildAppDest(base: string): string {
+    return refCode ? `${base}${base.includes("?") ? "&" : "?"}ref=${refCode}` : base;
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -111,11 +117,10 @@ function SignUpForm() {
     track("signup_started", { tier_intent: tierIntent });
     const supabase = createSupabaseBrowserClient();
 
-    // Thread the tier intent through the email-confirmation callback so users
-    // who confirm by email still land on the billing page.
-    const emailRedirectTo = billingDest
-      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(billingDest)}`
-      : `${window.location.origin}/auth/callback`;
+    const appDest = buildAppDest(billingDest ?? "/app/workspace");
+    // Thread the tier intent (and referral code) through the email-confirmation
+    // callback so users who confirm by email still land on the right page.
+    const emailRedirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(appDest)}`;
 
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
@@ -132,7 +137,7 @@ function SignUpForm() {
     }
     if (data.session) {
       track("signup_completed", { tier_intent: tierIntent });
-      router.replace(billingDest ?? "/app/workspace");
+      router.replace(appDest);
       router.refresh();
     } else {
       // Email confirmation required — redirect to the holding page.
@@ -148,7 +153,7 @@ function SignUpForm() {
     setLoading(true);
     track("signup_started", { tier_intent: tierIntent, method: "magic-link" });
     const supabase = createSupabaseBrowserClient();
-    const dest = billingDest ?? "/app/workspace";
+    const dest = buildAppDest(billingDest ?? "/app/workspace");
     const emailRedirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(dest)}`;
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email,

@@ -1767,6 +1767,91 @@ function BillingTab({
       <p className="text-[10px] text-[var(--color-text-muted)]">
         Allowance: {allowance.toLocaleString()} this cycle.
       </p>
+
+      <ReferralSection />
+    </div>
+  );
+}
+
+function ReferralSection() {
+  const [data, setData] = useState<{
+    referral_code: string | null;
+    referral_count: number;
+    total_earned: number;
+  } | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/conduit/referrals")
+      .then((r) => r.json())
+      .then(setData)
+      .catch(() => {});
+  }, []);
+
+  const link =
+    typeof window !== "undefined" && data?.referral_code
+      ? `${window.location.origin}/join/${data.referral_code}`
+      : null;
+
+  async function copyLink() {
+    if (!link) return;
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.prompt("Copy your referral link:", link);
+    }
+  }
+
+  return (
+    <div className="conduit-card p-5 space-y-4">
+      <div>
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
+          Refer & Earn
+        </div>
+        <p className="text-sm text-[var(--color-text-muted)]">
+          Share your link. When a friend signs up,{" "}
+          <strong className="text-[var(--color-text)]">both of you get 50 bonus tokens</strong>.
+        </p>
+      </div>
+
+      {data?.referral_code ? (
+        <div className="flex items-center gap-2">
+          <code className="flex-1 text-xs font-mono bg-[var(--color-surface)] rounded-lg px-3 py-2 text-[var(--color-text)] truncate">
+            {link}
+          </code>
+          <button
+            type="button"
+            onClick={copyLink}
+            className="shrink-0 inline-flex items-center gap-1.5 text-xs rounded-lg px-3 py-2 bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hi)] transition-colors"
+          >
+            {copied ? <Check size={12} /> : <ExternalLink size={12} />}
+            {copied ? "Copied!" : "Copy link"}
+          </button>
+        </div>
+      ) : (
+        <div className="h-8 rounded-lg animate-pulse bg-[var(--color-border)] w-48" />
+      )}
+
+      {data && data.referral_count > 0 && (
+        <div className="flex items-center gap-6 text-sm pt-2 border-t border-[var(--color-border)]">
+          <div>
+            <span className="font-semibold text-[var(--color-text)]">
+              {data.referral_count}
+            </span>
+            <span className="text-[var(--color-text-muted)] ml-1">
+              {data.referral_count === 1 ? "referral" : "referrals"}
+            </span>
+          </div>
+          <div>
+            <span className="font-semibold text-[var(--color-text)]">
+              +{data.total_earned}
+            </span>
+            <span className="text-[var(--color-text-muted)] ml-1">bonus tokens earned</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
