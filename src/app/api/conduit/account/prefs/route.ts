@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
     timezone?: string;
     notify_voice_room_ready?: boolean;
     theme_preference?: "system" | "light" | "dark";
+    display_name?: string;
   };
   try {
     body = await request.json();
@@ -27,6 +28,10 @@ export async function POST(request: NextRequest) {
   }
 
   const update: Record<string, unknown> = {};
+  if (body.display_name !== undefined) {
+    const name = body.display_name.trim().slice(0, 100);
+    update.display_name = name || null;
+  }
   if (body.timezone !== undefined) {
     const tz = body.timezone.trim();
     if (!tz || !TZ_RE.test(tz)) {

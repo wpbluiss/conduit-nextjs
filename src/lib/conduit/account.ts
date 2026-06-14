@@ -39,6 +39,9 @@ export interface ConduitAccount {
   notification_prefs?: { product_updates?: boolean; weekly_digest?: boolean } | null;
   // R21 onboarding checklist — nullable until migration 032 runs.
   onboarding_checklist?: Record<string, boolean> | null;
+  // R22 profile — nullable until migration 033 runs.
+  display_name?: string | null;
+  avatar_url?: string | null;
   created_at: string;
   updated_at: string;
 }
