@@ -40,6 +40,7 @@ export interface MessageRow {
   pending?: boolean;
   artifacts?: { id: string; title: string; type: string; preview?: string }[];
   handoffTo?: EmployeeKey;
+  handoffFrom?: EmployeeKey;
   memories?: { id: string; kind: string; content: string; tags?: string[] }[];
 }
 
@@ -504,7 +505,7 @@ export function Chat({
       let buf = "";
       let currentEmployee: EmployeeKey = placeholderEmp;
 
-      const ensurePendingFor = (employee: EmployeeKey) => {
+      const ensurePendingFor = (employee: EmployeeKey, handoffFrom?: EmployeeKey) => {
         setMessages((prev) => {
           const next = [...prev];
           const last = next[next.length - 1];
@@ -521,6 +522,7 @@ export function Chat({
             employee,
             content: "",
             pending: true,
+            ...(handoffFrom ? { handoffFrom } : {}),
           });
           return next;
         });
@@ -602,8 +604,9 @@ export function Chat({
           ensurePendingFor(employee);
           appendTo(employee, (data.delta as string) || "");
         } else if (event === "handoff") {
+          const from = currentEmployee;
           const to = data.to as EmployeeKey;
-          finishCurrent(currentEmployee);
+          finishCurrent(from);
           setMessages((prev) => [
             ...prev,
             {
@@ -614,7 +617,7 @@ export function Chat({
           ]);
           currentEmployee = to;
           setStreamingEmployee(to);
-          ensurePendingFor(to);
+          ensurePendingFor(to, from);
         } else if (event === "message_end") {
           const employee = (data.employee as EmployeeKey) || currentEmployee;
           finishCurrent(employee);
@@ -1208,13 +1211,29 @@ const MessageBubble = memo(function MessageBubble({
         <EmployeeAvatar employee={employee} size={32} active={message.pending} />
       </div>
       <div className="min-w-0 flex-1 space-y-1">
-        <div className="flex items-baseline gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span
             className="text-[12px] font-medium"
             style={{ color: DEPT_COLOR[employee] }}
           >
             {employeeLabel(employee)}
           </span>
+          {message.handoffFrom && (
+            <motion.span
+              initial={{ opacity: 0, x: -6 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
+              aria-label={`Handed off from ${employeeLabel(message.handoffFrom as EmployeeKey)}`}
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] uppercase tracking-[0.1em]"
+              style={{
+                background: `color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 12%, var(--color-surface-elevated))`,
+                color: DEPT_COLOR[message.handoffFrom as EmployeeKey],
+                border: `1px solid color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 28%, transparent)`,
+              }}
+            >
+              ← {employeeLabel(message.handoffFrom as EmployeeKey)}
+            </motion.span>
+          )}
           {message.pending && (
             <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
               {empty
