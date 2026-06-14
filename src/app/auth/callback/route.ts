@@ -31,6 +31,14 @@ export async function GET(request: Request) {
         }
       }
 
+      // If the user has TOTP enrolled, redirect to MFA challenge before the app.
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aal?.currentLevel === "aal1" && aal?.nextLevel === "aal2") {
+        return NextResponse.redirect(
+          `${origin}/auth/mfa?next=${encodeURIComponent(next)}`,
+        );
+      }
+
       return NextResponse.redirect(`${origin}${next}`);
     }
   }
