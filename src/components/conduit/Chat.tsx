@@ -148,6 +148,57 @@ const SPECIALIST_PROMPTS: Record<EmployeeId, string> = {
   legal: "Review this SaaS contract clause for potential liability risks",
 };
 
+// Three contextual starter prompts shown when a user opens a fresh conversation
+// with a specific pinned specialist. Tapping inserts the text into the input
+// so the user can edit before sending.
+const SPECIALIST_STARTER_PROMPTS: Record<EmployeeId, [string, string, string]> = {
+  jarvis: [
+    "Give me a weekly execution brief",
+    "What should I be focused on this quarter?",
+    "Review my biggest open risks",
+  ],
+  marketing: [
+    "Write a launch email for our new product",
+    "Draft a LinkedIn post announcing our funding",
+    "Build a content calendar for Q3",
+  ],
+  sales: [
+    "Write a cold outreach sequence for SaaS founders",
+    "Help me handle the 'too expensive' objection",
+    "Create a battle card vs. a competitor",
+  ],
+  engineering: [
+    "Design a CRM system for my small business",
+    "Review my tech stack and suggest improvements",
+    "Write a technical spec for a new feature",
+  ],
+  finance: [
+    "Analyze my revenue and suggest cost-saving measures",
+    "Build a 12-month cash flow projection",
+    "Help me set up a budget for a new hire",
+  ],
+  compliance: [
+    "What are my GDPR obligations as a SaaS company?",
+    "Review my privacy policy for gaps",
+    "Walk me through SOC 2 readiness basics",
+  ],
+  hr: [
+    "Draft a job description for a customer success manager",
+    "Write an offer letter for a full-time engineer",
+    "Create an employee onboarding checklist",
+  ],
+  ops: [
+    "Create an SOP for onboarding new clients",
+    "Design a project management workflow for my team",
+    "Write a vendor evaluation scorecard",
+  ],
+  legal: [
+    "Draft a basic NDA for a contractor",
+    "Review this SaaS contract clause for liability risks",
+    "Explain the difference between an employee and a contractor",
+  ],
+};
+
 type PinValue = EmployeeKey | "auto" | "team";
 
 const ALL_PIN_OPTIONS: { value: PinValue; label: string }[] = [
@@ -2266,35 +2317,38 @@ function EmptyState({
             >
               {EMPLOYEES[pin as EmployeeId].tagline}
             </p>
-            <button
-              type="button"
-              onClick={onFocusInput}
-              className="btn-primary !text-sm"
-              style={{
-                marginTop: "var(--space-5)",
-                background: EMPLOYEES[pin as EmployeeId].color,
-                color: "var(--color-surface)",
-              }}
-            >
-              Start a conversation
-            </button>
           </div>
           <div
-            className="grid grid-cols-1 sm:grid-cols-2"
+            className="flex flex-col sm:flex-row flex-wrap"
             style={{
-              marginTop: "var(--space-8)",
-              gap: "var(--space-3)",
+              marginTop: "var(--space-6)",
+              gap: "var(--space-2)",
+              justifyContent: "center",
             }}
           >
-            {suggestions.map((s) => (
-              <PraxisSuggestionTile
-                key={s.text}
-                dept={s.dept}
-                hint={s.hint}
-                prompt={s.text}
-                pin={s.pin}
-                onSelect={(text, p) => onSend(text, p)}
-              />
+            {SPECIALIST_STARTER_PROMPTS[pin as EmployeeId].map((prompt) => (
+              <button
+                key={prompt}
+                type="button"
+                onClick={() => onPromptInsert?.(prompt)}
+                className="px-4 py-2.5 rounded-xl text-sm text-left transition-all"
+                style={{
+                  border: `1px solid color-mix(in srgb, ${EMPLOYEES[pin as EmployeeId].color} 30%, var(--color-border))`,
+                  background: `color-mix(in srgb, ${EMPLOYEES[pin as EmployeeId].color} 6%, var(--color-surface-elevated))`,
+                  color: "var(--color-text)",
+                  cursor: "pointer",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = EMPLOYEES[pin as EmployeeId].color;
+                  (e.currentTarget as HTMLElement).style.background = `color-mix(in srgb, ${EMPLOYEES[pin as EmployeeId].color} 12%, var(--color-surface-elevated))`;
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = `color-mix(in srgb, ${EMPLOYEES[pin as EmployeeId].color} 30%, var(--color-border))`;
+                  (e.currentTarget as HTMLElement).style.background = `color-mix(in srgb, ${EMPLOYEES[pin as EmployeeId].color} 6%, var(--color-surface-elevated))`;
+                }}
+              >
+                {prompt}
+              </button>
             ))}
           </div>
         </>
