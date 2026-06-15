@@ -136,6 +136,9 @@ export default async function AppLayout({
   const checklistDismissed = Boolean(
     (account.onboarding_checklist as Record<string, boolean> | null)?.dismissed,
   );
+  const gsDismissed = Boolean(
+    (account.onboarding_checklist as Record<string, boolean> | null)?.gs_dismissed,
+  );
 
   const initialUser = {
     id: user.id,
@@ -176,6 +179,7 @@ export default async function AppLayout({
           inFlightBuildsInitial={inFlightBuildsInitial}
           avatarUrl={account.avatar_url ?? null}
           displayName={account.display_name ?? null}
+          showGettingStarted={onboarded && isNewAccount && !gsDismissed}
         />
         <main id="app-main" className="conduit-canvas praxis-canvas-tint flex-1 flex flex-col min-w-0 pt-12 md:pt-0">
           <UpgradeNudge

@@ -11,6 +11,12 @@ const VALID_KEYS = new Set([
   "invite_teammate",
   "command_palette",
   "dismissed",
+  // Getting-started sidebar checklist keys
+  "gs_msg",
+  "gs_connector",
+  "gs_template",
+  "gs_invite",
+  "gs_dismissed",
 ]);
 
 export async function GET() {
