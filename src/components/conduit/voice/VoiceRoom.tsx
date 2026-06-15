@@ -280,7 +280,7 @@ export default function VoiceRoom({
     <div
       className="fixed inset-0 z-[60] flex flex-col"
       style={{
-        background: "rgba(11, 11, 15, 0.90)",
+        background: "color-mix(in srgb, var(--cx-canvas) 90%, transparent)",
         backdropFilter: "var(--cx-glass-blur-float, blur(28px) saturate(140%))",
         WebkitBackdropFilter: "var(--cx-glass-blur-float, blur(28px) saturate(140%))",
         color: "var(--cx-text, #F4F4F7)",
