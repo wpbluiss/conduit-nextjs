@@ -717,13 +717,15 @@ body {
 @keyframes whisperWave3 { 0%,100% { height:6px; } 50% { height:14px; } }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-@keyframes presenceFade {
-  0% { opacity: 0; transform: translateY(2px); }
-  20%, 80% { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(0); }
+/* Presence line — fades in once when the specialist starts responding,
+   stays visible until React removes it from the DOM. No looping fade-out
+   so the mono micro-copy reads cleanly throughout the thinking window. */
+@keyframes presenceEnter {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 .presence-line {
-  animation: presenceFade 2.4s ease-in-out infinite;
+  animation: presenceEnter 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes typingDot {
@@ -745,48 +747,96 @@ body {
 
 /* Thinking indicator bubble + status — animated dots handled by framer-motion in TypingIndicator.tsx */
 
-/* Accent shimmer bar across the bottom of the active thinking bubble */
+/* Shimmer: a slim bar that sweeps linearly across the bubble bottom — GPU-cheap (transform only) */
 @keyframes thinkingShimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(300%); }
+  0%   { transform: translateX(-250%); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateX(350%); opacity: 0; }
+}
+
+/* Subtle ambient glow breathe on the thinking bubble (low-alpha, not distracting) */
+@keyframes thinkingBreath {
+  0%, 100% { box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18), var(--cx-glass-highlight, inset 0 1px 0 rgba(255,255,255,0.10)); }
+  50% {
+    box-shadow:
+      0 2px 12px rgba(0, 0, 0, 0.22),
+      0 0 0 1px color-mix(in srgb, var(--dept, var(--cx-accent, #7C6CFF)) 18%, transparent),
+      var(--cx-glass-highlight, inset 0 1px 0 rgba(255,255,255,0.10));
+  }
 }
 
 .thinking-bubble {
   position: relative;
   overflow: hidden;
-  background: color-mix(in srgb, var(--dept, var(--color-accent)) 5%, var(--color-surface-elevated));
+  background: color-mix(in srgb, var(--dept, var(--cx-accent, var(--color-accent))) 5%, var(--cx-surface-raised, var(--color-surface-elevated)));
   border: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08));
-  border-left: 2px solid var(--dept, var(--color-border));
+  border-left: 2px solid var(--dept, var(--cx-accent, var(--color-border)));
   border-radius: 22px 22px 6px 22px;
   box-shadow:
     0 1px 6px rgba(0, 0, 0, 0.18),
     var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
   backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
   -webkit-backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  animation: thinkingBreath 2.8s ease-in-out infinite;
 }
+/* Bottom sweep — the active "thinking" progress shimmer */
 .thinking-bubble::before {
   content: '';
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 40%;
+  width: 35%;
   height: 2px;
   border-radius: 9999px;
-  background: linear-gradient(90deg, transparent, var(--dept, var(--color-accent)), transparent);
-  animation: thinkingShimmer 1.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--dept, var(--cx-accent, var(--color-accent))) 80%, transparent) 50%,
+    transparent 100%
+  );
+  animation: thinkingShimmer 2s linear infinite;
+}
+/* Top hairline — static accent gradient, gives "pane of glass" depth */
+.thinking-bubble::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--dept, var(--cx-accent, var(--color-accent))) 45%, transparent) 50%,
+    transparent 100%
+  );
+  border-radius: 9999px;
+  pointer-events: none;
 }
 
 .thinking-status {
   font-family: var(--font-mono, monospace);
-  font-size: 11px;
-  color: var(--color-text-muted);
+  font-size: var(--cx-type-xs, 11px);
+  color: var(--cx-text-muted, var(--color-text-muted));
   letter-spacing: 0.01em;
+  line-height: 1.4;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .thinking-bubble {
+    animation: none;
+  }
   .thinking-bubble::before {
     animation: none;
     opacity: 0;
+  }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .thinking-bubble {
+    background: var(--cx-surface-raised, var(--color-surface-elevated));
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }
 
