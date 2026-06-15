@@ -629,10 +629,13 @@ body {
 
 .conduit-bubble-user {
   /* Solid accent-tinted surface — clearly "yours", right-aligned */
-  background: color-mix(in srgb, var(--cx-accent, var(--color-accent)) 16%, transparent);
-  border: 1px solid color-mix(in srgb, var(--cx-accent, var(--color-accent)) 35%, transparent);
+  background: color-mix(in srgb, var(--cx-accent, var(--color-accent)) 18%, transparent);
+  /* Stronger border for clear visual distinction from specialist glass */
+  border: 1px solid color-mix(in srgb, var(--cx-accent, var(--color-accent)) 50%, transparent);
   border-radius: var(--cx-radius-md, 12px);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 1px 6px rgba(0, 0, 0, 0.28);
   font-size: var(--cx-type-base, 14px);
   line-height: var(--cx-lh-body, 1.60);
 }
@@ -641,14 +644,13 @@ body {
   background: var(--cx-glass-bg, rgba(255, 255, 255, 0.04));
   backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
   -webkit-backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
-  /* Hairline glass edge on all sides + stronger dept-accent left rail */
+  /* Hairline glass edge on all sides + dept-accent left rail */
   border: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08));
   border-left: 3px solid var(--dept, var(--cx-accent, var(--color-accent)));
   border-radius: var(--cx-radius-md, 12px);
   box-shadow:
     var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10)),
-    0 1px 3px rgba(0, 0, 0, 0.40),
-    0 4px 16px rgba(0, 0, 0, 0.30);
+    var(--cx-glass-shadow, 0 1px 3px rgba(0, 0, 0, 0.40), 0 4px 16px rgba(0, 0, 0, 0.30));
   font-size: var(--cx-type-base, 14px);
   line-height: var(--cx-lh-body, 1.60);
 }
