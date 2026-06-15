@@ -1673,7 +1673,7 @@ function NavLink({
           : "",
       ].join(" ")}
       style={{
-        fontSize: !collapsed && small ? "0.75rem" : "0.8125rem",
+        fontSize: !collapsed && small ? "var(--cx-type-xs)" : "var(--cx-type-sm)",
         background: active
           ? `color-mix(in srgb, var(--color-accent) ${collapsed ? 12 : 10}%, var(--color-surface-elevated))`
           : undefined,

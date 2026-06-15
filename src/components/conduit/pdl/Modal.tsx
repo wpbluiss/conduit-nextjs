@@ -71,9 +71,10 @@ export function Modal({
               <h2
                 id={titleId}
                 style={{
-                  fontFamily: "var(--font-serif, serif)",
-                  fontSize: 20,
-                  lineHeight: 1.2,
+                  fontFamily: "var(--font-sans, system-ui, sans-serif)",
+                  fontSize: "var(--cx-type-lg)",
+                  lineHeight: "var(--cx-lh-heading)",
+                  letterSpacing: "var(--cx-ls-tight)",
                   color: "var(--pdl-text)",
                   margin: 0,
                 }}
@@ -86,9 +87,9 @@ export function Modal({
                 id={descId}
                 style={{
                   marginTop: 4,
-                  fontSize: 13,
+                  fontSize: "var(--cx-type-sm)",
                   color: "var(--pdl-text-muted)",
-                  lineHeight: 1.45,
+                  lineHeight: "var(--cx-lh-body)",
                 }}
               >
                 {description}

@@ -290,7 +290,7 @@ export default async function WorkspaceDashboard() {
             </p>
             <p className="praxis-numeric-display">
               {voiceMinutesToday}
-              <span style={{ fontSize: "1rem", color: "var(--color-text-muted)" }}>
+              <span style={{ fontSize: "var(--cx-type-md)", color: "var(--color-text-muted)" }}>
                 {" "}/ {voiceCapMinutes}
               </span>
             </p>
