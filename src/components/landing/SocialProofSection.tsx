@@ -16,14 +16,14 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 const EASE = [0.25, 1, 0.5, 1] as const;
 
 const INDUSTRIES = [
-  { icon: Code2, label: "Dev-tools" },
-  { icon: ShoppingBag, label: "E-commerce" },
-  { icon: TrendingUp, label: "Fintech" },
-  { icon: Megaphone, label: "Marketing" },
-  { icon: Scale, label: "Legal" },
-  { icon: HeartPulse, label: "Health" },
-  { icon: Building2, label: "B2B SaaS" },
-  { icon: Cpu, label: "AI / ML" },
+  { icon: Code2,       label: "Dev-tools",  color: "var(--color-dept-engineering)" },
+  { icon: ShoppingBag, label: "E-commerce", color: "var(--color-dept-sales)" },
+  { icon: TrendingUp,  label: "Fintech",    color: "var(--color-dept-finance)" },
+  { icon: Megaphone,   label: "Marketing",  color: "var(--color-dept-marketing)" },
+  { icon: Scale,       label: "Legal",      color: "var(--color-dept-legal)" },
+  { icon: HeartPulse,  label: "Health",     color: "var(--color-dept-hr)" },
+  { icon: Building2,   label: "B2B SaaS",   color: "var(--color-dept-ops)" },
+  { icon: Cpu,         label: "AI / ML",    color: "var(--color-dept-compliance)" },
 ] as const;
 
 const TESTIMONIALS = [
@@ -59,11 +59,13 @@ const TESTIMONIALS = [
 function IndustryChip({
   icon: Icon,
   label,
+  color,
   index,
   reduced,
 }: {
   icon: (typeof INDUSTRIES)[number]["icon"];
   label: string;
+  color: string;
   index: number;
   reduced: boolean;
 }) {
@@ -85,9 +87,9 @@ function IndustryChip({
         style={{
           width: 48,
           height: 48,
-          background: "var(--color-bg-surface-subtle)",
-          border: "1px solid var(--color-edge-subtle)",
-          color: "var(--color-dept-ops)",
+          background: `color-mix(in srgb, ${color} 10%, var(--color-bg-surface-subtle))`,
+          border: `1px solid color-mix(in srgb, ${color} 22%, var(--color-edge-subtle))`,
+          color,
         }}
         aria-hidden
       >
@@ -125,7 +127,7 @@ function TestimonialCard({
       }}
       className="conduit-card flex flex-col gap-4 p-6"
     >
-      {/* Quote mark */}
+      {/* Quote mark — tinted with the testimonial's dept color for visual identity */}
       <svg
         width="20"
         height="16"
@@ -136,8 +138,8 @@ function TestimonialCard({
         <path
           d="M0 16V9.6C0 4.267 2.667 1.067 8 0l1.067 1.867C6.4 2.667 4.933 4.4 4.8 7.2H8V16H0Zm12 0V9.6C12 4.267 14.667 1.067 20 0l1.067 1.867C18.4 2.667 16.933 4.4 16.8 7.2H20V16H12Z"
           fill="currentColor"
-          style={{ color: "var(--color-dept-ops)" }}
-          opacity={0.5}
+          style={{ color }}
+          opacity={0.45}
         />
       </svg>
 
@@ -216,6 +218,7 @@ export default function SocialProofSection() {
               <IndustryChip
                 icon={ind.icon}
                 label={ind.label}
+                color={ind.color}
                 index={i}
                 reduced={reduced}
               />
