@@ -12,7 +12,7 @@ import * as React from "react";
 import { useUser } from "@/context/UserContext";
 import { useRouter } from "next/navigation";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import {
   Sparkles, Code2, TrendingUp, Megaphone, DollarSign, Wrench, ShieldCheck,
   Users, Scale, SquarePen, Menu, ArrowUp, Paperclip, Search, Settings,
@@ -44,6 +44,44 @@ const DOC_TYPES = new Set(["post", "doc", "brief", "proposal", "report", "letter
 function extFor(type: string) { return type === "migration" || type === "sql" ? "sql" : type === "code" || type === "build" ? "ts" : "md"; }
 function slugify(s: string) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "artifact"; }
 function escapeHtml(s: string) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+// cx-reward token value (#34D399) used only for ephemeral animation keyframes
+const CX_REWARD_RING = "rgba(52,211,153,0.4)";
+const CX_REWARD_RING_FADE = "rgba(52,211,153,0)";
+
+function SpecialistChip({ icon: I, complete, reducedMotion }: {
+  icon: React.ComponentType<{ className?: string }>;
+  complete: boolean;
+  reducedMotion: boolean;
+}) {
+  const controls = useAnimation();
+  // Pre-initialize to true for messages already complete on mount (loaded from history)
+  const firedRef = React.useRef(complete);
+
+  React.useEffect(() => {
+    if (complete && !firedRef.current && !reducedMotion) {
+      firedRef.current = true;
+      controls.start({
+        scale: [1, 1.18, 0.95, 1],
+        boxShadow: [
+          `0 0 0 0px ${CX_REWARD_RING_FADE}`,
+          `0 0 0 5px ${CX_REWARD_RING}`,
+          `0 0 0 0px ${CX_REWARD_RING_FADE}`,
+        ],
+      }, { duration: 0.38, ease: [0.22, 1, 0.36, 1] });
+    }
+  }, [complete, reducedMotion, controls]);
+
+  return (
+    <motion.span
+      animate={controls}
+      className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-secondary text-primary"
+      style={{ willChange: "transform, box-shadow" }}
+    >
+      <I className="size-4" />
+    </motion.span>
+  );
+}
 
 export type LiveMsg = {
   id?: string;
@@ -481,7 +519,7 @@ export function LiveChat({
               const e = (m.employee as EmployeeId) ?? "jarvis"; const I = ICON[e] ?? Sparkles; const k = m.id ?? String(i);
               return (
                 <motion.div key={m.id ?? i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 28 }} className="group flex gap-3">
-                  <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-secondary text-primary"><I className="size-4" /></span>
+                  <SpecialistChip icon={I} complete={!m.pending} reducedMotion={reducedMotion} />
                   <div className="min-w-0 flex-1">
                     <p className="mb-1 text-sm font-semibold">{EMPLOYEES[e]?.name ?? "Atlas"}</p>
                     {m.pending && !m.content ? (
