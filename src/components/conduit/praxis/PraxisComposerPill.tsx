@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useAnimate } from "framer-motion";
 import { Mic, Mic2, MicOff, Send, Square } from "lucide-react";
 import { Button } from "@/components/conduit/ui/Button";
 import { EMPLOYEE_ORDER, EMPLOYEES, type EmployeeId } from "@/lib/conduit/employees";
@@ -99,6 +100,7 @@ export function PraxisComposerPill({
   const tint = useDeptTint();
   const composerRef = useRef<HTMLFormElement>(null);
   const { labelFor } = useNicknames();
+  const [sendScope, sendAnimate] = useAnimate();
 
   const CHAR_LIMIT = 4000;
   const COUNTER_THRESHOLD = 200;
@@ -177,7 +179,18 @@ export function PraxisComposerPill({
       ref={composerRef}
       onSubmit={(e) => {
         e.preventDefault();
-        if (!mentionOpen) onSubmit();
+        if (!mentionOpen) {
+          // Spring bounce on send — fire concurrently with the submit so
+          // keyboard (Cmd+Enter) users get the same tactile feedback as mouse.
+          if (sendScope.current) {
+            void sendAnimate(
+              sendScope.current,
+              { scale: [1, 0.82, 1.1, 0.97, 1] },
+              { duration: 0.38, ease: [0.22, 1, 0.36, 1] },
+            );
+          }
+          onSubmit();
+        }
       }}
       className="praxis-composer-pill"
       data-dept={composerDept}
@@ -775,16 +788,18 @@ export function PraxisComposerPill({
         </span>
       )}
 
-      <Button
-        type="submit"
-        variant="primary"
-        size="icon"
-        isDisabled={loading || !value.trim()}
-        isLoading={loading}
-        aria-label="Send"
-      >
-        <Send size={16} />
-      </Button>
+      <span ref={sendScope} style={{ display: "inline-flex", flexShrink: 0 }}>
+        <Button
+          type="submit"
+          variant="primary"
+          size="icon"
+          isDisabled={loading || !value.trim()}
+          isLoading={loading}
+          aria-label="Send"
+        >
+          <Send size={16} />
+        </Button>
+      </span>
     </form>
   );
 }
