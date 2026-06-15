@@ -212,6 +212,7 @@ export function Chat({
   const [sendError, setSendError] = useState<{
     text: string;
     retryText: string;
+    capacity?: boolean;
   } | null>(null);
   const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
 
@@ -1170,6 +1171,7 @@ export function Chat({
           setSendError({
             text: (data.message as string) || "Try again in a moment.",
             retryText: trimmed,
+            capacity: Boolean(data.capacity),
           });
         }
       };
@@ -1562,15 +1564,22 @@ export function Chat({
           {sendError && (
             <div
               className="conduit-card flex items-start gap-3 p-4"
-              style={{
-                borderColor: "rgba(248, 113, 113, 0.25)",
-                background: "rgba(248, 113, 113, 0.06)",
-              }}
+              style={
+                sendError.capacity
+                  ? {
+                      borderColor: "rgba(202, 138, 4, 0.25)",
+                      background: "rgba(202, 138, 4, 0.06)",
+                    }
+                  : {
+                      borderColor: "rgba(248, 113, 113, 0.25)",
+                      background: "rgba(248, 113, 113, 0.06)",
+                    }
+              }
             >
               <AlertCircle
                 size={16}
                 className="shrink-0 mt-0.5"
-                style={{ color: "#f87171" }}
+                style={{ color: sendError.capacity ? "#ca8a04" : "#f87171" }}
               />
               <p
                 className="flex-1 text-sm leading-relaxed"

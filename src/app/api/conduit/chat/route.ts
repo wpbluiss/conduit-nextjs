@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   getOrCreateAccount,
@@ -9,6 +10,7 @@ import {
   type ChatMessage,
   type EmployeeKey,
   friendlyErrorFor,
+  isCapacityError,
   maxTokensFor,
   streamComplete,
 } from "@/lib/ai/provider";
@@ -736,9 +738,18 @@ export async function POST(request: NextRequest) {
             }
           }
         } catch (err) {
-          console.error(`[${employee}] stream error`, err);
           ttsTurn?.cancel();
-          send("error", { employee, message: friendlyErrorFor(employee) });
+          if (isCapacityError(err)) {
+            send("error", {
+              employee,
+              message: "Your specialists are at capacity right now — try again in a moment.",
+              capacity: true,
+            });
+          } else {
+            console.error(`[${employee}] stream error`, err);
+            Sentry.captureException(err, { extra: { employee, accountId } });
+            send("error", { employee, message: friendlyErrorFor(employee) });
+          }
           return { ok: false };
         }
 
@@ -1133,10 +1144,15 @@ export async function POST(request: NextRequest) {
                 content,
               });
             } catch (err) {
-              console.error(`[round_table:${emp}]`, err);
+              if (!isCapacityError(err)) {
+                console.error(`[round_table:${emp}]`, err);
+                Sentry.captureException(err, { extra: { employee: emp, accountId } });
+              }
               send("round_table_response", {
                 employee: emp,
-                content: friendlyErrorFor(emp),
+                content: isCapacityError(err)
+                  ? "At capacity right now — try again in a moment."
+                  : friendlyErrorFor(emp),
                 errored: true,
               });
             }
@@ -1215,9 +1231,14 @@ export async function POST(request: NextRequest) {
 
           send("round_table_synthesis", { content: synthContent });
         } catch (err) {
-          console.error("round_table_synthesis", err);
+          if (!isCapacityError(err)) {
+            console.error("round_table_synthesis", err);
+            Sentry.captureException(err, { extra: { accountId } });
+          }
           send("round_table_synthesis", {
-            content: friendlyErrorFor("jarvis"),
+            content: isCapacityError(err)
+              ? "Your specialists are at capacity right now — try again in a moment."
+              : friendlyErrorFor("jarvis"),
             errored: true,
           });
         }
@@ -1325,8 +1346,16 @@ export async function POST(request: NextRequest) {
         send("done", { conversation_id: finalConvId });
         controller.close();
       } catch (err) {
-        console.error("chat fatal", err);
-        send("error", { message: friendlyErrorFor(initialEmployee) });
+        if (isCapacityError(err)) {
+          send("error", {
+            message: "Your specialists are at capacity right now — try again in a moment.",
+            capacity: true,
+          });
+        } else {
+          console.error("chat fatal", err);
+          Sentry.captureException(err, { extra: { accountId, conversationId: finalConvId } });
+          send("error", { message: friendlyErrorFor(initialEmployee) });
+        }
         controller.close();
       }
     },
