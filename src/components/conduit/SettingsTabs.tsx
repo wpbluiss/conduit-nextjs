@@ -3036,10 +3036,7 @@ function IntegrationsTab() {
   const [slackChannels, setSlackChannels] = useState<SlackChannel[] | null>(null);
   const [selectedChannel, setSelectedChannel] = useState<string>("");
   const [savingChannel, setSavingChannel] = useState(false);
-  // GitHub PAT connector state
-  const [githubPat, setGithubPat] = useState("");
-  const [githubRepos, setGithubRepos] = useState("");
-  const [githubSaving, setGithubSaving] = useState(false);
+  // GitHub OAuth connector state
   const [githubConnectedMeta, setGithubConnectedMeta] = useState<{ login: string; repos: string[]; last_fetched_at: string | null } | null>(null);
   // Google Drive connector state
   const [driveSelectedFiles, setDriveSelectedFiles] = useState<GoogleDriveFileInfo[]>([]);
@@ -3096,6 +3093,7 @@ function IntegrationsTab() {
         google_calendar: "Google Calendar",
         slack: "Slack",
         hubspot: "HubSpot",
+        github: "GitHub",
         google_drive: "Google Drive",
       };
       toast.success(`${labels[connected] ?? connected} connected.`);
@@ -3121,6 +3119,10 @@ function IntegrationsTab() {
         google_drive_csrf: "OAuth state mismatch — please try again.",
         google_drive_exchange: "Failed to exchange Google Drive auth code.",
         google_drive_db: "Failed to save Google Drive connection.",
+        github_denied: "GitHub access was denied.",
+        github_csrf: "OAuth state mismatch — please try again.",
+        github_exchange: "Failed to exchange GitHub auth code.",
+        github_db: "Failed to save GitHub connection.",
       };
       toast.error(msgs[error] ?? "Connection failed.");
       router.replace("/app/settings?tab=integrations");
@@ -3160,35 +3162,6 @@ function IntegrationsTab() {
       }
     } finally {
       setSavingChannel(false);
-    }
-  };
-
-  const connectGithub = async () => {
-    if (!githubPat.trim()) return;
-    setGithubSaving(true);
-    try {
-      const repos = githubRepos
-        .split(/[\n,]+/)
-        .map((r) => r.trim())
-        .filter(Boolean)
-        .slice(0, 5);
-      const res = await fetch("/api/conduit/connectors/github", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pat: githubPat.trim(), repos }),
-      });
-      const json = await res.json() as { error?: string; login?: string; repos?: string[] };
-      if (!res.ok) {
-        if (json.error === "invalid_pat") toast.error("Invalid GitHub token — check permissions and try again.");
-        else toast.error("Failed to connect GitHub.");
-      } else {
-        toast.success("GitHub connected.");
-        setGithubPat("");
-        setGithubRepos("");
-        fetchStatus();
-      }
-    } finally {
-      setGithubSaving(false);
     }
   };
 
@@ -3294,7 +3267,7 @@ function IntegrationsTab() {
         : provider === "hubspot"
           ? status?.available.hubspot ?? false
           : provider === "github"
-            ? status?.available.github ?? true
+            ? status?.available.github ?? false
             : provider === "google_drive"
               ? status?.available.google_drive ?? false
               : false;
@@ -3898,63 +3871,31 @@ function IntegrationsTab() {
               {disconnecting === "github" ? "Disconnecting…" : "Disconnect"}
             </button>
           </div>
+        ) : isAvailable("github") ? (
+          <a
+            href="/api/conduit/connectors/github/auth"
+            className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
+            style={{
+              background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
+              border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+              color: "var(--color-accent)",
+            }}
+          >
+            <Link size={12} />
+            Connect GitHub
+          </a>
         ) : (
-          <div className="space-y-3">
-            <div>
-              <label className="block text-[11px] text-[var(--color-text-muted)] mb-1.5">
-                GitHub Personal Access Token
-                <span className="ml-1 opacity-70">(classic, <code className="text-[10px]">repo</code> scope)</span>
-              </label>
-              <input
-                type="password"
-                value={githubPat}
-                onChange={(e) => setGithubPat(e.target.value)}
-                placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-                className="w-full px-3 py-2 rounded-lg text-xs font-mono"
-                style={{
-                  background: "var(--color-surface)",
-                  border: "1px solid var(--color-border)",
-                  color: "var(--color-text)",
-                  outline: "none",
-                }}
-              />
-            </div>
-            <div>
-              <label className="block text-[11px] text-[var(--color-text-muted)] mb-1.5">
-                Repos to watch <span className="opacity-70">(up to 5, one per line or comma-separated, format: owner/repo)</span>
-              </label>
-              <textarea
-                value={githubRepos}
-                onChange={(e) => setGithubRepos(e.target.value)}
-                placeholder={"acme/backend\nacme/frontend"}
-                rows={3}
-                className="w-full px-3 py-2 rounded-lg text-xs font-mono resize-none"
-                style={{
-                  background: "var(--color-surface)",
-                  border: "1px solid var(--color-border)",
-                  color: "var(--color-text)",
-                  outline: "none",
-                }}
-              />
-            </div>
-            <button
-              onClick={connectGithub}
-              disabled={githubSaving || !githubPat.trim()}
-              className="w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 disabled:opacity-40"
-              style={{
-                background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
-                border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
-                color: "var(--color-accent)",
-              }}
-            >
-              <Link size={12} />
-              {githubSaving ? "Connecting…" : "Connect GitHub"}
-            </button>
-            <p className="text-[10px] text-[var(--color-text-muted)]">
-              Create a token at github.com/settings/tokens. Only read access is
-              used — Praxis never writes to your repositories.
-            </p>
-          </div>
+          <button
+            disabled
+            className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
+            style={{
+              background: "var(--color-surface-elevated)",
+              border: "1px solid var(--color-border)",
+              color: "var(--color-text-muted)",
+            }}
+          >
+            Not configured
+          </button>
         )}
       </div>
 
