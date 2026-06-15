@@ -2136,24 +2136,50 @@ function EmptyState({
   );
 }
 
+function stripMarkdown(md: string): string {
+  return md
+    .replace(/```[^\n]*\n?([\s\S]*?)```/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\*{3}(.+?)\*{3}/g, "$1")
+    .replace(/_{3}(.+?)_{3}/g, "$1")
+    .replace(/\*{2}(.+?)\*{2}/g, "$1")
+    .replace(/_{2}(.+?)_{2}/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
+    .replace(/~~(.+?)~~/g, "$1")
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/^>\s*/gm, "")
+    .replace(/^[-*_]{3,}\s*$/gm, "")
+    .replace(/^[ \t]*[-*+]\s+/gm, "")
+    .replace(/^[ \t]*\d+\.\s+/gm, "")
+    .replace(/^\|(.+)\|$/gm, (_, inner: string) =>
+      inner.split("|").map((c) => c.trim()).filter(Boolean).join("  ")
+    )
+    .replace(/^\|[-|\s:]+\|$/gm, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function CopyButton({ content }: { content: string }) {
   const [copied, setCopied] = useState(false);
   const toast = useToast();
 
   const handleCopy = useCallback(async () => {
+    const plain = stripMarkdown(content);
     const succeed = () => {
       setCopied(true);
       toast.success("Copied!");
       setTimeout(() => setCopied(false), 1500);
     };
     try {
-      await navigator.clipboard.writeText(content);
+      await navigator.clipboard.writeText(plain);
       succeed();
     } catch {
       // execCommand fallback for older browsers / non-HTTPS contexts
       try {
         const ta = document.createElement("textarea");
-        ta.value = content;
+        ta.value = plain;
         ta.style.cssText = "position:fixed;opacity:0;pointer-events:none";
         document.body.appendChild(ta);
         ta.select();
