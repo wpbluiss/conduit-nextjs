@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MessageSquarePlus, Search, X } from "lucide-react";
@@ -62,14 +62,18 @@ export function ConversationSearchBar() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialQ = searchParams.get("q") ?? "";
+  const listboxId = useId();
 
   const [query, setQuery] = useState(initialQ);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
-  const [focused, setFocused] = useState(false);
+  // Start open when seeded from URL so results appear immediately
+  const [focused, setFocused] = useState(initialQ.length >= 2);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const search = useCallback(async (q: string) => {
     if (q.length < 2) {
@@ -106,6 +110,7 @@ export function ConversationSearchBar() {
       setResults([]);
       setLoading(false);
       setSearched(false);
+      setActiveIndex(-1);
       // Clear ?q= param
       const params = new URLSearchParams(window.location.search);
       params.delete("q");
@@ -114,6 +119,7 @@ export function ConversationSearchBar() {
       return;
     }
     setLoading(true);
+    setActiveIndex(-1);
     debounceRef.current = setTimeout(() => {
       void search(query);
       // Persist ?q= in URL
@@ -130,13 +136,55 @@ export function ConversationSearchBar() {
     setQuery("");
     setResults([]);
     setSearched(false);
+    setActiveIndex(-1);
     inputRef.current?.focus();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      setQuery("");
+      setResults([]);
+      setSearched(false);
+      setActiveIndex(-1);
+      setFocused(false);
+      inputRef.current?.blur();
+      const params = new URLSearchParams(window.location.search);
+      params.delete("q");
+      const newUrl = params.toString() ? `?${params}` : window.location.pathname;
+      router.replace(newUrl, { scroll: false });
+      return;
+    }
+    if (!showResults) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((i) => Math.min(i + 1, results.length - 1));
+      return;
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((i) => Math.max(i - 1, -1));
+      return;
+    }
+    if (e.key === "Enter" && activeIndex >= 0 && results[activeIndex]) {
+      e.preventDefault();
+      router.push(`/app?c=${results[activeIndex].conversation_id}`);
+      setFocused(false);
+      return;
+    }
+  };
+
+  // Hide results only when focus leaves the entire component (not when tabbing between input and results)
+  const handleContainerBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+    if (containerRef.current && !containerRef.current.contains(e.relatedTarget as Node | null)) {
+      setTimeout(() => setFocused(false), 50);
+    }
   };
 
   const showResults = focused && query.length >= 2;
 
   return (
-    <div className="relative w-full max-w-xl mb-6">
+    <div ref={containerRef} className="relative w-full max-w-xl mb-6" onBlur={handleContainerBlur}>
       {/* Input */}
       <div
         className="flex items-center gap-2 px-3 py-2 rounded-xl conduit-card transition-colors"
@@ -152,10 +200,15 @@ export function ConversationSearchBar() {
         <input
           ref={inputRef}
           type="search"
+          role="combobox"
+          aria-expanded={showResults}
+          aria-controls={listboxId}
+          aria-autocomplete="list"
+          aria-activedescendant={activeIndex >= 0 ? `search-result-${activeIndex}` : undefined}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setFocused(true)}
-          onBlur={() => setTimeout(() => setFocused(false), 150)}
+          onKeyDown={handleKeyDown}
           placeholder="Search conversations…"
           aria-label="Search conversations"
           autoComplete="off"
@@ -183,6 +236,9 @@ export function ConversationSearchBar() {
       {/* Results dropdown */}
       {showResults && (
         <div
+          id={listboxId}
+          role="listbox"
+          aria-label="Search results"
           className="absolute left-0 right-0 top-full mt-1 z-20 rounded-xl overflow-hidden conduit-card py-1"
           style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}
         >
@@ -201,18 +257,30 @@ export function ConversationSearchBar() {
               </Link>
             </div>
           )}
-          {results.map((r) => {
+          {results.map((r, idx) => {
             const dom = r.dominant_employee as string | null;
             const isTeam = dom === "team";
             const empKey = (dom && TEAM.has(dom) ? dom : "jarvis") as EmployeeKey;
             const RecentIcon = EMPLOYEE_ICON[empKey];
             const color = DEPT_COLOR[empKey];
+            const isActive = idx === activeIndex;
 
             return (
               <Link
                 key={r.conversation_id}
+                id={`search-result-${idx}`}
+                role="option"
+                aria-selected={isActive}
                 href={`/app?c=${r.conversation_id}`}
-                className="flex items-start gap-3 px-4 py-3 hover:bg-[color-mix(in_srgb,var(--color-accent)_6%,transparent)] transition-colors"
+                onClick={() => setFocused(false)}
+                className="flex items-start gap-3 px-4 py-3 transition-colors"
+                style={{
+                  background: isActive
+                    ? "color-mix(in srgb, var(--color-accent) 10%, transparent)"
+                    : undefined,
+                }}
+                onMouseEnter={() => setActiveIndex(idx)}
+                onMouseLeave={() => setActiveIndex(-1)}
               >
                 {isTeam ? (
                   <span
