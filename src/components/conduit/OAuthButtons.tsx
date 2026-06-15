@@ -110,7 +110,7 @@ export function OAuthButtons({ redirectTo = "/app/workspace" }: { redirectTo?: s
           style={{ background: "rgba(255,255,255,0.08)" }}
         />
         <span
-          className="text-[11px] uppercase tracking-[0.16em] shrink-0"
+          className="cx-type-xs uppercase tracking-[0.16em] shrink-0"
           style={{ color: "var(--color-ink-on-inverse-mute)" }}
         >
           or

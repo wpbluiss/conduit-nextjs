@@ -233,7 +233,7 @@ export default async function WorkspaceDashboard() {
                 marginTop: "var(--space-2)",
                 textTransform: "none",
                 letterSpacing: 0,
-                fontSize: "11px",
+                fontSize: "var(--cx-type-xs)",
                 color: "var(--color-text-muted)",
                 whiteSpace: "nowrap",
                 overflow: "hidden",

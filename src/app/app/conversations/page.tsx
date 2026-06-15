@@ -210,16 +210,16 @@ export default async function ConversationsPage({
               className="w-14 h-14 rounded-2xl flex items-center justify-center"
               style={{
                 background: "var(--cx-accent-tint)",
-                border: "1px solid rgba(124,108,255,0.20)",
+                border: "1px solid color-mix(in srgb, var(--cx-accent) 20%, transparent)",
               }}
             >
               <MessageSquare size={24} style={{ color: "var(--color-accent)" }} />
             </div>
             <div>
-              <p className="text-[15px] font-semibold text-[var(--color-text)] mb-1">
+              <p className="text-sm font-semibold text-[var(--color-text)] mb-1">
                 {activeLabelId ? "No conversations with this label" : "No conversations yet"}
               </p>
-              <p className="text-[13px] text-[var(--color-text-muted)] leading-relaxed">
+              <p className="cx-type-sm text-[var(--color-text-muted)] leading-relaxed">
                 {activeLabelId
                   ? "Try a different label filter or start a new conversation."
                   : "Ask Atlas anything — strategy, execution, or hand it to a specialist. Every exchange lives here."}
@@ -245,7 +245,7 @@ export default async function ConversationsPage({
                     className="text-[var(--color-amber)]"
                     style={{ fill: "currentColor" }}
                   />
-                  <span className="text-[11px] uppercase tracking-[0.12em] font-medium text-[var(--color-text-muted)]">
+                  <span className="cx-type-xs uppercase tracking-[0.12em] font-medium text-[var(--color-text-muted)]">
                     Pinned · {pinned.length}/{MAX_PINNED}
                   </span>
                 </div>
@@ -262,7 +262,7 @@ export default async function ConversationsPage({
               <div>
                 {pinned.length > 0 && (
                   <div className="mb-2">
-                    <span className="text-[11px] uppercase tracking-[0.12em] font-medium text-[var(--color-text-muted)]">
+                    <span className="cx-type-xs uppercase tracking-[0.12em] font-medium text-[var(--color-text-muted)]">
                       Recent
                     </span>
                   </div>

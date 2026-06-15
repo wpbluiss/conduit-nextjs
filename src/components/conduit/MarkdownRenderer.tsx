@@ -150,7 +150,7 @@ function CopyButton({ text, alwaysVisible }: { text: string; alwaysVisible?: boo
       aria-label={copied ? "Copied!" : "Copy code"}
       title={copied ? "Copied!" : "Copy code"}
       className={[
-        "flex items-center gap-1.5 px-2 py-1 rounded text-[11px] transition-all duration-150",
+        "flex items-center gap-1.5 px-2 py-1 rounded cx-type-xs transition-all duration-150",
         alwaysVisible || copied
           ? "opacity-100"
           : "opacity-0 group-hover:opacity-100 focus:opacity-100",
@@ -208,7 +208,7 @@ function HighlightedCodeBlock({
         }}
       >
         <span
-          className="text-[11px] uppercase tracking-[0.15em]"
+          className="cx-type-xs uppercase tracking-[0.15em]"
           style={{ fontFamily: "var(--font-mono, monospace)", color: "var(--cx-text-faint, #6B6B7B)" }}
         >
           {lang || "code"}
@@ -219,7 +219,7 @@ function HighlightedCodeBlock({
 
       {/* Code body */}
       <pre
-        className="overflow-x-auto px-4 py-3 text-[13px] leading-[1.7]"
+        className="overflow-x-auto px-4 py-3 cx-type-sm leading-[1.7]"
         style={{ fontFamily: "var(--font-mono, monospace)", margin: 0 }}
       >
         <code>

@@ -160,7 +160,7 @@ export default function PraxisLiveRoom({
           {ids.map((id) => { const I = ICON[id] ?? Sparkles; const on = id === activeSpeaker; return (
             <div key={id} className="flex flex-col items-center gap-1">
               <span className={`grid size-12 place-items-center rounded-full bg-secondary text-primary transition-all ${on ? "scale-110 ring-2 ring-primary wm-glow" : "border border-white/10 opacity-50"}`}><I className="size-5" /></span>
-              <span className="text-[11px] text-muted-foreground">{EMPLOYEES[id].name}</span>
+              <span className="cx-type-xs text-muted-foreground">{EMPLOYEES[id].name}</span>
             </div>
           ); })}
         </div>

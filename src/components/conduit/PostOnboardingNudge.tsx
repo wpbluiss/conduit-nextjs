@@ -53,7 +53,7 @@ export function PostOnboardingNudge() {
         <X size={14} />
       </button>
 
-      <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
+      <p className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
         You&apos;re all set
       </p>
       <p className="text-sm font-medium mb-3 pr-4">

@@ -51,13 +51,13 @@ export function PinnedMessagesBanner({ pins, onUnpin, onJumpTo }: Props) {
             style={{ color: "var(--color-accent)", flexShrink: 0 }}
           />
           <span
-            className="text-[11px] font-semibold uppercase tracking-[0.12em]"
+            className="cx-type-xs font-semibold uppercase tracking-[0.12em]"
             style={{ color: "var(--color-text-muted)" }}
           >
             Pinned
           </span>
           <span
-            className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold"
+            className="inline-flex items-center justify-center w-4 h-4 rounded-full cx-type-xs font-bold"
             style={{
               background: "var(--color-accent)",
               color: "#fff",
@@ -89,7 +89,7 @@ export function PinnedMessagesBanner({ pins, onUnpin, onJumpTo }: Props) {
               style={{ borderColor: "var(--color-border)" }}
             >
               <p
-                className="flex-1 text-[13px] leading-snug truncate"
+                className="flex-1 cx-type-sm leading-snug truncate"
                 style={{ color: "var(--color-text)" }}
                 title={pin.content}
               >
@@ -101,7 +101,7 @@ export function PinnedMessagesBanner({ pins, onUnpin, onJumpTo }: Props) {
                   onClick={() => onJumpTo(pin.message_id)}
                   aria-label="Jump to message"
                   title="Jump to message"
-                  className="text-[11px] px-2 py-0.5 rounded transition-colors"
+                  className="cx-type-xs px-2 py-0.5 rounded transition-colors"
                   style={{
                     color: "var(--color-accent)",
                     border: "1px solid var(--color-border)",

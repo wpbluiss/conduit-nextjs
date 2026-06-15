@@ -598,20 +598,44 @@ body {
 }
 
 .conduit-bubble-user {
-  background: color-mix(in srgb, var(--color-accent) 11%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
-  border-radius: 22px 22px 22px 6px;
-  box-shadow: 0 2px 12px color-mix(in srgb, var(--color-accent) 12%, transparent);
-  font-size: 14px;
-  line-height: 1.7;
+  /* Solid accent-tinted surface — clearly "yours", right-aligned */
+  background: color-mix(in srgb, var(--cx-accent, var(--color-accent)) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cx-accent, var(--color-accent)) 35%, transparent);
+  border-radius: var(--cx-radius-md, 12px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+  font-size: var(--cx-type-base, 14px);
+  line-height: var(--cx-lh-body, 1.60);
 }
 .conduit-bubble-assistant {
-  background: color-mix(in srgb, var(--dept, var(--color-accent)) 4%, var(--color-surface-elevated));
-  border-left: 2px solid var(--dept, var(--color-border));
-  border-radius: 22px 22px 6px 22px;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
-  font-size: 14px;
-  line-height: 1.75;
+  /* Glass surface — frosted pane over the dark canvas */
+  background: var(--cx-glass-bg, rgba(255, 255, 255, 0.04));
+  backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  -webkit-backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  /* Hairline glass edge on all sides + stronger dept-accent left rail */
+  border: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08));
+  border-left: 3px solid var(--dept, var(--cx-accent, var(--color-accent)));
+  border-radius: var(--cx-radius-md, 12px);
+  box-shadow:
+    var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10)),
+    0 1px 3px rgba(0, 0, 0, 0.40),
+    0 4px 16px rgba(0, 0, 0, 0.30);
+  font-size: var(--cx-type-base, 14px);
+  line-height: var(--cx-lh-body, 1.60);
+}
+/* Opaque fallback when backdrop-filter is unsupported */
+@supports not (backdrop-filter: blur(1px)) {
+  .conduit-bubble-assistant {
+    background: var(--cx-surface-raised, #1C1C26);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .conduit-bubble-assistant {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--cx-surface-raised, #1C1C26);
+  }
 }
 
 .conduit-suggestion {
@@ -689,30 +713,17 @@ body {
   .typing-dot { animation: none; opacity: 0.7; }
 }
 
-/* Premium thinking indicator — issue #802 */
-@keyframes thinkingPulse {
-  0%, 100% {
-    opacity: 0.25;
-    transform: scale(0.85);
-    box-shadow: 0 0 0 0 transparent;
-  }
-  40% {
-    opacity: 1;
-    transform: scale(1);
-    box-shadow: 0 0 6px 2px color-mix(in srgb, var(--dept, var(--color-accent)) 40%, transparent);
-  }
+/* Thinking indicator bubble + status — animated dots handled by framer-motion in TypingIndicator.tsx */
+
+/* Accent shimmer bar across the bottom of the active thinking bubble */
+@keyframes thinkingShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
 }
-.thinking-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 9999px;
-  background: var(--dept, var(--color-accent));
-  animation: thinkingPulse 1.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-}
-.thinking-dot:nth-child(2) { animation-delay: 200ms; }
-.thinking-dot:nth-child(3) { animation-delay: 400ms; }
 
 .thinking-bubble {
+  position: relative;
+  overflow: hidden;
   background: color-mix(in srgb, var(--dept, var(--color-accent)) 5%, var(--color-surface-elevated));
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-left: 2px solid var(--dept, var(--color-border));
@@ -723,6 +734,17 @@ body {
   backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
   -webkit-backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
 }
+.thinking-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  height: 2px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, transparent, var(--dept, var(--color-accent)), transparent);
+  animation: thinkingShimmer 1.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
 
 .thinking-status {
   font-family: var(--font-mono, monospace);
@@ -732,10 +754,9 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .thinking-dot {
+  .thinking-bubble::before {
     animation: none;
-    opacity: 0.6;
-    box-shadow: none;
+    opacity: 0;
   }
 }
 

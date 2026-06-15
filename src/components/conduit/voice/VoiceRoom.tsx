@@ -280,7 +280,7 @@ export default function VoiceRoom({
     <div
       className="fixed inset-0 z-[60] flex flex-col"
       style={{
-        background: "rgba(11, 11, 15, 0.90)",
+        background: "color-mix(in srgb, var(--cx-canvas) 90%, transparent)",
         backdropFilter: "var(--cx-glass-blur-float, blur(28px) saturate(140%))",
         WebkitBackdropFilter: "var(--cx-glass-blur-float, blur(28px) saturate(140%))",
         color: "var(--cx-text, #F4F4F7)",
@@ -290,7 +290,7 @@ export default function VoiceRoom({
         className="px-4 md:px-6 py-3 flex items-center justify-between border-b"
         style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}
       >
-        <div className="text-[10px] uppercase tracking-[0.22em] text-white/60">
+        <div className="cx-type-xs uppercase tracking-[0.22em] text-white/60">
           Praxis Voice · {isRoundTable ? "Round-table" : employeeName}
         </div>
         <button
@@ -328,7 +328,7 @@ export default function VoiceRoom({
                     />
                   )}
                   <div
-                    className={`mt-1 text-[10px] uppercase tracking-[0.15em] text-center transition-colors ${
+                    className={`mt-1 cx-type-xs uppercase tracking-[0.15em] text-center transition-colors ${
                       isActive ? "text-white/80" : "text-white/30"
                     }`}
                   >
@@ -359,13 +359,13 @@ export default function VoiceRoom({
 
         <div className="w-full max-w-md space-y-4">
           <div>
-            <div className="text-[10px] uppercase tracking-[0.18em] text-white/40 mb-1">
+            <div className="cx-type-xs uppercase tracking-[0.18em] text-white/40 mb-1">
               You {muted && "· muted"}
             </div>
             <Waveform analyserRef={userAnalyserRef} color={headerColor} />
           </div>
           <div>
-            <div className="text-[10px] uppercase tracking-[0.18em] text-white/40 mb-1">
+            <div className="cx-type-xs uppercase tracking-[0.18em] text-white/40 mb-1">
               {isRoundTable
                 ? activeDisplay?.name ?? "Team"
                 : employeeName}
@@ -406,7 +406,7 @@ export default function VoiceRoom({
               key={t.id}
               className={t.role === "user" ? "text-white/60" : "text-white/90"}
             >
-              <span className="text-[10px] uppercase tracking-[0.15em] text-white/40 mr-2">
+              <span className="cx-type-xs uppercase tracking-[0.15em] text-white/40 mr-2">
                 {speaker}
               </span>
               {t.text}

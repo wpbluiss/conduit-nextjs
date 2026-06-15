@@ -310,7 +310,7 @@ export function LiveChat({
         <Button size="icon" variant="secondary" className="size-9 rounded-lg bg-secondary hover:bg-input" onClick={() => { setDrawer(false); router.push("/chat?new=1"); }}><SquarePen className="size-4" /></Button>
       </div>
       <div className="px-3 pb-2">
-        <button onClick={() => setPalette(true)} className="flex h-9 w-full items-center gap-2 rounded-lg border border-input bg-secondary/50 px-3 text-sm text-muted-foreground hover:bg-secondary"><Search className="size-4" /> Search<span className="ml-auto flex items-center gap-0.5 rounded border border-white/10 px-1.5 py-0.5 text-[10px] font-mono"><Command className="size-2.5" />K</span></button>
+        <button onClick={() => setPalette(true)} className="flex h-9 w-full items-center gap-2 rounded-lg border border-input bg-secondary/50 px-3 text-sm text-muted-foreground hover:bg-secondary"><Search className="size-4" /> Search<span className="ml-auto flex items-center gap-0.5 rounded border border-white/10 px-1.5 py-0.5 cx-type-xs font-mono"><Command className="size-2.5" />K</span></button>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
         <p className="wm-label px-2 py-2">Recent</p>
@@ -342,7 +342,7 @@ export function LiveChat({
           <div className="fixed inset-0 z-[60] flex items-start justify-center p-4 pt-[12vh]">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setPalette(false)} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
             <motion.div initial={{ opacity: 0, y: -12, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8, scale: 0.98 }} transition={{ type: "spring", stiffness: 300, damping: 26 }} className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-card wm-glow">
-              <div className="flex items-center gap-2 border-b border-white/8 px-4"><Search className="size-4 text-muted-foreground" /><input autoFocus value={paletteQ} onChange={(e) => setPaletteQ(e.target.value)} placeholder="Jump to a teammate, start a chat…" className="h-12 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground" /><kbd className="rounded border border-white/10 px-1.5 py-0.5 text-[10px] text-muted-foreground">esc</kbd></div>
+              <div className="flex items-center gap-2 border-b border-white/8 px-4"><Search className="size-4 text-muted-foreground" /><input autoFocus value={paletteQ} onChange={(e) => setPaletteQ(e.target.value)} placeholder="Jump to a teammate, start a chat…" className="h-12 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground" /><kbd className="rounded border border-white/10 px-1.5 py-0.5 cx-type-xs text-muted-foreground">esc</kbd></div>
               <div className="max-h-72 overflow-y-auto p-2">
                 <p className="wm-label px-2 py-1.5">Actions</p>
                 <button onClick={() => { setPalette(false); router.push("/chat?new=1"); }} className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm hover:bg-secondary"><span className="grid size-7 place-items-center rounded-md bg-secondary text-primary"><SquarePen className="size-4" /></span>New chat</button>
@@ -368,7 +368,7 @@ export function LiveChat({
                 <Button onClick={() => setOpenArtifact(null)} size="icon" variant="ghost" className="size-9 rounded-lg text-muted-foreground hover:bg-secondary"><X className="size-4" /></Button>
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto p-5">
-                {artLoading || artContent === null ? <p className="text-sm text-muted-foreground">Loading…</p> : <pre className="whitespace-pre-wrap font-mono text-[13px] leading-relaxed text-foreground/90">{artContent}</pre>}
+                {artLoading || artContent === null ? <p className="text-sm text-muted-foreground">Loading…</p> : <pre className="whitespace-pre-wrap font-mono cx-type-sm leading-relaxed text-foreground/90">{artContent}</pre>}
               </div>
             </motion.div>
           </div>
@@ -443,7 +443,7 @@ export function LiveChat({
                             if (e.key === "Escape") cancelEdit();
                           }}
                           rows={3}
-                          className="w-full resize-none rounded-2xl rounded-br-md bg-secondary px-4 py-2.5 text-[15px] leading-relaxed outline-none ring-1 ring-primary/50 focus:ring-primary"
+                          className="w-full resize-none rounded-2xl rounded-br-md bg-secondary px-4 py-2.5 text-sm leading-relaxed outline-none ring-1 ring-primary/50 focus:ring-primary"
                         />
                         <div className="flex justify-end gap-2">
                           <button onClick={cancelEdit} className="rounded-lg px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">Cancel</button>
@@ -468,7 +468,7 @@ export function LiveChat({
                             <SquarePen className="size-3.5" />
                           </button>
                         )}
-                        <div className="whitespace-pre-wrap rounded-2xl rounded-br-md bg-secondary px-4 py-2.5 text-[15px] leading-relaxed">{m.content}</div>
+                        <div className="whitespace-pre-wrap rounded-2xl rounded-br-md bg-secondary px-4 py-2.5 text-sm leading-relaxed">{m.content}</div>
                       </div>
                     )}
                   </motion.div>
@@ -494,7 +494,7 @@ export function LiveChat({
                       </div>
                     ) : m.error ? (
                       <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3">
-                        <p className="text-[14px] text-destructive/90 leading-relaxed">{m.content}</p>
+                        <p className="text-sm text-destructive/90 leading-relaxed">{m.content}</p>
                         {lastSentMsg.current && (
                           <button
                             onClick={() => send(lastSentMsg.current)}
@@ -506,7 +506,7 @@ export function LiveChat({
                         )}
                       </div>
                     ) : (
-                      <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">{m.content}{m.pending && <span className={`ml-0.5 inline-block h-4 w-[3px] translate-y-0.5 rounded-full bg-primary align-middle${reducedMotion ? "" : " animate-pulse"}`} />}</div>
+                      <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{m.content}{m.pending && <span className={`ml-0.5 inline-block h-4 w-[3px] translate-y-0.5 rounded-full bg-primary align-middle${reducedMotion ? "" : " animate-pulse"}`} />}</div>
                     )}
                     {m.artifacts?.map((a) => (
                       <button key={a.id} onClick={() => setOpenArtifact(a)} className="mt-3 flex w-full max-w-sm items-center gap-3 rounded-xl border border-white/10 bg-secondary/40 p-3 text-left transition-colors hover:border-primary/40 hover:bg-secondary">
@@ -550,7 +550,7 @@ export function LiveChat({
             </AnimatePresence>
             <div data-tour-target="chat-input" className="flex items-end gap-2 rounded-2xl border border-white/10 bg-secondary/60 p-2 transition-all focus-within:border-primary/50 focus-within:bg-secondary focus-within:wm-glow">
               <Button type="button" size="icon" variant="ghost" className="size-9 shrink-0 rounded-xl text-muted-foreground hover:bg-input hover:text-foreground"><Paperclip className="size-4" /></Button>
-              <textarea ref={taRef} value={input} rows={1} onChange={(e) => { setInput(e.target.value); grow(); }} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !menu) { e.preventDefault(); send(input); } }} placeholder={`Message ${emp.name}…  ·  / for commands  ·  @ to route`} className="max-h-40 flex-1 resize-none bg-transparent py-2 text-[15px] leading-relaxed outline-none placeholder:text-muted-foreground" />
+              <textarea ref={taRef} value={input} rows={1} onChange={(e) => { setInput(e.target.value); grow(); }} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !menu) { e.preventDefault(); send(input); } }} placeholder={`Message ${emp.name}…  ·  / for commands  ·  @ to route`} className="max-h-40 flex-1 resize-none bg-transparent py-2 text-sm leading-relaxed outline-none placeholder:text-muted-foreground" />
               <motion.div whileTap={{ scale: 0.9 }}><Button type="submit" size="icon" disabled={!input.trim() || loading} className="size-9 shrink-0 rounded-xl wm-glow disabled:opacity-40"><ArrowUp className="size-4" /></Button></motion.div>
             </div>
             <p className="wm-label mt-2 flex items-center justify-center gap-3"><span className="flex items-center gap-1"><Command className="size-3" />K</span><span className="flex items-center gap-1"><Slash className="size-3" />commands</span><span className="flex items-center gap-1"><AtSign className="size-3" />route</span></p>

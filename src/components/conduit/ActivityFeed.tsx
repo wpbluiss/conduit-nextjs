@@ -57,14 +57,14 @@ function EventRow({ event }: { event: ActivityEvent }) {
       <span className="min-w-0 flex-1">
         <span className="flex items-baseline gap-1.5 flex-wrap">
           <span
-            className="text-[11px] font-semibold uppercase tracking-[0.1em] shrink-0"
+            className="cx-type-xs font-semibold uppercase tracking-[0.1em] shrink-0"
             style={{ color }}
           >
             {event.type === "build" ? "Engineering" : employeeLabel(event.employee)}
           </span>
           {event.type === "build" && (
             <span
-              className="text-[10px] uppercase tracking-[0.15em] shrink-0"
+              className="cx-type-xs uppercase tracking-[0.15em] shrink-0"
               style={{ color: "var(--color-text-muted)" }}
             >
               built
@@ -72,13 +72,13 @@ function EventRow({ event }: { event: ActivityEvent }) {
           )}
         </span>
         <p
-          className="mt-0.5 text-[13px] leading-snug line-clamp-2"
+          className="mt-0.5 cx-type-sm leading-snug line-clamp-2"
           style={{ color: "var(--color-text)" }}
         >
           {event.summary || "(no content)"}
         </p>
         <span
-          className="mt-1 block text-[11px] tabular-nums"
+          className="mt-1 block cx-mono cx-type-xs tabular-nums"
           style={{ color: "var(--color-text-muted)" }}
         >
           {relativeTime(event.timestamp)}
@@ -161,14 +161,14 @@ export function ActivityFeed({ initial, initialHasMore, initialNextBefore }: Pro
       <div ref={sentinelRef} className="py-4 flex items-center justify-center">
         {loading ? (
           <span
-            className="text-[11px] uppercase tracking-wider"
+            className="cx-type-xs uppercase tracking-wider"
             style={{ color: "var(--color-text-muted)" }}
           >
             Loading…
           </span>
         ) : !hasMore ? (
           <span
-            className="text-[11px] uppercase tracking-wider"
+            className="cx-type-xs uppercase tracking-wider"
             style={{ color: "var(--color-text-muted)" }}
           >
             All activity loaded

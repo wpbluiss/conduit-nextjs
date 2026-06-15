@@ -49,12 +49,12 @@ export default function HRWorkspace() {
       {/* Pipeline funnel */}
       <div>
         <div className="flex items-baseline justify-between mb-3">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
+          <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
             <Users2 size={11} /> Hiring pipeline
           </div>
           <Link
             href={`/app?pin=hr&prompt=${encodeURIComponent("Walk me through this week's pipeline")}`}
-            className="text-[10px] uppercase tracking-[0.15em]"
+            className="cx-type-xs uppercase tracking-[0.15em]"
             style={{ color: dept }}
           >
             Review pipeline →
@@ -76,7 +76,7 @@ export default function HRWorkspace() {
                     idx === PIPELINE.length - 1 ? deptSoft : undefined,
                 }}
               >
-                <span className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+                <span className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
                   {p.stage}
                 </span>
                 <span className="serif text-3xl leading-none mt-2">
@@ -100,12 +100,12 @@ export default function HRWorkspace() {
       {/* Open roles */}
       <div>
         <div className="flex items-baseline justify-between mb-3">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
+          <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
             <Briefcase size={11} /> Open roles
           </div>
           <Link
             href={`/app?pin=hr&prompt=${encodeURIComponent("Open a new role — draft the job description")}`}
-            className="text-[10px] uppercase tracking-[0.15em]"
+            className="cx-type-xs uppercase tracking-[0.15em]"
             style={{ color: dept }}
           >
             Open a role →
@@ -126,7 +126,7 @@ export default function HRWorkspace() {
                   <div className="text-sm text-[var(--color-text)]">
                     {r.title}
                   </div>
-                  <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-0.5">
+                  <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-0.5">
                     {r.team} · {r.location}
                   </div>
                 </div>
@@ -134,7 +134,7 @@ export default function HRWorkspace() {
                   <div className="serif text-xl leading-none">
                     {r.applicants}
                   </div>
-                  <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-0.5">
+                  <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-0.5">
                     {r.status === "open" ? "applicants" : "drafting"}
                   </div>
                 </div>
@@ -146,7 +146,7 @@ export default function HRWorkspace() {
             </li>
           ))}
         </ul>
-        <p className="mt-2 text-[10px] text-[var(--color-text-muted)]">
+        <p className="mt-2 cx-type-xs text-[var(--color-text-muted)]">
           Scaffold — HR will reflect real pipeline data once you connect your
           ATS or just describe a role to start.
         </p>

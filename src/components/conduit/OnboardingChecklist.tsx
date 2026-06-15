@@ -98,13 +98,13 @@ export function OnboardingChecklist({
         <div className="flex items-center justify-between mb-1.5">
           <div>
             <div
-              className="text-[11px] font-semibold"
+              className="cx-type-xs font-semibold"
               style={{ color: "var(--color-text)" }}
             >
               Get started
             </div>
             <div
-              className="text-[10px]"
+              className="cx-type-xs"
               style={{ color: "var(--color-text-muted)" }}
             >
               {doneCount} of {STEPS.length} complete
@@ -143,7 +143,7 @@ export function OnboardingChecklist({
             <li key={step.key}>
               <Link
                 href={step.href}
-                className={`flex items-center gap-2 px-3 py-1.5 text-[11px] transition-colors ${
+                className={`flex items-center gap-2 px-3 py-1.5 cx-type-xs transition-colors ${
                   checked
                     ? "pointer-events-none opacity-50"
                     : "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"

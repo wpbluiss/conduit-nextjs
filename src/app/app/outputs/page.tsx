@@ -25,7 +25,7 @@ function CopyAction({ content }: { content: string }) {
     <button
       type="button"
       onClick={() => void handleCopy()}
-      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
+      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg cx-type-xs transition-colors"
       style={{
         color: copied ? "var(--color-accent)" : "var(--color-text-muted)",
         border: "1px solid var(--color-border)",
@@ -55,7 +55,7 @@ function DownloadAction({ content, title }: { content: string; title: string }) 
     <button
       type="button"
       onClick={handleDownload}
-      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
+      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg cx-type-xs transition-colors"
       style={{ color: "var(--color-text-muted)", border: "1px solid var(--color-border)" }}
       aria-label="Download as Markdown"
     >
@@ -141,7 +141,7 @@ export default function OutputsPage() {
                         </h2>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span
-                            className="text-[10px] uppercase tracking-[0.15em] font-medium"
+                            className="cx-type-xs uppercase tracking-[0.15em] font-medium"
                             style={{ color: deptColor }}
                           >
                             {emp?.name ?? output.specialist}
@@ -159,7 +159,7 @@ export default function OutputsPage() {
                         type="button"
                         onClick={() => void handleDelete(output.id)}
                         disabled={deletingId === output.id}
-                        className="shrink-0 p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-destructive,#ef4444)] transition-colors disabled:opacity-40"
+                        className="shrink-0 p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-destructive,var(--cx-danger))] transition-colors disabled:opacity-40"
                         aria-label="Delete output"
                       >
                         <Trash2 size={13} />
@@ -180,7 +180,7 @@ export default function OutputsPage() {
                     {output.source_conversation_id && (
                       <Link
                         href={`/app?c=${output.source_conversation_id}`}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors ml-auto"
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg cx-type-xs transition-colors ml-auto"
                         style={{ color: "var(--color-text-muted)", border: "1px solid var(--color-border)" }}
                       >
                         View in chat

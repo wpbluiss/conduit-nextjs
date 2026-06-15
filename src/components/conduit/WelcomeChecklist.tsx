@@ -160,10 +160,7 @@ export function WelcomeChecklist({
       >
         <div
           className="conduit-card p-5"
-          style={{
-            background: "var(--color-surface-elevated)",
-            boxShadow: "0 8px 32px rgba(10,9,8,0.4)",
-          }}
+          style={{ boxShadow: "0 8px 32px rgba(10,9,8,0.4)" }}
         >
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
@@ -171,7 +168,7 @@ export function WelcomeChecklist({
               <ProgressRing done={done} total={ITEMS.length} />
               <div>
                 <div className="text-sm font-medium">Get started with Praxis</div>
-                <div className="text-[11px] text-[var(--color-text-muted)] mt-0.5">
+                <div className="cx-type-xs text-[var(--color-text-muted)] mt-0.5">
                   {done} of {ITEMS.length} complete
                 </div>
               </div>
@@ -270,7 +267,7 @@ export function ChecklistProgressPip({
       title={`Onboarding: ${done}/${total} steps done`}
     >
       <ProgressRing done={done} total={total} />
-      <span className="text-[var(--color-text-muted)] text-[11px] leading-tight">
+      <span className="text-[var(--color-text-muted)] cx-type-xs leading-tight">
         Setup <br />
         <span style={{ color: "var(--color-accent)" }}>
           {done}/{total} done

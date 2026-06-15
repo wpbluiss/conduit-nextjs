@@ -29,7 +29,7 @@ export function ConversationLabelFilter({
             key={label.id}
             type="button"
             onClick={() => toggle(label.id)}
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-medium transition-all"
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all"
             style={
               active
                 ? {

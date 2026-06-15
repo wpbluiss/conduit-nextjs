@@ -33,7 +33,7 @@ function LabelChip({
 }) {
   return (
     <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium"
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full cx-type-xs font-medium"
       style={{
         background: `color-mix(in srgb, ${label.color} 15%, var(--color-surface-elevated))`,
         color: label.color,
@@ -174,7 +174,7 @@ export function ConversationLabelManager({
           onClick={() => { setOpen((v) => !v); setCreating(false); }}
           aria-label="Manage conversation labels"
           title="Labels"
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cx-type-xs transition-colors"
           style={{
             color: assigned.length > 0 ? "var(--color-text)" : "var(--color-text-muted)",
             border: open ? "1px solid var(--color-border)" : "1px solid transparent",
@@ -192,7 +192,7 @@ export function ConversationLabelManager({
           <span className="hidden sm:inline">Labels</span>
           {assigned.length > 0 && (
             <span
-              className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-medium text-white"
+              className="inline-flex items-center justify-center w-4 h-4 rounded-full cx-type-xs font-medium text-white"
               style={{ background: assigned[0].color }}
             >
               {assigned.length}
@@ -201,12 +201,8 @@ export function ConversationLabelManager({
         </button>
         {open && (
           <div
-            className="absolute top-full right-0 mt-1.5 z-50 rounded-xl border shadow-xl overflow-hidden"
-            style={{
-              minWidth: "200px",
-              background: "var(--color-surface-elevated)",
-              borderColor: "var(--color-border)",
-            }}
+            className="cx-glass-float cx-glass-border absolute top-full right-0 mt-1.5 z-50 rounded-xl overflow-hidden"
+            style={{ minWidth: "200px" }}
           >
             {all.length > 0 && (
               <div className="p-2 space-y-0.5 max-h-48 overflow-y-auto">
@@ -228,14 +224,14 @@ export function ConversationLabelManager({
                         }}
                       />
                       <span className="flex-1 truncate text-left text-[var(--color-text)]">{label.name}</span>
-                      {isOn && <span className="text-[10px]" style={{ color: label.color }}>✓</span>}
+                      {isOn && <span className="cx-type-xs" style={{ color: label.color }}>✓</span>}
                     </button>
                   );
                 })}
               </div>
             )}
             {all.length === 0 && (
-              <p className="px-3 py-3 text-[12px] text-[var(--color-text-muted)]">
+              <p className="px-3 py-3 text-xs text-[var(--color-text-muted)]">
                 No labels yet. Create some in{" "}
                 <a href="/app/settings?tab=labels" className="underline">Settings → Labels</a>.
               </p>
@@ -256,7 +252,7 @@ export function ConversationLabelManager({
           type="button"
           onClick={() => { setOpen((v) => !v); setCreating(false); }}
           aria-label="Add or manage labels"
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] transition-colors"
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full cx-type-xs transition-colors"
           style={{
             color: "var(--color-text-muted)",
             border: "1px dashed var(--color-border)",
@@ -268,12 +264,8 @@ export function ConversationLabelManager({
 
         {open && (
           <div
-            className="absolute top-full left-0 mt-1.5 z-50 rounded-xl border shadow-xl overflow-hidden"
-            style={{
-              minWidth: "200px",
-              background: "var(--color-surface-elevated)",
-              borderColor: "var(--color-border)",
-            }}
+            className="cx-glass-float cx-glass-border absolute top-full left-0 mt-1.5 z-50 rounded-xl overflow-hidden"
+            style={{ minWidth: "200px" }}
           >
             {/* Existing labels */}
             {all.length > 0 && (
@@ -299,7 +291,7 @@ export function ConversationLabelManager({
                         {label.name}
                       </span>
                       {isOn && (
-                        <span className="text-[10px]" style={{ color: label.color }}>✓</span>
+                        <span className="cx-type-xs" style={{ color: label.color }}>✓</span>
                       )}
                     </button>
                   );
@@ -313,7 +305,7 @@ export function ConversationLabelManager({
                 type="button"
                 onClick={() => setCreating(true)}
                 disabled={all.length >= 10}
-                className="w-full flex items-center gap-1.5 px-3 py-2 text-[12px] border-t transition-colors hover:bg-[var(--color-surface)] disabled:opacity-40"
+                className="w-full flex items-center gap-1.5 px-3 py-2 text-xs border-t transition-colors hover:bg-[var(--color-surface)] disabled:opacity-40"
                 style={{ borderColor: "var(--color-border)", color: "var(--color-text-muted)" }}
               >
                 <Plus size={12} />
@@ -329,7 +321,7 @@ export function ConversationLabelManager({
                   onChange={(e) => setNewName(e.target.value.slice(0, 32))}
                   onKeyDown={(e) => { if (e.key === "Enter") void createLabel(); if (e.key === "Escape") setCreating(false); }}
                   maxLength={32}
-                  className="w-full px-2 py-1 text-[12px] rounded-lg border outline-none"
+                  className="w-full px-2 py-1 text-xs rounded-lg border outline-none"
                   style={{
                     background: "var(--color-surface)",
                     borderColor: "var(--color-border)",
@@ -357,7 +349,7 @@ export function ConversationLabelManager({
                     type="button"
                     onClick={() => void createLabel()}
                     disabled={!newName.trim() || busy}
-                    className="flex-1 px-2 py-1 rounded-lg text-[11px] font-medium text-white transition-opacity disabled:opacity-50"
+                    className="flex-1 px-2 py-1 rounded-lg cx-type-xs font-medium text-white transition-opacity disabled:opacity-50"
                     style={{ background: newColor }}
                   >
                     {busy ? "Creating…" : "Create"}
@@ -365,7 +357,7 @@ export function ConversationLabelManager({
                   <button
                     type="button"
                     onClick={() => setCreating(false)}
-                    className="px-2 py-1 rounded-lg text-[11px]"
+                    className="px-2 py-1 rounded-lg cx-type-xs"
                     style={{ color: "var(--color-text-muted)" }}
                   >
                     Cancel

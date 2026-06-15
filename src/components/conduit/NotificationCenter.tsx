@@ -130,7 +130,7 @@ export function NotificationCenter() {
         {unreadCount > 0 && (
           <span
             aria-hidden
-            className="absolute top-1 left-5 flex items-center justify-center w-3.5 h-3.5 rounded-full text-[9px] font-bold leading-none"
+            className="absolute top-1 left-5 flex items-center justify-center w-3.5 h-3.5 rounded-full cx-type-xs font-bold leading-none"
             style={{ background: "var(--color-red, var(--cx-danger))", color: "#fff" }}
           >
             {unreadCount > 9 ? "9+" : unreadCount}
@@ -164,8 +164,7 @@ export function NotificationCenter() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
-              className="cx-glass-float fixed top-0 right-0 bottom-0 z-[199] w-full max-w-sm flex flex-col border-l"
-              style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}
+              className="cx-glass-float cx-glass-border fixed top-0 right-0 bottom-0 z-[199] w-full max-w-sm flex flex-col border-l"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-3.5 border-b border-[var(--color-border)]">
@@ -173,7 +172,7 @@ export function NotificationCenter() {
                   <Bell size={14} className="text-[var(--color-text-muted)]" />
                   <span className="text-sm font-medium">Notifications</span>
                   {unreadCount > 0 && (
-                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-red-500 text-white leading-none">
+                    <span className="cx-type-xs font-semibold px-1.5 py-0.5 rounded-full bg-red-500 text-white leading-none">
                       {unreadCount}
                     </span>
                   )}
@@ -186,7 +185,7 @@ export function NotificationCenter() {
                       disabled={loading}
                       title="Mark all as read"
                       aria-label="Mark all as read"
-                      className="flex items-center gap-1 px-2 py-1 text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-text)] rounded-md hover:bg-[var(--color-surface)] transition-colors disabled:opacity-50"
+                      className="flex items-center gap-1 px-2 py-1 cx-type-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] rounded-md hover:bg-[var(--color-surface)] transition-colors disabled:opacity-50"
                     >
                       <CheckCheck size={12} />
                       Mark all read
@@ -214,7 +213,7 @@ export function NotificationCenter() {
                     <p className="text-sm text-[var(--color-text-muted)]">
                       No notifications yet
                     </p>
-                    <p className="text-[11px] text-[var(--color-text-muted)] opacity-70">
+                    <p className="cx-type-xs text-[var(--color-text-muted)] opacity-70">
                       Build completions, artifact events, and billing updates will appear here.
                     </p>
                   </div>
@@ -251,11 +250,11 @@ export function NotificationCenter() {
                               {n.title}
                             </span>
                             {n.body && (
-                              <span className="block text-[11px] text-[var(--color-text-muted)] mt-0.5 truncate">
+                              <span className="block cx-type-xs text-[var(--color-text-muted)] mt-0.5 truncate">
                                 {n.body}
                               </span>
                             )}
-                            <span className="block text-[10px] text-[var(--color-text-muted)] mt-1 opacity-70">
+                            <span className="block cx-type-xs text-[var(--color-text-muted)] mt-1 opacity-70">
                               {relativeTime(n.created_at)}
                             </span>
                           </span>
