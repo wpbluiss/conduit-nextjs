@@ -164,8 +164,8 @@ export function NotificationCenter() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
-              className="fixed top-0 right-0 bottom-0 z-[199] w-full max-w-sm flex flex-col border-l border-[var(--color-border)] shadow-2xl"
-              style={{ background: "var(--color-surface-elevated)" }}
+              className="cx-glass-float fixed top-0 right-0 bottom-0 z-[199] w-full max-w-sm flex flex-col border-l"
+              style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}
             >
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-3.5 border-b border-[var(--color-border)]">
