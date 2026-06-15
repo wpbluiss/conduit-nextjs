@@ -40,6 +40,7 @@ import { useNicknames } from "@/context/NicknameContext";
 import { SaveOutputButton } from "./SaveOutputButton";
 import { track } from "@/lib/analytics/track";
 import { ConversationLabelManager, type ConversationLabel } from "./ConversationLabels";
+import { Tooltip } from "./pdl/Tooltip";
 
 export interface VoicePrefs {
   enabled: boolean;
@@ -60,6 +61,7 @@ export interface MessageRow {
   handoffFrom?: EmployeeKey;
   memories?: { id: string; kind: string; content: string; tags?: string[] }[];
   feedback?: 1 | -1 | null;
+  created_at?: string | null;
 }
 
 interface Suggestion {
@@ -2477,6 +2479,62 @@ function MessageHandoffButton({
   );
 }
 
+function formatMessageTimestamp(iso: string): string {
+  return new Date(iso).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function MessageTimestamp({
+  createdAt,
+  touchVisible,
+  side = "top",
+}: {
+  createdAt: string;
+  touchVisible: boolean;
+  side?: "top" | "bottom";
+}) {
+  const full = formatMessageTimestamp(createdAt);
+  const short = new Date(createdAt).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+  if (touchVisible) {
+    return (
+      <time
+        dateTime={createdAt}
+        className="text-[11px] select-none"
+        style={{ color: "var(--color-text-muted)" }}
+      >
+        {full}
+      </time>
+    );
+  }
+
+  return (
+    <Tooltip
+      trigger={
+        <time
+          dateTime={createdAt}
+          className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity text-[11px] cursor-default select-none"
+          style={{ color: "var(--color-text-muted)" }}
+        >
+          {short}
+        </time>
+      }
+      side={side}
+      delay={300}
+    >
+      <span className="text-xs whitespace-nowrap">{full}</span>
+    </Tooltip>
+  );
+}
+
 const MessageBubble = memo(function MessageBubble({
   message,
   onOpenArtifact,
@@ -2509,6 +2567,21 @@ const MessageBubble = memo(function MessageBubble({
   const [editDraft, setEditDraft] = useState(message.content);
   const editRef = useRef<HTMLTextAreaElement>(null);
   const { labelFor: nickLabelFor } = useNicknames();
+  const [touchTimestamp, setTouchTimestamp] = useState(false);
+  const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchDismissRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleTouchStart = useCallback(() => {
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current);
+    touchTimerRef.current = setTimeout(() => {
+      setTouchTimestamp(true);
+      touchDismissRef.current = setTimeout(() => setTouchTimestamp(false), 2000);
+    }, 600);
+  }, []);
+
+  const cancelTouchTimer = useCallback(() => {
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current);
+  }, []);
 
   // Reset draft to current content when entering edit mode.
   useEffect(() => {
@@ -2602,6 +2675,9 @@ const MessageBubble = memo(function MessageBubble({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
         style={searchMatch ? { outline: "2px solid var(--color-accent)", outlineOffset: "3px", borderRadius: "12px" } : undefined}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={cancelTouchTimer}
+        onTouchMove={cancelTouchTimer}
       >
         <div className="flex flex-col items-end gap-1 max-w-[85%]">
           <div className="conduit-bubble-user px-4 py-3 text-[var(--color-text)]">
@@ -2616,17 +2692,26 @@ const MessageBubble = memo(function MessageBubble({
               <span className="whitespace-pre-wrap">{message.content}</span>
             )}
           </div>
-          {onEditStart && !isVoice && (
-            <button
-              type="button"
-              onClick={onEditStart}
-              className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-[11px] px-2 py-0.5 rounded"
-              style={{ color: "var(--color-text-muted)" }}
-              aria-label="Edit message"
-            >
-              Edit
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {onEditStart && !isVoice && (
+              <button
+                type="button"
+                onClick={onEditStart}
+                className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-[11px] px-2 py-0.5 rounded"
+                style={{ color: "var(--color-text-muted)" }}
+                aria-label="Edit message"
+              >
+                Edit
+              </button>
+            )}
+            {message.created_at && !message.pending && (
+              <MessageTimestamp
+                createdAt={message.created_at}
+                touchVisible={touchTimestamp}
+                side="top"
+              />
+            )}
+          </div>
         </div>
       </motion.div>
     );
@@ -2696,6 +2781,9 @@ const MessageBubble = memo(function MessageBubble({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={cancelTouchTimer}
+      onTouchMove={cancelTouchTimer}
     >
       <div className="pt-1 shrink-0">
         <EmployeeAvatar employee={employee} size={32} active={message.pending} />
@@ -2703,6 +2791,13 @@ const MessageBubble = memo(function MessageBubble({
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex items-center gap-2 flex-wrap">
           <SpecialistChip employee={employee} label={nickLabelFor(employee)} />
+          {message.created_at && !message.pending && (
+            <MessageTimestamp
+              createdAt={message.created_at}
+              touchVisible={touchTimestamp}
+              side="top"
+            />
+          )}
           {message.handoffFrom && (
             <motion.span
               initial={{ opacity: 0, x: -6 }}

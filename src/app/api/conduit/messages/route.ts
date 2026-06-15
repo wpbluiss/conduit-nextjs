@@ -132,6 +132,7 @@ export async function GET(req: NextRequest) {
     metadata: r.metadata,
     artifacts: artifactsByMsg[r.id],
     feedback: feedbackByMsg[r.id] ?? null,
+    created_at: r.created_at,
   }));
 
   return NextResponse.json({ messages, hasMore });

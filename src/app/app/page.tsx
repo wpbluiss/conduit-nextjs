@@ -108,6 +108,7 @@ export default async function ChatPage({ searchParams }: PageProps) {
         metadata: r.metadata,
         artifacts: artifactsByMsg[r.id],
         feedback: feedbackByMsg[r.id] ?? null,
+        created_at: r.created_at as string | null,
       }));
     }
   }
