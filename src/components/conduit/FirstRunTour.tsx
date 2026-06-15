@@ -150,7 +150,8 @@ export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
             position: "absolute",
             inset: 0,
             background: "rgba(10,9,8,0.55)",
-            backdropFilter: "blur(2px)",
+            backdropFilter: "var(--cx-scrim-blur, blur(2px))",
+            WebkitBackdropFilter: "var(--cx-scrim-blur, blur(2px))",
             pointerEvents: "auto",
           }}
           onClick={dismiss}

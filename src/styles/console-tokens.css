@@ -57,6 +57,8 @@
   /* Drop shadows — deeper for floating tier */
   --cx-glass-shadow:      0 1px 3px rgba(0, 0, 0, 0.40), 0 4px 16px rgba(0, 0, 0, 0.30);
   --cx-glass-shadow-float: 0 4px 24px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40);
+  /* Scrim / modal overlay blur — intentionally lighter than glass; not a glass surface */
+  --cx-scrim-blur:        blur(2px);
 
   /* ---- Electric violet accent (the ONE accent) ---- */
   --cx-accent:          #7C6CFF;
@@ -747,6 +749,25 @@ html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-thumb {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     background: var(--cx-surface-raised, #1C1C26);
+  }
+}
+
+/* ---- Mobile blur reduction (≤480px) ----
+ * High blur values (20–28px) can produce artifacts and GPU pressure on
+ * mid/low-end mobile. Reduce to a lighter blur; opaque backgrounds are
+ * slightly more opaque to compensate.
+ *
+ * Targets .praxis-root (not :root) so the override wins over the main
+ * .praxis-root block above — CSS custom properties inherit from the nearest
+ * ancestor, so overriding on the same element via a later rule wins.
+ * Cap: max two glass layers on mobile.
+ * ----------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .praxis-root {
+    --cx-glass-blur:       blur(12px) saturate(130%);
+    --cx-glass-blur-float: blur(16px) saturate(130%);
+    --cx-glass-bg:         rgba(255, 255, 255, 0.06);
+    --cx-glass-bg-float:   rgba(255, 255, 255, 0.08);
   }
 }
 
