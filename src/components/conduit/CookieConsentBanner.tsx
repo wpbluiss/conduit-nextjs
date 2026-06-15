@@ -48,11 +48,7 @@ export function CookieConsentBanner() {
       className={`fixed bottom-0 left-0 right-0 z-[55] px-4 pb-4 md:px-6 ${isAuthPage ? "md:pb-6" : "md:top-0 md:bottom-auto md:pt-6 md:pb-0"}`}
     >
       <div
-        className="mx-auto max-w-3xl conduit-card flex flex-row items-center gap-2 p-3 md:flex-row md:items-center md:gap-6 md:p-4"
-        style={{
-          background: "var(--color-surface-elevated)",
-          boxShadow: "0 4px 32px rgba(10,9,8,0.4)",
-        }}
+        className="mx-auto max-w-3xl cx-glass-float cx-glass-border flex flex-row items-center gap-2 p-3 md:flex-row md:items-center md:gap-6 md:p-4"
       >
         <p className="flex-1 text-xs md:text-sm text-[var(--color-text-muted)] leading-relaxed">
           We use analytics to improve Praxis.{" "}

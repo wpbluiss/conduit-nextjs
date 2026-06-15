@@ -243,8 +243,7 @@ export function ConversationSearchBar() {
           id={listboxId}
           role="listbox"
           aria-label="Search results"
-          className="absolute left-0 right-0 top-full mt-1 z-20 rounded-xl overflow-hidden conduit-card py-1"
-          style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}
+          className="absolute left-0 right-0 top-full mt-1 z-20 rounded-xl overflow-hidden cx-glass-float cx-glass-border py-1"
         >
           {!loading && searched && results.length === 0 && (
             <div className="px-4 py-4">

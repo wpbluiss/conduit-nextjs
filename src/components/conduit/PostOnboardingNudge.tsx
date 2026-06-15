@@ -42,7 +42,7 @@ export function PostOnboardingNudge() {
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-6 right-6 z-40 w-72 conduit-card p-5 shadow-xl animate-in slide-in-from-bottom-4 fade-in duration-300"
+      className="fixed bottom-6 right-6 z-40 w-72 cx-glass-float cx-glass-border p-5 animate-in slide-in-from-bottom-4 fade-in duration-300"
     >
       <button
         type="button"

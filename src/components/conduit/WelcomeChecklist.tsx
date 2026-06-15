@@ -159,8 +159,7 @@ export function WelcomeChecklist({
         className="fixed bottom-6 right-4 md:right-6 z-30 w-[calc(100vw-2rem)] max-w-sm"
       >
         <div
-          className="conduit-card p-5"
-          style={{ boxShadow: "0 8px 32px rgba(10,9,8,0.4)" }}
+          className="cx-glass-float cx-glass-border p-5"
         >
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
