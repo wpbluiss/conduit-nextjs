@@ -294,6 +294,9 @@ export function Chat({
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [streamingEmployee, setStreamingEmployee] =
     useState<EmployeeKey | null>(null);
+  // Reward beat: set on message_end, auto-cleared after 700ms
+  const [rewardEmployee, setRewardEmployee] = useState<EmployeeKey | null>(null);
+  const rewardClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Round-table: tracks which specialist is currently active (thinking/streaming).
   // null = none active yet, or round-table just ended.
   const [roundTableActiveEmployee, setRoundTableActiveEmployee] =
@@ -1193,6 +1196,10 @@ export function Chat({
         } else if (event === "message_end") {
           const employee = (data.employee as EmployeeKey) || currentEmployee;
           finishCurrent(employee);
+          // Reward beat — brief green pulse on the specialist avatar
+          if (rewardClearTimerRef.current) clearTimeout(rewardClearTimerRef.current);
+          setRewardEmployee(employee);
+          rewardClearTimerRef.current = setTimeout(() => setRewardEmployee(null), 700);
           // Auto-play the just-finished message if voice is on AND R13's
           // streaming TTS didn't already produce audio for this turn.
           const streamingPlayed = streamingAudioActiveRef.current;
@@ -1772,39 +1779,52 @@ export function Chat({
             />
           )}
 
-          {messages.map((m, i) => (
-            <MessageBubble
-              key={m.id ?? i}
-              message={m}
-              onOpenArtifact={(id) => setDrawerArtifactId(id)}
-              playing={playingMessageIdx === i}
-              onStopAudio={stopAudio}
-              onReplayAudio={
-                voice.ttsAllowed && m.role === "assistant" && m.employee
-                  ? () => playTTS(m.content, m.employee as EmployeeKey, i)
-                  : undefined
+          {(() => {
+            // Index of the last completed assistant message from the rewarded specialist
+            let lastRewardIdx = -1;
+            if (rewardEmployee) {
+              for (let j = 0; j < messages.length; j++) {
+                const msg = messages[j];
+                if (msg.role === "assistant" && msg.employee === rewardEmployee && !msg.pending) {
+                  lastRewardIdx = j;
+                }
               }
-              isEditing={editingMessageId === m.id}
-              onEditStart={
-                m.role === "user" && m.id && !loading
-                  ? () => setEditingMessageId(m.id!)
-                  : undefined
-              }
-              onEditCancel={() => setEditingMessageId(null)}
-              onEditSubmit={
-                m.id ? (text) => void submitEdit(m.id!, text) : undefined
-              }
-              pinned={m.id ? pinnedMessages.some((p) => p.message_id === m.id) : false}
-              onPinToggle={
-                m.role === "assistant" && m.id && conversationId
-                  ? (shouldPin) => void handlePinToggle(m.id!, shouldPin)
-                  : undefined
-              }
-              searchMatch={searchMatchSet.has(i)}
-              conversationId={conversationId}
-              roundTableActiveEmployee={roundTableActiveEmployee}
-            />
-          ))}
+            }
+            return messages.map((m, i) => (
+              <MessageBubble
+                key={m.id ?? i}
+                message={m}
+                onOpenArtifact={(id) => setDrawerArtifactId(id)}
+                playing={playingMessageIdx === i}
+                onStopAudio={stopAudio}
+                onReplayAudio={
+                  voice.ttsAllowed && m.role === "assistant" && m.employee
+                    ? () => playTTS(m.content, m.employee as EmployeeKey, i)
+                    : undefined
+                }
+                isEditing={editingMessageId === m.id}
+                onEditStart={
+                  m.role === "user" && m.id && !loading
+                    ? () => setEditingMessageId(m.id!)
+                    : undefined
+                }
+                onEditCancel={() => setEditingMessageId(null)}
+                onEditSubmit={
+                  m.id ? (text) => void submitEdit(m.id!, text) : undefined
+                }
+                pinned={m.id ? pinnedMessages.some((p) => p.message_id === m.id) : false}
+                onPinToggle={
+                  m.role === "assistant" && m.id && conversationId
+                    ? (shouldPin) => void handlePinToggle(m.id!, shouldPin)
+                    : undefined
+                }
+                searchMatch={searchMatchSet.has(i)}
+                conversationId={conversationId}
+                roundTableActiveEmployee={roundTableActiveEmployee}
+                rewarded={i === lastRewardIdx}
+              />
+            ));
+          })()}
 
           {/* Handoff banner — shown when this conversation was handed off */}
           {handoffInfo && (
@@ -2808,6 +2828,7 @@ const MessageBubble = memo(function MessageBubble({
   searchMatch = false,
   conversationId,
   roundTableActiveEmployee = null,
+  rewarded = false,
 }: {
   message: MessageRow;
   onOpenArtifact: (id: string) => void;
@@ -2823,6 +2844,7 @@ const MessageBubble = memo(function MessageBubble({
   searchMatch?: boolean;
   conversationId?: string | null;
   roundTableActiveEmployee?: EmployeeKey | null;
+  rewarded?: boolean;
 }) {
   const [editDraft, setEditDraft] = useState(message.content);
   const editRef = useRef<HTMLTextAreaElement>(null);
@@ -3053,7 +3075,7 @@ const MessageBubble = memo(function MessageBubble({
       onTouchMove={cancelTouchTimer}
     >
       <div className="pt-1 shrink-0">
-        <SpecialistAvatar employee={employee} size={32} streaming={message.pending} />
+        <SpecialistAvatar employee={employee} size={32} streaming={message.pending} rewarded={rewarded} />
       </div>
       <div className="min-w-0 flex-1 space-y-1">
         {/* Glass bubble — chip header + content in one pane */}
