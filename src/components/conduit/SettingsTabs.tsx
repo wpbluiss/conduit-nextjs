@@ -2645,8 +2645,7 @@ function BillingTab({
           onClick={(e) => e.target === e.currentTarget && setShowCancelModal(false)}
         >
           <div
-            className="conduit-card p-6 max-w-sm w-full space-y-4"
-            style={{ background: "var(--color-surface-elevated)" }}
+            className="cx-glass-float cx-glass-border p-6 max-w-sm w-full space-y-4"
           >
             <div>
               <div className="serif text-xl mb-1">Cancel subscription?</div>

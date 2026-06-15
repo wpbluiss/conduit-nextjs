@@ -1546,7 +1546,7 @@ export function Sidebar({
           role="menu"
           aria-label="Specialist options"
           onClick={(e) => e.stopPropagation()}
-          className="praxis-root"
+          className="praxis-root cx-glass-float cx-glass-border"
           style={{
             position: "fixed",
             top: ctxMenu.y,
@@ -1554,9 +1554,6 @@ export function Sidebar({
             zIndex: 100,
             minWidth: 140,
             borderRadius: 10,
-            border: "1px solid var(--color-border)",
-            background: "var(--color-surface-elevated)",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
             padding: "4px",
           }}
         >
