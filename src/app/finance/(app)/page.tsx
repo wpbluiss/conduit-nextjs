@@ -2,11 +2,14 @@ import Link from "next/link";
 import { getSnapshot } from "@/lib/finance/data";
 import {
   pooledCash, netWorth, projectIncome, goalProgress, orderDebts,
-  onTimeStats, dueNow,
+  onTimeStats, dueNow, recentActivity, effectiveBalance,
 } from "@/lib/finance/compute";
-import { gameState, vaultPct } from "@/lib/finance/gamify";
+import { gameState, vaultPct, weeklyQuests } from "@/lib/finance/gamify";
 import { fmtMoney, personLabel } from "@/lib/finance/constants";
 import { LevelBar } from "@/components/finance/LevelBar";
+import { CelebrationWatcher } from "@/components/finance/CelebrationWatcher";
+import { DailyCheckin } from "@/components/finance/DailyCheckin";
+import { QuestsCard, ActivityFeed } from "@/components/finance/GameStrips";
 import { MetricCard } from "@/components/finance/MetricCard";
 import { MoneyStrip } from "@/components/finance/MoneyStrip";
 import { CompactGoalDebt } from "@/components/finance/CompactGoalDebt";
@@ -60,9 +63,18 @@ export default async function FinanceHome() {
     .filter((v) => v.is_mystery && v.revealed && v.mystery_destination)
     .map((v) => ({ id: v.id, destination: v.mystery_destination!, blurb: v.mystery_blurb, emoji: v.emoji }));
 
+  const quests = weeklyQuests(snap);
+  const activity = recentActivity(snap, 7);
+  const defeatedNames = snap.debts
+    .filter((d) => d.status === "paid" || (Number(d.original_balance) > 0 && effectiveBalance(d) <= 0))
+    .map((d) => d.name);
+  const today = new Date().toISOString().slice(0, 10);
+  const checkedInToday = snap.household.last_checkin_date === today;
+
   return (
     <div className="space-y-5">
       <MysteryReveal vaults={revealedMysteries} />
+      <CelebrationWatcher level={game.level} levelName={game.levelName} defeated={defeatedNames} />
       {/* Greeting */}
       <div className="fin-rise flex items-center justify-between gap-3">
         <div>
@@ -74,8 +86,14 @@ export default async function FinanceHome() {
       {/* Game layer: level + XP */}
       <LevelBar g={game} />
 
+      {/* Daily streak — the habit hook */}
+      <DailyCheckin streak={Number(snap.household.checkin_streak ?? 0)} doneToday={checkedInToday} />
+
       {/* THE CENTERPIECE: the reward you're chasing */}
       <QuestHero vault={heroVault} autofundPct={Number(snap.household.vault_autofund_pct)} />
+
+      {/* This week's quests */}
+      <QuestsCard quests={quests} />
 
       {/* Goal + Boss battles */}
       <CompactGoalDebt
@@ -173,6 +191,9 @@ export default async function FinanceHome() {
           </div>
         </Card>
       </Link>
+
+      {/* Together — couple activity feed */}
+      <ActivityFeed items={activity} />
 
       {/* Windfall splitter */}
       <AllocationPlanner snap={snap} />

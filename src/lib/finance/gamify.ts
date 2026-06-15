@@ -87,6 +87,28 @@ export function gameState(s: Snapshot): GameState {
   };
 }
 
+export interface Quest { label: string; emoji: string; done: boolean; xp: number; }
+
+export function weeklyQuests(s: Snapshot): Quest[] {
+  const since = new Date();
+  since.setDate(since.getDate() - 7);
+  const sinceISO = since.toISOString().slice(0, 10);
+  const recentPay = s.paychecks.some((p) => p.pay_date >= sinceISO);
+  const onTime = s.payments.some((p) => p.on_time && p.date >= sinceISO);
+  const saved = s.savingsLog.some((r) => Number(r.amount) > 0 && r.date >= sinceISO);
+  const cardHealthy = s.accounts.some(
+    (a) => a.type === "credit_card" && a.credit_limit && a.credit_limit > 0 && Number(a.balance) / Number(a.credit_limit) <= 0.1,
+  );
+  const defeated = s.debts.some((d) => d.status === "paid" || (Number(d.original_balance) > 0 && Number(d.balance) <= 0));
+  return [
+    { label: "Log a paycheck", emoji: "💵", done: recentPay, xp: 10 },
+    { label: "Make an on-time payment", emoji: "⚡", done: onTime, xp: 15 },
+    { label: "Feed your goal or a reward", emoji: "🎯", done: saved, xp: 20 },
+    { label: "Keep a card under 10%", emoji: "💳", done: cardHealthy, xp: 15 },
+    { label: "Defeat a boss", emoji: "💀", done: defeated, xp: 75 },
+  ];
+}
+
 export function vaultPct(v: { saved_amount: number; target_amount: number }): number {
   return v.target_amount > 0 ? Math.min(100, (Number(v.saved_amount) / Number(v.target_amount)) * 100) : 0;
 }

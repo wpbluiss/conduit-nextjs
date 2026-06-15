@@ -15,6 +15,8 @@ export interface Household {
   stripe_subscription_id: string | null;
   current_period_end: string | null;
   vault_autofund_pct: number;
+  last_checkin_date: string | null;
+  checkin_streak: number;
   created_at: string;
 }
 

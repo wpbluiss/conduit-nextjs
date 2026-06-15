@@ -330,6 +330,32 @@ export function dueNow(s: Snapshot, withinDays = 16): DueItem[] {
   return items.sort((a, b) => (a.days ?? 99) - (b.days ?? 99));
 }
 
+// ---------- Couple activity feed ----------
+export interface ActivityItem {
+  id: string; date: string; person: string; text: string; amount: number; emoji: string;
+}
+
+function nameFor(tag: string): string {
+  if (tag === "luis") return "Luis";
+  if (tag === "delia") return "Delia";
+  return "Shared";
+}
+
+export function recentActivity(s: Snapshot, limit = 8): ActivityItem[] {
+  const items: ActivityItem[] = [];
+  for (const p of s.paychecks)
+    items.push({ id: `pc-${p.id}`, date: p.pay_date, person: nameFor(p.person_tag), text: "logged a paycheck", amount: Number(p.take_home), emoji: "💵" });
+  for (const i of s.inflows)
+    items.push({ id: `in-${i.id}`, date: i.date, person: nameFor(i.person_tag), text: i.source || "added money", amount: Number(i.amount), emoji: "🎁" });
+  for (const r of s.savingsLog)
+    items.push({ id: `sv-${r.id}`, date: r.date, person: "Shared", text: "added to the goal", amount: Number(r.amount), emoji: "🏆" });
+  for (const p of s.payments)
+    items.push({ id: `py-${p.id}`, date: p.date, person: "Shared", text: `paid ${p.label ?? "a bill"}`, amount: -Number(p.amount), emoji: "✅" });
+  return items
+    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+    .slice(0, limit);
+}
+
 // ---------- Credit utilization ----------
 export function cardUtilization(accounts: Account[]): {
   account: Account; util: number; over: boolean;
