@@ -1,101 +1,83 @@
 "use client";
 
-import { useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { ChevronDown } from "lucide-react";
+import { Accordion as AccordionPrimitive } from "radix-ui";
 
 const FAQ: { q: string; a: string }[] = [
   {
-    q: "Can I top up tokens?",
-    a: "Yes. Pro and Enterprise can buy $10, $25, or $50 token packs from /app/settings/billing. Top-ups never expire. Free is allowance-only — upgrade to Pro to enable top-ups.",
+    q: "What is a message?",
+    a: "Each AI response from a specialist counts toward your monthly token allowance. Token consumption varies by response length — a short reply might use a few hundred tokens while a detailed analysis or code review can use several thousand. Your plan's allowance covers all specialists.",
   },
   {
-    q: "What is Praxis Depth?",
-    a: "Praxis Flow is the fast model — the one running on most turns. Praxis Depth is the extended-thinking variant: longer reasoning, harder problems, deeper analysis. Atlas decides when Depth is worth it, and it's available on Enterprise. Free and Pro both run Flow.",
+    q: "Can I try Praxis free?",
+    a: "Yes. The Free tier gives you access to Atlas (your chief of staff) and the Marketing specialist with 50k tokens per month — no credit card required. Tokens reset at the start of each billing cycle.",
   },
   {
-    q: "How does multi-user work?",
-    a: "Enterprise unlocks multi-user workspaces — invite teammates with role-based access, share memory, run roundtable as a team. The implementation is rolling out across Q3 2026; today it's a single-seat with the upgrade path stamped in.",
+    q: "How do the specialists work?",
+    a: "Each specialist is a pre-built AI employee tuned for its domain — Marketing, Sales, Engineering, Finance, Compliance, and more. There's no setup or prompt engineering required. Describe your task in plain language; Atlas routes it to the right specialist automatically.",
+  },
+  {
+    q: "Is my data private?",
+    a: "Yes. Your data lives in a dedicated database with row-level security — only your account can access it. We never use your conversations to train models. All data is encrypted in transit and at rest.",
   },
   {
     q: "Can I cancel anytime?",
-    a: "Yes — through /app/settings/billing or by emailing luis@conduitai.io. We'll prorate the unused portion. No multi-month contracts on Pro; Enterprise is month-to-month or annual at your choice.",
+    a: "Yes. Cancel from Settings → Billing at any time with no cancellation fees. You keep full access through the end of your billing period — no proration penalties.",
   },
   {
     q: "What happens when I hit the token cap?",
-    a: "Free tier turns off the chat with a friendly notice when you hit the cap. Pro and Enterprise prompt you to top up. The cap rolls over automatically at the start of your next billing cycle.",
+    a: "You'll see an in-chat upgrade prompt. No conversations are lost and all your data stays intact. You can upgrade your plan or add a one-time token top-up ($10 / $25 / $50) that never expires.",
   },
   {
-    q: "Do you offer custom enterprise plans?",
-    a: "Yes — for teams replacing whole departments or running on-prem-style isolation, email luis@conduitai.io. We'll talk through token volume, employee customization, and SLA.",
+    q: "Do I need to manage each specialist?",
+    a: "No. The specialists are autonomous agents. Atlas, your chief of staff, decides which specialist handles each task and routes work automatically. You just describe what you need — the team figures out the rest.",
+  },
+  {
+    q: "Can I add my own team members?",
+    a: "Team collaboration is coming on the Enterprise plan. Today Praxis is a single-seat product optimized for the solo founder. You can join the waitlist by emailing luis@conduitai.io.",
   },
 ];
 
 export function PricingFAQ() {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const prefersReduced = useReducedMotion();
-
-  const duration = prefersReduced ? 0 : 0.3;
-
   return (
-    <dl className="mt-12 space-y-3">
-      {FAQ.map((item, i) => {
-        const isOpen = openIndex === i;
-        return (
-          <div
+    <AccordionPrimitive.Root type="single" collapsible asChild>
+      <dl className="mt-12 space-y-3">
+        {FAQ.map((item, i) => (
+          <AccordionPrimitive.Item
             key={item.q}
-            className="conduit-card group cursor-pointer"
-            style={{
-              transition: "transform 150ms ease",
-            }}
-            onMouseEnter={(e) => {
-              if (!isOpen) (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.transform = "";
-            }}
+            value={`item-${i}`}
+            asChild
           >
-            <button
-              type="button"
-              aria-expanded={isOpen}
-              className="w-full flex items-start justify-between gap-4 p-6 md:p-7 text-left"
-              onClick={() => setOpenIndex(isOpen ? null : i)}
-            >
-              <dt
-                className="text-[18px] md:text-[20px] tracking-[-0.01em] text-[var(--color-cream)]"
-                style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
+            <div className="conduit-card overflow-hidden">
+              <AccordionPrimitive.Header asChild>
+                <dt>
+                  <AccordionPrimitive.Trigger className="group flex w-full items-start justify-between gap-4 p-6 md:p-7 text-left">
+                    <span
+                      className="text-[18px] md:text-[20px] tracking-[-0.01em] text-[var(--color-cream)]"
+                      style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
+                    >
+                      {item.q}
+                    </span>
+                    <ChevronDown
+                      aria-hidden
+                      size={20}
+                      className="mt-1 shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] group-data-[state=open]:rotate-180"
+                      style={{ color: "var(--color-dept-ops)" }}
+                    />
+                  </AccordionPrimitive.Trigger>
+                </dt>
+              </AccordionPrimitive.Header>
+              <AccordionPrimitive.Content
+                className="overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up"
               >
-                {item.q}
-              </dt>
-              <motion.span
-                aria-hidden
-                animate={{ rotate: isOpen ? 45 : 0 }}
-                transition={{ duration, ease: [0.25, 1, 0.5, 1] }}
-                className="shrink-0 mt-1.5 w-6 h-6 rounded-full bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge)] flex items-center justify-center text-[var(--color-cream-mute)] group-hover:text-[var(--color-indigo-500)] group-hover:border-[var(--color-indigo-500)] transition-colors"
-                style={{ fontSize: "14px" }}
-              >
-                +
-              </motion.span>
-            </button>
-
-            <AnimatePresence initial={false}>
-              {isOpen && (
-                <motion.div
-                  key="content"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration, ease: [0.25, 1, 0.5, 1] }}
-                  style={{ overflow: "hidden" }}
-                >
-                  <dd className="px-6 md:px-7 pb-6 md:pb-7 text-[15px] md:text-[16px] text-[var(--color-cream-soft)] leading-[1.7]">
-                    {item.a}
-                  </dd>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        );
-      })}
-    </dl>
+                <dd className="px-6 md:px-7 pb-6 md:pb-7 text-[15px] md:text-[16px] text-[var(--color-cream-soft)] leading-[1.7]">
+                  {item.a}
+                </dd>
+              </AccordionPrimitive.Content>
+            </div>
+          </AccordionPrimitive.Item>
+        ))}
+      </dl>
+    </AccordionPrimitive.Root>
   );
 }
