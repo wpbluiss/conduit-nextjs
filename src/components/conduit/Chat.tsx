@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Link, Pin, Search, Share2, Tag, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { UpgradeCTABanner } from "./UpgradeCTABanner";
 import { AnimatePresence, motion } from "framer-motion";
+import { MESSAGE_SENT } from "@/lib/ui/motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
   DEPT_COLOR,
@@ -3028,9 +3029,9 @@ const MessageBubble = memo(function MessageBubble({
       <motion.div
         data-search-match={searchMatch || undefined}
         className="flex justify-end group"
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+        initial={MESSAGE_SENT.initial}
+        animate={MESSAGE_SENT.animate}
+        transition={MESSAGE_SENT.transition}
         style={searchMatch ? { outline: "2px solid var(--color-accent)", outlineOffset: "3px", borderRadius: "12px" } : undefined}
         onTouchStart={handleTouchStart}
         onTouchEnd={cancelTouchTimer}

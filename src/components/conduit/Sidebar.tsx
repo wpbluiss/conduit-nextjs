@@ -5,6 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { CX_EASE, CX_DUR_FAST, CX_DUR_BASE } from "@/lib/ui/motion";
 import {
   Activity,
   BarChart3,
@@ -603,7 +604,7 @@ export function Sidebar({
         aria-modal={open ? "true" : undefined}
         aria-label="Navigation"
         animate={{ width: collapsed ? 56 : 256 }}
-        transition={skipTransition || shouldReduceMotion ? { duration: 0 } : { duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+        transition={skipTransition || shouldReduceMotion ? { duration: 0 } : { duration: CX_DUR_BASE, ease: [...CX_EASE] }}
         className={`cx-glass fixed md:static z-40 inset-y-0 left-0 border-r flex flex-col overflow-hidden transform transition-transform duration-200 ease-in-out ${
           open ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
@@ -713,7 +714,7 @@ export function Sidebar({
             aria-label="New chat"
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.94 }}
-            transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
             className="mx-auto my-2 flex items-center justify-center w-8 h-8 rounded-lg"
             style={{
               background: "color-mix(in srgb, var(--color-accent) 12%, var(--color-surface-elevated))",
@@ -733,7 +734,7 @@ export function Sidebar({
             }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
             className="mx-3 my-2 flex items-center gap-2 px-3 py-2 rounded-lg cx-type-sm font-medium"
             style={{
               background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
@@ -1080,7 +1081,7 @@ export function Sidebar({
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
+                      transition={shouldReduceMotion ? { duration: 0 } : { duration: CX_DUR_FAST, ease: [...CX_EASE] }}
                       className="truncate"
                     >
                       Builds
@@ -1695,7 +1696,7 @@ function NavLink({
       <motion.span
         whileHover={shouldReduceMotion ? undefined : { scale: collapsed ? 1.15 : 1.12 }}
         whileTap={shouldReduceMotion ? undefined : { scale: 0.92 }}
-        transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
         className="shrink-0 inline-flex"
         style={{ color: active ? "var(--cx-accent, var(--color-accent))" : undefined }}
       >
@@ -1711,7 +1712,7 @@ function NavLink({
             transition={
               shouldReduceMotion
                 ? { duration: 0 }
-                : { duration: 0.12, ease: [0.22, 1, 0.36, 1] }
+                : { duration: CX_DUR_FAST, ease: [...CX_EASE] }
             }
             className="truncate"
           >
