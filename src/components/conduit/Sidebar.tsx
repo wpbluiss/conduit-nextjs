@@ -41,6 +41,7 @@ import { ChangelogPopover } from "./ChangelogPopover";
 import { NotificationCenter } from "./NotificationCenter";
 import { PaywallModal } from "./PaywallModal";
 import type { PaywallPayload } from "./PaywallModal";
+import { GettingStartedChecklist } from "./GettingStartedChecklist";
 
 const BANNER_SESSION_KEY = "praxis:upgrade_banner_dismissed";
 
@@ -239,6 +240,7 @@ export function Sidebar({
   inFlightBuildsInitial,
   avatarUrl,
   displayName,
+  showGettingStarted,
 }: {
   userEmail: string;
   accountName: string;
@@ -255,6 +257,7 @@ export function Sidebar({
   inFlightBuildsInitial: InFlightBuild[];
   avatarUrl?: string | null;
   displayName?: string | null;
+  showGettingStarted?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -1090,6 +1093,11 @@ export function Sidebar({
             </div>
           )}
         </nav>
+
+        {/* Getting-started checklist — new accounts only, hidden in icon-only mode */}
+        {!collapsed && showGettingStarted && (
+          <GettingStartedChecklist hasConversations={conversations.length > 0} />
+        )}
 
         {/* Upgrade banner — free-plan users only, hidden in icon-only mode */}
         {!collapsed && tierId === "free" && !internalAccount && typeof tokensUsed === "number" && typeof tokensAllowance === "number" && (
