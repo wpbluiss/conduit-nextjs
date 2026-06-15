@@ -284,6 +284,9 @@ export function Chat({
     hasChosen === false && messages.length === 0 && !conversationId;
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // True when the scroll container is within 150px of the bottom — used to
+  // decide whether auto-scroll should follow new content.
+  const atBottomRef = useRef(true);
   const toast = useToast();
   const [drawerArtifactId, setDrawerArtifactId] = useState<string | null>(null);
   const [paywall, setPaywall] = useState<PaywallPayload | null>(null);
@@ -870,19 +873,47 @@ export function Chat({
     setHasMore(initialHasMore);
   }, [initialId, initialMessages, initialHasMore]);
 
-  // Scroll to bottom when new messages arrive at the bottom (not when prepending older ones).
+  // Track whether the user has scrolled away from the bottom.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      atBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Smooth-scroll to bottom when a new message is added (new turn).
+  // Stops if the user has manually scrolled up.
   const prevMsgCountRef = useRef(initialMessages.length);
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     const prev = prevMsgCountRef.current;
     const curr = messages.length;
-    // Only auto-scroll when messages were appended (new turn), not prepended (older history).
     if (curr > prev && !loadingOlder) {
-      el.scrollTop = el.scrollHeight;
+      // Always follow when the user just sent something (two messages added at once:
+      // user + pending assistant), or when they are already near the bottom.
+      const added = curr - prev;
+      const userJustSent = added >= 2;
+      if (userJustSent || atBottomRef.current) {
+        el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+        atBottomRef.current = true;
+      }
     }
     prevMsgCountRef.current = curr;
-  }, [messages, loadingOlder]);
+  }, [messages.length, loadingOlder]);
+
+  // During streaming, keep scrolling to bottom if the user is at the bottom.
+  // Uses instant scroll (smooth would be jittery on rapid token updates).
+  useEffect(() => {
+    if (!loading) return;
+    const el = scrollRef.current;
+    if (!el || !atBottomRef.current) return;
+    el.scrollTop = el.scrollHeight;
+  }, [messages, loading]);
 
   const loadOlderMessages = useCallback(async () => {
     if (!conversationId || loadingOlder || !hasMore) return;
@@ -2902,9 +2933,9 @@ const MessageBubble = memo(function MessageBubble({
       <motion.div
         data-search-match={searchMatch || undefined}
         className="flex justify-end group"
-        initial={{ opacity: 0, y: 6 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+        transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
         style={searchMatch ? { outline: "2px solid var(--color-accent)", outlineOffset: "3px", borderRadius: "12px" } : undefined}
         onTouchStart={handleTouchStart}
         onTouchEnd={cancelTouchTimer}
@@ -2992,7 +3023,7 @@ const MessageBubble = memo(function MessageBubble({
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
+        transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
       >
         <TypingIndicator employee={employee} roundTable={isRoundTable} />
       </motion.div>
@@ -3012,7 +3043,7 @@ const MessageBubble = memo(function MessageBubble({
       }}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
+      transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
       onTouchStart={handleTouchStart}
       onTouchEnd={cancelTouchTimer}
       onTouchMove={cancelTouchTimer}
