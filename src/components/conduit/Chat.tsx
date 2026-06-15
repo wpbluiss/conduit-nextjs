@@ -132,6 +132,18 @@ function suggestionsForTier(allowed: Set<EmployeeKey>): Suggestion[] {
   return [...base, ...extras].slice(0, 4);
 }
 
+const SPECIALIST_PROMPTS: Record<EmployeeId, string> = {
+  jarvis: "Help me prioritize what to work on this week across my business",
+  marketing: "Draft a LinkedIn post announcing our new product feature",
+  sales: "Write a cold email sequence targeting e-commerce founders",
+  engineering: "Help me design a CRM system for my small business",
+  finance: "Analyze my business's cash flow and suggest cost-saving measures",
+  compliance: "What are my main compliance requirements for handling customer data?",
+  hr: "Draft a job description for a part-time customer support specialist",
+  ops: "Create an SOP for onboarding new clients to my consulting business",
+  legal: "Review this SaaS contract clause for potential liability risks",
+};
+
 type PinValue = EmployeeKey | "auto" | "team";
 
 const ALL_PIN_OPTIONS: { value: PinValue; label: string }[] = [
@@ -1504,8 +1516,19 @@ export function Chat({
               onSend={send}
               suggestions={suggestions}
               isFirstRun={isFirstRun}
+              pin={pin}
               onPinSelect={(emp) => {
                 setPin(emp);
+                requestAnimationFrame(() => {
+                  document
+                    .querySelector<HTMLTextAreaElement>(
+                      ".praxis-composer-pill textarea",
+                    )
+                    ?.focus();
+                });
+              }}
+              onPromptInsert={(text) => {
+                setInput(text);
                 requestAnimationFrame(() => {
                   document
                     .querySelector<HTMLTextAreaElement>(
@@ -1963,18 +1986,24 @@ function EmptyState({
   onSend,
   suggestions,
   isFirstRun = false,
+  pin = "auto",
   onPinSelect,
+  onPromptInsert,
 }: {
   firstName: string;
   onSend: (text: string, pin?: EmployeeKey) => void;
   suggestions: Suggestion[];
   isFirstRun?: boolean;
+  pin?: PinValue;
   onPinSelect?: (emp: EmployeeKey) => void;
+  onPromptInsert?: (text: string) => void;
 }) {
   const copy = composeChatEmptyCopy({
     firstName,
     timeOfDay: timeOfDayBucket(),
   });
+
+  const showSpecialistGrid = pin === "auto";
 
   return (
     <div
@@ -1982,7 +2011,7 @@ function EmptyState({
         paddingTop: "var(--space-8)",
       }}
     >
-      {isFirstRun ? (
+      {showSpecialistGrid ? (
         <>
           <p className="praxis-eyebrow">
             <span
@@ -1997,7 +2026,7 @@ function EmptyState({
                 display: "inline-block",
               }}
             />
-            Your team is ready · {firstName}
+            {isFirstRun ? `Your team is ready · ${firstName}` : `${copy.eyebrow} · ${firstName}`}
           </p>
           <div
             style={{
@@ -2009,17 +2038,19 @@ function EmptyState({
           >
             <PraxisAvatar employee="jarvis" size="xl" pulse="ambient" />
             <h1 className="praxis-display-1">
-              Meet your nine specialists
+              {isFirstRun ? "Meet your nine specialists" : copy.headline}
             </h1>
           </div>
           <p
             className="praxis-body-lg"
             style={{ marginTop: "var(--space-4)", maxWidth: "36rem" }}
           >
-            Click any specialist to open a conversation with them, or type anything below and Atlas will route it to the right person.
+            {isFirstRun
+              ? "Click any specialist to start with a sample prompt, or type anything below and Atlas will route it."
+              : copy.subline}
           </p>
           <div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            className="grid grid-cols-2 lg:grid-cols-3"
             style={{
               marginTop: "var(--space-8)",
               gap: "var(--space-3)",
@@ -2027,11 +2058,15 @@ function EmptyState({
           >
             {EMPLOYEE_ORDER.map((id) => {
               const emp = EMPLOYEES[id];
+              const prompt = SPECIALIST_PROMPTS[id];
               return (
                 <button
                   key={emp.id}
                   type="button"
-                  onClick={() => onPinSelect?.(emp.id as EmployeeKey)}
+                  onClick={() => {
+                    onPinSelect?.(emp.id as EmployeeKey);
+                    onPromptInsert?.(prompt);
+                  }}
                   className="praxis-card praxis-card-team text-left"
                   data-dept={emp.id}
                   style={{ cursor: "pointer", width: "100%" }}
@@ -2071,7 +2106,7 @@ function EmptyState({
                       lineHeight: 1.5,
                     }}
                   >
-                    {emp.tagline}
+                    {prompt}
                   </p>
                 </button>
               );
