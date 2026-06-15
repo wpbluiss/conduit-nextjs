@@ -99,7 +99,7 @@ export default function OutputsPage() {
           >
             <ArrowLeft size={14} />
           </Link>
-          <h1 className="serif text-3xl">Outputs</h1>
+          <h1 className="cx-heading-2xl">Outputs</h1>
         </div>
         <p className="text-sm text-[var(--color-text-muted)] mb-8">
           Specialist responses you&apos;ve saved for reference.
@@ -146,7 +146,7 @@ export default function OutputsPage() {
                           >
                             {emp?.name ?? output.specialist}
                           </span>
-                          <span className="text-[10px] text-[var(--color-text-muted)]">
+                          <span className="cx-meta">
                             {new Date(output.created_at).toLocaleDateString(undefined, {
                               month: "short",
                               day: "numeric",

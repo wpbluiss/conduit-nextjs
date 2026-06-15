@@ -10,10 +10,7 @@ export default function AppNotFound() {
       >
         404
       </p>
-      <h1
-        className="text-3xl md:text-4xl mb-3"
-        style={{ fontFamily: "var(--font-serif)", fontWeight: 400, letterSpacing: "-0.02em" }}
-      >
+      <h1 className="cx-heading-2xl mb-3">
         Page not found
       </h1>
       <p className="text-sm mb-8 max-w-xs" style={{ color: "var(--color-text-muted)", lineHeight: 1.6 }}>

@@ -165,7 +165,7 @@ function SidebarUpgradeBanner({
               }}
             />
           </div>
-          <p className="mt-1 text-[10px]" style={{ color: "var(--color-text-muted)" }}>
+          <p className="cx-mono cx-type-xs mt-1" style={{ color: "var(--color-text-muted)" }}>
             {usedK}k / {capK}k tokens used ({pctDisplay}%)
           </p>
         </div>
@@ -776,7 +776,7 @@ export function Sidebar({
           {/* Pinned specialists — non-collapsed, shown above the full team list */}
           {!collapsed && pinned.length > 0 && (
             <div className="mt-3">
-              <div className="px-3 py-1 flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+              <div className="px-3 py-1 flex items-center gap-1.5 cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                 <Pin size={9} aria-hidden /> Pinned
               </div>
               <ul className="space-y-0.5 mt-0.5">
@@ -860,12 +860,12 @@ export function Sidebar({
               <button
                 type="button"
                 onClick={() => setTeamExpanded((v) => !v)}
-                className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                className="w-full flex items-center justify-between px-3 py-1.5 cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
               >
                 <span className="inline-flex items-center gap-1.5">
                   <Users2 size={11} /> Team
                 </span>
-                <span aria-hidden className="text-[10px]">
+                <span aria-hidden>
                   {teamExpanded ? "−" : "+"}
                 </span>
               </button>
@@ -1173,7 +1173,7 @@ export function Sidebar({
           {/* Recent conversations — hidden in icon-only mode */}
           {!collapsed && conversations.length > 0 && (
             <div className="mt-4">
-              <div className="px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+              <div className="px-3 py-1.5 cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                 Recent
               </div>
 
@@ -1375,7 +1375,7 @@ export function Sidebar({
                               {titleOverrides[c.id] ?? c.title ?? "Untitled chat"}
                             </span>
                             <span
-                              className="shrink-0 text-[10px] font-mono opacity-0 group-hover:opacity-100 transition-opacity duration-100"
+                              className="shrink-0 cx-mono cx-type-xs opacity-0 group-hover:opacity-100 transition-opacity duration-100"
                               style={{ color: "var(--color-text-muted)" }}
                             >
                               {relativeDate(c.updated_at)}

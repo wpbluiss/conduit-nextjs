@@ -64,7 +64,7 @@ export default async function AnalyticsPage() {
           <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
             Praxis Console · Analytics
           </p>
-          <h1 className="serif text-4xl md:text-5xl mt-2">Analytics</h1>
+          <h1 className="cx-heading-3xl mt-2">Analytics</h1>
           <p className="mt-3 text-sm text-[var(--color-text-muted)] max-w-xl">
             What your team has been up to. Last 7 days unless noted.
           </p>
@@ -92,7 +92,7 @@ export default async function AnalyticsPage() {
           <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
             Coming soon
           </div>
-          <h2 className="serif text-2xl md:text-3xl mb-3">
+          <h2 className="cx-heading-xl mb-3">
             More analytics coming soon
           </h2>
           <p className="text-sm text-[var(--color-text-muted)] leading-relaxed max-w-2xl">
@@ -121,7 +121,7 @@ function Card({
       <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
         {label}
       </div>
-      <div className="serif text-3xl mt-2">{value}</div>
+      <div className="cx-stat mt-2">{value}</div>
       <div className="text-[11px] text-[var(--color-text-muted)] mt-1.5 leading-snug">
         {sub}
       </div>

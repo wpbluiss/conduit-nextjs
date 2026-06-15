@@ -79,7 +79,7 @@ export default async function ActivityPage() {
         style={{ borderColor: "var(--color-border)" }}
       >
         <h1
-          className="text-lg font-semibold"
+          className="cx-heading-lg"
           style={{ color: "var(--color-text)" }}
         >
           Activity

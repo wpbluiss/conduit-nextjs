@@ -36,10 +36,7 @@ export default function AppError({ error, reset, unstable_retry }: Props) {
       >
         <AlertTriangle size={22} />
       </span>
-      <h1
-        className="text-2xl md:text-3xl mb-3"
-        style={{ fontFamily: "var(--font-serif)", fontWeight: 400, letterSpacing: "-0.02em" }}
-      >
+      <h1 className="cx-heading-xl mb-3">
         Something went wrong
       </h1>
       <p className="text-sm mb-8 max-w-xs" style={{ color: "var(--color-text-muted)", lineHeight: 1.6 }}>
