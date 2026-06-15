@@ -16,8 +16,13 @@ export default async function ProfileSettings() {
 
   return (
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8">
-      <div className="mx-auto max-w-3xl">
-        <h1 className="cx-heading-2xl mb-8">Settings</h1>
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-8">
+          <h1 className="cx-heading-2xl">Settings</h1>
+          <p className="cx-type-sm mt-1" style={{ color: "var(--cx-text-muted)" }}>
+            Manage your account, workspace, and billing preferences.
+          </p>
+        </div>
         <SettingsTabs
           email={data.email}
           fullName={data.fullName}

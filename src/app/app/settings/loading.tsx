@@ -1,7 +1,3 @@
-/**
- * Loading skeleton for /app/settings. Mirrors the settings page structure:
- * header + tab bar + form rows. Renders inside the persistent /app layout.
- */
 export default function SettingsLoading() {
   return (
     <div
@@ -9,67 +5,73 @@ export default function SettingsLoading() {
       aria-busy
       aria-live="polite"
     >
-      <div className="mx-auto max-w-3xl">
-        {/* Page title */}
-        <div
-          style={{
-            height: 32,
-            width: 120,
-            marginBottom: "var(--space-8)",
-            borderRadius: 6,
-            background: "var(--color-border)",
-            opacity: 0.6,
-          }}
-        />
-
-        {/* Tab bar */}
-        <div
-          style={{
-            display: "flex",
-            gap: "var(--space-2)",
-            marginBottom: "var(--space-8)",
-            borderBottom: "1px solid var(--color-border)",
-            paddingBottom: "var(--space-3)",
-          }}
-        >
-          {[80, 64, 96].map((w, i) => (
-            <div
-              key={i}
-              style={{
-                height: 28,
-                width: w,
-                borderRadius: 6,
-                background: "var(--color-border)",
-                opacity: i === 0 ? 0.6 : 0.35,
-              }}
-            />
-          ))}
+      <div className="mx-auto max-w-5xl">
+        {/* Page title + subtitle */}
+        <div className="mb-8">
+          <div
+            style={{
+              height: 32,
+              width: 120,
+              marginBottom: 8,
+              borderRadius: 6,
+              background: "var(--cx-border)",
+              opacity: 0.6,
+            }}
+          />
+          <div
+            style={{
+              height: 14,
+              width: 240,
+              borderRadius: 9999,
+              background: "var(--cx-border)",
+              opacity: 0.35,
+            }}
+          />
         </div>
 
-        {/* Form rows */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-6)" }}>
-          {[160, 200, 180].map((w, i) => (
-            <div key={i}>
+        {/* Two-column layout skeleton */}
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* Sidebar nav skeleton (desktop only) */}
+          <div className="hidden md:flex flex-col gap-2 w-44 shrink-0 pt-1">
+            {[56, 72, 52, 64, 60].map((w, i) => (
               <div
+                key={i}
                 style={{
-                  height: 8,
+                  height: 32,
                   width: w,
-                  borderRadius: 9999,
-                  background: "var(--color-border)",
-                  opacity: 0.5,
-                  marginBottom: "var(--space-2)",
-                }}
-              />
-              <div
-                style={{
-                  height: 44,
                   borderRadius: 6,
-                  background: "var(--color-border)",
-                  opacity: 0.3,
+                  background: "var(--cx-border)",
+                  opacity: i === 0 ? 0.55 : 0.3,
                 }}
               />
-            </div>
-          ))}
+            ))}
+          </div>
+
+          {/* Content skeleton */}
+          <div className="flex-1 min-w-0 flex flex-col gap-6">
+            {[160, 200, 180].map((w, i) => (
+              <div key={i}>
+                <div
+                  style={{
+                    height: 8,
+                    width: w,
+                    borderRadius: 9999,
+                    background: "var(--cx-border)",
+                    opacity: 0.5,
+                    marginBottom: 8,
+                  }}
+                />
+                <div
+                  style={{
+                    height: 44,
+                    borderRadius: 8,
+                    background: "var(--cx-border)",
+                    opacity: 0.25,
+                  }}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
       <span className="sr-only">Loading settings…</span>

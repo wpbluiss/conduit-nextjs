@@ -109,6 +109,46 @@ export type SettingsTabKey =
   | "referrals"
   | "labels";
 
+const SETTINGS_NAV: { title: string | null; items: [SettingsTabKey, string][] }[] = [
+  {
+    title: null,
+    items: [
+      ["profile", "Profile"],
+      ["appearance", "Appearance"],
+      ["security", "Security"],
+    ],
+  },
+  {
+    title: "Workspace",
+    items: [
+      ["workspace", "Workspace"],
+      ["business", "Business"],
+      ["team", "Team"],
+      ["specialists", "Specialists"],
+      ["voice", "Voice"],
+    ],
+  },
+  {
+    title: "Platform",
+    items: [
+      ["integrations", "Integrations"],
+      ["notifications", "Notifications"],
+      ["api", "API Keys"],
+      ["labels", "Labels"],
+      ["referrals", "Referrals"],
+    ],
+  },
+  {
+    title: "Billing",
+    items: [
+      ["usage", "Usage"],
+      ["billing", "Billing"],
+    ],
+  },
+];
+
+const ALL_NAV_ITEMS = SETTINGS_NAV.flatMap((s) => s.items);
+
 export function SettingsTabs({
   email,
   fullName,
@@ -125,101 +165,121 @@ export function SettingsTabs({
   const [tab, setTab] = useState<SettingsTabKey>(defaultTab);
 
   return (
-    <div>
-      <div className="flex gap-1 border-b border-[var(--color-border)] mb-6 overflow-x-auto">
-        {(
-          [
-            ["profile", "Profile"],
-            ["workspace", "Workspace"],
-            ["business", "Business"],
-            ["specialists", "Specialists"],
-            ["voice", "Voice"],
-            ["team", "Team"],
-            ["usage", "Usage"],
-            ["billing", "Billing"],
-            ["security", "Security"],
-            ["notifications", "Notifications"],
-            ["integrations", "Integrations"],
-            ["appearance", "Appearance"],
-            ["api", "API"],
-            ["referrals", "Referrals"],
-            ["labels", "Labels"],
-          ] as const
-        ).map(([key, label]) => (
-          <button
-            key={key}
-            onClick={() => setTab(key)}
-            className={`px-4 py-3 text-sm transition-colors border-b-2 -mb-px ${
-              tab === key
-                ? "border-[var(--color-accent)] text-[var(--color-text)]"
-                : "border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+    <div className="flex flex-col md:flex-row gap-8">
+
+      {/* ── Mobile: horizontal pill strip ──────────────────────────── */}
+      <div className="md:hidden -mx-1 px-1 pb-2 overflow-x-auto">
+        <div className="flex gap-1">
+          {ALL_NAV_ITEMS.map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setTab(key)}
+              className={`px-3 py-1.5 rounded-full cx-type-xs whitespace-nowrap shrink-0 transition-all duration-150 ${
+                tab === key
+                  ? "bg-[var(--cx-accent-tint)] text-[var(--cx-accent-bright)] font-medium"
+                  : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[var(--cx-surface-raised)]"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {tab === "profile" && (
-        <ProfileTab
-          email={email}
-          fullName={fullName}
-          creatorMode={Boolean(account.creator_mode)}
-          creatorModeVersion={account.creator_mode_version ?? 1}
-          timezone={account.timezone ?? "America/New_York"}
-          themePref={account.theme_preference ?? "system"}
-          displayName={account.display_name ?? null}
-          avatarUrl={account.avatar_url ?? null}
-          workspaceName={account.workspace_name ?? null}
-        />
-      )}
-      {tab === "workspace" && (
-        <WorkspaceTab
-          workspaceName={account.workspace_name ?? null}
-          avatarUrl={account.avatar_url ?? null}
-        />
-      )}
-      {tab === "business" && <BusinessTab account={account} />}
-      {tab === "specialists" && (
-        <SpecialistsTab
-          initialNicknames={account.specialist_nicknames ?? {}}
-          initialPrefs={account.specialist_prefs ?? {}}
-        />
-      )}
-      {tab === "voice" && (
-        <VoiceTab
-          ttsAllowed={Boolean(
-            account.internal_account || (account.tier_id ?? "free") !== "free",
-          )}
-        />
-      )}
-      {tab === "team" && <TeamTab />}
-      {tab === "usage" && <UsageTab usage={usage} />}
-      {tab === "billing" && <BillingTab account={account} usage={usage} />}
-      {tab === "security" && <MFASecurity />}
-      {tab === "notifications" && <NotificationsTab />}
-      {tab === "integrations" && (
-        <IntegrationsTab
-          isFreeUser={
-            !account.internal_account && (account.tier_id ?? "free") === "free"
-          }
-        />
-      )}
-      {tab === "appearance" && (
-        <AppearanceTab
-          themePref={account.theme_preference ?? "system"}
-          accentPref={account.accent_preference ?? "ember"}
-        />
-      )}
-      {tab === "api" && (
-        <ApiKeysTab
-          isPro={Boolean(
-            account.internal_account || (account.tier_id ?? "free") !== "free",
-          )}
-        />
-      )}
-      {tab === "referrals" && <ReferralsTab />}
-      {tab === "labels" && <LabelsTab />}
+      {/* ── Desktop: vertical sidebar nav ──────────────────────────── */}
+      <nav className="hidden md:block w-44 shrink-0" aria-label="Settings navigation">
+        {SETTINGS_NAV.map((section, si) => (
+          <div key={si} className={si > 0 ? "mt-6" : ""}>
+            {section.title && (
+              <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-faint)] px-3 mb-1.5">
+                {section.title}
+              </div>
+            )}
+            <div className="space-y-0.5">
+              {section.items.map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setTab(key)}
+                  className={`w-full text-left px-3 py-2 rounded-md cx-type-sm transition-all duration-150 focus-visible:outline-none ${
+                    tab === key
+                      ? "bg-[var(--cx-accent-tint)] text-[var(--cx-accent-bright)] font-medium"
+                      : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[var(--cx-surface-raised)]"
+                  }`}
+                  style={tab === key ? { boxShadow: "inset 2px 0 0 var(--cx-accent)" } : undefined}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </nav>
+
+      {/* ── Content ────────────────────────────────────────────────── */}
+      <div className="flex-1 min-w-0">
+        {tab === "profile" && (
+          <ProfileTab
+            email={email}
+            fullName={fullName}
+            creatorMode={Boolean(account.creator_mode)}
+            creatorModeVersion={account.creator_mode_version ?? 1}
+            timezone={account.timezone ?? "America/New_York"}
+            themePref={account.theme_preference ?? "system"}
+            displayName={account.display_name ?? null}
+            avatarUrl={account.avatar_url ?? null}
+            workspaceName={account.workspace_name ?? null}
+          />
+        )}
+        {tab === "workspace" && (
+          <WorkspaceTab
+            workspaceName={account.workspace_name ?? null}
+            avatarUrl={account.avatar_url ?? null}
+          />
+        )}
+        {tab === "business" && <BusinessTab account={account} />}
+        {tab === "specialists" && (
+          <SpecialistsTab
+            initialNicknames={account.specialist_nicknames ?? {}}
+            initialPrefs={account.specialist_prefs ?? {}}
+          />
+        )}
+        {tab === "voice" && (
+          <VoiceTab
+            ttsAllowed={Boolean(
+              account.internal_account || (account.tier_id ?? "free") !== "free",
+            )}
+          />
+        )}
+        {tab === "team" && <TeamTab />}
+        {tab === "usage" && <UsageTab usage={usage} />}
+        {tab === "billing" && <BillingTab account={account} usage={usage} />}
+        {tab === "security" && <MFASecurity />}
+        {tab === "notifications" && <NotificationsTab />}
+        {tab === "integrations" && (
+          <IntegrationsTab
+            isFreeUser={
+              !account.internal_account && (account.tier_id ?? "free") === "free"
+            }
+          />
+        )}
+        {tab === "appearance" && (
+          <AppearanceTab
+            themePref={account.theme_preference ?? "system"}
+            accentPref={account.accent_preference ?? "ember"}
+          />
+        )}
+        {tab === "api" && (
+          <ApiKeysTab
+            isPro={Boolean(
+              account.internal_account || (account.tier_id ?? "free") !== "free",
+            )}
+          />
+        )}
+        {tab === "referrals" && <ReferralsTab />}
+        {tab === "labels" && <LabelsTab />}
+      </div>
     </div>
   );
 }
@@ -953,16 +1013,22 @@ function ToggleRow({
         type="button"
         onClick={() => onChange(!value)}
         aria-pressed={value}
-        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-150 focus-visible:outline-none ${
           value
-            ? "bg-[var(--color-accent)]"
-            : "bg-[var(--color-border)]"
+            ? "bg-[var(--cx-accent)]"
+            : "bg-[var(--cx-border-strong)]"
         }`}
+        style={undefined}
+        onFocus={(e) => {
+          if (e.target === e.currentTarget) e.currentTarget.style.boxShadow = "var(--cx-accent-glow)";
+        }}
+        onBlur={(e) => { e.currentTarget.style.boxShadow = ""; }}
       >
         <span
-          className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+          className={`inline-block h-5 w-5 transform rounded-full shadow-sm transition-transform motion-safe:duration-150 motion-safe:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${
             value ? "translate-x-5" : "translate-x-0.5"
           }`}
+          style={{ background: value ? "rgba(255,255,255,0.95)" : "var(--cx-text-muted)" }}
         />
       </button>
     </div>

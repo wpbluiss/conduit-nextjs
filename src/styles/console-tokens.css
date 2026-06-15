@@ -322,6 +322,46 @@
 }
 
 /* ------------------------------------------------------------
+ * Form control focus — global accent-glow ring
+ *
+ * Replaces the per-element Tailwind `ring-*` approach with a
+ * consistent spec-aligned focus treatment across all console forms.
+ * Scoped to .praxis-root so marketing / /finance are unaffected.
+ *
+ * Specificity: (0,2,1) beats the Tailwind ring (0,2,0) so our
+ * rule wins in the cascade without !important.
+ * ------------------------------------------------------------ */
+
+.praxis-root input[type="text"]:focus-visible,
+.praxis-root input[type="password"]:focus-visible,
+.praxis-root input[type="email"]:focus-visible,
+.praxis-root input[type="search"]:focus-visible,
+.praxis-root input[type="url"]:focus-visible,
+.praxis-root input[type="number"]:focus-visible,
+.praxis-root input[type="tel"]:focus-visible,
+.praxis-root textarea:focus-visible,
+.praxis-root select:focus-visible {
+  outline: none;
+  box-shadow: var(--cx-accent-glow);
+  border-color: var(--cx-accent) !important;
+}
+
+/* Reduced-motion: keep border-color feedback, drop the box-shadow glow */
+@media (prefers-reduced-motion: reduce) {
+  .praxis-root input[type="text"]:focus-visible,
+  .praxis-root input[type="password"]:focus-visible,
+  .praxis-root input[type="email"]:focus-visible,
+  .praxis-root input[type="search"]:focus-visible,
+  .praxis-root input[type="url"]:focus-visible,
+  .praxis-root input[type="number"]:focus-visible,
+  .praxis-root input[type="tel"]:focus-visible,
+  .praxis-root textarea:focus-visible,
+  .praxis-root select:focus-visible {
+    box-shadow: none;
+  }
+}
+
+/* ------------------------------------------------------------
  * .cx-surface-* utility classes
  *
  * Composable background tiers. Use instead of one-off bg- values.
