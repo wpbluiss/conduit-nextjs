@@ -32,7 +32,8 @@ import {
   X,
 } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
-import { DEPT_COLOR, EMPLOYEE_ICON, employeeLabel } from "./EmployeeBadge";
+import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
+import { SpecialistAvatar } from "./SpecialistAvatar";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import { useNicknames } from "@/context/NicknameContext";
 import { PraxisLogo } from "./PraxisLogo";
@@ -784,7 +785,6 @@ export function Sidebar({
                   const isStreaming = streamingEmployee === emp;
                   const allowed = allowedEmployees.includes(emp);
                   const active = pathname === `/app/team/${emp}`;
-                  const Icon = EMPLOYEE_ICON[emp];
                   const rowInner = (
                     <span
                       className={`relative flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-colors duration-100 ${!active ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]" : ""}`}
@@ -802,19 +802,7 @@ export function Sidebar({
                           className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
                         />
                       )}
-                      <span
-                        aria-hidden
-                        className="inline-flex items-center justify-center shrink-0 w-6 h-6 rounded-lg"
-                        style={{
-                          background: active
-                            ? `color-mix(in srgb, ${DEPT_COLOR[emp]} 22%, var(--color-surface-raised))`
-                            : `color-mix(in srgb, ${DEPT_COLOR[emp]} 14%, var(--color-surface-elevated))`,
-                          color: DEPT_COLOR[emp],
-                          boxShadow: active ? `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[emp]} 70%, transparent)` : `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[emp]} 50%, transparent)`,
-                        }}
-                      >
-                        <Icon size={12} strokeWidth={2.25} />
-                      </span>
+                      <SpecialistAvatar employee={emp} size={28} active={active} streaming={isStreaming} />
                       <span
                         className="truncate flex-1"
                         style={{ color: active ? "var(--color-text)" : "var(--color-text-muted)", fontWeight: active ? 500 : 400 }}
@@ -875,7 +863,6 @@ export function Sidebar({
                     const isStreaming = streamingEmployee === emp;
                     const allowed = allowedEmployees.includes(emp);
                     const active = pathname === `/app/team/${emp}`;
-                    const Icon = EMPLOYEE_ICON[emp];
                     const rowInner = (
                       <span
                         className="relative flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-colors duration-100"
@@ -893,19 +880,7 @@ export function Sidebar({
                             className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
                           />
                         )}
-                        <span
-                          aria-hidden
-                          className="inline-flex items-center justify-center shrink-0 w-6 h-6 rounded-lg"
-                          style={{
-                            background: active
-                              ? `color-mix(in srgb, ${DEPT_COLOR[emp]} 22%, var(--color-surface-raised))`
-                              : `color-mix(in srgb, ${DEPT_COLOR[emp]} 14%, var(--color-surface-elevated))`,
-                            color: DEPT_COLOR[emp],
-                            boxShadow: active ? `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[emp]} 70%, transparent)` : `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[emp]} 50%, transparent)`,
-                          }}
-                        >
-                          <Icon size={12} strokeWidth={2.25} />
-                        </span>
+                        <SpecialistAvatar employee={emp} size={28} active={active} streaming={isStreaming} />
                         <span
                           className="truncate flex-1"
                           style={{ color: active ? "var(--color-text)" : "var(--color-text-muted)", fontWeight: active ? 500 : 400 }}
@@ -969,14 +944,9 @@ export function Sidebar({
                 const allowed = allowedEmployees.includes(emp);
                 const active = pathname === `/app/team/${emp}`;
                 const isPinned = pinned.includes(emp);
-                const Icon = EMPLOYEE_ICON[emp];
                 const btn = (
                   <span
-                    className={`relative flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-100 ${!active ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]" : ""}`}
-                    style={{
-                      background: active ? `color-mix(in srgb, ${DEPT_COLOR[emp]} 18%, var(--color-surface-elevated))` : undefined,
-                      boxShadow: active ? `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[emp]} 65%, transparent)` : undefined,
-                    }}
+                    className="relative flex items-center justify-center"
                     onContextMenu={(e) => handleSpecialistContextMenu(e, emp)}
                     onTouchStart={(e) => handleSpecialistTouchStart(e, emp)}
                     onTouchEnd={handleSpecialistTouchEnd}
@@ -985,22 +955,18 @@ export function Sidebar({
                     {active && (
                       <span
                         aria-hidden
-                        className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
+                        className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)] z-10"
                       />
                     )}
-                    <Icon
-                      size={14}
-                      strokeWidth={2.25}
-                      style={{ color: active ? DEPT_COLOR[emp] : undefined }}
-                    />
+                    <SpecialistAvatar employee={emp} size={32} active={active} streaming={isStreaming} />
                     {!allowed && (
-                      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 flex items-center justify-center">
+                      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 flex items-center justify-center z-10">
                         <Lock size={8} className="text-[var(--color-text-muted)]" />
                       </span>
                     )}
                     {allowed && !isPinned && (
                       <span
-                        className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full border border-[var(--color-surface)]"
+                        className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full border border-[var(--color-surface)] z-10"
                         style={{
                           background: DEPT_COLOR[emp],
                           opacity: isStreaming ? 1 : 0.55,
@@ -1010,7 +976,7 @@ export function Sidebar({
                     )}
                     {allowed && isPinned && (
                       <span
-                        className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 flex items-center justify-center rounded-full border border-[var(--color-surface)]"
+                        className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 flex items-center justify-center rounded-full border border-[var(--color-surface)] z-10"
                         style={{ background: DEPT_COLOR[emp] }}
                         aria-label="Pinned"
                       >
@@ -1208,7 +1174,6 @@ export function Sidebar({
                   </button>
                   {activeSpecialists.map((emp) => {
                     const active = specialistFilter === emp;
-                    const Icon = EMPLOYEE_ICON[emp];
                     return (
                       <button
                         key={emp}
@@ -1234,7 +1199,7 @@ export function Sidebar({
                               }
                         }
                       >
-                        <Icon size={9} strokeWidth={2.5} />
+                        <SpecialistAvatar employee={emp} size={12} active={active} />
                         {labelFor(emp)}
                       </button>
                     );
@@ -1348,22 +1313,7 @@ export function Sidebar({
                                 }}
                               />
                             ) : (
-                              (() => {
-                                const RecentIcon = EMPLOYEE_ICON[empKey];
-                                return (
-                                  <span
-                                    aria-hidden
-                                    className="inline-flex items-center justify-center shrink-0 w-4 h-4 rounded-[5px]"
-                                    style={{
-                                      background: `color-mix(in srgb, ${DEPT_COLOR[empKey]} 18%, var(--color-surface-elevated))`,
-                                      color: DEPT_COLOR[empKey],
-                                      boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[empKey]} 55%, transparent)`,
-                                    }}
-                                  >
-                                    <RecentIcon size={9} strokeWidth={2.5} />
-                                  </span>
-                                );
-                              })()
+                              <SpecialistAvatar employee={empKey} size={16} active={active} />
                             )}
                             <span
                               className="truncate flex-1 text-[12px] leading-snug"
@@ -1625,7 +1575,6 @@ export function Sidebar({
         const dom = conv.dominant_employee;
         const isTeam = dom === "team";
         const empKey = (dom && (TEAM as string[]).includes(dom) ? dom : "jarvis") as EmployeeKey;
-        const PeekIcon = EMPLOYEE_ICON[empKey];
         const preview = conv.last_message
           ? conv.last_message.replace(/\n+/g, " ").trim().slice(0, 120) +
             (conv.last_message.length > 120 ? "…" : "")
@@ -1657,17 +1606,7 @@ export function Sidebar({
                   }}
                 />
               ) : (
-                <span
-                  aria-hidden
-                  className="inline-flex items-center justify-center shrink-0 w-3.5 h-3.5 rounded-[4px]"
-                  style={{
-                    background: `color-mix(in srgb, ${DEPT_COLOR[empKey]} 18%, var(--color-surface-elevated))`,
-                    color: DEPT_COLOR[empKey],
-                    boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[empKey]} 60%, transparent)`,
-                  }}
-                >
-                  <PeekIcon size={9} strokeWidth={2.5} />
-                </span>
+                <SpecialistAvatar employee={empKey} size={14} />
               )}
               <span
                 className="text-[10px] font-semibold truncate"
