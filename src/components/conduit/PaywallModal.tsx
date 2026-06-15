@@ -34,7 +34,7 @@ const FEATURES: {
 ];
 
 function FeatureValue({ value }: { value: string | boolean }) {
-  if (value === true) return <Check size={15} className="mx-auto text-[#14B8A6]" aria-label="Included" />;
+  if (value === true) return <Check size={15} className="mx-auto text-[var(--cx-reward)]" aria-label="Included" />;
   if (value === false) return <Minus size={15} className="mx-auto text-[var(--color-text-muted)] opacity-40" aria-label="Not included" />;
   return <span>{value}</span>;
 }
@@ -165,7 +165,7 @@ export function PaywallModal({
             <X size={18} />
           </button>
 
-          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-[#14B8A6] mb-2">
+          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-[var(--cx-reward)] mb-2">
             <Sparkles size={13} />
             {reasonLabel}
           </div>
@@ -200,7 +200,7 @@ export function PaywallModal({
               }
             >
               Annual
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: "color-mix(in srgb, #14B8A6 15%, transparent)", color: "#14B8A6" }}>
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: "color-mix(in srgb, var(--cx-reward) 15%, transparent)", color: "var(--cx-reward)" }}>
                 −20%
               </span>
             </button>
@@ -221,9 +221,9 @@ export function PaywallModal({
               <div
                 className="px-4 py-3 text-center font-medium uppercase tracking-[0.12em]"
                 style={{
-                  borderLeft: "1px solid rgba(20,184,166,0.3)",
-                  background: "color-mix(in srgb, #14B8A6 8%, transparent)",
-                  color: "#14B8A6",
+                  borderLeft: "1px solid rgba(52,211,153,0.30)",
+                  background: "color-mix(in srgb, var(--cx-reward) 8%, transparent)",
+                  color: "var(--cx-reward)",
                 }}
               >
                 Pro
@@ -247,8 +247,8 @@ export function PaywallModal({
                 <div
                   className="px-4 py-2.5 text-center text-[var(--color-text)]"
                   style={{
-                    borderLeft: "1px solid rgba(20,184,166,0.3)",
-                    background: "color-mix(in srgb, #14B8A6 5%, transparent)",
+                    borderLeft: "1px solid rgba(52,211,153,0.30)",
+                    background: "color-mix(in srgb, var(--cx-reward) 5%, transparent)",
                   }}
                 >
                   <FeatureValue value={f.pro} />
@@ -273,7 +273,7 @@ export function PaywallModal({
               )}
             </div>
             {billing === "annual" && (
-              <span className="text-xs text-[#14B8A6]">
+              <span className="text-xs text-[var(--cx-reward)]">
                 Billed ${(monthlyPrice * 12 * 0.8).toFixed(2)}/yr
               </span>
             )}
@@ -284,9 +284,9 @@ export function PaywallModal({
             disabled={busy}
             className="w-full py-3 rounded-xl text-sm font-medium transition-all disabled:opacity-60"
             style={{
-              background: busy ? "var(--color-border)" : "#14B8A6",
+              background: busy ? "var(--color-border)" : "var(--cx-reward)",
               color: busy ? "var(--color-text-muted)" : "#fff",
-              boxShadow: busy ? "none" : "0 4px 16px rgba(20,184,166,0.35)",
+              boxShadow: busy ? "none" : "0 4px 16px rgba(52,211,153,0.35)",
             }}
           >
             {busy ? "Opening checkout…" : "Upgrade to Pro"}

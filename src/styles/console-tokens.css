@@ -130,6 +130,19 @@
   --color-green:  var(--cx-reward);
   --color-pink:   var(--cx-danger);
 
+  /* -- Destructive / semantic signal bridges -- */
+  --color-destructive: var(--cx-danger);
+  --color-red:         var(--cx-danger);
+  --color-yellow:      #EAB308;
+
+  /* -- Indigo palette → electric violet (retire old --color-indigo-* in console) -- */
+  --color-indigo-50:  rgba(124, 108, 255, 0.08);
+  --color-indigo-100: rgba(124, 108, 255, 0.14);
+  --color-indigo-300: var(--cx-accent-bright);
+  --color-indigo-500: var(--cx-accent);
+  --color-indigo-700: #5548CC;
+  --color-indigo-900: #3B2FA0;
+
   /* -- PDL token bridge (praxis-design-language.css --pdl-* namespace) -- */
   --pdl-canvas:          var(--cx-canvas);
   --pdl-surface:         var(--cx-surface);

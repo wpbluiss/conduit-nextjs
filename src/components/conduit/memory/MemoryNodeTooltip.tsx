@@ -42,7 +42,7 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
       {text.slice(0, idx)}
       <mark
         style={{
-          background: "color-mix(in srgb, var(--pdl-accent, #5B63E8) 25%, transparent)",
+          background: "color-mix(in srgb, var(--pdl-accent, #7C6CFF) 25%, transparent)",
           color: "inherit",
           borderRadius: "2px",
           padding: "0 1px",
