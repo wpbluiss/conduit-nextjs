@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { DownloadSimple, X, Share } from "@phosphor-icons/react";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 type BIPEvent = Event & {
   prompt: () => Promise<void>;
@@ -103,23 +104,27 @@ export function PwaInstaller() {
               <p className="text-xs text-[var(--color-cream-mute)] mt-1">
                 Add to your home screen — opens full-screen like a native app.
               </p>
-              <button
+              <PraxisButton
+                type="button"
+                variant="primary"
+                size="sm"
                 onClick={install}
-                className="mt-2 rounded-lg px-3 py-1.5 text-xs font-medium text-[var(--color-cream)] transition-colors"
-                style={{ background: "var(--cx-accent)" }}
+                className="mt-2"
               >
                 Install
-              </button>
+              </PraxisButton>
             </>
           )}
         </div>
-        <button
+        <PraxisButton
+          type="button"
+          variant="ghost"
+          size="icon-sm"
           onClick={dismiss}
           aria-label="Dismiss"
-          className="text-[var(--color-cream-mute)] hover:text-[var(--color-cream)] p-0.5 transition-colors"
         >
           <X size={16} />
-        </button>
+        </PraxisButton>
       </div>
     </div>
   );

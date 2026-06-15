@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Loader2, StopCircle, X, CheckCircle2, AlertTriangle } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 import type { SessionRow } from "@/hooks/useBuildSession";
 import { ReconnectingPip } from "./ReconnectingPip";
 import type { SubscriptionStatus } from "@/hooks/useBuildSubscription";
@@ -110,26 +111,26 @@ export function BuildHeader({ session, subscription, heartbeat, onRefresh }: Pro
           <span className="text-xs text-[var(--color-pink)]">{abortError}</span>
         )}
         {isAbortable && (
-          <button
-            type="button"
+          <PraxisButton
+            variant="danger"
+            size="sm"
             onClick={onAbort}
             disabled={aborting}
-            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md border border-[var(--color-border)] hover:border-[var(--color-pink)] hover:text-[var(--color-pink)] text-xs text-[var(--color-text-muted)] transition-colors disabled:opacity-50"
             title="Kill the worker subprocess for this build"
           >
             <StopCircle size={13} />
             {aborting ? "Stopping…" : "Stop build"}
-          </button>
+          </PraxisButton>
         )}
-        <button
-          type="button"
+        <PraxisButton
+          variant="ghost"
+          size="icon-sm"
           onClick={() => router.push("/app/builds")}
-          className="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)]"
           aria-label="Back to all builds"
           title="Back to all builds"
         >
           <X size={16} />
-        </button>
+        </PraxisButton>
       </div>
     </header>
   );

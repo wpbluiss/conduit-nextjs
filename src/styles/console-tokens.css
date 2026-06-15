@@ -57,6 +57,8 @@
   /* Drop shadows — deeper for floating tier */
   --cx-glass-shadow:      0 1px 3px rgba(0, 0, 0, 0.40), 0 4px 16px rgba(0, 0, 0, 0.30);
   --cx-glass-shadow-float: 0 4px 24px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40);
+  /* Scrim / modal overlay blur — intentionally lighter than glass; not a glass surface */
+  --cx-scrim-blur:        blur(2px);
 
   /* ---- Electric violet accent (the ONE accent) ---- */
   --cx-accent:          #7C6CFF;
@@ -317,6 +319,46 @@
 /* Fallback for elements that don't support :focus-visible */
 .praxis-root .cx-focus-ring:focus:not(:focus-visible) {
   outline: none;
+}
+
+/* ------------------------------------------------------------
+ * Form control focus — global accent-glow ring
+ *
+ * Replaces the per-element Tailwind `ring-*` approach with a
+ * consistent spec-aligned focus treatment across all console forms.
+ * Scoped to .praxis-root so marketing / /finance are unaffected.
+ *
+ * Specificity: (0,2,1) beats the Tailwind ring (0,2,0) so our
+ * rule wins in the cascade without !important.
+ * ------------------------------------------------------------ */
+
+.praxis-root input[type="text"]:focus-visible,
+.praxis-root input[type="password"]:focus-visible,
+.praxis-root input[type="email"]:focus-visible,
+.praxis-root input[type="search"]:focus-visible,
+.praxis-root input[type="url"]:focus-visible,
+.praxis-root input[type="number"]:focus-visible,
+.praxis-root input[type="tel"]:focus-visible,
+.praxis-root textarea:focus-visible,
+.praxis-root select:focus-visible {
+  outline: none;
+  box-shadow: var(--cx-accent-glow);
+  border-color: var(--cx-accent) !important;
+}
+
+/* Reduced-motion: keep border-color feedback, drop the box-shadow glow */
+@media (prefers-reduced-motion: reduce) {
+  .praxis-root input[type="text"]:focus-visible,
+  .praxis-root input[type="password"]:focus-visible,
+  .praxis-root input[type="email"]:focus-visible,
+  .praxis-root input[type="search"]:focus-visible,
+  .praxis-root input[type="url"]:focus-visible,
+  .praxis-root input[type="number"]:focus-visible,
+  .praxis-root input[type="tel"]:focus-visible,
+  .praxis-root textarea:focus-visible,
+  .praxis-root select:focus-visible {
+    box-shadow: none;
+  }
 }
 
 /* ------------------------------------------------------------
@@ -747,6 +789,25 @@ html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-thumb {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     background: var(--cx-surface-raised, #1C1C26);
+  }
+}
+
+/* ---- Mobile blur reduction (≤480px) ----
+ * High blur values (20–28px) can produce artifacts and GPU pressure on
+ * mid/low-end mobile. Reduce to a lighter blur; opaque backgrounds are
+ * slightly more opaque to compensate.
+ *
+ * Targets .praxis-root (not :root) so the override wins over the main
+ * .praxis-root block above — CSS custom properties inherit from the nearest
+ * ancestor, so overriding on the same element via a later rule wins.
+ * Cap: max two glass layers on mobile.
+ * ----------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .praxis-root {
+    --cx-glass-blur:       blur(12px) saturate(130%);
+    --cx-glass-blur-float: blur(16px) saturate(130%);
+    --cx-glass-bg:         rgba(255, 255, 255, 0.06);
+    --cx-glass-bg-float:   rgba(255, 255, 255, 0.08);
   }
 }
 

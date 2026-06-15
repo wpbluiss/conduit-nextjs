@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { Button } from "@/components/conduit/ui/Button";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 interface Props {
   error: Error & { digest?: string };
@@ -81,13 +82,13 @@ export default function CinemaError({ error, unstable_retry, reset }: Props) {
               Open last-known preview <ExternalLink size={13} />
             </a>
           )}
-          <button
-            type="button"
+          <PraxisButton
+            variant="ghost"
+            size="sm"
             onClick={() => router.push("/app/builds")}
-            className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] underline-offset-2 hover:underline px-3"
           >
             Back to all builds
-          </button>
+          </PraxisButton>
         </div>
       </section>
     </div>

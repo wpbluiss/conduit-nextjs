@@ -8,6 +8,7 @@
 import { useState } from "react";
 import { Mic, Lock, AlertCircle } from "lucide-react";
 import { Button } from "@/components/conduit/ui/Button";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 import VoiceRoom, {
   type ParticipantDisplay,
   type VoiceTokenResponse,
@@ -166,13 +167,14 @@ export default function EnterTheRoomCard({
           <AlertCircle size={14} className="mt-0.5 shrink-0" />
           <div>
             <div>{error}</div>
-            <button
+            <PraxisButton
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => setError(null)}
-              className="text-xs underline mt-0.5 text-red-200/70"
             >
               dismiss
-            </button>
+            </PraxisButton>
           </div>
         </div>
       )}

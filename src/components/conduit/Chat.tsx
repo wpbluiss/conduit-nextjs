@@ -45,6 +45,7 @@ import { ConversationLabelManager, type ConversationLabel } from "./Conversation
 import { Tooltip } from "./pdl/Tooltip";
 import { SpecialistEmptyArt } from "./SpecialistEmptyArt";
 import { Button } from "@/components/conduit/ui/Button";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 export interface VoicePrefs {
   enabled: boolean;
@@ -1609,46 +1610,34 @@ export function Chat({
               </div>
               {messages.length > 0 && (
                 <div className="shrink-0 flex items-center gap-1">
-                  <button
+                  <PraxisButton
                     type="button"
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setSearchOpen((v) => !v)}
                     title="Search messages"
                     aria-label="Search messages"
                     aria-pressed={searchOpen}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cx-type-xs transition-colors"
-                    style={{
-                      color: searchOpen ? "var(--color-text)" : "var(--color-text-muted)",
-                      border: searchOpen ? "1px solid var(--color-border)" : "1px solid transparent",
-                    }}
                   >
                     <Search size={12} />
                     <span className="hidden sm:inline">Search</span>
-                  </button>
-                  <button
+                  </PraxisButton>
+                  <PraxisButton
                     type="button"
+                    variant="ghost"
+                    size="sm"
                     onClick={exportConversation}
                     title="Export as Markdown"
                     aria-label="Export conversation as Markdown"
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cx-type-xs transition-colors"
-                    style={{
-                      color: "var(--color-text-muted)",
-                      border: "1px solid transparent",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
-                      (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-                      (e.currentTarget as HTMLElement).style.borderColor = "transparent";
-                    }}
                   >
                     <Download size={12} />
                     <span className="hidden sm:inline">Markdown</span>
-                  </button>
+                  </PraxisButton>
                   {conversationId && (
-                    <button
+                    <PraxisButton
                       type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={() =>
                         window.open(
                           `/api/conduit/conversations/${conversationId}/export`,
@@ -1657,23 +1646,10 @@ export function Chat({
                       }
                       title="Print / Save as PDF"
                       aria-label="Print conversation or save as PDF"
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cx-type-xs transition-colors"
-                      style={{
-                        color: "var(--color-text-muted)",
-                        border: "1px solid transparent",
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
-                        (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-                        (e.currentTarget as HTMLElement).style.borderColor = "transparent";
-                      }}
                     >
                       <FileText size={12} />
                       <span className="hidden sm:inline">PDF</span>
-                    </button>
+                    </PraxisButton>
                   )}
                   {/* Tag button — only when a conversation exists */}
                   {conversationId && (
@@ -1687,60 +1663,34 @@ export function Chat({
                   )}
                   {/* Copy permalink button — only when a conversation exists */}
                   {conversationId && (
-                    <button
+                    <PraxisButton
                       type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => void copyPermalink()}
                       title="Copy link to this conversation"
                       aria-label="Copy link to this conversation"
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cx-type-xs transition-colors"
-                      style={{
-                        color: linkCopied ? "var(--color-text)" : "var(--color-text-muted)",
-                        border: linkCopied ? "1px solid var(--color-border)" : "1px solid transparent",
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!linkCopied) {
-                          (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
-                          (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!linkCopied) {
-                          (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-                          (e.currentTarget as HTMLElement).style.borderColor = "transparent";
-                        }
-                      }}
                     >
                       <Link size={12} />
                       <span className="hidden sm:inline">{linkCopied ? "Copied!" : "Copy link"}</span>
-                    </button>
+                    </PraxisButton>
                   )}
                   {/* Handoff button — only when conversation has messages and no existing handoff */}
                   {conversationId && !handoffInfo && (
-                    <button
+                    <PraxisButton
                       type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => setShowHandoffPicker(true)}
-                      disabled={handoffLoading}
+                      isDisabled={handoffLoading}
                       title="Hand off to another specialist"
                       aria-label="Hand off to another specialist"
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cx-type-xs transition-colors disabled:opacity-50"
-                      style={{
-                        color: "var(--color-text-muted)",
-                        border: "1px solid transparent",
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
-                        (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-                        (e.currentTarget as HTMLElement).style.borderColor = "transparent";
-                      }}
                     >
                       <Share2 size={12} />
                       <span className="hidden sm:inline">
                         {handoffLoading ? "Handing off…" : "Handoff"}
                       </span>
-                    </button>
+                    </PraxisButton>
                   )}
                 </div>
               )}
@@ -1770,17 +1720,15 @@ export function Chat({
                   {searchMatchSet.size} match{searchMatchSet.size !== 1 ? "es" : ""}
                 </span>
               )}
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="icon-sm"
                 onClick={() => setSearchOpen(false)}
                 aria-label="Close search"
-                className="shrink-0 p-0.5 rounded transition-colors"
-                style={{ color: "var(--color-text-muted)" }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
               >
                 <X size={13} />
-              </button>
+              </PraxisButton>
             </div>
           )}
 
@@ -1980,18 +1928,18 @@ export function Chat({
               >
                 {sendError.text}
               </p>
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => {
                   const retry = sendError.retryText;
                   setSendError(null);
                   void send(retry);
                 }}
-                className="shrink-0 text-sm font-medium transition-colors hover:opacity-80"
-                style={{ color: "var(--cx-accent)" }}
               >
                 Try again
-              </button>
+              </PraxisButton>
             </div>
           )}
           {rateLimitUntil && (
@@ -2059,17 +2007,15 @@ export function Chat({
             </span>
           </div>
           {(connStatus === 'reconnecting' || connStatus === 'reconnected') && (
-            <button
+            <PraxisButton
               type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => setConnStatus('connected')}
               aria-label="Dismiss"
-              className="shrink-0 p-0.5 rounded transition-colors"
-              style={{ color: 'var(--color-text-muted)' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--color-text)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'; }}
             >
               <X size={11} />
-            </button>
+            </PraxisButton>
           )}
         </div>
       )}
@@ -2212,18 +2158,15 @@ export function Chat({
                     Choose a specialist
                   </h2>
                 </div>
-                <button
+                <PraxisButton
                   type="button"
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => setShowHandoffPicker(false)}
                   aria-label="Close"
-                  className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors"
-                  style={{
-                    color: "var(--color-text-muted)",
-                    background: "var(--color-surface)",
-                  }}
                 >
                   <X size={14} />
-                </button>
+                </PraxisButton>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {EMPLOYEE_ORDER.map((empId) => {
@@ -2642,23 +2585,18 @@ function CopyButton({ content }: { content: string }) {
 
   const Icon = copied ? Check : Copy;
   return (
-    <button
+    <PraxisButton
       type="button"
+      variant="ghost"
+      size="sm"
       onClick={handleCopy}
       aria-label={copied ? "Copied!" : "Copy message"}
       title={copied ? "Copied!" : "Copy message"}
-      className="flex items-center gap-1 p-1 rounded transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100"
-      style={{ color: copied ? "var(--color-accent)" : "var(--color-text-muted)" }}
-      onMouseEnter={(e) => {
-        if (!copied) (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
-      }}
-      onMouseLeave={(e) => {
-        if (!copied) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-      }}
+      className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100"
     >
       <Icon size={13} />
       <span className="hidden md:inline cx-type-xs">{copied ? "Copied" : "Copy"}</span>
-    </button>
+    </PraxisButton>
   );
 }
 
@@ -2785,19 +2723,18 @@ function MessageHandoffButton({
 
   return (
     <div ref={ref} className="relative">
-      <button
+      <PraxisButton
         type="button"
+        variant="ghost"
+        size="icon-sm"
+        onClick={() => setOpen((o) => !o)}
         aria-label="Hand off to another specialist"
         title="Hand off to another specialist"
-        disabled={loading}
-        onClick={() => setOpen((o) => !o)}
-        className="p-1 rounded transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
-        style={{ color: "var(--color-text-muted)" }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
+        isDisabled={loading}
+        className="opacity-0 group-hover:opacity-100 disabled:opacity-50"
       >
         <Share2 size={13} />
-      </button>
+      </PraxisButton>
       {open && (
         <div
           className="cx-glass-float cx-glass-border absolute left-0 top-full mt-1 z-20 rounded-xl py-1 min-w-[170px]"
@@ -2993,32 +2930,23 @@ const MessageBubble = memo(function MessageBubble({
               aria-label="Edit message"
             />
             <div className="flex justify-end gap-2">
-              <button
+              <PraxisButton
                 type="button"
+                variant="secondary"
+                size="sm"
                 onClick={onEditCancel}
-                className="px-3 py-1.5 text-xs rounded-lg transition-colors"
-                style={{
-                  color: "var(--color-text-muted)",
-                  border: "1px solid var(--color-border)",
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
               >
                 Cancel
-              </button>
-              <button
+              </PraxisButton>
+              <PraxisButton
                 type="button"
-                disabled={!editDraft.trim()}
+                variant="primary"
+                size="sm"
+                isDisabled={!editDraft.trim()}
                 onClick={() => { if (editDraft.trim()) onEditSubmit?.(editDraft.trim()); }}
-                className="px-3 py-1.5 text-xs rounded-lg transition-colors disabled:opacity-40"
-                style={{
-                  background: "var(--color-accent)",
-                  color: "var(--cx-canvas, #0B0B0F)",
-                  fontWeight: 600,
-                }}
               >
                 Save &amp; resend
-              </button>
+              </PraxisButton>
             </div>
           </div>
         </motion.div>
@@ -3052,15 +2980,16 @@ const MessageBubble = memo(function MessageBubble({
           </div>
           <div className="flex items-center gap-2">
             {onEditStart && !isVoice && (
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={onEditStart}
-                className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity cx-type-xs px-2 py-0.5 rounded"
-                style={{ color: "var(--color-text-muted)" }}
                 aria-label="Edit message"
+                className="opacity-0 group-hover:opacity-100 focus:opacity-100"
               >
                 Edit
-              </button>
+              </PraxisButton>
             )}
             {message.created_at && !message.pending && (
               <MessageTimestamp
@@ -3236,13 +3165,16 @@ const MessageBubble = memo(function MessageBubble({
               </button>
             )}
             {!playing && !message.pending && onReplayAudio && (
-              <button
+              <PraxisButton
+                type="button"
+                variant="ghost"
+                size="sm"
                 onClick={onReplayAudio}
-                className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                 aria-label="Replay audio"
+                className="cx-type-xs uppercase tracking-[0.18em]"
               >
                 ▶ Listen
-              </button>
+              </PraxisButton>
             )}
           </div>
           {/* Bubble content */}
@@ -3325,24 +3257,18 @@ const MessageBubble = memo(function MessageBubble({
             <CopyButton content={message.content} />
             <MessageFeedbackButtons messageId={message.id} initialRating={message.feedback ?? null} />
             {onPinToggle && (
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => onPinToggle(!pinned)}
                 aria-label={pinned ? "Unpin message" : "Pin message"}
                 title={pinned ? "Unpin" : "Pin message (max 5)"}
-                onClick={() => onPinToggle(!pinned)}
-                className="p-1 rounded transition-colors opacity-0 group-hover:opacity-100"
-                style={{
-                  color: pinned ? "var(--color-accent)" : "var(--color-text-muted)",
-                }}
-                onMouseEnter={(e) => {
-                  if (!pinned) (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
-                }}
-                onMouseLeave={(e) => {
-                  if (!pinned) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-                }}
+                className="opacity-0 group-hover:opacity-100"
+                style={{ color: pinned ? "var(--color-accent)" : undefined }}
               >
                 <Pin size={13} fill={pinned ? "currentColor" : "none"} />
-              </button>
+              </PraxisButton>
             )}
             {message.employee && message.content && (
               <SaveOutputButton
@@ -3437,13 +3363,15 @@ function ArtifactDrawer({
                 >
                   Download
                 </Button>
-                <button
+                <PraxisButton
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={onClose}
-                  className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] px-2"
                   aria-label="Close"
                 >
                   ✕
-                </button>
+                </PraxisButton>
               </div>
             </div>
             <pre className="whitespace-pre-wrap font-sans text-[var(--color-text)] leading-relaxed text-sm">

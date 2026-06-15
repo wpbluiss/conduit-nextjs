@@ -109,6 +109,46 @@ export type SettingsTabKey =
   | "referrals"
   | "labels";
 
+const SETTINGS_NAV: { title: string | null; items: [SettingsTabKey, string][] }[] = [
+  {
+    title: null,
+    items: [
+      ["profile", "Profile"],
+      ["appearance", "Appearance"],
+      ["security", "Security"],
+    ],
+  },
+  {
+    title: "Workspace",
+    items: [
+      ["workspace", "Workspace"],
+      ["business", "Business"],
+      ["team", "Team"],
+      ["specialists", "Specialists"],
+      ["voice", "Voice"],
+    ],
+  },
+  {
+    title: "Platform",
+    items: [
+      ["integrations", "Integrations"],
+      ["notifications", "Notifications"],
+      ["api", "API Keys"],
+      ["labels", "Labels"],
+      ["referrals", "Referrals"],
+    ],
+  },
+  {
+    title: "Billing",
+    items: [
+      ["usage", "Usage"],
+      ["billing", "Billing"],
+    ],
+  },
+];
+
+const ALL_NAV_ITEMS = SETTINGS_NAV.flatMap((s) => s.items);
+
 export function SettingsTabs({
   email,
   fullName,
@@ -125,101 +165,121 @@ export function SettingsTabs({
   const [tab, setTab] = useState<SettingsTabKey>(defaultTab);
 
   return (
-    <div>
-      <div className="flex gap-1 border-b border-[var(--color-border)] mb-6 overflow-x-auto">
-        {(
-          [
-            ["profile", "Profile"],
-            ["workspace", "Workspace"],
-            ["business", "Business"],
-            ["specialists", "Specialists"],
-            ["voice", "Voice"],
-            ["team", "Team"],
-            ["usage", "Usage"],
-            ["billing", "Billing"],
-            ["security", "Security"],
-            ["notifications", "Notifications"],
-            ["integrations", "Integrations"],
-            ["appearance", "Appearance"],
-            ["api", "API"],
-            ["referrals", "Referrals"],
-            ["labels", "Labels"],
-          ] as const
-        ).map(([key, label]) => (
-          <button
-            key={key}
-            onClick={() => setTab(key)}
-            className={`px-4 py-3 text-sm transition-colors border-b-2 -mb-px ${
-              tab === key
-                ? "border-[var(--color-accent)] text-[var(--color-text)]"
-                : "border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+    <div className="flex flex-col md:flex-row gap-8">
+
+      {/* ── Mobile: horizontal pill strip ──────────────────────────── */}
+      <div className="md:hidden -mx-1 px-1 pb-2 overflow-x-auto">
+        <div className="flex gap-1">
+          {ALL_NAV_ITEMS.map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setTab(key)}
+              className={`px-3 py-1.5 rounded-full cx-type-xs whitespace-nowrap shrink-0 transition-all duration-150 ${
+                tab === key
+                  ? "bg-[var(--cx-accent-tint)] text-[var(--cx-accent-bright)] font-medium"
+                  : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[var(--cx-surface-raised)]"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {tab === "profile" && (
-        <ProfileTab
-          email={email}
-          fullName={fullName}
-          creatorMode={Boolean(account.creator_mode)}
-          creatorModeVersion={account.creator_mode_version ?? 1}
-          timezone={account.timezone ?? "America/New_York"}
-          themePref={account.theme_preference ?? "system"}
-          displayName={account.display_name ?? null}
-          avatarUrl={account.avatar_url ?? null}
-          workspaceName={account.workspace_name ?? null}
-        />
-      )}
-      {tab === "workspace" && (
-        <WorkspaceTab
-          workspaceName={account.workspace_name ?? null}
-          avatarUrl={account.avatar_url ?? null}
-        />
-      )}
-      {tab === "business" && <BusinessTab account={account} />}
-      {tab === "specialists" && (
-        <SpecialistsTab
-          initialNicknames={account.specialist_nicknames ?? {}}
-          initialPrefs={account.specialist_prefs ?? {}}
-        />
-      )}
-      {tab === "voice" && (
-        <VoiceTab
-          ttsAllowed={Boolean(
-            account.internal_account || (account.tier_id ?? "free") !== "free",
-          )}
-        />
-      )}
-      {tab === "team" && <TeamTab />}
-      {tab === "usage" && <UsageTab usage={usage} />}
-      {tab === "billing" && <BillingTab account={account} usage={usage} />}
-      {tab === "security" && <MFASecurity />}
-      {tab === "notifications" && <NotificationsTab />}
-      {tab === "integrations" && (
-        <IntegrationsTab
-          isFreeUser={
-            !account.internal_account && (account.tier_id ?? "free") === "free"
-          }
-        />
-      )}
-      {tab === "appearance" && (
-        <AppearanceTab
-          themePref={account.theme_preference ?? "system"}
-          accentPref={account.accent_preference ?? "ember"}
-        />
-      )}
-      {tab === "api" && (
-        <ApiKeysTab
-          isPro={Boolean(
-            account.internal_account || (account.tier_id ?? "free") !== "free",
-          )}
-        />
-      )}
-      {tab === "referrals" && <ReferralsTab />}
-      {tab === "labels" && <LabelsTab />}
+      {/* ── Desktop: vertical sidebar nav ──────────────────────────── */}
+      <nav className="hidden md:block w-44 shrink-0" aria-label="Settings navigation">
+        {SETTINGS_NAV.map((section, si) => (
+          <div key={si} className={si > 0 ? "mt-6" : ""}>
+            {section.title && (
+              <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-faint)] px-3 mb-1.5">
+                {section.title}
+              </div>
+            )}
+            <div className="space-y-0.5">
+              {section.items.map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setTab(key)}
+                  className={`w-full text-left px-3 py-2 rounded-md cx-type-sm transition-all duration-150 focus-visible:outline-none ${
+                    tab === key
+                      ? "bg-[var(--cx-accent-tint)] text-[var(--cx-accent-bright)] font-medium"
+                      : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[var(--cx-surface-raised)]"
+                  }`}
+                  style={tab === key ? { boxShadow: "inset 2px 0 0 var(--cx-accent)" } : undefined}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </nav>
+
+      {/* ── Content ────────────────────────────────────────────────── */}
+      <div className="flex-1 min-w-0">
+        {tab === "profile" && (
+          <ProfileTab
+            email={email}
+            fullName={fullName}
+            creatorMode={Boolean(account.creator_mode)}
+            creatorModeVersion={account.creator_mode_version ?? 1}
+            timezone={account.timezone ?? "America/New_York"}
+            themePref={account.theme_preference ?? "system"}
+            displayName={account.display_name ?? null}
+            avatarUrl={account.avatar_url ?? null}
+            workspaceName={account.workspace_name ?? null}
+          />
+        )}
+        {tab === "workspace" && (
+          <WorkspaceTab
+            workspaceName={account.workspace_name ?? null}
+            avatarUrl={account.avatar_url ?? null}
+          />
+        )}
+        {tab === "business" && <BusinessTab account={account} />}
+        {tab === "specialists" && (
+          <SpecialistsTab
+            initialNicknames={account.specialist_nicknames ?? {}}
+            initialPrefs={account.specialist_prefs ?? {}}
+          />
+        )}
+        {tab === "voice" && (
+          <VoiceTab
+            ttsAllowed={Boolean(
+              account.internal_account || (account.tier_id ?? "free") !== "free",
+            )}
+          />
+        )}
+        {tab === "team" && <TeamTab />}
+        {tab === "usage" && <UsageTab usage={usage} />}
+        {tab === "billing" && <BillingTab account={account} usage={usage} />}
+        {tab === "security" && <MFASecurity />}
+        {tab === "notifications" && <NotificationsTab />}
+        {tab === "integrations" && (
+          <IntegrationsTab
+            isFreeUser={
+              !account.internal_account && (account.tier_id ?? "free") === "free"
+            }
+          />
+        )}
+        {tab === "appearance" && (
+          <AppearanceTab
+            themePref={account.theme_preference ?? "system"}
+            accentPref={account.accent_preference ?? "ember"}
+          />
+        )}
+        {tab === "api" && (
+          <ApiKeysTab
+            isPro={Boolean(
+              account.internal_account || (account.tier_id ?? "free") !== "free",
+            )}
+          />
+        )}
+        {tab === "referrals" && <ReferralsTab />}
+        {tab === "labels" && <LabelsTab />}
+      </div>
     </div>
   );
 }
@@ -404,14 +464,16 @@ function SpecialistsTab({
                   />
                 </div>
                 {nicknames[emp] && (
-                  <button
+                  <PraxisButton
                     type="button"
                     onClick={() => handleNicknameReset(emp)}
                     title="Reset to default"
-                    className="shrink-0 p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="shrink-0"
                   >
                     <X size={13} />
-                  </button>
+                  </PraxisButton>
                 )}
               </div>
             );
@@ -860,10 +922,13 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
                   >
                     {employeeLabel(emp)}
                   </span>
-                  <button
+                  <PraxisButton
+                    type="button"
                     onClick={() => preview(emp, current)}
-                    disabled={!voiceConfigured || isPreviewing}
-                    className="inline-flex items-center gap-1 cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-40"
+                    isDisabled={!voiceConfigured || isPreviewing}
+                    variant="ghost"
+                    size="sm"
+                    className="cx-type-xs uppercase tracking-[0.18em]"
                   >
                     {isPreviewing ? (
                       "Playing…"
@@ -872,7 +937,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
                         <Play size={10} /> Preview
                       </>
                     )}
-                  </button>
+                  </PraxisButton>
                 </div>
                 <select
                   value={current}
@@ -896,14 +961,17 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
                     ))}
                 </select>
                 {current !== DEFAULT_EMPLOYEE_VOICES[emp] && (
-                  <button
+                  <PraxisButton
+                    type="button"
                     onClick={() =>
                       setEmployeeVoice(emp, DEFAULT_EMPLOYEE_VOICES[emp])
                     }
-                    className="cx-type-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] underline"
+                    variant="ghost"
+                    size="sm"
+                    className="cx-type-xs"
                   >
                     Reset to default
-                  </button>
+                  </PraxisButton>
                 )}
               </div>
             );
@@ -945,16 +1013,22 @@ function ToggleRow({
         type="button"
         onClick={() => onChange(!value)}
         aria-pressed={value}
-        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-150 focus-visible:outline-none ${
           value
-            ? "bg-[var(--color-accent)]"
-            : "bg-[var(--color-border)]"
+            ? "bg-[var(--cx-accent)]"
+            : "bg-[var(--cx-border-strong)]"
         }`}
+        style={undefined}
+        onFocus={(e) => {
+          if (e.target === e.currentTarget) e.currentTarget.style.boxShadow = "var(--cx-accent-glow)";
+        }}
+        onBlur={(e) => { e.currentTarget.style.boxShadow = ""; }}
       >
         <span
-          className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+          className={`inline-block h-5 w-5 transform rounded-full shadow-sm transition-transform motion-safe:duration-150 motion-safe:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${
             value ? "translate-x-5" : "translate-x-0.5"
           }`}
+          style={{ background: value ? "rgba(255,255,255,0.95)" : "var(--cx-text-muted)" }}
         />
       </button>
     </div>
@@ -1163,23 +1237,27 @@ function WorkspaceTab({
             </div>
           </button>
           <div className="space-y-2">
-            <button
+            <PraxisButton
               type="button"
               onClick={() => logoInputRef.current?.click()}
-              disabled={logoUploading}
-              className="text-xs text-[var(--color-accent)] hover:underline disabled:opacity-50"
+              isDisabled={logoUploading}
+              variant="ghost"
+              size="sm"
+              className="!text-xs"
             >
               {logoUploading ? "Uploading…" : "Choose logo"}
-            </button>
+            </PraxisButton>
             {logoPreview && (
-              <button
+              <PraxisButton
                 type="button"
                 onClick={removeLogo}
-                disabled={logoRemoving}
-                className="block text-xs text-[var(--color-text-muted)] hover:text-[var(--color-pink)] disabled:opacity-50 transition-colors"
+                isDisabled={logoRemoving}
+                variant="ghost"
+                size="sm"
+                className="!text-xs"
               >
                 {logoRemoving ? "Removing…" : "Remove logo"}
-              </button>
+              </PraxisButton>
             )}
             {logoError && (
               <p className="cx-type-xs text-[var(--color-pink)]">{logoError}</p>
@@ -1526,14 +1604,16 @@ function ProfileTab({
           </div>
         </button>
         <div>
-          <button
+          <PraxisButton
             type="button"
             onClick={() => avatarInputRef.current?.click()}
-            disabled={avatarUploading}
-            className="text-xs text-[var(--color-accent)] hover:underline disabled:opacity-50"
+            isDisabled={avatarUploading}
+            variant="ghost"
+            size="sm"
+            className="!text-xs"
           >
             {avatarUploading ? "Uploading…" : "Choose photo"}
-          </button>
+          </PraxisButton>
           <p className="mt-0.5 cx-type-xs text-[var(--color-text-muted)]">
             JPEG, PNG, WebP or GIF · max 5 MB
           </p>
@@ -1972,13 +2052,15 @@ function BusinessTab({ account }: { account: AccountData }) {
               {briefSaved ? <><Check size={12} /> Saved</> : "Save brief"}
             </PraxisButton>
             {brief && (
-              <button
+              <PraxisButton
                 type="button"
                 onClick={() => { setBrief(""); setBriefSaved(false); }}
-                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                variant="ghost"
+                size="sm"
+                className="!text-xs"
               >
                 Clear
-              </button>
+              </PraxisButton>
             )}
           </div>
         </form>
@@ -2615,23 +2697,27 @@ function BillingTab({
           )}
           {account.has_stripe_customer && tier.monthlyPriceCents > 0 && (
             isCanceling ? (
-              <button
+              <PraxisButton
                 type="button"
                 onClick={() => handleCancelOrReactivate("reactivate")}
-                disabled={busy !== null}
-                className="cx-type-xs underline underline-offset-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors disabled:opacity-40 text-center"
+                isDisabled={busy !== null}
+                variant="ghost"
+                size="sm"
+                className="cx-type-xs text-center"
               >
                 {busy === "reactivate" ? "Reactivating…" : "Reactivate plan"}
-              </button>
+              </PraxisButton>
             ) : (
-              <button
+              <PraxisButton
                 type="button"
                 onClick={() => setShowCancelModal(true)}
-                disabled={busy !== null}
-                className="cx-type-xs underline underline-offset-2 text-[var(--color-text-muted)] hover:text-[var(--color-destructive,var(--cx-danger))] transition-colors disabled:opacity-40 text-center"
+                isDisabled={busy !== null}
+                variant="ghost"
+                size="sm"
+                className="cx-type-xs text-center"
               >
                 Cancel subscription
-              </button>
+              </PraxisButton>
             )
           )}
         </div>
@@ -2663,26 +2749,23 @@ function BillingTab({
               <li>You can reactivate any time before the period ends</li>
             </ul>
             <div className="flex gap-2 justify-end pt-2">
-              <button
+              <PraxisButton
                 type="button"
                 onClick={() => setShowCancelModal(false)}
-                className="px-4 py-2 text-sm rounded-lg border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors"
+                variant="secondary"
+                size="sm"
               >
                 Keep my plan
-              </button>
-              <button
+              </PraxisButton>
+              <PraxisButton
                 type="button"
                 onClick={() => handleCancelOrReactivate("cancel")}
-                disabled={busy === "cancel"}
-                className="px-4 py-2 text-sm rounded-lg transition-colors disabled:opacity-40"
-                style={{
-                  background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 12%, transparent)",
-                  color: "var(--color-destructive, var(--cx-danger))",
-                  border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 35%, transparent)",
-                }}
+                isDisabled={busy === "cancel"}
+                variant="danger"
+                size="sm"
               >
                 {busy === "cancel" ? "Cancelling…" : "Yes, cancel"}
-              </button>
+              </PraxisButton>
             </div>
           </div>
         </div>
@@ -2981,14 +3064,16 @@ function ReferralSection() {
           <code className="flex-1 text-xs font-mono bg-[var(--color-surface)] rounded-lg px-3 py-2 text-[var(--color-text)] truncate">
             {link}
           </code>
-          <button
+          <PraxisButton
             type="button"
             onClick={copyLink}
-            className="shrink-0 inline-flex items-center gap-1.5 text-xs rounded-lg px-3 py-2 bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hi)] transition-colors"
+            variant="primary"
+            size="sm"
+            className="shrink-0 !text-xs"
           >
             {copied ? <Check size={12} /> : <ExternalLink size={12} />}
             {copied ? "Copied!" : "Copy link"}
-          </button>
+          </PraxisButton>
         </div>
       ) : (
         <div className="h-8 rounded-lg animate-pulse bg-[var(--color-border)] w-48" />
@@ -3534,19 +3619,17 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             </p>
           </div>
           {isConnected("google_calendar") ? (
-            <button
+            <PraxisButton
+              type="button"
               onClick={() => disconnect("google_calendar")}
-              disabled={disconnecting === "google_calendar"}
-              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
-              style={{
-                background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 8%, var(--color-surface-elevated))",
-                border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 25%, transparent)",
-                color: "var(--color-destructive, var(--cx-danger))",
-              }}
+              isDisabled={disconnecting === "google_calendar"}
+              variant="danger"
+              size="sm"
+              className="mt-auto w-full justify-center !text-xs"
             >
               <Link2Off size={12} />
               {disconnecting === "google_calendar" ? "Disconnecting…" : "Disconnect"}
-            </button>
+            </PraxisButton>
           ) : isAvailable("google_calendar") ? (
             <a
               href="/api/conduit/connectors/google-calendar/auth"
@@ -3638,33 +3721,29 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                       <option key={c.id} value={c.id}>#{c.name}</option>
                     ))}
                   </select>
-                  <button
+                  <PraxisButton
+                    type="button"
                     onClick={saveSlackChannel}
-                    disabled={!selectedChannel || savingChannel}
-                    className="px-3 py-2 rounded-lg text-xs font-medium"
-                    style={{
-                      background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
-                      border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
-                      color: "var(--color-accent)",
-                    }}
+                    isDisabled={!selectedChannel || savingChannel}
+                    variant="secondary"
+                    size="sm"
+                    className="!text-xs"
                   >
                     {savingChannel ? "…" : "Save"}
-                  </button>
+                  </PraxisButton>
                 </div>
               )}
-              <button
+              <PraxisButton
+                type="button"
                 onClick={() => disconnect("slack")}
-                disabled={disconnecting === "slack"}
-                className="w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
-                style={{
-                  background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 8%, var(--color-surface-elevated))",
-                  border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 25%, transparent)",
-                  color: "var(--color-destructive, var(--cx-danger))",
-                }}
+                isDisabled={disconnecting === "slack"}
+                variant="danger"
+                size="sm"
+                className="w-full justify-center !text-xs"
               >
                 <Link2Off size={12} />
                 {disconnecting === "slack" ? "Disconnecting…" : "Disconnect"}
-              </button>
+              </PraxisButton>
             </div>
           ) : isFreeUser ? (
             <a
@@ -3751,19 +3830,17 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             </p>
           </div>
           {isConnected("hubspot") ? (
-            <button
+            <PraxisButton
+              type="button"
               onClick={() => disconnect("hubspot")}
-              disabled={disconnecting === "hubspot"}
-              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
-              style={{
-                background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 8%, var(--color-surface-elevated))",
-                border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 25%, transparent)",
-                color: "var(--color-destructive, var(--cx-danger))",
-              }}
+              isDisabled={disconnecting === "hubspot"}
+              variant="danger"
+              size="sm"
+              className="mt-auto w-full justify-center !text-xs"
             >
               <Link2Off size={12} />
               {disconnecting === "hubspot" ? "Disconnecting…" : "Disconnect"}
-            </button>
+            </PraxisButton>
           ) : isAvailable("hubspot") ? (
             <a
               href="/api/conduit/connectors/hubspot/auth"
@@ -3856,18 +3933,16 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               )}
               {/* File picker */}
               {driveSearchResults === null ? (
-                <button
+                <PraxisButton
+                  type="button"
                   onClick={() => { setDriveSearchResults([]); }}
-                  className="w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
-                  style={{
-                    background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
-                    border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
-                    color: "var(--color-accent)",
-                  }}
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-center !text-xs"
                 >
                   <Link size={12} />
                   {driveSelectedFiles.length > 0 ? "Change files" : "Pick files"}
-                </button>
+                </PraxisButton>
               ) : (
                 <div className="flex flex-col gap-2">
                   <div className="flex gap-2">
@@ -3885,18 +3960,16 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                         outline: "none",
                       }}
                     />
-                    <button
+                    <PraxisButton
+                      type="button"
                       onClick={searchDriveFiles}
-                      disabled={driveSearching}
-                      className="px-3 py-2 rounded-lg text-xs font-medium shrink-0"
-                      style={{
-                        background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
-                        border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
-                        color: "var(--color-accent)",
-                      }}
+                      isDisabled={driveSearching}
+                      variant="secondary"
+                      size="sm"
+                      className="shrink-0 !text-xs"
                     >
                       {driveSearching ? "…" : "Search"}
-                    </button>
+                    </PraxisButton>
                   </div>
                   {driveSearchResults.length > 0 && (
                     <div className="flex flex-col gap-1 max-h-40 overflow-y-auto rounded-lg" style={{ border: "1px solid var(--color-border)" }}>
@@ -3936,30 +4009,26 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                     <p className="cx-type-xs text-[var(--color-text-muted)] text-center py-2">No Docs or Sheets found.</p>
                   )}
                   <div className="flex gap-2">
-                    <button
+                    <PraxisButton
+                      type="button"
                       onClick={() => setDriveSearchResults(null)}
-                      className="flex-1 py-2 rounded-lg text-xs font-medium"
-                      style={{
-                        background: "var(--color-surface-elevated)",
-                        border: "1px solid var(--color-border)",
-                        color: "var(--color-text-muted)",
-                      }}
+                      variant="secondary"
+                      size="sm"
+                      className="flex-1 justify-center !text-xs"
                     >
                       Done
-                    </button>
+                    </PraxisButton>
                     {driveSelectedFiles.length > 0 && (
-                      <button
+                      <PraxisButton
+                        type="button"
                         onClick={() => saveDriveFiles([])}
-                        disabled={driveSaving}
-                        className="flex-1 py-2 rounded-lg text-xs font-medium"
-                        style={{
-                          background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 8%, var(--color-surface-elevated))",
-                          border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 25%, transparent)",
-                          color: "var(--color-destructive, var(--cx-danger))",
-                        }}
+                        isDisabled={driveSaving}
+                        variant="danger"
+                        size="sm"
+                        className="flex-1 justify-center !text-xs"
                       >
                         Clear all
-                      </button>
+                      </PraxisButton>
                     )}
                   </div>
                 </div>
@@ -3967,32 +4036,28 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               {/* Refresh + Disconnect */}
               <div className="flex gap-2">
                 {driveSelectedFiles.length > 0 && (
-                  <button
+                  <PraxisButton
+                    type="button"
                     onClick={refreshDriveFiles}
-                    disabled={driveRefreshing}
-                    className="flex-1 py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
-                    style={{
-                      background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
-                      border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
-                      color: "var(--color-accent)",
-                    }}
+                    isDisabled={driveRefreshing}
+                    variant="ghost"
+                    size="sm"
+                    className="flex-1 justify-center !text-xs"
                   >
                     {driveRefreshing ? "Syncing…" : "Refresh"}
-                  </button>
+                  </PraxisButton>
                 )}
-                <button
+                <PraxisButton
+                  type="button"
                   onClick={() => disconnect("google_drive")}
-                  disabled={disconnecting === "google_drive"}
-                  className="flex-1 py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
-                  style={{
-                    background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 8%, var(--color-surface-elevated))",
-                    border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 25%, transparent)",
-                    color: "var(--color-destructive, var(--cx-danger))",
-                  }}
+                  isDisabled={disconnecting === "google_drive"}
+                  variant="danger"
+                  size="sm"
+                  className="flex-1 justify-center !text-xs"
                 >
                   <Link2Off size={12} />
                   {disconnecting === "google_drive" ? "Disconnecting…" : "Disconnect"}
-                </button>
+                </PraxisButton>
               </div>
             </div>
           ) : isFreeUser ? (
@@ -4092,19 +4157,17 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                 )}
               </div>
             )}
-            <button
+            <PraxisButton
+              type="button"
               onClick={() => disconnect("github")}
-              disabled={disconnecting === "github"}
-              className="w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
-              style={{
-                background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 8%, var(--color-surface-elevated))",
-                border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 25%, transparent)",
-                color: "var(--color-destructive, var(--cx-danger))",
-              }}
+              isDisabled={disconnecting === "github"}
+              variant="danger"
+              size="sm"
+              className="w-full justify-center !text-xs"
             >
               <Link2Off size={12} />
               {disconnecting === "github" ? "Disconnecting…" : "Disconnect"}
-            </button>
+            </PraxisButton>
           </div>
         ) : isAvailable("github") ? (
           <a
@@ -4495,14 +4558,16 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
             <code className="flex-1 text-xs font-mono bg-[var(--color-surface)] rounded-lg px-3 py-2 text-[var(--color-text)] break-all">
               {revealedKey}
             </code>
-            <button
+            <PraxisButton
               type="button"
               onClick={copyKey}
-              className="shrink-0 inline-flex items-center gap-1.5 text-xs rounded-lg px-3 py-2 bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hi)] transition-colors"
+              variant="primary"
+              size="sm"
+              className="shrink-0 !text-xs"
             >
               {copied ? <Check size={12} /> : <Lock size={12} />}
               {copied ? "Copied!" : "Copy"}
-            </button>
+            </PraxisButton>
           </div>
           <p className="text-xs text-[var(--color-text-muted)] mt-2">
             This key will not be shown again. Dismiss by creating another key or refreshing.
@@ -4521,14 +4586,14 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
           required
           className="flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-accent)] placeholder:text-[var(--color-text-muted)] transition-colors"
         />
-        <button
+        <PraxisButton
           type="submit"
-          disabled={creating || !newName.trim()}
-          className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-accent)] text-white px-4 py-2.5 text-sm font-medium hover:bg-[var(--color-accent-hi)] transition-colors disabled:opacity-50"
+          isDisabled={creating || !newName.trim()}
+          variant="primary"
         >
           {creating ? <SpinnerIcon /> : <ArrowRight size={14} />}
           Generate
-        </button>
+        </PraxisButton>
       </form>
 
       {/* Active keys */}
@@ -4558,16 +4623,18 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
                   {!k.last_used_at && " · Never used"}
                 </p>
               </div>
-              <button
+              <PraxisButton
                 type="button"
                 onClick={() => handleRevoke(k.id)}
-                disabled={revoking === k.id}
+                isDisabled={revoking === k.id}
                 aria-label={`Revoke key ${k.name}`}
-                className="shrink-0 inline-flex items-center gap-1 text-xs rounded-lg px-3 py-1.5 text-red-400 border border-red-400/20 hover:bg-red-400/10 transition-colors disabled:opacity-50"
+                variant="danger"
+                size="sm"
+                className="shrink-0 !text-xs"
               >
                 <X size={12} />
                 Revoke
-              </button>
+              </PraxisButton>
             </div>
           ))}
         </div>
@@ -4675,18 +4742,15 @@ function ReferralsTab() {
               className="flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] outline-none select-all cursor-text"
               onFocus={(e) => e.currentTarget.select()}
             />
-            <button
+            <PraxisButton
               type="button"
               onClick={copyLink}
-              className="shrink-0 inline-flex items-center gap-1.5 text-xs rounded-lg px-4 py-2 font-medium transition-colors"
-              style={{
-                background: copied ? "color-mix(in srgb, var(--color-accent) 15%, transparent)" : "var(--color-accent)",
-                color: copied ? "var(--color-accent)" : "#fff",
-                border: copied ? "1px solid var(--color-accent)" : "none",
-              }}
+              variant="primary"
+              size="sm"
+              className="shrink-0 !text-xs"
             >
               {copied ? <><Check size={12} /> Copied!</> : <><Link size={12} /> Copy link</>}
-            </button>
+            </PraxisButton>
           </div>
         ) : (
           <p className="text-[var(--color-text-muted)] text-xs">
@@ -4890,14 +4954,15 @@ function LabelsTab() {
                   >
                     {saving ? "Saving…" : "Save"}
                   </button>
-                  <button
+                  <PraxisButton
                     type="button"
                     onClick={() => setEditingId(null)}
-                    className="px-2 py-1 rounded-lg text-xs"
-                    style={{ color: "var(--color-text-muted)" }}
+                    variant="ghost"
+                    size="sm"
+                    className="!text-xs"
                   >
                     Cancel
-                  </button>
+                  </PraxisButton>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {PRESET_COLORS.map((c) => (
@@ -4935,25 +5000,25 @@ function LabelsTab() {
                   {label.name}
                 </span>
                 <div className="ml-auto flex items-center gap-1">
-                  <button
+                  <PraxisButton
                     type="button"
                     onClick={() => startEdit(label)}
                     aria-label={`Rename label ${label.name}`}
-                    className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors hover:bg-[var(--color-surface)]"
-                    style={{ color: "var(--color-text-muted)" }}
+                    variant="ghost"
+                    size="icon-sm"
                   >
                     <Pencil size={12} />
-                  </button>
-                  <button
+                  </PraxisButton>
+                  <PraxisButton
                     type="button"
                     onClick={() => void handleDelete(label.id)}
-                    disabled={deletingId === label.id}
+                    isDisabled={deletingId === label.id}
                     aria-label={`Delete label ${label.name}`}
-                    className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors hover:bg-[rgba(239,68,68,0.08)] disabled:opacity-40"
-                    style={{ color: "var(--color-text-muted)" }}
+                    variant="danger"
+                    size="icon-sm"
                   >
                     <Trash2 size={12} />
-                  </button>
+                  </PraxisButton>
                 </div>
               </div>
             )
@@ -4985,14 +5050,15 @@ function LabelsTab() {
                 >
                   {creating ? "Creating…" : "Create"}
                 </button>
-                <button
+                <PraxisButton
                   type="button"
                   onClick={() => { setShowCreate(false); setNewName(""); }}
-                  className="px-2 py-1 rounded-lg text-xs"
-                  style={{ color: "var(--color-text-muted)" }}
+                  variant="ghost"
+                  size="sm"
+                  className="!text-xs"
                 >
                   Cancel
-                </button>
+                </PraxisButton>
               </form>
               <div className="flex flex-wrap gap-1.5">
                 {PRESET_COLORS.map((c) => (
@@ -5011,19 +5077,17 @@ function LabelsTab() {
               </div>
             </div>
           ) : labels.length < 10 ? (
-            <button
+            <PraxisButton
               type="button"
               onClick={() => setShowCreate(true)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors"
-              style={{
-                color: "var(--color-text-muted)",
-                border: "1px dashed var(--color-border)",
-                width: "100%",
-              }}
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start gap-2"
+              style={{ border: "1px dashed var(--color-border)" }}
             >
               <Plus size={14} />
               Create label
-            </button>
+            </PraxisButton>
           ) : (
             <p className="text-xs text-[var(--color-text-muted)]">Label limit reached (10 max).</p>
           )}

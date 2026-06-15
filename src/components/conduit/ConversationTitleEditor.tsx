@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pencil } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 interface Props {
   conversationId: string;
@@ -92,17 +93,16 @@ export function ConversationTitleEditor({ conversationId, initialTitle }: Props)
   return (
     <span className="flex items-center gap-1.5 flex-1 min-w-0 group/title">
       <span className="truncate text-sm">{title}</span>
-      <button
+      <PraxisButton
         type="button"
+        variant="ghost"
+        size="icon-sm"
         onClick={(e) => { e.preventDefault(); startEdit(); }}
         aria-label="Rename conversation"
-        className="shrink-0 opacity-0 group-hover/title:opacity-100 focus:opacity-100 transition-opacity p-0.5 rounded"
-        style={{ color: "var(--color-text-muted)" }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
+        className="shrink-0 opacity-0 group-hover/title:opacity-100 focus:opacity-100"
       >
         <Pencil size={11} />
-      </button>
+      </PraxisButton>
     </span>
   );
 }

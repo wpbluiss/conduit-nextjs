@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Warning, X } from "@phosphor-icons/react";
 import { track } from "@/lib/analytics/track";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 const STORAGE_KEY = "conduit_budget_nudge_dismissed_v1";
 const WARN_THRESHOLD = 0.8;
@@ -80,14 +81,9 @@ export function TokenBudgetNudge({
       >
         Upgrade →
       </Link>
-      <button
-        onClick={close}
-        aria-label="Dismiss"
-        className="shrink-0 hover:opacity-70 transition-opacity"
-        style={{ color: "var(--color-text-muted)" }}
-      >
+      <PraxisButton type="button" variant="ghost" size="icon-sm" onClick={close} aria-label="Dismiss">
         <X size={14} />
-      </button>
+      </PraxisButton>
     </div>
   );
 }

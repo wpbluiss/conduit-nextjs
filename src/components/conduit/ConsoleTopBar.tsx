@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { Menu, Activity, BarChart2, Bookmark, Brain, Building2, CreditCard, Hammer, MessageSquare, Mic, Package, Settings, Sparkles, Users2 } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 import type { LucideIcon } from "lucide-react";
 
 interface PageMeta {
@@ -54,15 +55,17 @@ export function ConsoleTopBar() {
       aria-label="Console navigation"
     >
       {/* Mobile hamburger — triggers Sidebar via CustomEvent */}
-      <button
+      <PraxisButton
         type="button"
+        variant="ghost"
+        size="icon-sm"
         onClick={openSidebar}
         aria-label="Open navigation menu"
         aria-haspopup="dialog"
-        className="md:hidden cx-icon-btn cx-icon-btn-lg -ml-1 shrink-0"
+        className="md:hidden -ml-1 shrink-0"
       >
-        <Menu size={18} />
-      </button>
+        <Menu size={18} strokeWidth={1.75} />
+      </PraxisButton>
 
       {/* Accent bar + page title */}
       <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -73,6 +76,7 @@ export function ConsoleTopBar() {
         />
         <Icon
           size={14}
+          strokeWidth={1.75}
           aria-hidden="true"
           style={{ color: isChat ? "var(--cx-accent)" : "var(--cx-text-muted)" }}
           className="shrink-0"
@@ -86,8 +90,10 @@ export function ConsoleTopBar() {
       </div>
 
       {/* Right action area — keyboard shortcuts trigger */}
-      <button
+      <PraxisButton
         type="button"
+        variant="ghost"
+        size="icon-sm"
         onClick={() => {
           if (typeof window !== "undefined") {
             window.dispatchEvent(new CustomEvent("praxis:shortcuts:open"));
@@ -95,7 +101,7 @@ export function ConsoleTopBar() {
         }}
         aria-label="Keyboard shortcuts"
         title="Keyboard shortcuts (⌘/)"
-        className="cx-icon-btn shrink-0 hidden md:inline-flex"
+        className="shrink-0 hidden md:inline-flex"
       >
         <span
           className="cx-mono"
@@ -107,7 +113,7 @@ export function ConsoleTopBar() {
         >
           ⌘/
         </span>
-      </button>
+      </PraxisButton>
     </header>
   );
 }

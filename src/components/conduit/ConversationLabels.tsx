@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Plus, Tag, X } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 export interface ConversationLabel {
   id: string;
@@ -42,14 +43,15 @@ function LabelChip({
     >
       {label.name}
       {removable && (
-        <button
-          type="button"
+        <PraxisButton
+          variant="ghost"
+          size="icon-sm"
           onClick={(e) => { e.stopPropagation(); e.preventDefault(); onRemove?.(); }}
           aria-label={`Remove label ${label.name}`}
-          className="opacity-70 hover:opacity-100 ml-0.5"
+          className="ml-0.5"
         >
           <X size={9} strokeWidth={2.5} />
-        </button>
+        </PraxisButton>
       )}
     </span>
   );
@@ -301,16 +303,17 @@ export function ConversationLabelManager({
 
             {/* Create new label */}
             {!creating ? (
-              <button
-                type="button"
+              <PraxisButton
+                variant="ghost"
+                size="sm"
                 onClick={() => setCreating(true)}
                 disabled={all.length >= 10}
-                className="w-full flex items-center gap-1.5 px-3 py-2 text-xs border-t transition-colors hover:bg-[var(--color-surface)] disabled:opacity-40"
-                style={{ borderColor: "var(--color-border)", color: "var(--color-text-muted)" }}
+                className="w-full flex items-center gap-1.5 px-3 py-2 border-t disabled:opacity-40"
+                style={{ borderColor: "var(--color-border)" }}
               >
                 <Plus size={12} />
                 {all.length >= 10 ? "Label limit reached (10)" : "Create new label"}
-              </button>
+              </PraxisButton>
             ) : (
               <div className="p-2 border-t space-y-2" style={{ borderColor: "var(--color-border)" }}>
                 <input
@@ -354,14 +357,13 @@ export function ConversationLabelManager({
                   >
                     {busy ? "Creating…" : "Create"}
                   </button>
-                  <button
-                    type="button"
+                  <PraxisButton
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setCreating(false)}
-                    className="px-2 py-1 rounded-lg cx-type-xs"
-                    style={{ color: "var(--color-text-muted)" }}
                   >
                     Cancel
-                  </button>
+                  </PraxisButton>
                 </div>
               </div>
             )}

@@ -13,6 +13,7 @@ import {
   Inbox,
   X,
 } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 interface Notification {
   id: string;
@@ -119,11 +120,11 @@ export function NotificationCenter() {
   return (
     <>
       {/* Notification bell — matches sidebar NavLink style */}
-      <button
-        type="button"
+      <PraxisButton
+        variant="ghost"
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
         onClick={() => setOpen((v: boolean) => !v)}
-        className="relative flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] rounded-lg transition-colors duration-100 w-full"
+        className="relative flex items-center gap-2 px-3 py-1.5 text-xs w-full"
       >
         <Inbox size={14} className="shrink-0" />
         <span>Notifications</span>
@@ -136,7 +137,7 @@ export function NotificationCenter() {
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
-      </button>
+      </PraxisButton>
 
       <AnimatePresence>
         {open && (
@@ -179,26 +180,26 @@ export function NotificationCenter() {
                 </div>
                 <div className="flex items-center gap-1">
                   {unreadCount > 0 && (
-                    <button
-                      type="button"
+                    <PraxisButton
+                      variant="ghost"
+                      size="sm"
                       onClick={markAllRead}
-                      disabled={loading}
+                      isDisabled={loading}
                       title="Mark all as read"
                       aria-label="Mark all as read"
-                      className="flex items-center gap-1 px-2 py-1 cx-type-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] rounded-md hover:bg-[var(--color-surface)] transition-colors disabled:opacity-50"
                     >
                       <CheckCheck size={12} />
                       Mark all read
-                    </button>
+                    </PraxisButton>
                   )}
-                  <button
-                    type="button"
+                  <PraxisButton
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={() => setOpen(false)}
                     aria-label="Close notifications"
-                    className="flex items-center justify-center w-7 h-7 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors"
                   >
                     <X size={14} />
-                  </button>
+                  </PraxisButton>
                 </div>
               </div>
 

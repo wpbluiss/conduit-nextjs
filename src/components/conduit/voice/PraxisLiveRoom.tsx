@@ -19,6 +19,7 @@ import {
   Mic, MicOff, PhoneOff, AlertCircle,
   Sparkles, Code2, TrendingUp, Megaphone, DollarSign, Wrench, ShieldCheck, Users, Scale,
 } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 import Waveform from "./Waveform";
 import { EMPLOYEES, type EmployeeId } from "@/lib/conduit/employees";
 import type { VoiceTokenResponse } from "./VoiceRoom";
@@ -197,7 +198,7 @@ export default function PraxisLiveRoom({
       <div className="flex items-center gap-5">
         <button onClick={toggleMute} disabled={!connected} className={`grid size-14 place-items-center rounded-full border border-white/10 disabled:opacity-40 ${muted ? "bg-secondary text-primary" : "bg-secondary/60 text-foreground hover:bg-secondary"}`} aria-label={muted ? "Unmute" : "Mute"}>{muted ? <MicOff className="size-6" /> : <Mic className="size-6" />}</button>
         <div className={`rounded-full px-3 py-1 font-mono text-sm tabular-nums ${inWarn ? "bg-amber-400/10 text-amber-300" : "bg-white/5 text-muted-foreground"}`}>{fmtTime(elapsedSec)} / {fmtTime(tokenResponse.max_seconds)}</div>
-        <button onClick={end} className="grid size-16 place-items-center rounded-full bg-destructive text-white" aria-label="End call"><PhoneOff className="size-7" /></button>
+        <PraxisButton variant="danger" size="icon" onClick={end} aria-label="End call"><PhoneOff className="size-7" /></PraxisButton>
       </div>
     </div>
   );

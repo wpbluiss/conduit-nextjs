@@ -16,6 +16,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Download, Search, X } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 import type { MemoryRecord, MemoryKind } from "@/lib/ai/memory";
 import { Canvas } from "@/components/conduit/pdl/Canvas";
 import { Edge } from "@/components/conduit/pdl/Edge";
@@ -290,55 +291,39 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
               style={{ color: "var(--pdl-text, var(--color-text))", minWidth: 0 }}
             />
             {query && (
-              <button
-                type="button"
+              <PraxisButton
+                variant="ghost"
+                size="icon-sm"
                 onClick={() => handleQueryChange("")}
                 aria-label="Clear search"
                 className="shrink-0"
-                style={{ color: "var(--pdl-text-muted, var(--color-text-muted))" }}
               >
                 <X size={12} />
-              </button>
+              </PraxisButton>
             )}
           </div>
           {hasFilters && (
-            <button
-              type="button"
+            <PraxisButton
+              variant="ghost"
+              size="sm"
               onClick={clearFilters}
-              className="cx-type-xs px-2.5 py-1.5 rounded-lg transition-colors"
-              style={{
-                color: "var(--pdl-text-muted, var(--color-text-muted))",
-                border: "1px solid var(--pdl-border-hairline, var(--color-border))",
-              }}
             >
               Clear
-            </button>
+            </PraxisButton>
           )}
           {memories.length > 0 && (
-            <button
-              type="button"
+            <PraxisButton
+              variant="ghost"
+              size="sm"
               onClick={exportMemories}
               disabled={exportingMemories}
               title={`Export all ${memories.length} memories as JSON`}
               aria-label="Export memories as JSON"
-              className="ml-auto flex items-center gap-1.5 cx-type-xs px-2.5 py-1.5 rounded-lg transition-colors shrink-0"
-              style={{
-                color: "var(--pdl-text-muted, var(--color-text-muted))",
-                border: "1px solid var(--pdl-border-hairline, var(--color-border))",
-                opacity: exportingMemories ? 0.5 : 1,
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "var(--pdl-text, var(--color-text))";
-                (e.currentTarget as HTMLElement).style.borderColor = "var(--pdl-border, var(--color-border))";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "var(--pdl-text-muted, var(--color-text-muted))";
-                (e.currentTarget as HTMLElement).style.borderColor = "var(--pdl-border-hairline, var(--color-border))";
-              }}
+              className="ml-auto shrink-0"
             >
               <Download size={12} />
               <span className="hidden sm:inline">Export</span>
-            </button>
+            </PraxisButton>
           )}
         </div>
 
