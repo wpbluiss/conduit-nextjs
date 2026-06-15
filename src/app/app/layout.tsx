@@ -183,7 +183,7 @@ export default async function AppLayout({
   ) as Partial<Record<EmployeeKey, string>>;
 
   return (
-    <div className="praxis-root h-screen flex bg-[var(--color-surface)] text-[var(--color-text)]">
+    <div className="praxis-root h-screen flex bg-[var(--cx-canvas)] text-[var(--cx-text)]">
       <a href="#app-main" className="conduit-skip-link">Skip to main content</a>
       <UserProvider initialUser={initialUser}>
       <NicknameProvider initialNicknames={specialistNicknames}>

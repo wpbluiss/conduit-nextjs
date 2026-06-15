@@ -96,9 +96,9 @@ const ICON = {
 } as const;
 
 const COLOR = {
-  success: "var(--color-conduit-success, #4ADE80)",
-  error: "var(--color-conduit-danger, #F87171)",
-  info: "var(--color-indigo-500, #5B63E8)",
+  success: "var(--cx-reward, #34D399)",
+  error: "var(--cx-danger, #F4607D)",
+  info: "var(--cx-accent, #7C6CFF)",
 } as const;
 
 function ToastContainer({
@@ -126,11 +126,10 @@ function ToastContainer({
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 24, scale: 0.96 }}
               transition={{ duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
-              className="pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-xl border border-[var(--pdl-border-default,rgba(245,241,234,0.14))] shadow-lg"
+              className="cx-glass-float cx-glass-border pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-[12px]"
               style={{
-                background: "var(--pdl-surface, #131027)",
-                backdropFilter: "blur(16px)",
                 maxWidth: 320,
+                color: "var(--cx-text, #F4F4F7)",
               }}
             >
               <Icon
@@ -141,7 +140,6 @@ function ToastContainer({
               />
               <p
                 className="flex-1 text-[14px] leading-[1.5]"
-                style={{ color: "var(--pdl-text, #F5F1EA)" }}
               >
                 {toast.message}
               </p>

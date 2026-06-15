@@ -140,20 +140,14 @@ export function PaywallModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center px-4"
-      style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }}
+      className="fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-sm bg-black/65"
       aria-modal="true"
       role="dialog"
       aria-labelledby="paywall-title"
     >
       <div
         ref={dialogRef}
-        className="w-full max-w-2xl relative rounded-2xl overflow-hidden"
-        style={{
-          background: "var(--color-surface, #111)",
-          border: "1px solid var(--color-border)",
-          boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
-        }}
+        className="cx-glass-float cx-glass-border w-full max-w-2xl relative rounded-[16px] overflow-hidden"
       >
         {/* Header */}
         <div className="px-6 pt-6 pb-4">
