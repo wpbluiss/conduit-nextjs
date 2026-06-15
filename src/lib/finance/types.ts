@@ -166,6 +166,10 @@ export interface Vault {
   status: string;
   color: string;
   sort: number;
+  is_mystery: boolean;
+  revealed: boolean;
+  mystery_destination: string | null;
+  mystery_blurb: string | null;
 }
 
 export interface Snapshot {

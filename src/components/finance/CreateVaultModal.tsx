@@ -21,12 +21,24 @@ export function CreateVaultModal() {
       description="A jar for something fun. Fund it, and when it hits 100% you spend it guilt-free."
       action={createVault}
     >
-      <Field label="Name" name="name" placeholder="Cabo trip, new TV, date nights…" required />
+      <SelectField
+        label="Reveal"
+        name="is_mystery"
+        options={[
+          { value: "no", label: "I'll name it myself" },
+          { value: "yes", label: "🎁 Surprise me — Cadence picks the trip" },
+        ]}
+        defaultValue="no"
+      />
+      <Field label="Name (optional for surprises)" name="name" placeholder="Cabo trip, new TV, Mystery Trip…" />
       <div className="grid grid-cols-2 gap-3">
         <Field label="Emoji" name="emoji" placeholder="✈️" defaultValue="🎯" />
         <Field label="Target $" name="target_amount" type="number" step="50" placeholder="2000" required />
       </div>
       <SelectField label="Type" name="category" options={CATEGORIES} defaultValue="trip" />
+      <p className="text-[11px] text-[var(--fin-muted)]">
+        Surprise mode hides the destination until you hit 100% — then Cadence reveals a trip that fits your budget.
+      </p>
     </FormModal>
   );
 }

@@ -424,13 +424,15 @@ export async function deleteMyAccount(): Promise<Result> {
 // ===================== Reward Vaults (gamified sinking funds) =====================
 export async function createVault(form: FormData): Promise<Result> {
   const supabase = await db();
+  const mystery = str(form.get("is_mystery")) === "yes";
   const { error } = await supabase.from("fin_vaults").insert({
     household_id: (await getUserHouseholdId())!,
-    name: str(form.get("name"), "New Reward"),
-    emoji: str(form.get("emoji"), "🎯"),
-    category: str(form.get("category"), "reward"),
+    name: mystery ? str(form.get("name"), "Mystery Trip") : str(form.get("name"), "New Reward"),
+    emoji: mystery ? "🎁" : str(form.get("emoji"), "🎯"),
+    category: mystery ? "trip" : str(form.get("category"), "reward"),
     target_amount: num(form.get("target_amount")),
     color: str(form.get("color"), "#ff8a3d"),
+    is_mystery: mystery,
   });
   refresh();
   return { ok: !error, error: error?.message };
@@ -441,10 +443,22 @@ export async function fundVault(id: string, amount: number): Promise<Result> {
   const { data: v } = await supabase.from("fin_vaults").select("*").eq("id", id).single();
   if (!v) return { ok: false, error: "Vault not found" };
   const saved = Math.max(0, Number(v.saved_amount) + amount);
-  const status = saved >= Number(v.target_amount) && Number(v.target_amount) > 0 ? "funded" : "active";
-  const { error } = await supabase.from("fin_vaults")
-    .update({ saved_amount: saved, status, updated_at: new Date().toISOString() })
-    .eq("id", id);
+  const justFunded = saved >= Number(v.target_amount) && Number(v.target_amount) > 0;
+  const status = justFunded ? "funded" : "active";
+
+  const patch: Record<string, unknown> = { saved_amount: saved, status, updated_at: new Date().toISOString() };
+  // Surprise reveal: when a mystery trip gets fully funded, Cadence picks the destination.
+  if (justFunded && v.is_mystery && !v.revealed) {
+    const { pickMysteryDestination } = await import("./destinations");
+    const dest = pickMysteryDestination(Number(v.target_amount));
+    patch.revealed = true;
+    patch.mystery_destination = dest.destination;
+    patch.mystery_blurb = dest.blurb;
+    patch.emoji = dest.emoji;
+    patch.name = dest.destination;
+  }
+
+  const { error } = await supabase.from("fin_vaults").update(patch).eq("id", id);
   refresh();
   return { ok: !error, error: error?.message };
 }

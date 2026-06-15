@@ -26,6 +26,10 @@ export function VaultCard({ v }: { v: Vault }) {
     wasFunded.current = funded;
   }, [funded]);
 
+  const mysteryHidden = v.is_mystery && !v.revealed;
+  const displayEmoji = mysteryHidden ? "🎁" : v.emoji;
+  const displayName = mysteryHidden ? "Mystery Trip" : v.name;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -34,7 +38,7 @@ export function VaultCard({ v }: { v: Vault }) {
     >
       <Confetti fire={fire} />
       <div className="flex justify-between items-start">
-        <span className="text-2xl">{v.emoji}</span>
+        <span className="text-2xl">{displayEmoji}</span>
         <button
           onClick={() => { if (confirm(`Delete "${v.name}"?`)) start(() => { deleteVault(v.id); }); }}
           disabled={pending}
@@ -53,10 +57,16 @@ export function VaultCard({ v }: { v: Vault }) {
         </ProgressRing>
       </div>
 
-      <div className="font-semibold">{v.name}</div>
+      <div className="font-semibold">{displayName}</div>
       <div className="text-[11px] text-[var(--fin-muted)]">
         {fmtMoney(Number(v.saved_amount))} of {fmtMoney(Number(v.target_amount))}
       </div>
+      {mysteryHidden && (
+        <div className="text-[11px] text-[#ffa876] mt-1 fin-mono">🌍 destination revealed at 100%</div>
+      )}
+      {v.is_mystery && v.revealed && v.mystery_blurb && (
+        <div className="text-[11px] text-[var(--fin-muted)] mt-1 italic">✨ {v.mystery_blurb}</div>
+      )}
 
       <div className="mt-3">
         {spent ? (
@@ -72,7 +82,7 @@ export function VaultCard({ v }: { v: Vault }) {
             </Button>
           </div>
         ) : (
-          <FundVaultModal id={v.id} name={v.name} remaining={Number(v.target_amount) - Number(v.saved_amount)} />
+          <FundVaultModal id={v.id} name={displayName} remaining={Number(v.target_amount) - Number(v.saved_amount)} />
         )}
       </div>
     </motion.div>
