@@ -108,7 +108,7 @@ export default async function EmployeeRightRail({
     <aside className="w-full md:w-80 shrink-0 border-l border-[var(--color-border)] bg-[var(--color-surface)] p-5 space-y-6">
       {/* About */}
       <section>
-        <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
+        <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
           About {meta.name}
         </div>
         <p className="text-sm text-[var(--color-text)] leading-relaxed">
@@ -116,7 +116,7 @@ export default async function EmployeeRightRail({
         </p>
         <div className="mt-3 flex flex-wrap gap-1.5">
           <span
-            className="inline-flex items-center text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full"
+            className="inline-flex items-center cx-type-xs uppercase tracking-[0.15em] px-2 py-0.5 rounded-full"
             style={{
               background: meta.colorSoft,
               color: meta.color,
@@ -125,7 +125,7 @@ export default async function EmployeeRightRail({
             {meta.role}
           </span>
           <span
-            className={`inline-flex items-center text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full hairline ${
+            className={`inline-flex items-center cx-type-xs uppercase tracking-[0.15em] px-2 py-0.5 rounded-full hairline ${
               meta.canExecute
                 ? "text-[var(--color-text)]"
                 : "text-[var(--color-text-muted)]"
@@ -138,7 +138,7 @@ export default async function EmployeeRightRail({
 
       {/* Recent context */}
       <section>
-        <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
+        <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
           Recent context
         </div>
         {memory.length === 0 && engSessions.length === 0 ? (
@@ -156,7 +156,7 @@ export default async function EmployeeRightRail({
                   href={`/app/builds?session=${s.id}`}
                   className="conduit-card px-3 py-2 text-xs leading-snug block hover:border-[var(--color-accent)] transition-colors"
                 >
-                  <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1 inline-flex items-center gap-1.5">
+                  <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1 inline-flex items-center gap-1.5">
                     <Hammer size={10} /> build · {s.status} · {relativeTime(s.created_at)}
                   </div>
                   <p className="text-[var(--color-text)] line-clamp-2">
@@ -170,7 +170,7 @@ export default async function EmployeeRightRail({
                 key={m.id}
                 className="conduit-card px-3 py-2 text-xs leading-snug"
               >
-                <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
+                <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
                   {m.kind}
                 </div>
                 <p className="text-[var(--color-text)] line-clamp-3">
@@ -182,7 +182,7 @@ export default async function EmployeeRightRail({
         )}
         <Link
           href="/app/settings/memory"
-          className="mt-2 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.15em] text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+          className="mt-2 inline-flex items-center gap-1 cx-type-xs uppercase tracking-[0.15em] text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
         >
           See all memory <ArrowRight size={10} />
         </Link>
@@ -191,7 +191,7 @@ export default async function EmployeeRightRail({
       {/* Quick actions */}
       {actions.length > 0 && (
         <section>
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
+          <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
             Quick actions
           </div>
           <div className="space-y-1.5">
@@ -203,7 +203,7 @@ export default async function EmployeeRightRail({
                   ["--dept" as string]: meta.color,
                   ["--dept-soft" as string]: meta.colorSoft,
                 }}
-                className="conduit-suggestion px-3 py-2.5 text-[12px] block leading-snug border-[var(--color-accent)]"
+                className="conduit-suggestion px-3 py-2.5 text-xs block leading-snug border-[var(--color-accent)]"
               >
                 <span className="inline-flex items-center gap-1.5">
                   <Hammer size={11} /> Resume last build · {activeSession.status}
@@ -218,7 +218,7 @@ export default async function EmployeeRightRail({
                   ["--dept" as string]: meta.color,
                   ["--dept-soft" as string]: meta.colorSoft,
                 }}
-                className="conduit-suggestion px-3 py-2.5 text-[12px] block leading-snug"
+                className="conduit-suggestion px-3 py-2.5 text-xs block leading-snug"
               >
                 {a}
               </Link>

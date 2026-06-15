@@ -5,7 +5,7 @@ export default function AppNotFound() {
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-6 py-20 text-center">
       <p
-        className="text-[10px] uppercase tracking-[0.2em] mb-3"
+        className="cx-type-xs uppercase tracking-[0.2em] mb-3"
         style={{ color: "var(--color-text-muted)" }}
       >
         404
@@ -20,7 +20,7 @@ export default function AppNotFound() {
         <Link
           href="/app/workspace"
           className="btn-primary inline-flex items-center gap-2"
-          style={{ padding: "10px 20px", fontSize: "14px" }}
+          style={{ padding: "10px 20px", fontSize: "var(--cx-type-base)" }}
         >
           <Home size={14} />
           Workspace

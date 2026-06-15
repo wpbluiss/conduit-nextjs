@@ -46,7 +46,7 @@ export function BillingDashboard({
     return (
       <div className="space-y-6 text-sm">
         <div className="conduit-card p-6">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
+          <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
             Internal Account · Conduit AI Team
           </div>
           <div className="serif text-2xl">No charge, full access</div>
@@ -154,12 +154,12 @@ export function BillingDashboard({
       {/* Current plan card */}
       <div className="conduit-card p-6 flex items-start justify-between gap-4">
         <div>
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+          <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
             Current plan ·{" "}
             {(account.subscription_status ?? "inactive").replace("_", " ")}
           </div>
           <div className="serif text-3xl mt-1">{tier.name}</div>
-          <div className="text-[var(--color-text-muted)] text-xs mt-1.5">
+          <div className="cx-mono text-[var(--color-text-muted)] text-xs mt-1.5 tabular-nums">
             {tier.monthlyPriceCents > 0
               ? `$${tier.monthlyPriceCents / 100} / month`
               : "Free forever"}{" "}
@@ -210,7 +210,7 @@ export function BillingDashboard({
                 }`}
               >
                 {isCurrent && (
-                  <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
+                  <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
                     Current plan
                   </div>
                 )}
@@ -302,12 +302,12 @@ export function BillingDashboard({
             </button>
           ))}
         </div>
-        <p className="mt-2 text-[10px] text-[var(--color-text-muted)]">
+        <p className="mt-2 cx-type-xs text-[var(--color-text-muted)]">
           Bonus tokens stack on your monthly allowance and roll over until used.
         </p>
       </div>
 
-      <p className="text-[10px] text-[var(--color-text-muted)]">
+      <p className="cx-mono cx-type-xs text-[var(--color-text-muted)] tabular-nums">
         Allowance this cycle: {allowance.toLocaleString()} tokens.
       </p>
     </div>
@@ -333,7 +333,7 @@ function TokenUsageBar({
         <span className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
           Tokens this cycle
         </span>
-        <span className="text-sm">
+        <span className="cx-mono cx-type-base">
           {used.toLocaleString()} / {total.toLocaleString()}
         </span>
       </div>

@@ -54,7 +54,7 @@ export function PraxisDangerZone() {
       </p>
       <label className="mt-4 block">
         <span
-          className="mb-1.5 block text-[11px] uppercase tracking-[0.16em]"
+          className="mb-1.5 block cx-type-xs uppercase tracking-[0.16em]"
           style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-mono)" }}
         >
           Type DELETE to confirm

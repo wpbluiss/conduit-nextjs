@@ -207,7 +207,7 @@ export function PraxisComposerPill({
           cursor: "pointer",
           letterSpacing: 0,
           textTransform: "none",
-          fontSize: "12px",
+          fontSize: "var(--cx-type-xs)",
           position: "relative",
           flexShrink: 0,
           border: "none",
@@ -266,7 +266,7 @@ export function PraxisComposerPill({
                     alignItems: "center",
                     gap: "var(--space-2)",
                     padding: "var(--space-2) var(--space-3)",
-                    fontSize: "12px",
+                    fontSize: "var(--cx-type-xs)",
                     textAlign: "left",
                     background: active
                       ? "var(--color-surface-raised)"
@@ -324,7 +324,7 @@ export function PraxisComposerPill({
                     alignItems: "center",
                     gap: "var(--space-3)",
                     padding: "var(--space-2) var(--space-3)",
-                    fontSize: "13px",
+                    fontSize: "var(--cx-type-sm)",
                     textAlign: "left",
                     background: highlighted ? "var(--color-surface-raised)" : "transparent",
                     color: "var(--color-text)",
@@ -335,13 +335,13 @@ export function PraxisComposerPill({
                   <PraxisAvatar employee={id} size="sm" />
                   <span style={{ flex: 1, minWidth: 0 }}>
                     <span style={{ display: "block" }}>{nick}</span>
-                    <span style={{ display: "block", fontSize: "11px", color: "var(--color-text-muted)" }}>
+                    <span style={{ display: "block", fontSize: "var(--cx-type-xs)", color: "var(--color-text-muted)" }}>
                       {emp.role}
                     </span>
                   </span>
                   <span
                     style={{
-                      fontSize: "11px",
+                      fontSize: "var(--cx-type-xs)",
                       color: "var(--color-text-muted)",
                       fontFamily: "var(--font-mono)",
                       flexShrink: 0,
@@ -368,7 +368,7 @@ export function PraxisComposerPill({
                 borderRadius: "var(--radius-pill)",
                 background: EMPLOYEES[mentionOverride].colorSoft,
                 border: `1px solid ${EMPLOYEES[mentionOverride].color}`,
-                fontSize: "12px",
+                fontSize: "var(--cx-type-xs)",
                 color: EMPLOYEES[mentionOverride].color,
                 flexShrink: 0,
                 lineHeight: 1,
@@ -393,7 +393,7 @@ export function PraxisComposerPill({
                   border: "none",
                   color: "inherit",
                   cursor: "pointer",
-                  fontSize: "11px",
+                  fontSize: "var(--cx-type-xs)",
                   lineHeight: 1,
                   padding: 0,
                   opacity: 0.7,
@@ -454,7 +454,7 @@ export function PraxisComposerPill({
             border: "none",
             outline: "none",
             padding: "var(--space-2)",
-            fontSize: "15px",
+            fontSize: "var(--cx-type-base)",
             lineHeight: 1.4,
             maxHeight: "8rem",
             color: "var(--color-text)",
@@ -536,7 +536,7 @@ export function PraxisComposerPill({
             />
             <span
               style={{
-                fontSize: "11px",
+                fontSize: "var(--cx-type-xs)",
                 fontVariantNumeric: "tabular-nums",
                 color: "var(--color-text-muted)",
                 minWidth: "2.8ch",
@@ -583,7 +583,7 @@ export function PraxisComposerPill({
                 color: "var(--color-text-muted)",
                 border: "1px solid var(--color-border)",
                 cursor: "pointer",
-                fontSize: "12px",
+                fontSize: "var(--cx-type-xs)",
                 flexShrink: 0,
               }}
             >
@@ -699,7 +699,7 @@ export function PraxisComposerPill({
                 color: "var(--color-text-muted)",
                 border: "1px solid var(--color-border)",
                 cursor: "pointer",
-                fontSize: "11px",
+                fontSize: "var(--cx-type-xs)",
                 flexShrink: 0,
               }}
             >
@@ -763,7 +763,7 @@ export function PraxisComposerPill({
           aria-label={`${charCount} characters, approximately ${tokenEstimate} tokens`}
           style={{
             flexShrink: 0,
-            fontSize: "11px",
+            fontSize: "var(--cx-type-xs)",
             fontFamily: "var(--font-mono)",
             color: counterColor,
             whiteSpace: "nowrap",

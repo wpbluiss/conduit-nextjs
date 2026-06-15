@@ -110,7 +110,7 @@ export default async function VoiceRoomLanding() {
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-10">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
+          <p className="cx-type-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
             Praxis Console · Voice Room
           </p>
           <h1 className="cx-heading-3xl mt-2 inline-flex items-center gap-3">
@@ -128,7 +128,7 @@ export default async function VoiceRoomLanding() {
             <Lock size={14} className="text-[var(--color-accent-hi)]" />
             <div>
               <div className="text-sm">Voice mode is a Pro perk</div>
-              <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5">
+              <p className="cx-type-xs text-[var(--color-text-muted)] mt-0.5">
                 Free accounts can still use voice <em>input</em> in chat.{" "}
                 <Link
                   href="/app/settings/billing"
@@ -144,7 +144,7 @@ export default async function VoiceRoomLanding() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-10">
           <div className="conduit-card p-5">
-            <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+            <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
               Today
             </div>
             <div className="cx-stat mt-2">
@@ -167,32 +167,32 @@ export default async function VoiceRoomLanding() {
                 }}
               />
             </div>
-            <div className="text-[10px] text-[var(--color-text-muted)] mt-1.5">
+            <div className="cx-type-xs text-[var(--color-text-muted)] mt-1.5">
               Daily cap resets at midnight
             </div>
           </div>
           <div className="conduit-card p-5">
-            <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+            <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
               Per-session cap
             </div>
             <div className="cx-stat mt-2">
               {Math.floor(ceilings.maxSeconds / 60)} min
             </div>
-            <div className="text-[11px] text-[var(--color-text-muted)] mt-1.5">
+            <div className="cx-type-xs text-[var(--color-text-muted)] mt-1.5">
               You&apos;ll hear a soft warning at{" "}
               {Math.floor(ceilings.warnSeconds / 60)} min
             </div>
           </div>
           <div className="conduit-card p-5">
-            <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+            <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
               Voice settings
             </div>
-            <p className="text-[12px] mt-2 text-[var(--color-text-muted)]">
+            <p className="text-xs mt-2 text-[var(--color-text-muted)]">
               Per-employee voices, auto-play, streaming.
             </p>
             <Link
               href="/app/settings/voice"
-              className="mt-3 inline-flex items-center gap-1 text-[12px] text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+              className="mt-3 inline-flex items-center gap-1 text-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
             >
               Manage →
             </Link>
@@ -208,10 +208,10 @@ export default async function VoiceRoomLanding() {
 
         {/* Pick an employee for a 1:1. */}
         <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="text-[12px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+          <h2 className="text-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
             Talk solo
           </h2>
-          <span className="text-[10px] text-[var(--color-text-muted)]">
+          <span className="cx-type-xs text-[var(--color-text-muted)]">
             1-on-1 conversation · opens the workspace
           </span>
         </div>
@@ -238,7 +238,7 @@ export default async function VoiceRoomLanding() {
                   >
                     {meta.name}
                   </div>
-                  <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] truncate">
+                  <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] truncate">
                     {meta.role}
                   </div>
                 </div>
@@ -252,18 +252,18 @@ export default async function VoiceRoomLanding() {
 
         {/* Recent sessions */}
         <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="text-[12px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+          <h2 className="text-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
             Recent sessions
           </h2>
           <Link
             href="/app/settings/voice-history"
-            className="text-[10px] text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+            className="cx-type-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
           >
             See full history →
           </Link>
         </div>
         {recent.length === 0 ? (
-          <p className="text-[12px] text-[var(--color-text-muted)] mt-2">
+          <p className="text-xs text-[var(--color-text-muted)] mt-2">
             No voice sessions yet. Pick an employee above to start your first
             room.
           </p>
@@ -287,7 +287,7 @@ export default async function VoiceRoomLanding() {
                     <div className="text-sm" style={{ color: meta.color }}>
                       {meta.name}
                     </div>
-                    <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+                    <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
                       {fmtDuration(s.duration_seconds ?? 0)} ·{" "}
                       {relativeTime(s.started_at)}
                     </div>

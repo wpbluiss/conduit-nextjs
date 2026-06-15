@@ -92,7 +92,7 @@ export function PwaInstaller() {
             Install Praxis
           </div>
           {iosHint ? (
-            <p className="text-[12px] text-[var(--color-cream-mute)] mt-1 flex items-center gap-1 flex-wrap">
+            <p className="text-xs text-[var(--color-cream-mute)] mt-1 flex items-center gap-1 flex-wrap">
               Tap <Share size={13} className="inline" /> Share →{" "}
               <span className="text-[var(--color-cream)]">
                 Add to Home Screen
@@ -100,7 +100,7 @@ export function PwaInstaller() {
             </p>
           ) : (
             <>
-              <p className="text-[12px] text-[var(--color-cream-mute)] mt-1">
+              <p className="text-xs text-[var(--color-cream-mute)] mt-1">
                 Add to your home screen — opens full-screen like a native app.
               </p>
               <button

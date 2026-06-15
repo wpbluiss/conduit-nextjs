@@ -194,7 +194,7 @@ export function PaywallModal({
               }
             >
               Annual
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: "color-mix(in srgb, var(--cx-reward) 15%, transparent)", color: "var(--cx-reward)" }}>
+              <span className="cx-type-xs px-1.5 py-0.5 rounded-full font-medium" style={{ background: "color-mix(in srgb, var(--cx-reward) 15%, transparent)", color: "var(--cx-reward)" }}>
                 −20%
               </span>
             </button>

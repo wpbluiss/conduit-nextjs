@@ -47,7 +47,7 @@ export default function AppError({ error, reset, unstable_retry }: Props) {
         <Button
           onClick={onRetry}
           className="inline-flex items-center gap-2"
-          style={{ padding: "10px 20px", fontSize: "14px" }}
+          style={{ padding: "10px 20px", fontSize: "var(--cx-type-base)" }}
         >
           <RotateCcw size={14} />
           Try again

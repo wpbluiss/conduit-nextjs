@@ -181,7 +181,7 @@ function UsageBanner({
 }) {
   if (internal || usage.unlimited) {
     return (
-      <div className="flex items-center gap-3 mb-4 text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+      <div className="flex items-center gap-3 mb-4 cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
         <span className="text-[var(--color-green)]">●</span> Unlimited
         engineering builds (internal account)
       </div>
@@ -208,7 +208,7 @@ function UsageBanner({
       }}
     >
       <div className="flex items-center gap-4">
-        <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+        <span className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
           Today &middot; {tierName}
         </span>
         <span className={buildsExhausted ? "text-[var(--color-pink)]" : ""}>
@@ -245,7 +245,7 @@ function FailedToggle({
     <button
       type="button"
       onClick={() => onToggle(!showFailed)}
-      className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] pb-2"
+      className="inline-flex items-center gap-1.5 cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] pb-2"
       title={
         showFailed
           ? "Hide failed and aborted builds"
@@ -285,12 +285,12 @@ function Tab({
     >
       {label}
       {count !== null && (
-        <span className="ml-1.5 text-[10px] text-[var(--color-text-muted)]">
+        <span className="ml-1.5 cx-type-xs text-[var(--color-text-muted)]">
           {count}
         </span>
       )}
       {badge && (
-        <span className="ml-2 text-[9px] uppercase tracking-[0.15em] text-[var(--color-accent-hi)]">
+        <span className="ml-2 cx-type-xs uppercase tracking-[0.15em] text-[var(--color-accent-hi)]">
           {badge}
         </span>
       )}
@@ -302,7 +302,7 @@ function TemplatesTab({ builds }: { builds: R7Build[] }) {
   if (builds.length === 0) {
     return (
       <div className="conduit-card p-8 max-w-md">
-        <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
+        <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
           Nothing shipped yet
         </div>
         <p className="text-[var(--color-text)] mb-4">
@@ -324,7 +324,7 @@ function TemplatesTab({ builds }: { builds: R7Build[] }) {
           style={{ borderLeftColor: "var(--color-dept-engineering)" }}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+            <span className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
               {b.template_id}
             </span>
             <StatusPill status={b.status} />
@@ -345,7 +345,7 @@ function TemplatesTab({ builds }: { builds: R7Build[] }) {
           ) : (
             <p className="text-xs text-[var(--color-text-muted)]">Building…</p>
           )}
-          <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted)] mt-auto pt-2">
+          <div className="flex items-center justify-between cx-type-xs text-[var(--color-text-muted)] mt-auto pt-2">
             <span>{new Date(b.created_at).toLocaleString()}</span>
             {b.conversation_id && (
               <Link
@@ -372,7 +372,7 @@ function EngineeringTab({
   if (sessions.length === 0) {
     return (
       <div className="conduit-card p-8 max-w-md">
-        <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
+        <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
           Nothing built yet
         </div>
         <p className="text-[var(--color-text)] mb-4">
@@ -397,7 +397,7 @@ function EngineeringTab({
             className="flex flex-col gap-3 text-left hover:opacity-95 transition-opacity"
           >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+              <span className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                 {s.build_type ?? "custom"}
                 {s.parent_session_id && (
                   <span className="ml-2 text-[var(--color-accent)]">
@@ -425,7 +425,7 @@ function EngineeringTab({
               </p>
             )}
           </Link>
-          <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted)] pt-2 border-t border-[var(--color-border)]">
+          <div className="flex items-center justify-between cx-type-xs text-[var(--color-text-muted)] pt-2 border-t border-[var(--color-border)]">
             <span>{new Date(s.created_at).toLocaleString()}</span>
             <span className="flex items-center gap-3">
               <span>
@@ -435,7 +435,7 @@ function EngineeringTab({
                 <button
                   type="button"
                   onClick={() => onContinue(s)}
-                  className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.15em] text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+                  className="inline-flex items-center gap-1 cx-type-xs uppercase tracking-[0.15em] text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
                   title="Continue from this build (clones the workspace files)"
                 >
                   Continue <ArrowRight size={10} />
@@ -501,7 +501,7 @@ function ContinueModal({
       <div className="w-full max-w-lg conduit-card p-6">
         <div className="flex items-start justify-between mb-3">
           <div>
-            <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-1">
+            <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-1">
               Continue build
             </div>
             <p className="serif text-lg line-clamp-2">{parent.prompt}</p>
@@ -584,7 +584,7 @@ function StatusPill({ status }: { status: string }) {
   const m = map[status] ?? map.pending;
   return (
     <span
-      className="text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full"
+      className="cx-type-xs uppercase tracking-[0.15em] px-2 py-0.5 rounded-full"
       style={{
         color: m.color,
         background: `color-mix(in srgb, ${m.color} 14%, transparent)`,

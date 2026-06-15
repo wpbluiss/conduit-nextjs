@@ -358,7 +358,7 @@ export function OnboardingModal({
 
       {/* Footer */}
       <div className="px-8 pb-6">
-        <div className="max-w-2xl mx-auto text-center text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
+        <div className="max-w-2xl mx-auto text-center cx-type-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
           Praxis · By Conduit
         </div>
       </div>

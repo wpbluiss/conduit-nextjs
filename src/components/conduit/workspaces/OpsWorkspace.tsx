@@ -30,12 +30,12 @@ export default function OpsWorkspace() {
       {/* SOP list */}
       <div>
         <div className="flex items-baseline justify-between mb-3">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
+          <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
             <ClipboardList size={11} /> Standard procedures
           </div>
           <Link
             href={`/app?pin=ops&prompt=${encodeURIComponent("Build an SOP for client onboarding")}`}
-            className="text-[10px] uppercase tracking-[0.15em]"
+            className="cx-type-xs uppercase tracking-[0.15em]"
             style={{ color: dept }}
           >
             New SOP →
@@ -55,12 +55,12 @@ export default function OpsWorkspace() {
                   <div className="text-sm text-[var(--color-text)] truncate">
                     {sop.title}
                   </div>
-                  <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-0.5">
+                  <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-0.5">
                     {sop.updated}
                   </div>
                 </div>
                 <span
-                  className="text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full"
+                  className="cx-type-xs uppercase tracking-[0.15em] px-2 py-0.5 rounded-full"
                   style={{
                     color: statusColor(sop.status),
                     background: `color-mix(in srgb, ${statusColor(sop.status)} 14%, transparent)`,
@@ -78,10 +78,10 @@ export default function OpsWorkspace() {
       {/* Vendor renewal countdown */}
       <div>
         <div className="flex items-baseline justify-between mb-3">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
+          <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
             <Building2 size={11} /> Vendor renewals
           </div>
-          <span className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+          <span className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
             {VENDORS.length} tracked
           </span>
         </div>
@@ -102,7 +102,7 @@ export default function OpsWorkspace() {
                   <div className="text-sm text-[var(--color-text)]">
                     {v.name}
                   </div>
-                  <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-0.5">
+                  <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-0.5">
                     {v.service}
                   </div>
                 </div>
@@ -114,11 +114,11 @@ export default function OpsWorkspace() {
                 >
                   <div className="serif text-2xl leading-none flex items-baseline gap-1 justify-end">
                     {v.renewsInDays}
-                    <span className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+                    <span className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
                       d
                     </span>
                   </div>
-                  <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-0.5 inline-flex items-center gap-1">
+                  <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-0.5 inline-flex items-center gap-1">
                     <Clock size={9} /> until renew
                   </div>
                 </div>
@@ -142,7 +142,7 @@ export default function OpsWorkspace() {
           style={{ borderLeftColor: dept }}
         >
           <div>
-            <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+            <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
               Weekly cadence
             </div>
             <div className="text-sm text-[var(--color-text)] mt-0.5">

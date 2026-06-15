@@ -256,7 +256,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
                   }
                 />
                 <kbd
-                  className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono rounded border shrink-0"
+                  className="hidden sm:inline-flex items-center px-1.5 py-0.5 cx-type-xs font-mono rounded border shrink-0"
                   style={{
                     background: "var(--color-surface)",
                     borderColor: "var(--color-border)",
@@ -282,7 +282,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
                 ) : (
                   groups.map((group) => (
                     <div key={group.name}>
-                      <div className="px-4 pt-3 pb-1 text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                      <div className="px-4 pt-3 pb-1 cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                         {group.name}
                       </div>
                       {group.items.map((item) => {
@@ -321,14 +321,14 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
                                 {item.label}
                               </span>
                               {item.sublabel && (
-                                <span className="block text-[11px] text-[var(--color-text-muted)] truncate">
+                                <span className="block cx-type-xs text-[var(--color-text-muted)] truncate">
                                   {item.sublabel}
                                 </span>
                               )}
                             </span>
                             {isActive && (
                               <kbd
-                                className="hidden sm:inline-flex shrink-0 items-center px-1.5 py-0.5 text-[10px] font-mono rounded border"
+                                className="hidden sm:inline-flex shrink-0 items-center px-1.5 py-0.5 cx-type-xs font-mono rounded border"
                                 style={{
                                   background: "var(--color-surface)",
                                   borderColor: "var(--color-border)",
@@ -349,7 +349,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
 
               {/* Footer */}
               <div
-                className="px-4 py-2.5 border-t border-[var(--color-border)] flex items-center gap-4 text-[10px]"
+                className="px-4 py-2.5 border-t border-[var(--color-border)] flex items-center gap-4 cx-type-xs"
                 style={{ color: "var(--color-text-muted)" }}
               >
                 <span>

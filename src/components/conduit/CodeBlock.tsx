@@ -83,7 +83,7 @@ export function CodeBlock({ code, className = "", showLineNumbers = true }: Prop
 
   return (
     <pre
-      className={`code-block-root relative overflow-x-auto rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-[13px] leading-[1.7] font-mono ${className}`}
+      className={`code-block-root relative overflow-x-auto rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] cx-type-sm leading-[1.7] font-mono ${className}`}
       style={{ fontFamily: "var(--font-mono, 'JetBrains Mono', 'Monaco', 'Courier New', monospace)" }}
     >
       <code className="block">
@@ -135,7 +135,7 @@ export function CodeBlock({ code, className = "", showLineNumbers = true }: Prop
                 {info.text}
                 {showEllipsis && (
                   <span
-                    className="ml-2 text-[var(--color-text-muted)] opacity-60 text-[11px] select-none"
+                    className="ml-2 text-[var(--color-text-muted)] opacity-60 cx-type-xs select-none"
                     aria-label={`${ellipsisCount} lines hidden`}
                   >
                     … {ellipsisCount} {ellipsisCount === 1 ? "line" : "lines"}

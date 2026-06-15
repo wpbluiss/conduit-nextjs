@@ -1520,14 +1520,14 @@ export function Chat({
               <div ref={topSentinelRef} className="flex-1 flex justify-center">
                 {loadingOlder ? (
                   <span
-                    className="text-[11px] uppercase tracking-wider"
+                    className="cx-type-xs uppercase tracking-wider"
                     style={{ color: "var(--color-text-muted)" }}
                   >
                     Loading older messages…
                   </span>
                 ) : !hasMore && messages.length > 0 ? (
                   <span
-                    className="text-[11px] uppercase tracking-wider"
+                    className="cx-type-xs uppercase tracking-wider"
                     style={{ color: "var(--color-text-muted)" }}
                   >
                     All messages loaded
@@ -1542,7 +1542,7 @@ export function Chat({
                     title="Search messages"
                     aria-label="Search messages"
                     aria-pressed={searchOpen}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cx-type-xs transition-colors"
                     style={{
                       color: searchOpen ? "var(--color-text)" : "var(--color-text-muted)",
                       border: searchOpen ? "1px solid var(--color-border)" : "1px solid transparent",
@@ -1556,7 +1556,7 @@ export function Chat({
                     onClick={exportConversation}
                     title="Export as Markdown"
                     aria-label="Export conversation as Markdown"
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cx-type-xs transition-colors"
                     style={{
                       color: "var(--color-text-muted)",
                       border: "1px solid transparent",
@@ -1584,7 +1584,7 @@ export function Chat({
                       }
                       title="Print / Save as PDF"
                       aria-label="Print conversation or save as PDF"
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cx-type-xs transition-colors"
                       style={{
                         color: "var(--color-text-muted)",
                         border: "1px solid transparent",
@@ -1619,7 +1619,7 @@ export function Chat({
                       onClick={() => void copyPermalink()}
                       title="Copy link to this conversation"
                       aria-label="Copy link to this conversation"
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cx-type-xs transition-colors"
                       style={{
                         color: linkCopied ? "var(--color-text)" : "var(--color-text-muted)",
                         border: linkCopied ? "1px solid var(--color-border)" : "1px solid transparent",
@@ -1649,7 +1649,7 @@ export function Chat({
                       disabled={handoffLoading}
                       title="Hand off to another specialist"
                       aria-label="Hand off to another specialist"
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors disabled:opacity-50"
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cx-type-xs transition-colors disabled:opacity-50"
                       style={{
                         color: "var(--color-text-muted)",
                         border: "1px solid transparent",
@@ -1693,7 +1693,7 @@ export function Chat({
                 className="flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--color-text-muted)]"
               />
               {searchQuery && (
-                <span className="text-[11px] shrink-0" style={{ color: "var(--color-text-muted)" }}>
+                <span className="cx-type-xs shrink-0" style={{ color: "var(--color-text-muted)" }}>
                   {searchMatchSet.size} match{searchMatchSet.size !== 1 ? "es" : ""}
                 </span>
               )}
@@ -2046,7 +2046,7 @@ export function Chat({
           />
           <div
             className="mt-2 h-4 flex items-center justify-center"
-            style={{ fontSize: "11px" }}
+            style={{ fontSize: "var(--cx-type-xs)" }}
           >
             {streamingEmployee ? (
               <span className="presence-line flex items-center gap-1.5">
@@ -2115,7 +2115,7 @@ export function Chat({
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p
-                    className="text-[11px] uppercase tracking-[0.15em] mb-1"
+                    className="cx-type-xs uppercase tracking-[0.15em] mb-1"
                     style={{ color: "var(--color-text-muted)" }}
                   >
                     Hand off to…
@@ -2176,13 +2176,13 @@ export function Chat({
                         {emp.initial}
                       </span>
                       <span
-                        className="text-[11px] font-medium text-center leading-tight"
+                        className="cx-type-xs font-medium text-center leading-tight"
                         style={{ color: "var(--color-text)" }}
                       >
                         {emp.name}
                       </span>
                       <span
-                        className="text-[9px] text-center leading-tight"
+                        className="cx-type-xs text-center leading-tight"
                         style={{ color: "var(--color-text-muted)" }}
                       >
                         {emp.role}
@@ -2191,7 +2191,7 @@ export function Chat({
                   );
                 })}
               </div>
-              <p className="text-[11px] mt-4" style={{ color: "var(--color-text-muted)" }}>
+              <p className="cx-type-xs mt-4" style={{ color: "var(--color-text-muted)" }}>
                 A new conversation will open with context from this thread.
                 {allowedEmployees.length < EMPLOYEE_ORDER.length && (
                   <> Dimmed specialists require a higher plan.</>
@@ -2569,7 +2569,7 @@ function CopyButton({ content }: { content: string }) {
       }}
     >
       <Icon size={13} />
-      <span className="hidden md:inline text-[11px]">{copied ? "Copied" : "Copy"}</span>
+      <span className="hidden md:inline cx-type-xs">{copied ? "Copied" : "Copy"}</span>
     </button>
   );
 }
@@ -2714,7 +2714,7 @@ function MessageHandoffButton({
         <div
           className="cx-glass-float cx-glass-border absolute left-0 top-full mt-1 z-20 rounded-xl py-1 min-w-[170px]"
         >
-          <p className="px-3 py-1.5 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+          <p className="px-3 py-1.5 cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
             Hand off to…
           </p>
           {targets.map((emp) => (
@@ -2731,7 +2731,7 @@ function MessageHandoffButton({
               }}
             >
               <span
-                className="w-5 h-5 rounded-full shrink-0 flex items-center justify-center text-[8px] font-bold uppercase"
+                className="w-5 h-5 rounded-full shrink-0 flex items-center justify-center cx-type-xs font-bold uppercase"
                 style={{ background: DEPT_COLOR[emp], color: "#fff" }}
               >
                 {labelFor(emp).slice(0, 2)}
@@ -2774,7 +2774,7 @@ function MessageTimestamp({
     return (
       <time
         dateTime={createdAt}
-        className="text-[11px] select-none"
+        className="cx-mono cx-type-xs select-none tabular-nums"
         style={{ color: "var(--color-text-muted)" }}
       >
         {full}
@@ -2787,7 +2787,7 @@ function MessageTimestamp({
       trigger={
         <time
           dateTime={createdAt}
-          className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity text-[11px] cursor-default select-none"
+          className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity cx-mono cx-type-xs cursor-default select-none tabular-nums"
           style={{ color: "var(--color-text-muted)" }}
         >
           {short}
@@ -2965,7 +2965,7 @@ const MessageBubble = memo(function MessageBubble({
               <button
                 type="button"
                 onClick={onEditStart}
-                className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-[11px] px-2 py-0.5 rounded"
+                className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity cx-type-xs px-2 py-0.5 rounded"
                 style={{ color: "var(--color-text-muted)" }}
                 aria-label="Edit message"
               >
@@ -3009,7 +3009,7 @@ const MessageBubble = memo(function MessageBubble({
       return (
         <div className="handoff-card flex items-center gap-3 my-2">
           <div className="flex-1 h-px bg-[var(--color-border)]" />
-          <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
+          <span className="cx-type-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
             {message.content}
           </span>
           <div className="flex-1 h-px bg-[var(--color-border)]" />
@@ -3084,7 +3084,7 @@ const MessageBubble = memo(function MessageBubble({
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
                 aria-label={`Handed off from ${nickLabelFor(message.handoffFrom as EmployeeKey)}`}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] uppercase tracking-[0.1em]"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full cx-type-xs uppercase tracking-[0.1em]"
                 style={{
                   background: `color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 12%, var(--color-surface-elevated))`,
                   color: DEPT_COLOR[message.handoffFrom as EmployeeKey],
@@ -3096,7 +3096,7 @@ const MessageBubble = memo(function MessageBubble({
             )}
             {message.pending && (
               <span
-                className="text-[10px] uppercase tracking-[0.18em]"
+                className="cx-type-xs uppercase tracking-[0.18em]"
                 style={{ color: "var(--cx-text-faint, var(--color-text-muted))" }}
               >
                 writing…
@@ -3105,7 +3105,7 @@ const MessageBubble = memo(function MessageBubble({
             {playing && (
               <button
                 onClick={onStopAudio}
-                className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em]"
+                className="inline-flex items-center gap-1.5 cx-type-xs uppercase tracking-[0.18em]"
                 style={{ color: DEPT_COLOR[employee] }}
                 aria-label="Stop audio"
               >
@@ -3141,7 +3141,7 @@ const MessageBubble = memo(function MessageBubble({
             {!playing && !message.pending && onReplayAudio && (
               <button
                 onClick={onReplayAudio}
-                className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                 aria-label="Replay audio"
               >
                 ▶ Listen
@@ -3159,7 +3159,7 @@ const MessageBubble = memo(function MessageBubble({
         </div>
         {!!(message.metadata as Record<string, unknown>)?.incomplete && (
           <div
-            className="flex items-center gap-1.5 mt-2 text-[11px]"
+            className="flex items-center gap-1.5 mt-2 cx-type-xs"
             style={{ color: '#ca8a04' }}
             aria-label="Response was cut short due to a connection drop"
           >
@@ -3170,7 +3170,7 @@ const MessageBubble = memo(function MessageBubble({
         {message.memories?.map((mem) => (
           <div
             key={mem.id}
-            className="mt-2 inline-flex items-center gap-2 text-[11px] hairline rounded-full pl-2 pr-3 py-1 max-w-full"
+            className="mt-2 inline-flex items-center gap-2 cx-type-xs hairline rounded-full pl-2 pr-3 py-1 max-w-full"
             style={{
               borderColor: "color-mix(in srgb, var(--color-accent) 35%, transparent)",
               background: "color-mix(in srgb, var(--color-accent) 6%, transparent)",
@@ -3181,7 +3181,7 @@ const MessageBubble = memo(function MessageBubble({
               className="inline-block w-1.5 h-1.5 rounded-full"
               style={{ background: "var(--color-accent)" }}
             />
-            <span className="text-[var(--color-text-muted)] uppercase tracking-[0.15em] text-[10px]">
+            <span className="text-[var(--color-text-muted)] uppercase tracking-[0.15em] cx-type-xs">
               {mem.kind} remembered
             </span>
             <span className="text-[var(--color-text)] truncate max-w-[40ch]">
@@ -3205,13 +3205,13 @@ const MessageBubble = memo(function MessageBubble({
               <FileText size={16} style={{ color: DEPT_COLOR[employee] }} />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+              <span className="block cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                 {a.type.replace("_", " ")} · by {nickLabelFor(employee)}
               </span>
               <span className="block text-sm text-[var(--color-text)] mt-0.5 truncate">
                 {a.title}
               </span>
-              <span className="block text-[11px] text-[var(--color-text-muted)] mt-1 inline-flex items-center gap-1 group-hover:text-[var(--color-text)]">
+              <span className="block cx-type-xs text-[var(--color-text-muted)] mt-1 inline-flex items-center gap-1 group-hover:text-[var(--color-text)]">
                 Open in drawer
                 <ArrowRight size={11} />
               </span>
@@ -3299,7 +3299,7 @@ function ArtifactDrawer({
           <>
             <div className="flex items-start justify-between gap-3 mb-6">
               <div className="min-w-0">
-                <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
+                <div className="cx-type-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
                   {data.type.replace("_", " ")} · by {data.produced_by}
                 </div>
                 <h2 className="serif text-2xl md:text-3xl mt-1 leading-tight">
@@ -3344,7 +3344,7 @@ function ArtifactDrawer({
                 </button>
               </div>
             </div>
-            <pre className="whitespace-pre-wrap font-sans text-[var(--color-text)] leading-relaxed text-[15px]">
+            <pre className="whitespace-pre-wrap font-sans text-[var(--color-text)] leading-relaxed text-sm">
               {data.content}
             </pre>
           </>

@@ -60,12 +60,12 @@ export default function ComplianceWorkspace() {
   return (
     <section className="space-y-4">
       <div className="flex items-baseline justify-between">
-        <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
+        <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
           <ShieldCheck size={11} /> Framework readiness
         </div>
         <Link
           href={`/app?pin=compliance&prompt=${encodeURIComponent("What regulations apply to my business?")}`}
-          className="text-[10px] uppercase tracking-[0.15em]"
+          className="cx-type-xs uppercase tracking-[0.15em]"
           style={{ color: dept }}
         >
           Pick the right framework →
@@ -91,7 +91,7 @@ export default function ComplianceWorkspace() {
                     {f.blurb}
                   </p>
                 </div>
-                <span className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+                <span className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
                   {f.done}/{f.total}
                 </span>
               </div>
@@ -105,7 +105,7 @@ export default function ComplianceWorkspace() {
                   }}
                 />
               </div>
-              <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+              <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
                 {pct}% scaffolded
               </div>
 
@@ -139,7 +139,7 @@ export default function ComplianceWorkspace() {
               </ul>
 
               <span
-                className="text-[10px] uppercase tracking-[0.15em] inline-flex items-center gap-1 mt-auto"
+                className="cx-type-xs uppercase tracking-[0.15em] inline-flex items-center gap-1 mt-auto"
                 style={{ color: dept }}
               >
                 Open framework <ArrowRight size={10} />

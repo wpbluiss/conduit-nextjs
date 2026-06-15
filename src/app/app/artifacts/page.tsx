@@ -86,7 +86,7 @@ export default async function ArtifactsPage() {
                     >
                       <FileText size={13} style={{ color: DEPT_COLOR[emp] }} />
                     </span>
-                    <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] flex-1 min-w-0">
+                    <span className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] flex-1 min-w-0">
                       {(a.type as string).replace("_", " ")} ·{" "}
                       <span style={{ color: DEPT_COLOR[emp] }}>
                         {employeeLabel(emp)}
