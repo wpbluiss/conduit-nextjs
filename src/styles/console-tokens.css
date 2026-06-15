@@ -1,0 +1,386 @@
+/* ============================================================
+ * Praxis Console — R19 foundation token layer
+ *
+ * Implements the CONSOLE_REDESIGN.md color/type/spacing/motion
+ * system. Scoped to .praxis-root (the /app shell wrapper) so
+ * marketing pages and /finance are never affected.
+ *
+ * Strategy:
+ *   1. Define raw --cx-* values per CONSOLE_REDESIGN.md spec.
+ *   2. Re-map the existing semantic bridge tokens (--color-*,
+ *      --pdl-*) to point at --cx-* values so every existing
+ *      component gets the new palette without per-component edits.
+ *
+ * This file is the single source of truth for the console's
+ * visual constitution. Every subsequent [REDESIGN] surface task
+ * reads from these tokens — never one-off hex values.
+ *
+ * Import order: loaded after praxis-tokens.css and
+ * praxis-design-language.css (see app/layout.tsx) so overrides
+ * win in the cascade.
+ * ============================================================ */
+
+/* ------------------------------------------------------------
+ * Raw console tokens — dark (default)
+ * ------------------------------------------------------------ */
+
+.praxis-root {
+  /* ---- Ink: background tiers ---- */
+  --cx-canvas:          #0B0B0F;
+  --cx-surface:         #131319;
+  --cx-surface-raised:  #1C1C26;
+  --cx-surface-overlay: #23232E;
+
+  /* ---- Ink: borders / hairlines ---- */
+  --cx-border:          #262630;
+  --cx-border-strong:   #33333F;
+
+  /* ---- Text scale ---- */
+  --cx-text:            #F4F4F7;
+  --cx-text-muted:      #A0A0B0;
+  --cx-text-faint:      #6B6B7B;
+
+  /* ---- Electric violet accent (the ONE accent) ---- */
+  --cx-accent:          #7C6CFF;
+  --cx-accent-bright:   #9B8CFF;
+  --cx-accent-tint:     rgba(124, 108, 255, 0.12);
+  /* Shadow-form glow for focus rings / CTAs (use in box-shadow) */
+  --cx-accent-glow:     0 0 0 3px rgba(124, 108, 255, 0.25);
+  /* Raw alpha for color-mix() and box-shadow consumers */
+  --cx-accent-glow-raw: rgba(124, 108, 255, 0.25);
+
+  /* ---- Semantic signal colors ---- */
+  --cx-reward:          #34D399;
+  --cx-danger:          #F4607D;
+
+  /* ---- Type scale (px, applied as font-size) ----
+   * 12 / 13 / 14 (body) / 16 / 20 / 24 / 32 / 44
+   * Tight headings (lh 1.05–1.15), comfortable body (lh 1.55–1.65)
+   * Negative tracking on large text for engineered density */
+  --cx-type-xs:    12px;
+  --cx-type-sm:    13px;
+  --cx-type-base:  14px;
+  --cx-type-md:    16px;
+  --cx-type-lg:    20px;
+  --cx-type-xl:    24px;
+  --cx-type-2xl:   32px;
+  --cx-type-3xl:   44px;
+
+  --cx-lh-heading: 1.10;
+  --cx-lh-body:    1.60;
+  --cx-ls-tight:   -0.01em;
+  --cx-ls-tighter: -0.02em;
+
+  /* ---- Spacing scale (4 px base) ---- */
+  --cx-space-1:   4px;
+  --cx-space-2:   8px;
+  --cx-space-3:   12px;
+  --cx-space-4:   16px;
+  --cx-space-6:   24px;
+  --cx-space-8:   32px;
+  --cx-space-12:  48px;
+  --cx-space-16:  64px;
+
+  /* ---- Radii ---- */
+  --cx-radius-sm:   8px;
+  --cx-radius-md:   12px;
+  --cx-radius-lg:   16px;
+  --cx-radius-full: 9999px;
+
+  /* ---- Motion: durations (120–220ms range per spec) ---- */
+  --cx-dur-fast:       120ms;
+  --cx-dur-default:    180ms;
+  --cx-dur-emphasis:   220ms;
+  --cx-dur-exit:       150ms;
+
+  /* ---- Motion: easing ---- */
+  /* "Snappy spring" — used for enters, hovers, micro-feedback */
+  --cx-ease:        cubic-bezier(0.22, 1, 0.36, 1);
+  /* Symmetric — used for exits, fades */
+  --cx-ease-inout:  cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ================================================================
+   * Bridge: remap existing semantic tokens → --cx-* values
+   *
+   * Every component that already reads var(--color-surface),
+   * var(--color-accent), var(--pdl-canvas) etc. now resolves to
+   * the new electric-violet dark palette without per-component edits.
+   * ================================================================ */
+
+  /* -- Existing --color-* surface tokens -- */
+  --color-surface:          var(--cx-canvas);
+  --color-surface-elevated: var(--cx-surface);
+  --color-surface-raised:   var(--cx-surface-raised);
+
+  /* -- Existing --color-text tokens -- */
+  --color-text:       var(--cx-text);
+  --color-text-muted: var(--cx-text-muted);
+
+  /* -- Existing --color-border tokens -- */
+  --color-border:      var(--cx-border);
+  --color-border-soft: var(--cx-border-strong);
+
+  /* -- Existing --color-accent tokens (was warm orange → electric violet) -- */
+  --color-accent:       var(--cx-accent);
+  --color-accent-hi:    var(--cx-accent-bright);
+  --color-accent-deep:  #5548CC;
+  --color-accent-soft:  var(--cx-accent-tint);
+
+  /* -- Existing --color-green / --color-danger -- */
+  --color-green:  var(--cx-reward);
+  --color-pink:   var(--cx-danger);
+
+  /* -- PDL token bridge (praxis-design-language.css --pdl-* namespace) -- */
+  --pdl-canvas:          var(--cx-canvas);
+  --pdl-surface:         var(--cx-surface);
+  --pdl-surface-raised:  var(--cx-surface-raised);
+  --pdl-surface-glass:   rgba(19, 19, 25, 0.72);
+
+  --pdl-text:      var(--cx-text);
+  --pdl-text-muted: var(--cx-text-muted);
+  --pdl-text-soft:  var(--cx-text-faint);
+
+  --pdl-border-hairline: var(--cx-border);
+  --pdl-border-default:  var(--cx-border);
+  --pdl-border-strong:   var(--cx-border-strong);
+
+  --pdl-accent:      var(--cx-accent);
+  --pdl-accent-soft: var(--cx-accent-tint);
+  --pdl-accent-glow: var(--cx-accent-glow-raw);
+
+  /* PDL elevation shadows — tuned for deeper black canvas */
+  --pdl-elev-1: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --pdl-elev-2: 0 4px 16px rgba(0, 0, 0, 0.55);
+  --pdl-elev-3: 0 16px 48px rgba(0, 0, 0, 0.65);
+
+  /* PDL motion alignment — match --cx-* ranges */
+  --pdl-dur-ultra:    var(--cx-dur-fast);
+  --pdl-dur-default:  var(--cx-dur-default);
+  --pdl-dur-emphasis: var(--cx-dur-emphasis);
+  --pdl-ease:         var(--cx-ease);
+  --pdl-ease-emphasis: var(--cx-ease-inout);
+
+  /* -- R15 elevation bridge (praxis-tokens.css --elev-* namespace) -- */
+  --elev-rest-1: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  --elev-rest-2:
+    0 1px 3px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  --elev-rest-3:
+    0 4px 16px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+
+  /* -- bg-canvas / bg-surface aliases used by conduit-card primitives -- */
+  --color-bg-canvas:          var(--cx-canvas);
+  --color-bg-surface:         var(--cx-surface);
+  --color-bg-surface-subtle:  var(--cx-surface-raised);
+  --color-bg-surface-sunken:  var(--cx-canvas);
+  --color-bg-inverse:         var(--cx-canvas);
+  --color-bg-inverse-elevated: var(--cx-surface);
+
+  --color-ink-primary:         var(--cx-text);
+  --color-ink-secondary:       var(--cx-text-muted);
+  --color-ink-tertiary:        var(--cx-text-faint);
+  --color-ink-on-inverse:      var(--cx-text);
+  --color-ink-on-inverse-soft: var(--cx-text-muted);
+  --color-ink-on-inverse-mute: var(--cx-text-faint);
+
+  --color-border-subtle:          var(--cx-border);
+  --color-border-default:         var(--cx-border);
+  --color-border-strong:          var(--cx-border-strong);
+  --color-border-on-inverse:      var(--cx-border);
+  --color-border-on-inverse-strong: var(--cx-border-strong);
+}
+
+/* ------------------------------------------------------------
+ * Canvas radial — electric violet gradient wash
+ *
+ * Replaces the old brand-purple wash. Upper-left origin, subtle
+ * 6% tint so content reads cleanly against the deep canvas.
+ * ------------------------------------------------------------ */
+
+.praxis-root .conduit-canvas {
+  background:
+    radial-gradient(
+      ellipse 85% 55% at 0% 0%,
+      rgba(124, 108, 255, 0.07),
+      var(--cx-canvas) 58%
+    );
+  color: var(--cx-text);
+}
+
+/* Card hover — electric violet edge + glow (replaces old purple) */
+.praxis-root .conduit-card:hover {
+  border-color: rgba(124, 108, 255, 0.30);
+  box-shadow:
+    0 0 0 1px rgba(124, 108, 255, 0.08),
+    0 0 24px rgba(124, 108, 255, 0.10),
+    0 12px 40px rgba(0, 0, 0, 0.50);
+}
+
+/* Praxis brand-mark glow — electric violet */
+.praxis-mark {
+  filter:
+    drop-shadow(0 0 6px rgba(124, 108, 255, 0.35))
+    drop-shadow(0 0 20px rgba(124, 108, 255, 0.16));
+}
+
+/* ------------------------------------------------------------
+ * Focus-visible ring utility — accent glow ring
+ *
+ * Apply .cx-focus-ring on interactive elements for a premium
+ * focus experience matching the spec's accent glow definition.
+ * ------------------------------------------------------------ */
+
+.praxis-root .cx-focus-ring:focus-visible {
+  outline: none;
+  box-shadow: var(--cx-accent-glow);
+}
+
+/* Fallback for elements that don't support :focus-visible */
+.praxis-root .cx-focus-ring:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ------------------------------------------------------------
+ * .cx-surface-* utility classes
+ *
+ * Composable background tiers. Use instead of one-off bg- values.
+ * ------------------------------------------------------------ */
+
+.praxis-root .cx-canvas         { background-color: var(--cx-canvas); }
+.praxis-root .cx-surface        { background-color: var(--cx-surface); }
+.praxis-root .cx-surface-raised { background-color: var(--cx-surface-raised); }
+.praxis-root .cx-overlay        { background-color: var(--cx-surface-overlay); }
+
+/* ------------------------------------------------------------
+ * .cx-text-* utilities
+ * ------------------------------------------------------------ */
+
+.praxis-root .cx-text            { color: var(--cx-text); }
+.praxis-root .cx-text-muted      { color: var(--cx-text-muted); }
+.praxis-root .cx-text-faint      { color: var(--cx-text-faint); }
+.praxis-root .cx-text-accent     { color: var(--cx-accent); }
+.praxis-root .cx-text-reward     { color: var(--cx-reward); }
+.praxis-root .cx-text-danger     { color: var(--cx-danger); }
+
+/* Mono label utility — "engineered" numbers/metadata */
+.praxis-root .cx-mono {
+  font-family: var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+/* ------------------------------------------------------------
+ * .cx-accent-* utilities
+ * ------------------------------------------------------------ */
+
+.praxis-root .cx-accent-bg     { background-color: var(--cx-accent); }
+.praxis-root .cx-accent-tint   { background-color: var(--cx-accent-tint); }
+.praxis-root .cx-accent-border { border-color: var(--cx-accent); }
+
+/* ------------------------------------------------------------
+ * .cx-border-* utilities
+ * ------------------------------------------------------------ */
+
+.praxis-root .cx-border         { border-color: var(--cx-border); }
+.praxis-root .cx-border-strong  { border-color: var(--cx-border-strong); }
+
+/* ------------------------------------------------------------
+ * .cx-radius-* utilities
+ * ------------------------------------------------------------ */
+
+.praxis-root .cx-radius-sm   { border-radius: var(--cx-radius-sm); }
+.praxis-root .cx-radius-md   { border-radius: var(--cx-radius-md); }
+.praxis-root .cx-radius-lg   { border-radius: var(--cx-radius-lg); }
+.praxis-root .cx-radius-full { border-radius: var(--cx-radius-full); }
+
+/* ------------------------------------------------------------
+ * Scrollbar styling — matches new deep canvas
+ * ------------------------------------------------------------ */
+
+.praxis-root ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.praxis-root ::-webkit-scrollbar-track {
+  background: var(--cx-canvas);
+}
+
+.praxis-root ::-webkit-scrollbar-thumb {
+  background: var(--cx-border-strong);
+  border-radius: var(--cx-radius-full);
+}
+
+.praxis-root ::-webkit-scrollbar-thumb:hover {
+  background: var(--cx-text-faint);
+}
+
+/* ------------------------------------------------------------
+ * Selection highlight — accent tint
+ * ------------------------------------------------------------ */
+
+.praxis-root ::selection {
+  background: var(--cx-accent-tint);
+  color: var(--cx-text);
+}
+
+/* ================================================================
+ * Light theme overrides
+ *
+ * The console redesign is dark-first, but we preserve the existing
+ * light theme token remaps so ThemeBoot's data-praxis-theme="light"
+ * still produces a coherent result.
+ * ================================================================ */
+
+html[data-praxis-theme="light"] .praxis-root {
+  --cx-canvas:          #F5F5F8;
+  --cx-surface:         #FFFFFF;
+  --cx-surface-raised:  #EBEBF0;
+  --cx-surface-overlay: #E2E2EA;
+
+  --cx-border:          #D6D6E0;
+  --cx-border-strong:   #C0C0CE;
+
+  --cx-text:       #0F0F14;
+  --cx-text-muted: #5A5A70;
+  --cx-text-faint: #8F8FA0;
+
+  /* Electric violet deepens slightly for legibility on light canvas */
+  --cx-accent:        #6054E8;
+  --cx-accent-bright: #7C6CFF;
+  --cx-accent-tint:   rgba(96, 84, 232, 0.10);
+  --cx-accent-glow:   0 0 0 3px rgba(96, 84, 232, 0.20);
+  --cx-accent-glow-raw: rgba(96, 84, 232, 0.20);
+
+  --pdl-surface-glass: rgba(255, 255, 255, 0.82);
+  --pdl-elev-1: 0 1px 2px rgba(15, 15, 20, 0.06);
+  --pdl-elev-2: 0 4px 16px rgba(15, 15, 20, 0.08);
+  --pdl-elev-3: 0 16px 48px rgba(15, 15, 20, 0.12);
+}
+
+html[data-praxis-theme="light"] .praxis-root .conduit-canvas {
+  background:
+    radial-gradient(
+      ellipse 85% 55% at 0% 0%,
+      rgba(96, 84, 232, 0.05),
+      var(--cx-canvas) 60%
+    );
+  color: var(--cx-text);
+}
+
+html[data-praxis-theme="light"] .praxis-root .conduit-card:hover {
+  border-color: rgba(96, 84, 232, 0.30);
+  box-shadow:
+    0 0 0 1px rgba(96, 84, 232, 0.08),
+    0 1px 2px rgba(15, 15, 20, 0.04),
+    0 8px 24px rgba(15, 15, 20, 0.08);
+}
+
+html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-track {
+  background: var(--cx-surface-raised);
+}
+
+html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-thumb {
+  background: var(--cx-border-strong);
+}
