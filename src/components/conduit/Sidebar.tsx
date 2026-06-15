@@ -5,7 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { CX_EASE, CX_DUR_FAST, CX_DUR_BASE } from "@/lib/ui/motion";
+import { CX_EASE, CX_DUR_FAST, CX_DUR_BASE, CX_SPRING_SOFT } from "@/lib/ui/motion";
 import {
   Activity,
   BarChart3,
@@ -620,7 +620,7 @@ export function Sidebar({
         aria-modal={open ? "true" : undefined}
         aria-label="Navigation"
         animate={{ width: collapsed ? 56 : 256 }}
-        transition={skipTransition || shouldReduceMotion ? { duration: 0 } : { duration: CX_DUR_BASE, ease: [...CX_EASE] }}
+        transition={skipTransition || shouldReduceMotion ? { duration: 0 } : { ...CX_SPRING_SOFT }}
         className={`cx-glass fixed md:static z-40 inset-y-0 left-0 border-r flex flex-col overflow-hidden transform transition-transform duration-200 ease-in-out ${
           open ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
@@ -1699,65 +1699,70 @@ function NavLink({
   const shouldReduceMotion = useReducedMotion() ?? false;
 
   return (
-    <Link
-      href={href}
-      onClick={onClick}
-      title={collapsed ? label : undefined}
-      aria-label={collapsed ? label : undefined}
-      className={[
-        "relative flex items-center rounded-lg transition-colors duration-100",
-        collapsed
-          ? "justify-center mx-auto w-8 h-8"
-          : `gap-2 px-3 ${small ? "py-1.5" : "py-2"}`,
-        !active
-          ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] hover:text-[var(--color-text)]"
-          : "",
-      ].join(" ")}
-      style={{
-        fontSize: !collapsed && small ? "var(--cx-type-xs)" : "var(--cx-type-sm)",
-        background: active
-          ? `color-mix(in srgb, var(--color-accent) ${collapsed ? 12 : 10}%, var(--color-surface-elevated))`
-          : undefined,
-        color: active ? "var(--color-text)" : "var(--color-text-muted)",
-        fontWeight: active ? 500 : 400,
-      }}
+    <motion.div
+      whileHover={!shouldReduceMotion ? { y: -1 } : undefined}
+      transition={{ duration: 0.15, ease: [...CX_EASE] }}
     >
-      {active && (
-        <span
-          aria-hidden
-          className={`absolute left-0 rounded-full ${
-            collapsed ? "top-1.5 bottom-1.5 w-0.5" : "top-2 bottom-2 w-[3px]"
-          }`}
-          style={{ background: "var(--cx-accent, var(--color-accent))" }}
-        />
-      )}
-      <motion.span
-        whileHover={shouldReduceMotion ? undefined : { scale: collapsed ? 1.15 : 1.12 }}
-        whileTap={shouldReduceMotion ? undefined : { scale: 0.92 }}
-        transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
-        className="shrink-0 inline-flex"
-        style={{ color: active ? "var(--cx-accent, var(--color-accent))" : undefined }}
+      <Link
+        href={href}
+        onClick={onClick}
+        title={collapsed ? label : undefined}
+        aria-label={collapsed ? label : undefined}
+        className={[
+          "relative flex items-center rounded-lg transition-colors duration-100",
+          collapsed
+            ? "justify-center mx-auto w-8 h-8"
+            : `gap-2 px-3 ${small ? "py-1.5" : "py-2"}`,
+          !active
+            ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] hover:text-[var(--color-text)]"
+            : "",
+        ].join(" ")}
+        style={{
+          fontSize: !collapsed && small ? "var(--cx-type-xs)" : "var(--cx-type-sm)",
+          background: active
+            ? `color-mix(in srgb, var(--color-accent) ${collapsed ? 12 : 10}%, var(--color-surface-elevated))`
+            : undefined,
+          color: active ? "var(--color-text)" : "var(--color-text-muted)",
+          fontWeight: active ? 500 : 400,
+        }}
       >
-        {icon}
-      </motion.span>
-      <AnimatePresence mode="popLayout">
-        {!collapsed && (
-          <motion.span
-            key="nav-label"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={
-              shouldReduceMotion
-                ? { duration: 0 }
-                : { duration: CX_DUR_FAST, ease: [...CX_EASE] }
-            }
-            className="truncate"
-          >
-            {label}
-          </motion.span>
+        {active && (
+          <span
+            aria-hidden
+            className={`absolute left-0 rounded-full ${
+              collapsed ? "top-1.5 bottom-1.5 w-0.5" : "top-2 bottom-2 w-[3px]"
+            }`}
+            style={{ background: "var(--cx-accent, var(--color-accent))" }}
+          />
         )}
-      </AnimatePresence>
-    </Link>
+        <motion.span
+          whileHover={shouldReduceMotion ? undefined : { scale: collapsed ? 1.15 : 1.12 }}
+          whileTap={shouldReduceMotion ? undefined : { scale: 0.92 }}
+          transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
+          className="shrink-0 inline-flex"
+          style={{ color: active ? "var(--cx-accent, var(--color-accent))" : undefined }}
+        >
+          {icon}
+        </motion.span>
+        <AnimatePresence mode="popLayout">
+          {!collapsed && (
+            <motion.span
+              key="nav-label"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={
+                shouldReduceMotion
+                  ? { duration: 0 }
+                  : { duration: CX_DUR_FAST, ease: [...CX_EASE] }
+              }
+              className="truncate"
+            >
+              {label}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </Link>
+    </motion.div>
   );
 }
