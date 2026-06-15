@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ExternalLink, ArrowRight, EyeOff, X } from "lucide-react";
 import { Button } from "@/components/conduit/ui/Button";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 import type { DailyUsage } from "@/lib/engineering/limits";
 
 const FAILED_STATUSES = new Set(["failed", "timeout", "aborted"]);
@@ -242,10 +243,11 @@ function FailedToggle({
   // Nothing to surface if no failures exist and the toggle is already off.
   if (!showFailed && hiddenCount === 0) return null;
   return (
-    <button
+    <PraxisButton
       type="button"
+      variant="ghost"
+      size="sm"
       onClick={() => onToggle(!showFailed)}
-      className="inline-flex items-center gap-1.5 cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] pb-2"
       title={
         showFailed
           ? "Hide failed and aborted builds"
@@ -256,7 +258,7 @@ function FailedToggle({
       {showFailed
         ? "Hide failed"
         : `Show failed${hiddenCount > 0 ? ` (${hiddenCount})` : ""}`}
-    </button>
+    </PraxisButton>
   );
 }
 
@@ -432,14 +434,15 @@ function EngineeringTab({
                 {(s.total_input_tokens ?? 0) + (s.total_output_tokens ?? 0)}t
               </span>
               {s.status === "complete" && (
-                <button
+                <PraxisButton
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => onContinue(s)}
-                  className="inline-flex items-center gap-1 cx-type-xs uppercase tracking-[0.15em] text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
                   title="Continue from this build (clones the workspace files)"
                 >
                   Continue <ArrowRight size={10} />
-                </button>
+                </PraxisButton>
               )}
             </span>
           </div>
@@ -506,14 +509,15 @@ function ContinueModal({
             </div>
             <p className="serif text-lg line-clamp-2">{parent.prompt}</p>
           </div>
-          <button
+          <PraxisButton
             type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={onClose}
-            className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
             aria-label="Close"
           >
             <X size={16} />
-          </button>
+          </PraxisButton>
         </div>
         <p className="text-xs text-[var(--color-text-muted)] mb-3">
           Engineering will start a new build with this prompt and the
@@ -532,14 +536,15 @@ function ContinueModal({
           <p className="text-xs text-[var(--color-pink)] mt-2">{error}</p>
         )}
         <div className="flex items-center justify-end gap-2 mt-4">
-          <button
+          <PraxisButton
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={onClose}
-            className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] px-3 py-1.5"
             disabled={submitting}
           >
             Cancel
-          </button>
+          </PraxisButton>
           <Button
             onClick={submit}
             disabled={submitting}

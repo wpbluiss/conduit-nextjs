@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Bell, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CHANGELOG_ENTRIES } from "@/lib/conduit/changelog-entries";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 const STORAGE_KEY = "praxis_changelog_last_seen";
 const RECENT_ENTRIES = CHANGELOG_ENTRIES.slice(0, 5);
@@ -91,11 +92,13 @@ export function ChangelogPopover() {
 
   return (
     <div className="relative">
-      <button
+      <PraxisButton
         type="button"
+        variant="ghost"
+        size="sm"
         onClick={handleOpen}
         aria-label={`What's new${unseen > 0 ? ` — ${unseen} unread` : ""}`}
-        className="relative flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] rounded-lg transition-colors duration-100 w-full"
+        className="relative w-full justify-start"
       >
         <Bell size={14} />
         <span>What&apos;s new</span>
@@ -111,7 +114,7 @@ export function ChangelogPopover() {
             {unseen > 9 ? "9+" : unseen}
           </span>
         )}
-      </button>
+      </PraxisButton>
 
       <AnimatePresence>
         {open && (
@@ -131,14 +134,15 @@ export function ChangelogPopover() {
               <span className="text-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                 What&apos;s new
               </span>
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="icon-sm"
                 onClick={() => setOpen(false)}
                 aria-label="Close"
-                className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
               >
                 <X size={14} />
-              </button>
+              </PraxisButton>
             </div>
 
             {/* Entries */}

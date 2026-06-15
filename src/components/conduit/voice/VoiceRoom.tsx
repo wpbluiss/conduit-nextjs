@@ -13,6 +13,7 @@ import {
   type RemoteAudioTrack,
 } from "livekit-client";
 import { Mic, MicOff, X, AlertCircle, PhoneOff } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 import Waveform from "./Waveform";
 
 export interface VoiceTokenResponse {
@@ -293,14 +294,14 @@ export default function VoiceRoom({
         <div className="cx-type-xs uppercase tracking-[0.22em] text-white/60">
           Praxis Voice · {isRoundTable ? "Round-table" : employeeName}
         </div>
-        <button
-          type="button"
+        <PraxisButton
+          variant="ghost"
+          size="icon-sm"
           onClick={end}
-          className="text-white/60 hover:text-white"
           aria-label="End call"
         >
           <X size={20} />
-        </button>
+        </PraxisButton>
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center gap-6 md:gap-8 px-4">
@@ -437,14 +438,14 @@ export default function VoiceRoom({
         >
           {fmtTime(elapsedSec)} / {fmtTime(tokenResponse.max_seconds)}
         </div>
-        <button
-          type="button"
+        <PraxisButton
+          variant="danger"
+          size="icon"
           onClick={end}
-          className="w-12 h-12 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center transition-colors"
           aria-label="End call"
         >
           <PhoneOff size={20} />
-        </button>
+        </PraxisButton>
       </div>
     </div>
   );

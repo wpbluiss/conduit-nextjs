@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronUp, MapPin, X } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 export interface PinnedMessage {
   id: string;
@@ -37,13 +38,13 @@ export function PinnedMessagesBanner({ pins, onUnpin, onJumpTo }: Props) {
       }}
     >
       {/* Header row */}
-      <button
+      <PraxisButton
         type="button"
+        variant="ghost"
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left"
         aria-expanded={expanded}
         aria-label={expanded ? "Collapse pinned messages" : "Expand pinned messages"}
-        style={{ background: "transparent" }}
+        className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left"
       >
         <div className="flex items-center gap-2">
           <MapPin
@@ -71,7 +72,7 @@ export function PinnedMessagesBanner({ pins, onUnpin, onJumpTo }: Props) {
         ) : (
           <ChevronDown size={13} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} />
         )}
-      </button>
+      </PraxisButton>
 
       {/* Expanded list */}
       {expanded && (
@@ -96,42 +97,27 @@ export function PinnedMessagesBanner({ pins, onUnpin, onJumpTo }: Props) {
                 {truncate(pin.content)}
               </p>
               <div className="flex items-center gap-1.5 shrink-0">
-                <button
+                <PraxisButton
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => onJumpTo(pin.message_id)}
                   aria-label="Jump to message"
                   title="Jump to message"
-                  className="cx-type-xs px-2 py-0.5 rounded transition-colors"
-                  style={{
-                    color: "var(--color-accent)",
-                    border: "1px solid var(--color-border)",
-                    background: "transparent",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "var(--color-surface-raised)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "transparent";
-                  }}
+                  className="cx-type-xs"
                 >
                   ↑ Go
-                </button>
-                <button
+                </PraxisButton>
+                <PraxisButton
                   type="button"
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => onUnpin(pin.message_id)}
                   aria-label="Unpin message"
                   title="Unpin"
-                  className="p-1 rounded transition-colors"
-                  style={{ color: "var(--color-text-muted)" }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-                  }}
                 >
                   <X size={11} />
-                </button>
+                </PraxisButton>
               </div>
             </div>
           ))}

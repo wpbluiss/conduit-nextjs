@@ -40,6 +40,7 @@ import { PraxisLogo } from "./PraxisLogo";
 import { SidebarBuildPip } from "./builds/in-flight/SidebarBuildPip";
 import { SidebarBuildsSection } from "./builds/in-flight/SidebarBuildsSection";
 import { Button } from "@/components/conduit/ui/Button";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 import type { InFlightBuild } from "@/lib/engineering/in-flight";
 import { ChangelogPopover } from "./ChangelogPopover";
 import { NotificationCenter } from "./NotificationCenter";
@@ -141,15 +142,15 @@ function SidebarUpgradeBanner({
               Unlock all 9 specialists
             </span>
           </div>
-          <button
+          <PraxisButton
             type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={dismiss}
             aria-label="Dismiss upgrade prompt"
-            className="shrink-0 transition-colors"
-            style={{ color: "var(--color-text-muted)" }}
           >
             <X size={12} />
-          </button>
+          </PraxisButton>
         </div>
 
         {/* Usage meter */}
@@ -282,28 +283,31 @@ function SidebarThemeButton({ collapsed = false }: { collapsed?: boolean }) {
 
   if (collapsed) {
     return (
-      <button
+      <PraxisButton
         type="button"
+        variant="ghost"
+        size="icon-sm"
         onClick={cycle}
         title={nextLabels[pref]}
         aria-label={nextLabels[pref]}
-        className="flex items-center justify-center w-8 h-8 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors duration-100"
       >
         {icons[pref]}
-      </button>
+      </PraxisButton>
     );
   }
 
   return (
-    <button
+    <PraxisButton
       type="button"
+      variant="ghost"
+      size="sm"
       onClick={cycle}
       title={nextLabels[pref]}
-      className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] rounded-lg transition-colors duration-100"
+      className="w-full justify-start"
     >
       {icons[pref]}
       {labels[pref]}
-    </button>
+    </PraxisButton>
   );
 }
 
@@ -674,14 +678,16 @@ export function Sidebar({
                   <PanelLeftClose size={16} strokeWidth={1.75} />
                 </button>
               </div>
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="icon-sm"
                 onClick={close}
                 aria-label="Close menu"
-                className="md:hidden text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors p-1 rounded"
+                className="md:hidden"
               >
                 <X size={18} />
-              </button>
+              </PraxisButton>
             </>
           )}
         </div>
@@ -838,11 +844,11 @@ export function Sidebar({
           {/* Team header (collapsible) — hidden in icon-only mode */}
           {!collapsed && (
             <div className="mt-3">
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
                 onClick={() => setTeamExpanded((v) => !v)}
-                className="w-full flex items-center justify-between px-3 py-1.5 cx-type-xs font-medium uppercase tracking-[0.14em] transition-colors duration-[120ms] hover:text-[var(--cx-text-muted,var(--color-text-muted))]"
-                style={{ color: "var(--cx-text-faint, var(--color-text-muted))" }}
+                className="w-full flex items-center justify-between px-3 py-1.5 cx-type-xs font-medium uppercase tracking-[0.14em]"
               >
                 <span className="inline-flex items-center gap-1.5">
                   <Users2 size={11} /> Specialists
@@ -850,7 +856,7 @@ export function Sidebar({
                 <span aria-hidden className="text-[10px]">
                   {teamExpanded ? "−" : "+"}
                 </span>
-              </button>
+              </PraxisButton>
               {teamExpanded && (
                 <ul className="space-y-0.5 mt-1">
                   {TEAM.map((emp) => {
@@ -1203,18 +1209,19 @@ export function Sidebar({
               {/* Search input */}
               <div className="px-2 pb-1">
                 {/* Mobile: icon-only trigger — collapses the search to a single tap target */}
-                <button
+                <PraxisButton
                   type="button"
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => {
                     setSearchExpanded(true);
                     requestAnimationFrame(() => searchInputRef.current?.focus());
                   }}
                   aria-label="Search conversations"
-                  className={`${searchExpanded ? "hidden" : "md:hidden"} flex items-center justify-center w-7 h-7 rounded-lg transition-colors duration-100`}
-                  style={{ color: "var(--color-text-muted)" }}
+                  className={`${searchExpanded ? "hidden" : "md:hidden"}`}
                 >
                   <Search size={13} />
-                </button>
+                </PraxisButton>
                 {/* Full input: always on desktop; on mobile only when expanded */}
                 <div
                   className={`${searchExpanded ? "flex" : "hidden md:flex"} items-center gap-1.5 px-2 py-1.5 rounded-lg`}
@@ -1240,15 +1247,16 @@ export function Sidebar({
                     style={{ color: "var(--color-text)" }}
                   />
                   {convSearch && (
-                    <button
+                    <PraxisButton
                       type="button"
+                      variant="ghost"
+                      size="icon-sm"
                       onClick={() => { setConvSearch(""); searchInputRef.current?.focus(); }}
                       aria-label="Clear search"
                       className="shrink-0"
-                      style={{ color: "var(--color-text-muted)" }}
                     >
                       <X size={11} />
-                    </button>
+                    </PraxisButton>
                   )}
                 </div>
               </div>
@@ -1403,16 +1411,16 @@ export function Sidebar({
             <div className="flex flex-col items-center gap-1 px-2">
               <div className="flex justify-center"><ChangelogPopover /></div>
               <div className="flex justify-center"><NotificationCenter /></div>
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="icon-sm"
                 onClick={() => window.dispatchEvent(new CustomEvent("praxis:shortcuts:open"))}
                 title="Keyboard shortcuts"
                 aria-label="Keyboard shortcuts"
-                className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-[120ms]"
-                style={{ color: "var(--cx-text-muted, var(--color-text-muted))" }}
               >
                 <CircleHelp size={16} />
-              </button>
+              </PraxisButton>
               <SidebarThemeButton collapsed />
               <Link href="/app/settings" title="Settings" aria-label="Settings" onClick={close} data-tour-target="settings"
                 className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-[120ms] ${isActive("/app/settings") ? "" : ""}`}
@@ -1459,13 +1467,15 @@ export function Sidebar({
             <div className="px-2 space-y-0.5">
               <ChangelogPopover />
               <div className="px-1"><NotificationCenter /></div>
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => window.dispatchEvent(new CustomEvent("praxis:shortcuts:open"))}
-                className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] rounded-lg transition-colors duration-100"
+                className="w-full justify-start"
               >
                 <CircleHelp size={16} /> Shortcuts
-              </button>
+              </PraxisButton>
               <SidebarThemeButton />
               <div data-tour-target="settings">
               <NavLink
@@ -1557,19 +1567,20 @@ export function Sidebar({
             padding: "4px",
           }}
         >
-          <button
-            role="menuitem"
+          <PraxisButton
             type="button"
+            role="menuitem"
+            variant="ghost"
+            size="sm"
             onClick={() => {
               pinned.includes(ctxMenu.emp) ? unpin(ctxMenu.emp) : pin(ctxMenu.emp);
               setCtxMenu(null);
             }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-lg transition-colors duration-100 hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
-            style={{ color: "var(--color-text)" }}
+            className="w-full justify-start"
           >
             <Pin size={12} style={{ color: "var(--color-text-muted)" }} />
             {pinned.includes(ctxMenu.emp) ? "Unpin specialist" : "Pin specialist"}
-          </button>
+          </PraxisButton>
         </div>,
         document.body
       )}

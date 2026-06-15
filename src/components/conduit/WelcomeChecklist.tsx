@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, X } from "lucide-react";
 import Link from "next/link";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 export type ChecklistKey =
   | "meet_team"
@@ -172,13 +173,15 @@ export function WelcomeChecklist({
                 </div>
               </div>
             </div>
-            <button
+            <PraxisButton
+              type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={dismiss}
               aria-label="Dismiss checklist"
-              className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors p-0.5"
             >
               <X size={16} />
-            </button>
+            </PraxisButton>
           </div>
 
           {/* Items */}
@@ -211,14 +214,16 @@ export function WelcomeChecklist({
               return (
                 <li key={item.key}>
                   {item.action === "cmd-k" ? (
-                    <button
+                    <PraxisButton
                       type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={triggerCmdK}
                       className="w-full text-left"
-                      disabled={done}
+                      isDisabled={done}
                     >
                       {inner}
-                    </button>
+                    </PraxisButton>
                   ) : item.href ? (
                     <Link
                       href={item.href}
@@ -228,14 +233,16 @@ export function WelcomeChecklist({
                       {inner}
                     </Link>
                   ) : (
-                    <button
+                    <PraxisButton
                       type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => !done && check(item.key)}
                       className="w-full text-left"
-                      disabled={done}
+                      isDisabled={done}
                     >
                       {inner}
-                    </button>
+                    </PraxisButton>
                   )}
                 </li>
               );

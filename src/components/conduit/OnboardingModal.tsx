@@ -125,13 +125,14 @@ export function OnboardingModal({
               </span>
             </div>
             {step < 5 && (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={dismiss}
-                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
               >
                 Skip for now
-              </button>
+              </Button>
             )}
           </div>
           <div className="h-[2px] bg-[var(--color-border)] relative rounded-full overflow-hidden">

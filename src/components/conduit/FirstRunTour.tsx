@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight } from "@phosphor-icons/react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { Button } from "@/components/conduit/ui/Button";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 const STORAGE_KEY = "praxis_tour_v1_done";
 
@@ -208,14 +209,14 @@ export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
                   {step + 1} / {STEPS.length}
                 </span>
               </div>
-              <button
-                type="button"
+              <PraxisButton
+                variant="ghost"
+                size="icon-sm"
                 onClick={dismiss}
-                className="text-[var(--color-cream-mute)] hover:text-[var(--color-cream)] transition-colors p-0.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-indigo-500)]"
                 aria-label="Skip tour"
               >
                 <X size={16} />
-              </button>
+              </PraxisButton>
             </div>
 
             <h3 className="text-sm font-semibold text-[var(--color-cream)] leading-snug mb-2">
@@ -227,13 +228,13 @@ export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
 
             {/* Actions */}
             <div className="flex items-center justify-between gap-3">
-              <button
-                type="button"
+              <PraxisButton
+                variant="ghost"
+                size="sm"
                 onClick={dismiss}
-                className="text-xs text-[var(--color-cream-mute)] hover:text-[var(--color-cream)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-indigo-500)] rounded"
               >
                 Skip tour
-              </button>
+              </PraxisButton>
               <Button
                 onClick={next}
                 size="sm"

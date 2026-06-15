@@ -2,6 +2,7 @@
 
 import type { SubscriptionStatus } from "@/hooks/useBuildSubscription";
 import type { HeartbeatState } from "@/hooks/useBuildHeartbeat";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 interface Props {
   subscription: SubscriptionStatus;
@@ -18,8 +19,9 @@ interface Props {
 export function ReconnectingPip({ subscription, heartbeat, onRefresh }: Props) {
   if (heartbeat.kind === "investigating") {
     return (
-      <button
-        type="button"
+      <PraxisButton
+        variant="ghost"
+        size="sm"
         onClick={onRefresh}
         className="eng-reconnecting-pip"
         data-kind="investigating"
@@ -27,7 +29,7 @@ export function ReconnectingPip({ subscription, heartbeat, onRefresh }: Props) {
       >
         <span className="eng-reconnecting-pip-dot" aria-hidden />
         Refresh now
-      </button>
+      </PraxisButton>
     );
   }
   if (subscription.kind === "degraded" || subscription.kind === "reconnecting") {

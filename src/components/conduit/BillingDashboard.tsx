@@ -285,11 +285,14 @@ export function BillingDashboard({
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {TOPUPS.map((t) => (
-            <button
+            <PraxisButton
               key={t.id}
+              type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => buyTopup(t.id)}
-              disabled={busy !== null}
-              className="conduit-card p-5 text-left hover:border-[var(--color-accent)] transition-colors disabled:opacity-50"
+              isDisabled={busy !== null}
+              className="conduit-card p-5 text-left hover:border-[var(--color-accent)] transition-colors disabled:opacity-50 flex-col items-start"
             >
               <div className="serif text-2xl">${t.amountCents / 100}</div>
               <div className="mt-1 text-sm">
@@ -299,7 +302,7 @@ export function BillingDashboard({
                 {busy === t.id ? "Opening Stripe…" : "Buy"}
                 <ArrowRight size={11} />
               </span>
-            </button>
+            </PraxisButton>
           ))}
         </div>
         <p className="mt-2 cx-type-xs text-[var(--color-text-muted)]">

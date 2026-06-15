@@ -11,6 +11,7 @@ import {
   Check,
 } from "lucide-react";
 import { Button } from "@/components/conduit/ui/Button";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 import {
   VERTICALS,
   VERTICAL_LABELS,
@@ -237,14 +238,14 @@ export default function LeadsTableClient({
             <p className="text-[var(--color-text)]">
               No leads match these filters.
             </p>
-            <button
+            <PraxisButton
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => setShowModal(true)}
-              className="mt-3 text-sm"
-              style={{ color: deptColor }}
             >
               Run Discovery →
-            </button>
+            </PraxisButton>
           </div>
         ) : (
           <ul className="space-y-2">
@@ -375,20 +376,22 @@ function LeadCard({
           </div>
           {!isDead && (
             <div className="flex flex-wrap items-center gap-1.5 shrink-0">
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={onDraft}
-                className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md border border-[var(--color-border)] hover:border-[var(--color-accent)]"
                 title="Draft cold outreach"
               >
                 <Send size={12} />
                 <span className="hidden sm:inline">Draft</span>
-              </button>
-              <button
+              </PraxisButton>
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={onMarkContacted}
                 disabled={lead.status === "contacted"}
-                className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md border border-[var(--color-border)] hover:border-[var(--color-accent)] disabled:opacity-50"
                 title="Mark contacted"
               >
                 {lead.status === "contacted" ? (
@@ -399,15 +402,16 @@ function LeadCard({
                 <span className="hidden sm:inline">
                   {lead.status === "contacted" ? "Contacted" : "Mark contacted"}
                 </span>
-              </button>
-              <button
+              </PraxisButton>
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="icon-sm"
                 onClick={onDiscard}
-                className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md border border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-accent)]"
                 title="Discard"
               >
                 <Trash2 size={12} />
-              </button>
+              </PraxisButton>
             </div>
           )}
         </div>
@@ -478,15 +482,16 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
       <div className="conduit-card max-w-md w-full p-5 space-y-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between">
           <h3 className="serif text-xl">Run Discovery</h3>
-          <button
+          <PraxisButton
             type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={onClose}
             disabled={running}
-            className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-30"
             aria-label="Close"
           >
             <X size={18} />
-          </button>
+          </PraxisButton>
         </div>
 
         <div className="space-y-3 text-sm">
@@ -606,14 +611,15 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
             </Button>
           ) : (
             <>
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={onClose}
                 disabled={running}
-                className="text-sm px-3 py-1.5 text-[var(--color-text-muted)] disabled:opacity-30"
               >
                 Cancel
-              </button>
+              </PraxisButton>
               <Button
                 onClick={start}
                 disabled={running || (!useOverpass && !useReddit && !useMaps)}

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Bookmark, Copy, Download, Trash2, ArrowLeft, Check } from "lucide-react";
 import Link from "next/link";
 import { EMPLOYEES, type EmployeeId } from "@/lib/conduit/employees";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 interface Output {
   id: string;
@@ -22,19 +23,16 @@ function CopyAction({ content }: { content: string }) {
     setTimeout(() => setCopied(false), 1500);
   };
   return (
-    <button
+    <PraxisButton
       type="button"
+      variant="ghost"
+      size="sm"
       onClick={() => void handleCopy()}
-      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg cx-type-xs transition-colors"
-      style={{
-        color: copied ? "var(--color-accent)" : "var(--color-text-muted)",
-        border: "1px solid var(--color-border)",
-      }}
       aria-label="Copy to clipboard"
     >
       {copied ? <Check size={11} /> : <Copy size={11} />}
       {copied ? "Copied" : "Copy"}
-    </button>
+    </PraxisButton>
   );
 }
 
@@ -52,16 +50,16 @@ function DownloadAction({ content, title }: { content: string; title: string }) 
     URL.revokeObjectURL(url);
   };
   return (
-    <button
+    <PraxisButton
       type="button"
+      variant="ghost"
+      size="sm"
       onClick={handleDownload}
-      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg cx-type-xs transition-colors"
-      style={{ color: "var(--color-text-muted)", border: "1px solid var(--color-border)" }}
       aria-label="Download as Markdown"
     >
       <Download size={11} />
       <span className="hidden sm:inline">Download</span>
-    </button>
+    </PraxisButton>
   );
 }
 
@@ -155,15 +153,16 @@ export default function OutputsPage() {
                           </span>
                         </div>
                       </div>
-                      <button
+                      <PraxisButton
                         type="button"
+                        variant="ghost"
+                        size="icon-sm"
                         onClick={() => void handleDelete(output.id)}
                         disabled={deletingId === output.id}
-                        className="shrink-0 p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-destructive,var(--cx-danger))] transition-colors disabled:opacity-40"
                         aria-label="Delete output"
                       >
                         <Trash2 size={13} />
-                      </button>
+                      </PraxisButton>
                     </div>
 
                     <p className="text-sm text-[var(--color-text-muted)] mt-2 line-clamp-3 whitespace-pre-wrap">

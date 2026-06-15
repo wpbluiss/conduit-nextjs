@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 type OAuthProvider = "apple" | "google";
 
@@ -61,38 +62,25 @@ function OAuthButton({
   const label = provider === "apple" ? "Apple" : "Google";
 
   return (
-    <button
+    <PraxisButton
       type="button"
+      variant="secondary"
+      size="md"
       onClick={handleClick}
       disabled={loading}
       aria-label={`Continue with ${label}`}
-      className="w-full flex items-center justify-center gap-2.5 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 disabled:opacity-50"
+      className="w-full"
       style={{
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.10)",
-        color: "var(--color-ink-on-inverse)",
         // Apple HIG: use system font for the Apple button
         fontFamily:
           provider === "apple"
             ? "-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif"
             : undefined,
       }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.background =
-          "rgba(255,255,255,0.08)";
-        (e.currentTarget as HTMLButtonElement).style.borderColor =
-          "rgba(255,255,255,0.16)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.background =
-          "rgba(255,255,255,0.04)";
-        (e.currentTarget as HTMLButtonElement).style.borderColor =
-          "rgba(255,255,255,0.10)";
-      }}
     >
       {provider === "apple" ? <AppleIcon /> : <GoogleIcon />}
       {loading ? `Connecting…` : `Continue with ${label}`}
-    </button>
+    </PraxisButton>
   );
 }
 

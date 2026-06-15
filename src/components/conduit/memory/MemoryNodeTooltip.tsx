@@ -13,6 +13,7 @@
 
 import { useState } from "react";
 import { Pin, PinOff, Lock, LockOpen, Edit3, Archive } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 import type { MemoryRecord, MemoryKind } from "@/lib/ai/memory";
 import { EMPLOYEES, type EmployeeId } from "@/lib/conduit/employees";
 import { DeptIcon } from "@/components/conduit/pdl/DeptIcon";
@@ -133,8 +134,9 @@ export function MemoryNodeTooltip({
       </div>
 
       <div className="mem-tooltip-actions">
-        <button
-          type="button"
+        <PraxisButton
+          variant="ghost"
+          size="icon-sm"
           className="mem-tooltip-action"
           data-active={memory.pinned || undefined}
           onClick={() => patch({ pinned: !memory.pinned })}
@@ -143,9 +145,10 @@ export function MemoryNodeTooltip({
           aria-label={memory.pinned ? "Unpin memory" : "Pin memory"}
         >
           {memory.pinned ? <PinOff size={13} /> : <Pin size={13} />}
-        </button>
-        <button
-          type="button"
+        </PraxisButton>
+        <PraxisButton
+          variant="ghost"
+          size="icon-sm"
           className="mem-tooltip-action"
           data-active={memory.locked || undefined}
           onClick={() => patch({ locked: !memory.locked })}
@@ -154,9 +157,10 @@ export function MemoryNodeTooltip({
           aria-label={memory.locked ? "Unlock memory" : "Lock memory"}
         >
           {memory.locked ? <LockOpen size={13} /> : <Lock size={13} />}
-        </button>
-        <button
-          type="button"
+        </PraxisButton>
+        <PraxisButton
+          variant="ghost"
+          size="icon-sm"
           className="mem-tooltip-action"
           onClick={onEdit}
           disabled={busy}
@@ -164,9 +168,10 @@ export function MemoryNodeTooltip({
           aria-label="Edit memory"
         >
           <Edit3 size={13} />
-        </button>
-        <button
-          type="button"
+        </PraxisButton>
+        <PraxisButton
+          variant="danger"
+          size="icon-sm"
           className="mem-tooltip-action"
           data-destructive="true"
           onClick={archive}
@@ -175,7 +180,7 @@ export function MemoryNodeTooltip({
           aria-label="Archive memory"
         >
           <Archive size={13} />
-        </button>
+        </PraxisButton>
       </div>
     </div>
   );

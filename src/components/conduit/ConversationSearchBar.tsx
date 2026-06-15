@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MessageSquarePlus, Search, X } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 import { DEPT_COLOR, EMPLOYEE_ICON } from "./EmployeeBadge";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 
@@ -220,14 +221,16 @@ export function ConversationSearchBar() {
           style={{ color: "var(--color-text)" }}
         />
         {query && (
-          <button
+          <PraxisButton
             type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={clear}
             aria-label="Clear search"
-            className="shrink-0 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+            className="shrink-0"
           >
             <X size={13} />
-          </button>
+          </PraxisButton>
         )}
         {loading && (
           <span

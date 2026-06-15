@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Sparkles, X } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 const STORAGE_KEY = "conduit_upgrade_nudge_dismissed";
 
@@ -52,13 +53,9 @@ export function UpgradeNudge({
       >
         Upgrade →
       </Link>
-      <button
-        onClick={close}
-        aria-label="Dismiss"
-        className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-      >
+      <PraxisButton type="button" variant="ghost" size="icon-sm" onClick={close} aria-label="Dismiss">
         <X size={14} />
-      </button>
+      </PraxisButton>
     </div>
   );
 }

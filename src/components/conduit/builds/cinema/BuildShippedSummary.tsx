@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ExternalLink, Code2 } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 import type { SessionRow, LogRow } from "@/hooks/useBuildSession";
 import {
   translateBuildError,
@@ -204,13 +205,13 @@ export function BuildShippedSummary({ session, logs, internalAccount }: Props) {
       {/* Optional raw-details disclosure */}
       {translated?.rawDetails && (
         <div>
-          <button
-            type="button"
+          <PraxisButton
+            variant="ghost"
+            size="sm"
             onClick={() => setShowDetails((v) => !v)}
-            className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] underline-offset-2 hover:underline"
           >
             {showDetails ? "Hide technical details" : "Show technical details"}
-          </button>
+          </PraxisButton>
           {showDetails && (
             <pre className="eng-cinema-summary-rawdetails">
               {scrubProviderTells(translated.rawDetails)}
