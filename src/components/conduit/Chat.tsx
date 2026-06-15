@@ -3394,7 +3394,7 @@ function ArtifactDrawer({
   return (
     <div className="fixed inset-0 z-40 flex">
       <div onClick={onClose} className="flex-1 bg-black/60" />
-      <div className="w-full max-w-2xl bg-[var(--color-surface-elevated)] border-l border-[var(--color-border)] overflow-y-auto p-6 md:p-8">
+      <div className="cx-glass w-full max-w-2xl border-l overflow-y-auto p-6 md:p-8" style={{ borderLeftColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>
         {!data ? (
           <p className="text-sm text-[var(--color-text-muted)]">Loading…</p>
         ) : (
