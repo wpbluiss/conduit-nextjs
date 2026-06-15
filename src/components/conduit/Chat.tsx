@@ -27,7 +27,7 @@ import {
 } from "./praxis/PraxisComposerPill";
 import { composeChatEmptyCopy, timeOfDayBucket } from "@/lib/conduit/welcome-copy";
 import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
-import { TypingIndicator } from "./TypingIndicator";
+import { ThinkingBubble } from "./TypingIndicator";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import {
   SpecialistSelectorModal,
@@ -1806,10 +1806,10 @@ export function Chat({
                 }
               }
               return messages.map((m, i) => {
-                // Pending messages with no content yet render as the typing indicator.
-                // Giving them a distinct key ("typing-X") lets AnimatePresence play
-                // an exit animation when the first token arrives and the key switches.
-                const msgKey = m.pending && !m.content ? `typing-${m.id ?? i}` : (m.id ?? i);
+                // Stable key throughout the message lifecycle. The empty→streaming
+                // transition is handled by internal AnimatePresence inside MessageBubble
+                // so there's no layout jump when the first token arrives.
+                const msgKey = m.id ?? i;
                 return (
                   <MessageBubble
                     key={msgKey}
@@ -3048,27 +3048,8 @@ const MessageBubble = memo(function MessageBubble({
     roundTableActiveEmployee === null ||
     roundTableActiveEmployee === employee;
 
-  // Before any tokens arrive: render a dedicated accessible typing indicator.
-  // exit plays when the key changes (typing-X → X) as content starts streaming.
-  if (empty) {
-    const msgMeta = (message.metadata ?? {}) as Record<string, unknown>;
-    const routingTo = msgMeta.routingTo as EmployeeKey | undefined;
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.12, ease: [0.4, 0, 0.2, 1] } }}
-        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <TypingIndicator
-          employee={employee}
-          roundTable={isRoundTable}
-          isActive={isActive}
-          routingTarget={routingTo ?? null}
-        />
-      </motion.div>
-    );
-  }
+  const msgMeta = (message.metadata ?? {}) as Record<string, unknown>;
+  const routingTo = msgMeta.routingTo as EmployeeKey | undefined;
 
   return (
     <motion.div
@@ -3091,7 +3072,31 @@ const MessageBubble = memo(function MessageBubble({
       <div className="pt-1 shrink-0">
         <SpecialistAvatar employee={employee} size={32} streaming={message.pending} rewarded={rewarded} />
       </div>
-      <div className="min-w-0 flex-1 space-y-1">
+      {/* Inner content area — AnimatePresence crossfades thinking↔streaming
+          within a stable layout shell, eliminating the layout-jump that occurred
+          when the key changed (typing-N → N) under the old approach. */}
+      <motion.div className="min-w-0 flex-1" layout>
+        <AnimatePresence mode="popLayout" initial={false}>
+          {empty ? (
+            <motion.div
+              key="thinking"
+              exit={{ opacity: 0, transition: { duration: 0.14, ease: [0.4, 0, 0.2, 1] } }}
+            >
+              <ThinkingBubble
+                employee={employee}
+                roundTable={isRoundTable}
+                isActive={isActive}
+                routingTarget={routingTo ?? null}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="content"
+              className="space-y-1"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            >
         {/* Glass bubble — chip header + content in one pane */}
         <div className="conduit-bubble-assistant max-w-[68ch]">
           {/* Bubble header: specialist chip + timestamp + meta */}
@@ -3288,7 +3293,10 @@ const MessageBubble = memo(function MessageBubble({
             )}
           </motion.div>
         )}
-      </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </motion.div>
   );
 });
