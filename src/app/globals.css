@@ -341,8 +341,8 @@ body {
 /* secondary = glass surface (frosted, translucent) */
 .btn-secondary {
   background: var(--cx-glass-bg, rgba(255,255,255,0.04));
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  -webkit-backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
   color: var(--cx-text, #F4F4F7);
   padding: var(--cx-space-3, 12px) var(--cx-space-6, 24px);
   font-size: var(--cx-type-base, 14px);
