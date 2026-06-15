@@ -258,6 +258,7 @@ function SpecialistsTab({
 }) {
   const toast = useToast();
   const { setNicknames: setCtxNicknames } = useNicknames();
+  const [view, setView] = useState<"settings" | "usage">("settings");
   const [nicknames, setNicknames] = useState<Record<string, string>>(
     () => Object.fromEntries(
       (EMPLOYEE_ORDER as EmployeeKey[]).map((emp) => [emp, initialNicknames[emp] ?? ""])
@@ -321,6 +322,28 @@ function SpecialistsTab({
   };
 
   return (
+    <div className="space-y-6">
+      {/* Sub-view toggle */}
+      <div className="flex gap-1 border-b border-[var(--color-border)] -mb-2">
+        {(["settings", "usage"] as const).map((v) => (
+          <button
+            key={v}
+            type="button"
+            onClick={() => setView(v)}
+            className={`px-4 py-2.5 text-sm transition-colors border-b-2 -mb-px capitalize ${
+              view === v
+                ? "border-[var(--color-accent)] text-[var(--color-text)]"
+                : "border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+            }`}
+          >
+            {v === "usage" ? "Usage metrics" : "Settings"}
+          </button>
+        ))}
+      </div>
+
+      {view === "usage" ? (
+        <SpecialistMetrics />
+      ) : (
     <form onSubmit={handleSave} className="space-y-8 text-sm">
       {/* Nicknames */}
       <div>
@@ -443,6 +466,174 @@ function SpecialistsTab({
         </PraxisButton>
       </div>
     </form>
+      )}
+    </div>
+  );
+}
+
+type MetricsRange = "7" | "30" | "90" | "all";
+
+interface SpecialistMetric {
+  employee: string;
+  totalMessages: number;
+  thisMonth: number;
+  avgWordCount: number;
+}
+
+const RANGE_OPTIONS: { value: MetricsRange; label: string }[] = [
+  { value: "7", label: "7 days" },
+  { value: "30", label: "30 days" },
+  { value: "90", label: "90 days" },
+  { value: "all", label: "All time" },
+];
+
+function SpecialistMetrics() {
+  const [range, setRange] = useState<MetricsRange>("30");
+  const [metrics, setMetrics] = useState<SpecialistMetric[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(false);
+    fetch(`/api/conduit/specialists/metrics?range=${range}`)
+      .then((r) => {
+        if (!r.ok) throw new Error();
+        return r.json();
+      })
+      .then((data: { metrics: SpecialistMetric[] }) => {
+        setMetrics(data.metrics);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError(true);
+        setLoading(false);
+      });
+  }, [range]);
+
+  const maxMessages = Math.max(1, ...(metrics ?? []).map((m) => m.totalMessages));
+  const totalMessages = (metrics ?? []).reduce((s, m) => s + m.totalMessages, 0);
+
+  return (
+    <div className="space-y-5 text-sm">
+      {/* Date range picker */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">Period</span>
+        <div className="flex flex-wrap gap-1.5">
+          {RANGE_OPTIONS.map(({ value, label }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setRange(value)}
+              className="px-3 py-1 rounded-full text-xs transition-colors"
+              style={{
+                background: range === value ? "var(--color-accent)" : "var(--color-surface-elevated)",
+                color: range === value ? "#fff" : "var(--color-text-muted)",
+                border: `1px solid ${range === value ? "var(--color-accent)" : "var(--color-border)"}`,
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {loading && (
+          <span className="text-[11px] text-[var(--color-text-muted)] animate-pulse">Loading…</span>
+        )}
+      </div>
+
+      {error && (
+        <p className="text-[var(--color-text-muted)] text-sm">
+          Failed to load metrics. Please try again.
+        </p>
+      )}
+
+      {!loading && !error && metrics !== null && metrics.length === 0 && (
+        <div className="conduit-card p-8 text-center">
+          <p className="text-[var(--color-text-muted)]">No specialist activity in this period.</p>
+          <p className="text-xs text-[var(--color-text-muted)] mt-1">
+            Start a conversation with any specialist to see usage here.
+          </p>
+        </div>
+      )}
+
+      {!error && metrics !== null && metrics.length > 0 && (
+        <>
+          {/* Summary stat */}
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-2xl font-semibold tabular-nums">{totalMessages.toLocaleString()}</span>
+            <span className="text-[var(--color-text-muted)]">
+              specialist {totalMessages === 1 ? "response" : "responses"} in this period
+            </span>
+          </div>
+
+          {/* Ranked list */}
+          <div className="space-y-3">
+            {metrics.map((m) => {
+              const Icon = EMPLOYEE_ICON[m.employee as EmployeeKey];
+              const color = DEPT_COLOR[m.employee as EmployeeKey];
+              const label = employeeLabel(m.employee as EmployeeKey);
+              const barPct = Math.round((m.totalMessages / maxMessages) * 100);
+              const sharePct = Math.round((m.totalMessages / totalMessages) * 100);
+
+              return (
+                <div key={m.employee} className="conduit-card px-4 py-3.5">
+                  <div className="flex items-center gap-3 mb-2.5">
+                    <span
+                      className="flex items-center justify-center w-7 h-7 rounded-full shrink-0"
+                      style={{
+                        background: `color-mix(in srgb, ${color} 18%, var(--color-surface-elevated))`,
+                        boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 32%, transparent)`,
+                      }}
+                    >
+                      <Icon size={13} style={{ color }} strokeWidth={2} />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline justify-between gap-2 flex-wrap">
+                        <span className="font-medium text-[var(--color-text)]">{label}</span>
+                        <div className="flex items-center gap-3 text-[12px] text-[var(--color-text-muted)] tabular-nums shrink-0">
+                          <span title="Responses in period">
+                            <span className="font-semibold text-[var(--color-text)]">{m.totalMessages.toLocaleString()}</span>
+                            {" "}responses
+                          </span>
+                          <span title="Responses this calendar month">
+                            <span className="font-semibold text-[var(--color-text)]">{m.thisMonth.toLocaleString()}</span>
+                            {" "}this month
+                          </span>
+                          <span title="Average words per response">
+                            ~<span className="font-semibold text-[var(--color-text)]">{m.avgWordCount}</span>
+                            {" "}words/reply
+                          </span>
+                          <span
+                            className="text-[10px] px-1.5 py-0.5 rounded-full"
+                            style={{
+                              background: `color-mix(in srgb, ${color} 14%, var(--color-surface-elevated))`,
+                              color,
+                            }}
+                          >
+                            {sharePct}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Usage bar */}
+                  <div className="h-1.5 rounded-full bg-[var(--color-border)] overflow-hidden">
+                    <div
+                      className="h-1.5 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${barPct}%`,
+                        background: color,
+                        opacity: 0.8,
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+    </div>
   );
 }
 
