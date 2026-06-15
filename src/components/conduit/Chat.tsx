@@ -3126,10 +3126,10 @@ const MessageBubble = memo(function MessageBubble({
     const routingTo = msgMeta.routingTo as EmployeeKey | undefined;
     return (
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -6, transition: { duration: 0.15, ease: [0.4, 0, 0.2, 1] } }}
-        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+        exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.12, ease: [0.4, 0, 0.2, 1] } }}
+        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
       >
         <TypingIndicator
           employee={employee}
@@ -3193,7 +3193,7 @@ const MessageBubble = memo(function MessageBubble({
             )}
             {message.pending && (
               <span
-                className="cx-type-xs uppercase tracking-[0.18em]"
+                className="cx-mono cx-type-xs uppercase tracking-[0.18em]"
                 style={{ color: "var(--cx-text-faint, var(--color-text-muted))" }}
               >
                 writing…
