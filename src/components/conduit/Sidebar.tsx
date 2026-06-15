@@ -27,7 +27,6 @@ import {
   Sparkles,
   Sun,
   Users2,
-  Menu,
   Monitor,
   X,
 } from "lucide-react";
@@ -357,7 +356,6 @@ export function Sidebar({
   // Suppress the width transition on initial hydration to avoid CLS.
   const [skipTransition, setSkipTransition] = useState(true);
   const sidebarRef = useRef<HTMLElement>(null);
-  const openBtnRef = useRef<HTMLButtonElement>(null);
   // Conversation list search
   const [convSearch, setConvSearch] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -492,17 +490,19 @@ export function Sidebar({
     return () => window.removeEventListener("keydown", trap);
   }, [open]);
 
-  // Return focus to the hamburger button when the mobile drawer closes
-  useEffect(() => {
-    if (open || typeof window === "undefined" || window.innerWidth >= 768) return;
-    openBtnRef.current?.focus();
-  }, [open]);
 
   // Keyboard shortcut: Cmd/Ctrl+Shift+S → toggle sidebar collapsed state
   useEffect(() => {
     const onToggle = () => toggleCollapsed();
     window.addEventListener("praxis:sidebar:toggle", onToggle);
     return () => window.removeEventListener("praxis:sidebar:toggle", onToggle);
+  }, []);
+
+  // ConsoleTopBar → open mobile drawer via event (avoids prop-drilling through layout)
+  useEffect(() => {
+    const onOpen = () => setOpen(true);
+    window.addEventListener("praxis:sidebar:open", onOpen);
+    return () => window.removeEventListener("praxis:sidebar:open", onOpen);
   }, []);
 
   // Streaming employee: pulsed strong + steady while a Chat is streaming.
@@ -580,18 +580,6 @@ export function Sidebar({
 
   return (
     <>
-      <button
-        ref={openBtnRef}
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label="Open navigation menu"
-        aria-expanded={open}
-        aria-controls="app-sidebar"
-        className="md:hidden fixed top-3 left-3 z-30 conduit-card p-2"
-      >
-        <Menu size={18} />
-      </button>
-
       {/* Mobile backdrop — framer-motion fade, closes on outside tap */}
       <AnimatePresence>
         {open && (

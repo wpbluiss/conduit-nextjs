@@ -11,6 +11,7 @@ import { OnboardingModal } from "@/components/conduit/OnboardingModal";
 import { UpgradeNudge } from "@/components/conduit/UpgradeNudge";
 import { TokenBudgetNudge } from "@/components/conduit/TokenBudgetNudge";
 import { RouteProgress } from "@/components/conduit/RouteProgress";
+import { ConsoleTopBar } from "@/components/conduit/ConsoleTopBar";
 import { PraxisCanvasTintProvider } from "@/components/conduit/praxis/PraxisCanvasTintProvider";
 import { ToastProvider } from "@/context/ToastContext";
 import { UserProvider } from "@/context/UserContext";
@@ -213,7 +214,8 @@ export default async function AppLayout({
           showGettingStarted={onboarded && isNewAccount && !gsDismissed}
           hasContext={onboarded}
         />
-        <main id="app-main" className="conduit-canvas praxis-canvas-tint flex-1 flex flex-col min-w-0 pt-12 md:pt-0">
+        <main id="app-main" className="conduit-canvas praxis-canvas-tint flex-1 flex flex-col min-w-0">
+          <ConsoleTopBar />
           <UpgradeNudge
             tierId={account.tier_id ?? "free"}
             internalAccount={Boolean(account.internal_account)}
