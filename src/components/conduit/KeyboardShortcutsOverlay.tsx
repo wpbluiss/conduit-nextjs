@@ -34,7 +34,7 @@ function buildShortcutGroups(isMac: boolean): ShortcutGroup[] {
       title: "General",
       shortcuts: [
         { keys: [`${mod}K`], label: "Open command palette" },
-        { keys: [`${mod}⇧S`], label: "Toggle sidebar" },
+        { keys: [`${mod}B`], label: "Toggle sidebar" },
         { keys: ["?"], label: "Open keyboard shortcuts" },
         { keys: ["Esc"], label: "Close overlay / sidebar" },
       ],
@@ -99,11 +99,13 @@ export function KeyboardShortcutsOverlay() {
     let gTimer: ReturnType<typeof setTimeout> | null = null;
 
     const onKey = (e: KeyboardEvent) => {
-      // Cmd/Ctrl+Shift+S → toggle sidebar (checked before modifier-skip)
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === "s" || e.key === "S")) {
-        e.preventDefault();
-        window.dispatchEvent(new CustomEvent("praxis:sidebar:toggle"));
-        return;
+      // Cmd/Ctrl+B → toggle sidebar
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && (e.key === "b" || e.key === "B")) {
+        if (!isInputFocused()) {
+          e.preventDefault();
+          window.dispatchEvent(new CustomEvent("praxis:sidebar:toggle"));
+          return;
+        }
       }
 
       // Skip remaining shortcuts if any modifier key is held
