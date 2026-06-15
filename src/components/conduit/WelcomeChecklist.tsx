@@ -160,10 +160,7 @@ export function WelcomeChecklist({
       >
         <div
           className="conduit-card p-5"
-          style={{
-            background: "var(--color-surface-elevated)",
-            boxShadow: "0 8px 32px rgba(10,9,8,0.4)",
-          }}
+          style={{ boxShadow: "0 8px 32px rgba(10,9,8,0.4)" }}
         >
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
