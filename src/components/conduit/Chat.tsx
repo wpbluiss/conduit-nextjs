@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Pin, Search, Share2, Tag, ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Link, Pin, Search, Share2, Tag, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
@@ -384,6 +384,30 @@ export function Chat({
     URL.revokeObjectURL(url);
     toast.success("Conversation downloaded");
   }, [messages, currentTitle, toast]);
+
+  // Copy a permalink to this conversation to the clipboard.
+  const [linkCopied, setLinkCopied] = useState(false);
+  const copyPermalink = useCallback(async () => {
+    if (!conversationId) return;
+    const url = `${window.location.origin}/app?c=${conversationId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      // Fallback for HTTP contexts where Clipboard API is blocked.
+      const ta = document.createElement("textarea");
+      ta.value = url;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+    setLinkCopied(true);
+    toast.success("Link copied!");
+    setTimeout(() => setLinkCopied(false), 1500);
+  }, [conversationId, toast]);
 
   // Load pinned messages when conversation is available.
   const loadPins = useCallback(async (convId: string) => {
@@ -1413,6 +1437,35 @@ export function Chat({
                       onUpdate={setAssignedLabels}
                       compact
                     />
+                  )}
+                  {/* Copy permalink button — only when a conversation exists */}
+                  {conversationId && (
+                    <button
+                      type="button"
+                      onClick={() => void copyPermalink()}
+                      title="Copy link to this conversation"
+                      aria-label="Copy link to this conversation"
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
+                      style={{
+                        color: linkCopied ? "var(--color-text)" : "var(--color-text-muted)",
+                        border: linkCopied ? "1px solid var(--color-border)" : "1px solid transparent",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!linkCopied) {
+                          (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
+                          (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!linkCopied) {
+                          (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
+                          (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                        }
+                      }}
+                    >
+                      <Link size={12} />
+                      <span className="hidden sm:inline">{linkCopied ? "Copied!" : "Copy link"}</span>
+                    </button>
                   )}
                   {/* Handoff button — only when conversation has messages and no existing handoff */}
                   {conversationId && !handoffInfo && (
