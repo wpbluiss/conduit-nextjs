@@ -64,7 +64,7 @@ export function ConsoleTopBar() {
         aria-haspopup="dialog"
         className="md:hidden -ml-1 shrink-0"
       >
-        <Menu size={18} />
+        <Menu size={18} strokeWidth={1.75} />
       </PraxisButton>
 
       {/* Accent bar + page title */}
@@ -76,6 +76,7 @@ export function ConsoleTopBar() {
         />
         <Icon
           size={14}
+          strokeWidth={1.75}
           aria-hidden="true"
           style={{ color: isChat ? "var(--cx-accent)" : "var(--cx-text-muted)" }}
           className="shrink-0"
