@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import { Mic, Mic2, MicOff, Send, Square } from "lucide-react";
+import { Button } from "@/components/conduit/ui/Button";
 import { EMPLOYEE_ORDER, EMPLOYEES, type EmployeeId } from "@/lib/conduit/employees";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { useNicknames } from "@/context/NicknameContext";
@@ -99,7 +99,6 @@ export function PraxisComposerPill({
   const tint = useDeptTint();
   const composerRef = useRef<HTMLFormElement>(null);
   const { labelFor } = useNicknames();
-  const shouldReduceMotion = useReducedMotion();
 
   const CHAR_LIMIT = 4000;
   const COUNTER_THRESHOLD = 200;
@@ -780,38 +779,16 @@ export function PraxisComposerPill({
         </span>
       )}
 
-      <motion.button
+      <Button
         type="submit"
-        disabled={loading || !value.trim()}
+        variant="primary"
+        size="icon"
+        isDisabled={loading || !value.trim()}
+        isLoading={loading}
         aria-label="Send"
-        whileHover={
-          !shouldReduceMotion && !(loading || !value.trim())
-            ? { boxShadow: "0 0 0 3px rgba(124,108,255,0.25)", backgroundColor: "var(--cx-accent-bright, #9B8CFF)" }
-            : undefined
-        }
-        whileTap={
-          !shouldReduceMotion && !(loading || !value.trim())
-            ? { scale: 0.97 }
-            : undefined
-        }
-        transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
-        style={{
-          flexShrink: 0,
-          width: "44px",
-          height: "44px",
-          borderRadius: "9999px",
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "var(--color-accent)",
-          color: "var(--color-surface)",
-          border: "none",
-          cursor: loading || !value.trim() ? "not-allowed" : "pointer",
-          opacity: loading || !value.trim() ? 0.4 : 1,
-        }}
       >
         <Send size={16} />
-      </motion.button>
+      </Button>
     </form>
   );
 }

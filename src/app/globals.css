@@ -442,6 +442,67 @@ body {
   }
 }
 
+/* Button size modifiers — pair with .btn-{variant} to set height/padding/type.
+ * Defined after the variant classes so they win in the cascade (equal specificity,
+ * last rule wins). Sizes: sm=32px, md=40px, lg=48px; icon/icon-sm are circular.
+ * Touch target ≥44px enforced via @media(pointer:coarse) expansion on smaller sizes. */
+.btn-sz-sm {
+  min-height: 32px;
+  height: 32px;
+  padding: 0 var(--cx-space-3, 12px);
+  font-size: var(--cx-type-sm, 13px);
+  gap: 6px;
+}
+.btn-sz-md {
+  min-height: 40px;
+  height: 40px;
+  padding: 0 var(--cx-space-4, 16px);
+  font-size: var(--cx-type-base, 14px);
+  gap: var(--cx-space-2, 8px);
+}
+.btn-sz-lg {
+  min-height: 48px;
+  height: 48px;
+  padding: 0 var(--cx-space-6, 24px);
+  font-size: 15px;
+  gap: var(--cx-space-2, 8px);
+}
+.btn-sz-icon {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: var(--cx-radius-full, 9999px);
+  flex-shrink: 0;
+}
+.btn-sz-icon-sm {
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  border-radius: var(--cx-radius-full, 9999px);
+  flex-shrink: 0;
+}
+
+/* Touch target expansion — coarse-pointer (mobile) devices get ≥44px touch area */
+@media (pointer: coarse) {
+  .btn-sz-sm {
+    min-height: 44px;
+    height: auto;
+    padding: 6px var(--cx-space-3, 12px);
+  }
+  .btn-sz-md {
+    min-height: 44px;
+    height: auto;
+    padding: 2px var(--cx-space-4, 16px);
+  }
+  .btn-sz-icon-sm {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+}
+
 /* Accordion (Radix) — height driven by --radix-accordion-content-height */
 @keyframes accordion-down {
   from { height: 0; opacity: 0; }
