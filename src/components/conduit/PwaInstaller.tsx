@@ -16,6 +16,16 @@ export function PwaInstaller() {
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
+
+      // When a new SW activates via skipWaiting(), reload once so the client
+      // gets fresh HTML + chunks instead of the pre-deploy app shell.
+      let refreshed = false;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (!refreshed) {
+          refreshed = true;
+          window.location.reload();
+        }
+      });
     }
 
     const dismissed = localStorage.getItem("praxis.install.dismissed");
