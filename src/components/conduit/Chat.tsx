@@ -9,10 +9,10 @@ import type { EmployeeKey } from "@/lib/ai/provider";
 import {
   DEPT_COLOR,
   DEPT_COLOR_SOFT,
-  EmployeeAvatar,
   employeeLabel,
   SpecialistChip,
 } from "./EmployeeBadge";
+import { SpecialistAvatar } from "./SpecialistAvatar";
 import { PaywallModal, type PaywallPayload } from "./PaywallModal";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useVoiceRecorder } from "@/hooks/useVoiceRecorder";
@@ -3041,7 +3041,7 @@ const MessageBubble = memo(function MessageBubble({
       onTouchMove={cancelTouchTimer}
     >
       <div className="pt-1 shrink-0">
-        <EmployeeAvatar employee={employee} size={32} active={message.pending} />
+        <SpecialistAvatar employee={employee} size={32} streaming={message.pending} />
       </div>
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex items-center gap-2 flex-wrap">

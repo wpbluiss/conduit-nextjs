@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
-import { EmployeeAvatar, DEPT_COLOR, DEPT_COLOR_SOFT } from "./EmployeeBadge";
+import { DEPT_COLOR, DEPT_COLOR_SOFT } from "./EmployeeBadge";
+import { SpecialistAvatar } from "./SpecialistAvatar";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { useNicknames } from "@/context/NicknameContext";
 import { Button } from "@/components/conduit/ui/Button";
@@ -111,7 +112,7 @@ export function SpecialistSelectorModal({
                 }}
                 aria-pressed={isSelected}
               >
-                <EmployeeAvatar employee={id as EmployeeKey} size={28} active={isSelected} />
+                <SpecialistAvatar employee={id as EmployeeKey} size={28} active={isSelected} />
                 <div>
                   <div
                     className="text-[13px] font-medium leading-tight"
