@@ -3061,88 +3061,96 @@ const MessageBubble = memo(function MessageBubble({
         <SpecialistAvatar employee={employee} size={32} streaming={message.pending} />
       </div>
       <div className="min-w-0 flex-1 space-y-1">
-        <div className="flex items-center gap-2 flex-wrap">
-          <SpecialistChip employee={employee} label={nickLabelFor(employee)} />
-          {message.created_at && !message.pending && (
-            <MessageTimestamp
-              createdAt={message.created_at}
-              touchVisible={touchTimestamp}
-              side="top"
-            />
-          )}
-          {message.handoffFrom && (
-            <motion.span
-              initial={{ opacity: 0, x: -6 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
-              aria-label={`Handed off from ${nickLabelFor(message.handoffFrom as EmployeeKey)}`}
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] uppercase tracking-[0.1em]"
-              style={{
-                background: `color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 12%, var(--color-surface-elevated))`,
-                color: DEPT_COLOR[message.handoffFrom as EmployeeKey],
-                border: `1px solid color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 28%, transparent)`,
-              }}
-            >
-              ← {nickLabelFor(message.handoffFrom as EmployeeKey)}
-            </motion.span>
-          )}
-          {message.pending && (
-            <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-              writing…
-            </span>
-          )}
-          {playing && (
-            <button
-              onClick={onStopAudio}
-              className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em]"
-              style={{ color: DEPT_COLOR[employee] }}
-              aria-label="Stop audio"
-            >
-              <span className="inline-flex items-end gap-[2px] h-3">
-                <span
-                  className="w-[2px] rounded-sm"
-                  style={{
-                    background: DEPT_COLOR[employee],
-                    height: "8px",
-                    animation: "wave1 1s ease-in-out infinite",
-                  }}
-                />
-                <span
-                  className="w-[2px] rounded-sm"
-                  style={{
-                    background: DEPT_COLOR[employee],
-                    height: "12px",
-                    animation: "wave2 1s ease-in-out infinite",
-                  }}
-                />
-                <span
-                  className="w-[2px] rounded-sm"
-                  style={{
-                    background: DEPT_COLOR[employee],
-                    height: "6px",
-                    animation: "wave3 1s ease-in-out infinite",
-                  }}
-                />
+        {/* Glass bubble — chip header + content in one pane */}
+        <div className="conduit-bubble-assistant max-w-[68ch]">
+          {/* Bubble header: specialist chip + timestamp + meta */}
+          <div className="px-4 pt-3 pb-2 flex items-center gap-2 flex-wrap">
+            <SpecialistChip employee={employee} label={nickLabelFor(employee)} />
+            {message.created_at && !message.pending && (
+              <MessageTimestamp
+                createdAt={message.created_at}
+                touchVisible={touchTimestamp}
+                side="top"
+              />
+            )}
+            {message.handoffFrom && (
+              <motion.span
+                initial={{ opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
+                aria-label={`Handed off from ${nickLabelFor(message.handoffFrom as EmployeeKey)}`}
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] uppercase tracking-[0.1em]"
+                style={{
+                  background: `color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 12%, var(--color-surface-elevated))`,
+                  color: DEPT_COLOR[message.handoffFrom as EmployeeKey],
+                  border: `1px solid color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 28%, transparent)`,
+                }}
+              >
+                ← {nickLabelFor(message.handoffFrom as EmployeeKey)}
+              </motion.span>
+            )}
+            {message.pending && (
+              <span
+                className="text-[10px] uppercase tracking-[0.18em]"
+                style={{ color: "var(--cx-text-faint, var(--color-text-muted))" }}
+              >
+                writing…
               </span>
-              Speaking
-            </button>
-          )}
-          {!playing && !message.pending && onReplayAudio && (
-            <button
-              onClick={onReplayAudio}
-              className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-              aria-label="Replay audio"
-            >
-              ▶ Listen
-            </button>
-          )}
-        </div>
-        <div className="conduit-bubble-assistant px-4 py-3 text-[var(--color-text)]">
-          <MarkdownRenderer
-            content={message.content}
-            streaming={message.pending}
-            caretColor={message.pending ? DEPT_COLOR[employee] : undefined}
-          />
+            )}
+            {playing && (
+              <button
+                onClick={onStopAudio}
+                className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em]"
+                style={{ color: DEPT_COLOR[employee] }}
+                aria-label="Stop audio"
+              >
+                <span className="inline-flex items-end gap-[2px] h-3">
+                  <span
+                    className="w-[2px] rounded-sm"
+                    style={{
+                      background: DEPT_COLOR[employee],
+                      height: "8px",
+                      animation: "wave1 1s ease-in-out infinite",
+                    }}
+                  />
+                  <span
+                    className="w-[2px] rounded-sm"
+                    style={{
+                      background: DEPT_COLOR[employee],
+                      height: "12px",
+                      animation: "wave2 1s ease-in-out infinite",
+                    }}
+                  />
+                  <span
+                    className="w-[2px] rounded-sm"
+                    style={{
+                      background: DEPT_COLOR[employee],
+                      height: "6px",
+                      animation: "wave3 1s ease-in-out infinite",
+                    }}
+                  />
+                </span>
+                Speaking
+              </button>
+            )}
+            {!playing && !message.pending && onReplayAudio && (
+              <button
+                onClick={onReplayAudio}
+                className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                aria-label="Replay audio"
+              >
+                ▶ Listen
+              </button>
+            )}
+          </div>
+          {/* Bubble content */}
+          <div className="px-4 pb-3 text-[var(--color-text)]">
+            <MarkdownRenderer
+              content={message.content}
+              streaming={message.pending}
+              caretColor={message.pending ? DEPT_COLOR[employee] : undefined}
+            />
+          </div>
         </div>
         {!!(message.metadata as Record<string, unknown>)?.incomplete && (
           <div
