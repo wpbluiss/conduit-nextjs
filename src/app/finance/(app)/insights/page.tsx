@@ -59,6 +59,15 @@ export default async function InsightsPage() {
   }
   const marks = Array.from(markMap.values());
 
+  // "Your week" digest — last 7 days
+  const wk = new Date(); wk.setDate(wk.getDate() - 7);
+  const wkISO = wk.toISOString().slice(0, 10);
+  const weekIn =
+    snap.paychecks.filter((p) => p.pay_date >= wkISO).reduce((t, p) => t + Number(p.take_home) + Number(p.mileage_reimbursement || 0), 0) +
+    snap.inflows.filter((i) => i.date >= wkISO).reduce((t, i) => t + Number(i.amount), 0);
+  const weekOut = snap.payments.filter((p) => p.date >= wkISO).reduce((t, p) => t + Number(p.amount), 0);
+  const weekSaved = snap.savingsLog.filter((r) => r.date >= wkISO && Number(r.amount) > 0).reduce((t, r) => t + Number(r.amount), 0);
+
   return (
     <div className="space-y-5">
       <div>
@@ -97,6 +106,16 @@ export default async function InsightsPage() {
           </Card>
         </div>
       </div>
+
+      {/* Your week digest */}
+      <Card className="!p-4">
+        <div className="fin-mono text-[10px] uppercase tracking-[0.2em] text-[var(--fin-muted)]">Your week</div>
+        <p className="text-sm mt-2 text-white/90">
+          {weekIn === 0 && weekOut === 0 && weekSaved === 0
+            ? "Quiet week so far — log a paycheck or a payment and your recap fills in here."
+            : <>This week you brought in <span className="text-[#7cc6a0]">{fmtMoney(weekIn)}</span>, paid out <span className="text-[#ffa876]">{fmtMoney(weekOut)}</span>, and moved <GradientText>{fmtMoney(weekSaved)}</GradientText> toward what matters. Keep the rhythm. 🎵</>}
+        </p>
+      </Card>
 
       {/* Net worth over time */}
       <Card>

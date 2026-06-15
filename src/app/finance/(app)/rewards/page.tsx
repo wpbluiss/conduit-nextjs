@@ -5,6 +5,7 @@ import { LevelBar } from "@/components/finance/LevelBar";
 import { VaultCard } from "@/components/finance/VaultCard";
 import { CreateVaultModal } from "@/components/finance/CreateVaultModal";
 import { MysteryReveal } from "@/components/finance/MysteryReveal";
+import { ShareButton } from "@/components/finance/ShareButton";
 import { Card, EmptyState } from "@/components/finance/ui";
 
 export const dynamic = "force-dynamic";
@@ -86,6 +87,9 @@ export default async function RewardsPage() {
                 <div className="font-semibold text-sm mt-1 leading-tight">{v.mystery_destination ?? v.name}</div>
                 <div className="fin-mono text-[9px] uppercase tracking-[0.18em] text-[#ffa876] mt-1.5 border-t border-[#ff8a3d]/20 pt-1.5">
                   {v.status === "spent" ? "Visited" : "Funded"} ✓
+                </div>
+                <div className="mt-2 flex justify-center">
+                  <ShareButton text={`We just funded a trip to ${v.mystery_destination ?? v.name} 🏝️✈️ — saved up for it, guilt-free, with Cadence.`} />
                 </div>
               </div>
             ))}
