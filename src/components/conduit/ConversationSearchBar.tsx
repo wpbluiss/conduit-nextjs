@@ -12,12 +12,12 @@ const TEAM = new Set<string>(EMPLOYEE_ORDER);
 
 interface SearchResult {
   conversation_id: string;
+  message_id: string | null;
   title: string | null;
   dominant_employee: string | null;
   updated_at: string | null;
   snippet: string;
-  role: string;
-  employee: string | null;
+  match_type?: "message" | "title";
 }
 
 function relativeDate(iso: string): string {
@@ -85,7 +85,7 @@ export function ConversationSearchBar() {
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/conduit/messages/search?q=${encodeURIComponent(q)}`,
+        `/api/conduit/conversations/search?q=${encodeURIComponent(q)}`,
       );
       if (!res.ok) return;
       const json = (await res.json()) as { results: SearchResult[] };
@@ -168,7 +168,11 @@ export function ConversationSearchBar() {
     }
     if (e.key === "Enter" && activeIndex >= 0 && results[activeIndex]) {
       e.preventDefault();
-      router.push(`/app?c=${results[activeIndex].conversation_id}`);
+      const r = results[activeIndex];
+      const href = r.message_id
+        ? `/app?c=${r.conversation_id}&msg=${r.message_id}`
+        : `/app?c=${r.conversation_id}`;
+      router.push(href);
       setFocused(false);
       return;
     }
@@ -271,7 +275,7 @@ export function ConversationSearchBar() {
                 id={`search-result-${idx}`}
                 role="option"
                 aria-selected={isActive}
-                href={`/app?c=${r.conversation_id}`}
+                href={r.message_id ? `/app?c=${r.conversation_id}&msg=${r.message_id}` : `/app?c=${r.conversation_id}`}
                 onClick={() => setFocused(false)}
                 className="flex items-start gap-3 px-4 py-3 transition-colors"
                 style={{
