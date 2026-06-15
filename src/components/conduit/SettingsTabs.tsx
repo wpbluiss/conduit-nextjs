@@ -90,6 +90,7 @@ const COMMON_TIMEZONES = [
 
 export type SettingsTabKey =
   | "profile"
+  | "workspace"
   | "business"
   | "specialists"
   | "voice"
@@ -124,6 +125,7 @@ export function SettingsTabs({
         {(
           [
             ["profile", "Profile"],
+            ["workspace", "Workspace"],
             ["business", "Business"],
             ["specialists", "Specialists"],
             ["voice", "Voice"],
@@ -163,6 +165,12 @@ export function SettingsTabs({
           displayName={account.display_name ?? null}
           avatarUrl={account.avatar_url ?? null}
           workspaceName={account.workspace_name ?? null}
+        />
+      )}
+      {tab === "workspace" && (
+        <WorkspaceTab
+          workspaceName={account.workspace_name ?? null}
+          avatarUrl={account.avatar_url ?? null}
         />
       )}
       {tab === "business" && <BusinessTab account={account} />}
@@ -780,6 +788,247 @@ function PwMeter({ pw }: { pw: string }) {
           }}
         />
       ))}
+    </div>
+  );
+}
+
+/* ─── Workspace tab ───────────────────────────────────────────────────────── */
+
+const WS_NAME_MAX = 64;
+
+function WorkspaceTab({
+  workspaceName,
+  avatarUrl,
+}: {
+  workspaceName: string | null;
+  avatarUrl: string | null;
+}) {
+  const router = useRouter();
+  const toast = useToast();
+
+  const [wsName, setWsName] = useState(workspaceName ?? "");
+  const [wsNameSaving, setWsNameSaving] = useState(false);
+  const [wsNameSaved, setWsNameSaved] = useState(false);
+  const [wsNameError, setWsNameError] = useState("");
+
+  const [logoPreview, setLogoPreview] = useState<string | null>(avatarUrl);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const [logoRemoving, setLogoRemoving] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  const saveWsName = async (e: FormEvent) => {
+    e.preventDefault();
+    setWsNameSaving(true);
+    setWsNameError("");
+    setWsNameSaved(false);
+    const trimmed = wsName.trim().slice(0, WS_NAME_MAX);
+    const r = await fetch("/api/conduit/workspace", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ workspace_name: trimmed || null }),
+    });
+    setWsNameSaving(false);
+    if (r.ok) {
+      setWsNameSaved(true);
+      toast.success("Workspace name updated.");
+      router.refresh();
+    } else {
+      setWsNameError("Couldn't save workspace name. Try again.");
+    }
+  };
+
+  const handleLogoChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogoError(null);
+
+    if (file.size > 2 * 1024 * 1024) {
+      setLogoError("Logo must be under 2 MB.");
+      if (logoInputRef.current) logoInputRef.current.value = "";
+      return;
+    }
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      setLogoError("Only JPEG or PNG logos are allowed.");
+      if (logoInputRef.current) logoInputRef.current.value = "";
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    setLogoPreview(objectUrl);
+    setLogoUploading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const r = await fetch("/api/conduit/workspace/logo", { method: "POST", body: fd });
+      const j = await r.json().catch(() => ({})) as { avatar_url?: string; error?: string };
+      if (!r.ok) {
+        const msg =
+          j.error === "file_too_large"
+            ? "Logo must be under 2 MB."
+            : j.error === "invalid_file_type"
+              ? "Only JPEG or PNG logos are allowed."
+              : "Upload failed. Try again.";
+        setLogoError(msg);
+        setLogoPreview(avatarUrl);
+        URL.revokeObjectURL(objectUrl);
+      } else if (j.avatar_url) {
+        setLogoPreview(j.avatar_url);
+        URL.revokeObjectURL(objectUrl);
+        toast.success("Workspace logo updated.");
+        router.refresh();
+      }
+    } catch {
+      setLogoError("Upload failed. Try again.");
+      setLogoPreview(avatarUrl);
+      URL.revokeObjectURL(objectUrl);
+    } finally {
+      setLogoUploading(false);
+      if (logoInputRef.current) logoInputRef.current.value = "";
+    }
+  };
+
+  const removeLogo = async () => {
+    setLogoRemoving(true);
+    setLogoError(null);
+    const r = await fetch("/api/conduit/workspace", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ avatar_url: null }),
+    });
+    setLogoRemoving(false);
+    if (r.ok) {
+      setLogoPreview(null);
+      toast.success("Workspace logo removed.");
+      router.refresh();
+    } else {
+      setLogoError("Couldn't remove logo. Try again.");
+    }
+  };
+
+  return (
+    <div className="space-y-8 text-sm">
+      {/* ── Workspace logo ── */}
+      <div>
+        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
+          Workspace logo
+        </div>
+        <p className="text-[11px] text-[var(--color-text-muted)] mb-3">
+          Shown in the sidebar header. JPEG or PNG, max 2 MB.
+        </p>
+        <div className="flex items-center gap-5">
+          <button
+            type="button"
+            onClick={() => logoInputRef.current?.click()}
+            disabled={logoUploading}
+            className="relative group shrink-0"
+            aria-label="Upload workspace logo"
+          >
+            <div
+              className="w-16 h-16 rounded-xl flex items-center justify-center overflow-hidden border-2 border-[var(--color-border)] group-hover:border-[var(--color-accent)] transition-colors"
+              style={{ background: "var(--color-surface-elevated)" }}
+            >
+              {logoPreview ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={logoPreview}
+                  alt="Workspace logo"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-2xl font-bold" style={{ color: "var(--color-accent-hi)" }}>
+                  {(wsName || workspaceName || "P")[0]?.toUpperCase() ?? "P"}
+                </span>
+              )}
+            </div>
+            {logoUploading && (
+              <div className="absolute inset-0 rounded-xl bg-black/40 flex items-center justify-center">
+                <SpinnerIcon size={18} />
+              </div>
+            )}
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[var(--color-accent)] flex items-center justify-center shadow">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="white">
+                <path d="M5 2v6M2 5h6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </div>
+          </button>
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => logoInputRef.current?.click()}
+              disabled={logoUploading}
+              className="text-xs text-[var(--color-accent)] hover:underline disabled:opacity-50"
+            >
+              {logoUploading ? "Uploading…" : "Choose logo"}
+            </button>
+            {logoPreview && (
+              <button
+                type="button"
+                onClick={removeLogo}
+                disabled={logoRemoving}
+                className="block text-xs text-[var(--color-text-muted)] hover:text-[var(--color-pink)] disabled:opacity-50 transition-colors"
+              >
+                {logoRemoving ? "Removing…" : "Remove logo"}
+              </button>
+            )}
+            {logoError && (
+              <p className="text-[11px] text-[var(--color-pink)]">{logoError}</p>
+            )}
+          </div>
+          <input
+            ref={logoInputRef}
+            type="file"
+            accept="image/jpeg,image/png"
+            className="hidden"
+            onChange={handleLogoChange}
+            aria-hidden
+          />
+        </div>
+      </div>
+
+      {/* ── Workspace name ── */}
+      <form onSubmit={saveWsName} className="space-y-2 max-w-sm">
+        <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block">
+          Workspace name
+        </label>
+        <p className="text-[11px] text-[var(--color-text-muted)] -mt-1">
+          Shown in the sidebar. Leave blank to use your account name.
+        </p>
+        <div className="relative">
+          <input
+            value={wsName}
+            onChange={(e) => {
+              setWsName(e.target.value.slice(0, WS_NAME_MAX));
+              setWsNameSaved(false);
+              setWsNameError("");
+            }}
+            maxLength={WS_NAME_MAX}
+            placeholder="e.g. Acme AI Team"
+            className="w-full conduit-card px-4 py-2.5 outline-none focus:border-[var(--color-accent)] text-sm pr-12"
+          />
+          <span
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] tabular-nums"
+            style={{
+              color:
+                wsName.length >= WS_NAME_MAX
+                  ? "var(--color-pink)"
+                  : "var(--color-text-muted)",
+            }}
+          >
+            {wsName.length}/{WS_NAME_MAX}
+          </span>
+        </div>
+        {wsNameError && <p className="text-[11px] text-[var(--color-pink)]">{wsNameError}</p>}
+        <PraxisButton
+          type="submit"
+          isLoading={wsNameSaving}
+          isDisabled={wsNameSaving}
+          variant="secondary"
+          className="!text-xs"
+        >
+          {wsNameSaved ? <><Check size={12} /> Saved</> : "Save name"}
+        </PraxisButton>
+      </form>
     </div>
   );
 }

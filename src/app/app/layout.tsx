@@ -29,21 +29,29 @@ import { PostHogIdentify } from "@/components/PostHogIdentify";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  robots: { index: false, follow: false },
-  openGraph: {
-    title: "Praxis Workspace",
-    description: "Your AI-powered business team — voice, sales, engineering, ops, finance.",
-    images: [
-      {
-        url: "/api/og?title=Praxis+Workspace&description=Your+AI-powered+business+team",
-        width: 1200,
-        height: 630,
-        alt: "Praxis Workspace",
-      },
-    ],
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const current = await getCurrentAccount();
+  const wsName =
+    (current?.account as unknown as { workspace_name?: string | null })
+      ?.workspace_name ?? null;
+  const title = wsName ? `${wsName} — Praxis` : "Praxis Workspace";
+  return {
+    title,
+    robots: { index: false, follow: false },
+    openGraph: {
+      title,
+      description: "Your AI-powered business team — voice, sales, engineering, ops, finance.",
+      images: [
+        {
+          url: `/api/og?title=${encodeURIComponent(title)}&description=Your+AI-powered+business+team`,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+  };
+}
 
 export default async function AppLayout({
   children,
