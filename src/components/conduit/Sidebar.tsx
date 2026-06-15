@@ -42,6 +42,7 @@ import { NotificationCenter } from "./NotificationCenter";
 import { PaywallModal } from "./PaywallModal";
 import type { PaywallPayload } from "./PaywallModal";
 import { GettingStartedChecklist } from "./GettingStartedChecklist";
+import { OnboardingChecklist } from "./OnboardingChecklist";
 
 const BANNER_SESSION_KEY = "praxis:upgrade_banner_dismissed";
 
@@ -241,6 +242,7 @@ export function Sidebar({
   avatarUrl,
   displayName,
   showGettingStarted,
+  hasContext,
 }: {
   userEmail: string;
   accountName: string;
@@ -258,6 +260,7 @@ export function Sidebar({
   avatarUrl?: string | null;
   displayName?: string | null;
   showGettingStarted?: boolean;
+  hasContext?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -1177,6 +1180,14 @@ export function Sidebar({
             </div>
           )}
         </nav>
+
+        {/* Onboarding checklist — early-stage workspaces only, hidden in icon-only mode */}
+        {!collapsed && !showGettingStarted && (
+          <OnboardingChecklist
+            conversationCount={conversations.length}
+            hasContext={Boolean(hasContext)}
+          />
+        )}
 
         {/* Getting-started checklist — new accounts only, hidden in icon-only mode */}
         {!collapsed && showGettingStarted && (
