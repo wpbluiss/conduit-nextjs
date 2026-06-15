@@ -1,5 +1,6 @@
 "use client";
 
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { DEPT_COLOR, employeeLabel, SpecialistChip } from "./EmployeeBadge";
 import { SpecialistAvatar } from "./SpecialistAvatar";
 import type { EmployeeKey } from "@/lib/ai/provider";
@@ -20,42 +21,56 @@ const THINKING_STATUS: Record<EmployeeKey, string> = {
 export function TypingIndicator({
   employee,
   roundTable = false,
+  isActive = true,
 }: {
   employee: EmployeeKey;
   roundTable?: boolean;
+  /** false = another specialist is active; this one is waiting its turn (round-table only) */
+  isActive?: boolean;
 }) {
+  const reduced = useReducedMotion();
   const name = employeeLabel(employee);
   const deptColor = DEPT_COLOR[employee];
-  const statusText = roundTable
+
+  const statusText = !isActive
+    ? "waiting…"
+    : roundTable
     ? "contributing to the discussion…"
     : (THINKING_STATUS[employee] ?? "thinking…");
 
   return (
     <div
       className="flex gap-3"
-      style={{ ["--dept" as string]: deptColor }}
+      style={{
+        ["--dept" as string]: deptColor,
+        opacity: isActive ? 1 : 0.45,
+        transition: "opacity 200ms ease",
+      }}
     >
       <div className="pt-1 shrink-0">
-        <SpecialistAvatar employee={employee} size={32} streaming />
+        <SpecialistAvatar employee={employee} size={32} streaming={isActive && !reduced} />
       </div>
       <div className="min-w-0 flex-1 space-y-1.5">
         <SpecialistChip employee={employee} />
         <div
           role="status"
           aria-live="polite"
-          aria-label={`${name} is responding`}
+          aria-label={isActive ? `${name} is responding` : `${name} is waiting`}
           className="thinking-bubble inline-flex flex-col gap-2 px-4 py-3"
         >
-          {/* Pulsing dots indicator */}
-          <div className="flex items-center gap-1.5" aria-hidden="true">
-            <span className="thinking-dot" />
-            <span className="thinking-dot" />
-            <span className="thinking-dot" />
-          </div>
-          {/* Mono status micro-copy */}
-          <span className="thinking-status" aria-hidden="true">
-            {statusText}
-          </span>
+          {reduced ? (
+            /* Reduced-motion: static text, no animation */
+            <span className="thinking-status">{statusText}</span>
+          ) : (
+            <>
+              <div className="flex items-center gap-1.5" aria-hidden="true">
+                <span className="thinking-dot" />
+                <span className="thinking-dot" />
+                <span className="thinking-dot" />
+              </div>
+              <span className="thinking-status" aria-hidden="true">{statusText}</span>
+            </>
+          )}
         </div>
       </div>
     </div>

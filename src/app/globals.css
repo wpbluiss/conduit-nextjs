@@ -571,6 +571,9 @@ body {
 /* Terminal caret */
 @keyframes caret { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
 .caret { animation: caret 900ms step-end infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .caret { animation: none; opacity: 1; }
+}
 
 /* Hairline divider */
 .divider { height: 1px; background: var(--color-border-default); width: 100%; }
@@ -711,7 +714,15 @@ body {
 .thinking-dot:nth-child(2) { animation-delay: 200ms; }
 .thinking-dot:nth-child(3) { animation-delay: 400ms; }
 
+/* Accent shimmer bar across the bottom of the active thinking bubble */
+@keyframes thinkingShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+
 .thinking-bubble {
+  position: relative;
+  overflow: hidden;
   background: color-mix(in srgb, var(--dept, var(--color-accent)) 5%, var(--color-surface-elevated));
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-left: 2px solid var(--dept, var(--color-border));
@@ -721,6 +732,17 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
   backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
   -webkit-backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+}
+.thinking-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  height: 2px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, transparent, var(--dept, var(--color-accent)), transparent);
+  animation: thinkingShimmer 1.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
 .thinking-status {
@@ -735,6 +757,10 @@ body {
     animation: none;
     opacity: 0.6;
     box-shadow: none;
+  }
+  .thinking-bubble::before {
+    animation: none;
+    opacity: 0;
   }
 }
 
