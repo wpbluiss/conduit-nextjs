@@ -617,6 +617,67 @@ body {
   .typing-dot { animation: none; opacity: 0.7; }
 }
 
+/* Premium thinking indicator — issue #802 */
+@keyframes thinkingPulse {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+    box-shadow: 0 0 0 0 transparent;
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 6px 2px color-mix(in srgb, var(--dept, var(--color-accent)) 40%, transparent);
+  }
+}
+.thinking-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: var(--dept, var(--color-accent));
+  animation: thinkingPulse 1.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+.thinking-dot:nth-child(2) { animation-delay: 200ms; }
+.thinking-dot:nth-child(3) { animation-delay: 400ms; }
+
+.thinking-bubble {
+  background: color-mix(in srgb, var(--dept, var(--color-accent)) 5%, var(--color-surface-elevated));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-left: 2px solid var(--dept, var(--color-border));
+  border-radius: 22px 22px 6px 22px;
+  box-shadow:
+    0 1px 6px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px) saturate(140%);
+}
+
+.thinking-status {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.01em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thinking-dot {
+    animation: none;
+    opacity: 0.6;
+    box-shadow: none;
+  }
+}
+
+/* Presence line dot — pulses in dept color while specialist is active */
+@keyframes presenceDot {
+  0%, 100% { opacity: 0.6; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+.presence-dot {
+  animation: presenceDot 1.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .presence-dot { animation: none; opacity: 0.8; }
+}
+
 @keyframes handoffSlide {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
