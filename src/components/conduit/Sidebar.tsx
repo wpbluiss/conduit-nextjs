@@ -20,6 +20,7 @@ import {
   Moon,
   PanelLeftClose,
   PanelLeftOpen,
+  Pin,
   Plus,
   Search,
   Settings,
@@ -45,6 +46,40 @@ import { GettingStartedChecklist } from "./GettingStartedChecklist";
 import { OnboardingChecklist } from "./OnboardingChecklist";
 
 const BANNER_SESSION_KEY = "praxis:upgrade_banner_dismissed";
+const PINNED_SPECIALISTS_KEY = "praxis:pinned-specialists";
+
+function usePinnedSpecialists() {
+  const [pinned, setPinned] = useState<EmployeeKey[]>([]);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(PINNED_SPECIALISTS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) setPinned(parsed as EmployeeKey[]);
+      }
+    } catch { }
+  }, []);
+
+  const pin = (id: EmployeeKey) => {
+    setPinned((prev) => {
+      // Newest pin goes to the front; oldest (last) is evicted when over limit.
+      const next = [id, ...prev.filter((x) => x !== id)].slice(0, 3);
+      try { localStorage.setItem(PINNED_SPECIALISTS_KEY, JSON.stringify(next)); } catch { }
+      return next;
+    });
+  };
+
+  const unpin = (id: EmployeeKey) => {
+    setPinned((prev) => {
+      const next = prev.filter((x) => x !== id);
+      try { localStorage.setItem(PINNED_SPECIALISTS_KEY, JSON.stringify(next)); } catch { }
+      return next;
+    });
+  };
+
+  return { pinned, pin, unpin };
+}
 
 function SidebarUpgradeBanner({
   tokensUsed,
@@ -286,6 +321,33 @@ export function Sidebar({
   // Specialist filter chip — null = "All"
   const [specialistFilter, setSpecialistFilter] = useState<EmployeeKey | null>(null);
 
+  const { pinned, pin, unpin } = usePinnedSpecialists();
+
+  // Specialist context menu (right-click / long-press to pin/unpin)
+  const [ctxMenu, setCtxMenu] = useState<{ emp: EmployeeKey; x: number; y: number } | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSpecialistContextMenu = (e: { preventDefault(): void; clientX: number; clientY: number }, emp: EmployeeKey) => {
+    e.preventDefault();
+    setCtxMenu({ emp, x: e.clientX, y: e.clientY });
+  };
+
+  const handleSpecialistTouchStart = (e: { touches: ArrayLike<{ clientX: number; clientY: number }> }, emp: EmployeeKey) => {
+    const touch = e.touches[0];
+    const x = touch.clientX;
+    const y = touch.clientY;
+    longPressTimer.current = setTimeout(() => {
+      setCtxMenu({ emp, x, y });
+    }, 500);
+  };
+
+  const handleSpecialistTouchEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
   // Quick-peek tooltip: which conversation is hovered + its anchor rect.
   const [peekId, setPeekId] = useState<string | null>(null);
   const [peekRect, setPeekRect] = useState<DOMRect | null>(null);
@@ -413,6 +475,24 @@ export function Sidebar({
   useEffect(() => {
     setIsCoarsePointer(window.matchMedia("(pointer: coarse)").matches);
     setPortalMounted(true);
+  }, []);
+
+  // Dismiss specialist context menu on outside click or Escape.
+  useEffect(() => {
+    if (!ctxMenu) return;
+    const dismiss = () => setCtxMenu(null);
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") dismiss(); };
+    window.addEventListener("click", dismiss);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("click", dismiss);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [ctxMenu]);
+
+  // Clean up long-press timer on unmount.
+  useEffect(() => {
+    return () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
   }, []);
 
   const openPeek = (id: string, el: HTMLAnchorElement, fromFocus = false) => {
@@ -647,6 +727,80 @@ export function Sidebar({
           />
           </div>
 
+          {/* Pinned specialists — non-collapsed, shown above the full team list */}
+          {!collapsed && pinned.length > 0 && (
+            <div className="mt-3">
+              <div className="px-3 py-1 flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                <Pin size={9} aria-hidden /> Pinned
+              </div>
+              <ul className="space-y-0.5 mt-0.5">
+                {pinned.map((emp) => {
+                  const isStreaming = streamingEmployee === emp;
+                  const allowed = allowedEmployees.includes(emp);
+                  const active = pathname === `/app/team/${emp}`;
+                  const Icon = EMPLOYEE_ICON[emp];
+                  const rowInner = (
+                    <span
+                      className="relative flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-colors duration-100 hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
+                      onContextMenu={(e) => handleSpecialistContextMenu(e, emp)}
+                      onTouchStart={(e) => handleSpecialistTouchStart(e, emp)}
+                      onTouchEnd={handleSpecialistTouchEnd}
+                      onTouchCancel={handleSpecialistTouchEnd}
+                    >
+                      {active && (
+                        <span
+                          aria-hidden
+                          className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full"
+                          style={{ background: DEPT_COLOR[emp] }}
+                        />
+                      )}
+                      <span
+                        aria-hidden
+                        className="inline-flex items-center justify-center shrink-0 w-5 h-5 rounded-md"
+                        style={{
+                          background: `color-mix(in srgb, ${DEPT_COLOR[emp]} 18%, var(--color-surface-elevated))`,
+                          color: DEPT_COLOR[emp],
+                          boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[emp]} 65%, transparent)`,
+                        }}
+                      >
+                        <Icon size={11} strokeWidth={2.25} />
+                      </span>
+                      <span className="text-[var(--color-text)] truncate flex-1">
+                        {labelFor(emp)}
+                      </span>
+                      {!allowed ? (
+                        <Lock
+                          size={10}
+                          aria-label="Locked — upgrade to unlock"
+                          className="text-[var(--color-text-muted)]"
+                        />
+                      ) : (
+                        <span
+                          className="w-1.5 h-1.5 rounded-full"
+                          style={{
+                            background: DEPT_COLOR[emp],
+                            opacity: isStreaming ? 1 : 0.55,
+                            boxShadow: isStreaming ? `0 0 6px ${DEPT_COLOR[emp]}` : "none",
+                          }}
+                          aria-label={isStreaming ? "Active" : "Online"}
+                        />
+                      )}
+                    </span>
+                  );
+                  return (
+                    <li key={emp} title={allowed ? undefined : "Available on a higher plan"}>
+                      {allowed ? (
+                        <Link href={`/app/team/${emp}`} onClick={close} className="block">{rowInner}</Link>
+                      ) : (
+                        <Link href="/app/settings" onClick={close} className="block">{rowInner}</Link>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+
           {/* Team header (collapsible) — hidden in icon-only mode */}
           {!collapsed && (
             <div className="mt-3">
@@ -670,7 +824,13 @@ export function Sidebar({
                     const active = pathname === `/app/team/${emp}`;
                     const Icon = EMPLOYEE_ICON[emp];
                     const rowInner = (
-                      <span className="relative flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-colors duration-100 hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]">
+                      <span
+                        className="relative flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-colors duration-100 hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
+                        onContextMenu={(e) => handleSpecialistContextMenu(e, emp)}
+                        onTouchStart={(e) => handleSpecialistTouchStart(e, emp)}
+                        onTouchEnd={handleSpecialistTouchEnd}
+                        onTouchCancel={handleSpecialistTouchEnd}
+                      >
                         {active && (
                           <span
                             aria-hidden
@@ -750,6 +910,7 @@ export function Sidebar({
                 const isStreaming = streamingEmployee === emp;
                 const allowed = allowedEmployees.includes(emp);
                 const active = pathname === `/app/team/${emp}`;
+                const isPinned = pinned.includes(emp);
                 const Icon = EMPLOYEE_ICON[emp];
                 const btn = (
                   <span
@@ -758,6 +919,10 @@ export function Sidebar({
                       background: active ? `color-mix(in srgb, ${DEPT_COLOR[emp]} 18%, var(--color-surface-elevated))` : undefined,
                       boxShadow: active ? `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[emp]} 65%, transparent)` : undefined,
                     }}
+                    onContextMenu={(e) => handleSpecialistContextMenu(e, emp)}
+                    onTouchStart={(e) => handleSpecialistTouchStart(e, emp)}
+                    onTouchEnd={handleSpecialistTouchEnd}
+                    onTouchCancel={handleSpecialistTouchEnd}
                   >
                     <Icon
                       size={14}
@@ -769,7 +934,7 @@ export function Sidebar({
                         <Lock size={8} className="text-[var(--color-text-muted)]" />
                       </span>
                     )}
-                    {allowed && (
+                    {allowed && !isPinned && (
                       <span
                         className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full border border-[var(--color-surface)]"
                         style={{
@@ -778,6 +943,15 @@ export function Sidebar({
                           boxShadow: isStreaming ? `0 0 4px ${DEPT_COLOR[emp]}` : "none",
                         }}
                       />
+                    )}
+                    {allowed && isPinned && (
+                      <span
+                        className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 flex items-center justify-center rounded-full border border-[var(--color-surface)]"
+                        style={{ background: DEPT_COLOR[emp] }}
+                        aria-label="Pinned"
+                      >
+                        <Pin size={7} style={{ color: "var(--color-canvas, #fff)" }} strokeWidth={2.5} />
+                      </span>
                     )}
                   </span>
                 );
@@ -1329,6 +1503,43 @@ export function Sidebar({
           } satisfies PaywallPayload}
           onClose={() => setShowPaywall(false)}
         />
+      )}
+
+      {/* Specialist pin/unpin context menu — portal-rendered to escape sidebar overflow */}
+      {portalMounted && ctxMenu && createPortal(
+        <div
+          role="menu"
+          aria-label="Specialist options"
+          onClick={(e) => e.stopPropagation()}
+          className="praxis-root"
+          style={{
+            position: "fixed",
+            top: ctxMenu.y,
+            left: ctxMenu.x,
+            zIndex: 100,
+            minWidth: 140,
+            borderRadius: 10,
+            border: "1px solid var(--color-border)",
+            background: "var(--color-surface-elevated)",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+            padding: "4px",
+          }}
+        >
+          <button
+            role="menuitem"
+            type="button"
+            onClick={() => {
+              pinned.includes(ctxMenu.emp) ? unpin(ctxMenu.emp) : pin(ctxMenu.emp);
+              setCtxMenu(null);
+            }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-lg transition-colors duration-100 hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
+            style={{ color: "var(--color-text)" }}
+          >
+            <Pin size={12} style={{ color: "var(--color-text-muted)" }} />
+            {pinned.includes(ctxMenu.emp) ? "Unpin specialist" : "Pin specialist"}
+          </button>
+        </div>,
+        document.body
       )}
 
       {/* Conversation quick-peek tooltip — portal-rendered to escape sidebar overflow */}
