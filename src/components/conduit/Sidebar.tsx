@@ -370,7 +370,7 @@ export function Sidebar({
         } md:translate-x-0`}
         style={{ minWidth: collapsed ? 56 : 256 }}
       >
-        {/* Header — Praxis wordmark + workspace name + collapse toggle */}
+        {/* Header — workspace logo / Praxis wordmark + collapse toggle */}
         <div
           className={`px-3 py-4 flex items-center border-b border-[var(--color-border)] ${
             collapsed ? "justify-center" : "justify-between"
@@ -380,9 +380,23 @@ export function Sidebar({
             <Link
               href="/app/workspace"
               onClick={close}
-              className="flex items-center"
+              className="flex items-center gap-2 min-w-0"
             >
-              <PraxisLogo size={32} withWordmark glow />
+              {avatarUrl ? (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={avatarUrl}
+                    alt="Workspace logo"
+                    className="w-7 h-7 rounded-lg object-cover shrink-0 border border-[var(--color-border)]"
+                  />
+                  <span className="text-sm font-semibold truncate" style={{ color: "var(--color-text)" }}>
+                    {workspaceName || accountName}
+                  </span>
+                </>
+              ) : (
+                <PraxisLogo size={32} withWordmark glow />
+              )}
             </Link>
           )}
           {collapsed && (
@@ -390,9 +404,18 @@ export function Sidebar({
               href="/app/workspace"
               onClick={close}
               className="flex items-center justify-center"
-              title="Workspace"
+              title={workspaceName || accountName || "Workspace"}
             >
-              <PraxisLogo size={28} glow />
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatarUrl}
+                  alt="Workspace logo"
+                  className="w-7 h-7 rounded-lg object-cover border border-[var(--color-border)]"
+                />
+              ) : (
+                <PraxisLogo size={28} glow />
+              )}
             </Link>
           )}
           {/* Toggle button — desktop only; close button — mobile only */}
