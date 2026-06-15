@@ -99,6 +99,21 @@ export async function addPaycheck(form: FormData): Promise<Result> {
     mileage_reimbursement: num(form.get("mileage_reimbursement")),
     notes: str(form.get("notes")) || null,
   });
+
+  // Auto-stash a slice of take-home into the active Mystery Trip — the surprise
+  // builds itself in the background.
+  if (!error) {
+    const hh = (await getUserHouseholdId())!;
+    const { data: hhRow } = await supabase.from("fin_household").select("vault_autofund_pct").eq("id", hh).single();
+    const pct = Number(hhRow?.vault_autofund_pct ?? 0);
+    const stash = Math.round(num(form.get("take_home")) * pct * 100) / 100;
+    if (pct > 0 && stash > 0) {
+      const { data: vault } = await supabase.from("fin_vaults")
+        .select("id").eq("status", "active").eq("is_mystery", true)
+        .order("sort").limit(1).maybeSingle();
+      if (vault?.id) await fundVault(vault.id, stash);
+    }
+  }
   refresh();
   return { ok: !error, error: error?.message };
 }
@@ -474,6 +489,16 @@ export async function markVaultSpent(id: string): Promise<Result> {
 export async function deleteVault(id: string): Promise<Result> {
   const supabase = await db();
   const { error } = await supabase.from("fin_vaults").delete().eq("id", id);
+  refresh();
+  return { ok: !error, error: error?.message };
+}
+
+// Set what % of each paycheck auto-stashes into the active Mystery Trip.
+export async function updateAutofundPct(form: FormData): Promise<Result> {
+  const supabase = await db();
+  const pct = Math.max(0, Math.min(1, num(form.get("pct")) / 100));
+  const { error } = await supabase.from("fin_household")
+    .update({ vault_autofund_pct: pct }).eq("id", (await getUserHouseholdId())!);
   refresh();
   return { ok: !error, error: error?.message };
 }

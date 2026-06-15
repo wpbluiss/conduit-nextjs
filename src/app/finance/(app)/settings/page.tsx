@@ -1,7 +1,7 @@
 import { getSnapshot } from "@/lib/finance/data";
 import { goalProgress, daysBetween } from "@/lib/finance/compute";
 import { fmtMoney } from "@/lib/finance/constants";
-import { updateGoalSettings, updateChildSupport } from "@/lib/finance/actions";
+import { updateGoalSettings, updateChildSupport, updateAutofundPct } from "@/lib/finance/actions";
 import { Card, SectionTitle, EmptyState } from "@/components/finance/ui";
 import { Field } from "@/components/finance/forms";
 import { SettingsForm } from "@/components/finance/SettingsForm";
@@ -73,6 +73,17 @@ export default async function SettingsPage() {
           </SettingsForm>
         </Card>
       </div>
+
+      <Card>
+        <SectionTitle eyebrow="Surprise engine" title="Auto-stash to Mystery Trips" />
+        <SettingsForm action={updateAutofundPct} submitLabel="Save">
+          <Field label="% of each paycheck" name="pct" type="number" step="1" min="0"
+            defaultValue={Math.round((h.vault_autofund_pct ?? 0) * 100)} />
+        </SettingsForm>
+        <p className="text-[11px] text-[var(--fin-muted)] mt-2">
+          Every paycheck you log auto-drips this % into your active Mystery Trip — the surprise builds itself. Set 0 to turn off.
+        </p>
+      </Card>
 
       <Card>
         <SectionTitle eyebrow="Goal" title="Target vs. actual savings" />

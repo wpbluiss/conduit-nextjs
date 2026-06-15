@@ -25,6 +25,11 @@ export default async function RewardsPage() {
           <p className="text-sm text-[var(--fin-muted)] mt-1">
             Save up, unlock, and spend it guilt-free — it&apos;s already paid for.
           </p>
+          {Number(snap.household.vault_autofund_pct) > 0 && (
+            <p className="text-[11px] text-[#ffa876] mt-1 fin-mono">
+              🎁 auto-stashing {Math.round(Number(snap.household.vault_autofund_pct) * 100)}% of every paycheck into your Mystery Trip
+            </p>
+          )}
         </div>
         <CreateVaultModal />
       </div>
