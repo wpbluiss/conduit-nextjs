@@ -50,12 +50,33 @@ function SectionBlock({
           className="origin-left h-px mb-24 md:mb-28"
           style={{
             background:
-              "linear-gradient(90deg, transparent, rgba(255,138,61,0.3), transparent)",
+              "linear-gradient(90deg, transparent, rgba(214,120,23,0.55), transparent)",
           }}
         />
       )}
 
       <div className="relative">
+        {/* Ghost numeral — large decorative background number, editorial magazine style.
+            z-index: -1 places it behind flow children within this positioned parent. */}
+        <span
+          aria-hidden
+          className="absolute select-none pointer-events-none leading-none tabular-nums hidden sm:block"
+          style={{
+            top: "-0.12em",
+            right: 0,
+            fontFamily: "var(--font-sans)",
+            fontSize: "clamp(7rem, 14vw, 12rem)",
+            fontWeight: 800,
+            letterSpacing: "-0.05em",
+            lineHeight: 1,
+            color: "var(--color-ink-primary)",
+            opacity: 0.04,
+            zIndex: -1,
+          }}
+        >
+          {section.n}
+        </span>
+
         {/* Section number — gutter label. Hidden on xl when rail nav is present. */}
         <motion.span
           aria-hidden
@@ -81,12 +102,15 @@ function SectionBlock({
           {section.title}
         </motion.h2>
 
-        {/* Step 2 — lead sentence (ember, larger) */}
+        {/* Step 2 — lead sentence (ember, larger). Uses --color-ember-500 (#D67817)
+            directly rather than --color-accent (#FF8A3D) for better contrast on the
+            bone canvas and visual alignment with the pull-quote border. */}
         <motion.p
           initial={reduced ? false : { opacity: 0, y: 14 }}
           animate={active ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.75, ease: EASE, delay: reduced ? 0 : 0.08 }}
-          className="text-xl md:text-2xl font-medium text-[var(--color-accent)] leading-[1.45] mb-6"
+          className="text-xl md:text-2xl font-medium leading-[1.45] mb-6"
+          style={{ color: "var(--color-ember-500)" }}
         >
           {leadSentence}
         </motion.p>
@@ -129,15 +153,19 @@ function SectionBlock({
           ))}
         </motion.div>
 
-        {/* Pull-quote — fades + slides in from left */}
+        {/* Pull-quote — slides up + fades, slight scale from 0.98 for tactile depth */}
         {section.quote && (
           <motion.blockquote
-            initial={{ opacity: 0, x: reduced ? 0 : -16 }}
+            initial={reduced ? false : { opacity: 0, y: 20, scale: 0.98 }}
             animate={
-              active ? { opacity: 1, x: 0 } : { opacity: 0, x: reduced ? 0 : -16 }
+              active
+                ? { opacity: 1, y: 0, scale: 1 }
+                : reduced
+                ? {}
+                : { opacity: 0, y: 20, scale: 0.98 }
             }
-            transition={{ duration: 0.9, ease: EASE, delay: 0.48 }}
-            className="conduit-pullquote my-12 md:my-14"
+            transition={{ duration: 1.0, ease: EASE, delay: 0.52 }}
+            className="conduit-pullquote my-16 md:my-20"
           >
             {section.quote}
           </motion.blockquote>

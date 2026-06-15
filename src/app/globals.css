@@ -1209,39 +1209,40 @@ body {
   font-weight: 500;
 }
 
-/* Pull-quote — italic Fraunces with indigo accent + ember decorative mark */
+/* Pull-quote — editorial ember identity: large italic Fraunces, ember accent border */
 .conduit-pullquote {
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: clamp(1.5rem, 2.5vw + 0.5rem, 2.125rem);
-  line-height: 1.38;
-  letter-spacing: -0.018em;
+  font-size: clamp(1.625rem, 2.5vw + 0.5rem, 2.25rem);
+  line-height: 1.35;
+  letter-spacing: -0.022em;
   color: var(--color-ink-primary);
-  border-left: 2px solid var(--color-indigo-500);
-  padding: 28px 32px 28px 36px;
+  border-left: 3px solid var(--color-ember-500);
+  padding: 32px 36px 32px 44px;
   position: relative;
   background: linear-gradient(
-    105deg,
-    rgba(91, 99, 232, 0.055) 0%,
-    rgba(91, 99, 232, 0.02) 55%,
+    108deg,
+    rgba(214, 120, 23, 0.07) 0%,
+    rgba(214, 120, 23, 0.025) 50%,
     transparent 100%
   );
-  border-radius: 0 12px 12px 0;
+  border-radius: 0 14px 14px 0;
   overflow: visible;
+  box-shadow: inset 2px 0 12px rgba(214, 120, 23, 0.06);
 }
-/* Large decorative opening mark — ember warmth against the indigo grid */
+/* Large decorative opening mark — ember, clearly visible at the new ember identity */
 .conduit-pullquote::before {
   content: "\201C";
   position: absolute;
-  top: -0.2em;
-  left: 22px;
+  top: -0.18em;
+  left: 26px;
   font-family: var(--font-serif);
   font-size: 5em;
   line-height: 1;
   font-style: normal;
   font-weight: 700;
   color: var(--color-ember-500);
-  opacity: 0.18;
+  opacity: 0.36;
   pointer-events: none;
   user-select: none;
   letter-spacing: normal;
