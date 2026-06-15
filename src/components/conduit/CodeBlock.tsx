@@ -130,7 +130,7 @@ export function CodeBlock({
         style={{
           height: "36px",
           borderBottom: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))",
-          background: "rgba(255, 255, 255, 0.03)",
+          background: "var(--cx-glass-bg, rgba(255,255,255,0.04))",
         }}
       >
         <span
