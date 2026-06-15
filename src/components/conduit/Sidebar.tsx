@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -280,6 +280,8 @@ export function Sidebar({
   const [searchExpanded, setSearchExpanded] = useState(false);
   // Optimistic title overrides — updated when chat fires praxis:title_updated.
   const [titleOverrides, setTitleOverrides] = useState<Record<string, string>>({});
+  // Specialist filter chip — null = "All"
+  const [specialistFilter, setSpecialistFilter] = useState<EmployeeKey | null>(null);
 
   // Quick-peek tooltip: which conversation is hovered + its anchor rect.
   const [peekId, setPeekId] = useState<string | null>(null);
@@ -430,6 +432,16 @@ export function Sidebar({
 
   // `team` prop reserved for future per-employee status coloring.
   void team;
+
+  // Specialists that appear in the current conversation list (in EMPLOYEE_ORDER sequence).
+  const activeSpecialists = useMemo<EmployeeKey[]>(() => {
+    const seen = new Set<string>();
+    for (const c of conversations) {
+      const key = c.dominant_employee;
+      if (key && (TEAM as string[]).includes(key)) seen.add(key);
+    }
+    return (TEAM as EmployeeKey[]).filter((k) => seen.has(k));
+  }, [conversations]);
 
   const isActive = (path: string) =>
     pathname === path || pathname.startsWith(path + "/");
@@ -924,6 +936,71 @@ export function Sidebar({
                 Recent
               </div>
 
+              {/* Specialist filter chips — only when 2+ specialists appear in the list */}
+              {activeSpecialists.length > 1 && (
+                <div
+                  className="px-2 pb-1 flex items-center gap-1 overflow-x-auto"
+                  style={{ scrollbarWidth: "none" }}
+                  role="group"
+                  aria-label="Filter by specialist"
+                >
+                  {/* "All" chip */}
+                  <button
+                    type="button"
+                    onClick={() => setSpecialistFilter(null)}
+                    className="shrink-0 flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors duration-100 whitespace-nowrap"
+                    style={
+                      specialistFilter === null
+                        ? {
+                            background: "var(--color-accent)",
+                            color: "#fff",
+                          }
+                        : {
+                            background: "var(--color-surface-elevated)",
+                            color: "var(--color-text-muted)",
+                            border: "1px solid var(--color-border)",
+                          }
+                    }
+                    aria-pressed={specialistFilter === null}
+                  >
+                    All
+                  </button>
+                  {activeSpecialists.map((emp) => {
+                    const active = specialistFilter === emp;
+                    const Icon = EMPLOYEE_ICON[emp];
+                    return (
+                      <button
+                        key={emp}
+                        type="button"
+                        onClick={() =>
+                          setSpecialistFilter(active ? null : emp)
+                        }
+                        title={labelFor(emp)}
+                        aria-label={`Filter by ${labelFor(emp)}`}
+                        aria-pressed={active}
+                        className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors duration-100 whitespace-nowrap"
+                        style={
+                          active
+                            ? {
+                                background: `color-mix(in srgb, ${DEPT_COLOR[emp]} 20%, var(--color-surface-elevated))`,
+                                color: DEPT_COLOR[emp],
+                                border: `1px solid color-mix(in srgb, ${DEPT_COLOR[emp]} 50%, transparent)`,
+                              }
+                            : {
+                                background: "var(--color-surface-elevated)",
+                                color: "var(--color-text-muted)",
+                                border: "1px solid var(--color-border)",
+                              }
+                        }
+                      >
+                        <Icon size={9} strokeWidth={2.5} />
+                        {labelFor(emp)}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
               {/* Search input */}
               <div className="px-2 pb-1">
                 {/* Mobile: icon-only trigger — collapses the search to a single tap target */}
@@ -980,11 +1057,16 @@ export function Sidebar({
               {/* Filtered list */}
               {(() => {
                 const q = convSearch.trim().toLowerCase();
-                const filtered = q
+                const bySearch = q
                   ? conversations.filter((c) =>
                       (titleOverrides[c.id] ?? c.title ?? "").toLowerCase().includes(q)
                     )
-                  : conversations.slice(0, 8);
+                  : conversations;
+                const filtered = specialistFilter
+                  ? bySearch.filter(
+                      (c) => c.dominant_employee === specialistFilter,
+                    )
+                  : bySearch.slice(0, 8);
                 return (
                   <>
                     <div className="space-y-0.5">
@@ -1068,12 +1150,14 @@ export function Sidebar({
                         );
                       })}
                     </div>
-                    {q && filtered.length === 0 && (
+                    {(q || specialistFilter) && filtered.length === 0 && (
                       <p className="px-3 py-2 text-[11px]" style={{ color: "var(--color-text-muted)" }}>
-                        No conversations match
+                        {specialistFilter && !q
+                          ? `No conversations with ${labelFor(specialistFilter)} yet`
+                          : "No conversations match"}
                       </p>
                     )}
-                    {!q && conversations.length > 8 && (
+                    {!q && !specialistFilter && conversations.length > 8 && (
                       <Link
                         href="/app/conversations"
                         onClick={close}
@@ -1082,7 +1166,7 @@ export function Sidebar({
                         See all ({conversations.length})
                       </Link>
                     )}
-                    {q && filtered.length > 8 && (
+                    {filtered.length > 8 && (
                       <p className="px-3 py-1 text-[10px]" style={{ color: "var(--color-text-muted)" }}>
                         Showing 8 of {filtered.length} matches
                       </p>
