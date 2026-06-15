@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { Mic, Mic2, MicOff, Send, Square } from "lucide-react";
 import { EMPLOYEE_ORDER, EMPLOYEES, type EmployeeId } from "@/lib/conduit/employees";
 import type { EmployeeKey } from "@/lib/ai/provider";
@@ -98,6 +99,7 @@ export function PraxisComposerPill({
   const tint = useDeptTint();
   const composerRef = useRef<HTMLFormElement>(null);
   const { labelFor } = useNicknames();
+  const shouldReduceMotion = useReducedMotion();
 
   const CHAR_LIMIT = 4000;
   const COUNTER_THRESHOLD = 200;
@@ -778,10 +780,21 @@ export function PraxisComposerPill({
         </span>
       )}
 
-      <button
+      <motion.button
         type="submit"
         disabled={loading || !value.trim()}
         aria-label="Send"
+        whileHover={
+          !shouldReduceMotion && !(loading || !value.trim())
+            ? { boxShadow: "0 0 0 3px rgba(124,108,255,0.25)", backgroundColor: "var(--cx-accent-bright, #9B8CFF)" }
+            : undefined
+        }
+        whileTap={
+          !shouldReduceMotion && !(loading || !value.trim())
+            ? { scale: 0.97 }
+            : undefined
+        }
+        transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
         style={{
           flexShrink: 0,
           width: "44px",
@@ -795,11 +808,10 @@ export function PraxisComposerPill({
           border: "none",
           cursor: loading || !value.trim() ? "not-allowed" : "pointer",
           opacity: loading || !value.trim() ? 0.4 : 1,
-          transition: "background 180ms var(--praxis-ease-out-quart)",
         }}
       >
         <Send size={16} />
-      </button>
+      </motion.button>
     </form>
   );
 }
