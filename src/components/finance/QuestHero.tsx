@@ -9,6 +9,7 @@ import { FormModal, Field } from "./forms";
 import { GradientText } from "./ui";
 import { fmtMoney } from "@/lib/finance/constants";
 import { vaultPct, isVaultFunded } from "@/lib/finance/gamify";
+import { mysteryHints } from "@/lib/finance/destinations";
 import { fundVault } from "@/lib/finance/actions";
 import type { Vault } from "@/lib/finance/types";
 
@@ -69,9 +70,23 @@ export function QuestHero({ vault, autofundPct }: { vault: Vault | null; autofun
         {fmtMoney(Number(vault.saved_amount))} of {fmtMoney(Number(vault.target_amount))}
         {!funded && remaining > 0 && <> · {fmtMoney(remaining)} to unlock</>}
       </div>
-      {mysteryHidden && (
-        <div className="text-[12px] text-[#ffa876] mt-1">🌍 destination revealed at 100%</div>
-      )}
+      {mysteryHidden && (() => {
+        const hints = mysteryHints(Number(vault.target_amount));
+        const unlocked = Math.min(hints.length, Math.floor(pct / 25) + 1);
+        return (
+          <div className="mt-2">
+            <div className="text-[12px] text-[#ffa876]">🌍 destination revealed at 100%</div>
+            <div className="mt-2 flex flex-wrap justify-center gap-1.5">
+              {hints.map((h, i) => (
+                <span key={i} className={`text-[11px] rounded-full border px-2.5 py-1 ${i < unlocked ? "border-[#ff8a3d]/30 text-[#ffa876]" : "border-white/10 text-white/25"}`}>
+                  {i < unlocked ? h : "🔒 hint"}
+                </span>
+              ))}
+            </div>
+            <div className="text-[10px] text-[var(--fin-muted)] mt-1 fin-mono">{unlocked}/{hints.length} clues · more unlock as you save</div>
+          </div>
+        );
+      })()}
       {vault.is_mystery && vault.revealed && vault.mystery_blurb && (
         <div className="text-[12px] text-[var(--fin-muted)] italic mt-1">✨ {vault.mystery_blurb}</div>
       )}

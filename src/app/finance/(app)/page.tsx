@@ -11,6 +11,7 @@ import { MetricCard } from "@/components/finance/MetricCard";
 import { MoneyStrip } from "@/components/finance/MoneyStrip";
 import { CompactGoalDebt } from "@/components/finance/CompactGoalDebt";
 import { QuestHero } from "@/components/finance/QuestHero";
+import { MysteryReveal } from "@/components/finance/MysteryReveal";
 import { QuickAddRow } from "@/components/finance/QuickAdd";
 import { AllocationPlanner } from "@/components/finance/AllocationPlanner";
 import { Card, Pill } from "@/components/finance/ui";
@@ -55,8 +56,13 @@ export default async function FinanceHome() {
     return "default";
   }
 
+  const revealedMysteries = snap.vaults
+    .filter((v) => v.is_mystery && v.revealed && v.mystery_destination)
+    .map((v) => ({ id: v.id, destination: v.mystery_destination!, blurb: v.mystery_blurb, emoji: v.emoji }));
+
   return (
     <div className="space-y-5">
+      <MysteryReveal vaults={revealedMysteries} />
       {/* Greeting */}
       <div className="fin-rise flex items-center justify-between gap-3">
         <div>

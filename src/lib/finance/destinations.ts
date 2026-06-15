@@ -44,3 +44,22 @@ export function pickMysteryDestination(budget: number): Dest {
   const tier = TIERS.find((t) => budget <= t.max) ?? TIERS[TIERS.length - 1];
   return tier.picks[Math.floor(Math.random() * tier.picks.length)];
 }
+
+// Non-spoiler teaser hints, by budget tier — build anticipation as the jar fills.
+const HINTS: { max: number; hints: string[] }[] = [
+  { max: 800, hints: ["Within a tank of gas ⛽", "Cobblestones & charm", "A long-weekend escape"] },
+  { max: 2000, hints: ["Pack flip-flops 🩴", "Somewhere warm…", "Passport optional 🛂"] },
+  { max: 4000, hints: ["The water will be CLEAR 🐠", "Definitely tropical ☀️", "Bring the good camera 📸"] },
+  { max: Infinity, hints: ["Dust off the passport ✈️", "Across an ocean 🌊", "Trip-of-a-lifetime vibes ✨"] },
+];
+
+export function mysteryHints(budget: number): string[] {
+  return (HINTS.find((t) => budget <= t.max) ?? HINTS[HINTS.length - 1]).hints;
+}
+
+// Fake destinations to "spin" through during the reveal animation.
+export const SPIN_NAMES = [
+  "Cancún", "Tokyo", "Aruba", "Santorini", "Maui", "Costa Rica",
+  "Bora Bora", "Key West", "Amalfi", "Turks & Caicos", "Sedona", "San Juan",
+];
+

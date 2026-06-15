@@ -4,6 +4,7 @@ import { fmtMoney } from "@/lib/finance/constants";
 import { LevelBar } from "@/components/finance/LevelBar";
 import { VaultCard } from "@/components/finance/VaultCard";
 import { CreateVaultModal } from "@/components/finance/CreateVaultModal";
+import { MysteryReveal } from "@/components/finance/MysteryReveal";
 import { EmptyState } from "@/components/finance/ui";
 
 export const dynamic = "force-dynamic";
@@ -17,8 +18,13 @@ export default async function RewardsPage() {
   const unlocked = snap.vaults.filter((v) => isVaultFunded(v) && v.status !== "spent").length;
   const totalSaved = snap.vaults.reduce((s, v) => s + Number(v.saved_amount), 0);
 
+  const revealedMysteries = snap.vaults
+    .filter((v) => v.is_mystery && v.revealed && v.mystery_destination)
+    .map((v) => ({ id: v.id, destination: v.mystery_destination!, blurb: v.mystery_blurb, emoji: v.emoji }));
+
   return (
     <div className="space-y-5">
+      <MysteryReveal vaults={revealedMysteries} />
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="fin-display text-2xl sm:text-3xl tracking-tight">Rewards</h1>
