@@ -81,22 +81,25 @@ export default async function AppLayout({
     getInFlightBuilds(supabase, account.id),
   ]);
 
-  // Last activity per employee (for team status dots)
+  // Last activity per employee (for team status dots) + last message preview (for sidebar quick-peek)
   const { data: latestPerEmployee } = await supabase
     .from("conduit_messages")
-    .select("employee, created_at")
+    .select("employee, created_at, content, conversation_id")
     .eq("role", "assistant")
     .in(
       "conversation_id",
       (convos ?? []).map((c) => c.id),
     )
     .order("created_at", { ascending: false })
-    .limit(50);
+    .limit(100);
 
   const lastActiveMap: Record<string, string> = {};
+  const previewMap: Record<string, string> = {};
   for (const m of latestPerEmployee ?? []) {
     const e = m.employee as string | null;
     if (e && !lastActiveMap[e]) lastActiveMap[e] = m.created_at as string;
+    const cid = m.conversation_id as string | null;
+    if (cid && !previewMap[cid]) previewMap[cid] = (m.content as string) ?? "";
   }
   const team = (EMPLOYEE_ORDER as EmployeeKey[]).map((emp) => ({
     employee: emp,
@@ -149,7 +152,7 @@ export default async function AppLayout({
           userEmail={user.email ?? ""}
           accountName={account.name}
           workspaceName={(account as unknown as { workspace_name?: string | null }).workspace_name ?? null}
-          conversations={convos ?? []}
+          conversations={(convos ?? []).map((c) => ({ ...c, last_message: previewMap[c.id] ?? null }))}
           team={team}
           allowedEmployees={allowedEmployees}
           tierName={
