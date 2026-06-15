@@ -249,10 +249,22 @@ export default function AboutPage() {
             </ScrollRevealItem>
 
             <ScrollRevealItem>
-              <div className="conduit-card p-7 md:p-8 border-dashed border-[var(--color-edge)] flex items-center justify-center h-full">
-                <p className="conduit-caption text-[var(--color-cream-faint)] text-center">
-                  More customers · soon
-                </p>
+              <div
+                className="conduit-card p-7 md:p-8 h-full flex flex-col items-center justify-center gap-6 text-center"
+                style={{
+                  border: "1px dashed color-mix(in srgb, var(--color-accent) 30%, var(--color-edge))",
+                  background: "radial-gradient(ellipse 80% 60% at 100% 100%, rgba(255,138,61,0.08) 0%, transparent 65%)",
+                }}
+              >
+                <div className="space-y-3">
+                  <p className="conduit-display-sm">Ship your workforce.</p>
+                  <p className="conduit-body text-[var(--color-cream-muted)]">
+                    Get nine AI specialists running before your next sprint ends.
+                  </p>
+                </div>
+                <Link href="/auth/sign-up" className="conduit-btn-primary">
+                  Get started free
+                </Link>
               </div>
             </ScrollRevealItem>
           </ScrollRevealCards>
