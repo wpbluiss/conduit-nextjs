@@ -1908,12 +1908,12 @@ export function Chat({
               style={
                 sendError.capacity
                   ? {
-                      borderColor: "rgba(202, 138, 4, 0.25)",
-                      background: "rgba(202, 138, 4, 0.06)",
+                      borderColor: "color-mix(in srgb, var(--color-amber) 25%, transparent)",
+                      background: "color-mix(in srgb, var(--color-amber) 6%, transparent)",
                     }
                   : {
-                      borderColor: "rgba(248, 113, 113, 0.25)",
-                      background: "rgba(248, 113, 113, 0.06)",
+                      borderColor: "color-mix(in srgb, var(--cx-danger) 25%, transparent)",
+                      background: "color-mix(in srgb, var(--cx-danger) 6%, transparent)",
                     }
               }
             >
@@ -1951,8 +1951,8 @@ export function Chat({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
               style={{
-                borderColor: "rgba(202, 138, 4, 0.30)",
-                background: "rgba(202, 138, 4, 0.06)",
+                borderColor: "color-mix(in srgb, var(--color-amber) 30%, transparent)",
+                background: "color-mix(in srgb, var(--color-amber) 6%, transparent)",
               }}
             >
               <AlertCircle
@@ -1976,16 +1976,16 @@ export function Chat({
           className="flex items-center justify-between gap-3 px-4 md:px-8 py-2 text-xs"
           style={{
             background: connStatus === 'reconnected'
-              ? 'rgba(34, 197, 94, 0.08)'
+              ? 'color-mix(in srgb, var(--cx-reward) 8%, transparent)'
               : connStatus === 'failed'
-              ? 'rgba(248, 113, 113, 0.08)'
-              : 'rgba(202, 138, 4, 0.08)',
+              ? 'color-mix(in srgb, var(--cx-danger) 8%, transparent)'
+              : 'color-mix(in srgb, var(--color-amber) 8%, transparent)',
             borderTop: `1px solid ${
               connStatus === 'reconnected'
-                ? 'rgba(34, 197, 94, 0.2)'
+                ? 'color-mix(in srgb, var(--cx-reward) 20%, transparent)'
                 : connStatus === 'failed'
-                ? 'rgba(248, 113, 113, 0.2)'
-                : 'rgba(202, 138, 4, 0.2)'
+                ? 'color-mix(in srgb, var(--cx-danger) 20%, transparent)'
+                : 'color-mix(in srgb, var(--color-amber) 20%, transparent)'
             }`,
           }}
         >
@@ -1993,10 +1993,10 @@ export function Chat({
             className="flex items-center gap-2"
             style={{
               color: connStatus === 'reconnected'
-                ? '#22c55e'
+                ? 'var(--cx-reward)'
                 : connStatus === 'failed'
-                ? '#f87171'
-                : '#ca8a04',
+                ? 'var(--cx-danger)'
+                : 'var(--color-amber)',
             }}
           >
             <AlertCircle size={12} aria-hidden />
@@ -3189,7 +3189,7 @@ const MessageBubble = memo(function MessageBubble({
         {!!(message.metadata as Record<string, unknown>)?.incomplete && (
           <div
             className="flex items-center gap-1.5 mt-2 cx-type-xs"
-            style={{ color: '#ca8a04' }}
+            style={{ color: "var(--color-amber)" }}
             aria-label="Response was cut short due to a connection drop"
           >
             <AlertCircle size={11} aria-hidden />
