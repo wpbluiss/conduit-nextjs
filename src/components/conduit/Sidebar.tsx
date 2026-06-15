@@ -207,7 +207,10 @@ const COLLAPSED_KEY = "praxis:sidebar:collapsed";
 function readCollapsed(): boolean {
   if (typeof window === "undefined") return false;
   try {
-    return localStorage.getItem(COLLAPSED_KEY) === "1";
+    const stored = localStorage.getItem(COLLAPSED_KEY);
+    if (stored !== null) return stored === "1";
+    // No explicit preference — auto-collapse on tablet (768–1023px)
+    return window.innerWidth >= 768 && window.innerWidth < 1024;
   } catch {
     return false;
   }
@@ -412,9 +415,18 @@ export function Sidebar({
   // the animated transition, preventing a visible collapse animation on load.
   useEffect(() => {
     setCollapsed(readCollapsed());
+    // Responsive: auto-collapse/expand on resize when user has no stored preference.
+    const onResize = () => {
+      try {
+        if (localStorage.getItem(COLLAPSED_KEY) !== null) return;
+      } catch { /* ignore */ }
+      setCollapsed(window.innerWidth >= 768 && window.innerWidth < 1024);
+    };
+    window.addEventListener("resize", onResize, { passive: true });
     requestAnimationFrame(() => {
       requestAnimationFrame(() => setSkipTransition(false));
     });
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   useEffect(() => {
@@ -756,7 +768,7 @@ export function Sidebar({
         <nav className="flex-1 overflow-y-auto pb-3" aria-label="Main navigation">
           <NavLink
             href="/app/workspace"
-            icon={<LayoutGrid size={20} />}
+            icon={<LayoutGrid size={20} strokeWidth={1.75} />}
             label="Workspace"
             active={isActive("/app/workspace")}
             onClick={close}
@@ -765,7 +777,7 @@ export function Sidebar({
           <div data-tour-target="specialists">
           <NavLink
             href="/app/team"
-            icon={<Users2 size={20} />}
+            icon={<Users2 size={20} strokeWidth={1.75} />}
             label="Team"
             active={pathname === "/app/team"}
             onClick={close}
@@ -776,8 +788,17 @@ export function Sidebar({
           {/* Pinned specialists — non-collapsed, shown above the full team list */}
           {!collapsed && pinned.length > 0 && (
             <div className="mt-3">
-              <div className="px-3 py-1 flex items-center gap-1.5 cx-type-xs font-medium uppercase tracking-[0.14em]" style={{ color: "var(--cx-text-faint, var(--color-text-muted))" }}>
-                <Pin size={9} aria-hidden /> Pinned
+              <div
+                className="mx-3 mt-0 mb-1.5 pb-1 flex items-center gap-1.5"
+                style={{ borderBottom: "1px solid var(--cx-border)" }}
+              >
+                <Pin size={9} aria-hidden style={{ color: "var(--cx-text-faint)" }} />
+                <span
+                  className="cx-type-xs font-semibold uppercase tracking-[0.15em]"
+                  style={{ color: "var(--cx-text-faint)" }}
+                >
+                  Pinned
+                </span>
               </div>
               <ul className="space-y-0.5 mt-0.5">
                 {pinned.map((emp) => {
@@ -844,19 +865,19 @@ export function Sidebar({
           {/* Team header (collapsible) — hidden in icon-only mode */}
           {!collapsed && (
             <div className="mt-3">
-              <PraxisButton
+              <button
                 type="button"
-                variant="ghost"
                 onClick={() => setTeamExpanded((v) => !v)}
-                className="w-full flex items-center justify-between px-3 py-1.5 cx-type-xs font-medium uppercase tracking-[0.14em]"
+                className="w-full mx-0 flex items-center justify-between px-3 py-1 cx-type-xs font-semibold uppercase tracking-[0.15em] transition-colors duration-100"
+                style={{ color: "var(--cx-text-faint)", borderBottom: "1px solid var(--cx-border)", paddingBottom: "6px", marginBottom: "4px" }}
               >
                 <span className="inline-flex items-center gap-1.5">
-                  <Users2 size={11} /> Specialists
+                  <Users2 size={9} strokeWidth={2} aria-hidden /> Specialists
                 </span>
-                <span aria-hidden className="text-[10px]">
+                <span aria-hidden style={{ fontSize: 10 }}>
                   {teamExpanded ? "−" : "+"}
                 </span>
-              </PraxisButton>
+              </button>
               {teamExpanded && (
                 <ul className="space-y-0.5 mt-1">
                   {TEAM.map((emp) => {
@@ -1005,7 +1026,7 @@ export function Sidebar({
           <div className="mt-3 space-y-0.5">
             <NavLink
               href="/app/voice"
-              icon={<Mic size={20} />}
+              icon={<Mic size={20} strokeWidth={1.75} />}
               label="Voice Room"
               active={isActive("/app/voice")}
               onClick={close}
@@ -1014,7 +1035,7 @@ export function Sidebar({
             {allowedEmployees.includes("sales") && (
               <NavLink
                 href="/app/team/sales"
-                icon={<Sparkles size={20} />}
+                icon={<Sparkles size={20} strokeWidth={1.75} />}
                 label="Leads"
                 active={pathname === "/app/team/sales"}
                 onClick={close}
@@ -1024,7 +1045,7 @@ export function Sidebar({
             <div data-tour-target="memory">
             <NavLink
               href="/app/activity"
-              icon={<Activity size={20} />}
+              icon={<Activity size={20} strokeWidth={1.75} />}
               label="Activity"
               active={isActive("/app/activity")}
               onClick={close}
@@ -1032,7 +1053,7 @@ export function Sidebar({
             />
             <NavLink
               href="/app/memory"
-              icon={<Brain size={20} />}
+              icon={<Brain size={20} strokeWidth={1.75} />}
               label="Memory"
               active={isActive("/app/memory")}
               onClick={close}
@@ -1041,7 +1062,7 @@ export function Sidebar({
             </div>
             <NavLink
               href="/app/outputs"
-              icon={<Bookmark size={20} />}
+              icon={<Bookmark size={20} strokeWidth={1.75} />}
               label="Outputs"
               active={isActive("/app/outputs")}
               onClick={close}
@@ -1098,7 +1119,7 @@ export function Sidebar({
             )}
             <NavLink
               href="/app/analytics"
-              icon={<BarChart3 size={20} />}
+              icon={<BarChart3 size={20} strokeWidth={1.75} />}
               label="Analytics"
               active={isActive("/app/analytics")}
               onClick={close}
@@ -1127,9 +1148,10 @@ export function Sidebar({
               <Link
                 href="/app"
                 onClick={close}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity mt-1"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg cx-type-xs font-medium hover:opacity-90 transition-opacity mt-1"
+                style={{ background: "var(--cx-accent)", color: "var(--cx-canvas)" }}
               >
-                <Plus size={12} />
+                <Plus size={12} strokeWidth={2} />
                 Start a conversation
               </Link>
             </div>
@@ -1138,8 +1160,16 @@ export function Sidebar({
           {/* Recent conversations — hidden in icon-only mode */}
           {!collapsed && conversations.length > 0 && (
             <div className="mt-3">
-              <div className="px-3 pt-3 pb-1.5 cx-type-xs font-medium uppercase tracking-[0.14em]" style={{ color: "var(--cx-text-faint, var(--color-text-muted))" }}>
-                Conversations
+              <div
+                className="mx-3 mt-3 mb-1.5 pb-1.5 flex items-center gap-2"
+                style={{ borderBottom: "1px solid var(--cx-border)" }}
+              >
+                <span
+                  className="cx-type-xs font-semibold uppercase tracking-[0.15em]"
+                  style={{ color: "var(--cx-text-faint)" }}
+                >
+                  Conversations
+                </span>
               </div>
 
               {/* Specialist filter chips — only when 2+ specialists appear in the list */}
@@ -1480,7 +1510,7 @@ export function Sidebar({
               <div data-tour-target="settings">
               <NavLink
                 href="/app/settings"
-                icon={<Settings size={16} />}
+                icon={<Settings size={16} strokeWidth={1.75} />}
                 label="Settings"
                 active={
                   pathname === "/app/settings" ||
@@ -1493,7 +1523,7 @@ export function Sidebar({
               </div>
               <NavLink
                 href="/app/settings/billing"
-                icon={<CreditCard size={16} />}
+                icon={<CreditCard size={16} strokeWidth={1.75} />}
                 label="Billing"
                 active={isActive("/app/settings/billing")}
                 onClick={close}
@@ -1502,9 +1532,9 @@ export function Sidebar({
               <form action="/auth/sign-out" method="post">
                 <button
                   type="submit"
-                  className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] rounded-lg transition-colors duration-100"
+                  className="w-full flex items-center gap-2 px-3 py-1.5 cx-type-sm rounded-lg transition-colors duration-100 text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)]"
                 >
-                  <LogOut size={16} /> Sign out
+                  <LogOut size={16} strokeWidth={1.75} /> Sign out
                 </button>
               </form>
               <div className="px-3 pt-2 flex items-center gap-2">
