@@ -11,40 +11,46 @@ const CUSTOMERS = [
     sector: "Insurance",
     use: "Sales specialist closing 40% more warm leads",
     mark: "LU",
+    color: "var(--color-dept-sales)",
   },
   {
     name: "Meridian",
     sector: "SaaS",
     use: "Engineering specialist shipping weekly product updates",
     mark: "MD",
+    color: "var(--color-dept-engineering)",
   },
   {
     name: "Apex",
     sector: "Commerce",
     use: "Marketing specialist producing 20+ content pieces/month",
     mark: "AX",
+    color: "var(--color-dept-marketing)",
   },
   {
     name: "Clarity",
     sector: "Media",
     use: "Voice specialist qualifying inbound inquiries 24/7",
     mark: "CL",
+    color: "var(--color-dept-compliance)",
   },
   {
     name: "Beacon",
     sector: "Analytics",
     use: "Ops specialist running weekly reporting on autopilot",
     mark: "BC",
+    color: "var(--color-dept-ops)",
   },
   {
     name: "Orbit",
     sector: "Platform",
     use: "Finance specialist preparing board reports on demand",
     mark: "OR",
+    color: "var(--color-dept-finance)",
   },
 ] as const;
 
-function CompanyMark({ mark }: { mark: string }) {
+function CompanyMark({ mark, color }: { mark: string; color: string }) {
   return (
     <svg
       width="40"
@@ -59,18 +65,20 @@ function CompanyMark({ mark }: { mark: string }) {
         height="40"
         rx="10"
         fill="var(--color-bg-surface-subtle)"
-        stroke="var(--color-edge-subtle)"
         strokeWidth="1"
       />
+      {/* Color-coded bottom edge — matches the dept color for the specialist in use */}
+      <rect x="0" y="30" width="40" height="10" rx="0" fill={color} opacity="0.18" />
+      <rect x="0" y="29" width="40" height="1.5" fill={color} opacity="0.45" />
       <text
         x="50%"
-        y="50%"
+        y="47%"
         dominantBaseline="central"
         textAnchor="middle"
-        fontSize="13"
-        fontWeight="600"
+        fontSize="12"
+        fontWeight="700"
         fontFamily="var(--font-sans, system-ui)"
-        fill="var(--color-ink-secondary)"
+        fill={color}
       >
         {mark}
       </text>
@@ -116,7 +124,7 @@ export default function TrustBar() {
               }}
               className="flex flex-col items-center gap-2.5 shrink-0 w-[136px] md:w-[148px]"
             >
-              <CompanyMark mark={c.mark} />
+              <CompanyMark mark={c.mark} color={c.color} />
 
               <div className="text-center">
                 <p
