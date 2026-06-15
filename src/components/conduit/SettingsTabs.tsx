@@ -3661,6 +3661,19 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                 {disconnecting === "slack" ? "Disconnecting…" : "Disconnect"}
               </button>
             </div>
+          ) : isFreeUser ? (
+            <a
+              href="/app/settings?tab=billing"
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
+              style={{
+                background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+                color: "var(--color-accent)",
+              }}
+            >
+              <Lock size={12} />
+              Pro feature — Upgrade
+            </a>
           ) : isAvailable("slack") ? (
             <a
               href="/api/conduit/connectors/slack/auth"
