@@ -171,7 +171,7 @@ function SignUpForm() {
   }
 
   return (
-    <main className="conduit-bg-inverse min-h-screen relative overflow-hidden flex items-center justify-center px-6 py-16">
+    <main className="conduit-bg-inverse min-h-screen relative overflow-hidden flex items-center justify-center px-6 pt-16 pb-32 sm:pb-16">
       {/* Atmospheric layers */}
       <div className="conduit-mesh" aria-hidden />
       <div className="conduit-ember-radial" aria-hidden />
