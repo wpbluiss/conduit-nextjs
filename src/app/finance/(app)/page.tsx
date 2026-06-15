@@ -9,6 +9,7 @@ import { fmtMoney, personLabel } from "@/lib/finance/constants";
 import { LevelBar } from "@/components/finance/LevelBar";
 import { CelebrationWatcher } from "@/components/finance/CelebrationWatcher";
 import { DailyCheckin } from "@/components/finance/DailyCheckin";
+import { SurpriseDrop } from "@/components/finance/SurpriseDrop";
 import { QuestsCard, ActivityFeed } from "@/components/finance/GameStrips";
 import { MetricCard } from "@/components/finance/MetricCard";
 import { MoneyStrip } from "@/components/finance/MoneyStrip";
@@ -88,6 +89,9 @@ export default async function FinanceHome() {
 
       {/* Daily streak — the habit hook */}
       <DailyCheckin streak={Number(snap.household.checkin_streak ?? 0)} doneToday={checkedInToday} />
+
+      {/* Surprise drop — only appears when you're ahead of pace */}
+      <SurpriseDrop aheadDollars={g.aheadBehindDollars} />
 
       {/* THE CENTERPIECE: the reward you're chasing */}
       <QuestHero vault={heroVault} autofundPct={Number(snap.household.vault_autofund_pct)} />

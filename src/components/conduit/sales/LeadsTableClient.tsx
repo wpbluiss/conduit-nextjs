@@ -164,7 +164,7 @@ export default function LeadsTableClient({
           <Button
             onClick={() => setShowModal(true)}
             className="!text-sm inline-flex items-center gap-2"
-            style={{ background: deptColor, color: "#0A0908" }}
+            style={{ background: deptColor, color: "var(--cx-canvas, #0B0B0F)" }}
           >
             <Search size={14} />
             Run Discovery
@@ -600,7 +600,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
             <Button
               onClick={onComplete}
               className="!text-sm"
-              style={{ background: deptColor, color: "#0A0908" }}
+              style={{ background: deptColor, color: "var(--cx-canvas, #0B0B0F)" }}
             >
               Done
             </Button>
@@ -618,7 +618,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
                 onClick={start}
                 disabled={running || (!useOverpass && !useReddit && !useMaps)}
                 className="!text-sm disabled:opacity-50"
-                style={{ background: deptColor, color: "#0A0908" }}
+                style={{ background: deptColor, color: "var(--cx-canvas, #0B0B0F)" }}
               >
                 {running ? "Running…" : "Start"}
               </Button>

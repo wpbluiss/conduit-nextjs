@@ -19,7 +19,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { PraxisButton, SpinnerIcon } from "./PraxisButton";
+import { Button as PraxisButton, SpinnerIcon } from "@/components/conduit/ui/Button";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { EMPLOYEES, EMPLOYEE_ORDER } from "@/lib/conduit/employees";
@@ -2588,12 +2588,12 @@ function BillingTab({
           {isCanceling && (
             <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full cx-type-xs font-medium"
               style={{
-                background: "color-mix(in srgb, var(--color-destructive, #ef4444) 10%, transparent)",
-                color: "var(--color-destructive, #ef4444)",
-                border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 30%, transparent)",
+                background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 10%, transparent)",
+                color: "var(--color-destructive, var(--cx-danger))",
+                border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 30%, transparent)",
               }}
             >
-              <span aria-hidden className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-destructive, #ef4444)" }} />
+              <span aria-hidden className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-destructive, var(--cx-danger))" }} />
               {cancelAt
                 ? `Cancels ${new Date(cancelAt * 1000).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`
                 : "Cancels at end of billing period"}
@@ -2628,7 +2628,7 @@ function BillingTab({
                 type="button"
                 onClick={() => setShowCancelModal(true)}
                 disabled={busy !== null}
-                className="cx-type-xs underline underline-offset-2 text-[var(--color-text-muted)] hover:text-[var(--color-destructive,#ef4444)] transition-colors disabled:opacity-40 text-center"
+                className="cx-type-xs underline underline-offset-2 text-[var(--color-text-muted)] hover:text-[var(--color-destructive,var(--cx-danger))] transition-colors disabled:opacity-40 text-center"
               >
                 Cancel subscription
               </button>
@@ -2677,9 +2677,9 @@ function BillingTab({
                 disabled={busy === "cancel"}
                 className="px-4 py-2 text-sm rounded-lg transition-colors disabled:opacity-40"
                 style={{
-                  background: "color-mix(in srgb, var(--color-destructive, #ef4444) 12%, transparent)",
-                  color: "var(--color-destructive, #ef4444)",
-                  border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 35%, transparent)",
+                  background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 12%, transparent)",
+                  color: "var(--color-destructive, var(--cx-danger))",
+                  border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 35%, transparent)",
                 }}
               >
                 {busy === "cancel" ? "Cancelling…" : "Yes, cancel"}
@@ -3540,9 +3540,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               disabled={disconnecting === "google_calendar"}
               className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
               style={{
-                background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
-                border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
-                color: "var(--color-destructive, #ef4444)",
+                background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 8%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 25%, transparent)",
+                color: "var(--color-destructive, var(--cx-danger))",
               }}
             >
               <Link2Off size={12} />
@@ -3658,9 +3658,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                 disabled={disconnecting === "slack"}
                 className="w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
                 style={{
-                  background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
-                  border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
-                  color: "var(--color-destructive, #ef4444)",
+                  background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 8%, var(--color-surface-elevated))",
+                  border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 25%, transparent)",
+                  color: "var(--color-destructive, var(--cx-danger))",
                 }}
               >
                 <Link2Off size={12} />
@@ -3757,9 +3757,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               disabled={disconnecting === "hubspot"}
               className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
               style={{
-                background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
-                border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
-                color: "var(--color-destructive, #ef4444)",
+                background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 8%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 25%, transparent)",
+                color: "var(--color-destructive, var(--cx-danger))",
               }}
             >
               <Link2Off size={12} />
@@ -3954,9 +3954,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                         disabled={driveSaving}
                         className="flex-1 py-2 rounded-lg text-xs font-medium"
                         style={{
-                          background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
-                          border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
-                          color: "var(--color-destructive, #ef4444)",
+                          background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 8%, var(--color-surface-elevated))",
+                          border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 25%, transparent)",
+                          color: "var(--color-destructive, var(--cx-danger))",
                         }}
                       >
                         Clear all
@@ -3986,9 +3986,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                   disabled={disconnecting === "google_drive"}
                   className="flex-1 py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
                   style={{
-                    background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
-                    border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
-                    color: "var(--color-destructive, #ef4444)",
+                    background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 8%, var(--color-surface-elevated))",
+                    border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 25%, transparent)",
+                    color: "var(--color-destructive, var(--cx-danger))",
                   }}
                 >
                   <Link2Off size={12} />
@@ -4098,9 +4098,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               disabled={disconnecting === "github"}
               className="w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
               style={{
-                background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
-                border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
-                color: "var(--color-destructive, #ef4444)",
+                background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 8%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 25%, transparent)",
+                color: "var(--color-destructive, var(--cx-danger))",
               }}
             >
               <Link2Off size={12} />

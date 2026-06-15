@@ -74,11 +74,7 @@ export function SaveOutputButton({ messageId, content, specialist, conversationI
 
       {open && (
         <div
-          className="absolute bottom-full left-0 mb-2 z-30 rounded-xl border p-3 shadow-lg w-64"
-          style={{
-            background: "var(--color-surface-elevated)",
-            border: "1px solid var(--color-border)",
-          }}
+          className="cx-glass-float cx-glass-border absolute bottom-full left-0 mb-2 z-30 rounded-xl p-3 w-64"
         >
           <div className="flex items-center justify-between mb-2">
             <span className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">

@@ -210,7 +210,7 @@ export default async function ConversationsPage({
               className="w-14 h-14 rounded-2xl flex items-center justify-center"
               style={{
                 background: "var(--cx-accent-tint)",
-                border: "1px solid rgba(124,108,255,0.20)",
+                border: "1px solid color-mix(in srgb, var(--cx-accent) 20%, transparent)",
               }}
             >
               <MessageSquare size={24} style={{ color: "var(--color-accent)" }} />
@@ -228,7 +228,7 @@ export default async function ConversationsPage({
             {!activeLabelId && (
               <Link
                 href="/app"
-                className="conduit-btn-primary cx-type-sm px-4 py-2"
+                className="btn-primary btn-sz-sm"
               >
                 Start your first conversation
               </Link>

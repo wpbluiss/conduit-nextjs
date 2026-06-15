@@ -89,7 +89,7 @@ export default function EngineeringBuildButton({
       <Button
         onClick={() => setOpen(true)}
         className="!text-sm inline-flex items-center gap-1.5"
-        style={{ background: deptColor, color: "#0A0908" }}
+        style={{ background: deptColor, color: "var(--cx-canvas, #0B0B0F)" }}
       >
         <Hammer size={13} /> Start a build
       </Button>
@@ -176,7 +176,7 @@ export default function EngineeringBuildButton({
                 onClick={submit}
                 disabled={submitting || prompt.trim().length < 8}
                 className="!text-sm inline-flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ background: deptColor, color: "#0A0908" }}
+                style={{ background: deptColor, color: "var(--cx-canvas, #0B0B0F)" }}
               >
                 {submitting && <Loader2 size={12} className="animate-spin" />}
                 Ship it

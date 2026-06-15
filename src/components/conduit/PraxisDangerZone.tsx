@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { Button } from "@/components/conduit/ui/Button";
 
 // Account-deletion "danger zone" for Praxis settings. Type-to-confirm,
 // calls POST /api/conduit/account/delete, signs out, returns home.
@@ -75,15 +76,17 @@ export function PraxisDangerZone() {
           {error}
         </p>
       )}
-      <button
-        type="button"
-        disabled={pending || confirm !== "DELETE"}
+      <Button
+        variant="danger"
+        size="sm"
+        isLoading={pending}
+        loadingText="Deleting…"
+        isDisabled={pending || confirm !== "DELETE"}
         onClick={remove}
-        className="mt-4 rounded-lg px-4 py-2 text-sm font-semibold transition-opacity disabled:opacity-40"
-        style={{ background: "#e5484d", color: "#fff" }}
+        className="mt-4"
       >
-        {pending ? "Deleting…" : "Delete my account & data"}
-      </button>
+        Delete my account & data
+      </Button>
     </div>
   );
 }

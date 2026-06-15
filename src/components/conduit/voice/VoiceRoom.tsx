@@ -277,8 +277,19 @@ export default function VoiceRoom({
   const remainingSec = Math.max(0, tokenResponse.max_seconds - elapsedSec);
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/85 backdrop-blur-md flex flex-col text-white">
-      <div className="px-4 md:px-6 py-3 flex items-center justify-between border-b border-white/10">
+    <div
+      className="fixed inset-0 z-[60] flex flex-col"
+      style={{
+        background: "color-mix(in srgb, var(--cx-canvas) 90%, transparent)",
+        backdropFilter: "var(--cx-glass-blur-float, blur(28px) saturate(140%))",
+        WebkitBackdropFilter: "var(--cx-glass-blur-float, blur(28px) saturate(140%))",
+        color: "var(--cx-text, #F4F4F7)",
+      }}
+    >
+      <div
+        className="px-4 md:px-6 py-3 flex items-center justify-between border-b"
+        style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}
+      >
         <div className="cx-type-xs uppercase tracking-[0.22em] text-white/60">
           Praxis Voice · {isRoundTable ? "Round-table" : employeeName}
         </div>
@@ -303,7 +314,7 @@ export default function VoiceRoom({
                     className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center text-lg md:text-xl font-medium serif transition-all ${
                       isActive ? "" : "opacity-40"
                     }`}
-                    style={{ background: d.color, color: "#0A0908" }}
+                    style={{ background: d.color, color: "var(--cx-canvas, #0B0B0F)" }}
                     title={d.name}
                   >
                     {d.initial}
@@ -331,7 +342,7 @@ export default function VoiceRoom({
           <div className="relative">
             <div
               className="w-24 h-24 md:w-32 md:h-32 rounded-full flex items-center justify-center text-3xl md:text-4xl font-medium serif"
-              style={{ background: deptColor, color: "#0A0908" }}
+              style={{ background: deptColor, color: "var(--cx-canvas, #0B0B0F)" }}
             >
               {employeeInitial}
             </div>
@@ -404,7 +415,10 @@ export default function VoiceRoom({
         })}
       </div>
 
-      <div className="px-4 py-4 md:py-5 flex items-center justify-center gap-4 border-t border-white/10">
+      <div
+        className="px-4 py-4 md:py-5 flex items-center justify-center gap-4 border-t"
+        style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}
+      >
         <button
           type="button"
           onClick={toggleMute}

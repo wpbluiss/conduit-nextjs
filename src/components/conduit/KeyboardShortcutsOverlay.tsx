@@ -218,8 +218,7 @@ export function KeyboardShortcutsOverlay() {
           >
             <div
               ref={panelRef}
-              className="pointer-events-auto w-full max-w-sm rounded-2xl border border-[var(--color-border)] shadow-2xl overflow-hidden"
-              style={{ background: "var(--color-surface-elevated)" }}
+              className="cx-glass-float cx-glass-border pointer-events-auto w-full max-w-sm rounded-2xl overflow-hidden"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">

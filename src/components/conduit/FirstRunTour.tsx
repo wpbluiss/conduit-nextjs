@@ -177,9 +177,9 @@ export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
             className="conduit-card p-6"
             style={{
               background: "var(--color-ink-surface-elevated)",
-              border: "1px solid rgba(124,108,255,0.30)",
+              border: "1px solid color-mix(in srgb, var(--cx-accent) 30%, transparent)",
               boxShadow:
-                "0 0 0 1px rgba(124,108,255,0.12), 0 16px 48px rgba(0,0,0,0.40)",
+                "0 0 0 1px var(--cx-accent-tint), 0 16px 48px rgba(0,0,0,0.40)",
             }}
           >
             {/* Header */}
