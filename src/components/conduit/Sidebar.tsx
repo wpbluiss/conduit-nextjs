@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Activity,
@@ -44,6 +45,7 @@ interface ConvoSummary {
   title: string | null;
   updated_at: string;
   dominant_employee: string | null;
+  last_message?: string | null;
 }
 
 interface TeamActivity {
@@ -171,6 +173,14 @@ export function Sidebar({
   // Optimistic title overrides — updated when chat fires praxis:title_updated.
   const [titleOverrides, setTitleOverrides] = useState<Record<string, string>>({});
 
+  // Quick-peek tooltip: which conversation is hovered + its anchor rect.
+  const [peekId, setPeekId] = useState<string | null>(null);
+  const [peekRect, setPeekRect] = useState<DOMRect | null>(null);
+  const [portalMounted, setPortalMounted] = useState(false);
+  const [isCoarsePointer, setIsCoarsePointer] = useState(true); // assume touch until checked
+  const peekOpenTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const peekDismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Hydrate collapsed state from localStorage after mount (avoids SSR mismatch).
   // Two rAF calls ensure the corrected layout is painted before re-enabling
   // the animated transition, preventing a visible collapse animation on load.
@@ -285,6 +295,30 @@ export function Sidebar({
     return () =>
       window.removeEventListener("conduit:stream", onStream as EventListener);
   }, []);
+
+  // Detect coarse-pointer (touch) devices to suppress hover tooltip.
+  useEffect(() => {
+    setIsCoarsePointer(window.matchMedia("(pointer: coarse)").matches);
+    setPortalMounted(true);
+  }, []);
+
+  const openPeek = (id: string, el: HTMLAnchorElement, fromFocus = false) => {
+    // Suppress hover tooltip on touch/coarse-pointer devices; always allow keyboard focus.
+    if (!fromFocus && isCoarsePointer) return;
+    if (peekOpenTimer.current) clearTimeout(peekOpenTimer.current);
+    if (peekDismissTimer.current) clearTimeout(peekDismissTimer.current);
+    peekOpenTimer.current = setTimeout(() => {
+      setPeekRect(el.getBoundingClientRect());
+      setPeekId(id);
+      peekDismissTimer.current = setTimeout(() => setPeekId(null), 3000);
+    }, 300);
+  };
+
+  const closePeek = () => {
+    if (peekOpenTimer.current) clearTimeout(peekOpenTimer.current);
+    if (peekDismissTimer.current) clearTimeout(peekDismissTimer.current);
+    setPeekId(null);
+  };
 
   // `team` prop reserved for future per-employee status coloring.
   void team;
@@ -840,6 +874,10 @@ export function Sidebar({
                                 ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
                                 : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
                             }`}
+                            onMouseEnter={(e) => openPeek(c.id, e.currentTarget)}
+                            onMouseLeave={closePeek}
+                            onFocus={(e) => openPeek(c.id, e.currentTarget, true)}
+                            onBlur={closePeek}
                           >
                             {active && (
                               <span
@@ -1028,6 +1066,78 @@ export function Sidebar({
           )}
         </div>
       </motion.aside>
+
+      {/* Conversation quick-peek tooltip — portal-rendered to escape sidebar overflow */}
+      {portalMounted && peekId && peekRect && (() => {
+        const conv = conversations.find((c) => c.id === peekId);
+        if (!conv) return null;
+        const dom = conv.dominant_employee;
+        const isTeam = dom === "team";
+        const empKey = (dom && (TEAM as string[]).includes(dom) ? dom : "jarvis") as EmployeeKey;
+        const PeekIcon = EMPLOYEE_ICON[empKey];
+        const preview = conv.last_message
+          ? conv.last_message.replace(/\n+/g, " ").trim().slice(0, 120) +
+            (conv.last_message.length > 120 ? "…" : "")
+          : null;
+        const tooltipTop = peekRect.top + peekRect.height / 2;
+        const tooltipLeft = peekRect.right + 8;
+        return createPortal(
+          <div
+            role="tooltip"
+            className="praxis-root pdl-tooltip pdl-glass"
+            style={{
+              position: "fixed",
+              top: tooltipTop,
+              left: tooltipLeft,
+              transform: "translateY(-50%)",
+              maxWidth: 240,
+              pointerEvents: "none",
+              zIndex: 50,
+            }}
+          >
+            <div className="flex items-center gap-1.5 mb-1">
+              {isTeam ? (
+                <span
+                  aria-hidden
+                  className="inline-block w-3.5 h-3.5 rounded-full shrink-0"
+                  style={{
+                    background:
+                      "conic-gradient(from 90deg, var(--color-dept-marketing), var(--color-dept-sales), var(--color-dept-engineering), var(--color-dept-jarvis), var(--color-dept-marketing))",
+                  }}
+                />
+              ) : (
+                <span
+                  aria-hidden
+                  className="inline-flex items-center justify-center shrink-0 w-3.5 h-3.5 rounded-[4px]"
+                  style={{
+                    background: `color-mix(in srgb, ${DEPT_COLOR[empKey]} 18%, var(--color-surface-elevated))`,
+                    color: DEPT_COLOR[empKey],
+                    boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[empKey]} 60%, transparent)`,
+                  }}
+                >
+                  <PeekIcon size={9} strokeWidth={2.5} />
+                </span>
+              )}
+              <span
+                className="text-[10px] font-semibold truncate"
+                style={{ color: isTeam ? "var(--color-accent-hi)" : DEPT_COLOR[empKey] }}
+              >
+                {isTeam ? "Team" : employeeLabel(empKey)}
+              </span>
+            </div>
+            {preview ? (
+              <p className="text-[11px] leading-snug" style={{ color: "var(--pdl-text-muted, var(--color-text-muted))" }}>
+                {preview}
+              </p>
+            ) : (
+              <p className="text-[11px] italic" style={{ color: "var(--pdl-text-muted, var(--color-text-muted))" }}>
+                No messages yet
+              </p>
+            )}
+          </div>,
+          document.body,
+        );
+      })()}
     </>
   );
 }
