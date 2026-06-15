@@ -82,6 +82,16 @@ function usePinnedSpecialists() {
   return { pinned, pin, unpin };
 }
 
+function relativeDate(iso: string): string {
+  const d = new Date(iso);
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - d.getTime()) / 86400000);
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return d.toLocaleDateString("en-US", { weekday: "short" });
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
 function SidebarUpgradeBanner({
   tokensUsed,
   tokensAllowance,
@@ -697,24 +707,9 @@ export function Sidebar({
           </div>
         )}
 
-        {/* Workspace name — hidden when collapsed */}
-        {!collapsed && (
-          <div className="px-5 py-3 border-b border-[var(--color-border)]">
-            <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-              Workspace
-            </div>
-            <div className="mt-1 text-sm font-medium truncate">{workspaceName || accountName}</div>
-            <div className="mt-1.5 flex items-center gap-1 w-fit px-2 py-0.5 rounded-full" style={{ background: "color-mix(in srgb, var(--color-accent) 10%, transparent)", border: "1px solid color-mix(in srgb, var(--color-accent) 22%, transparent)" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/praxis-mark.png" alt="" width={9} height={14} style={{ display: "block", width: 9, height: 14, opacity: 0.8 }} />
-              <span className="text-[9px] uppercase tracking-[0.2em] font-semibold" style={{ color: "var(--color-accent-hi, var(--color-accent))" }}>Praxis</span>
-            </div>
-          </div>
-        )}
-
         {/* New chat — quick action */}
         {collapsed ? (
-          <button
+          <motion.button
             type="button"
             onClick={() => {
               close();
@@ -723,22 +718,38 @@ export function Sidebar({
             }}
             title="New chat"
             aria-label="New chat"
-            className="mx-auto my-3 conduit-card p-2 flex items-center justify-center hover:border-[var(--color-accent)] hover:text-[var(--color-accent-hi)] transition-colors"
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.94 }}
+            transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
+            className="mx-auto my-2 flex items-center justify-center w-8 h-8 rounded-lg"
+            style={{
+              background: "color-mix(in srgb, var(--color-accent) 12%, var(--color-surface-elevated))",
+              border: "1px solid color-mix(in srgb, var(--color-accent) 25%, var(--color-border))",
+              color: "var(--color-accent)",
+            }}
           >
             <Plus size={14} />
-          </button>
+          </motion.button>
         ) : (
-          <button
+          <motion.button
             type="button"
             onClick={() => {
               close();
               router.push("/app");
               router.refresh();
             }}
-            className="mx-3 my-3 conduit-card px-3 py-2 text-sm flex items-center gap-2 hover:border-[var(--color-accent)] hover:text-[var(--color-accent-hi)] transition-colors"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
+            className="mx-3 my-2 flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] font-medium"
+            style={{
+              background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
+              border: "1px solid color-mix(in srgb, var(--color-accent) 22%, var(--color-border))",
+              color: "var(--color-accent-hi, var(--color-accent))",
+            }}
           >
             <Plus size={14} /> New chat
-          </button>
+          </motion.button>
         )}
 
         {/* Primary nav sections */}
@@ -776,7 +787,10 @@ export function Sidebar({
                   const Icon = EMPLOYEE_ICON[emp];
                   const rowInner = (
                     <span
-                      className="relative flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-colors duration-100 hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
+                      className={`relative flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-colors duration-100 ${!active ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]" : ""}`}
+                      style={{
+                        background: active ? "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))" : undefined,
+                      }}
                       onContextMenu={(e) => handleSpecialistContextMenu(e, emp)}
                       onTouchStart={(e) => handleSpecialistTouchStart(e, emp)}
                       onTouchEnd={handleSpecialistTouchEnd}
@@ -785,22 +799,26 @@ export function Sidebar({
                       {active && (
                         <span
                           aria-hidden
-                          className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full"
-                          style={{ background: DEPT_COLOR[emp] }}
+                          className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
                         />
                       )}
                       <span
                         aria-hidden
-                        className="inline-flex items-center justify-center shrink-0 w-5 h-5 rounded-md"
+                        className="inline-flex items-center justify-center shrink-0 w-6 h-6 rounded-lg"
                         style={{
-                          background: `color-mix(in srgb, ${DEPT_COLOR[emp]} 18%, var(--color-surface-elevated))`,
+                          background: active
+                            ? `color-mix(in srgb, ${DEPT_COLOR[emp]} 22%, var(--color-surface-raised))`
+                            : `color-mix(in srgb, ${DEPT_COLOR[emp]} 14%, var(--color-surface-elevated))`,
                           color: DEPT_COLOR[emp],
-                          boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[emp]} 65%, transparent)`,
+                          boxShadow: active ? `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[emp]} 70%, transparent)` : `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[emp]} 50%, transparent)`,
                         }}
                       >
-                        <Icon size={11} strokeWidth={2.25} />
+                        <Icon size={12} strokeWidth={2.25} />
                       </span>
-                      <span className="text-[var(--color-text)] truncate flex-1">
+                      <span
+                        className="truncate flex-1"
+                        style={{ color: active ? "var(--color-text)" : "var(--color-text-muted)", fontWeight: active ? 500 : 400 }}
+                      >
                         {labelFor(emp)}
                       </span>
                       {!allowed ? (
@@ -811,11 +829,11 @@ export function Sidebar({
                         />
                       ) : (
                         <span
-                          className="w-1.5 h-1.5 rounded-full"
+                          className="w-1.5 h-1.5 rounded-full shrink-0"
                           style={{
-                            background: DEPT_COLOR[emp],
-                            opacity: isStreaming ? 1 : 0.55,
-                            boxShadow: isStreaming ? `0 0 6px ${DEPT_COLOR[emp]}` : "none",
+                            background: isStreaming ? "var(--color-accent)" : DEPT_COLOR[emp],
+                            opacity: isStreaming ? 1 : 0.5,
+                            boxShadow: isStreaming ? "0 0 6px var(--color-accent)" : "none",
                           }}
                           aria-label={isStreaming ? "Active" : "Online"}
                         />
@@ -860,7 +878,10 @@ export function Sidebar({
                     const Icon = EMPLOYEE_ICON[emp];
                     const rowInner = (
                       <span
-                        className="relative flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-colors duration-100 hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
+                        className="relative flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-colors duration-100"
+                        style={{
+                          background: active ? "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))" : undefined,
+                        }}
                         onContextMenu={(e) => handleSpecialistContextMenu(e, emp)}
                         onTouchStart={(e) => handleSpecialistTouchStart(e, emp)}
                         onTouchEnd={handleSpecialistTouchEnd}
@@ -869,22 +890,26 @@ export function Sidebar({
                         {active && (
                           <span
                             aria-hidden
-                            className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full"
-                            style={{ background: DEPT_COLOR[emp] }}
+                            className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
                           />
                         )}
                         <span
                           aria-hidden
-                          className="inline-flex items-center justify-center shrink-0 w-5 h-5 rounded-md"
+                          className="inline-flex items-center justify-center shrink-0 w-6 h-6 rounded-lg"
                           style={{
-                            background: `color-mix(in srgb, ${DEPT_COLOR[emp]} 18%, var(--color-surface-elevated))`,
+                            background: active
+                              ? `color-mix(in srgb, ${DEPT_COLOR[emp]} 22%, var(--color-surface-raised))`
+                              : `color-mix(in srgb, ${DEPT_COLOR[emp]} 14%, var(--color-surface-elevated))`,
                             color: DEPT_COLOR[emp],
-                            boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[emp]} 65%, transparent)`,
+                            boxShadow: active ? `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[emp]} 70%, transparent)` : `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[emp]} 50%, transparent)`,
                           }}
                         >
-                          <Icon size={11} strokeWidth={2.25} />
+                          <Icon size={12} strokeWidth={2.25} />
                         </span>
-                        <span className="text-[var(--color-text)] truncate flex-1">
+                        <span
+                          className="truncate flex-1"
+                          style={{ color: active ? "var(--color-text)" : "var(--color-text-muted)", fontWeight: active ? 500 : 400 }}
+                        >
                           {labelFor(emp)}
                         </span>
                         {!allowed ? (
@@ -895,13 +920,11 @@ export function Sidebar({
                           />
                         ) : (
                           <span
-                            className="w-1.5 h-1.5 rounded-full"
+                            className="w-1.5 h-1.5 rounded-full shrink-0"
                             style={{
-                              background: DEPT_COLOR[emp],
-                              opacity: isStreaming ? 1 : 0.55,
-                              boxShadow: isStreaming
-                                ? `0 0 6px ${DEPT_COLOR[emp]}`
-                                : "none",
+                              background: isStreaming ? "var(--color-accent)" : DEPT_COLOR[emp],
+                              opacity: isStreaming ? 1 : 0.5,
+                              boxShadow: isStreaming ? "0 0 6px var(--color-accent)" : "none",
                             }}
                             aria-label={isStreaming ? "Active" : "Online"}
                           />
@@ -949,7 +972,7 @@ export function Sidebar({
                 const Icon = EMPLOYEE_ICON[emp];
                 const btn = (
                   <span
-                    className="relative flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-100 hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
+                    className={`relative flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-100 ${!active ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]" : ""}`}
                     style={{
                       background: active ? `color-mix(in srgb, ${DEPT_COLOR[emp]} 18%, var(--color-surface-elevated))` : undefined,
                       boxShadow: active ? `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[emp]} 65%, transparent)` : undefined,
@@ -959,6 +982,12 @@ export function Sidebar({
                     onTouchEnd={handleSpecialistTouchEnd}
                     onTouchCancel={handleSpecialistTouchEnd}
                   >
+                    {active && (
+                      <span
+                        aria-hidden
+                        className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
+                      />
+                    )}
                     <Icon
                       size={14}
                       strokeWidth={2.25}
@@ -1294,11 +1323,10 @@ export function Sidebar({
                             key={c.id}
                             href={`/app?c=${c.id}`}
                             onClick={close}
-                            className={`relative flex items-center gap-2 pl-3 pr-3 py-1.5 text-xs rounded-lg transition-colors duration-100 ${
-                              active
-                                ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
-                                : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
-                            }`}
+                            className={`relative flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-lg transition-colors duration-100 group ${!active ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]" : ""}`}
+                            style={{
+                              background: active ? "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))" : undefined,
+                            }}
                             onMouseEnter={(e) => openPeek(c.id, e.currentTarget)}
                             onMouseLeave={closePeek}
                             onFocus={(e) => openPeek(c.id, e.currentTarget, true)}
@@ -1307,18 +1335,13 @@ export function Sidebar({
                             {active && (
                               <span
                                 aria-hidden
-                                className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full"
-                                style={{
-                                  background: isTeam
-                                    ? "var(--color-accent)"
-                                    : DEPT_COLOR[empKey],
-                                }}
+                                className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
                               />
                             )}
                             {isTeam ? (
                               <span
                                 aria-hidden
-                                className="inline-block w-3 h-3 rounded-full shrink-0"
+                                className="inline-block w-3.5 h-3.5 rounded-full shrink-0"
                                 style={{
                                   background:
                                     "conic-gradient(from 90deg, var(--color-dept-marketing), var(--color-dept-sales), var(--color-dept-engineering), var(--color-dept-jarvis), var(--color-dept-marketing))",
@@ -1330,11 +1353,11 @@ export function Sidebar({
                                 return (
                                   <span
                                     aria-hidden
-                                    className="inline-flex items-center justify-center shrink-0 w-3.5 h-3.5 rounded-[4px]"
+                                    className="inline-flex items-center justify-center shrink-0 w-4 h-4 rounded-[5px]"
                                     style={{
                                       background: `color-mix(in srgb, ${DEPT_COLOR[empKey]} 18%, var(--color-surface-elevated))`,
                                       color: DEPT_COLOR[empKey],
-                                      boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[empKey]} 60%, transparent)`,
+                                      boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${DEPT_COLOR[empKey]} 55%, transparent)`,
                                     }}
                                   >
                                     <RecentIcon size={9} strokeWidth={2.5} />
@@ -1342,8 +1365,20 @@ export function Sidebar({
                                 );
                               })()
                             )}
-                            <span className="truncate flex-1">
+                            <span
+                              className="truncate flex-1 text-[12px] leading-snug"
+                              style={{
+                                color: active ? "var(--color-text)" : "var(--color-text-muted)",
+                                fontWeight: active ? 500 : 400,
+                              }}
+                            >
                               {titleOverrides[c.id] ?? c.title ?? "Untitled chat"}
+                            </span>
+                            <span
+                              className="shrink-0 text-[10px] font-mono opacity-0 group-hover:opacity-100 transition-opacity duration-100"
+                              style={{ color: "var(--color-text-muted)" }}
+                            >
+                              {relativeDate(c.updated_at)}
                             </span>
                             {c.labels && c.labels.length > 0 && (
                               <span className="flex items-center gap-0.5 shrink-0">
@@ -1505,24 +1540,30 @@ export function Sidebar({
               </form>
               <div className="px-3 pt-2 flex items-center gap-2">
                 <div
-                  className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-semibold shrink-0 overflow-hidden border border-[var(--color-border)]"
-                  style={{ background: "var(--color-surface-elevated)" }}
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold shrink-0 overflow-hidden"
+                  style={{
+                    background: "color-mix(in srgb, var(--color-accent) 15%, var(--color-surface-elevated))",
+                    border: "1px solid color-mix(in srgb, var(--color-accent) 25%, var(--color-border))",
+                  }}
                 >
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <span style={{ color: "var(--color-accent-hi)" }}>
+                    <span style={{ color: "var(--color-accent-hi, var(--color-accent))" }}>
                       {(displayName || userEmail)[0]?.toUpperCase() ?? "?"}
                     </span>
                   )}
                 </div>
-                <span className="text-[10px] text-[var(--color-text-muted)] truncate min-w-0">
-                  {displayName || userEmail}
-                </span>
-              </div>
-              <div className="px-3 text-[10px] text-[var(--color-text-muted)]">
-                Praxis Flow{tierName ? ` · ${tierName}` : ""}
+                <div className="min-w-0 flex-1">
+                  <div className="text-[11px] font-medium truncate" style={{ color: "var(--color-text)" }}>
+                    {displayName || userEmail.split("@")[0]}
+                  </div>
+                  <div className="text-[10px] truncate" style={{ color: "var(--color-text-muted)" }}>
+                    {tierName ? tierName : "Free"}{" "}
+                    {workspaceName || accountName ? `· ${(workspaceName || accountName).slice(0, 16)}` : ""}
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -1677,11 +1718,11 @@ function NavLink({
           onClick={onClick}
           title={label}
           aria-label={label}
-          className={`relative flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-100 ${
-            active
-              ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
-              : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
-          }`}
+          className={`relative flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-100 ${!active ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] hover:text-[var(--color-text)]" : ""}`}
+          style={{
+            background: active ? "color-mix(in srgb, var(--color-accent) 12%, var(--color-surface-elevated))" : undefined,
+            color: active ? "var(--color-text)" : "var(--color-text-muted)",
+          }}
         >
           {active && (
             <span
@@ -1689,7 +1730,13 @@ function NavLink({
               className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
             />
           )}
-          {icon}
+          <motion.span
+            whileHover={{ scale: 1.15 }}
+            transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
+            className="inline-flex"
+          >
+            {icon}
+          </motion.span>
         </Link>
       </div>
     );
@@ -1699,13 +1746,15 @@ function NavLink({
     <Link
       href={href}
       onClick={onClick}
-      className={`relative flex items-center gap-2 px-3 ${
-        small ? "py-1.5 text-xs" : "py-2 text-sm"
-      } rounded-lg transition-colors duration-100 ${
-        active
-          ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
-          : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
-      }`}
+      className={`relative flex items-center gap-2 px-3 rounded-lg transition-colors duration-100 ${!active ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] hover:text-[var(--color-text)]" : ""}`}
+      style={{
+        paddingTop: small ? "0.375rem" : "0.5rem",
+        paddingBottom: small ? "0.375rem" : "0.5rem",
+        fontSize: small ? "0.75rem" : "0.8125rem",
+        background: active ? "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))" : undefined,
+        color: active ? "var(--color-text)" : "var(--color-text-muted)",
+        fontWeight: active ? 500 : 400,
+      }}
     >
       {active && (
         <span
@@ -1713,7 +1762,13 @@ function NavLink({
           className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
         />
       )}
-      {icon}
+      <motion.span
+        whileHover={{ scale: 1.12 }}
+        transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
+        className="shrink-0 inline-flex"
+      >
+        {icon}
+      </motion.span>
       <span>{label}</span>
     </Link>
   );
