@@ -606,6 +606,23 @@ export function Chat({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Scroll to a specific message when arriving from conversation search (?msg=).
+  useEffect(() => {
+    const msgId = searchParams.get("msg");
+    if (!msgId) return;
+    // Give the DOM a moment to render messages, then scroll.
+    const timer = setTimeout(() => {
+      handleScrollToMessage(msgId);
+      // Strip ?msg= so refresh doesn't re-trigger.
+      const cid = searchParams.get("c");
+      const path = cid ? `/app?c=${cid}` : "/app";
+      window.history.replaceState({}, "", path);
+    }, 350);
+    return () => clearTimeout(timer);
+    // Run only on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Voice input (browser STT)
   const speech = useSpeechRecognition();
   const lastTranscriptRef = useRef("");
