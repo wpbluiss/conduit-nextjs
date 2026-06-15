@@ -1,7 +1,7 @@
 // Praxis service worker — network-first with offline shell fallback.
 // CACHE name is stamped with the Next.js BUILD_ID at build time so that
 // each deploy gets a fresh cache key and old caches are purged on activate.
-const CACHE = "praxis-BUILD_STAMP";
+const CACHE = "praxis-8HW3ziyT4UzrnoLgOM6DC";
 
 self.addEventListener("install", () => self.skipWaiting());
 

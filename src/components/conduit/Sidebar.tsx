@@ -159,6 +159,8 @@ export function Sidebar({
   const [teamExpanded, setTeamExpanded] = useState(true);
   // Desktop collapsed state — lazy init from localStorage, persisted.
   const [collapsed, setCollapsed] = useState<boolean>(false);
+  // Suppress the width transition on initial hydration to avoid CLS.
+  const [skipTransition, setSkipTransition] = useState(true);
   const sidebarRef = useRef<HTMLElement>(null);
   const openBtnRef = useRef<HTMLButtonElement>(null);
   // Conversation list search
@@ -170,8 +172,13 @@ export function Sidebar({
   const [titleOverrides, setTitleOverrides] = useState<Record<string, string>>({});
 
   // Hydrate collapsed state from localStorage after mount (avoids SSR mismatch).
+  // Two rAF calls ensure the corrected layout is painted before re-enabling
+  // the animated transition, preventing a visible collapse animation on load.
   useEffect(() => {
     setCollapsed(readCollapsed());
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setSkipTransition(false));
+    });
   }, []);
 
   useEffect(() => {
@@ -323,7 +330,7 @@ export function Sidebar({
         aria-modal={open ? "true" : undefined}
         aria-label="Navigation"
         animate={{ width: collapsed ? 56 : 256 }}
-        transition={{ duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
+        transition={skipTransition ? { duration: 0 } : { duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
         className={`fixed md:static z-40 inset-y-0 left-0 bg-[var(--color-surface)] border-r border-[var(--color-border)] flex flex-col overflow-hidden transform transition-transform duration-200 ease-in-out ${
           open ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
