@@ -23,8 +23,8 @@ const FALLBACK_EMPLOYEE = {
   name: "Specialist",
   role: "",
   initial: "?",
-  color: "var(--color-text-muted, #8a8a8a)",
-  colorSoft: "rgba(138,138,138,0.12)",
+  color: "var(--cx-text-muted, #A0A0B0)",
+  colorSoft: "rgba(160,160,176,0.12)",
 };
 
 export function EmployeeAvatar({

@@ -153,6 +153,27 @@
   --color-red:         var(--cx-danger);
   --color-yellow:      #EAB308;
 
+  /* -- Success bridge — used by SettingsTabs integration status rows -- */
+  --color-success: var(--cx-reward);
+
+  /* -- Ember token bridge — retires warm-orange accent inside the console.
+     Any component still reading --color-ember-* in a .praxis-root context
+     now resolves to the electric-violet palette instead of warm orange.
+     New code must use --cx-accent / --cx-reward / --cx-danger directly. -- */
+  --color-ember-50:  rgba(124, 108, 255, 0.06);
+  --color-ember-100: rgba(124, 108, 255, 0.12);
+  --color-ember-300: var(--cx-accent-bright);
+  --color-ember-500: var(--cx-accent);
+  --color-ember-700: #5548CC;
+  --color-ember-900: #3B2FA0;
+
+  /* -- Cream bridge — marketing warm-text tokens used in some console components
+     (PwaInstaller, etc.). Re-map to the ink scale so they read correctly on
+     the dark canvas. New code must use --cx-text / --cx-text-muted directly. -- */
+  --color-cream:      var(--cx-text);
+  --color-cream-soft: var(--cx-text-muted);
+  --color-cream-mute: var(--cx-text-faint);
+
   /* -- Indigo palette → electric violet (retire old --color-indigo-* in console) -- */
   --color-indigo-50:  rgba(124, 108, 255, 0.08);
   --color-indigo-100: rgba(124, 108, 255, 0.14);
