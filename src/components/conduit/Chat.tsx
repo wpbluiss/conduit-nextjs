@@ -327,6 +327,13 @@ export function Chat({
     return () => window.removeEventListener("praxis:title_updated", onTitleUpdated);
   }, [conversationId]);
 
+  // Sync browser tab title when the conversation title is set or updated.
+  useEffect(() => {
+    if (currentTitle) {
+      document.title = `${currentTitle} — Praxis`;
+    }
+  }, [currentTitle]);
+
   // Focus search input when opened; close on Escape.
   useEffect(() => {
     if (searchOpen) {
@@ -1221,7 +1228,7 @@ export function Chat({
             window.history.replaceState({}, "", `/app?c=${cid}`);
           }
           if (wasNewConversation && cid) {
-            fetch(`/api/conduit/conversations/${cid}/title`, { method: "POST" })
+            fetch(`/api/conduit/conversations/${cid}/auto-title`, { method: "PATCH" })
               .then((r) => (r.ok ? r.json() : null))
               .then((d: { ok: boolean; title?: string } | null) => {
                 if (d?.title) {
