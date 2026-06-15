@@ -6,6 +6,7 @@ import {
   rollBillingCycleIfDue,
   userDisplayName,
 } from "@/lib/conduit/account";
+import { resolveApiKeyAuth } from "@/lib/conduit/api-key-auth";
 import {
   type ChatMessage,
   type EmployeeKey,
@@ -98,11 +99,22 @@ function sseEvent(event: string, data: unknown): string {
 
 export async function POST(request: NextRequest) {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  // Accept either a session cookie OR an API key (Authorization: Bearer prx_…).
+  const apiKeyResult = await resolveApiKeyAuth(request);
+
+  let user: Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"] | null = null;
+  let initialAccount: Awaited<ReturnType<typeof getOrCreateAccount>>;
+
+  if (apiKeyResult) {
+    initialAccount = apiKeyResult.account;
+  } else {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+    if (!user) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
+    initialAccount = await getOrCreateAccount(supabase, user);
   }
 
   let body: {
@@ -120,8 +132,6 @@ export async function POST(request: NextRequest) {
   if (!message) {
     return NextResponse.json({ error: "empty_message" }, { status: 400 });
   }
-
-  const initialAccount = await getOrCreateAccount(supabase, user);
   if (!initialAccount.business_type || !initialAccount.business_description) {
     return NextResponse.json(
       { error: "onboarding_required" },
@@ -315,7 +325,7 @@ export async function POST(request: NextRequest) {
   }
 
   const ctx: AccountContext = {
-    user_name: userDisplayName(user),
+    user_name: user ? userDisplayName(user) : (initialAccount.display_name ?? initialAccount.name ?? "there"),
     account_name: account.name,
     business_type: businessType,
     business_description: businessDescription,

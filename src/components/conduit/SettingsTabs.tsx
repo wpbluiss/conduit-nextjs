@@ -211,7 +211,13 @@ export function SettingsTabs({
           accentPref={account.accent_preference ?? "ember"}
         />
       )}
-      {tab === "api" && <ApiKeysTab />}
+      {tab === "api" && (
+        <ApiKeysTab
+          isPro={Boolean(
+            account.internal_account || (account.tier_id ?? "free") !== "free",
+          )}
+        />
+      )}
       {tab === "referrals" && <ReferralsTab />}
       {tab === "labels" && <LabelsTab />}
     </div>
@@ -4360,7 +4366,7 @@ interface ApiKey {
   revoked_at: string | null;
 }
 
-function ApiKeysTab() {
+function ApiKeysTab({ isPro }: { isPro: boolean }) {
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState("");
@@ -4428,6 +4434,35 @@ function ApiKeysTab() {
 
   const activeKeys = keys.filter((k) => !k.revoked_at);
   const revokedKeys = keys.filter((k) => k.revoked_at);
+
+  if (!isPro) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-lg font-semibold mb-1">API Keys</h2>
+          <p className="text-sm text-[var(--color-text-muted)]">
+            Integrate Praxis into your own tools and workflows via REST API.
+          </p>
+        </div>
+        <div
+          className="conduit-card p-6 text-center"
+          style={{
+            background:
+              "linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-elevated)), var(--color-surface-elevated))",
+          }}
+        >
+          <div className="flex items-center justify-center gap-2 text-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
+            <Lock size={12} /> Pro feature
+          </div>
+          <p className="serif text-2xl">Programmatic access</p>
+          <p className="mt-2 text-sm text-[var(--color-text-muted)] max-w-md mx-auto">
+            Generate API keys to call Praxis specialists from your own code,
+            automations, and integrations. Upgrade to Pro to unlock.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
