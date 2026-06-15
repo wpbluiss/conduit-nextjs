@@ -761,6 +761,7 @@ export function Chat({
       setFollowUpSuggestions([]);
       setLoading(true);
       setInput("");
+      const wasNewConversation = !conversationId;
       // Capture and clear the one-off @mention override before the async send.
       const capturedMentionOverride = mentionOverride;
       setMentionOverride(null);
@@ -1161,6 +1162,20 @@ export function Chat({
           if (cid && cid !== conversationId) {
             setConversationId(cid);
             window.history.replaceState({}, "", `/app?c=${cid}`);
+          }
+          if (wasNewConversation && cid) {
+            fetch(`/api/conduit/conversations/${cid}/title`, { method: "POST" })
+              .then((r) => (r.ok ? r.json() : null))
+              .then((d: { ok: boolean; title?: string } | null) => {
+                if (d?.title) {
+                  window.dispatchEvent(
+                    new CustomEvent("praxis:title_updated", {
+                      detail: { conversation_id: cid, title: d.title },
+                    }),
+                  );
+                }
+              })
+              .catch(() => {/* silent — title stays as first-message excerpt */});
           }
         } else if (event === "error") {
           setMessages((prev) => {
