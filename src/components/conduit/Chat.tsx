@@ -294,6 +294,10 @@ export function Chat({
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [streamingEmployee, setStreamingEmployee] =
     useState<EmployeeKey | null>(null);
+  // Round-table: tracks which specialist is currently active (thinking/streaming).
+  // null = none active yet, or round-table just ended.
+  const [roundTableActiveEmployee, setRoundTableActiveEmployee] =
+    useState<EmployeeKey | null>(null);
   const [sendError, setSendError] = useState<{
     text: string;
     retryText: string;
@@ -1249,6 +1253,7 @@ export function Chat({
           });
         } else if (event === "round_table_thinking") {
           const emp = data.employee as EmployeeKey;
+          setRoundTableActiveEmployee(emp);
           // Insert a placeholder pending bubble for this employee
           setMessages((prev) => [
             ...prev,
@@ -1262,6 +1267,8 @@ export function Chat({
           ]);
         } else if (event === "round_table_response") {
           const emp = data.employee as EmployeeKey;
+          // Mark this specialist as no longer active; next thinking event will set the new one.
+          setRoundTableActiveEmployee((prev) => (prev === emp ? null : prev));
           const content = (data.content as string) || "";
           // Resolve the matching pending bubble (last one for this employee)
           setMessages((prev) => {
@@ -1448,6 +1455,7 @@ export function Chat({
         });
       } finally {
         setStreamingEmployee(null);
+        setRoundTableActiveEmployee(null);
         setLoading(false);
         router.refresh();
       }
@@ -1794,6 +1802,7 @@ export function Chat({
               }
               searchMatch={searchMatchSet.has(i)}
               conversationId={conversationId}
+              roundTableActiveEmployee={roundTableActiveEmployee}
             />
           ))}
 
@@ -2803,6 +2812,7 @@ const MessageBubble = memo(function MessageBubble({
   onPinToggle,
   searchMatch = false,
   conversationId,
+  roundTableActiveEmployee = null,
 }: {
   message: MessageRow;
   onOpenArtifact: (id: string) => void;
@@ -2817,6 +2827,7 @@ const MessageBubble = memo(function MessageBubble({
   onPinToggle?: (shouldPin: boolean) => void;
   searchMatch?: boolean;
   conversationId?: string | null;
+  roundTableActiveEmployee?: EmployeeKey | null;
 }) {
   const [editDraft, setEditDraft] = useState(message.content);
   const editRef = useRef<HTMLTextAreaElement>(null);
@@ -3008,6 +3019,12 @@ const MessageBubble = memo(function MessageBubble({
   const employee = (message.employee as EmployeeKey) ?? "jarvis";
   const empty = !message.content && message.pending;
   const isRoundTable = Boolean((message.metadata as Record<string, unknown>)?.round_table);
+  // Active when: not a round-table message, OR no specialist is currently designated active,
+  // OR this specialist is the one currently generating.
+  const isActive =
+    !isRoundTable ||
+    roundTableActiveEmployee === null ||
+    roundTableActiveEmployee === employee;
 
   // Before any tokens arrive: render a dedicated accessible typing indicator.
   if (empty) {
@@ -3017,7 +3034,7 @@ const MessageBubble = memo(function MessageBubble({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
       >
-        <TypingIndicator employee={employee} roundTable={isRoundTable} />
+        <TypingIndicator employee={employee} roundTable={isRoundTable} isActive={isActive} />
       </motion.div>
     );
   }
