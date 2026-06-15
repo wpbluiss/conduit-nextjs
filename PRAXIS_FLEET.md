@@ -35,6 +35,15 @@ ran dry 6/13; per Luis ($0 until revenue) the brain was moved onto GitHub Action
 030–048 (additive, idempotent) so schema matches code. If new migration files appear, apply them
 manually via Supabase MCP `execute_sql` before their feature works (the pipeline won't).
 
+## Console redesign (active, 2026-06-15)
+- **CONSOLE_REDESIGN.md is the authoritative /app UI spec.** Direction locked: "Bold & addictive,
+  dark" — near-black ink + ONE electric-violet accent. Component-system v2 section adds the founder's
+  6/15 mandate: Apple-grade `<Button>`, system-wide glassmorphism, unified icons, a charts/data-viz
+  language, refined chat text bubbles, and premium fast "AI is thinking/processing" states.
+- Queue (label `claude-queue` + `[REDESIGN]`): button system #799, glassmorphism #800, charts #801,
+  AI-thinking states #802, plus existing bubbles #775, composer #776, speed #774/#787/#788, icons
+  #796, settings #781, motion #782/#783/#784, etc. Coordinator prioritizes `[REDESIGN]`.
+
 ## Supabase (project `mvuslmfjkkuizixjpkgl`)
 - Edge fns use custom auth: header `x-praxis-secret` == `conduit_secrets.PRAXIS_CRON_SECRET`.
 - Secrets present: `ANTHROPIC_API_KEY` (OUT OF CREDITS — metered layer off), `ELEVENLABS_API_KEY`,
@@ -43,11 +52,25 @@ manually via Supabase MCP `execute_sql` before their feature works (the pipeline
 - Still-used edge fns: `praxis-dispatcher` (fires repo workflows incl. coordinator), `praxis-notify`
   (Twilio SMS — see below), `praxis-launch-watch` (PR alerts + conduitai.io uptime probe),
   `praxis-atlas-call`/`-tools`/`-call-transcripts` (Atlas phone).
+- **Storage buckets:** `conduit` (PUBLIC, 10MB) created 6/15 — was MISSING, which 500'd every voice
+  note, workspace-logo, and account-avatar upload (all three routes hard-code `BUCKET="conduit"`).
+  Other buckets: `gallery`, `mateo-photos` (public), `lunaro-documents` (private).
+
+## Voice (two separate features — don't conflate)
+- **Voice notes in chat** (`/api/conduit/voice/message`): records a clip, uploads to the `conduit`
+  bucket. Was 500ing ("voice upload error") only because the bucket didn't exist — FIXED 6/15.
+- **Voice ROOM / live agent** (`/api/voice/token` → LiveKit → `conduit-voice-worker` on Railway):
+  token endpoint mints 200 (LIVEKIT_* env present on Vercel). The live agent is the dead part —
+  it needs the **Railway worker running** + **OpenAI Realtime** + **ElevenLabs**, all metered/
+  always-on. No voice session has recorded a duration since **2026-05-14** (today's test created a
+  row with `duration_seconds=null` → agent never completed a turn). This conflicts with $0-until-
+  revenue; it's a funding/infra decision, not a conduit-nextjs code bug. Worker last shipped 5/12.
 
 ## Repos (org wpbluiss)
 Wired: `conduit-nextjs` (web, PUBLIC, the launch priority + only one with the Max coordinator),
 `conduit-mobile`, `conduit-backend`, `conduit-marketing-worker`, `conduit-engineering-worker`,
-`jonathan-demo` (Lunaro). Private repos cost Actions minutes (Luis set Actions budget $0).
+`conduit-voice-worker` (Railway, OpenAI Realtime→ElevenLabs bridge), `jonathan-demo` (Lunaro).
+Private repos cost Actions minutes (Luis set Actions budget $0).
 
 ## Atlas (phone chief of staff, via Vapi)
 - Calls from 561-678-3691 → OWNER_PHONE. Brain `claude-sonnet-4` via Vapi (its OWN provider, NOT
@@ -56,9 +79,10 @@ Wired: `conduit-nextjs` (web, PUBLIC, the launch priority + only one with the Ma
 - ⚠️ Atlas ACCURACY BUG (open): on free-form live calls his tool-backed numbers inflate/hallucinate
   ("963 shipped" etc.). `praxis-atlas-tools` metrics need auditing. Prefer scripted-message calls.
 
-## Current status (2026-06-14)
+## Current status (2026-06-15)
 - Site LIVE & healthy, shipping continuously on the stable config. DB reconciled. Funnel pages
   (home/pricing) clean; FAQ Cadence-bleed scrubbed (PR #401). Build green.
+- Console redesign in flight (see section above). Voice notes fixed; voice room agent dormant.
 - Honest readiness: features ~high, but VERIFIED launch-readiness gated on the items below. The
   product is feature-rich; "ready to take a paying customer" is unproven until the test purchase.
 
@@ -69,7 +93,9 @@ Wired: `conduit-nextjs` (web, PUBLIC, the launch priority + only one with the Ma
    Register A2P 10DLC in Twilio Console (Messaging → Regulatory Compliance, Sole Proprietor path).
    Until then alerts log to `praxis_runs` (event pending_alert); Atlas CALLS work as the channel.
 3. Walk the live funnel on a phone (sign up → use a specialist → upgrade) and report breakage.
-4. App Store (native) = separate, days-long, Apple-account-gated track. The PWA (installable) is
+4. **Voice room** — decide whether to fund the always-on stack (Railway worker + OpenAI Realtime +
+   ElevenLabs). Until then the live room won't talk back even though the UI + token work.
+5. App Store (native) = separate, days-long, Apple-account-gated track. The PWA (installable) is
    the "downloadable app" for now.
 
 ## House rules
