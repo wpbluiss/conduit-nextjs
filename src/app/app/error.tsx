@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, RotateCcw, Home } from "lucide-react";
+import { Button } from "@/components/conduit/ui/Button";
 
 interface Props {
   error: Error & { digest?: string };
@@ -43,15 +44,14 @@ export default function AppError({ error, reset, unstable_retry }: Props) {
         An error occurred while loading this page. Your data is safe — try reloading.
       </p>
       <div className="flex flex-col sm:flex-row items-center gap-3">
-        <button
-          type="button"
+        <Button
           onClick={onRetry}
-          className="btn-primary inline-flex items-center gap-2"
+          className="inline-flex items-center gap-2"
           style={{ padding: "10px 20px", fontSize: "14px" }}
         >
           <RotateCcw size={14} />
           Try again
-        </button>
+        </Button>
         <button
           type="button"
           onClick={() => router.push("/app/workspace")}

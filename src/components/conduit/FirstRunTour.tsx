@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight } from "@phosphor-icons/react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { Button } from "@/components/conduit/ui/Button";
 
 const STORAGE_KEY = "praxis_tour_v1_done";
 
@@ -233,15 +234,14 @@ export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
               >
                 Skip tour
               </button>
-              <button
-                type="button"
+              <Button
                 onClick={next}
-                className="conduit-btn-primary text-[13px] px-4 py-2 gap-1.5"
+                size="sm"
                 autoFocus
               >
                 {isLast ? "Get started" : "Next →"}
                 <ArrowRight size={13} weight="bold" />
-              </button>
+              </Button>
             </div>
           </div>
         </motion.div>

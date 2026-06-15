@@ -5,6 +5,7 @@ import QRCode from "qrcode";
 import { Copy, Download } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { SpinnerIcon } from "./PraxisButton";
+import { Button } from "@/components/conduit/ui/Button";
 
 type MFAState =
   | { phase: "loading" }
@@ -354,16 +355,15 @@ export function MFASecurity() {
             Each code can only be used once. Store them somewhere safe — they won't be shown again.
           </p>
           <BackupCodesGrid codes={state.codes} />
-          <button
-            type="button"
+          <Button
             onClick={async () => {
               setSuccess("Two-factor authentication is now enabled.");
               await loadFactors();
             }}
-            className="mt-4 w-full rounded-lg px-4 py-2.5 text-sm font-medium btn-primary"
+            className="mt-4 w-full rounded-lg px-4 py-2.5 text-sm font-medium"
           >
             I've saved my codes — done
-          </button>
+          </Button>
         </SectionCard>
       )}
 
@@ -423,14 +423,13 @@ export function MFASecurity() {
                 Enable 2FA to protect your account with a time-based one-time password.
               </p>
             </div>
-            <button
-              type="button"
+            <Button
               onClick={startEnrollment}
               disabled={isPending}
-              className="shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition-opacity disabled:opacity-50 btn-primary"
+              className="shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition-opacity disabled:opacity-50"
             >
               {isPending ? <SpinnerIcon size={14} /> : "Enable 2FA"}
-            </button>
+            </Button>
           </div>
         </SectionCard>
       )}
@@ -482,16 +481,15 @@ export function MFASecurity() {
             >
               Cancel
             </button>
-            <button
-              type="button"
+            <Button
               disabled={isPending || code.length !== 6}
               onClick={verifyEnrollment}
-              className="rounded-lg px-4 py-2 text-sm font-medium transition-opacity disabled:opacity-40 btn-primary"
+              className="rounded-lg px-4 py-2 text-sm font-medium transition-opacity disabled:opacity-40"
             >
               {isPending ? (
                 <span className="flex items-center gap-1.5"><SpinnerIcon size={14} />Verifying…</span>
               ) : "Verify & enable"}
-            </button>
+            </Button>
           </div>
         </SectionCard>
       )}

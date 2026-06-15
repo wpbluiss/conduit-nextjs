@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { ArrowRight, ExternalLink } from "lucide-react";
+import { Button } from "@/components/conduit/ui/Button";
 
 interface Props {
   error: Error & { digest?: string };
@@ -64,13 +65,12 @@ export default function CinemaError({ error, unstable_retry, reset }: Props) {
           </p>
         </div>
         <div className="eng-cinema-summary-actions">
-          <button
-            type="button"
+          <Button
             onClick={onReopen}
-            className="btn-primary inline-flex items-center gap-1.5"
+            className="inline-flex items-center gap-1.5"
           >
             Reopen the live view <ArrowRight size={13} />
-          </button>
+          </Button>
           {deployUrl && (
             <a
               href={deployUrl}
