@@ -766,6 +766,26 @@ export function Chat({
       window.removeEventListener("conduit:stopAudio", onStop);
     };
   }, [playingMessageIdx, stopAudio]);
+
+  // Specialist quick-switch: digit keys 1–9 route to the nth specialist in sidebar order.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const digit = parseInt(e.key, 10);
+      if (isNaN(digit) || digit < 1 || digit > 9) return;
+      // Don't intercept keys while the user is typing.
+      const el = document.activeElement as HTMLElement | null;
+      if (!el) return;
+      const tag = el.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || el.isContentEditable) return;
+      const empKey = EMPLOYEE_ORDER[digit - 1] as EmployeeKey;
+      if (!empKey || !allowedEmployees.includes(empKey)) return;
+      setPin(empKey);
+      toast.info(`→ ${labelFor(empKey)}`);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [allowedEmployees, labelFor, toast]);
+
   const playTTS = useCallback(
     async (text: string, employee: EmployeeKey, idx: number) => {
       if (!voice.ttsAllowed || !text.trim()) return;
