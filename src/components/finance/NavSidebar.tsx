@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   House, Wallet, Money, Receipt, Flame, ChartLineUp,
-  Gauge, Sparkle, GearSix, SignOut, List, X, Crown, Trophy,
+  Gauge, Sparkle, GearSix, SignOut, List, X, Crown, Trophy, ChartPie,
 } from "@phosphor-icons/react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { clsx } from "./clsx";
@@ -20,6 +20,7 @@ const NAV = [
   { href: "/finance/debts", label: "Debt-Killer", icon: Flame },
   { href: "/finance/investments", label: "Investments", icon: ChartLineUp },
   { href: "/finance/credit", label: "Credit", icon: Gauge },
+  { href: "/finance/insights", label: "Insights", icon: ChartPie },
   { href: "/finance/advisor", label: "Advisor", icon: Sparkle },
   { href: "/finance/upgrade", label: "Upgrade", icon: Crown },
   { href: "/finance/settings", label: "Settings", icon: GearSix },
