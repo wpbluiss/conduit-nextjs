@@ -75,7 +75,7 @@ export function EmployeeAvatar({
         ["--dept" as string]: m.color,
         boxShadow: `inset 0 0 0 1.5px ${m.color}`,
       }}
-      className={`relative inline-flex items-center justify-center rounded-full text-[11px] font-medium ${
+      className={`relative inline-flex items-center justify-center rounded-full cx-type-xs font-medium ${
         active ? "employee-pulse" : ""
       }`}
     >
@@ -101,13 +101,13 @@ export function EmployeeBadge({
       <EmployeeAvatar employee={employee} size={26} />
       <span className="leading-tight">
         <span
-          className="block text-[12px] font-medium tracking-tight"
+          className="block text-xs font-medium tracking-tight"
           style={{ color: m.color }}
         >
           {m.name}
         </span>
         {withRole && (
-          <span className="block text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+          <span className="block cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
             {m.role}
           </span>
         )}
@@ -127,7 +127,7 @@ export function SpecialistChip({
   const m = EMPLOYEES[employee] ?? FALLBACK_EMPLOYEE;
   return (
     <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold leading-none tracking-tight select-none"
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full cx-type-xs font-semibold leading-none tracking-tight select-none"
       style={{
         background: m.colorSoft,
         color: m.color,

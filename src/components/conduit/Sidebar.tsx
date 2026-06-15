@@ -135,7 +135,7 @@ function SidebarUpgradeBanner({
         <div className="flex items-start justify-between gap-1 mb-2">
           <div className="flex items-center gap-1.5">
             <Sparkles size={11} style={{ color: "var(--color-accent)", flexShrink: 0 }} />
-            <span className="text-[11px] font-semibold" style={{ color: "var(--color-text)" }}>
+            <span className="cx-type-xs font-semibold" style={{ color: "var(--color-text)" }}>
               Unlock all 9 specialists
             </span>
           </div>
@@ -173,7 +173,7 @@ function SidebarUpgradeBanner({
         <button
           type="button"
           onClick={() => { dismiss(); onUpgradeClick(); }}
-          className="w-full py-1.5 rounded-lg text-[11px] font-semibold transition-opacity hover:opacity-90"
+          className="w-full py-1.5 rounded-lg cx-type-xs font-semibold transition-opacity hover:opacity-90"
           style={{ background: "var(--color-accent)", color: "#fff" }}
         >
           Upgrade to Pro
@@ -741,7 +741,7 @@ export function Sidebar({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
-            className="mx-3 my-2 flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] font-medium"
+            className="mx-3 my-2 flex items-center gap-2 px-3 py-2 rounded-lg cx-type-sm font-medium"
             style={{
               background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
               border: "1px solid color-mix(in srgb, var(--color-accent) 22%, var(--color-border))",
@@ -1189,7 +1189,7 @@ export function Sidebar({
                   <button
                     type="button"
                     onClick={() => setSpecialistFilter(null)}
-                    className="shrink-0 flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors duration-100 whitespace-nowrap"
+                    className="shrink-0 flex items-center px-2 py-0.5 rounded-full cx-type-xs font-medium transition-colors duration-100 whitespace-nowrap"
                     style={
                       specialistFilter === null
                         ? {
@@ -1219,7 +1219,7 @@ export function Sidebar({
                         title={labelFor(emp)}
                         aria-label={`Filter by ${labelFor(emp)}`}
                         aria-pressed={active}
-                        className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors duration-100 whitespace-nowrap"
+                        className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full cx-type-xs font-medium transition-colors duration-100 whitespace-nowrap"
                         style={
                           active
                             ? {
@@ -1366,7 +1366,7 @@ export function Sidebar({
                               })()
                             )}
                             <span
-                              className="truncate flex-1 text-[12px] leading-snug"
+                              className="truncate flex-1 text-xs leading-snug"
                               style={{
                                 color: active ? "var(--color-text)" : "var(--color-text-muted)",
                                 fontWeight: active ? 500 : 400,
@@ -1398,7 +1398,7 @@ export function Sidebar({
                       })}
                     </div>
                     {(q || specialistFilter) && filtered.length === 0 && (
-                      <p className="px-3 py-2 text-[11px]" style={{ color: "var(--color-text-muted)" }}>
+                      <p className="px-3 py-2 cx-type-xs" style={{ color: "var(--color-text-muted)" }}>
                         {specialistFilter && !q
                           ? `No conversations with ${labelFor(specialistFilter)} yet`
                           : "No conversations match"}
@@ -1408,13 +1408,13 @@ export function Sidebar({
                       <Link
                         href="/app/conversations"
                         onClick={close}
-                        className="mt-1 flex items-center px-3 py-1.5 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+                        className="mt-1 flex items-center px-3 py-1.5 cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
                       >
                         See all ({conversations.length})
                       </Link>
                     )}
                     {filtered.length > 8 && (
-                      <p className="px-3 py-1 text-[10px]" style={{ color: "var(--color-text-muted)" }}>
+                      <p className="px-3 py-1 cx-type-xs" style={{ color: "var(--color-text-muted)" }}>
                         Showing 8 of {filtered.length} matches
                       </p>
                     )}
@@ -1482,7 +1482,7 @@ export function Sidebar({
                 </button>
               </form>
               <div
-                className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-semibold shrink-0 overflow-hidden border border-[var(--color-border)] mt-1"
+                className="w-6 h-6 rounded-full flex items-center justify-center cx-type-xs font-semibold shrink-0 overflow-hidden border border-[var(--color-border)] mt-1"
                 style={{ background: "var(--color-surface-elevated)" }}
                 title={displayName || userEmail}
               >
@@ -1540,7 +1540,7 @@ export function Sidebar({
               </form>
               <div className="px-3 pt-2 flex items-center gap-2">
                 <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold shrink-0 overflow-hidden"
+                  className="w-6 h-6 rounded-full flex items-center justify-center cx-type-xs font-semibold shrink-0 overflow-hidden"
                   style={{
                     background: "color-mix(in srgb, var(--color-accent) 15%, var(--color-surface-elevated))",
                     border: "1px solid color-mix(in srgb, var(--color-accent) 25%, var(--color-border))",
@@ -1556,10 +1556,10 @@ export function Sidebar({
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-[11px] font-medium truncate" style={{ color: "var(--color-text)" }}>
+                  <div className="cx-type-xs font-medium truncate" style={{ color: "var(--color-text)" }}>
                     {displayName || userEmail.split("@")[0]}
                   </div>
-                  <div className="text-[10px] truncate" style={{ color: "var(--color-text-muted)" }}>
+                  <div className="cx-type-xs truncate" style={{ color: "var(--color-text-muted)" }}>
                     {tierName ? tierName : "Free"}{" "}
                     {workspaceName || accountName ? `· ${(workspaceName || accountName).slice(0, 16)}` : ""}
                   </div>
@@ -1670,18 +1670,18 @@ export function Sidebar({
                 </span>
               )}
               <span
-                className="text-[10px] font-semibold truncate"
+                className="cx-type-xs font-semibold truncate"
                 style={{ color: isTeam ? "var(--color-accent-hi)" : DEPT_COLOR[empKey] }}
               >
                 {isTeam ? "Team" : employeeLabel(empKey)}
               </span>
             </div>
             {preview ? (
-              <p className="text-[11px] leading-snug" style={{ color: "var(--pdl-text-muted, var(--color-text-muted))" }}>
+              <p className="cx-type-xs leading-snug" style={{ color: "var(--pdl-text-muted, var(--color-text-muted))" }}>
                 {preview}
               </p>
             ) : (
-              <p className="text-[11px] italic" style={{ color: "var(--pdl-text-muted, var(--color-text-muted))" }}>
+              <p className="cx-type-xs italic" style={{ color: "var(--pdl-text-muted, var(--color-text-muted))" }}>
                 No messages yet
               </p>
             )}

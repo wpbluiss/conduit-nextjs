@@ -23,7 +23,7 @@ const VARIANT_CLASS: Record<PraxisButtonVariant, string> = {
 };
 
 const SIZE_OVERRIDE: Record<PraxisButtonSize, string> = {
-  sm: "!px-4 !py-2 !text-[13px] !gap-1.5",
+  sm: "!px-4 !py-2 !cx-type-sm !gap-1.5",
   md: "",
   lg: "!px-8 !py-4 !text-base",
   icon: "!p-2 !gap-0 !justify-center",

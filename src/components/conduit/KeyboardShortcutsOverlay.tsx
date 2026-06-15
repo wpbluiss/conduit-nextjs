@@ -242,7 +242,7 @@ export function KeyboardShortcutsOverlay() {
               <div className="px-5 py-4 space-y-5 max-h-[60vh] overflow-y-auto">
                 {groups.map((group) => (
                   <div key={group.title}>
-                    <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
+                    <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
                       {group.title}
                     </div>
                     <div className="space-y-1.5">
@@ -258,12 +258,12 @@ export function KeyboardShortcutsOverlay() {
                             {s.keys.map((k, i) => (
                               <span key={k}>
                                 {i > 0 && (
-                                  <span className="text-[10px] text-[var(--color-text-muted)] mx-0.5">
+                                  <span className="cx-type-xs text-[var(--color-text-muted)] mx-0.5">
                                     then
                                   </span>
                                 )}
                                 <kbd
-                                  className="inline-flex items-center justify-center min-w-[1.5rem] px-1.5 py-0.5 text-[11px] font-mono rounded border"
+                                  className="inline-flex items-center justify-center min-w-[1.5rem] px-1.5 py-0.5 cx-type-xs font-mono rounded border"
                                   style={{
                                     background: "var(--color-surface)",
                                     borderColor: "var(--color-border)",
@@ -283,7 +283,7 @@ export function KeyboardShortcutsOverlay() {
               </div>
 
               <div className="px-5 py-3 border-t border-[var(--color-border)]">
-                <p className="text-[11px] text-[var(--color-text-muted)]">
+                <p className="cx-type-xs text-[var(--color-text-muted)]">
                   Shortcuts are disabled when typing in text fields.
                 </p>
               </div>

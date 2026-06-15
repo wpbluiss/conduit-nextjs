@@ -102,7 +102,7 @@ export function ChangelogPopover() {
         {unseen > 0 && (
           <span
             aria-hidden
-            className="absolute top-1 left-5 flex items-center justify-center w-3.5 h-3.5 rounded-full text-[9px] font-bold leading-none"
+            className="absolute top-1 left-5 flex items-center justify-center w-3.5 h-3.5 rounded-full cx-type-xs font-bold leading-none"
             style={{
               background: "var(--color-accent)",
               color: "#fff",
@@ -150,19 +150,19 @@ export function ChangelogPopover() {
                   <li key={`${e.date}-${e.title}`} className="px-4 py-3 space-y-1.5">
                     <div className="flex items-center gap-2">
                       <span
-                        className="inline-block text-[9px] uppercase tracking-[0.12em] font-semibold rounded-full px-1.5 py-0.5"
+                        className="inline-block cx-type-xs uppercase tracking-[0.12em] font-semibold rounded-full px-1.5 py-0.5"
                         style={{ background: tag.bg, color: tag.color }}
                       >
                         {e.tag}
                       </span>
-                      <span className="text-[10px] text-[var(--color-text-muted)] font-mono">
+                      <span className="cx-meta tabular-nums">
                         {e.date}
                       </span>
                     </div>
-                    <p className="text-[13px] font-medium leading-snug text-[var(--color-text)]">
+                    <p className="cx-type-sm font-medium leading-snug text-[var(--color-text)]">
                       {e.title}
                     </p>
-                    <p className="text-[12px] text-[var(--color-text-muted)] leading-relaxed line-clamp-2">
+                    <p className="text-xs text-[var(--color-text-muted)] leading-relaxed line-clamp-2">
                       {e.body}
                     </p>
                   </li>
@@ -176,7 +176,7 @@ export function ChangelogPopover() {
                 href="/changelog"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[11px] text-[var(--color-accent)] hover:underline"
+                className="cx-type-xs text-[var(--color-accent)] hover:underline"
                 onClick={() => setOpen(false)}
               >
                 Full changelog →

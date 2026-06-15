@@ -69,7 +69,7 @@ export function SaveOutputButton({ messageId, content, specialist, conversationI
         }}
       >
         {saved ? <BookmarkCheck size={13} /> : <Bookmark size={13} />}
-        <span className="hidden md:inline text-[11px]">{saved ? "Saved" : "Save"}</span>
+        <span className="hidden md:inline cx-type-xs">{saved ? "Saved" : "Save"}</span>
       </button>
 
       {open && (
@@ -81,7 +81,7 @@ export function SaveOutputButton({ messageId, content, specialist, conversationI
           }}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+            <span className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
               Save as output
             </span>
             <button

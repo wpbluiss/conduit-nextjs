@@ -66,13 +66,13 @@ export function SpecialistSelectorModal({
         style={{ color: "var(--cx-text, #F4F4F7)" }}
       >
         <p
-          className="text-[11px] uppercase tracking-[0.2em] mb-2"
+          className="cx-type-xs uppercase tracking-[0.2em] mb-2"
           style={{ color: "var(--color-text-muted)" }}
         >
           Your team · First task
         </p>
         <h2
-          className="text-xl md:text-2xl font-semibold mb-1"
+          className="cx-heading-lg md:cx-heading-xl font-semibold mb-1"
           style={{ color: "var(--color-text)" }}
         >
           Who leads this?
@@ -113,20 +113,20 @@ export function SpecialistSelectorModal({
                 <EmployeeAvatar employee={id as EmployeeKey} size={28} active={isSelected} />
                 <div>
                   <div
-                    className="text-[13px] font-medium leading-tight"
+                    className="cx-type-sm font-medium leading-tight"
                     style={{ color: isSelected ? DEPT_COLOR[id as EmployeeKey] : "var(--color-text)" }}
                   >
                     {labelFor(id as EmployeeKey)}
                   </div>
                   <div
-                    className="text-[10px] uppercase tracking-[0.14em] mt-0.5"
+                    className="cx-type-xs uppercase tracking-[0.14em] mt-0.5"
                     style={{ color: "var(--color-text-muted)" }}
                   >
                     {m.role}
                   </div>
                 </div>
                 <p
-                  className="text-[11px] leading-snug hidden sm:block"
+                  className="cx-type-xs leading-snug hidden sm:block"
                   style={{ color: "var(--color-text-muted)" }}
                 >
                   {m.tagline}

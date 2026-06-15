@@ -110,7 +110,7 @@ export function ThemeToggle({
           );
         })}
       </div>
-      <p className="mt-2 text-[10px] text-[var(--color-text-muted)]">
+      <p className="mt-2 cx-type-xs text-[var(--color-text-muted)]">
         {saving
           ? "Saving…"
           : pref === "system"

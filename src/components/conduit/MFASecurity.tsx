@@ -292,7 +292,7 @@ export function MFASecurity() {
               <div>
                 <div className="flex items-center gap-2">
                   <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em]"
+                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 cx-type-xs font-semibold uppercase tracking-[0.12em]"
                     style={{ background: "color-mix(in srgb, var(--cx-reward) 15%, transparent)", color: "var(--cx-reward)" }}
                   >
                     <span className="h-1.5 w-1.5 rounded-full bg-current" />
@@ -377,7 +377,7 @@ export function MFASecurity() {
             This removes the additional security layer from your account. Type <strong>DISABLE</strong> to confirm.
           </p>
           <label className="mt-4 block">
-            <span className="mb-1.5 block text-[11px] uppercase tracking-[0.16em]" style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-mono)" }}>
+            <span className="mb-1.5 block cx-type-xs uppercase tracking-[0.16em]" style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-mono)" }}>
               Type DISABLE to confirm
             </span>
             <input

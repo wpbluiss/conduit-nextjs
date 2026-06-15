@@ -253,7 +253,7 @@ export function ConversationSearchBar() {
               </p>
               <Link
                 href="/app"
-                className="inline-flex items-center gap-1.5 text-[13px] font-medium"
+                className="inline-flex items-center gap-1.5 cx-type-sm font-medium"
                 style={{ color: "var(--color-accent)" }}
               >
                 <MessageSquarePlus size={13} />
@@ -314,7 +314,7 @@ export function ConversationSearchBar() {
                       {r.title || "Untitled chat"}
                     </span>
                     {r.updated_at && (
-                      <span className="shrink-0 text-[11px] text-[var(--color-text-muted)]">
+                      <span className="shrink-0 cx-type-xs text-[var(--color-text-muted)]">
                         {relativeDate(r.updated_at)}
                       </span>
                     )}

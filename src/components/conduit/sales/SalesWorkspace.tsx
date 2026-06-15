@@ -58,7 +58,7 @@ export default async function SalesWorkspace({ supabase, account }: Props) {
           <EmployeeAvatar employee="sales" size={56} />
           <div className="min-w-0 flex-1">
             <div
-              className="text-[10px] uppercase tracking-[0.2em]"
+              className="cx-type-xs uppercase tracking-[0.2em]"
               style={{ color: employee.color }}
             >
               {employee.role}
@@ -138,7 +138,7 @@ function Stat({
       </div>
       <div className="serif text-2xl mt-1">{value}</div>
       {sub && (
-        <div className="text-[10px] text-[var(--color-text-muted)] mt-0.5">
+        <div className="cx-type-xs text-[var(--color-text-muted)] mt-0.5">
           {sub}
         </div>
       )}

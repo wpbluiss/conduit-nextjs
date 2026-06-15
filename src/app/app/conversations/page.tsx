@@ -216,10 +216,10 @@ export default async function ConversationsPage({
               <MessageSquare size={24} style={{ color: "var(--color-accent)" }} />
             </div>
             <div>
-              <p className="text-[15px] font-semibold text-[var(--color-text)] mb-1">
+              <p className="text-sm font-semibold text-[var(--color-text)] mb-1">
                 {activeLabelId ? "No conversations with this label" : "No conversations yet"}
               </p>
-              <p className="text-[13px] text-[var(--color-text-muted)] leading-relaxed">
+              <p className="cx-type-sm text-[var(--color-text-muted)] leading-relaxed">
                 {activeLabelId
                   ? "Try a different label filter or start a new conversation."
                   : "Ask Atlas anything — strategy, execution, or hand it to a specialist. Every exchange lives here."}
@@ -228,7 +228,7 @@ export default async function ConversationsPage({
             {!activeLabelId && (
               <Link
                 href="/app"
-                className="conduit-btn-primary text-[13px] px-4 py-2"
+                className="conduit-btn-primary cx-type-sm px-4 py-2"
               >
                 Start your first conversation
               </Link>
@@ -245,7 +245,7 @@ export default async function ConversationsPage({
                     className="text-[var(--color-amber)]"
                     style={{ fill: "currentColor" }}
                   />
-                  <span className="text-[11px] uppercase tracking-[0.12em] font-medium text-[var(--color-text-muted)]">
+                  <span className="cx-type-xs uppercase tracking-[0.12em] font-medium text-[var(--color-text-muted)]">
                     Pinned · {pinned.length}/{MAX_PINNED}
                   </span>
                 </div>
@@ -262,7 +262,7 @@ export default async function ConversationsPage({
               <div>
                 {pinned.length > 0 && (
                   <div className="mb-2">
-                    <span className="text-[11px] uppercase tracking-[0.12em] font-medium text-[var(--color-text-muted)]">
+                    <span className="cx-type-xs uppercase tracking-[0.12em] font-medium text-[var(--color-text-muted)]">
                       Recent
                     </span>
                   </div>

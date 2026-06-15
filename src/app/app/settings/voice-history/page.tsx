@@ -98,11 +98,11 @@ export default async function VoiceHistoryPage() {
                 >
                   <div className="flex flex-wrap items-baseline gap-2">
                     <span className="font-medium">{employee.name}</span>
-                    <span className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+                    <span className="cx-mono cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] tabular-nums">
                       {fmtRelative(s.started_at)} · {fmtDuration(s.duration_seconds)}
                     </span>
                     {s.end_reason && s.end_reason !== "user_left" && (
-                      <span className="text-[10px] uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
+                      <span className="cx-type-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
                         ended: {s.end_reason}
                       </span>
                     )}
@@ -127,7 +127,7 @@ export default async function VoiceHistoryPage() {
                                 : "text-[var(--color-text)]"
                             }
                           >
-                            <span className="text-[10px] uppercase tracking-[0.12em] mr-2 text-[var(--color-text-muted)]">
+                            <span className="cx-type-xs uppercase tracking-[0.12em] mr-2 text-[var(--color-text-muted)]">
                               {entry.role === "user" ? "You" : employee.name}
                             </span>
                             {entry.text}

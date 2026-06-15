@@ -149,7 +149,7 @@ export default function LeadsTableClient({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div
-              className="text-[10px] uppercase tracking-[0.18em]"
+              className="cx-type-xs uppercase tracking-[0.18em]"
               style={{ color: deptColor }}
             >
               Fresh Leads
@@ -344,19 +344,19 @@ function LeadCard({
               <span className="text-[var(--color-text)] font-medium truncate">
                 {lead.business_name}
               </span>
-              <span className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+              <span className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
                 {lead.vertical.replace("_", " ")} · {lead.city}
               </span>
               {lead.intent_signal_score > 0 && (
                 <span
-                  className="text-[10px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded"
+                  className="cx-type-xs uppercase tracking-[0.12em] px-1.5 py-0.5 rounded"
                   style={{ background: deptColorSoft, color: deptColor }}
                 >
                   intent {lead.intent_signal_score}
                 </span>
               )}
               {lead.status !== "new" && (
-                <span className="text-[10px] uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
+                <span className="cx-type-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
                   {STATUS_LABELS[lead.status]}
                 </span>
               )}

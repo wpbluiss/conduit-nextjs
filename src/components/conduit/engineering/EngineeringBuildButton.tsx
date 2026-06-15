@@ -103,7 +103,7 @@ export default function EngineeringBuildButton({
           <div className="conduit-card w-full max-w-lg p-6">
             <div className="flex items-start justify-between gap-3 mb-4">
               <div>
-                <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                   Engineering · early access
                 </div>
                 <h2 className="serif text-xl mt-1">Start a build</h2>
@@ -118,7 +118,7 @@ export default function EngineeringBuildButton({
               </button>
             </div>
 
-            <label className="block text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-1.5">
+            <label className="block cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-1.5">
               Build type
             </label>
             <div className="grid grid-cols-2 gap-2 mb-4">
@@ -138,14 +138,14 @@ export default function EngineeringBuildButton({
                   }}
                 >
                   <div className="text-sm">{t.label}</div>
-                  <div className="text-[10px] text-[var(--color-text-muted)] mt-0.5">
+                  <div className="cx-type-xs text-[var(--color-text-muted)] mt-0.5">
                     {t.hint}
                   </div>
                 </button>
               ))}
             </div>
 
-            <label className="block text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-1.5">
+            <label className="block cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-1.5">
               What should I build?
             </label>
             <textarea
@@ -156,7 +156,7 @@ export default function EngineeringBuildButton({
               className="w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-md focus:border-[var(--color-accent)] outline-none p-3 text-sm resize-none leading-relaxed"
               maxLength={4000}
             />
-            <div className="text-[10px] text-[var(--color-text-muted)] mt-1">
+            <div className="cx-type-xs text-[var(--color-text-muted)] mt-1">
               {prompt.length}/4000
             </div>
 

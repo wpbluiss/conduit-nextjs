@@ -285,7 +285,7 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
               onChange={(e) => handleQueryChange(e.target.value)}
               placeholder="Search memories…"
               aria-label="Search memories"
-              className="flex-1 bg-transparent outline-none text-[13px] placeholder:text-[var(--pdl-text-muted,var(--color-text-muted))]"
+              className="flex-1 bg-transparent outline-none cx-type-sm placeholder:text-[var(--pdl-text-muted,var(--color-text-muted))]"
               style={{ color: "var(--pdl-text, var(--color-text))", minWidth: 0 }}
             />
             {query && (
@@ -304,7 +304,7 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
             <button
               type="button"
               onClick={clearFilters}
-              className="text-[11px] px-2.5 py-1.5 rounded-lg transition-colors"
+              className="cx-type-xs px-2.5 py-1.5 rounded-lg transition-colors"
               style={{
                 color: "var(--pdl-text-muted, var(--color-text-muted))",
                 border: "1px solid var(--pdl-border-hairline, var(--color-border))",
@@ -320,7 +320,7 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
               disabled={exportingMemories}
               title={`Export all ${memories.length} memories as JSON`}
               aria-label="Export memories as JSON"
-              className="ml-auto flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg transition-colors shrink-0"
+              className="ml-auto flex items-center gap-1.5 cx-type-xs px-2.5 py-1.5 rounded-lg transition-colors shrink-0"
               style={{
                 color: "var(--pdl-text-muted, var(--color-text-muted))",
                 border: "1px solid var(--pdl-border-hairline, var(--color-border))",
@@ -350,7 +350,7 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
           <button
             type="button"
             onClick={() => handleDeptChange("all")}
-            className="shrink-0 text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded-full transition-colors"
+            className="shrink-0 cx-type-xs uppercase tracking-[0.12em] px-2.5 py-1 rounded-full transition-colors"
             style={{
               background: deptFilter === "all"
                 ? "color-mix(in srgb, var(--pdl-accent, var(--color-accent)) 15%, transparent)"
@@ -374,7 +374,7 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
                 key={empId}
                 type="button"
                 onClick={() => handleDeptChange(active ? "all" : empId)}
-                className="shrink-0 text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded-full transition-colors"
+                className="shrink-0 cx-type-xs uppercase tracking-[0.12em] px-2.5 py-1 rounded-full transition-colors"
                 style={{
                   background: active
                     ? `color-mix(in srgb, ${emp.color} 15%, transparent)`
@@ -406,7 +406,7 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
                 key={kind}
                 type="button"
                 onClick={() => handleKindToggle(kind)}
-                className="shrink-0 text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded-full transition-colors"
+                className="shrink-0 cx-type-xs uppercase tracking-[0.12em] px-2.5 py-1 rounded-full transition-colors"
                 style={{
                   background: active
                     ? "color-mix(in srgb, var(--pdl-accent, var(--color-accent)) 12%, transparent)"
