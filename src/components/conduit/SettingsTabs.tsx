@@ -192,7 +192,13 @@ export function SettingsTabs({
       {tab === "billing" && <BillingTab account={account} usage={usage} />}
       {tab === "security" && <MFASecurity />}
       {tab === "notifications" && <NotificationsTab />}
-      {tab === "integrations" && <IntegrationsTab />}
+      {tab === "integrations" && (
+        <IntegrationsTab
+          isFreeUser={
+            !account.internal_account && (account.tier_id ?? "free") === "free"
+          }
+        />
+      )}
       {tab === "appearance" && (
         <AppearanceTab
           themePref={account.theme_preference ?? "system"}
@@ -3027,7 +3033,7 @@ interface SlackChannel {
   is_member: boolean;
 }
 
-function IntegrationsTab() {
+function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
   const params = useSearchParams();
   const router = useRouter();
   const toast = useToast();
@@ -3773,6 +3779,19 @@ function IntegrationsTab() {
                 </button>
               </div>
             </div>
+          ) : isFreeUser ? (
+            <a
+              href="/app/settings?tab=billing"
+              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
+              style={{
+                background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+                color: "var(--color-accent)",
+              }}
+            >
+              <Lock size={12} />
+              Pro feature — Upgrade
+            </a>
           ) : isAvailable("google_drive") ? (
             <a
               href="/api/conduit/connectors/google-drive/auth"
