@@ -168,7 +168,7 @@ export default function Pricing() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "25%" }}
               transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: EASE, delay: shouldReduceMotion ? 0 : i * 0.08 }}
-              className={t.popular ? "md:-my-3 md:scale-[1.02]" : ""}
+              className={t.popular ? "md:-my-3 md:scale-[1.04] md:z-10" : ""}
             >
               <div
                 className={`conduit-card relative p-8 md:p-10 h-full flex flex-col ${
@@ -176,9 +176,18 @@ export default function Pricing() {
                 }`}
               >
                 {t.popular && (
-                  <span className="conduit-badge conduit-badge-popular absolute -top-3 left-1/2 -translate-x-1/2">
-                    Most Popular
-                  </span>
+                  <>
+                    <div
+                      aria-hidden
+                      className="absolute inset-x-0 top-0 h-0.5 rounded-t-2xl"
+                      style={{
+                        background: "linear-gradient(90deg, var(--color-ember-300), var(--color-accent))",
+                      }}
+                    />
+                    <span className="conduit-badge conduit-badge-popular absolute -top-3 left-1/2 -translate-x-1/2">
+                      Most Popular
+                    </span>
+                  </>
                 )}
 
                 <p className="conduit-caption text-[var(--color-cream-mute)] mb-6">
