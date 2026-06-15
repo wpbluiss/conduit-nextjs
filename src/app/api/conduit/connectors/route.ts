@@ -5,6 +5,7 @@ import { isGoogleCalendarConfigured } from "@/lib/connectors/google-calendar";
 import { isSlackConfigured } from "@/lib/connectors/slack";
 import { isHubSpotConfigured } from "@/lib/connectors/hubspot";
 import { isGoogleDriveConfigured } from "@/lib/connectors/google-drive";
+import { isGithubOAuthConfigured } from "@/lib/connectors/github";
 
 export const runtime = "nodejs";
 
@@ -53,7 +54,7 @@ export async function GET() {
       google_calendar: isGoogleCalendarConfigured(),
       slack: isSlackConfigured(),
       hubspot: isHubSpotConfigured(),
-      github: true, // PAT-based — always available, no env vars required
+      github: isGithubOAuthConfigured(),
       google_drive: isGoogleDriveConfigured(),
     },
   });
