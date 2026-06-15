@@ -1971,7 +1971,7 @@ export function Chat({
               <AlertCircle
                 size={16}
                 className="shrink-0 mt-0.5"
-                style={{ color: sendError.capacity ? "#ca8a04" : "#f87171" }}
+                style={{ color: sendError.capacity ? "var(--color-yellow, #EAB308)" : "var(--cx-danger, #F4607D)" }}
               />
               <p
                 className="flex-1 text-sm leading-relaxed"
@@ -1987,7 +1987,7 @@ export function Chat({
                   void send(retry);
                 }}
                 className="shrink-0 text-sm font-medium transition-colors hover:opacity-80"
-                style={{ color: "var(--color-ember-500)" }}
+                style={{ color: "var(--cx-accent, #7C6CFF)" }}
               >
                 Try again
               </button>
