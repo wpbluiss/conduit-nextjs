@@ -42,6 +42,7 @@ import { SaveOutputButton } from "./SaveOutputButton";
 import { track } from "@/lib/analytics/track";
 import { ConversationLabelManager, type ConversationLabel } from "./ConversationLabels";
 import { Tooltip } from "./pdl/Tooltip";
+import { SpecialistEmptyArt } from "./SpecialistEmptyArt";
 
 export interface VoicePrefs {
   enabled: boolean;
@@ -1639,6 +1640,15 @@ export function Chat({
                     ?.focus();
                 });
               }}
+              onFocusInput={() => {
+                requestAnimationFrame(() => {
+                  document
+                    .querySelector<HTMLTextAreaElement>(
+                      ".praxis-composer-pill textarea",
+                    )
+                    ?.focus();
+                });
+              }}
             />
           )}
 
@@ -2093,6 +2103,7 @@ function EmptyState({
   pin = "auto",
   onPinSelect,
   onPromptInsert,
+  onFocusInput,
 }: {
   firstName: string;
   onSend: (text: string, pin?: EmployeeKey) => void;
@@ -2101,6 +2112,7 @@ function EmptyState({
   pin?: PinValue;
   onPinSelect?: (emp: EmployeeKey) => void;
   onPromptInsert?: (text: string) => void;
+  onFocusInput?: () => void;
 }) {
   const copy = composeChatEmptyCopy({
     firstName,
@@ -2108,6 +2120,8 @@ function EmptyState({
   });
 
   const showSpecialistGrid = pin === "auto";
+  // true when user has pinned a specific specialist (not auto-route or team)
+  const isSpecialistPin = pin !== "auto" && pin !== "team" && pin in EMPLOYEES;
 
   return (
     <div
@@ -2217,7 +2231,75 @@ function EmptyState({
             })}
           </div>
         </>
+      ) : isSpecialistPin ? (
+        /* Illustrated zero-state for a pinned specialist (issue #755) */
+        <>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              textAlign: "center",
+              paddingTop: "var(--space-6)",
+              paddingBottom: "var(--space-2)",
+            }}
+          >
+            <SpecialistEmptyArt employeeId={pin as EmployeeId} size={220} />
+            <h1
+              className="praxis-display-1"
+              style={{
+                marginTop: "var(--space-5)",
+                color: EMPLOYEES[pin as EmployeeId].color,
+              }}
+            >
+              {pin === "jarvis"
+                ? "Atlas is ready"
+                : `Your ${EMPLOYEES[pin as EmployeeId].name.toLowerCase()} specialist is ready`}
+            </h1>
+            <p
+              className="praxis-body-lg"
+              style={{
+                marginTop: "var(--space-2)",
+                maxWidth: "28rem",
+                color: "var(--color-text-muted)",
+              }}
+            >
+              {EMPLOYEES[pin as EmployeeId].tagline}
+            </p>
+            <button
+              type="button"
+              onClick={onFocusInput}
+              className="btn-primary !text-sm"
+              style={{
+                marginTop: "var(--space-5)",
+                background: EMPLOYEES[pin as EmployeeId].color,
+                color: "var(--color-surface)",
+              }}
+            >
+              Start a conversation
+            </button>
+          </div>
+          <div
+            className="grid grid-cols-1 sm:grid-cols-2"
+            style={{
+              marginTop: "var(--space-8)",
+              gap: "var(--space-3)",
+            }}
+          >
+            {suggestions.map((s) => (
+              <PraxisSuggestionTile
+                key={s.text}
+                dept={s.dept}
+                hint={s.hint}
+                prompt={s.text}
+                pin={s.pin}
+                onSelect={(text, p) => onSend(text, p)}
+              />
+            ))}
+          </div>
+        </>
       ) : (
+        /* Fallback: team round-table or other non-auto, non-specialist pin */
         <>
           <p className="praxis-eyebrow">
             <span
@@ -2265,7 +2347,7 @@ function EmptyState({
                 hint={s.hint}
                 prompt={s.text}
                 pin={s.pin}
-                onSelect={(text, pin) => onSend(text, pin)}
+                onSelect={(text, p) => onSend(text, p)}
               />
             ))}
           </div>
