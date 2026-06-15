@@ -108,7 +108,7 @@ export function TypingIndicator({
                       width: 7,
                       height: 7,
                       borderRadius: 9999,
-                      background: "var(--dept, var(--cx-accent, #7C6CFF))",
+                      background: "var(--dept, var(--cx-accent))",
                       flexShrink: 0,
                     }}
                   />

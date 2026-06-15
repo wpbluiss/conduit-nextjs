@@ -5,11 +5,11 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, DEPT_COLOR_SOFT, EMPLOYEE_ICON } from "./EmployeeBadge";
 import { SPECIALIST_ICON_STROKE } from "@/lib/ui/specialist-icons";
+import { CX_REWARD, CX_ACCENT, CX_ACCENT_BRIGHT } from "@/lib/design-system/cx-tokens";
 
 // Spark burst geometry for the reward beat (5 evenly-spaced angles)
 const SPARK_ANGLES_DEG = [0, 72, 144, 216, 288];
-// Colors match --cx-reward and --cx-accent / --cx-accent-bright token values.
-const SPARK_COLORS = ["#34D399", "#7C6CFF", "#34D399", "#9B8CFF", "#34D399"];
+const SPARK_COLORS = [CX_REWARD, CX_ACCENT, CX_REWARD, CX_ACCENT_BRIGHT, CX_REWARD];
 
 interface BuiltinProps {
   employee: EmployeeKey;
@@ -66,19 +66,19 @@ export function SpecialistAvatar({
 
   const deptColor = isBuiltin
     ? DEPT_COLOR[employee!]
-    : (color ?? "var(--cx-accent, #7C6CFF)");
+    : (color ?? "var(--cx-accent)");
   const deptColorSoft = isBuiltin
     ? DEPT_COLOR_SOFT[employee!]
-    : (color ? `color-mix(in srgb, ${color} 12%, transparent)` : "var(--cx-accent-tint, rgba(124,108,255,0.12))");
+    : (color ? `color-mix(in srgb, ${color} 12%, transparent)` : "var(--cx-accent-tint)");
 
   const bg = active
-    ? "var(--cx-accent-tint, rgba(124,108,255,0.12))"
+    ? "var(--cx-accent-tint)"
     : deptColorSoft;
   const iconColor = active
-    ? "var(--cx-accent-bright, #9B8CFF)"
+    ? "var(--cx-accent-bright)"
     : deptColor;
   const shadow = active
-    ? "inset 0 0 0 1.5px var(--cx-accent, #7C6CFF)"
+    ? "inset 0 0 0 1.5px var(--cx-accent)"
     : `inset 0 0 0 1.5px color-mix(in srgb, ${deptColor} 55%, transparent)`;
 
   const radius = Math.round(size * 0.25); // 8px at size=32, scales proportionally
@@ -128,7 +128,7 @@ export function SpecialistAvatar({
                 transition={{ duration: 0.52, ease: [0.22, 1, 0.36, 1] }}
                 style={{
                   borderRadius: radius,
-                  boxShadow: "0 0 0 2px var(--cx-reward, #34D399)",
+                  boxShadow: "0 0 0 2px var(--cx-reward)",
                 }}
               />
               {/* Spark particles */}

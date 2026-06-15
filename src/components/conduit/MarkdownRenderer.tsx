@@ -91,12 +91,12 @@ function tokenizeLine(line: string): Token[] {
 
 // Syntax colors use cx tokens — fallbacks are cx-spec values (not ember palette)
 const TOKEN_COLOR: Record<TokenKind, string> = {
-  keyword:  "var(--cx-accent-bright, #9B8CFF)",
-  string:   "var(--cx-reward, #34D399)",
-  comment:  "var(--cx-text-faint, #6B6B7B)",
-  number:   "var(--color-amber, #FBBF24)",
-  operator: "var(--cx-text-muted, #A0A0B0)",
-  plain:    "var(--cx-text, #F4F4F7)",
+  keyword:  "var(--cx-accent-bright)",
+  string:   "var(--cx-reward)",
+  comment:  "var(--cx-text-faint)",
+  number:   "var(--color-amber)",
+  operator: "var(--cx-text-muted)",
+  plain:    "var(--cx-text)",
 };
 
 function SyntaxLine({ line }: { line: string }) {
@@ -159,7 +159,7 @@ function CopyButton({ text, alwaysVisible }: { text: string; alwaysVisible?: boo
       style={{
         transitionDuration: "var(--cx-dur-fast, 120ms)",
         transitionTimingFunction: "var(--cx-ease, cubic-bezier(0.22,1,0.36,1))",
-        color: copied ? "var(--cx-reward, #34D399)" : undefined,
+        color: copied ? "var(--cx-reward)" : undefined,
       }}
     >
       {copied ? <Check size={14} strokeWidth={2} /> : <Copy size={14} strokeWidth={2} />}
@@ -186,8 +186,8 @@ function HighlightedCodeBlock({
     <div
       className="rounded-xl overflow-hidden my-3 group"
       style={{
-        background: "var(--cx-surface-raised, #1C1C26)",
-        border: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))",
+        background: "var(--cx-surface-raised)",
+        border: "1px solid var(--cx-glass-border)",
         boxShadow: [
           "var(--cx-glass-shadow, 0 1px 3px rgba(0,0,0,.40), 0 4px 16px rgba(0,0,0,.30))",
           "var(--cx-glass-highlight, inset 0 1px 0 rgba(255,255,255,.10))",
@@ -199,13 +199,13 @@ function HighlightedCodeBlock({
         className="flex items-center justify-between px-4"
         style={{
           height: "36px",
-          borderBottom: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))",
-          background: "var(--cx-glass-bg, rgba(255,255,255,0.04))",
+          borderBottom: "1px solid var(--cx-glass-border)",
+          background: "var(--cx-glass-bg)",
         }}
       >
         <span
           className="cx-mono cx-type-xs uppercase tracking-[0.15em]"
-          style={{ color: "var(--cx-text-faint, #6B6B7B)" }}
+          style={{ color: "var(--cx-text-faint)" }}
         >
           {lang || "code"}
         </span>
@@ -338,14 +338,14 @@ function renderSegments(segments: Segment[], key: string) {
     const k = `${key}-${j}`;
     if (seg.type === "bold") {
       return (
-        <strong key={k} style={{ color: "var(--cx-text, #F4F4F7)", fontWeight: 600 }}>
+        <strong key={k} style={{ color: "var(--cx-text)", fontWeight: 600 }}>
           {seg.content}
         </strong>
       );
     }
     if (seg.type === "italic") {
       return (
-        <em key={k} style={{ color: "var(--cx-text, #F4F4F7)" }}>
+        <em key={k} style={{ color: "var(--cx-text)" }}>
           {seg.content}
         </em>
       );
@@ -356,10 +356,10 @@ function renderSegments(segments: Segment[], key: string) {
           key={k}
           className="px-1.5 py-0.5 rounded-md text-[0.85em]"
           style={{
-            background: "var(--cx-surface-raised, #1C1C26)",
-            border: "1px solid var(--cx-border, #262630)",
+            background: "var(--cx-surface-raised)",
+            border: "1px solid var(--cx-border)",
             fontFamily: "var(--font-mono, monospace)",
-            color: "var(--cx-accent-bright, #9B8CFF)",
+            color: "var(--cx-accent-bright)",
           }}
         >
           {seg.content}
@@ -377,13 +377,13 @@ function renderSegments(segments: Segment[], key: string) {
           target="_blank"
           rel="noopener noreferrer"
           className="underline underline-offset-2 transition-colors duration-150"
-          style={{ color: "var(--cx-accent-bright, #9B8CFF)" }}
+          style={{ color: "var(--cx-accent-bright)" }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.color = "var(--cx-accent, #7C6CFF)";
+            (e.currentTarget as HTMLElement).style.color = "var(--cx-accent)";
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLElement).style.color =
-              "var(--cx-accent-bright, #9B8CFF)";
+              "var(--cx-accent-bright)";
           }}
         >
           {seg.content}
@@ -560,7 +560,7 @@ function renderBlock(block: Block, bi: number, caretColor?: string): React.React
         key={bi}
         style={{
           border: "none",
-          borderTop: "1px solid var(--cx-border, #262630)",
+          borderTop: "1px solid var(--cx-border)",
           margin: "var(--cx-space-4, 16px) 0",
         }}
       />
@@ -585,7 +585,7 @@ function renderBlock(block: Block, bi: number, caretColor?: string): React.React
           fontWeight: 600,
           lineHeight: "var(--cx-lh-heading, 1.10)",
           letterSpacing: "var(--cx-ls-tight, -0.01em)",
-          color: "var(--cx-text, #F4F4F7)",
+          color: "var(--cx-text)",
         }}
       >
         {rendered}
@@ -602,8 +602,8 @@ function renderBlock(block: Block, bi: number, caretColor?: string): React.React
         className="my-2 py-2 pr-3 rounded-r-lg"
         style={{
           paddingLeft: "var(--cx-space-4, 16px)",
-          borderLeft: "3px solid var(--cx-accent, #7C6CFF)",
-          background: "var(--cx-accent-tint, rgba(124, 108, 255, 0.12))",
+          borderLeft: "3px solid var(--cx-accent)",
+          background: "var(--cx-accent-tint)",
         }}
       >
         {items.map((line, li) => {
@@ -612,7 +612,7 @@ function renderBlock(block: Block, bi: number, caretColor?: string): React.React
             <p
               key={li}
               className="text-sm leading-relaxed"
-              style={{ color: "var(--cx-text-muted, #A0A0B0)" }}
+              style={{ color: "var(--cx-text-muted)" }}
             >
               {renderSegments(parseInline(line), `bq${bi}-${li}`)}
               {caretColor && isLast && <StreamingCaret color={caretColor} />}
@@ -631,7 +631,7 @@ function renderBlock(block: Block, bi: number, caretColor?: string): React.React
         key={bi}
         className={block.ordered ? "list-decimal space-y-1" : "list-disc space-y-1"}
         style={{
-          color: "var(--cx-text, #F4F4F7)",
+          color: "var(--cx-text)",
           paddingLeft: "var(--cx-space-4, 16px)",
           margin: "var(--cx-space-2, 8px) 0",
         }}
@@ -661,7 +661,7 @@ function renderBlock(block: Block, bi: number, caretColor?: string): React.React
       <div key={bi} className="overflow-x-auto my-3">
         <table
           className="w-full text-sm border-collapse"
-          style={{ borderColor: "var(--cx-border, #262630)" }}
+          style={{ borderColor: "var(--cx-border)" }}
         >
           <thead>
             <tr>
@@ -670,13 +670,13 @@ function renderBlock(block: Block, bi: number, caretColor?: string): React.React
                   key={ci}
                   className="px-4 py-2.5 text-left text-[11px] uppercase tracking-[0.12em] font-semibold"
                   style={{
-                    background: "var(--cx-surface-overlay, #23232E)",
-                    borderBottom: "1px solid var(--cx-border-strong, #33333F)",
+                    background: "var(--cx-surface-overlay)",
+                    borderBottom: "1px solid var(--cx-border-strong)",
                     borderRight:
                       ci < (block.headers ?? []).length - 1
-                        ? "1px solid var(--cx-border, #262630)"
+                        ? "1px solid var(--cx-border)"
                         : "none",
-                    color: "var(--cx-text-muted, #A0A0B0)",
+                    color: "var(--cx-text-muted)",
                   }}
                 >
                   {renderSegments(parseInline(h), `th${bi}-${ci}`)}
@@ -694,7 +694,7 @@ function renderBlock(block: Block, bi: number, caretColor?: string): React.React
                     background:
                       ri % 2 === 0
                         ? "transparent"
-                        : "var(--cx-surface-raised, #1C1C26)",
+                        : "var(--cx-surface-raised)",
                   }}
                 >
                   {row.map((cell, ci) => {
@@ -704,8 +704,8 @@ function renderBlock(block: Block, bi: number, caretColor?: string): React.React
                         key={ci}
                         className="px-4 py-2"
                         style={{
-                          border: "1px solid var(--cx-border, #262630)",
-                          color: "var(--cx-text, #F4F4F7)",
+                          border: "1px solid var(--cx-border)",
+                          color: "var(--cx-text)",
                           fontSize: "var(--cx-type-sm, 13px)",
                         }}
                       >
@@ -733,7 +733,7 @@ function renderBlock(block: Block, bi: number, caretColor?: string): React.React
       style={{
         fontSize: "var(--cx-type-sm, 13px)",
         lineHeight: "var(--cx-lh-body, 1.60)",
-        color: "var(--cx-text, #F4F4F7)",
+        color: "var(--cx-text)",
       }}
     >
       {renderSegments(segs, `p${bi}`)}
@@ -773,7 +773,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
           style={{
             fontSize: "var(--cx-type-sm, 13px)",
             lineHeight: "var(--cx-lh-body, 1.60)",
-            color: "var(--cx-text, #F4F4F7)",
+            color: "var(--cx-text)",
           }}
         >
           {content}

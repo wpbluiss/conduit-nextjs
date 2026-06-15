@@ -15,11 +15,11 @@ const TAG_COLOR: Record<string, { bg: string; color: string }> = {
   },
   fix: {
     bg: "rgba(22, 163, 74, 0.10)",
-    color: "var(--color-green, #4ade80)",
+    color: "var(--color-green)",
   },
   infra: {
     bg: "rgba(202, 138, 4, 0.10)",
-    color: "var(--color-amber, #ca8a04)",
+    color: "var(--color-amber)",
   },
 };
 

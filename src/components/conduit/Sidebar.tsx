@@ -162,7 +162,7 @@ function SidebarUpgradeBanner({
               className="h-full rounded-full"
               style={{
                 width: `${pct * 100}%`,
-                background: pct >= 0.8 ? "var(--cx-danger, #F4607D)" : "var(--color-accent)",
+                background: pct >= 0.8 ? "var(--cx-danger)" : "var(--color-accent)",
                 transition: "width 0.3s ease",
               }}
             />
@@ -608,7 +608,7 @@ export function Sidebar({
         className={`cx-glass fixed md:static z-40 inset-y-0 left-0 border-r flex flex-col overflow-hidden transform transition-transform duration-200 ease-in-out ${
           open ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
-        style={{ minWidth: collapsed ? 56 : 256, borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}
+        style={{ minWidth: collapsed ? 56 : 256, borderColor: "var(--cx-glass-border)" }}
       >
         {/* Header — workspace logo / Praxis wordmark + collapse toggle */}
         <div
@@ -974,7 +974,7 @@ export function Sidebar({
                         style={{ background: DEPT_COLOR[emp] }}
                         aria-label="Pinned"
                       >
-                        <Pin size={7} style={{ color: "var(--color-canvas, #fff)" }} strokeWidth={2.5} />
+                        <Pin size={7} style={{ color: "var(--color-canvas)" }} strokeWidth={2.5} />
                       </span>
                     )}
                   </span>

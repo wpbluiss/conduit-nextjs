@@ -173,7 +173,7 @@ export function PaywallModal({
           </p>
 
           {/* Billing toggle */}
-          <div className="mt-4 inline-flex items-center gap-1 rounded-full p-1" style={{ background: "var(--cx-surface-raised, #1C1C26)", border: "1px solid var(--color-border)" }}>
+          <div className="mt-4 inline-flex items-center gap-1 rounded-full p-1" style={{ background: "var(--cx-surface-raised)", border: "1px solid var(--color-border)" }}>
             <button
               onClick={() => setBilling("monthly")}
               className="px-3 py-1 text-xs rounded-full transition-colors"

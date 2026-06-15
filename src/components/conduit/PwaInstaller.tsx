@@ -74,17 +74,17 @@ export function PwaInstaller() {
         className="conduit-card p-4 flex items-start gap-3"
         style={{
           boxShadow:
-            "0 0 0 1px var(--cx-accent-glow-raw, rgba(124,108,255,0.2)), 0 8px 32px rgba(0,0,0,0.4)",
+            "0 0 0 1px var(--cx-accent-glow-raw), 0 8px 32px rgba(0,0,0,0.4)",
         }}
       >
         <div
           className="rounded-lg p-2 shrink-0"
-          style={{ background: "var(--cx-accent-tint, rgba(124,108,255,0.12))" }}
+          style={{ background: "var(--cx-accent-tint)" }}
         >
           <DownloadSimple
             size={18}
             weight="fill"
-            style={{ color: "var(--cx-accent, #7C6CFF)" }}
+            style={{ color: "var(--cx-accent)" }}
           />
         </div>
         <div className="flex-1 min-w-0">
@@ -106,7 +106,7 @@ export function PwaInstaller() {
               <button
                 onClick={install}
                 className="mt-2 rounded-lg px-3 py-1.5 text-xs font-medium text-[var(--color-cream)] transition-colors"
-                style={{ background: "var(--cx-accent, #7C6CFF)" }}
+                style={{ background: "var(--cx-accent)" }}
               >
                 Install
               </button>

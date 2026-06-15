@@ -96,9 +96,9 @@ const ICON = {
 } as const;
 
 const COLOR = {
-  success: "var(--cx-reward, #34D399)",
-  error: "var(--cx-danger, #F4607D)",
-  info: "var(--cx-accent, #7C6CFF)",
+  success: "var(--cx-reward)",
+  error: "var(--cx-danger)",
+  info: "var(--cx-accent)",
 } as const;
 
 function ToastContainer({
@@ -129,7 +129,7 @@ function ToastContainer({
               className="cx-glass-float cx-glass-border pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-[12px]"
               style={{
                 maxWidth: 320,
-                color: "var(--cx-text, #F4F4F7)",
+                color: "var(--cx-text)",
               }}
             >
               <Icon
