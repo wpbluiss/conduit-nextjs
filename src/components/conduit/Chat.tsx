@@ -1669,11 +1669,7 @@ export function Chat({
           {/* Inline search bar — shown when searchOpen is true */}
           {searchOpen && conversationId && (
             <div
-              className="flex items-center gap-2 px-2 py-2 mb-2 rounded-xl border"
-              style={{
-                background: "var(--color-surface-elevated)",
-                borderColor: "var(--color-border)",
-              }}
+              className="cx-glass cx-glass-border flex items-center gap-2 px-2 py-2 mb-2 rounded-[8px]"
             >
               <Search size={13} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} aria-hidden />
               <input
@@ -2098,11 +2094,7 @@ export function Chat({
             className="fixed inset-0 z-50 flex items-center justify-center px-4"
           >
             <div
-              className="w-full max-w-md rounded-2xl border p-6 shadow-2xl"
-              style={{
-                background: "var(--color-surface-elevated)",
-                borderColor: "var(--color-border)",
-              }}
+              className="cx-glass-float cx-glass-border w-full max-w-md rounded-[16px] p-6"
             >
               <div className="flex items-center justify-between mb-4">
                 <div>

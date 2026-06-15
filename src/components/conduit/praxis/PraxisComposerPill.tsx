@@ -231,16 +231,14 @@ export function PraxisComposerPill({
           <div
             onMouseLeave={() => setPinOpen(false)}
             role="listbox"
+            className="cx-glass-float cx-glass-border"
             style={{
               position: "absolute",
               bottom: "100%",
               left: 0,
-              marginBottom: "var(--space-2)",
+              marginBottom: "var(--cx-space-2, 8px)",
               width: "16rem",
-              borderRadius: "var(--radius-card)",
-              background: "var(--color-surface-elevated)",
-              border: "1px solid var(--color-border)",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+              borderRadius: "var(--cx-radius-md, 12px)",
               overflow: "hidden",
               textAlign: "left",
               zIndex: 10,
@@ -294,15 +292,13 @@ export function PraxisComposerPill({
           <div
             role="listbox"
             aria-label="Specialist suggestions"
+            className="cx-glass-float cx-glass-border"
             style={{
               position: "absolute",
               bottom: "calc(100% + 8px)",
               left: 0,
               right: 0,
-              borderRadius: "var(--radius-card)",
-              background: "var(--color-surface-elevated)",
-              border: "1px solid var(--color-border)",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+              borderRadius: "var(--cx-radius-md, 12px)",
               overflow: "hidden",
               zIndex: 20,
             }}
