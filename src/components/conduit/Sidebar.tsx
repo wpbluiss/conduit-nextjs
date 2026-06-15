@@ -160,7 +160,7 @@ function SidebarUpgradeBanner({
               className="h-full rounded-full"
               style={{
                 width: `${pct * 100}%`,
-                background: pct >= 0.8 ? "#FF8A3D" : "var(--color-accent)",
+                background: pct >= 0.8 ? "var(--cx-danger, #F4607D)" : "var(--color-accent)",
                 transition: "width 0.3s ease",
               }}
             />
