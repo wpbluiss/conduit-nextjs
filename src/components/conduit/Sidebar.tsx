@@ -264,9 +264,9 @@ function SidebarThemeButton({ collapsed = false }: { collapsed?: boolean }) {
   }
 
   const icons: Record<ThemePref, React.ReactNode> = {
-    light: <Sun size={14} />,
-    dark: <Moon size={14} />,
-    system: <Monitor size={14} />,
+    light: <Sun size={16} />,
+    dark: <Moon size={16} />,
+    system: <Monitor size={16} />,
   };
   const labels: Record<ThemePref, string> = {
     light: "Light",
@@ -759,7 +759,7 @@ export function Sidebar({
         <nav className="flex-1 overflow-y-auto pb-3" aria-label="Main navigation">
           <NavLink
             href="/app/workspace"
-            icon={<LayoutGrid size={16} />}
+            icon={<LayoutGrid size={20} />}
             label="Workspace"
             active={isActive("/app/workspace")}
             onClick={close}
@@ -768,7 +768,7 @@ export function Sidebar({
           <div data-tour-target="specialists">
           <NavLink
             href="/app/team"
-            icon={<Users2 size={16} />}
+            icon={<Users2 size={20} />}
             label="Team"
             active={pathname === "/app/team"}
             onClick={close}
@@ -1008,7 +1008,7 @@ export function Sidebar({
           <div className="mt-3 space-y-0.5">
             <NavLink
               href="/app/voice"
-              icon={<Mic size={16} />}
+              icon={<Mic size={20} />}
               label="Voice Room"
               active={isActive("/app/voice")}
               onClick={close}
@@ -1017,7 +1017,7 @@ export function Sidebar({
             {allowedEmployees.includes("sales") && (
               <NavLink
                 href="/app/team/sales"
-                icon={<Sparkles size={16} />}
+                icon={<Sparkles size={20} />}
                 label="Leads"
                 active={pathname === "/app/team/sales"}
                 onClick={close}
@@ -1027,7 +1027,7 @@ export function Sidebar({
             <div data-tour-target="memory">
             <NavLink
               href="/app/activity"
-              icon={<Activity size={16} />}
+              icon={<Activity size={20} />}
               label="Activity"
               active={isActive("/app/activity")}
               onClick={close}
@@ -1035,7 +1035,7 @@ export function Sidebar({
             />
             <NavLink
               href="/app/memory"
-              icon={<Brain size={16} />}
+              icon={<Brain size={20} />}
               label="Memory"
               active={isActive("/app/memory")}
               onClick={close}
@@ -1044,7 +1044,7 @@ export function Sidebar({
             </div>
             <NavLink
               href="/app/outputs"
-              icon={<Bookmark size={16} />}
+              icon={<Bookmark size={20} />}
               label="Outputs"
               active={isActive("/app/outputs")}
               onClick={close}
@@ -1068,7 +1068,7 @@ export function Sidebar({
                       className="relative inline-flex"
                       style={{ color: isActive("/app/builds") ? "var(--cx-accent, var(--color-accent))" : undefined }}
                     >
-                      <Hammer size={16} />
+                      <Hammer size={20} />
                       <SidebarBuildPip
                         initial={inFlightBuildsInitial}
                         accountId={accountId}
@@ -1108,7 +1108,7 @@ export function Sidebar({
             )}
             <NavLink
               href="/app/analytics"
-              icon={<BarChart3 size={16} />}
+              icon={<BarChart3 size={20} />}
               label="Analytics"
               active={isActive("/app/analytics")}
               onClick={close}
@@ -1427,7 +1427,7 @@ export function Sidebar({
                 className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-[120ms]"
                 style={{ color: "var(--cx-text-muted, var(--color-text-muted))" }}
               >
-                <CircleHelp size={15} />
+                <CircleHelp size={16} />
               </button>
               <SidebarThemeButton collapsed />
               <Link href="/app/settings" title="Settings" aria-label="Settings" onClick={close} data-tour-target="settings"
@@ -1436,7 +1436,7 @@ export function Sidebar({
                   background: isActive("/app/settings") ? "color-mix(in srgb, var(--cx-accent, var(--color-accent)) 12%, var(--color-surface-elevated))" : undefined,
                   color: isActive("/app/settings") ? "var(--cx-accent, var(--color-accent))" : "var(--cx-text-muted, var(--color-text-muted))",
                 }}>
-                <Settings size={15} />
+                <Settings size={16} />
               </Link>
               <Link href="/app/settings/billing" title="Billing" aria-label="Billing" onClick={close}
                 className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-[120ms]"
@@ -1444,13 +1444,13 @@ export function Sidebar({
                   background: isActive("/app/settings/billing") ? "color-mix(in srgb, var(--cx-accent, var(--color-accent)) 12%, var(--color-surface-elevated))" : undefined,
                   color: isActive("/app/settings/billing") ? "var(--cx-accent, var(--color-accent))" : "var(--cx-text-muted, var(--color-text-muted))",
                 }}>
-                <CreditCard size={15} />
+                <CreditCard size={16} />
               </Link>
               <form action="/auth/sign-out" method="post">
                 <button type="submit" title="Sign out" aria-label="Sign out"
                   className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-[120ms]"
                   style={{ color: "var(--cx-text-muted, var(--color-text-muted))" }}>
-                  <LogOut size={15} />
+                  <LogOut size={16} />
                 </button>
               </form>
               <div
@@ -1480,13 +1480,13 @@ export function Sidebar({
                 onClick={() => window.dispatchEvent(new CustomEvent("praxis:shortcuts:open"))}
                 className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] rounded-lg transition-colors duration-100"
               >
-                <CircleHelp size={15} /> Shortcuts
+                <CircleHelp size={16} /> Shortcuts
               </button>
               <SidebarThemeButton />
               <div data-tour-target="settings">
               <NavLink
                 href="/app/settings"
-                icon={<Settings size={15} />}
+                icon={<Settings size={16} />}
                 label="Settings"
                 active={
                   pathname === "/app/settings" ||
@@ -1499,7 +1499,7 @@ export function Sidebar({
               </div>
               <NavLink
                 href="/app/settings/billing"
-                icon={<CreditCard size={15} />}
+                icon={<CreditCard size={16} />}
                 label="Billing"
                 active={isActive("/app/settings/billing")}
                 onClick={close}
@@ -1510,7 +1510,7 @@ export function Sidebar({
                   type="submit"
                   className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] rounded-lg transition-colors duration-100"
                 >
-                  <LogOut size={15} /> Sign out
+                  <LogOut size={16} /> Sign out
                 </button>
               </form>
               <div className="px-3 pt-2 flex items-center gap-2">

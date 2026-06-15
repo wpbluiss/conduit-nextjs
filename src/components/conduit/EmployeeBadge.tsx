@@ -1,17 +1,7 @@
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { EMPLOYEES } from "@/lib/conduit/employees";
-import {
-  Code2,
-  Compass,
-  DollarSign,
-  HeartHandshake,
-  Megaphone,
-  Scale,
-  ShieldCheck,
-  TrendingUp,
-  Workflow,
-  type LucideIcon,
-} from "lucide-react";
+import { Compass, type LucideIcon } from "lucide-react";
+import { SPECIALIST_ICON, SPECIALIST_ICON_STROKE } from "@/lib/ui/specialist-icons";
 
 // Re-exported as Records for compatibility with existing call sites that
 // indexed by EmployeeKey directly.
@@ -23,19 +13,8 @@ export const DEPT_COLOR_SOFT: Record<EmployeeKey, string> = Object.fromEntries(
   Object.entries(EMPLOYEES).map(([id, c]) => [id, c.colorSoft]),
 ) as Record<EmployeeKey, string>;
 
-// R14 role-icon avatars — replaces the letter-initial mark in the rail
-// and any dense surface where the icon reads faster than a letter.
-export const EMPLOYEE_ICON: Record<EmployeeKey, LucideIcon> = {
-  jarvis: Compass,        // Atlas — routes work, holds bigger picture
-  marketing: Megaphone,
-  sales: TrendingUp,
-  engineering: Code2,
-  finance: DollarSign,
-  compliance: ShieldCheck,
-  hr: HeartHandshake,
-  ops: Workflow,
-  legal: Scale,
-};
+// Re-export from canonical source for existing call sites.
+export const EMPLOYEE_ICON: Record<EmployeeKey, LucideIcon> = SPECIALIST_ICON;
 
 // Fallback for any employee id that isn't one of the current specialists
 // (e.g. an old conversation/message tagged with a since-removed id). Prevents
@@ -82,7 +61,7 @@ export function EmployeeAvatar({
       {variant === "letter" ? (
         <span style={{ color: "var(--color-text)" }}>{m.initial}</span>
       ) : (
-        <Icon size={glyphSize} strokeWidth={2.25} />
+        <Icon size={glyphSize} strokeWidth={SPECIALIST_ICON_STROKE} />
       )}
     </span>
   );
