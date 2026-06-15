@@ -1077,6 +1077,32 @@ export function Chat({
       let buf = "";
       let currentEmployee: EmployeeKey = placeholderEmp;
 
+      // RAF-batched token accumulation — collapse per-token setStates into
+      // one DOM update per animation frame (~60fps) for smooth streaming perf.
+      let tokenBuf = "";
+      let tokenBufEmployee: EmployeeKey = placeholderEmp;
+      let tokenRafId: number | null = null;
+
+      const flushTokenBuf = () => {
+        if (tokenBuf) {
+          appendTo(tokenBufEmployee, tokenBuf);
+          tokenBuf = "";
+        }
+        tokenRafId = null;
+      };
+
+      const scheduleTokenFlush = () => {
+        if (!tokenRafId) tokenRafId = requestAnimationFrame(flushTokenBuf);
+      };
+
+      const flushTokenBufNow = () => {
+        if (tokenRafId !== null) {
+          cancelAnimationFrame(tokenRafId);
+          tokenRafId = null;
+        }
+        flushTokenBuf();
+      };
+
       const ensurePendingFor = (employee: EmployeeKey, handoffFrom?: EmployeeKey) => {
         setMessages((prev) => {
           const next = [...prev];
@@ -1171,11 +1197,18 @@ export function Chat({
         }
         if (event === "token") {
           const employee = (data.employee as EmployeeKey) || currentEmployee;
+          if (employee !== tokenBufEmployee) {
+            // Employee changed mid-stream — flush the old buffer before switching
+            flushTokenBufNow();
+            tokenBufEmployee = employee;
+          }
           currentEmployee = employee;
           setStreamingEmployee(employee);
           ensurePendingFor(employee);
-          appendTo(employee, (data.delta as string) || "");
+          tokenBuf += (data.delta as string) || "";
+          scheduleTokenFlush();
         } else if (event === "handoff") {
+          flushTokenBufNow();
           const from = currentEmployee;
           const to = data.to as EmployeeKey;
           finishCurrent(from);
@@ -1191,6 +1224,7 @@ export function Chat({
           setStreamingEmployee(to);
           ensurePendingFor(to, from);
         } else if (event === "message_end") {
+          flushTokenBufNow();
           const employee = (data.employee as EmployeeKey) || currentEmployee;
           finishCurrent(employee);
           // Auto-play the just-finished message if voice is on AND R13's
@@ -1443,7 +1477,8 @@ export function Chat({
           }
         }
       } catch {
-        // Stream dropped mid-response — mark the in-flight message as incomplete.
+        // Stream dropped mid-response — flush buffer then mark incomplete.
+        flushTokenBufNow();
         setMessages((prev) => {
           const next = [...prev];
           const last = next[next.length - 1];
@@ -1454,6 +1489,7 @@ export function Chat({
           return next;
         });
       } finally {
+        flushTokenBufNow();
         setStreamingEmployee(null);
         setRoundTableActiveEmployee(null);
         setLoading(false);
@@ -3219,7 +3255,12 @@ const MessageBubble = memo(function MessageBubble({
           </button>
         ))}
         {message.id && !message.pending && (
-          <div className="flex items-center gap-2">
+          <motion.div
+            className="flex items-center gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.12, ease: "easeOut" }}
+          >
             <CopyButton content={message.content} />
             <MessageFeedbackButtons messageId={message.id} initialRating={message.feedback ?? null} />
             {onPinToggle && (
@@ -3258,7 +3299,7 @@ const MessageBubble = memo(function MessageBubble({
                 sourceEmployee={message.employee as EmployeeKey}
               />
             )}
-          </div>
+          </motion.div>
         )}
       </div>
     </motion.div>
