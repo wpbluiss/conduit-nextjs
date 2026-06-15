@@ -308,6 +308,94 @@
 .praxis-root .cx-radius-full { border-radius: var(--cx-radius-full); }
 
 /* ------------------------------------------------------------
+ * .cx-icon-btn — square icon-only button
+ *
+ * Pairs with any PraxisButton variant or standalone.
+ * Standard size: 32px (p-2 + 16px icon). Use .cx-icon-btn-lg
+ * for 36px touch targets on primary icon actions.
+ * ------------------------------------------------------------ */
+
+.praxis-root .cx-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--cx-space-2, 8px);
+  border-radius: var(--cx-radius-sm, 8px);
+  color: var(--cx-text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background var(--cx-dur-fast, 120ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
+    color var(--cx-dur-fast, 120ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1));
+}
+.praxis-root .cx-icon-btn:hover {
+  background: var(--cx-surface-raised, #1C1C26);
+  color: var(--cx-text, #F4F4F7);
+}
+.praxis-root .cx-icon-btn:active {
+  background: color-mix(in srgb, var(--cx-surface-raised, #1C1C26) 70%, var(--cx-accent-tint));
+  transform: scale(0.95);
+}
+.praxis-root .cx-icon-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--cx-accent-glow);
+}
+.praxis-root .cx-icon-btn.cx-icon-btn--accent:hover {
+  background: var(--cx-accent-tint);
+  color: var(--cx-accent-bright);
+}
+
+.praxis-root .cx-icon-btn-lg {
+  padding: var(--cx-space-2, 8px);
+  width: 36px;
+  height: 36px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .praxis-root .cx-icon-btn { transition: none; }
+  .praxis-root .cx-icon-btn:active { transform: none; }
+}
+
+/* ------------------------------------------------------------
+ * .cx-interactive — tactile feedback for rows / list items /
+ * any clickable surface that isn't a button.
+ *
+ * Provides: hover background lift, active press feedback,
+ * spec-aligned focus ring. Use on <li>, <div role="button">,
+ * sidebar rows, etc.
+ * ------------------------------------------------------------ */
+
+.praxis-root .cx-interactive {
+  cursor: pointer;
+  transition:
+    background var(--cx-dur-fast, 120ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
+    color var(--cx-dur-fast, 120ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1));
+}
+.praxis-root .cx-interactive:hover {
+  background: var(--cx-surface-raised, #1C1C26);
+}
+.praxis-root .cx-interactive:active {
+  background: color-mix(in srgb, var(--cx-surface-raised, #1C1C26) 80%, var(--cx-border));
+}
+.praxis-root .cx-interactive:focus-visible {
+  outline: none;
+  box-shadow: var(--cx-accent-glow);
+}
+
+/* Selected / active state within a list */
+.praxis-root .cx-interactive[aria-selected="true"],
+.praxis-root .cx-interactive[data-active="true"] {
+  background: var(--cx-accent-tint);
+  color: var(--cx-accent-bright);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .praxis-root .cx-interactive { transition: none; }
+}
+
+/* ------------------------------------------------------------
  * Scrollbar styling — matches new deep canvas
  * ------------------------------------------------------------ */
 
