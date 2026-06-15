@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   CreditCard,
+  Keyboard,
   Lock,
   MessageSquare,
   Puzzle,
@@ -361,8 +362,22 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
                 <span>
                   <kbd className="font-mono">Esc</kbd> close
                 </span>
-                <span className="ml-auto">
-                  <kbd className="font-mono">⌘K</kbd> to reopen
+                <span className="ml-auto flex items-center gap-3">
+                  <span className="hidden sm:inline">
+                    <kbd className="font-mono">⌘K</kbd> to reopen
+                  </span>
+                  <button
+                    type="button"
+                    className="sm:hidden flex items-center gap-1.5 transition-colors hover:text-[var(--color-text)]"
+                    onClick={() => {
+                      close();
+                      window.dispatchEvent(new CustomEvent("praxis:shortcuts:open"));
+                    }}
+                    aria-label="Open keyboard shortcuts"
+                  >
+                    <Keyboard size={12} />
+                    Shortcuts
+                  </button>
                 </span>
               </div>
             </div>
