@@ -39,6 +39,101 @@ import { SidebarBuildsSection } from "./builds/in-flight/SidebarBuildsSection";
 import type { InFlightBuild } from "@/lib/engineering/in-flight";
 import { ChangelogPopover } from "./ChangelogPopover";
 import { NotificationCenter } from "./NotificationCenter";
+import { PaywallModal } from "./PaywallModal";
+import type { PaywallPayload } from "./PaywallModal";
+
+const BANNER_SESSION_KEY = "praxis:upgrade_banner_dismissed";
+
+function SidebarUpgradeBanner({
+  tokensUsed,
+  tokensAllowance,
+  onUpgradeClick,
+}: {
+  tokensUsed: number;
+  tokensAllowance: number;
+  onUpgradeClick: () => void;
+}) {
+  const [dismissed, setDismissed] = useState(true);
+
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(BANNER_SESSION_KEY) !== "1") setDismissed(false);
+    } catch {
+      setDismissed(false);
+    }
+  }, []);
+
+  if (dismissed) return null;
+
+  const pct = tokensAllowance > 0 ? Math.min(tokensUsed / tokensAllowance, 1) : 0;
+  const pctDisplay = Math.round(pct * 100);
+  const usedK = (tokensUsed / 1000).toFixed(0);
+  const capK = (tokensAllowance / 1000).toFixed(0);
+
+  const dismiss = () => {
+    setDismissed(true);
+    try { sessionStorage.setItem(BANNER_SESSION_KEY, "1"); } catch { /* ignore */ }
+  };
+
+  return (
+    <div
+      className="mx-3 mb-2 rounded-xl"
+      style={{
+        background: "color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-elevated))",
+        border: "1px solid color-mix(in srgb, var(--color-accent) 20%, var(--color-border))",
+      }}
+    >
+      <div className="px-3 pt-2.5 pb-2.5">
+        <div className="flex items-start justify-between gap-1 mb-2">
+          <div className="flex items-center gap-1.5">
+            <Sparkles size={11} style={{ color: "var(--color-accent)", flexShrink: 0 }} />
+            <span className="text-[11px] font-semibold" style={{ color: "var(--color-text)" }}>
+              Unlock all 9 specialists
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={dismiss}
+            aria-label="Dismiss upgrade prompt"
+            className="shrink-0 transition-colors"
+            style={{ color: "var(--color-text-muted)" }}
+          >
+            <X size={12} />
+          </button>
+        </div>
+
+        {/* Usage meter */}
+        <div className="mb-2.5">
+          <div
+            className="w-full rounded-full overflow-hidden"
+            style={{ height: 4, background: "var(--color-border)" }}
+          >
+            <div
+              className="h-full rounded-full"
+              style={{
+                width: `${pct * 100}%`,
+                background: pct >= 0.8 ? "#FF8A3D" : "var(--color-accent)",
+                transition: "width 0.3s ease",
+              }}
+            />
+          </div>
+          <p className="mt-1 text-[10px]" style={{ color: "var(--color-text-muted)" }}>
+            {usedK}k / {capK}k tokens used ({pctDisplay}%)
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => { dismiss(); onUpgradeClick(); }}
+          className="w-full py-1.5 rounded-lg text-[11px] font-semibold transition-opacity hover:opacity-90"
+          style={{ background: "var(--color-accent)", color: "#fff" }}
+        >
+          Upgrade to Pro
+        </button>
+      </div>
+    </div>
+  );
+}
 
 interface ConvoSummary {
   id: string;
@@ -135,6 +230,10 @@ export function Sidebar({
   team,
   allowedEmployees,
   tierName,
+  tierId,
+  tokensUsed,
+  tokensAllowance,
+  internalAccount,
   accountId,
   inFlightBuildsInitial,
   avatarUrl,
@@ -147,6 +246,10 @@ export function Sidebar({
   team: TeamActivity[];
   allowedEmployees: EmployeeKey[];
   tierName?: string;
+  tierId?: string;
+  tokensUsed?: number;
+  tokensAllowance?: number;
+  internalAccount?: boolean;
   accountId: string;
   inFlightBuildsInitial: InFlightBuild[];
   avatarUrl?: string | null;
@@ -159,6 +262,7 @@ export function Sidebar({
   const { labelFor } = useNicknames();
   const [open, setOpen] = useState(false);
   const [teamExpanded, setTeamExpanded] = useState(true);
+  const [showPaywall, setShowPaywall] = useState(false);
   // Desktop collapsed state — lazy init from localStorage, persisted.
   const [collapsed, setCollapsed] = useState<boolean>(false);
   // Suppress the width transition on initial hydration to avoid CLS.
@@ -973,6 +1077,15 @@ export function Sidebar({
           )}
         </nav>
 
+        {/* Upgrade banner — free-plan users only, hidden in icon-only mode */}
+        {!collapsed && tierId === "free" && !internalAccount && typeof tokensUsed === "number" && typeof tokensAllowance === "number" && (
+          <SidebarUpgradeBanner
+            tokensUsed={tokensUsed}
+            tokensAllowance={tokensAllowance}
+            onUpgradeClick={() => setShowPaywall(true)}
+          />
+        )}
+
         {/* Bottom — settings, billing, sign out, email, tier */}
         <div
           className="pt-2 pb-3 border-t border-[var(--color-border)] space-y-0.5"
@@ -1089,6 +1202,17 @@ export function Sidebar({
           )}
         </div>
       </motion.aside>
+
+      {/* Upgrade / paywall modal — triggered from banner CTA */}
+      {showPaywall && (
+        <PaywallModal
+          payload={{
+            reason: "employee_locked",
+            message: "Upgrade to unlock all 9 Praxis specialists.",
+          } satisfies PaywallPayload}
+          onClose={() => setShowPaywall(false)}
+        />
+      )}
 
       {/* Conversation quick-peek tooltip — portal-rendered to escape sidebar overflow */}
       {portalMounted && peekId && peekRect && (() => {

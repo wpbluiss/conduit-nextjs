@@ -168,6 +168,10 @@ export default async function AppLayout({
               ? "Internal"
               : tierById(account.tier_id).name
           }
+          tierId={account.tier_id ?? "free"}
+          tokensUsed={account.monthly_tokens_used}
+          tokensAllowance={effectiveAllowance}
+          internalAccount={Boolean(account.internal_account)}
           accountId={account.id}
           inFlightBuildsInitial={inFlightBuildsInitial}
           avatarUrl={account.avatar_url ?? null}
