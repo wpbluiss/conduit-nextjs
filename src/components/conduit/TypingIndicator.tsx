@@ -1,6 +1,7 @@
 "use client";
 
-import { EmployeeAvatar, DEPT_COLOR, employeeLabel, SpecialistChip } from "./EmployeeBadge";
+import { DEPT_COLOR, employeeLabel, SpecialistChip } from "./EmployeeBadge";
+import { SpecialistAvatar } from "./SpecialistAvatar";
 import type { EmployeeKey } from "@/lib/ai/provider";
 
 // Contextual mono micro-copy per specialist — shown while waiting for first token.
@@ -35,7 +36,7 @@ export function TypingIndicator({
       style={{ ["--dept" as string]: deptColor }}
     >
       <div className="pt-1 shrink-0">
-        <EmployeeAvatar employee={employee} size={32} active />
+        <SpecialistAvatar employee={employee} size={32} streaming />
       </div>
       <div className="min-w-0 flex-1 space-y-1.5">
         <SpecialistChip employee={employee} />
