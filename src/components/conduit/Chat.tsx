@@ -2909,7 +2909,7 @@ const MessageBubble = memo(function MessageBubble({
                 className="px-3 py-1.5 text-xs rounded-lg transition-colors disabled:opacity-40"
                 style={{
                   background: "var(--color-accent)",
-                  color: "#0A0908",
+                  color: "#FFFFFF",
                   fontWeight: 600,
                 }}
               >
