@@ -28,6 +28,7 @@ import {
   Sun,
   Users2,
   Menu,
+  Monitor,
   X,
 } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
@@ -200,30 +201,47 @@ function readCollapsed(): boolean {
 }
 
 const THEME_KEY = "praxis.theme";
+type ThemePref = "system" | "light" | "dark";
+const THEME_CYCLE: ThemePref[] = ["light", "dark", "system"];
+
+function applyThemePref(pref: ThemePref): void {
+  if (typeof document === "undefined") return;
+  const resolved =
+    pref === "system"
+      ? window.matchMedia?.("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light"
+      : pref;
+  document.documentElement.setAttribute("data-praxis-theme", resolved);
+  document.documentElement.setAttribute("data-praxis-theme-pref", pref);
+}
 
 function SidebarThemeButton({ collapsed = false }: { collapsed?: boolean }) {
-  const [dark, setDark] = useState<boolean>(() => {
-    if (typeof document === "undefined") return true;
-    return document.documentElement.getAttribute("data-praxis-theme") === "dark";
+  const [pref, setPref] = useState<ThemePref>(() => {
+    if (typeof localStorage === "undefined") return "system";
+    return (localStorage.getItem(THEME_KEY) as ThemePref | null) ?? "system";
   });
 
   useEffect(() => {
-    const stored = typeof localStorage !== "undefined"
-      ? (localStorage.getItem(THEME_KEY) ?? "system")
-      : "system";
-    const resolved = stored === "system"
-      ? (typeof window !== "undefined" && window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light")
-      : stored;
-    setDark(resolved === "dark");
+    const stored = (localStorage.getItem(THEME_KEY) as ThemePref | null) ?? "system";
+    setPref(stored);
+    applyThemePref(stored);
+
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = () => {
+      if ((localStorage.getItem(THEME_KEY) ?? "system") === "system") {
+        applyThemePref("system");
+      }
+    };
+    mq.addEventListener?.("change", onChange);
+    return () => mq.removeEventListener?.("change", onChange);
   }, []);
 
-  function toggle() {
-    const next = dark ? "light" : "dark";
-    setDark(!dark);
-    if (typeof document !== "undefined") {
-      document.documentElement.setAttribute("data-praxis-theme", next);
-      document.documentElement.setAttribute("data-praxis-theme-pref", next);
-    }
+  function cycle() {
+    const idx = THEME_CYCLE.indexOf(pref);
+    const next = THEME_CYCLE[(idx + 1) % THEME_CYCLE.length];
+    setPref(next);
+    applyThemePref(next);
     if (typeof localStorage !== "undefined") {
       localStorage.setItem(THEME_KEY, next);
     }
@@ -234,16 +252,32 @@ function SidebarThemeButton({ collapsed = false }: { collapsed?: boolean }) {
     }).catch(() => {});
   }
 
+  const icons: Record<ThemePref, React.ReactNode> = {
+    light: <Sun size={14} />,
+    dark: <Moon size={14} />,
+    system: <Monitor size={14} />,
+  };
+  const labels: Record<ThemePref, string> = {
+    light: "Light",
+    dark: "Dark",
+    system: "System",
+  };
+  const nextLabels: Record<ThemePref, string> = {
+    light: "Switch to dark",
+    dark: "Switch to system",
+    system: "Switch to light",
+  };
+
   if (collapsed) {
     return (
       <button
         type="button"
-        onClick={toggle}
-        title={dark ? "Switch to light theme" : "Switch to dark theme"}
-        aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
+        onClick={cycle}
+        title={nextLabels[pref]}
+        aria-label={nextLabels[pref]}
         className="flex items-center justify-center w-8 h-8 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors duration-100"
       >
-        {dark ? <Sun size={14} /> : <Moon size={14} />}
+        {icons[pref]}
       </button>
     );
   }
@@ -251,11 +285,12 @@ function SidebarThemeButton({ collapsed = false }: { collapsed?: boolean }) {
   return (
     <button
       type="button"
-      onClick={toggle}
+      onClick={cycle}
+      title={nextLabels[pref]}
       className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] rounded-lg transition-colors duration-100"
     >
-      {dark ? <Sun size={14} /> : <Moon size={14} />}
-      {dark ? "Light" : "Dark"}
+      {icons[pref]}
+      {labels[pref]}
     </button>
   );
 }
