@@ -1983,8 +1983,7 @@ export function Chat({
       <UpgradeCTABanner internalAccount={internalAccount} />
 
       <div
-        className="px-4 md:px-8 py-3 md:py-4"
-        style={{ background: "var(--color-surface)" }}
+        className="cx-glass cx-glass-border border-t px-4 md:px-8 py-3 md:py-4"
       >
         <div className="mx-auto" style={{ maxWidth: "48rem" }}>
           <PraxisComposerPill
@@ -2705,11 +2704,7 @@ function MessageHandoffButton({
       </button>
       {open && (
         <div
-          className="absolute left-0 top-full mt-1 z-20 rounded-xl shadow-xl py-1 min-w-[170px]"
-          style={{
-            background: "var(--color-surface-elevated)",
-            border: "1px solid var(--color-border)",
-          }}
+          className="cx-glass-float cx-glass-border absolute left-0 top-full mt-1 z-20 rounded-xl py-1 min-w-[170px]"
         >
           <p className="px-3 py-1.5 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
             Hand off to…
