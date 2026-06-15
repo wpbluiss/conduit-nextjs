@@ -4,12 +4,13 @@ import {
   pooledCash, netWorth, projectIncome, goalProgress, orderDebts,
   onTimeStats, dueNow,
 } from "@/lib/finance/compute";
-import { gameState, vaultPct, isVaultFunded } from "@/lib/finance/gamify";
+import { gameState, vaultPct } from "@/lib/finance/gamify";
 import { fmtMoney, personLabel } from "@/lib/finance/constants";
 import { LevelBar } from "@/components/finance/LevelBar";
 import { MetricCard } from "@/components/finance/MetricCard";
 import { MoneyStrip } from "@/components/finance/MoneyStrip";
 import { CompactGoalDebt } from "@/components/finance/CompactGoalDebt";
+import { QuestHero } from "@/components/finance/QuestHero";
 import { QuickAddRow } from "@/components/finance/QuickAdd";
 import { AllocationPlanner } from "@/components/finance/AllocationPlanner";
 import { Card, Pill } from "@/components/finance/ui";
@@ -28,7 +29,14 @@ export default async function FinanceHome() {
   const debt = orderDebts(snap.debts);
   const ot = onTimeStats(snap.payments);
   const game = gameState(snap);
-  const topVaults = snap.vaults.filter((v) => v.status !== "spent").slice(0, 3);
+  // The reward you're chasing — most progress first, surprises win ties.
+  const heroVault =
+    snap.vaults
+      .filter((v) => v.status === "active")
+      .sort((a, b) => {
+        const d = vaultPct(b) - vaultPct(a);
+        return d !== 0 ? d : (b.is_mystery ? 1 : 0) - (a.is_mystery ? 1 : 0);
+      })[0] ?? null;
 
   const due = dueNow(snap, 16);
   const dueTotal = due.reduce((s, d) => s + d.amount, 0);
@@ -49,15 +57,34 @@ export default async function FinanceHome() {
 
   return (
     <div className="space-y-5">
-      {/* Greeting + quick add */}
-      <div className="fin-rise">
-        <h1 className="fin-display text-2xl sm:text-3xl tracking-tight">Good to see you, Luis &amp; Delia</h1>
-        <p className="text-sm text-[var(--fin-muted)] mt-1 mb-3">One pool. One goal. Here&apos;s what matters today.</p>
-        <QuickAddRow />
+      {/* Greeting */}
+      <div className="fin-rise flex items-center justify-between gap-3">
+        <div>
+          <h1 className="fin-display text-2xl sm:text-3xl tracking-tight">Hey, Luis &amp; Delia</h1>
+          <p className="text-sm text-[var(--fin-muted)] mt-1">Level up. Unlock the good stuff.</p>
+        </div>
       </div>
 
       {/* Game layer: level + XP */}
       <LevelBar g={game} />
+
+      {/* THE CENTERPIECE: the reward you're chasing */}
+      <QuestHero vault={heroVault} autofundPct={Number(snap.household.vault_autofund_pct)} />
+
+      {/* Goal + Boss battles */}
+      <CompactGoalDebt
+        saved={g.saved}
+        goal={g.goal}
+        goalPct={g.pct}
+        projectedCompletion={g.projectedCompletion}
+        debtLeft={debt.total}
+        debtPaid={debt.paidOff}
+        debtOriginal={debt.originalTotal}
+        attackNext={debt.next?.name ?? null}
+      />
+
+      {/* Quick add */}
+      <QuickAddRow />
 
       {/* Money strip */}
       <MoneyStrip
@@ -69,12 +96,12 @@ export default async function FinanceHome() {
         onTrack={g.onTrack}
       />
 
-      {/* THE CENTERPIECE: what's due */}
+      {/* Coming up: what's due (calmer, lower) */}
       <Card className="!p-0 overflow-hidden">
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <div>
-            <div className="fin-mono text-[10px] uppercase tracking-[0.2em] text-[var(--fin-muted)]">Action list</div>
-            <h2 className="text-lg font-semibold tracking-tight">Due now &amp; this week</h2>
+            <div className="fin-mono text-[10px] uppercase tracking-[0.2em] text-[var(--fin-muted)]">Handle first</div>
+            <h2 className="text-lg font-semibold tracking-tight">Coming up</h2>
           </div>
           <div className="text-right">
             <div className="fin-mono text-[10px] uppercase tracking-wide text-[var(--fin-muted)]">To pay</div>
@@ -140,55 +167,6 @@ export default async function FinanceHome() {
           </div>
         </Card>
       </Link>
-
-      {/* Goal + Debt compact */}
-      <CompactGoalDebt
-        saved={g.saved}
-        goal={g.goal}
-        goalPct={g.pct}
-        projectedCompletion={g.projectedCompletion}
-        debtLeft={debt.total}
-        debtPaid={debt.paidOff}
-        debtOriginal={debt.originalTotal}
-        attackNext={debt.next?.name ?? null}
-      />
-
-      {/* Rewards preview */}
-      {topVaults.length > 0 && (
-        <Link href="/finance/rewards" className="block">
-          <Card className="hover:bg-white/[0.04] transition">
-            <div className="flex items-center justify-between mb-3">
-              <div className="fin-mono text-[10px] uppercase tracking-[0.2em] text-[var(--fin-muted)]">
-                Reward vaults
-              </div>
-              <span className="text-xs text-[#ffa876]">Open →</span>
-            </div>
-            <div className="space-y-3">
-              {topVaults.map((v) => {
-                const pct = vaultPct(v);
-                const done = isVaultFunded(v);
-                return (
-                  <div key={v.id}>
-                    <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="flex items-center gap-2">
-                        <span>{v.emoji}</span> {v.name}
-                        {done && <span className="text-[10px] text-[#ffa876] fin-mono uppercase">unlocked</span>}
-                      </span>
-                      <span className="text-[var(--fin-muted)] text-xs">
-                        {fmtMoney(Number(v.saved_amount))} / {fmtMoney(Number(v.target_amount))}
-                      </span>
-                    </div>
-                    <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-                      <div className="h-full rounded-full"
-                        style={{ width: `${pct}%`, background: "linear-gradient(90deg,#d9532a,#ff8a3d,#ffa876)" }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </Card>
-        </Link>
-      )}
 
       {/* Windfall splitter */}
       <AllocationPlanner snap={snap} />
