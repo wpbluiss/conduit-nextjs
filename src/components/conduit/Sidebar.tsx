@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   Activity,
   BarChart3,
@@ -368,6 +368,7 @@ export function Sidebar({
   // Specialist filter chip — null = "All"
   const [specialistFilter, setSpecialistFilter] = useState<EmployeeKey | null>(null);
 
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const { pinned, pin, unpin } = usePinnedSpecialists();
 
   // Specialist context menu (right-click / long-press to pin/unpin)
@@ -614,7 +615,7 @@ export function Sidebar({
         aria-modal={open ? "true" : undefined}
         aria-label="Navigation"
         animate={{ width: collapsed ? 56 : 256 }}
-        transition={skipTransition ? { duration: 0 } : { duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
+        transition={skipTransition || shouldReduceMotion ? { duration: 0 } : { duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
         className={`cx-glass fixed md:static z-40 inset-y-0 left-0 border-r flex flex-col overflow-hidden transform transition-transform duration-200 ease-in-out ${
           open ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
@@ -679,9 +680,9 @@ export function Sidebar({
                   onClick={toggleCollapsed}
                   aria-label="Collapse sidebar"
                   title="Collapse sidebar"
-                  className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors p-1 rounded"
+                  className="cx-icon-btn cx-focus-ring"
                 >
-                  <PanelLeftClose size={15} />
+                  <PanelLeftClose size={16} strokeWidth={1.75} />
                 </button>
               </div>
               <button
@@ -704,9 +705,9 @@ export function Sidebar({
               onClick={toggleCollapsed}
               aria-label="Expand sidebar"
               title="Expand sidebar"
-              className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors p-1 rounded"
+              className="cx-icon-btn cx-focus-ring"
             >
-              <PanelLeftOpen size={15} />
+              <PanelLeftOpen size={16} strokeWidth={1.75} />
             </button>
           </div>
         )}
@@ -1052,60 +1053,53 @@ export function Sidebar({
               collapsed={collapsed}
             />
             {allowedEmployees.includes("engineering") && (
-              collapsed ? (
-                <div className="flex justify-center">
-                  <Link
-                    href="/app/builds"
-                    onClick={close}
-                    title="Builds"
-                    aria-label="Builds"
-                    className={`relative flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-100 ${
-                      isActive("/app/builds")
-                        ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
-                        : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
-                    }`}
-                  >
-                    <span
-                      className="relative inline-flex"
-                      style={{ color: isActive("/app/builds") ? "var(--cx-accent, var(--color-accent))" : undefined }}
-                    >
-                      <Hammer size={20} />
-                      <SidebarBuildPip
-                        initial={inFlightBuildsInitial}
-                        accountId={accountId}
-                      />
-                    </span>
-                  </Link>
-                </div>
-              ) : (
-                <Link
-                  href="/app/builds"
-                  onClick={close}
-                  className={`relative flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors duration-100 ${
-                    isActive("/app/builds")
-                      ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
-                      : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
-                  }`}
-                >
-                  {isActive("/app/builds") && (
-                    <span
-                      aria-hidden
-                      className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-[var(--cx-accent,var(--color-accent))]"
-                    />
-                  )}
+              <Link
+                href="/app/builds"
+                onClick={close}
+                title={collapsed ? "Builds" : undefined}
+                aria-label={collapsed ? "Builds" : undefined}
+                className={[
+                  "relative flex items-center rounded-lg transition-colors duration-100",
+                  collapsed ? "justify-center mx-auto w-8 h-8" : "gap-2 px-3 py-2 text-sm",
+                  isActive("/app/builds")
+                    ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
+                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]",
+                ].join(" ")}
+              >
+                {isActive("/app/builds") && (
                   <span
-                    className="relative inline-flex"
-                    style={{ color: isActive("/app/builds") ? "var(--cx-accent, var(--color-accent))" : undefined }}
-                  >
-                    <Hammer size={16} />
-                    <SidebarBuildPip
-                      initial={inFlightBuildsInitial}
-                      accountId={accountId}
-                    />
-                  </span>
-                  <span>Builds</span>
-                </Link>
-              )
+                    aria-hidden
+                    className={`absolute left-0 rounded-full ${
+                      collapsed ? "top-1.5 bottom-1.5 w-0.5" : "top-2 bottom-2 w-[3px]"
+                    }`}
+                    style={{ background: "var(--cx-accent, var(--color-accent))" }}
+                  />
+                )}
+                <span
+                  className="relative inline-flex shrink-0"
+                  style={{ color: isActive("/app/builds") ? "var(--cx-accent, var(--color-accent))" : undefined }}
+                >
+                  <Hammer size={collapsed ? 20 : 16} strokeWidth={1.75} />
+                  <SidebarBuildPip
+                    initial={inFlightBuildsInitial}
+                    accountId={accountId}
+                  />
+                </span>
+                <AnimatePresence mode="popLayout">
+                  {!collapsed && (
+                    <motion.span
+                      key="builds-label"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
+                      className="truncate"
+                    >
+                      Builds
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </Link>
             )}
             <NavLink
               href="/app/analytics"
@@ -1675,50 +1669,28 @@ function NavLink({
   small?: boolean;
   collapsed?: boolean;
 }) {
-  if (collapsed) {
-    return (
-      <div className="flex justify-center">
-        <Link
-          href={href}
-          onClick={onClick}
-          title={label}
-          aria-label={label}
-          className={`relative flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-100 ${!active ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] hover:text-[var(--color-text)]" : ""}`}
-          style={{
-            background: active ? "color-mix(in srgb, var(--color-accent) 12%, var(--color-surface-elevated))" : undefined,
-            color: active ? "var(--color-text)" : "var(--color-text-muted)",
-          }}
-        >
-          {active && (
-            <span
-              aria-hidden
-              className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
-            />
-          )}
-          <motion.span
-            whileHover={{ scale: 1.15 }}
-            whileTap={{ scale: 0.92 }}
-            transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
-            className="inline-flex"
-            style={{ color: active ? "var(--cx-accent, var(--color-accent))" : undefined }}
-          >
-            {icon}
-          </motion.span>
-        </Link>
-      </div>
-    );
-  }
+  const shouldReduceMotion = useReducedMotion() ?? false;
 
   return (
     <Link
       href={href}
       onClick={onClick}
-      className={`relative flex items-center gap-2 px-3 rounded-lg transition-colors duration-100 ${!active ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] hover:text-[var(--color-text)]" : ""}`}
+      title={collapsed ? label : undefined}
+      aria-label={collapsed ? label : undefined}
+      className={[
+        "relative flex items-center rounded-lg transition-colors duration-100",
+        collapsed
+          ? "justify-center mx-auto w-8 h-8"
+          : `gap-2 px-3 ${small ? "py-1.5" : "py-2"}`,
+        !active
+          ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] hover:text-[var(--color-text)]"
+          : "",
+      ].join(" ")}
       style={{
-        paddingTop: small ? "0.375rem" : "0.5rem",
-        paddingBottom: small ? "0.375rem" : "0.5rem",
-        fontSize: small ? "0.75rem" : "0.8125rem",
-        background: active ? "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))" : undefined,
+        fontSize: !collapsed && small ? "0.75rem" : "0.8125rem",
+        background: active
+          ? `color-mix(in srgb, var(--color-accent) ${collapsed ? 12 : 10}%, var(--color-surface-elevated))`
+          : undefined,
         color: active ? "var(--color-text)" : "var(--color-text-muted)",
         fontWeight: active ? 500 : 400,
       }}
@@ -1726,19 +1698,39 @@ function NavLink({
       {active && (
         <span
           aria-hidden
-          className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-[var(--cx-accent,var(--color-accent))]"
+          className={`absolute left-0 rounded-full ${
+            collapsed ? "top-1.5 bottom-1.5 w-0.5" : "top-2 bottom-2 w-[3px]"
+          }`}
+          style={{ background: "var(--cx-accent, var(--color-accent))" }}
         />
       )}
       <motion.span
-        whileHover={{ scale: 1.12 }}
-        whileTap={{ scale: 0.92 }}
+        whileHover={shouldReduceMotion ? undefined : { scale: collapsed ? 1.15 : 1.12 }}
+        whileTap={shouldReduceMotion ? undefined : { scale: 0.92 }}
         transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
         className="shrink-0 inline-flex"
         style={{ color: active ? "var(--cx-accent, var(--color-accent))" : undefined }}
       >
         {icon}
       </motion.span>
-      <span>{label}</span>
+      <AnimatePresence mode="popLayout">
+        {!collapsed && (
+          <motion.span
+            key="nav-label"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={
+              shouldReduceMotion
+                ? { duration: 0 }
+                : { duration: 0.12, ease: [0.22, 1, 0.36, 1] }
+            }
+            className="truncate"
+          >
+            {label}
+          </motion.span>
+        )}
+      </AnimatePresence>
     </Link>
   );
 }
