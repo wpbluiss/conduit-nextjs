@@ -12,7 +12,11 @@ import {
   Link,
   Link2Off,
   Lock,
+  Pencil,
   Play,
+  Plus,
+  Tag,
+  Trash2,
   X,
 } from "lucide-react";
 import { PraxisButton, SpinnerIcon } from "./PraxisButton";
@@ -102,7 +106,8 @@ export type SettingsTabKey =
   | "integrations"
   | "appearance"
   | "api"
-  | "referrals";
+  | "referrals"
+  | "labels";
 
 export function SettingsTabs({
   email,
@@ -138,6 +143,7 @@ export function SettingsTabs({
             ["appearance", "Appearance"],
             ["api", "API"],
             ["referrals", "Referrals"],
+            ["labels", "Labels"],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -207,6 +213,7 @@ export function SettingsTabs({
       )}
       {tab === "api" && <ApiKeysTab />}
       {tab === "referrals" && <ReferralsTab />}
+      {tab === "labels" && <LabelsTab />}
     </div>
   );
 }
@@ -4684,6 +4691,297 @@ function ReferralsTab() {
           </li>
         </ol>
       </div>
+    </div>
+  );
+}
+
+const PRESET_COLORS = [
+  "#ef4444", "#f97316", "#eab308", "#22c55e",
+  "#14b8a6", "#3b82f6", "#6366f1", "#a855f7",
+  "#ec4899", "#6b7280",
+];
+
+interface LabelRecord {
+  id: string;
+  name: string;
+  color: string;
+}
+
+function LabelsTab() {
+  const [labels, setLabels] = useState<LabelRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newName, setNewName] = useState("");
+  const [newColor, setNewColor] = useState(PRESET_COLORS[6]);
+  const [creating, setCreating] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editColor, setEditColor] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/conduit/labels")
+      .then((r) => r.json())
+      .then((d: { labels?: LabelRecord[] }) => setLabels(d.labels ?? []))
+      .catch(() => setLabels([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    const name = newName.trim();
+    if (!name || creating) return;
+    setCreating(true);
+    try {
+      const res = await fetch("/api/conduit/labels", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name, color: newColor }),
+      });
+      if (!res.ok) throw new Error("create_failed");
+      const data = await res.json() as { label: LabelRecord };
+      setLabels((prev) => [...prev, data.label]);
+      setNewName("");
+      setShowCreate(false);
+    } catch {
+      // silent — user retries
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  function startEdit(label: LabelRecord) {
+    setEditingId(label.id);
+    setEditName(label.name);
+    setEditColor(label.color);
+  }
+
+  async function handleSave(id: string) {
+    if (saving) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/conduit/labels/${id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name: editName.trim(), color: editColor }),
+      });
+      if (!res.ok) throw new Error("update_failed");
+      const data = await res.json() as { label: LabelRecord };
+      setLabels((prev) => prev.map((l) => (l.id === id ? data.label : l)));
+      setEditingId(null);
+    } catch {
+      // silent
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm("Delete this label? It will be removed from all conversations.")) return;
+    setDeletingId(id);
+    try {
+      await fetch(`/api/conduit/labels/${id}`, { method: "DELETE" });
+      setLabels((prev) => prev.filter((l) => l.id !== id));
+    } catch {
+      // silent
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-lg font-semibold mb-1">Labels</h2>
+        <p className="text-sm text-[var(--color-text-muted)]">
+          Color-coded labels to organize conversations by project, client, or status.
+        </p>
+      </div>
+
+      {loading ? (
+        <div className="text-sm text-[var(--color-text-muted)]">Loading labels…</div>
+      ) : (
+        <div className="space-y-2">
+          {labels.length === 0 && !showCreate && (
+            <div className="conduit-card p-6 flex flex-col items-center gap-3 text-center">
+              <Tag size={20} style={{ color: "var(--color-text-muted)" }} />
+              <p className="text-sm text-[var(--color-text-muted)]">No labels yet. Create one to start organizing conversations.</p>
+            </div>
+          )}
+
+          {labels.map((label) =>
+            editingId === label.id ? (
+              <div
+                key={label.id}
+                className="conduit-card p-3 flex flex-col gap-2"
+              >
+                <div className="flex items-center gap-2">
+                  <input
+                    autoFocus
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value.slice(0, 32))}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") void handleSave(label.id);
+                      if (e.key === "Escape") setEditingId(null);
+                    }}
+                    maxLength={32}
+                    className="flex-1 px-2 py-1 text-sm rounded-lg border outline-none"
+                    style={{
+                      background: "var(--color-surface)",
+                      borderColor: "var(--color-border)",
+                      color: "var(--color-text)",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void handleSave(label.id)}
+                    disabled={!editName.trim() || saving}
+                    className="px-3 py-1 rounded-lg text-[12px] font-medium text-white disabled:opacity-50"
+                    style={{ background: editColor }}
+                  >
+                    {saving ? "Saving…" : "Save"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingId(null)}
+                    className="px-2 py-1 rounded-lg text-[12px]"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {PRESET_COLORS.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setEditColor(c)}
+                      className="w-5 h-5 rounded-full transition-transform hover:scale-110"
+                      style={{
+                        background: c,
+                        outline: editColor === c ? `2px solid ${c}` : "none",
+                        outlineOffset: "2px",
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div
+                key={label.id}
+                className="conduit-card p-3 flex items-center gap-3"
+              >
+                <span
+                  className="w-4 h-4 rounded-full shrink-0"
+                  style={{ background: label.color }}
+                />
+                <span
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium"
+                  style={{
+                    background: `color-mix(in srgb, ${label.color} 15%, var(--color-surface-elevated))`,
+                    color: label.color,
+                    border: `1px solid color-mix(in srgb, ${label.color} 40%, transparent)`,
+                  }}
+                >
+                  {label.name}
+                </span>
+                <div className="ml-auto flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => startEdit(label)}
+                    aria-label={`Rename label ${label.name}`}
+                    className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors hover:bg-[var(--color-surface)]"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
+                    <Pencil size={12} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleDelete(label.id)}
+                    disabled={deletingId === label.id}
+                    aria-label={`Delete label ${label.name}`}
+                    className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors hover:bg-[rgba(239,68,68,0.08)] disabled:opacity-40"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              </div>
+            )
+          )}
+
+          {/* Create new label */}
+          {showCreate ? (
+            <div className="conduit-card p-3 space-y-2">
+              <form onSubmit={(e) => void handleCreate(e)} className="flex items-center gap-2">
+                <input
+                  autoFocus
+                  type="text"
+                  placeholder="Label name"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value.slice(0, 32))}
+                  maxLength={32}
+                  className="flex-1 px-2 py-1 text-sm rounded-lg border outline-none"
+                  style={{
+                    background: "var(--color-surface)",
+                    borderColor: "var(--color-border)",
+                    color: "var(--color-text)",
+                  }}
+                />
+                <button
+                  type="submit"
+                  disabled={!newName.trim() || creating}
+                  className="px-3 py-1 rounded-lg text-[12px] font-medium text-white disabled:opacity-50"
+                  style={{ background: newColor }}
+                >
+                  {creating ? "Creating…" : "Create"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowCreate(false); setNewName(""); }}
+                  className="px-2 py-1 rounded-lg text-[12px]"
+                  style={{ color: "var(--color-text-muted)" }}
+                >
+                  Cancel
+                </button>
+              </form>
+              <div className="flex flex-wrap gap-1.5">
+                {PRESET_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setNewColor(c)}
+                    className="w-5 h-5 rounded-full transition-transform hover:scale-110"
+                    style={{
+                      background: c,
+                      outline: newColor === c ? `2px solid ${c}` : "none",
+                      outlineOffset: "2px",
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : labels.length < 10 ? (
+            <button
+              type="button"
+              onClick={() => setShowCreate(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors"
+              style={{
+                color: "var(--color-text-muted)",
+                border: "1px dashed var(--color-border)",
+                width: "100%",
+              }}
+            >
+              <Plus size={14} />
+              Create label
+            </button>
+          ) : (
+            <p className="text-[12px] text-[var(--color-text-muted)]">Label limit reached (10 max).</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

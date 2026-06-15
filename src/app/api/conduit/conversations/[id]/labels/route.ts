@@ -8,6 +8,39 @@ interface RouteCtx {
   params: Promise<{ id: string }>;
 }
 
+export async function GET(_request: NextRequest, ctx: RouteCtx) {
+  const { id: conversationId } = await ctx.params;
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  const account = await getOrCreateAccount(supabase, user);
+
+  const { data: convo } = await supabase
+    .from("conduit_conversations")
+    .select("id")
+    .eq("id", conversationId)
+    .eq("account_id", account.id)
+    .maybeSingle();
+  if (!convo) return NextResponse.json({ error: "not_found" }, { status: 404 });
+
+  const { data: assignments } = await supabase
+    .from("conduit_conversation_label_assignments")
+    .select("label_id")
+    .eq("conversation_id", conversationId);
+
+  if (!assignments || assignments.length === 0) return NextResponse.json({ labels: [] });
+
+  const labelIds = assignments.map((a) => a.label_id as string);
+  const { data: labels } = await supabase
+    .from("conduit_conversation_labels")
+    .select("id, name, color")
+    .in("id", labelIds)
+    .eq("account_id", account.id);
+
+  return NextResponse.json({ labels: labels ?? [] });
+}
+
 export async function POST(request: NextRequest, ctx: RouteCtx) {
   const { id: conversationId } = await ctx.params;
   const supabase = await createSupabaseServerClient();
