@@ -79,8 +79,16 @@ export function useInFlightBuilds({
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
+    // Unique channel name per mount — reusing a fixed name can return an
+    // already-subscribed channel (remount / second consumer), and calling
+    // .on() on it throws "cannot add postgres_changes callbacks after subscribe()".
+    const channelId = `account-builds:${accountId}:${
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : Math.random().toString(36).slice(2)
+    }`;
     const channel = supabase
-      .channel(`account-builds:${accountId}`)
+      .channel(channelId)
       .on(
         "postgres_changes" as never,
         {
