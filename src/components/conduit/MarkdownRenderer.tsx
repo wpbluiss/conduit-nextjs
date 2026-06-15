@@ -89,13 +89,14 @@ function tokenizeLine(line: string): Token[] {
   return tokens;
 }
 
+// Syntax colors use cx tokens — fallbacks are cx-spec values (not ember palette)
 const TOKEN_COLOR: Record<TokenKind, string> = {
-  keyword: "var(--color-dept-engineering, #60A5FA)",
-  string: "var(--color-green, #34D399)",
-  comment: "var(--color-text-muted, #8C8884)",
-  number: "var(--color-amber, #FBBF24)",
-  operator: "var(--color-text, #F5F1EA)",
-  plain: "var(--color-text, #F5F1EA)",
+  keyword:  "var(--cx-accent-bright, #9B8CFF)",
+  string:   "var(--cx-reward, #34D399)",
+  comment:  "var(--cx-text-faint, #6B6B7B)",
+  number:   "var(--color-amber, #FBBF24)",
+  operator: "var(--cx-text-muted, #A0A0B0)",
+  plain:    "var(--cx-text, #F4F4F7)",
 };
 
 function SyntaxLine({ line }: { line: string }) {
@@ -112,10 +113,10 @@ function SyntaxLine({ line }: { line: string }) {
 }
 
 // ---------------------------------------------------------------------------
-// Code block with language label + copy button
+// Code block with language label + copy button (appears on hover)
 // ---------------------------------------------------------------------------
 
-function CopyButton({ text }: { text: string }) {
+function CopyButton({ text, alwaysVisible }: { text: string; alwaysVisible?: boolean }) {
   const [copied, setCopied] = useState(false);
 
   const copy = useCallback(async () => {
@@ -134,16 +135,25 @@ function CopyButton({ text }: { text: string }) {
       onClick={copy}
       aria-label={copied ? "Copied!" : "Copy code"}
       title={copied ? "Copied!" : "Copy code"}
-      className="flex items-center gap-1.5 px-2 py-1 rounded text-[11px] transition-all"
+      className={[
+        "flex items-center gap-1.5 px-2 py-1 rounded text-[11px] transition-all duration-150",
+        alwaysVisible || copied
+          ? "opacity-100"
+          : "opacity-0 group-hover:opacity-100 focus:opacity-100",
+      ].join(" ")}
       style={{
-        color: copied ? "var(--color-green, #34D399)" : "var(--color-text-muted, #8C8884)",
-        background: "transparent",
+        color: copied
+          ? "var(--cx-reward, #34D399)"
+          : "var(--cx-text-muted, #A0A0B0)",
       }}
       onMouseEnter={(e) => {
-        if (!copied) (e.currentTarget as HTMLElement).style.color = "var(--color-text, #F5F1EA)";
+        if (!copied)
+          (e.currentTarget as HTMLElement).style.color = "var(--cx-text, #F4F4F7)";
       }}
       onMouseLeave={(e) => {
-        if (!copied) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted, #8C8884)";
+        if (!copied)
+          (e.currentTarget as HTMLElement).style.color =
+            "var(--cx-text-muted, #A0A0B0)";
       }}
     >
       {copied ? <Check size={12} /> : <Copy size={12} />}
@@ -159,33 +169,33 @@ function HighlightedCodeBlock({ lang, code }: { lang: string; code: string }) {
 
   return (
     <div
-      className="rounded-lg overflow-hidden my-3"
+      className="rounded-xl overflow-hidden my-3 group"
       style={{
-        border: "1px solid var(--color-border, #1F1C19)",
-        background: "var(--color-surface, #0A0908)",
+        border: "1px solid var(--cx-border, #262630)",
+        background: "var(--cx-surface-raised, #1C1C26)",
       }}
     >
       {/* Header bar */}
       <div
         className="flex items-center justify-between px-4 py-2"
         style={{
-          borderBottom: "1px solid var(--color-border, #1F1C19)",
-          background: "var(--color-surface-elevated, #14110F)",
+          borderBottom: "1px solid var(--cx-border, #262630)",
+          background: "var(--cx-surface-overlay, #23232E)",
         }}
       >
         <span
           className="text-[11px] uppercase tracking-[0.15em]"
-          style={{ color: "var(--color-text-muted, #8C8884)" }}
+          style={{ fontFamily: "var(--font-mono, monospace)", color: "var(--cx-text-faint, #6B6B7B)" }}
         >
           {lang || "code"}
         </span>
         <CopyButton text={code} />
       </div>
 
-      {/* Code */}
+      {/* Code body */}
       <pre
         className="overflow-x-auto px-4 py-3 text-[13px] leading-[1.7]"
-        style={{ fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)", margin: 0 }}
+        style={{ fontFamily: "var(--font-mono, monospace)", margin: 0 }}
       >
         <code>
           {lines.map((line, i) => (
@@ -284,21 +294,29 @@ function renderSegments(segments: Segment[], key: string) {
   return segments.map((seg, j) => {
     const k = `${key}-${j}`;
     if (seg.type === "bold") {
-      return <strong key={k} style={{ color: "var(--color-text, #F5F1EA)", fontWeight: 600 }}>{seg.content}</strong>;
+      return (
+        <strong key={k} style={{ color: "var(--cx-text, #F4F4F7)", fontWeight: 600 }}>
+          {seg.content}
+        </strong>
+      );
     }
     if (seg.type === "italic") {
-      return <em key={k} style={{ color: "var(--color-text, #F5F1EA)" }}>{seg.content}</em>;
+      return (
+        <em key={k} style={{ color: "var(--cx-text, #F4F4F7)" }}>
+          {seg.content}
+        </em>
+      );
     }
     if (seg.type === "code") {
       return (
         <code
           key={k}
-          className="px-1.5 py-0.5 rounded text-[0.85em]"
+          className="px-1.5 py-0.5 rounded-md text-[0.85em]"
           style={{
-            background: "var(--color-surface-elevated, #14110F)",
-            border: "1px solid var(--color-border, #1F1C19)",
-            fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-            color: "var(--color-accent, #FF8A3D)",
+            background: "var(--cx-surface-raised, #1C1C26)",
+            border: "1px solid var(--cx-border, #262630)",
+            fontFamily: "var(--font-mono, monospace)",
+            color: "var(--cx-accent-bright, #9B8CFF)",
           }}
         >
           {seg.content}
@@ -315,8 +333,15 @@ function renderSegments(segments: Segment[], key: string) {
           href={seg.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="underline underline-offset-2"
-          style={{ color: "var(--color-dept-engineering, #60A5FA)" }}
+          className="underline underline-offset-2 transition-colors duration-150"
+          style={{ color: "var(--cx-accent-bright, #9B8CFF)" }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.color = "var(--cx-accent, #7C6CFF)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.color =
+              "var(--cx-accent-bright, #9B8CFF)";
+          }}
         >
           {seg.content}
         </a>
@@ -331,11 +356,11 @@ function renderSegments(segments: Segment[], key: string) {
 // ---------------------------------------------------------------------------
 
 interface Block {
-  type: "paragraph" | "heading" | "code" | "list" | "hr" | "table";
+  type: "paragraph" | "heading" | "code" | "list" | "hr" | "table" | "blockquote";
   level?: number;       // heading
   lang?: string;        // code fence
   content?: string;     // paragraph/heading
-  items?: string[];     // list
+  items?: string[];     // list or blockquote lines
   code?: string;        // code block
   ordered?: boolean;
   headers?: string[];   // table
@@ -381,6 +406,17 @@ function parseBlocks(text: string): Block[] {
         content: headingMatch[2],
       });
       i++;
+      continue;
+    }
+
+    // Blockquote: lines starting with >
+    if (/^>\s?/.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && /^>\s?/.test(lines[i])) {
+        items.push(lines[i].replace(/^>\s?/, ""));
+        i++;
+      }
+      blocks.push({ type: "blockquote", items });
       continue;
     }
 
@@ -442,6 +478,7 @@ function parseBlocks(text: string): Block[] {
       !/^[-*+]\s/.test(lines[i]) &&
       !/^\d+\.\s/.test(lines[i]) &&
       !/^```/.test(lines[i]) &&
+      !/^>\s?/.test(lines[i]) &&
       !/^(---+|\*\*\*+|___+)\s*$/.test(lines[i]) &&
       !(lines[i].includes("|") && i + 1 < lines.length && /^[\s|:\-]+$/.test(lines[i + 1]) && lines[i + 1].includes("-"))
     ) {
@@ -507,7 +544,11 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
           return (
             <hr
               key={bi}
-              style={{ border: "none", borderTop: "1px solid var(--color-border, #1F1C19)", margin: "1rem 0" }}
+              style={{
+                border: "none",
+                borderTop: "1px solid var(--cx-border, #262630)",
+                margin: "var(--cx-space-4, 16px) 0",
+              }}
             />
           );
         }
@@ -515,15 +556,50 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
         if (block.type === "heading") {
           const segs = parseInline(block.content ?? "");
           const rendered = renderSegments(segs, `h${bi}`);
-          const sz = block.level === 1
-            ? "text-xl font-semibold mt-4 mb-1"
-            : block.level === 2
-            ? "text-lg font-semibold mt-3 mb-1"
-            : "text-base font-semibold mt-2 mb-0.5";
+          const [fontSize, margin] =
+            block.level === 1
+              ? ["var(--cx-type-lg, 20px)", "mt-5 mb-2"]
+              : block.level === 2
+              ? ["var(--cx-type-md, 16px)", "mt-4 mb-1"]
+              : ["var(--cx-type-base, 14px)", "mt-3 mb-0.5"];
           return (
-            <p key={bi} className={sz} style={{ color: "var(--color-text, #F5F1EA)" }}>
+            <p
+              key={bi}
+              className={margin}
+              style={{
+                fontSize,
+                fontWeight: 600,
+                lineHeight: "var(--cx-lh-heading, 1.10)",
+                letterSpacing: "var(--cx-ls-tight, -0.01em)",
+                color: "var(--cx-text, #F4F4F7)",
+              }}
+            >
               {rendered}
             </p>
+          );
+        }
+
+        if (block.type === "blockquote") {
+          return (
+            <blockquote
+              key={bi}
+              className="my-2 py-2 pr-3 rounded-r-lg"
+              style={{
+                paddingLeft: "var(--cx-space-4, 16px)",
+                borderLeft: "3px solid var(--cx-accent, #7C6CFF)",
+                background: "var(--cx-accent-tint, rgba(124, 108, 255, 0.12))",
+              }}
+            >
+              {(block.items ?? []).map((line, li) => (
+                <p
+                  key={li}
+                  className="text-sm leading-relaxed"
+                  style={{ color: "var(--cx-text-muted, #A0A0B0)" }}
+                >
+                  {renderSegments(parseInline(line), `bq${bi}-${li}`)}
+                </p>
+              ))}
+            </blockquote>
           );
         }
 
@@ -532,13 +608,23 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
           return (
             <Tag
               key={bi}
-              className={block.ordered ? "list-decimal pl-5 space-y-1" : "list-disc pl-5 space-y-1"}
-              style={{ color: "var(--color-text, #F5F1EA)" }}
+              className={block.ordered ? "list-decimal space-y-1" : "list-disc space-y-1"}
+              style={{
+                color: "var(--cx-text, #F4F4F7)",
+                paddingLeft: "var(--cx-space-4, 16px)",
+                margin: "var(--cx-space-2, 8px) 0",
+              }}
             >
               {block.items!.map((item, li) => {
                 const segs = parseInline(item);
                 return (
-                  <li key={li} className="text-sm leading-relaxed">
+                  <li
+                    key={li}
+                    style={{
+                      fontSize: "var(--cx-type-sm, 13px)",
+                      lineHeight: "var(--cx-lh-body, 1.60)",
+                    }}
+                  >
                     {renderSegments(segs, `li${bi}-${li}`)}
                   </li>
                 );
@@ -552,21 +638,22 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
             <div key={bi} className="overflow-x-auto my-3">
               <table
                 className="w-full text-sm border-collapse"
-                style={{ borderColor: "var(--color-border, #1F1C19)" }}
+                style={{ borderColor: "var(--cx-border, #262630)" }}
               >
                 <thead>
                   <tr>
                     {(block.headers ?? []).map((h, ci) => (
                       <th
                         key={ci}
-                        className="px-4 py-2 text-left text-[11px] uppercase tracking-[0.12em] font-semibold"
+                        className="px-4 py-2.5 text-left text-[11px] uppercase tracking-[0.12em] font-semibold"
                         style={{
-                          background: "var(--color-surface-elevated, #14110F)",
-                          borderBottom: "2px solid var(--color-border, #1F1C19)",
-                          borderRight: ci < (block.headers ?? []).length - 1
-                            ? "1px solid var(--color-border, #1F1C19)"
-                            : "none",
-                          color: "var(--color-text-muted, #8C8884)",
+                          background: "var(--cx-surface-overlay, #23232E)",
+                          borderBottom: "1px solid var(--cx-border-strong, #33333F)",
+                          borderRight:
+                            ci < (block.headers ?? []).length - 1
+                              ? "1px solid var(--cx-border, #262630)"
+                              : "none",
+                          color: "var(--cx-text-muted, #A0A0B0)",
                         }}
                       >
                         {renderSegments(parseInline(h), `th${bi}-${ci}`)}
@@ -579,9 +666,10 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
                     <tr
                       key={ri}
                       style={{
-                        background: ri % 2 === 0
-                          ? "transparent"
-                          : "color-mix(in srgb, var(--color-surface-elevated, #14110F) 50%, transparent)",
+                        background:
+                          ri % 2 === 0
+                            ? "transparent"
+                            : "var(--cx-surface-raised, #1C1C26)",
                       }}
                     >
                       {row.map((cell, ci) => (
@@ -589,8 +677,9 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
                           key={ci}
                           className="px-4 py-2"
                           style={{
-                            border: "1px solid var(--color-border, #1F1C19)",
-                            color: "var(--color-text, #F5F1EA)",
+                            border: "1px solid var(--cx-border, #262630)",
+                            color: "var(--cx-text, #F4F4F7)",
+                            fontSize: "var(--cx-type-sm, 13px)",
                           }}
                         >
                           {renderSegments(parseInline(cell), `td${bi}-${ri}-${ci}`)}
@@ -609,8 +698,11 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
         return (
           <p
             key={bi}
-            className="text-sm leading-relaxed"
-            style={{ color: "var(--color-text, #F5F1EA)" }}
+            style={{
+              fontSize: "var(--cx-type-sm, 13px)",
+              lineHeight: "var(--cx-lh-body, 1.60)",
+              color: "var(--cx-text, #F4F4F7)",
+            }}
           >
             {renderSegments(segs, `p${bi}`)}
           </p>
