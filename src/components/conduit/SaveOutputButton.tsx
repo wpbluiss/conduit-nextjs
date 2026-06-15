@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Bookmark, BookmarkCheck, X } from "lucide-react";
+import { Button } from "@/components/conduit/ui/Button";
 
 interface Props {
   messageId: string;
@@ -107,18 +108,18 @@ export function SaveOutputButton({ messageId, content, specialist, conversationI
               color: "var(--color-text)",
             }}
           />
-          <button
+          <Button
             type="button"
             onClick={() => void save()}
-            disabled={!title.trim() || busy}
-            className="w-full py-1.5 rounded-lg text-xs font-medium transition-opacity disabled:opacity-40"
-            style={{
-              background: "var(--color-accent)",
-              color: "#fff",
-            }}
+            isDisabled={!title.trim()}
+            isLoading={busy}
+            loadingText="Saving…"
+            variant="primary"
+            size="sm"
+            className="w-full"
           >
-            {busy ? "Saving…" : "Save to Outputs"}
-          </button>
+            Save to Outputs
+          </Button>
         </div>
       )}
     </span>
