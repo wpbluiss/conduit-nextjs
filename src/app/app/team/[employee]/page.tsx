@@ -490,7 +490,7 @@ function Stat({
       <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
         {label}
       </div>
-      <div className="serif text-2xl mt-1">{value}</div>
+      <div className="cx-stat mt-1">{value}</div>
       {sub && (
         <div className="text-[10px] text-[var(--color-text-muted)] mt-0.5">
           {sub}

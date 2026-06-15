@@ -276,11 +276,90 @@
 .praxis-root .cx-text-reward     { color: var(--cx-reward); }
 .praxis-root .cx-text-danger     { color: var(--cx-danger); }
 
+/* ---- Type scale utilities ---- */
+.praxis-root .cx-type-xs   { font-size: var(--cx-type-xs); }
+.praxis-root .cx-type-sm   { font-size: var(--cx-type-sm); }
+.praxis-root .cx-type-base { font-size: var(--cx-type-base); }
+.praxis-root .cx-type-md   { font-size: var(--cx-type-md); }
+.praxis-root .cx-type-lg   { font-size: var(--cx-type-lg); }
+.praxis-root .cx-type-xl   { font-size: var(--cx-type-xl); }
+.praxis-root .cx-type-2xl  { font-size: var(--cx-type-2xl); }
+.praxis-root .cx-type-3xl  { font-size: var(--cx-type-3xl); }
+
+/* ---- Heading auto-treatment ----
+ * Scoped to .praxis-root so marketing pages are never affected.
+ * Sets font-family (Geist sans), tight letter-spacing, and heading
+ * line-height. Does NOT override font-size — explicit cx-heading-*
+ * or cx-type-* classes handle that. */
+.praxis-root h1,
+.praxis-root h2,
+.praxis-root h3,
+.praxis-root h4 {
+  font-family: var(--font-sans, system-ui, sans-serif);
+  line-height: var(--cx-lh-heading);
+}
+
+.praxis-root h1 { letter-spacing: var(--cx-ls-tighter); }
+.praxis-root h2 { letter-spacing: var(--cx-ls-tighter); }
+.praxis-root h3 { letter-spacing: var(--cx-ls-tight); }
+.praxis-root h4 { letter-spacing: var(--cx-ls-tight); }
+
+/* ---- Heading compound utilities ----
+ * Use cx-heading-* on any element (div, h1, etc.) to get size +
+ * letter-spacing + line-height + font-family in one class. */
+.praxis-root .cx-heading-3xl {
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: var(--cx-type-3xl);
+  line-height: var(--cx-lh-heading);
+  letter-spacing: var(--cx-ls-tighter);
+  font-weight: 600;
+}
+.praxis-root .cx-heading-2xl {
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: var(--cx-type-2xl);
+  line-height: var(--cx-lh-heading);
+  letter-spacing: var(--cx-ls-tighter);
+  font-weight: 600;
+}
+.praxis-root .cx-heading-xl {
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: var(--cx-type-xl);
+  line-height: var(--cx-lh-heading);
+  letter-spacing: var(--cx-ls-tight);
+  font-weight: 600;
+}
+.praxis-root .cx-heading-lg {
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: var(--cx-type-lg);
+  line-height: var(--cx-lh-heading);
+  letter-spacing: var(--cx-ls-tight);
+  font-weight: 600;
+}
+
 /* Mono label utility — "engineered" numbers/metadata */
 .praxis-root .cx-mono {
   font-family: var(--font-mono, monospace);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
+}
+
+/* Metadata chip — mono + xs + faint; for timestamps, IDs, labels */
+.praxis-root .cx-meta {
+  font-family: var(--font-mono, monospace);
+  font-size: var(--cx-type-xs);
+  color: var(--cx-text-faint);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+/* Stat number display — mono + 32px for metric cards */
+.praxis-root .cx-stat {
+  font-family: var(--font-mono, monospace);
+  font-size: var(--cx-type-2xl);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  font-weight: 600;
 }
 
 /* ------------------------------------------------------------

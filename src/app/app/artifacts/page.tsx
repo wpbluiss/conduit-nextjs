@@ -46,7 +46,7 @@ export default async function ArtifactsPage() {
   return (
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8">
       <div className="mx-auto max-w-4xl">
-        <h1 className="serif text-3xl mb-2">Artifacts</h1>
+        <h1 className="cx-heading-2xl mb-2">Artifacts</h1>
         <p className="text-sm text-[var(--color-text-muted)] mb-8">
           Everything your team has produced.
         </p>
@@ -101,13 +101,13 @@ export default async function ArtifactsPage() {
                     href={`/app?c=${a.conversation_id}`}
                     className="flex flex-col gap-2 group"
                   >
-                    <div className="serif text-lg leading-snug group-hover:text-[var(--color-accent)] transition-colors">
+                    <div className="cx-heading-lg group-hover:text-[var(--color-accent)] transition-colors">
                       {a.title}
                     </div>
                     <p className="text-xs text-[var(--color-text-muted)] line-clamp-2">
                       {preview}…
                     </p>
-                    <div className="text-[10px] text-[var(--color-text-muted)] mt-auto pt-2">
+                    <div className="cx-meta mt-auto pt-2">
                       {new Date(a.created_at).toLocaleString()}
                     </div>
                   </Link>
