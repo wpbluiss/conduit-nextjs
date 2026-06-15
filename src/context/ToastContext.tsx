@@ -125,11 +125,14 @@ function ToastContainer({
               initial={{ opacity: 0, x: 24, scale: 0.96 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 24, scale: 0.96 }}
-              transition={{ duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
-              className="cx-glass-float cx-glass-border pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-[12px]"
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className="cx-glass pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-[12px]"
               style={{
                 maxWidth: 320,
                 color: "var(--cx-text)",
+                border: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))",
+                borderLeftWidth: "3px",
+                borderLeftColor: color,
               }}
             >
               <Icon
