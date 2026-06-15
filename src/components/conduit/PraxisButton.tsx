@@ -2,6 +2,7 @@
 
 import { type ReactNode } from "react";
 import { motion, useReducedMotion, type HTMLMotionProps } from "framer-motion";
+import { CX_SPRING_SNAPPY, TX_FAST } from "@/lib/ui/motion";
 
 export type PraxisButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export type PraxisButtonSize = "sm" | "md" | "lg" | "icon" | "icon-sm";
@@ -29,21 +30,6 @@ const SIZE_CLASS: Record<PraxisButtonSize, string> = {
   icon: "btn-sz-icon",
   "icon-sm": "btn-sz-icon-sm",
 };
-
-/*
- * Press transition: fast spring that physically collapses on tap and
- * rebounds with a touch of overshoot on release — the "Apple button" feel.
- * stiffness/damping tuned for snappy <120ms press, springy ~200ms release.
- */
-const PRESS_SPRING = {
-  type: "spring" as const,
-  stiffness: 500,
-  damping: 30,
-  mass: 0.8,
-};
-
-/* Hover lift — subtle, sub-100ms, eased */
-const HOVER_EASE = { duration: 0.12, ease: [0.22, 1, 0.36, 1] as const };
 
 export function SpinnerIcon({ size = 14 }: { size?: number }) {
   return (
@@ -96,7 +82,7 @@ export function PraxisButton({
       /* Press: scale 0.96 + return to baseline y; springy release on pointer-up */
       whileTap={isActuallyDisabled || prefersReduced ? undefined : { scale: 0.96, y: 0 }}
       /* Per-property: scale gets the spring (tactile snap+rebound); y gets a quick ease (hover lift) */
-      transition={prefersReduced ? HOVER_EASE : { scale: PRESS_SPRING, y: HOVER_EASE }}
+      transition={prefersReduced ? TX_FAST : { scale: CX_SPRING_SNAPPY, y: TX_FAST }}
       className={`${variantClass} ${sizeClass} disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
       {/* Relative wrapper so spinner can overlay without shifting button width */}

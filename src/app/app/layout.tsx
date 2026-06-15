@@ -27,6 +27,7 @@ import { Suspense } from "react";
 import { ReferralClaimer } from "@/components/conduit/ReferralClaimer";
 import { NicknameProvider } from "@/context/NicknameContext";
 import { PostHogIdentify } from "@/components/PostHogIdentify";
+import { ConsoleMotionProvider } from "@/components/conduit/ConsoleMotionProvider";
 
 export const dynamic = "force-dynamic";
 
@@ -185,6 +186,7 @@ export default async function AppLayout({
   return (
     <div className="praxis-root h-screen flex bg-[var(--cx-canvas)] text-[var(--cx-text)]">
       <a href="#app-main" className="conduit-skip-link">Skip to main content</a>
+      <ConsoleMotionProvider>
       <UserProvider initialUser={initialUser}>
       <NicknameProvider initialNicknames={specialistNicknames}>
       <ToastProvider>
@@ -246,6 +248,7 @@ export default async function AppLayout({
       </ToastProvider>
       </NicknameProvider>
       </UserProvider>
+      </ConsoleMotionProvider>
     </div>
   );
 }
