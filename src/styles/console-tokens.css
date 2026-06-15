@@ -541,6 +541,33 @@
 }
 
 /* ------------------------------------------------------------
+ * Code block scrollbar — thin accent-colored horizontal bar
+ *
+ * Overrides the global scrollbar rule above for elements that
+ * carry the .cx-code-scroll class (the <pre> inside code blocks).
+ * Horizontal axis only (height); accent thumb signals "scrollable".
+ * ------------------------------------------------------------ */
+
+.praxis-root .cx-code-scroll::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+.praxis-root .cx-code-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.praxis-root .cx-code-scroll::-webkit-scrollbar-thumb {
+  background: var(--cx-accent, #7C6CFF);
+  border-radius: var(--cx-radius-full);
+  opacity: 0.6;
+}
+
+.praxis-root .cx-code-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--cx-accent-bright, #9B8CFF);
+}
+
+/* ------------------------------------------------------------
  * Selection highlight — accent tint
  * ------------------------------------------------------------ */
 

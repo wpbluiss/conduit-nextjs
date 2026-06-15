@@ -137,7 +137,7 @@ function CopyButton({ text, alwaysVisible }: { text: string; alwaysVisible?: boo
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), 1500);
     } catch {
       // clipboard blocked
     }
@@ -148,30 +148,21 @@ function CopyButton({ text, alwaysVisible }: { text: string; alwaysVisible?: boo
       type="button"
       onClick={copy}
       aria-label={copied ? "Copied!" : "Copy code"}
-      title={copied ? "Copied!" : "Copy code"}
+      title={copied ? "Copied!" : "Copy"}
       className={[
-        "flex items-center gap-1.5 px-2 py-1 rounded cx-type-xs transition-all duration-150",
+        "cx-icon-btn cx-focus-ring flex items-center justify-center w-8 h-8 rounded-lg",
+        "transition-opacity",
         alwaysVisible || copied
           ? "opacity-100"
           : "opacity-0 group-hover:opacity-100 focus:opacity-100",
       ].join(" ")}
       style={{
-        color: copied
-          ? "var(--cx-reward, #34D399)"
-          : "var(--cx-text-muted, #A0A0B0)",
-      }}
-      onMouseEnter={(e) => {
-        if (!copied)
-          (e.currentTarget as HTMLElement).style.color = "var(--cx-text, #F4F4F7)";
-      }}
-      onMouseLeave={(e) => {
-        if (!copied)
-          (e.currentTarget as HTMLElement).style.color =
-            "var(--cx-text-muted, #A0A0B0)";
+        transitionDuration: "var(--cx-dur-fast, 120ms)",
+        transitionTimingFunction: "var(--cx-ease, cubic-bezier(0.22,1,0.36,1))",
+        color: copied ? "var(--cx-reward, #34D399)" : undefined,
       }}
     >
-      {copied ? <Check size={12} /> : <Copy size={12} />}
-      <span>{copied ? "Copied!" : "Copy"}</span>
+      {copied ? <Check size={14} strokeWidth={2} /> : <Copy size={14} strokeWidth={2} />}
     </button>
   );
 }
@@ -195,31 +186,47 @@ function HighlightedCodeBlock({
     <div
       className="rounded-xl overflow-hidden my-3 group"
       style={{
-        border: "1px solid var(--cx-border, #262630)",
         background: "var(--cx-surface-raised, #1C1C26)",
+        border: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))",
+        boxShadow: [
+          "var(--cx-glass-shadow, 0 1px 3px rgba(0,0,0,.40), 0 4px 16px rgba(0,0,0,.30))",
+          "var(--cx-glass-highlight, inset 0 1px 0 rgba(255,255,255,.10))",
+        ].join(", "),
       }}
     >
       {/* Header bar */}
       <div
-        className="flex items-center justify-between px-4 py-2"
+        className="flex items-center justify-between px-4"
         style={{
-          borderBottom: "1px solid var(--cx-border, #262630)",
-          background: "var(--cx-surface-overlay, #23232E)",
+          height: "36px",
+          borderBottom: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))",
+          background: "rgba(255, 255, 255, 0.03)",
         }}
       >
         <span
-          className="cx-type-xs uppercase tracking-[0.15em]"
-          style={{ fontFamily: "var(--font-mono, monospace)", color: "var(--cx-text-faint, #6B6B7B)" }}
+          className="cx-mono cx-type-xs uppercase tracking-[0.15em]"
+          style={{ color: "var(--cx-text-faint, #6B6B7B)" }}
         >
           {lang || "code"}
         </span>
-        {/* Hide copy button while still streaming — no complete content yet */}
-        {!streaming && <CopyButton text={code} />}
+        {/* Copy button: hidden during streaming (opacity 0, pointer-events off),
+            fades in at 120ms when streaming ends */}
+        <div
+          style={{
+            opacity: streaming ? 0 : 1,
+            transition: streaming
+              ? undefined
+              : "opacity var(--cx-dur-fast, 120ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1))",
+            pointerEvents: streaming ? "none" : undefined,
+          }}
+        >
+          <CopyButton text={code} />
+        </div>
       </div>
 
       {/* Code body */}
       <pre
-        className="overflow-x-auto px-4 py-3 cx-type-sm leading-[1.7]"
+        className="cx-code-scroll overflow-x-auto px-4 py-3 cx-type-sm leading-[1.7]"
         style={{ fontFamily: "var(--font-mono, monospace)", margin: 0 }}
       >
         <code>
