@@ -4,8 +4,7 @@ import { useState, useEffect, useTransition } from "react";
 import QRCode from "qrcode";
 import { Copy, Download } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import { SpinnerIcon } from "./PraxisButton";
-import { Button } from "@/components/conduit/ui/Button";
+import { Button, SpinnerIcon } from "@/components/conduit/ui/Button";
 
 type MFAState =
   | { phase: "loading" }
@@ -100,30 +99,12 @@ function BackupCodesGrid({ codes }: { codes: string[] }) {
         ))}
       </div>
       <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={copyAll}
-          className="flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-opacity hover:opacity-80"
-          style={{
-            background: "var(--color-surface)",
-            border: "1px solid var(--color-border)",
-            color: "var(--color-text-muted)",
-          }}
-        >
+        <Button variant="secondary" size="sm" onClick={copyAll} className="flex-1 justify-center">
           <Copy size={13} /> Copy all
-        </button>
-        <button
-          type="button"
-          onClick={download}
-          className="flex-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-opacity hover:opacity-80"
-          style={{
-            background: "var(--color-surface)",
-            border: "1px solid var(--color-border)",
-            color: "var(--color-text-muted)",
-          }}
-        >
+        </Button>
+        <Button variant="secondary" size="sm" onClick={download} className="flex-1 justify-center">
           <Download size={13} /> Download
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -303,14 +284,14 @@ export function MFASecurity() {
                   Authenticator app — your account is protected with TOTP.
                 </p>
               </div>
-              <button
-                type="button"
+              <Button
+                variant="danger"
+                size="sm"
+                className="shrink-0"
                 onClick={() => { setError(null); setState({ phase: "disabling", factorId: state.factorId }); }}
-                className="shrink-0 rounded-lg px-3 py-2 text-sm transition-colors hover:opacity-80"
-                style={{ background: "color-mix(in srgb, var(--cx-danger) 12%, transparent)", color: "var(--cx-danger)", border: "1px solid color-mix(in srgb, var(--cx-danger) 30%, transparent)" }}
               >
                 Disable
-              </button>
+              </Button>
             </div>
           </SectionCard>
 
@@ -326,19 +307,17 @@ export function MFASecurity() {
                   Each code works once.
                 </p>
               </div>
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="sm"
+                className="shrink-0"
                 onClick={generateNewCodes}
-                disabled={isPending}
-                className="shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition-opacity disabled:opacity-50"
-                style={{
-                  background: "var(--color-surface)",
-                  border: "1px solid var(--color-border)",
-                  color: "var(--color-text-muted)",
-                }}
+                isLoading={isPending}
+                loadingText="Regenerating…"
+                isDisabled={isPending}
               >
-                {isPending ? <SpinnerIcon size={14} /> : "Regenerate"}
-              </button>
+                Regenerate
+              </Button>
             </div>
             {error && <p className="mt-2 text-xs" style={{ color: "var(--cx-danger)" }}>{error}</p>}
           </SectionCard>
@@ -390,23 +369,19 @@ export function MFASecurity() {
           </label>
           {error && <p className="mt-2 text-xs" style={{ color: "var(--cx-danger)" }}>{error}</p>}
           <div className="mt-4 flex gap-2">
-            <button
-              type="button"
-              onClick={cancelDisable}
-              className="rounded-lg px-4 py-2 text-sm transition-opacity"
-              style={{ background: "var(--color-surface-elevated)", border: "1px solid var(--color-border)", color: "var(--color-text-muted)" }}
-            >
+            <Button variant="ghost" size="sm" onClick={cancelDisable}>
               Cancel
-            </button>
-            <button
-              type="button"
-              disabled={isPending || disableConfirm !== "DISABLE"}
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              isDisabled={isPending || disableConfirm !== "DISABLE"}
+              isLoading={isPending}
+              loadingText="Disabling…"
               onClick={disableMFA}
-              className="rounded-lg px-4 py-2 text-sm font-semibold transition-opacity disabled:opacity-40"
-              style={{ background: "var(--cx-danger)", color: "#fff" }}
             >
-              {isPending ? "Disabling…" : "Disable 2FA"}
-            </button>
+              Disable 2FA
+            </Button>
           </div>
         </SectionCard>
       )}
@@ -473,14 +448,13 @@ export function MFASecurity() {
           </div>
           {error && <p className="mt-2 text-xs" style={{ color: "var(--cx-danger)" }}>{error}</p>}
           <div className="mt-4 flex gap-2">
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => { setState({ phase: "idle", enrolled: false }); setError(null); setCode(""); }}
-              className="rounded-lg px-4 py-2 text-sm transition-opacity"
-              style={{ background: "var(--color-surface-elevated)", border: "1px solid var(--color-border)", color: "var(--color-text-muted)" }}
             >
               Cancel
-            </button>
+            </Button>
             <Button
               disabled={isPending || code.length !== 6}
               onClick={verifyEnrollment}

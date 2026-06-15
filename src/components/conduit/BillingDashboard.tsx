@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ArrowRight, Check, ExternalLink } from "lucide-react";
 import { ORDERED_TIERS, TOPUPS, tierById, type TierId } from "@/lib/billing/tiers";
 import { track } from "@/lib/analytics/track";
-import { PraxisButton } from "./PraxisButton";
+import { Button as PraxisButton } from "@/components/conduit/ui/Button";
 
 interface UsageData {
   totals: { input: number; output: number; cost: number };

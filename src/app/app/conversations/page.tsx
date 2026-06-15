@@ -228,7 +228,7 @@ export default async function ConversationsPage({
             {!activeLabelId && (
               <Link
                 href="/app"
-                className="conduit-btn-primary text-[13px] px-4 py-2"
+                className="btn-primary btn-sz-sm"
               >
                 Start your first conversation
               </Link>
