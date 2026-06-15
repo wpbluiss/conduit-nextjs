@@ -277,7 +277,7 @@ export function MFASecurity() {
       {success && (
         <div
           className="rounded-lg px-4 py-3 text-sm"
-          style={{ background: "color-mix(in srgb, #30a46c 12%, transparent)", color: "#30a46c", border: "1px solid color-mix(in srgb, #30a46c 30%, transparent)" }}
+          style={{ background: "color-mix(in srgb, var(--cx-reward) 12%, transparent)", color: "var(--cx-reward)", border: "1px solid color-mix(in srgb, var(--cx-reward) 30%, transparent)" }}
         >
           {success}
         </div>
@@ -292,7 +292,7 @@ export function MFASecurity() {
                 <div className="flex items-center gap-2">
                   <span
                     className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em]"
-                    style={{ background: "color-mix(in srgb, #30a46c 15%, transparent)", color: "#30a46c" }}
+                    style={{ background: "color-mix(in srgb, var(--cx-reward) 15%, transparent)", color: "var(--cx-reward)" }}
                   >
                     <span className="h-1.5 w-1.5 rounded-full bg-current" />
                     Enabled
@@ -306,7 +306,7 @@ export function MFASecurity() {
                 type="button"
                 onClick={() => { setError(null); setState({ phase: "disabling", factorId: state.factorId }); }}
                 className="shrink-0 rounded-lg px-3 py-2 text-sm transition-colors hover:opacity-80"
-                style={{ background: "color-mix(in srgb, #e5484d 12%, transparent)", color: "#f0888c", border: "1px solid color-mix(in srgb, #e5484d 30%, transparent)" }}
+                style={{ background: "color-mix(in srgb, var(--cx-danger) 12%, transparent)", color: "var(--cx-danger)", border: "1px solid color-mix(in srgb, var(--cx-danger) 30%, transparent)" }}
               >
                 Disable
               </button>
@@ -339,7 +339,7 @@ export function MFASecurity() {
                 {isPending ? <SpinnerIcon size={14} /> : "Regenerate"}
               </button>
             </div>
-            {error && <p className="mt-2 text-xs" style={{ color: "#f0888c" }}>{error}</p>}
+            {error && <p className="mt-2 text-xs" style={{ color: "var(--cx-danger)" }}>{error}</p>}
           </SectionCard>
         </>
       )}
@@ -370,7 +370,7 @@ export function MFASecurity() {
       {/* ── Disable confirm ── */}
       {state.phase === "disabling" && (
         <SectionCard>
-          <h3 className="text-sm font-semibold" style={{ color: "#f0888c" }}>
+          <h3 className="text-sm font-semibold" style={{ color: "var(--cx-danger)" }}>
             Disable two-factor authentication
           </h3>
           <p className="mt-1.5 text-sm" style={{ color: "var(--color-text-muted)" }}>
@@ -388,7 +388,7 @@ export function MFASecurity() {
               style={{ background: "var(--color-surface-elevated)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
             />
           </label>
-          {error && <p className="mt-2 text-xs" style={{ color: "#f0888c" }}>{error}</p>}
+          {error && <p className="mt-2 text-xs" style={{ color: "var(--cx-danger)" }}>{error}</p>}
           <div className="mt-4 flex gap-2">
             <button
               type="button"
@@ -403,7 +403,7 @@ export function MFASecurity() {
               disabled={isPending || disableConfirm !== "DISABLE"}
               onClick={disableMFA}
               className="rounded-lg px-4 py-2 text-sm font-semibold transition-opacity disabled:opacity-40"
-              style={{ background: "#e5484d", color: "#fff" }}
+              style={{ background: "var(--cx-danger)", color: "#fff" }}
             >
               {isPending ? "Disabling…" : "Disable 2FA"}
             </button>
@@ -472,7 +472,7 @@ export function MFASecurity() {
           <div className="mt-3">
             <CodeInput value={code} onChange={setCode} disabled={isPending} />
           </div>
-          {error && <p className="mt-2 text-xs" style={{ color: "#f0888c" }}>{error}</p>}
+          {error && <p className="mt-2 text-xs" style={{ color: "var(--cx-danger)" }}>{error}</p>}
           <div className="mt-4 flex gap-2">
             <button
               type="button"

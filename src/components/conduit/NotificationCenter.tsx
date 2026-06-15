@@ -131,7 +131,7 @@ export function NotificationCenter() {
           <span
             aria-hidden
             className="absolute top-1 left-5 flex items-center justify-center w-3.5 h-3.5 rounded-full text-[9px] font-bold leading-none"
-            style={{ background: "var(--color-red, #ef4444)", color: "#fff" }}
+            style={{ background: "var(--color-red, var(--cx-danger))", color: "#fff" }}
           >
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>

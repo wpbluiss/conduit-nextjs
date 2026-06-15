@@ -10,7 +10,7 @@ import { Loader2, Upload, Clock, Hammer } from "lucide-react";
 import { useInFlightBuilds } from "./useInFlightBuilds";
 import type { InFlightBuild } from "@/lib/engineering/in-flight";
 
-const DEPT_COLOR_ENG = "#7C8CF8";
+const DEPT_COLOR_ENG = "var(--cx-accent)";
 const MAX_SHOWN = 3;
 
 function formatElapsed(startedAt: string | null, createdAt: string, nowMs: number): string {

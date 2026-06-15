@@ -54,17 +54,17 @@ export function TokenBudgetNudge({
       role="alert"
       className="hairline border-l-0 border-r-0 border-t-0 px-4 py-2 flex items-center gap-3 text-xs"
       style={{
-        background: "color-mix(in srgb, rgba(255,138,61,0.08) 100%, transparent)",
-        borderBottomColor: "rgba(255,138,61,0.14)",
+        background: "var(--cx-accent-tint)",
+        borderBottomColor: "rgba(124,108,255,0.20)",
       }}
     >
       <Warning
         size={14}
         weight="fill"
-        style={{ color: "#FF8A3D", flexShrink: 0 }}
+        style={{ color: "var(--cx-accent)", flexShrink: 0 }}
       />
       <span style={{ color: "var(--color-text)" }}>
-        <span style={{ color: "#F5EFE6", fontWeight: 500 }}>
+        <span style={{ color: "var(--cx-text)", fontWeight: 500 }}>
           {pctDisplay}%
         </span>{" "}
         of your free tokens used — {remaining} remaining this month.
@@ -76,7 +76,7 @@ export function TokenBudgetNudge({
           close();
         }}
         className="ml-auto inline-flex items-center gap-1 font-medium shrink-0 hover:opacity-80 transition-opacity"
-        style={{ color: "#FF8A3D" }}
+        style={{ color: "var(--cx-accent)" }}
       >
         Upgrade →
       </Link>

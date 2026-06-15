@@ -532,7 +532,7 @@ export function PraxisComposerPill({
                 width: 8,
                 height: 8,
                 borderRadius: "50%",
-                background: "#ef4444",
+                background: "var(--cx-danger)",
                 animation: "voiceRecordPulse 1s ease-in-out infinite",
                 flexShrink: 0,
               }}
@@ -561,7 +561,7 @@ export function PraxisComposerPill({
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                background: "#ef4444",
+                background: "var(--cx-danger)",
                 color: "#fff",
                 border: "none",
                 cursor: "pointer",

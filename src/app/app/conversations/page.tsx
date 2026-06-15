@@ -209,8 +209,8 @@ export default async function ConversationsPage({
             <div
               className="w-14 h-14 rounded-2xl flex items-center justify-center"
               style={{
-                background: "rgba(91,99,232,0.08)",
-                border: "1px solid rgba(91,99,232,0.18)",
+                background: "var(--cx-accent-tint)",
+                border: "1px solid rgba(124,108,255,0.20)",
               }}
             >
               <MessageSquare size={24} style={{ color: "var(--color-accent)" }} />
