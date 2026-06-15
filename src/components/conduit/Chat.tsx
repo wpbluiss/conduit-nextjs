@@ -38,6 +38,7 @@ import {
 import { useToast } from "@/context/ToastContext";
 import { useNicknames } from "@/context/NicknameContext";
 import { SaveOutputButton } from "./SaveOutputButton";
+import { ConversationShareButton } from "./ConversationShareButton";
 import { track } from "@/lib/analytics/track";
 
 export interface VoicePrefs {
@@ -1401,6 +1402,10 @@ export function Chat({
                         {handoffLoading ? "Handing off…" : "Handoff"}
                       </span>
                     </button>
+                  )}
+                  {/* Share button — generate a public read-only link */}
+                  {conversationId && (
+                    <ConversationShareButton conversationId={conversationId} />
                   )}
                 </div>
               )}
