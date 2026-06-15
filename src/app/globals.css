@@ -30,22 +30,25 @@
 
 @theme inline {
   /* ============================================================
-   * /app Console tokens (DO NOT MODIFY — Console redesign tokens)
+   * /app Console tokens — R19 ink + electric violet palette
+   * (defined here so Tailwind JIT sees the right base values;
+   *  console-tokens.css re-maps these inside .praxis-root too)
    * ============================================================ */
-  --color-surface: #0A0908;
-  --color-surface-elevated: #14110F;
-  --color-surface-raised: #1A1714;
-  --color-border: #1F1C19;
-  --color-border-soft: #2A2622;
-  --color-text: #F5F1EA;
-  --color-text-muted: #8C8884;
-  --color-accent: #FF8A3D;
-  --color-accent-hi: #FFA876;
-  --color-accent-deep: #D9532A;
+  --color-surface: #0B0B0F;
+  --color-surface-elevated: #131319;
+  --color-surface-raised: #1C1C26;
+  --color-border: #262630;
+  --color-border-soft: #33333F;
+  --color-border-default: #262630;
+  --color-text: #F4F4F7;
+  --color-text-muted: #A0A0B0;
+  --color-accent: #7C6CFF;
+  --color-accent-hi: #9B8CFF;
+  --color-accent-deep: #5548CC;
   --color-cyan: #22D3EE;
   --color-purple: #A855F7;
   --color-green: #34D399;
-  --color-pink: #F472B6;
+  --color-pink: #F4607D;
   --color-amber: #FBBF24;
   /* Conduit department colors — used for employee accents.
      Jarvis = silver/platinum (chief of staff)
@@ -244,14 +247,18 @@ body {
   border: 1px solid var(--color-border-default);
 }
 
-/* Auth pages — ember CTA on dark inverse background */
+/* Auth pages — electric violet CTA on dark inverse background */
 .conduit-auth-btn {
-  background: var(--color-accent);
+  background: var(--color-accent, #7C6CFF);
   color: #FFFFFF;
   padding: 14px 32px;
   font-weight: 500;
   font-size: 0.9375rem;
   letter-spacing: -0.005em;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(124, 108, 255, 0.15);
   transition: background 200ms var(--conduit-ease-out-quart), box-shadow 200ms var(--conduit-ease-out-quart), transform 200ms var(--conduit-ease-out-quart);
   display: inline-flex;
   align-items: center;
@@ -260,14 +267,17 @@ body {
   cursor: pointer;
 }
 .conduit-auth-btn:hover {
-  background: #FFAA6B;
-  box-shadow: 0 0 40px rgba(255, 138, 61, 0.40);
+  background: var(--color-accent-hi, #9B8CFF);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 6px 24px rgba(124, 108, 255, 0.40),
+    0 2px 8px rgba(0, 0, 0, 0.35);
   transform: translateY(-1px);
 }
 .conduit-auth-btn:active { transform: translateY(0); }
 .conduit-auth-btn:focus-visible {
-  outline: 2px solid var(--color-ember-300);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(124, 108, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 /* Console button system — Apple-grade, electric violet dark palette (CONSOLE_REDESIGN.md spec)
