@@ -79,7 +79,7 @@ export async function getSnapshot(): Promise<Snapshot | null> {
 
   const [
     household, people, accounts, paychecks, inflows, expenses,
-    debts, childSupport, payments, savingsLog, investments, creditScores,
+    debts, childSupport, payments, savingsLog, investments, creditScores, vaults,
   ] = await Promise.all([
     supabase.from("fin_household").select("*").eq("id", hh).single(),
     supabase.from("fin_people").select("*").order("role"),
@@ -93,6 +93,7 @@ export async function getSnapshot(): Promise<Snapshot | null> {
     supabase.from("fin_savings_log").select("*").order("date", { ascending: true }),
     supabase.from("fin_investments").select("*").order("bucket"),
     supabase.from("fin_credit_scores").select("*").order("date", { ascending: true }),
+    supabase.from("fin_vaults").select("*").order("sort", { ascending: true }),
   ]);
 
   if (!household.data) return null;
@@ -110,6 +111,7 @@ export async function getSnapshot(): Promise<Snapshot | null> {
     savingsLog: savingsLog.data ?? [],
     investments: investments.data ?? [],
     creditScores: creditScores.data ?? [],
+    vaults: vaults.data ?? [],
   };
 }
 

@@ -4,7 +4,9 @@ import {
   pooledCash, netWorth, projectIncome, goalProgress, orderDebts,
   onTimeStats, dueNow,
 } from "@/lib/finance/compute";
+import { gameState, vaultPct, isVaultFunded } from "@/lib/finance/gamify";
 import { fmtMoney, personLabel } from "@/lib/finance/constants";
+import { LevelBar } from "@/components/finance/LevelBar";
 import { MetricCard } from "@/components/finance/MetricCard";
 import { MoneyStrip } from "@/components/finance/MoneyStrip";
 import { CompactGoalDebt } from "@/components/finance/CompactGoalDebt";
@@ -25,6 +27,8 @@ export default async function FinanceHome() {
   const g = goalProgress(snap.savingsLog, snap.household.savings_goal, snap.household.goal_start_date, snap.household.goal_target_date);
   const debt = orderDebts(snap.debts);
   const ot = onTimeStats(snap.payments);
+  const game = gameState(snap);
+  const topVaults = snap.vaults.filter((v) => v.status !== "spent").slice(0, 3);
 
   const due = dueNow(snap, 16);
   const dueTotal = due.reduce((s, d) => s + d.amount, 0);
@@ -51,6 +55,9 @@ export default async function FinanceHome() {
         <p className="text-sm text-[var(--fin-muted)] mt-1 mb-3">One pool. One goal. Here&apos;s what matters today.</p>
         <QuickAddRow />
       </div>
+
+      {/* Game layer: level + XP */}
+      <LevelBar g={game} />
 
       {/* Money strip */}
       <MoneyStrip
@@ -145,6 +152,43 @@ export default async function FinanceHome() {
         debtOriginal={debt.originalTotal}
         attackNext={debt.next?.name ?? null}
       />
+
+      {/* Rewards preview */}
+      {topVaults.length > 0 && (
+        <Link href="/finance/rewards" className="block">
+          <Card className="hover:bg-white/[0.04] transition">
+            <div className="flex items-center justify-between mb-3">
+              <div className="fin-mono text-[10px] uppercase tracking-[0.2em] text-[var(--fin-muted)]">
+                Reward vaults
+              </div>
+              <span className="text-xs text-[#ffa876]">Open →</span>
+            </div>
+            <div className="space-y-3">
+              {topVaults.map((v) => {
+                const pct = vaultPct(v);
+                const done = isVaultFunded(v);
+                return (
+                  <div key={v.id}>
+                    <div className="flex items-center justify-between text-sm mb-1">
+                      <span className="flex items-center gap-2">
+                        <span>{v.emoji}</span> {v.name}
+                        {done && <span className="text-[10px] text-[#ffa876] fin-mono uppercase">unlocked</span>}
+                      </span>
+                      <span className="text-[var(--fin-muted)] text-xs">
+                        {fmtMoney(Number(v.saved_amount))} / {fmtMoney(Number(v.target_amount))}
+                      </span>
+                    </div>
+                    <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+                      <div className="h-full rounded-full"
+                        style={{ width: `${pct}%`, background: "linear-gradient(90deg,#d9532a,#ff8a3d,#ffa876)" }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        </Link>
+      )}
 
       {/* Windfall splitter */}
       <AllocationPlanner snap={snap} />

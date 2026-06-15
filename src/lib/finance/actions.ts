@@ -420,3 +420,46 @@ export async function deleteMyAccount(): Promise<Result> {
   const { error } = await supabase.rpc("fin_delete_my_account");
   return { ok: !error, error: error?.message };
 }
+
+// ===================== Reward Vaults (gamified sinking funds) =====================
+export async function createVault(form: FormData): Promise<Result> {
+  const supabase = await db();
+  const { error } = await supabase.from("fin_vaults").insert({
+    household_id: (await getUserHouseholdId())!,
+    name: str(form.get("name"), "New Reward"),
+    emoji: str(form.get("emoji"), "🎯"),
+    category: str(form.get("category"), "reward"),
+    target_amount: num(form.get("target_amount")),
+    color: str(form.get("color"), "#ff8a3d"),
+  });
+  refresh();
+  return { ok: !error, error: error?.message };
+}
+
+export async function fundVault(id: string, amount: number): Promise<Result> {
+  const supabase = await db();
+  const { data: v } = await supabase.from("fin_vaults").select("*").eq("id", id).single();
+  if (!v) return { ok: false, error: "Vault not found" };
+  const saved = Math.max(0, Number(v.saved_amount) + amount);
+  const status = saved >= Number(v.target_amount) && Number(v.target_amount) > 0 ? "funded" : "active";
+  const { error } = await supabase.from("fin_vaults")
+    .update({ saved_amount: saved, status, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  refresh();
+  return { ok: !error, error: error?.message };
+}
+
+export async function markVaultSpent(id: string): Promise<Result> {
+  const supabase = await db();
+  const { error } = await supabase.from("fin_vaults")
+    .update({ status: "spent", updated_at: new Date().toISOString() }).eq("id", id);
+  refresh();
+  return { ok: !error, error: error?.message };
+}
+
+export async function deleteVault(id: string): Promise<Result> {
+  const supabase = await db();
+  const { error } = await supabase.from("fin_vaults").delete().eq("id", id);
+  refresh();
+  return { ok: !error, error: error?.message };
+}

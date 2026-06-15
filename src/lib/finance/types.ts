@@ -155,6 +155,19 @@ export interface AiMessage {
   created_at: string;
 }
 
+export interface Vault {
+  id: string;
+  household_id: string;
+  name: string;
+  emoji: string;
+  category: string;
+  target_amount: number;
+  saved_amount: number;
+  status: string;
+  color: string;
+  sort: number;
+}
+
 export interface Snapshot {
   household: Household;
   people: Person[];
@@ -168,4 +181,5 @@ export interface Snapshot {
   savingsLog: SavingsLog[];
   investments: Investment[];
   creditScores: CreditScore[];
+  vaults: Vault[];
 }
