@@ -2425,7 +2425,7 @@ function EmptyState({
                     <div>
                       <p
                         style={{
-                          fontSize: 13,
+                          fontSize: "var(--cx-type-sm)",
                           fontWeight: 600,
                           color: "var(--color-text)",
                           lineHeight: 1.3,
@@ -2443,9 +2443,9 @@ function EmptyState({
                   </div>
                   <p
                     style={{
-                      fontSize: 12,
+                      fontSize: "var(--cx-type-xs)",
                       color: "var(--color-text-muted)",
-                      lineHeight: 1.5,
+                      lineHeight: "var(--cx-lh-body)",
                     }}
                   >
                     {prompt}
