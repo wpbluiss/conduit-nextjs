@@ -45,6 +45,87 @@ const ROUTING_TO_STATUS: Partial<Record<EmployeeKey, string>> = {
   legal:       "routing to Legal…",
 };
 
+/**
+ * The chip + animated thinking bubble without any outer flex wrapper or avatar.
+ * Used by Chat.tsx's MessageBubble so the avatar lives in the stable outer
+ * shell and only the content area crossfades when streaming begins.
+ */
+export function ThinkingBubble({
+  employee,
+  roundTable = false,
+  isActive = true,
+  routingTarget = null,
+}: {
+  employee: EmployeeKey;
+  roundTable?: boolean;
+  isActive?: boolean;
+  routingTarget?: EmployeeKey | null;
+}) {
+  const reduced = useReducedMotion();
+  const name = employeeLabel(employee);
+
+  const statusText = !isActive
+    ? "waiting…"
+    : routingTarget && employee === "jarvis"
+    ? (ROUTING_TO_STATUS[routingTarget] ?? `routing to ${employeeLabel(routingTarget)}…`)
+    : roundTable
+    ? "contributing to the discussion…"
+    : (THINKING_STATUS[employee] ?? "thinking…");
+
+  return (
+    <div
+      className="space-y-1.5"
+      style={{ opacity: isActive ? 1 : 0.45, transition: "opacity 200ms ease" }}
+    >
+      <SpecialistChip employee={employee} />
+      <div
+        role="status"
+        aria-live="polite"
+        aria-label={isActive ? `${name} is responding` : `${name} is waiting`}
+        className="thinking-bubble inline-flex flex-col gap-2 px-4 py-3"
+      >
+        {reduced ? (
+          <span className="thinking-status">{statusText}</span>
+        ) : (
+          <>
+            {/* Three pulsing dots — framer-motion stagger */}
+            <div className="flex items-center gap-1.5" aria-hidden="true">
+              {[0, 1, 2].map((i) => (
+                <motion.span
+                  key={i}
+                  custom={i}
+                  variants={dotVariants}
+                  animate="pulse"
+                  style={{
+                    display: "inline-block",
+                    width: 7,
+                    height: 7,
+                    borderRadius: 9999,
+                    background: "var(--dept, var(--cx-accent))",
+                    flexShrink: 0,
+                  }}
+                />
+              ))}
+            </div>
+            {/* Micro-copy: animates when routing target is revealed */}
+            <motion.span
+              key={statusText}
+              className="thinking-status"
+              aria-hidden="true"
+              initial={{ opacity: 0, y: 3 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {statusText}
+            </motion.span>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Standalone indicator with avatar — used outside of MessageBubble (e.g. tests, storybook). */
 export function TypingIndicator({
   employee,
   roundTable = false,
@@ -59,16 +140,7 @@ export function TypingIndicator({
   routingTarget?: EmployeeKey | null;
 }) {
   const reduced = useReducedMotion();
-  const name = employeeLabel(employee);
   const deptColor = DEPT_COLOR[employee];
-
-  const statusText = !isActive
-    ? "waiting…"
-    : routingTarget && employee === "jarvis"
-    ? (ROUTING_TO_STATUS[routingTarget] ?? `routing to ${employeeLabel(routingTarget)}…`)
-    : roundTable
-    ? "contributing to the discussion…"
-    : (THINKING_STATUS[employee] ?? "thinking…");
 
   return (
     <div
@@ -82,52 +154,13 @@ export function TypingIndicator({
       <div className="pt-1 shrink-0">
         <SpecialistAvatar employee={employee} size={32} streaming={isActive && !reduced} />
       </div>
-      <div className="min-w-0 flex-1 space-y-1.5">
-        <SpecialistChip employee={employee} />
-        <div
-          role="status"
-          aria-live="polite"
-          aria-label={isActive ? `${name} is responding` : `${name} is waiting`}
-          className="thinking-bubble inline-flex flex-col gap-2 px-4 py-3"
-        >
-          {reduced ? (
-            /* prefers-reduced-motion: static label, no animation */
-            <span className="thinking-status">{statusText}</span>
-          ) : (
-            <>
-              {/* Three pulsing dots — framer-motion stagger */}
-              <div className="flex items-center gap-1.5" aria-hidden="true">
-                {[0, 1, 2].map((i) => (
-                  <motion.span
-                    key={i}
-                    custom={i}
-                    variants={dotVariants}
-                    animate="pulse"
-                    style={{
-                      display: "inline-block",
-                      width: 7,
-                      height: 7,
-                      borderRadius: 9999,
-                      background: "var(--dept, var(--cx-accent))",
-                      flexShrink: 0,
-                    }}
-                  />
-                ))}
-              </div>
-              {/* Micro-copy: animates when routing target is revealed */}
-              <motion.span
-                key={statusText}
-                className="thinking-status"
-                aria-hidden="true"
-                initial={{ opacity: 0, y: 3 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-              >
-                {statusText}
-              </motion.span>
-            </>
-          )}
-        </div>
+      <div className="min-w-0 flex-1">
+        <ThinkingBubble
+          employee={employee}
+          roundTable={roundTable}
+          isActive={isActive}
+          routingTarget={routingTarget}
+        />
       </div>
     </div>
   );
