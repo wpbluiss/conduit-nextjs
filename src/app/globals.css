@@ -568,9 +568,10 @@ body {
 }
 .scroll-hint { animation: scrollHint 2s ease-in-out infinite; }
 
-/* Terminal caret */
-@keyframes caret { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
-.caret { animation: caret 900ms step-end infinite; }
+/* Terminal caret — soft blink, ease-in-out per design spec */
+@keyframes caret-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+.caret { animation: caret-blink 1.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .caret { animation: none; opacity: 1; } }
 
 /* Hairline divider */
 .divider { height: 1px; background: var(--color-border-default); width: 100%; }
