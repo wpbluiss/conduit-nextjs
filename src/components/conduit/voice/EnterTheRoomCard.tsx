@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 import { Mic, Lock, Loader2, AlertCircle } from "lucide-react";
+import { Button } from "@/components/conduit/ui/Button";
 import VoiceRoom, {
   type ParticipantDisplay,
   type VoiceTokenResponse,
@@ -144,11 +145,10 @@ export default function EnterTheRoomCard({
             round-robin. Atlas closes.
           </p>
         </div>
-        <button
-          type="button"
+        <Button
           onClick={start}
           disabled={requesting}
-          className="btn-primary !text-base shrink-0 inline-flex items-center gap-2 disabled:opacity-50"
+          className="!text-base shrink-0 inline-flex items-center gap-2 disabled:opacity-50"
           style={{ background: "var(--color-accent)", color: "#0A0908" }}
         >
           {requesting ? (
@@ -157,7 +157,7 @@ export default function EnterTheRoomCard({
             <Mic size={14} />
           )}
           {requesting ? "Connecting…" : "Enter the room"}
-        </button>
+        </Button>
       </div>
 
       {error && (

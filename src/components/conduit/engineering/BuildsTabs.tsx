@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ExternalLink, ArrowRight, EyeOff, X } from "lucide-react";
+import { Button } from "@/components/conduit/ui/Button";
 import type { DailyUsage } from "@/lib/engineering/limits";
 
 const FAILED_STATUSES = new Set(["failed", "timeout", "aborted"]);
@@ -539,14 +540,12 @@ function ContinueModal({
           >
             Cancel
           </button>
-          <button
-            type="button"
+          <Button
             onClick={submit}
-            className="btn-primary"
             disabled={submitting}
           >
             {submitting ? "Starting…" : "Start continuation →"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

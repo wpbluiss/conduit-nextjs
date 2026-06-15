@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Hammer, Lock, Loader2, X } from "lucide-react";
+import { Button } from "@/components/conduit/ui/Button";
 
 interface Props {
   internalAccount: boolean;
@@ -85,14 +86,13 @@ export default function EngineeringBuildButton({
 
   return (
     <>
-      <button
-        type="button"
+      <Button
         onClick={() => setOpen(true)}
-        className="btn-primary !text-sm inline-flex items-center gap-1.5"
+        className="!text-sm inline-flex items-center gap-1.5"
         style={{ background: deptColor, color: "#0A0908" }}
       >
         <Hammer size={13} /> Start a build
-      </button>
+      </Button>
 
       {open && (
         <div
@@ -172,16 +172,15 @@ export default function EngineeringBuildButton({
               >
                 Cancel
               </button>
-              <button
-                type="button"
+              <Button
                 onClick={submit}
                 disabled={submitting || prompt.trim().length < 8}
-                className="btn-primary !text-sm inline-flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="!text-sm inline-flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ background: deptColor, color: "#0A0908" }}
               >
                 {submitting && <Loader2 size={12} className="animate-spin" />}
                 Ship it
-              </button>
+              </Button>
             </div>
           </div>
         </div>
