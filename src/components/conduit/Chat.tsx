@@ -3,6 +3,7 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Link, Pin, Search, Share2, Tag, ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { UpgradeCTABanner } from "./UpgradeCTABanner";
 import { motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
@@ -1801,6 +1802,8 @@ export function Chat({
           )}
         </div>
       )}
+
+      <UpgradeCTABanner internalAccount={internalAccount} />
 
       <div
         className="px-4 md:px-8 py-3 md:py-4"
