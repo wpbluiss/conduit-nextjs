@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Check, Minus, Sparkles, X } from "lucide-react";
 import { TIERS, type TierId } from "@/lib/billing/tiers";
 import { track } from "@/lib/analytics/track";
+import { Button } from "@/components/conduit/ui/Button";
 
 export type PaywallReason =
   | "cap_reached"
@@ -273,18 +274,16 @@ export function PaywallModal({
             )}
           </div>
 
-          <button
+          <Button
             onClick={upgrade}
-            disabled={busy}
-            className="w-full py-3 rounded-xl text-sm font-medium transition-all disabled:opacity-60"
-            style={{
-              background: busy ? "var(--color-border)" : "var(--cx-reward)",
-              color: busy ? "var(--color-text-muted)" : "#fff",
-              boxShadow: busy ? "none" : "0 4px 16px color-mix(in srgb, var(--cx-reward) 35%, transparent)",
-            }}
+            isLoading={busy}
+            loadingText="Opening checkout…"
+            variant="primary"
+            size="lg"
+            className="w-full rounded-xl"
           >
-            {busy ? "Opening checkout…" : "Upgrade to Pro"}
-          </button>
+            Upgrade to Pro
+          </Button>
 
           {error && (
             <p className="mt-3 text-xs text-[var(--color-pink,#f87171)]">{error}</p>

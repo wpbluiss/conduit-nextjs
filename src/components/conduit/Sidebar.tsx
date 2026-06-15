@@ -39,6 +39,7 @@ import { useNicknames } from "@/context/NicknameContext";
 import { PraxisLogo } from "./PraxisLogo";
 import { SidebarBuildPip } from "./builds/in-flight/SidebarBuildPip";
 import { SidebarBuildsSection } from "./builds/in-flight/SidebarBuildsSection";
+import { Button } from "@/components/conduit/ui/Button";
 import type { InFlightBuild } from "@/lib/engineering/in-flight";
 import { ChangelogPopover } from "./ChangelogPopover";
 import { NotificationCenter } from "./NotificationCenter";
@@ -171,14 +172,14 @@ function SidebarUpgradeBanner({
           </p>
         </div>
 
-        <button
-          type="button"
+        <Button
           onClick={() => { dismiss(); onUpgradeClick(); }}
-          className="w-full py-1.5 rounded-lg cx-type-xs font-semibold transition-opacity hover:opacity-90"
-          style={{ background: "var(--color-accent)", color: "#fff" }}
+          variant="primary"
+          size="sm"
+          className="w-full"
         >
           Upgrade to Pro
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -44,23 +44,18 @@ export default function AppError({ error, reset, unstable_retry }: Props) {
         An error occurred while loading this page. Your data is safe — try reloading.
       </p>
       <div className="flex flex-col sm:flex-row items-center gap-3">
-        <Button
-          onClick={onRetry}
-          className="inline-flex items-center gap-2"
-          style={{ padding: "10px 20px", fontSize: "var(--cx-type-base)" }}
-        >
+        <Button onClick={onRetry} variant="primary" size="md">
           <RotateCcw size={14} />
           Try again
         </Button>
-        <button
-          type="button"
+        <Button
           onClick={() => router.push("/app/workspace")}
-          className="inline-flex items-center gap-1.5 text-sm"
-          style={{ color: "var(--color-text-muted)" }}
+          variant="ghost"
+          size="md"
         >
           <Home size={13} />
           Workspace
-        </button>
+        </Button>
       </div>
     </div>
   );
