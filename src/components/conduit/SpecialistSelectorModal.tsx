@@ -59,14 +59,11 @@ export function SpecialistSelectorModal({
       role="dialog"
       aria-modal="true"
       aria-label="Choose your specialist"
-      className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm"
+      className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm"
     >
       <div
-        className="w-full max-w-2xl rounded-2xl border p-6 md:p-8 shadow-xl"
-        style={{
-          background: "var(--color-surface-elevated)",
-          borderColor: "var(--color-border)",
-        }}
+        className="cx-glass-float cx-glass-border w-full max-w-2xl rounded-[16px] p-6 md:p-8"
+        style={{ color: "var(--cx-text, #F4F4F7)" }}
       >
         <p
           className="text-[11px] uppercase tracking-[0.2em] mb-2"

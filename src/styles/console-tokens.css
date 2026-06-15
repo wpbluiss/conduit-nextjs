@@ -40,6 +40,24 @@
   --cx-text-muted:      #A0A0B0;
   --cx-text-faint:      #6B6B7B;
 
+  /* ---- Glass recipe tokens (depth tiers for frosted glass surfaces) ---- */
+  /* Tier 1 — raised (sidebar, cards, composer): subtle bg + moderate blur */
+  --cx-glass-bg:          rgba(255, 255, 255, 0.04);
+  /* Tier 2 — floating (menus, modals, toasts): slightly more opaque + heavier blur */
+  --cx-glass-bg-float:    rgba(255, 255, 255, 0.06);
+  /* Accent-tinted glass — active/primary panels */
+  --cx-glass-bg-accent:   rgba(124, 108, 255, 0.08);
+  /* Shared hairline border — "pane of glass" edge */
+  --cx-glass-border:      rgba(255, 255, 255, 0.08);
+  /* Inset top highlight — simulates glass catching light */
+  --cx-glass-highlight:   inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  /* Blur amounts */
+  --cx-glass-blur:        blur(20px) saturate(140%);
+  --cx-glass-blur-float:  blur(28px) saturate(140%);
+  /* Drop shadows — deeper for floating tier */
+  --cx-glass-shadow:      0 1px 3px rgba(0, 0, 0, 0.40), 0 4px 16px rgba(0, 0, 0, 0.30);
+  --cx-glass-shadow-float: 0 4px 24px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40);
+
   /* ---- Electric violet accent (the ONE accent) ---- */
   --cx-accent:          #7C6CFF;
   --cx-accent-bright:   #9B8CFF;
@@ -147,7 +165,7 @@
   --pdl-canvas:          var(--cx-canvas);
   --pdl-surface:         var(--cx-surface);
   --pdl-surface-raised:  var(--cx-surface-raised);
-  --pdl-surface-glass:   rgba(19, 19, 25, 0.72);
+  --pdl-surface-glass:   var(--cx-glass-bg-float);
 
   --pdl-text:      var(--cx-text);
   --pdl-text-muted: var(--cx-text-muted);
@@ -221,10 +239,36 @@
   color: var(--cx-text);
 }
 
+/* Cards — raised glass surface in the console (overwrites marketing light-surface default) */
+.praxis-root .conduit-card {
+  background: var(--cx-glass-bg);
+  backdrop-filter: var(--cx-glass-blur);
+  -webkit-backdrop-filter: var(--cx-glass-blur);
+  border-color: var(--cx-glass-border);
+  box-shadow: var(--cx-glass-highlight);
+}
+
+/* Opaque card fallback */
+@supports not (backdrop-filter: blur(1px)) {
+  .praxis-root .conduit-card {
+    background: var(--cx-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .praxis-root .conduit-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--cx-surface);
+  }
+}
+
 /* Card hover — electric violet edge + glow (replaces old purple) */
 .praxis-root .conduit-card:hover {
   border-color: rgba(124, 108, 255, 0.30);
   box-shadow:
+    var(--cx-glass-highlight),
     0 0 0 1px rgba(124, 108, 255, 0.08),
     0 0 24px rgba(124, 108, 255, 0.10),
     0 12px 40px rgba(0, 0, 0, 0.50);
@@ -533,7 +577,16 @@ html[data-praxis-theme="light"] .praxis-root {
   --cx-accent-glow:   0 0 0 3px rgba(96, 84, 232, 0.20);
   --cx-accent-glow-raw: rgba(96, 84, 232, 0.20);
 
-  --pdl-surface-glass: rgba(255, 255, 255, 0.82);
+  /* Glass overrides — light canvas: translucent white surface instead of dark ink overlay */
+  --cx-glass-bg:          rgba(255, 255, 255, 0.65);
+  --cx-glass-bg-float:    rgba(255, 255, 255, 0.82);
+  --cx-glass-bg-accent:   rgba(96, 84, 232, 0.08);
+  --cx-glass-border:      rgba(0, 0, 0, 0.07);
+  --cx-glass-highlight:   inset 0 1px 0 rgba(255, 255, 255, 0.80);
+  --cx-glass-shadow:      0 1px 3px rgba(15, 15, 20, 0.08), 0 4px 16px rgba(15, 15, 20, 0.06);
+  --cx-glass-shadow-float: 0 4px 24px rgba(15, 15, 20, 0.14), 0 2px 8px rgba(15, 15, 20, 0.08);
+
+  --pdl-surface-glass: var(--cx-glass-bg-float);
   --pdl-elev-1: 0 1px 2px rgba(15, 15, 20, 0.06);
   --pdl-elev-2: 0 4px 16px rgba(15, 15, 20, 0.08);
   --pdl-elev-3: 0 16px 48px rgba(15, 15, 20, 0.12);
@@ -563,4 +616,108 @@ html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-track {
 
 html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-thumb {
   background: var(--cx-border-strong);
+}
+
+/* ================================================================
+ * Glass utility classes — frosted glass depth hierarchy
+ *
+ * Defined globally (not scoped to .praxis-root) so they work in
+ * Radix UI portals that render outside the .praxis-root tree.
+ * Hardcoded dark fallbacks ensure coherence even without the
+ * .praxis-root token cascade; .praxis-root vars take priority
+ * for in-tree elements and light-theme overrides.
+ *
+ * Depth hierarchy (spec: CONSOLE_REDESIGN.md → Glassmorphism):
+ *   canvas (opaque ink)
+ *   → .cx-glass        raised panel   (sidebar, cards, composer)
+ *   → .cx-glass-float  floating panel (menus, modals, toasts)
+ *   → .cx-glass-accent accent-tinted  (active/primary panels)
+ * ================================================================ */
+
+/* ---- Tier 1: raised glass ---- */
+.cx-glass {
+  background: var(--cx-glass-bg, rgba(255, 255, 255, 0.04));
+  backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  -webkit-backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  box-shadow:
+    var(--cx-glass-shadow, 0 1px 3px rgba(0, 0, 0, 0.40), 0 4px 16px rgba(0, 0, 0, 0.30)),
+    var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
+}
+
+/* ---- Tier 2: floating glass (heavier blur + stronger shadow) ---- */
+.cx-glass-float {
+  background: var(--cx-glass-bg-float, rgba(255, 255, 255, 0.06));
+  backdrop-filter: var(--cx-glass-blur-float, blur(28px) saturate(140%));
+  -webkit-backdrop-filter: var(--cx-glass-blur-float, blur(28px) saturate(140%));
+  box-shadow:
+    var(--cx-glass-shadow-float, 0 4px 24px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40)),
+    var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
+}
+
+/* ---- Accent-tinted glass — for active/primary panels ---- */
+.cx-glass-accent {
+  background: var(--cx-glass-bg-accent, rgba(124, 108, 255, 0.08));
+  backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  -webkit-backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  box-shadow:
+    var(--cx-glass-shadow, 0 1px 3px rgba(0, 0, 0, 0.40), 0 4px 16px rgba(0, 0, 0, 0.30)),
+    var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
+}
+
+/* ---- Opaque fallback when backdrop-filter is not supported ---- */
+@supports not (backdrop-filter: blur(1px)) {
+  .cx-glass {
+    background: var(--cx-surface, #131319);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .cx-glass-float {
+    background: var(--cx-surface-overlay, #23232E);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .cx-glass-accent {
+    background: var(--cx-surface-raised, #1C1C26);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* ---- Opaque fallback for prefers-reduced-transparency ---- */
+@media (prefers-reduced-transparency: reduce) {
+  .cx-glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--cx-surface, #131319);
+  }
+  .cx-glass-float {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--cx-surface-overlay, #23232E);
+  }
+  .cx-glass-accent {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--cx-surface-raised, #1C1C26);
+  }
+}
+
+/* ---- Light theme glass token overrides ----
+ * Defined at html[data-praxis-theme="light"] so portal elements
+ * (Radix dialogs, dropdowns) also pick up the light-theme values —
+ * they render outside .praxis-root but are still descendants of <html>.
+ * ----------------------------------------------------------------- */
+html[data-praxis-theme="light"] {
+  --cx-glass-bg:           rgba(255, 255, 255, 0.65);
+  --cx-glass-bg-float:     rgba(255, 255, 255, 0.82);
+  --cx-glass-bg-accent:    rgba(96, 84, 232, 0.08);
+  --cx-glass-border:       rgba(0, 0, 0, 0.07);
+  --cx-glass-highlight:    inset 0 1px 0 rgba(255, 255, 255, 0.80);
+  --cx-glass-shadow:       0 1px 3px rgba(15, 15, 20, 0.08), 0 4px 16px rgba(15, 15, 20, 0.06);
+  --cx-glass-shadow-float: 0 4px 24px rgba(15, 15, 20, 0.14), 0 2px 8px rgba(15, 15, 20, 0.08);
+}
+
+/* ---- Glass border utility — add hairline to glass panels ---- */
+.cx-glass-border {
+  border: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08));
 }

@@ -613,10 +613,10 @@ export function Sidebar({
         aria-label="Navigation"
         animate={{ width: collapsed ? 56 : 256 }}
         transition={skipTransition ? { duration: 0 } : { duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
-        className={`fixed md:static z-40 inset-y-0 left-0 bg-[var(--color-surface)] border-r border-[var(--color-border)] flex flex-col overflow-hidden transform transition-transform duration-200 ease-in-out ${
+        className={`cx-glass fixed md:static z-40 inset-y-0 left-0 border-r flex flex-col overflow-hidden transform transition-transform duration-200 ease-in-out ${
           open ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
-        style={{ minWidth: collapsed ? 56 : 256 }}
+        style={{ minWidth: collapsed ? 56 : 256, borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}
       >
         {/* Header — workspace logo / Praxis wordmark + collapse toggle */}
         <div
