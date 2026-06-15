@@ -4,7 +4,7 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Link, Pin, Search, Share2, Tag, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { UpgradeCTABanner } from "./UpgradeCTABanner";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
   DEPT_COLOR,
@@ -1737,9 +1737,15 @@ export function Chat({
             />
           )}
 
-          {messages.map((m, i) => (
+          <AnimatePresence mode="sync">
+            {messages.map((m, i) => {
+              // Pending messages with no content yet render as the typing indicator.
+              // Giving them a distinct key ("typing-X") lets AnimatePresence play
+              // an exit animation when the first token arrives and the key switches.
+              const msgKey = m.pending && !m.content ? `typing-${m.id ?? i}` : (m.id ?? i);
+              return (
             <MessageBubble
-              key={m.id ?? i}
+              key={msgKey}
               message={m}
               onOpenArtifact={(id) => setDrawerArtifactId(id)}
               playing={playingMessageIdx === i}
@@ -1768,7 +1774,9 @@ export function Chat({
               searchMatch={searchMatchSet.has(i)}
               conversationId={conversationId}
             />
-          ))}
+              );
+            })}
+          </AnimatePresence>
 
           {/* Handoff banner — shown when this conversation was handed off */}
           {handoffInfo && (
@@ -2987,12 +2995,14 @@ const MessageBubble = memo(function MessageBubble({
   const isRoundTable = Boolean((message.metadata as Record<string, unknown>)?.round_table);
 
   // Before any tokens arrive: render a dedicated accessible typing indicator.
+  // exit plays when the key changes (typing-X → X) as content starts streaming.
   if (empty) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
+        exit={{ opacity: 0, y: -6, transition: { duration: 0.15, ease: [0.4, 0, 0.2, 1] } }}
+        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
       >
         <TypingIndicator employee={employee} roundTable={isRoundTable} />
       </motion.div>
