@@ -19,7 +19,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { PraxisButton, SpinnerIcon } from "./PraxisButton";
+import { Button as PraxisButton, SpinnerIcon } from "@/components/conduit/ui/Button";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { EMPLOYEES, EMPLOYEE_ORDER } from "@/lib/conduit/employees";

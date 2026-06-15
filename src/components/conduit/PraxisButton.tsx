@@ -86,17 +86,36 @@ export function PraxisButton({
       transition={SPRING}
       className={`${variantClass} ${sizeClass} disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
-      {isLoading && <SpinnerIcon />}
-      <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "8px",
-          opacity: isLoading ? 0.65 : 1,
-          transition: "opacity 0.2s ease-out",
-        }}
-      >
-        {isLoading && loadingText ? loadingText : children}
+      {/* Relative wrapper so spinner can overlay without shifting button width */}
+      <span style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+        {/* Children always rendered — preserves natural button width during loading */}
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            opacity: isLoading ? 0 : 1,
+            transition: "opacity 0.15s ease-out",
+          }}
+        >
+          {children}
+        </span>
+        {/* Spinner + optional loading label — absolutely overlaid, zero layout impact */}
+        {isLoading && (
+          <span
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px",
+            }}
+          >
+            <SpinnerIcon />
+            {loadingText && <span>{loadingText}</span>}
+          </span>
+        )}
       </span>
     </motion.button>
   );
