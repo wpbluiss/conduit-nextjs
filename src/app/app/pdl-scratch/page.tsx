@@ -148,7 +148,7 @@ export default function PdlScratchPage() {
                         style={{
                           padding: "4px 10px",
                           background: "var(--pdl-surface-glass)",
-                          backdropFilter: "blur(16px) saturate(180%)",
+                          backdropFilter: "var(--cx-glass-blur, blur(20px) saturate(140%))",
                           border: "1px solid var(--pdl-border-hairline)",
                           borderRadius: "var(--pdl-radius-round)",
                           color: "var(--pdl-text)",

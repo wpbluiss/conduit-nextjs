@@ -263,7 +263,8 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
       <div
         style={{
           background: "var(--pdl-surface-glass, var(--color-surface-elevated))",
-          backdropFilter: "blur(16px)",
+          backdropFilter: "var(--cx-glass-blur, blur(20px) saturate(140%))",
+          WebkitBackdropFilter: "var(--cx-glass-blur, blur(20px) saturate(140%))",
           borderBottom: "1px solid var(--pdl-border-hairline, var(--color-border))",
           zIndex: 20,
           position: "relative",
