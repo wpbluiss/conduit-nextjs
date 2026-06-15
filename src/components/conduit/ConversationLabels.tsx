@@ -75,11 +75,13 @@ export function ConversationLabelManager({
   assignedLabels,
   allLabels,
   onUpdate,
+  compact,
 }: {
   conversationId: string;
   assignedLabels: ConversationLabel[];
   allLabels: ConversationLabel[];
   onUpdate: (labels: ConversationLabel[]) => void;
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [assigned, setAssigned] = useState<ConversationLabel[]>(assignedLabels);
@@ -89,6 +91,10 @@ export function ConversationLabelManager({
   const [newColor, setNewColor] = useState(PRESET_COLORS[6]);
   const [busy, setBusy] = useState(false);
   const popRef = useRef<HTMLDivElement>(null);
+
+  // Sync when parent updates labels (e.g. async fetch in Chat)
+  useEffect(() => { setAssigned(assignedLabels); }, [assignedLabels]);
+  useEffect(() => { setAll(allLabels); }, [allLabels]);
 
   useEffect(() => {
     if (!open) return;
@@ -159,6 +165,86 @@ export function ConversationLabelManager({
       method: "DELETE",
     });
   }, [assigned, conversationId, onUpdate]);
+
+  if (compact) {
+    return (
+      <div className="relative" ref={popRef}>
+        <button
+          type="button"
+          onClick={() => { setOpen((v) => !v); setCreating(false); }}
+          aria-label="Manage conversation labels"
+          title="Labels"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
+          style={{
+            color: assigned.length > 0 ? "var(--color-text)" : "var(--color-text-muted)",
+            border: open ? "1px solid var(--color-border)" : "1px solid transparent",
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
+            (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.color = assigned.length > 0 ? "var(--color-text)" : "var(--color-text-muted)";
+            (e.currentTarget as HTMLElement).style.borderColor = open ? "var(--color-border)" : "transparent";
+          }}
+        >
+          <Tag size={12} />
+          <span className="hidden sm:inline">Labels</span>
+          {assigned.length > 0 && (
+            <span
+              className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-medium text-white"
+              style={{ background: assigned[0].color }}
+            >
+              {assigned.length}
+            </span>
+          )}
+        </button>
+        {open && (
+          <div
+            className="absolute top-full right-0 mt-1.5 z-50 rounded-xl border shadow-xl overflow-hidden"
+            style={{
+              minWidth: "200px",
+              background: "var(--color-surface-elevated)",
+              borderColor: "var(--color-border)",
+            }}
+          >
+            {all.length > 0 && (
+              <div className="p-2 space-y-0.5 max-h-48 overflow-y-auto">
+                {all.map((label) => {
+                  const isOn = assigned.some((l) => l.id === label.id);
+                  return (
+                    <button
+                      key={label.id}
+                      type="button"
+                      onClick={() => void toggle(label)}
+                      className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm hover:bg-[var(--color-surface)] transition-colors"
+                    >
+                      <span
+                        className="w-3 h-3 rounded-full shrink-0"
+                        style={{
+                          background: label.color,
+                          outline: isOn ? `2px solid ${label.color}` : "none",
+                          outlineOffset: "2px",
+                        }}
+                      />
+                      <span className="flex-1 truncate text-left text-[var(--color-text)]">{label.name}</span>
+                      {isOn && <span className="text-[10px]" style={{ color: label.color }}>✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            {all.length === 0 && (
+              <p className="px-3 py-3 text-[12px] text-[var(--color-text-muted)]">
+                No labels yet. Create some in{" "}
+                <a href="/app/settings?tab=labels" className="underline">Settings → Labels</a>.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="relative inline-flex flex-wrap items-center gap-1">

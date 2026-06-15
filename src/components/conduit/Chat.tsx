@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Pin, Search, Share2, ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Pin, Search, Share2, Tag, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
@@ -39,6 +39,7 @@ import { useToast } from "@/context/ToastContext";
 import { useNicknames } from "@/context/NicknameContext";
 import { SaveOutputButton } from "./SaveOutputButton";
 import { track } from "@/lib/analytics/track";
+import { ConversationLabelManager, type ConversationLabel } from "./ConversationLabels";
 
 export interface VoicePrefs {
   enabled: boolean;
@@ -233,6 +234,10 @@ export function Chat({
   const [showHandoffPicker, setShowHandoffPicker] = useState(false);
   const [handoffLoading, setHandoffLoading] = useState(false);
 
+  // Conversation labels
+  const [assignedLabels, setAssignedLabels] = useState<ConversationLabel[]>([]);
+  const [allLabels, setAllLabels] = useState<ConversationLabel[]>([]);
+
   // SSE connection resilience: tracks offline / reconnecting / reconnected state.
   const [connStatus, setConnStatus] = useState<'connected' | 'reconnecting' | 'reconnected' | 'failed'>('connected');
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -384,6 +389,19 @@ export function Chat({
     if (conversationId) void loadPins(conversationId);
     else setPinnedMessages([]);
   }, [conversationId, loadPins]);
+
+  useEffect(() => {
+    if (!conversationId) { setAssignedLabels([]); return; }
+    Promise.all([
+      fetch(`/api/conduit/labels`).then((r) => r.json()),
+      fetch(`/api/conduit/conversations/${conversationId}/labels`).then((r) => r.json()),
+    ])
+      .then(([allData, assignedData]: [{ labels?: ConversationLabel[] }, { labels?: ConversationLabel[] }]) => {
+        setAllLabels(allData.labels ?? []);
+        setAssignedLabels(assignedData.labels ?? []);
+      })
+      .catch(() => {});
+  }, [conversationId]);
 
   const performHandoff = useCallback(
     async (targetEmployee: EmployeeKey) => {
@@ -1373,6 +1391,16 @@ export function Chat({
                       <FileText size={12} />
                       <span className="hidden sm:inline">PDF</span>
                     </button>
+                  )}
+                  {/* Tag button — only when a conversation exists */}
+                  {conversationId && (
+                    <ConversationLabelManager
+                      conversationId={conversationId}
+                      assignedLabels={assignedLabels}
+                      allLabels={allLabels}
+                      onUpdate={setAssignedLabels}
+                      compact
+                    />
                   )}
                   {/* Handoff button — only when conversation has messages and no existing handoff */}
                   {conversationId && !handoffInfo && (

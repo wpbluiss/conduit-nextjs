@@ -89,17 +89,47 @@ export default async function AppLayout({
     getInFlightBuilds(supabase, account.id),
   ]);
 
+  const convoIds = (convos ?? []).map((c) => c.id as string);
+
   // Last activity per employee (for team status dots) + last message preview (for sidebar quick-peek)
-  const { data: latestPerEmployee } = await supabase
-    .from("conduit_messages")
-    .select("employee, created_at, content, conversation_id")
-    .eq("role", "assistant")
-    .in(
-      "conversation_id",
-      (convos ?? []).map((c) => c.id),
-    )
-    .order("created_at", { ascending: false })
-    .limit(100);
+  // Label assignments for sidebar dots — run in parallel with messages query
+  const [{ data: latestPerEmployee }, labelAssignmentsResult, { data: labelDefs }] =
+    await Promise.all([
+      supabase
+        .from("conduit_messages")
+        .select("employee, created_at, content, conversation_id")
+        .eq("role", "assistant")
+        .in("conversation_id", convoIds)
+        .order("created_at", { ascending: false })
+        .limit(100),
+      convoIds.length
+        ? supabase
+            .from("conduit_conversation_label_assignments")
+            .select("conversation_id, label_id")
+            .in("conversation_id", convoIds)
+        : { data: [] as { conversation_id: string; label_id: string }[] },
+      supabase
+        .from("conduit_conversation_labels")
+        .select("id, name, color")
+        .eq("account_id", account.id),
+    ]);
+  const labelAssignments = labelAssignmentsResult.data;
+
+  // Build label lookup map: conversationId → label[]
+  type LabelShape = { id: string; name: string; color: string };
+  const labelById: Record<string, LabelShape> = {};
+  for (const l of labelDefs ?? []) {
+    const id = l.id as string;
+    labelById[id] = { id, name: l.name as string, color: l.color as string };
+  }
+  const sidebarLabelMap: Record<string, LabelShape[]> = {};
+  for (const a of labelAssignments ?? []) {
+    const cid = a.conversation_id as string;
+    const lbl = labelById[a.label_id as string];
+    if (!lbl) continue;
+    if (!sidebarLabelMap[cid]) sidebarLabelMap[cid] = [];
+    sidebarLabelMap[cid].push(lbl);
+  }
 
   const lastActiveMap: Record<string, string> = {};
   const previewMap: Record<string, string> = {};
@@ -160,7 +190,7 @@ export default async function AppLayout({
           userEmail={user.email ?? ""}
           accountName={account.name}
           workspaceName={(account as unknown as { workspace_name?: string | null }).workspace_name ?? null}
-          conversations={(convos ?? []).map((c) => ({ ...c, last_message: previewMap[c.id] ?? null }))}
+          conversations={(convos ?? []).map((c) => ({ ...c, last_message: previewMap[c.id as string] ?? null, labels: sidebarLabelMap[c.id as string] ?? [] }))}
           team={team}
           allowedEmployees={allowedEmployees}
           tierName={

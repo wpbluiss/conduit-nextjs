@@ -141,6 +141,7 @@ interface ConvoSummary {
   updated_at: string;
   dominant_employee: string | null;
   last_message?: string | null;
+  labels?: { id: string; name: string; color: string }[];
 }
 
 interface TeamActivity {
@@ -1044,9 +1045,22 @@ export function Sidebar({
                                 );
                               })()
                             )}
-                            <span className="truncate">
+                            <span className="truncate flex-1">
                               {titleOverrides[c.id] ?? c.title ?? "Untitled chat"}
                             </span>
+                            {c.labels && c.labels.length > 0 && (
+                              <span className="flex items-center gap-0.5 shrink-0">
+                                {c.labels.slice(0, 3).map((l) => (
+                                  <span
+                                    key={l.id}
+                                    aria-label={l.name}
+                                    title={l.name}
+                                    className="inline-block w-2 h-2 rounded-full"
+                                    style={{ background: l.color }}
+                                  />
+                                ))}
+                              </span>
+                            )}
                           </Link>
                         );
                       })}
