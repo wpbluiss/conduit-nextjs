@@ -3,6 +3,7 @@
 import { Compass } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, DEPT_COLOR_SOFT, EMPLOYEE_ICON } from "./EmployeeBadge";
+import { SPECIALIST_ICON_STROKE } from "@/lib/ui/specialist-icons";
 
 interface BuiltinProps {
   employee: EmployeeKey;
@@ -90,7 +91,7 @@ export function SpecialistAvatar({
       }}
     >
       {isBuiltin && Icon ? (
-        <Icon size={glyphSize} strokeWidth={2.25} />
+        <Icon size={glyphSize} strokeWidth={SPECIALIST_ICON_STROKE} />
       ) : (
         <span
           className="font-semibold leading-none"
