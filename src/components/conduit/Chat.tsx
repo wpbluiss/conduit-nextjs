@@ -368,26 +368,48 @@ export function Chat({
     );
     if (visibleMessages.length === 0) return;
 
-    const today = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const today = now.toISOString().slice(0, 10);
+    const exported = now.toISOString();
     const title = currentTitle || "Praxis Conversation";
-    const lines: string[] = [`# ${title}`, ""];
+
+    // Derive specialist slug from the first assistant message.
+    const firstAssistant = visibleMessages.find(
+      (m) => m.role === "assistant" && m.employee,
+    );
+    const specialistSlug = firstAssistant?.employee
+      ? employeeLabel(firstAssistant.employee as EmployeeKey)
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "")
+      : "conversation";
+
+    const lines: string[] = [
+      "---",
+      `title: "${title.replace(/"/g, '\\"')}"`,
+      `date: ${today}`,
+      `exported: ${exported}`,
+      "---",
+      "",
+      `# ${title}`,
+      "",
+    ];
 
     for (const msg of visibleMessages) {
       if (msg.role === "user") {
-        lines.push(`**You:** ${msg.content.trim()}`, "");
+        lines.push("**You**", "", msg.content.trim(), "", "---", "");
       } else if (msg.role === "assistant" && msg.employee) {
         const label = employeeLabel(msg.employee as EmployeeKey);
-        lines.push(`**${label}:** ${msg.content.trim()}`, "");
+        lines.push(`**${label}**`, "", msg.content.trim(), "", "---", "");
       }
     }
 
-    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 50);
     const md = lines.join("\n");
     const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${slug || "praxis-conversation"}-${today}.md`;
+    a.download = `praxis-${specialistSlug}-${today}.md`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -1390,8 +1412,8 @@ export function Chat({
                   <button
                     type="button"
                     onClick={exportConversation}
-                    title="Download as Markdown"
-                    aria-label="Download conversation as Markdown"
+                    title="Export as Markdown"
+                    aria-label="Export conversation as Markdown"
                     className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
                     style={{
                       color: "var(--color-text-muted)",
