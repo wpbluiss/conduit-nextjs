@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
-import { EmployeeAvatar, DEPT_COLOR, DEPT_COLOR_SOFT } from "./EmployeeBadge";
+import { DEPT_COLOR, DEPT_COLOR_SOFT } from "./EmployeeBadge";
+import { SpecialistAvatar } from "./SpecialistAvatar";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { useNicknames } from "@/context/NicknameContext";
+import { Button } from "@/components/conduit/ui/Button";
 
 const STORAGE_KEY = "conduit_specialist_choice_v1";
 
@@ -110,7 +112,7 @@ export function SpecialistSelectorModal({
                 }}
                 aria-pressed={isSelected}
               >
-                <EmployeeAvatar employee={id as EmployeeKey} size={28} active={isSelected} />
+                <SpecialistAvatar employee={id as EmployeeKey} size={28} active={isSelected} />
                 <div>
                   <div
                     className="text-[13px] font-medium leading-tight"
@@ -137,38 +139,25 @@ export function SpecialistSelectorModal({
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="md"
             onClick={skip}
-            className="flex-1 rounded-xl border px-4 py-2.5 text-sm transition-colors text-center"
-            style={{
-              borderColor: "var(--color-border)",
-              color: "var(--color-text-muted)",
-            }}
+            className="flex-1 justify-center"
           >
             Let Atlas decide
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="primary"
+            size="md"
             onClick={confirm}
-            disabled={!selected}
-            className="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all disabled:opacity-40 text-center"
-            style={
-              selected
-                ? {
-                    background: DEPT_COLOR[selected as EmployeeKey],
-                    color: "var(--color-canvas)",
-                  }
-                : {
-                    background: "var(--color-accent)",
-                    color: "var(--color-canvas)",
-                  }
-            }
+            isDisabled={!selected}
+            className="flex-1 justify-center"
           >
             {selected
               ? `Talk to ${labelFor(selected as EmployeeKey)} →`
               : "Select a specialist first"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

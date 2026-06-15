@@ -6,7 +6,7 @@
 // "go around" round-robin trigger phrases handled by the worker per R12.5.
 
 import { useState } from "react";
-import { Mic, Lock, Loader2, AlertCircle } from "lucide-react";
+import { Mic, Lock, AlertCircle } from "lucide-react";
 import { Button } from "@/components/conduit/ui/Button";
 import VoiceRoom, {
   type ParticipantDisplay,
@@ -146,17 +146,15 @@ export default function EnterTheRoomCard({
           </p>
         </div>
         <Button
+          variant="primary"
+          size="lg"
           onClick={start}
-          disabled={requesting}
-          className="!text-base shrink-0 inline-flex items-center gap-2 disabled:opacity-50"
-          style={{ background: "var(--color-accent)", color: "#0A0908" }}
+          isLoading={requesting}
+          loadingText="Connecting…"
+          className="shrink-0"
         >
-          {requesting ? (
-            <Loader2 size={14} className="animate-spin" />
-          ) : (
-            <Mic size={14} />
-          )}
-          {requesting ? "Connecting…" : "Enter the room"}
+          <Mic size={14} />
+          Enter the room
         </Button>
       </div>
 
@@ -205,7 +203,7 @@ function AvatarStack({ displays }: { displays: ParticipantDisplay[] }) {
         <div
           key={d.id}
           className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-base serif border-2 border-[var(--color-bg)]"
-          style={{ background: d.color, color: "#0A0908" }}
+          style={{ background: d.color, color: "var(--cx-canvas, #0B0B0F)" }}
           title={d.name}
         >
           {d.initial}

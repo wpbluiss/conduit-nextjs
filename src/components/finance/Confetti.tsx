@@ -11,6 +11,7 @@ export function Confetti({ fire }: { fire: boolean }) {
   useEffect(() => {
     if (fire) {
       setPieces(Array.from({ length: 36 }, (_, i) => i));
+      try { navigator.vibrate?.([18, 40, 18, 40, 60]); } catch {}
       const t = setTimeout(() => setPieces([]), 1400);
       return () => clearTimeout(t);
     }

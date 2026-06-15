@@ -30,22 +30,25 @@
 
 @theme inline {
   /* ============================================================
-   * /app Console tokens (DO NOT MODIFY — Console redesign tokens)
+   * /app Console tokens — R19 ink + electric violet palette
+   * (defined here so Tailwind JIT sees the right base values;
+   *  console-tokens.css re-maps these inside .praxis-root too)
    * ============================================================ */
-  --color-surface: #0A0908;
-  --color-surface-elevated: #14110F;
-  --color-surface-raised: #1A1714;
-  --color-border: #1F1C19;
-  --color-border-soft: #2A2622;
-  --color-text: #F5F1EA;
-  --color-text-muted: #8C8884;
-  --color-accent: #FF8A3D;
-  --color-accent-hi: #FFA876;
-  --color-accent-deep: #D9532A;
+  --color-surface: #0B0B0F;
+  --color-surface-elevated: #131319;
+  --color-surface-raised: #1C1C26;
+  --color-border: #262630;
+  --color-border-soft: #33333F;
+  --color-border-default: #262630;
+  --color-text: #F4F4F7;
+  --color-text-muted: #A0A0B0;
+  --color-accent: #7C6CFF;
+  --color-accent-hi: #9B8CFF;
+  --color-accent-deep: #5548CC;
   --color-cyan: #22D3EE;
   --color-purple: #A855F7;
   --color-green: #34D399;
-  --color-pink: #F472B6;
+  --color-pink: #F4607D;
   --color-amber: #FBBF24;
   /* Conduit department colors — used for employee accents.
      Jarvis = silver/platinum (chief of staff)
@@ -244,14 +247,18 @@ body {
   border: 1px solid var(--color-border-default);
 }
 
-/* Auth pages — ember CTA on dark inverse background */
+/* Auth pages — electric violet CTA on dark inverse background */
 .conduit-auth-btn {
-  background: var(--color-accent);
+  background: var(--color-accent, #7C6CFF);
   color: #FFFFFF;
   padding: 14px 32px;
   font-weight: 500;
   font-size: 0.9375rem;
   letter-spacing: -0.005em;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(124, 108, 255, 0.15);
   transition: background 200ms var(--conduit-ease-out-quart), box-shadow 200ms var(--conduit-ease-out-quart), transform 200ms var(--conduit-ease-out-quart);
   display: inline-flex;
   align-items: center;
@@ -260,14 +267,17 @@ body {
   cursor: pointer;
 }
 .conduit-auth-btn:hover {
-  background: #FFAA6B;
-  box-shadow: 0 0 40px rgba(255, 138, 61, 0.40);
+  background: var(--color-accent-hi, #9B8CFF);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 6px 24px rgba(124, 108, 255, 0.40),
+    0 2px 8px rgba(0, 0, 0, 0.35);
   transform: translateY(-1px);
 }
 .conduit-auth-btn:active { transform: translateY(0); }
 .conduit-auth-btn:focus-visible {
-  outline: 2px solid var(--color-ember-300);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(124, 108, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 /* Console button system — Apple-grade, electric violet dark palette (CONSOLE_REDESIGN.md spec)
@@ -442,6 +452,67 @@ body {
   }
 }
 
+/* Button size modifiers — pair with .btn-{variant} to set height/padding/type.
+ * Defined after the variant classes so they win in the cascade (equal specificity,
+ * last rule wins). Sizes: sm=32px, md=40px, lg=48px; icon/icon-sm are circular.
+ * Touch target ≥44px enforced via @media(pointer:coarse) expansion on smaller sizes. */
+.btn-sz-sm {
+  min-height: 32px;
+  height: 32px;
+  padding: 0 var(--cx-space-3, 12px);
+  font-size: var(--cx-type-sm, 13px);
+  gap: 6px;
+}
+.btn-sz-md {
+  min-height: 40px;
+  height: 40px;
+  padding: 0 var(--cx-space-4, 16px);
+  font-size: var(--cx-type-base, 14px);
+  gap: var(--cx-space-2, 8px);
+}
+.btn-sz-lg {
+  min-height: 48px;
+  height: 48px;
+  padding: 0 var(--cx-space-6, 24px);
+  font-size: 15px;
+  gap: var(--cx-space-2, 8px);
+}
+.btn-sz-icon {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: var(--cx-radius-full, 9999px);
+  flex-shrink: 0;
+}
+.btn-sz-icon-sm {
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  border-radius: var(--cx-radius-full, 9999px);
+  flex-shrink: 0;
+}
+
+/* Touch target expansion — coarse-pointer (mobile) devices get ≥44px touch area */
+@media (pointer: coarse) {
+  .btn-sz-sm {
+    min-height: 44px;
+    height: auto;
+    padding: 6px var(--cx-space-3, 12px);
+  }
+  .btn-sz-md {
+    min-height: 44px;
+    height: auto;
+    padding: 2px var(--cx-space-4, 16px);
+  }
+  .btn-sz-icon-sm {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+}
+
 /* Accordion (Radix) — height driven by --radix-accordion-content-height */
 @keyframes accordion-down {
   from { height: 0; opacity: 0; }
@@ -500,6 +571,9 @@ body {
 /* Terminal caret */
 @keyframes caret { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
 .caret { animation: caret 900ms step-end infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .caret { animation: none; opacity: 1; }
+}
 
 /* Hairline divider */
 .divider { height: 1px; background: var(--color-border-default); width: 100%; }
@@ -526,20 +600,44 @@ body {
 }
 
 .conduit-bubble-user {
-  background: color-mix(in srgb, var(--color-accent) 11%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
-  border-radius: 22px 22px 22px 6px;
-  box-shadow: 0 2px 12px color-mix(in srgb, var(--color-accent) 12%, transparent);
-  font-size: 14px;
-  line-height: 1.7;
+  /* Solid accent-tinted surface — clearly "yours", right-aligned */
+  background: color-mix(in srgb, var(--cx-accent, var(--color-accent)) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cx-accent, var(--color-accent)) 35%, transparent);
+  border-radius: var(--cx-radius-md, 12px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+  font-size: var(--cx-type-base, 14px);
+  line-height: var(--cx-lh-body, 1.60);
 }
 .conduit-bubble-assistant {
-  background: color-mix(in srgb, var(--dept, var(--color-accent)) 4%, var(--color-surface-elevated));
-  border-left: 2px solid var(--dept, var(--color-border));
-  border-radius: 22px 22px 6px 22px;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
-  font-size: 14px;
-  line-height: 1.75;
+  /* Glass surface — frosted pane over the dark canvas */
+  background: var(--cx-glass-bg, rgba(255, 255, 255, 0.04));
+  backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  -webkit-backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  /* Hairline glass edge on all sides + stronger dept-accent left rail */
+  border: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08));
+  border-left: 3px solid var(--dept, var(--cx-accent, var(--color-accent)));
+  border-radius: var(--cx-radius-md, 12px);
+  box-shadow:
+    var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10)),
+    0 1px 3px rgba(0, 0, 0, 0.40),
+    0 4px 16px rgba(0, 0, 0, 0.30);
+  font-size: var(--cx-type-base, 14px);
+  line-height: var(--cx-lh-body, 1.60);
+}
+/* Opaque fallback when backdrop-filter is unsupported */
+@supports not (backdrop-filter: blur(1px)) {
+  .conduit-bubble-assistant {
+    background: var(--cx-surface-raised, #1C1C26);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .conduit-bubble-assistant {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--cx-surface-raised, #1C1C26);
+  }
 }
 
 .conduit-suggestion {
@@ -618,7 +716,16 @@ body {
 }
 
 /* Thinking indicator bubble + status — animated dots handled by framer-motion in TypingIndicator.tsx */
+
+/* Accent shimmer bar across the bottom of the active thinking bubble */
+@keyframes thinkingShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+
 .thinking-bubble {
+  position: relative;
+  overflow: hidden;
   background: color-mix(in srgb, var(--dept, var(--color-accent)) 5%, var(--color-surface-elevated));
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-left: 2px solid var(--dept, var(--color-border));
@@ -626,7 +733,19 @@ body {
   box-shadow:
     0 1px 6px rgba(0, 0, 0, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  -webkit-backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+}
+.thinking-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  height: 2px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, transparent, var(--dept, var(--color-accent)), transparent);
+  animation: thinkingShimmer 1.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
 .thinking-status {
@@ -634,6 +753,13 @@ body {
   font-size: 11px;
   color: var(--color-text-muted);
   letter-spacing: 0.01em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thinking-bubble::before {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 /* Presence line dot — pulses in dept color while specialist is active */

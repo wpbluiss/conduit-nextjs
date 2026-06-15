@@ -201,12 +201,8 @@ export function ConversationLabelManager({
         </button>
         {open && (
           <div
-            className="absolute top-full right-0 mt-1.5 z-50 rounded-xl border shadow-xl overflow-hidden"
-            style={{
-              minWidth: "200px",
-              background: "var(--color-surface-elevated)",
-              borderColor: "var(--color-border)",
-            }}
+            className="cx-glass-float cx-glass-border absolute top-full right-0 mt-1.5 z-50 rounded-xl overflow-hidden"
+            style={{ minWidth: "200px" }}
           >
             {all.length > 0 && (
               <div className="p-2 space-y-0.5 max-h-48 overflow-y-auto">
@@ -268,12 +264,8 @@ export function ConversationLabelManager({
 
         {open && (
           <div
-            className="absolute top-full left-0 mt-1.5 z-50 rounded-xl border shadow-xl overflow-hidden"
-            style={{
-              minWidth: "200px",
-              background: "var(--color-surface-elevated)",
-              borderColor: "var(--color-border)",
-            }}
+            className="cx-glass-float cx-glass-border absolute top-full left-0 mt-1.5 z-50 rounded-xl overflow-hidden"
+            style={{ minWidth: "200px" }}
           >
             {/* Existing labels */}
             {all.length > 0 && (

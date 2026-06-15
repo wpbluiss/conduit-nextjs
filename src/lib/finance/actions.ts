@@ -502,3 +502,20 @@ export async function updateAutofundPct(form: FormData): Promise<Result> {
   refresh();
   return { ok: !error, error: error?.message };
 }
+
+// Daily check-in streak — the habit hook.
+export async function dailyCheckin(): Promise<Result & { streak?: number; already?: boolean }> {
+  const supabase = await db();
+  const hh = (await getUserHouseholdId())!;
+  const { data: h } = await supabase.from("fin_household").select("last_checkin_date, checkin_streak").eq("id", hh).single();
+  const today = new Date().toISOString().slice(0, 10);
+  const last = h?.last_checkin_date as string | null;
+  if (last === today) return { ok: true, already: true, streak: Number(h?.checkin_streak ?? 0) };
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  const yesterday = y.toISOString().slice(0, 10);
+  const streak = last === yesterday ? Number(h?.checkin_streak ?? 0) + 1 : 1;
+  const { error } = await supabase.from("fin_household")
+    .update({ last_checkin_date: today, checkin_streak: streak }).eq("id", hh);
+  refresh();
+  return { ok: !error, error: error?.message, streak };
+}

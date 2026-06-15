@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   House, Wallet, Money, Receipt, Flame, ChartLineUp,
-  Gauge, Sparkle, GearSix, SignOut, List, X, Crown, Trophy,
+  Gauge, Sparkle, GearSix, SignOut, List, X, Crown, Trophy, ChartPie,
 } from "@phosphor-icons/react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { clsx } from "./clsx";
@@ -20,6 +20,7 @@ const NAV = [
   { href: "/finance/debts", label: "Debt-Killer", icon: Flame },
   { href: "/finance/investments", label: "Investments", icon: ChartLineUp },
   { href: "/finance/credit", label: "Credit", icon: Gauge },
+  { href: "/finance/insights", label: "Insights", icon: ChartPie },
   { href: "/finance/advisor", label: "Advisor", icon: Sparkle },
   { href: "/finance/upgrade", label: "Upgrade", icon: Crown },
   { href: "/finance/settings", label: "Settings", icon: GearSix },
@@ -106,19 +107,25 @@ export function NavSidebar() {
       </aside>
 
       {/* Mobile top bar */}
-      <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between border-b border-white/5 bg-black/50 backdrop-blur-xl px-4 py-3">
+      <div
+        className="lg:hidden sticky top-0 z-40 flex items-center justify-between border-b border-white/5 bg-black/50 backdrop-blur-xl px-4 pb-3"
+        style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)" }}
+      >
         <div className="fin-display text-base">
           <GradientText>Cadence</GradientText>
         </div>
-        <button onClick={() => setOpen(true)} className="text-white p-1">
-          <List size={22} />
+        <button onClick={() => setOpen(true)} aria-label="Menu" className="text-white p-2 -mr-2">
+          <List size={24} />
         </button>
       </div>
 
       {open && (
         <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/70" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 left-0 w-64 bg-[#131110] border-r border-white/10 p-4 flex flex-col justify-between">
+          <div
+            className="absolute inset-y-0 left-0 w-64 bg-[#131110] border-r border-white/10 p-4 flex flex-col justify-between"
+            style={{ paddingTop: "calc(env(safe-area-inset-top) + 1rem)" }}
+          >
             <div>
               <div className="flex items-center justify-between mb-4">
                 <Brand />

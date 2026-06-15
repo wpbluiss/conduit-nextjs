@@ -330,6 +330,69 @@ export function dueNow(s: Snapshot, withinDays = 16): DueItem[] {
   return items.sort((a, b) => (a.days ?? 99) - (b.days ?? 99));
 }
 
+// ---------- Couple activity feed ----------
+export interface ActivityItem {
+  id: string; date: string; person: string; text: string; amount: number; emoji: string;
+}
+
+function nameFor(tag: string): string {
+  if (tag === "luis") return "Luis";
+  if (tag === "delia") return "Delia";
+  return "Shared";
+}
+
+export function recentActivity(s: Snapshot, limit = 8): ActivityItem[] {
+  const items: ActivityItem[] = [];
+  for (const p of s.paychecks)
+    items.push({ id: `pc-${p.id}`, date: p.pay_date, person: nameFor(p.person_tag), text: "logged a paycheck", amount: Number(p.take_home), emoji: "💵" });
+  for (const i of s.inflows)
+    items.push({ id: `in-${i.id}`, date: i.date, person: nameFor(i.person_tag), text: i.source || "added money", amount: Number(i.amount), emoji: "🎁" });
+  for (const r of s.savingsLog)
+    items.push({ id: `sv-${r.id}`, date: r.date, person: "Shared", text: "added to the goal", amount: Number(r.amount), emoji: "🏆" });
+  for (const p of s.payments)
+    items.push({ id: `py-${p.id}`, date: p.date, person: "Shared", text: `paid ${p.label ?? "a bill"}`, amount: -Number(p.amount), emoji: "✅" });
+  return items
+    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+    .slice(0, limit);
+}
+
+// ---------- Insights: safe-to-spend, spending breakdown, monthly recap ----------
+export function thisMonthKey(): string {
+  return new Date().toISOString().slice(0, 7);
+}
+
+export function safeToSpend(s: Snapshot): number {
+  const cash = pooledCash(s.accounts);
+  const expected = Number(s.household.expected_next_deposit);
+  const expDate = s.household.expected_deposit_date;
+  const within30 = expDate ? daysBetween(todayISO(), expDate) <= 30 && daysBetween(todayISO(), expDate) >= -2 : false;
+  const obligations = dueNow(s, 30).reduce((sum, d) => sum + d.amount, 0);
+  return cash + (within30 ? expected : 0) - obligations;
+}
+
+export interface CatSpend { key: string; amount: number; }
+export function monthSpending(s: Snapshot, ym = thisMonthKey()): CatSpend[] {
+  const map = new Map<string, number>();
+  const add = (k: string, v: number) => map.set(k, (map.get(k) ?? 0) + v);
+  for (const e of s.expenses) if (e.paid && e.paid_date?.slice(0, 7) === ym) add(e.category || "general", Number(e.amount));
+  for (const p of s.payments) if (p.date.slice(0, 7) === ym) add(p.kind === "child_support" ? "child support" : p.kind, Number(p.amount));
+  return Array.from(map.entries())
+    .map(([key, amount]) => ({ key, amount }))
+    .sort((a, b) => b.amount - a.amount);
+}
+
+export interface Recap { inflow: number; outflow: number; saved: number; net: number; }
+export function monthlyRecap(s: Snapshot, ym = thisMonthKey()): Recap {
+  const inflow =
+    s.paychecks.filter((p) => p.pay_date.slice(0, 7) === ym).reduce((t, p) => t + Number(p.take_home) + Number(p.mileage_reimbursement || 0), 0) +
+    s.inflows.filter((i) => i.date.slice(0, 7) === ym).reduce((t, i) => t + Number(i.amount), 0);
+  const outflow =
+    s.payments.filter((p) => p.date.slice(0, 7) === ym).reduce((t, p) => t + Number(p.amount), 0) +
+    s.expenses.filter((e) => e.paid && e.paid_date?.slice(0, 7) === ym).reduce((t, e) => t + Number(e.amount), 0);
+  const saved = s.savingsLog.filter((r) => r.date.slice(0, 7) === ym && Number(r.amount) > 0).reduce((t, r) => t + Number(r.amount), 0);
+  return { inflow, outflow, saved, net: inflow - outflow };
+}
+
 // ---------- Credit utilization ----------
 export function cardUtilization(accounts: Account[]): {
   account: Account; util: number; over: boolean;

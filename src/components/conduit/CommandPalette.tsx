@@ -228,8 +228,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
               role="dialog"
               aria-label="Command palette"
               aria-modal="true"
-              className="pointer-events-auto w-full max-w-lg rounded-2xl border border-[var(--color-border)] shadow-2xl overflow-hidden"
-              style={{ background: "var(--color-surface-elevated)" }}
+              className="cx-glass-float cx-glass-border pointer-events-auto w-full max-w-lg rounded-2xl overflow-hidden"
             >
               {/* Search input */}
               <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[var(--color-border)]">

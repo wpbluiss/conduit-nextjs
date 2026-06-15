@@ -9,10 +9,10 @@ import type { EmployeeKey } from "@/lib/ai/provider";
 import {
   DEPT_COLOR,
   DEPT_COLOR_SOFT,
-  EmployeeAvatar,
   employeeLabel,
   SpecialistChip,
 } from "./EmployeeBadge";
+import { SpecialistAvatar } from "./SpecialistAvatar";
 import { PaywallModal, type PaywallPayload } from "./PaywallModal";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useVoiceRecorder } from "@/hooks/useVoiceRecorder";
@@ -284,12 +284,19 @@ export function Chat({
     hasChosen === false && messages.length === 0 && !conversationId;
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // True when the scroll container is within 150px of the bottom — used to
+  // decide whether auto-scroll should follow new content.
+  const atBottomRef = useRef(true);
   const toast = useToast();
   const [drawerArtifactId, setDrawerArtifactId] = useState<string | null>(null);
   const [paywall, setPaywall] = useState<PaywallPayload | null>(null);
   // Message edit: id of the user message currently being edited inline.
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [streamingEmployee, setStreamingEmployee] =
+    useState<EmployeeKey | null>(null);
+  // Round-table: tracks which specialist is currently active (thinking/streaming).
+  // null = none active yet, or round-table just ended.
+  const [roundTableActiveEmployee, setRoundTableActiveEmployee] =
     useState<EmployeeKey | null>(null);
   const [sendError, setSendError] = useState<{
     text: string;
@@ -870,19 +877,47 @@ export function Chat({
     setHasMore(initialHasMore);
   }, [initialId, initialMessages, initialHasMore]);
 
-  // Scroll to bottom when new messages arrive at the bottom (not when prepending older ones).
+  // Track whether the user has scrolled away from the bottom.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      atBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Smooth-scroll to bottom when a new message is added (new turn).
+  // Stops if the user has manually scrolled up.
   const prevMsgCountRef = useRef(initialMessages.length);
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     const prev = prevMsgCountRef.current;
     const curr = messages.length;
-    // Only auto-scroll when messages were appended (new turn), not prepended (older history).
     if (curr > prev && !loadingOlder) {
-      el.scrollTop = el.scrollHeight;
+      // Always follow when the user just sent something (two messages added at once:
+      // user + pending assistant), or when they are already near the bottom.
+      const added = curr - prev;
+      const userJustSent = added >= 2;
+      if (userJustSent || atBottomRef.current) {
+        el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+        atBottomRef.current = true;
+      }
     }
     prevMsgCountRef.current = curr;
-  }, [messages, loadingOlder]);
+  }, [messages.length, loadingOlder]);
+
+  // During streaming, keep scrolling to bottom if the user is at the bottom.
+  // Uses instant scroll (smooth would be jittery on rapid token updates).
+  useEffect(() => {
+    if (!loading) return;
+    const el = scrollRef.current;
+    if (!el || !atBottomRef.current) return;
+    el.scrollTop = el.scrollHeight;
+  }, [messages, loading]);
 
   const loadOlderMessages = useCallback(async () => {
     if (!conversationId || loadingOlder || !hasMore) return;
@@ -1218,6 +1253,7 @@ export function Chat({
           });
         } else if (event === "round_table_thinking") {
           const emp = data.employee as EmployeeKey;
+          setRoundTableActiveEmployee(emp);
           // Insert a placeholder pending bubble for this employee
           setMessages((prev) => [
             ...prev,
@@ -1231,6 +1267,8 @@ export function Chat({
           ]);
         } else if (event === "round_table_response") {
           const emp = data.employee as EmployeeKey;
+          // Mark this specialist as no longer active; next thinking event will set the new one.
+          setRoundTableActiveEmployee((prev) => (prev === emp ? null : prev));
           const content = (data.content as string) || "";
           // Resolve the matching pending bubble (last one for this employee)
           setMessages((prev) => {
@@ -1417,6 +1455,7 @@ export function Chat({
         });
       } finally {
         setStreamingEmployee(null);
+        setRoundTableActiveEmployee(null);
         setLoading(false);
         router.refresh();
       }
@@ -1638,11 +1677,7 @@ export function Chat({
           {/* Inline search bar — shown when searchOpen is true */}
           {searchOpen && conversationId && (
             <div
-              className="flex items-center gap-2 px-2 py-2 mb-2 rounded-xl border"
-              style={{
-                background: "var(--color-surface-elevated)",
-                borderColor: "var(--color-border)",
-              }}
+              className="cx-glass cx-glass-border flex items-center gap-2 px-2 py-2 mb-2 rounded-[8px]"
             >
               <Search size={13} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} aria-hidden />
               <input
@@ -1773,6 +1808,7 @@ export function Chat({
               }
               searchMatch={searchMatchSet.has(i)}
               conversationId={conversationId}
+              roundTableActiveEmployee={roundTableActiveEmployee}
             />
               );
             })}
@@ -1955,8 +1991,7 @@ export function Chat({
       <UpgradeCTABanner internalAccount={internalAccount} />
 
       <div
-        className="px-4 md:px-8 py-3 md:py-4"
-        style={{ background: "var(--color-surface)" }}
+        className="cx-glass cx-glass-border border-t px-4 md:px-8 py-3 md:py-4"
       >
         <div className="mx-auto" style={{ maxWidth: "48rem" }}>
           <PraxisComposerPill
@@ -2075,11 +2110,7 @@ export function Chat({
             className="fixed inset-0 z-50 flex items-center justify-center px-4"
           >
             <div
-              className="w-full max-w-md rounded-2xl border p-6 shadow-2xl"
-              style={{
-                background: "var(--color-surface-elevated)",
-                borderColor: "var(--color-border)",
-              }}
+              className="cx-glass-float cx-glass-border w-full max-w-md rounded-[16px] p-6"
             >
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -2681,11 +2712,7 @@ function MessageHandoffButton({
       </button>
       {open && (
         <div
-          className="absolute left-0 top-full mt-1 z-20 rounded-xl shadow-xl py-1 min-w-[170px]"
-          style={{
-            background: "var(--color-surface-elevated)",
-            border: "1px solid var(--color-border)",
-          }}
+          className="cx-glass-float cx-glass-border absolute left-0 top-full mt-1 z-20 rounded-xl py-1 min-w-[170px]"
         >
           <p className="px-3 py-1.5 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
             Hand off to…
@@ -2788,6 +2815,7 @@ const MessageBubble = memo(function MessageBubble({
   onPinToggle,
   searchMatch = false,
   conversationId,
+  roundTableActiveEmployee = null,
 }: {
   message: MessageRow;
   onOpenArtifact: (id: string) => void;
@@ -2802,6 +2830,7 @@ const MessageBubble = memo(function MessageBubble({
   onPinToggle?: (shouldPin: boolean) => void;
   searchMatch?: boolean;
   conversationId?: string | null;
+  roundTableActiveEmployee?: EmployeeKey | null;
 }) {
   const [editDraft, setEditDraft] = useState(message.content);
   const editRef = useRef<HTMLTextAreaElement>(null);
@@ -2894,7 +2923,7 @@ const MessageBubble = memo(function MessageBubble({
                 className="px-3 py-1.5 text-xs rounded-lg transition-colors disabled:opacity-40"
                 style={{
                   background: "var(--color-accent)",
-                  color: "#0A0908",
+                  color: "#FFFFFF",
                   fontWeight: 600,
                 }}
               >
@@ -2910,9 +2939,9 @@ const MessageBubble = memo(function MessageBubble({
       <motion.div
         data-search-match={searchMatch || undefined}
         className="flex justify-end group"
-        initial={{ opacity: 0, y: 6 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+        transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
         style={searchMatch ? { outline: "2px solid var(--color-accent)", outlineOffset: "3px", borderRadius: "12px" } : undefined}
         onTouchStart={handleTouchStart}
         onTouchEnd={cancelTouchTimer}
@@ -2993,6 +3022,12 @@ const MessageBubble = memo(function MessageBubble({
   const employee = (message.employee as EmployeeKey) ?? "jarvis";
   const empty = !message.content && message.pending;
   const isRoundTable = Boolean((message.metadata as Record<string, unknown>)?.round_table);
+  // Active when: not a round-table message, OR no specialist is currently designated active,
+  // OR this specialist is the one currently generating.
+  const isActive =
+    !isRoundTable ||
+    roundTableActiveEmployee === null ||
+    roundTableActiveEmployee === employee;
 
   // Before any tokens arrive: render a dedicated accessible typing indicator.
   // exit plays when the key changes (typing-X → X) as content starts streaming.
@@ -3004,7 +3039,7 @@ const MessageBubble = memo(function MessageBubble({
         exit={{ opacity: 0, y: -6, transition: { duration: 0.15, ease: [0.4, 0, 0.2, 1] } }}
         transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
       >
-        <TypingIndicator employee={employee} roundTable={isRoundTable} />
+        <TypingIndicator employee={employee} roundTable={isRoundTable} isActive={isActive} />
       </motion.div>
     );
   }
@@ -3022,97 +3057,105 @@ const MessageBubble = memo(function MessageBubble({
       }}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
+      transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
       onTouchStart={handleTouchStart}
       onTouchEnd={cancelTouchTimer}
       onTouchMove={cancelTouchTimer}
     >
       <div className="pt-1 shrink-0">
-        <EmployeeAvatar employee={employee} size={32} active={message.pending} />
+        <SpecialistAvatar employee={employee} size={32} streaming={message.pending} />
       </div>
       <div className="min-w-0 flex-1 space-y-1">
-        <div className="flex items-center gap-2 flex-wrap">
-          <SpecialistChip employee={employee} label={nickLabelFor(employee)} />
-          {message.created_at && !message.pending && (
-            <MessageTimestamp
-              createdAt={message.created_at}
-              touchVisible={touchTimestamp}
-              side="top"
-            />
-          )}
-          {message.handoffFrom && (
-            <motion.span
-              initial={{ opacity: 0, x: -6 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
-              aria-label={`Handed off from ${nickLabelFor(message.handoffFrom as EmployeeKey)}`}
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] uppercase tracking-[0.1em]"
-              style={{
-                background: `color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 12%, var(--color-surface-elevated))`,
-                color: DEPT_COLOR[message.handoffFrom as EmployeeKey],
-                border: `1px solid color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 28%, transparent)`,
-              }}
-            >
-              ← {nickLabelFor(message.handoffFrom as EmployeeKey)}
-            </motion.span>
-          )}
-          {message.pending && (
-            <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-              writing…
-            </span>
-          )}
-          {playing && (
-            <button
-              onClick={onStopAudio}
-              className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em]"
-              style={{ color: DEPT_COLOR[employee] }}
-              aria-label="Stop audio"
-            >
-              <span className="inline-flex items-end gap-[2px] h-3">
-                <span
-                  className="w-[2px] rounded-sm"
-                  style={{
-                    background: DEPT_COLOR[employee],
-                    height: "8px",
-                    animation: "wave1 1s ease-in-out infinite",
-                  }}
-                />
-                <span
-                  className="w-[2px] rounded-sm"
-                  style={{
-                    background: DEPT_COLOR[employee],
-                    height: "12px",
-                    animation: "wave2 1s ease-in-out infinite",
-                  }}
-                />
-                <span
-                  className="w-[2px] rounded-sm"
-                  style={{
-                    background: DEPT_COLOR[employee],
-                    height: "6px",
-                    animation: "wave3 1s ease-in-out infinite",
-                  }}
-                />
+        {/* Glass bubble — chip header + content in one pane */}
+        <div className="conduit-bubble-assistant max-w-[68ch]">
+          {/* Bubble header: specialist chip + timestamp + meta */}
+          <div className="px-4 pt-3 pb-2 flex items-center gap-2 flex-wrap">
+            <SpecialistChip employee={employee} label={nickLabelFor(employee)} />
+            {message.created_at && !message.pending && (
+              <MessageTimestamp
+                createdAt={message.created_at}
+                touchVisible={touchTimestamp}
+                side="top"
+              />
+            )}
+            {message.handoffFrom && (
+              <motion.span
+                initial={{ opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
+                aria-label={`Handed off from ${nickLabelFor(message.handoffFrom as EmployeeKey)}`}
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] uppercase tracking-[0.1em]"
+                style={{
+                  background: `color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 12%, var(--color-surface-elevated))`,
+                  color: DEPT_COLOR[message.handoffFrom as EmployeeKey],
+                  border: `1px solid color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 28%, transparent)`,
+                }}
+              >
+                ← {nickLabelFor(message.handoffFrom as EmployeeKey)}
+              </motion.span>
+            )}
+            {message.pending && (
+              <span
+                className="text-[10px] uppercase tracking-[0.18em]"
+                style={{ color: "var(--cx-text-faint, var(--color-text-muted))" }}
+              >
+                writing…
               </span>
-              Speaking
-            </button>
-          )}
-          {!playing && !message.pending && onReplayAudio && (
-            <button
-              onClick={onReplayAudio}
-              className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-              aria-label="Replay audio"
-            >
-              ▶ Listen
-            </button>
-          )}
-        </div>
-        <div className="conduit-bubble-assistant px-4 py-3 text-[var(--color-text)]">
-          <MarkdownRenderer
-            content={message.content}
-            streaming={message.pending}
-            caretColor={message.pending ? DEPT_COLOR[employee] : undefined}
-          />
+            )}
+            {playing && (
+              <button
+                onClick={onStopAudio}
+                className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em]"
+                style={{ color: DEPT_COLOR[employee] }}
+                aria-label="Stop audio"
+              >
+                <span className="inline-flex items-end gap-[2px] h-3">
+                  <span
+                    className="w-[2px] rounded-sm"
+                    style={{
+                      background: DEPT_COLOR[employee],
+                      height: "8px",
+                      animation: "wave1 1s ease-in-out infinite",
+                    }}
+                  />
+                  <span
+                    className="w-[2px] rounded-sm"
+                    style={{
+                      background: DEPT_COLOR[employee],
+                      height: "12px",
+                      animation: "wave2 1s ease-in-out infinite",
+                    }}
+                  />
+                  <span
+                    className="w-[2px] rounded-sm"
+                    style={{
+                      background: DEPT_COLOR[employee],
+                      height: "6px",
+                      animation: "wave3 1s ease-in-out infinite",
+                    }}
+                  />
+                </span>
+                Speaking
+              </button>
+            )}
+            {!playing && !message.pending && onReplayAudio && (
+              <button
+                onClick={onReplayAudio}
+                className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                aria-label="Replay audio"
+              >
+                ▶ Listen
+              </button>
+            )}
+          </div>
+          {/* Bubble content */}
+          <div className="px-4 pb-3 text-[var(--color-text)]">
+            <MarkdownRenderer
+              content={message.content}
+              streaming={message.pending}
+              caretColor={message.pending ? DEPT_COLOR[employee] : undefined}
+            />
+          </div>
         </div>
         {!!(message.metadata as Record<string, unknown>)?.incomplete && (
           <div

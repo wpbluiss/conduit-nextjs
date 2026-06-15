@@ -99,6 +99,7 @@ export default async function SettingsPage() {
           <Link href="/finance/legal/terms" className="text-[#ffa876] hover:underline">Terms</Link>
           <Link href="/finance/legal/privacy" className="text-[#ffa876] hover:underline">Privacy</Link>
           <Link href="/finance/upgrade" className="text-[#ffa876] hover:underline">Plan</Link>
+          <a href="/api/finance/export" className="text-[#ffa876] hover:underline">Export CSV</a>
           <a href="mailto:support@conduitai.io" className="text-[var(--fin-muted)] hover:text-white">Support</a>
         </div>
       </Card>
