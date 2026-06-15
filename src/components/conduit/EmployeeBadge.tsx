@@ -23,7 +23,7 @@ const FALLBACK_EMPLOYEE = {
   name: "Specialist",
   role: "",
   initial: "?",
-  color: "var(--cx-text-muted, #A0A0B0)",
+  color: "var(--cx-text-muted)",
   colorSoft: "rgba(160,160,176,0.12)",
 };
 

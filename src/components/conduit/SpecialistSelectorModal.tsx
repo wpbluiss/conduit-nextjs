@@ -65,7 +65,7 @@ export function SpecialistSelectorModal({
     >
       <div
         className="cx-glass-float cx-glass-border w-full max-w-2xl rounded-[16px] p-6 md:p-8"
-        style={{ color: "var(--cx-text, #F4F4F7)" }}
+        style={{ color: "var(--cx-text)" }}
       >
         <p
           className="cx-type-xs uppercase tracking-[0.2em] mb-2"

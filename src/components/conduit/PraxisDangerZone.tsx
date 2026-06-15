@@ -45,7 +45,7 @@ export function PraxisDangerZone() {
         background: "color-mix(in srgb, #e5484d 5%, transparent)",
       }}
     >
-      <h2 className="text-sm font-semibold" style={{ color: "var(--cx-danger, #F4607D)" }}>
+      <h2 className="text-sm font-semibold" style={{ color: "var(--cx-danger)" }}>
         Danger zone
       </h2>
       <p className="mt-1.5 text-sm" style={{ color: "var(--color-text-muted)" }}>
@@ -72,7 +72,7 @@ export function PraxisDangerZone() {
         />
       </label>
       {error && (
-        <p className="mt-2 text-xs" style={{ color: "var(--cx-danger, #F4607D)" }}>
+        <p className="mt-2 text-xs" style={{ color: "var(--cx-danger)" }}>
           {error}
         </p>
       )}

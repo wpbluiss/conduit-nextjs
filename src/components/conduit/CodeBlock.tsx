@@ -71,7 +71,7 @@ function CopyButton({ text }: { text: string }) {
       style={{
         transitionDuration: "var(--cx-dur-fast, 120ms)",
         transitionTimingFunction: "var(--cx-ease, cubic-bezier(0.22,1,0.36,1))",
-        color: copied ? "var(--cx-reward, #34D399)" : undefined,
+        color: copied ? "var(--cx-reward)" : undefined,
       }}
     >
       {copied ? <Check size={14} strokeWidth={2} /> : <Copy size={14} strokeWidth={2} />}
@@ -116,8 +116,8 @@ export function CodeBlock({
     <div
       className={`group rounded-xl overflow-hidden ${className}`}
       style={{
-        background: "var(--cx-surface-raised, #1C1C26)",
-        border: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))",
+        background: "var(--cx-surface-raised)",
+        border: "1px solid var(--cx-glass-border)",
         boxShadow: [
           "var(--cx-glass-shadow, 0 1px 3px rgba(0,0,0,.40), 0 4px 16px rgba(0,0,0,.30))",
           "var(--cx-glass-highlight, inset 0 1px 0 rgba(255,255,255,.10))",
@@ -129,13 +129,13 @@ export function CodeBlock({
         className="flex items-center justify-between px-4"
         style={{
           height: "36px",
-          borderBottom: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))",
-          background: "var(--cx-glass-bg, rgba(255,255,255,0.04))",
+          borderBottom: "1px solid var(--cx-glass-border)",
+          background: "var(--cx-glass-bg)",
         }}
       >
         <span
           className="cx-mono cx-type-xs uppercase tracking-[0.15em]"
-          style={{ color: "var(--cx-text-faint, #6B6B7B)" }}
+          style={{ color: "var(--cx-text-faint)" }}
         >
           {lang || "code"}
         </span>
@@ -165,7 +165,7 @@ export function CodeBlock({
                     className="code-block-lineno hidden sm:inline-block select-none text-right pr-4 shrink-0"
                     style={{
                       minWidth: `${gutterWidth + 1}ch`,
-                      color: "var(--cx-text-faint, #6B6B7B)",
+                      color: "var(--cx-text-faint)",
                       opacity: 0.5,
                     }}
                   >
@@ -182,7 +182,7 @@ export function CodeBlock({
                       onClick={() => toggle(i)}
                       className="transition-colors mt-[2px]"
                       style={{
-                        color: "var(--cx-text-faint, #6B6B7B)",
+                        color: "var(--cx-text-faint)",
                         transitionDuration: "var(--cx-dur-fast, 120ms)",
                       }}
                     >
@@ -199,13 +199,13 @@ export function CodeBlock({
 
                 <span
                   className="code-block-text flex-1 whitespace-pre pl-1"
-                  style={{ color: "var(--cx-text, #F4F4F7)" }}
+                  style={{ color: "var(--cx-text)" }}
                 >
                   {info.text}
                   {showEllipsis && (
                     <span
                       className="ml-2 cx-type-xs select-none"
-                      style={{ color: "var(--cx-text-faint, #6B6B7B)", opacity: 0.7 }}
+                      style={{ color: "var(--cx-text-faint)", opacity: 0.7 }}
                       aria-label={`${ellipsisCount} lines hidden`}
                     >
                       … {ellipsisCount} {ellipsisCount === 1 ? "line" : "lines"}

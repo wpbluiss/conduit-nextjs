@@ -203,7 +203,7 @@ function AvatarStack({ displays }: { displays: ParticipantDisplay[] }) {
         <div
           key={d.id}
           className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-base serif border-2 border-[var(--color-bg)]"
-          style={{ background: d.color, color: "var(--cx-canvas, #0B0B0F)" }}
+          style={{ background: d.color, color: "var(--cx-canvas)" }}
           title={d.name}
         >
           {d.initial}
