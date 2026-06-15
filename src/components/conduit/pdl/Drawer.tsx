@@ -9,6 +9,7 @@
 
 import { useEffect, useId, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface Props {
   open: boolean;
@@ -31,6 +32,7 @@ export function Drawer({
 }: Props) {
   const titleId = useId();
   const descId = useId();
+  const dialogRef = useFocusTrap<HTMLDivElement>(open);
 
   useEffect(() => {
     if (!open) return;
@@ -57,6 +59,7 @@ export function Drawer({
         aria-hidden
       />
       <div
+        ref={dialogRef}
         className={`pdl-drawer pdl-glass${className ? ` ${className}` : ""}`}
         role="dialog"
         aria-modal="true"

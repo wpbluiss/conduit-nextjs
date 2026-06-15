@@ -258,6 +258,7 @@ interface DrawerProps {
 - Mobile (≤ 640 px): bottom-sheet from bottom.
 - Backdrop: `rgba(0, 0, 0, 0.35)` in dark / `rgba(20, 16, 31, 0.20)` in light, plus blur(8 px) on the backdrop.
 - Escape + outside-click dismiss.
+- Focus management (`aria-modal="true"` obligation, WCAG 2.4.3): on open, focus moves to the first focusable child (or the dialog itself when it has none); Tab / Shift+Tab are trapped inside the surface; focus returns to the trigger on dismiss. Provided by the shared `useFocusTrap` hook so consumers get it for free.
 
 ### 2.8 `Modal`
 
@@ -275,6 +276,7 @@ interface ModalProps {
 - Surface uses `.pdl-glass`.
 - Same backdrop treatment as Drawer.
 - Reserved for true confirm-or-cancel moments (destructive actions, sign-out).
+- Same focus management as Drawer (§2.7) via the shared `useFocusTrap` hook.
 
 ### 2.9 `Canvas`
 
