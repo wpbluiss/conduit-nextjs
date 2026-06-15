@@ -241,7 +241,7 @@ function TeamTab() {
             "linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-elevated)), var(--color-surface-elevated))",
         }}
       >
-        <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
+        <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
           Coming soon
         </div>
         <p className="serif text-2xl">Personality tuning</p>
@@ -360,7 +360,7 @@ function SpecialistsTab({
     <form onSubmit={handleSave} className="space-y-8 text-sm">
       {/* Nicknames */}
       <div>
-        <h3 className="text-[11px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-3">
+        <h3 className="cx-type-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-3">
           Custom nicknames
         </h3>
         <p className="text-[var(--color-text-muted)] max-w-xl mb-4">
@@ -386,7 +386,7 @@ function SpecialistsTab({
                 <div className="flex-1 min-w-0">
                   <label
                     htmlFor={`nick-${emp}`}
-                    className="block text-[11px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-1"
+                    className="block cx-type-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-1"
                   >
                     {canonical}
                     <span className="ml-1 text-[var(--color-text-muted)] normal-case tracking-normal">
@@ -421,7 +421,7 @@ function SpecialistsTab({
 
       {/* Response length */}
       <div>
-        <h3 className="text-[11px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-3">
+        <h3 className="cx-type-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-3">
           Response length
         </h3>
         <p className="text-[var(--color-text-muted)] max-w-xl mb-4">
@@ -445,7 +445,7 @@ function SpecialistsTab({
                   <Icon size={14} style={{ color }} strokeWidth={2} />
                 </span>
                 <div className="flex-1 min-w-0">
-                  <span className="block text-[11px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-1.5">
+                  <span className="block cx-type-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-1.5">
                     {canonical}
                   </span>
                   <div className="flex gap-1" role="group" aria-label={`${canonical} response length`}>
@@ -455,7 +455,7 @@ function SpecialistsTab({
                         type="button"
                         onClick={() => handleLengthChange(emp, value)}
                         title={hint}
-                        className={`px-3 py-1.5 rounded-md text-[12px] font-medium transition-all ${
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                           current === value
                             ? "bg-[var(--color-accent)] text-white"
                             : "border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-text-muted)]"
@@ -550,7 +550,7 @@ function SpecialistMetrics() {
           ))}
         </div>
         {loading && (
-          <span className="text-[11px] text-[var(--color-text-muted)] animate-pulse">Loading…</span>
+          <span className="cx-type-xs text-[var(--color-text-muted)] animate-pulse">Loading…</span>
         )}
       </div>
 
@@ -573,7 +573,7 @@ function SpecialistMetrics() {
         <>
           {/* Summary stat */}
           <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl font-semibold tabular-nums">{totalMessages.toLocaleString()}</span>
+            <span className="cx-stat">{totalMessages.toLocaleString()}</span>
             <span className="text-[var(--color-text-muted)]">
               specialist {totalMessages === 1 ? "response" : "responses"} in this period
             </span>
@@ -603,7 +603,7 @@ function SpecialistMetrics() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-baseline justify-between gap-2 flex-wrap">
                         <span className="font-medium text-[var(--color-text)]">{label}</span>
-                        <div className="flex items-center gap-3 text-[12px] text-[var(--color-text-muted)] tabular-nums shrink-0">
+                        <div className="flex items-center gap-3 cx-mono text-xs text-[var(--color-text-muted)] tabular-nums shrink-0">
                           <span title="Responses in period">
                             <span className="font-semibold text-[var(--color-text)]">{m.totalMessages.toLocaleString()}</span>
                             {" "}responses
@@ -617,7 +617,7 @@ function SpecialistMetrics() {
                             {" "}words/reply
                           </span>
                           <span
-                            className="text-[10px] px-1.5 py-0.5 rounded-full"
+                            className="cx-type-xs px-1.5 py-0.5 rounded-full"
                             style={{
                               background: `color-mix(in srgb, ${color} 14%, var(--color-surface-elevated))`,
                               color,
@@ -855,7 +855,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
               >
                 <div className="flex items-center justify-between">
                   <span
-                    className="text-[12px] font-medium"
+                    className="text-xs font-medium"
                     style={{ color: DEPT_COLOR[emp] }}
                   >
                     {employeeLabel(emp)}
@@ -863,7 +863,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
                   <button
                     onClick={() => preview(emp, current)}
                     disabled={!voiceConfigured || isPreviewing}
-                    className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-40"
+                    className="inline-flex items-center gap-1 cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-40"
                   >
                     {isPreviewing ? (
                       "Playing…"
@@ -900,7 +900,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
                     onClick={() =>
                       setEmployeeVoice(emp, DEFAULT_EMPLOYEE_VOICES[emp])
                     }
-                    className="text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-text)] underline"
+                    className="cx-type-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] underline"
                   >
                     Reset to default
                   </button>
@@ -1123,7 +1123,7 @@ function WorkspaceTab({
         <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
           Workspace logo
         </div>
-        <p className="text-[11px] text-[var(--color-text-muted)] mb-3">
+        <p className="cx-type-xs text-[var(--color-text-muted)] mb-3">
           Shown in the sidebar header. JPEG or PNG, max 2 MB.
         </p>
         <div className="flex items-center gap-5">
@@ -1182,7 +1182,7 @@ function WorkspaceTab({
               </button>
             )}
             {logoError && (
-              <p className="text-[11px] text-[var(--color-pink)]">{logoError}</p>
+              <p className="cx-type-xs text-[var(--color-pink)]">{logoError}</p>
             )}
           </div>
           <input
@@ -1201,7 +1201,7 @@ function WorkspaceTab({
         <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block">
           Workspace name
         </label>
-        <p className="text-[11px] text-[var(--color-text-muted)] -mt-1">
+        <p className="cx-type-xs text-[var(--color-text-muted)] -mt-1">
           Shown in the sidebar. Leave blank to use your account name.
         </p>
         <div className="relative">
@@ -1217,7 +1217,7 @@ function WorkspaceTab({
             className="w-full conduit-card px-4 py-2.5 outline-none focus:border-[var(--color-accent)] text-sm pr-12"
           />
           <span
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] tabular-nums"
+            className="absolute right-3 top-1/2 -translate-y-1/2 cx-type-xs tabular-nums"
             style={{
               color:
                 wsName.length >= WS_NAME_MAX
@@ -1228,7 +1228,7 @@ function WorkspaceTab({
             {wsName.length}/{WS_NAME_MAX}
           </span>
         </div>
-        {wsNameError && <p className="text-[11px] text-[var(--color-pink)]">{wsNameError}</p>}
+        {wsNameError && <p className="cx-type-xs text-[var(--color-pink)]">{wsNameError}</p>}
         <PraxisButton
           type="submit"
           isLoading={wsNameSaving}
@@ -1534,11 +1534,11 @@ function ProfileTab({
           >
             {avatarUploading ? "Uploading…" : "Choose photo"}
           </button>
-          <p className="mt-0.5 text-[10px] text-[var(--color-text-muted)]">
+          <p className="mt-0.5 cx-type-xs text-[var(--color-text-muted)]">
             JPEG, PNG, WebP or GIF · max 5 MB
           </p>
           {avatarError && (
-            <p className="mt-1 text-[11px] text-[var(--color-pink)]">{avatarError}</p>
+            <p className="mt-1 cx-type-xs text-[var(--color-pink)]">{avatarError}</p>
           )}
         </div>
         <input
@@ -1574,7 +1574,7 @@ function ProfileTab({
             {nameSaved ? <><Check size={12} /> Saved</> : "Save"}
           </PraxisButton>
         </div>
-        {nameError && <p className="text-[11px] text-[var(--color-pink)]">{nameError}</p>}
+        {nameError && <p className="cx-type-xs text-[var(--color-pink)]">{nameError}</p>}
       </form>
 
       {/* ── Workspace name ── */}
@@ -1582,7 +1582,7 @@ function ProfileTab({
         <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block">
           Workspace name
         </label>
-        <p className="text-[11px] text-[var(--color-text-muted)] -mt-1">
+        <p className="cx-type-xs text-[var(--color-text-muted)] -mt-1">
           Shown in the sidebar header. Leave blank to use your account name.
         </p>
         <div className="flex gap-2">
@@ -1603,7 +1603,7 @@ function ProfileTab({
             {wsNameSaved ? <><Check size={12} /> Saved</> : "Save"}
           </PraxisButton>
         </div>
-        {wsNameError && <p className="text-[11px] text-[var(--color-pink)]">{wsNameError}</p>}
+        {wsNameError && <p className="cx-type-xs text-[var(--color-pink)]">{wsNameError}</p>}
       </form>
 
       {/* ── Account info ── */}
@@ -1630,7 +1630,7 @@ function ProfileTab({
               </option>
             ))}
           </select>
-          <p className="mt-1 text-[10px] text-[var(--color-text-muted)]">
+          <p className="mt-1 cx-type-xs text-[var(--color-text-muted)]">
             {tzSaving ? "Saving…" : tzSaved ? "Saved" : "Used so the team knows what time of day it is for you."}
           </p>
         </div>
@@ -1947,7 +1947,7 @@ function BusinessTab({ account }: { account: AccountData }) {
               className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)] resize-none text-sm"
             />
             <span
-              className="absolute bottom-3 right-3 text-[10px] tabular-nums"
+              className="absolute bottom-3 right-3 cx-type-xs tabular-nums"
               style={{
                 color:
                   brief.length >= COMPANY_BRIEF_MAX
@@ -2081,7 +2081,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
           ))}
         </div>
         {monthLoading && (
-          <span className="text-[11px] text-[var(--color-text-muted)] animate-pulse">Loading…</span>
+          <span className="cx-type-xs text-[var(--color-text-muted)] animate-pulse">Loading…</span>
         )}
       </div>
 
@@ -2130,7 +2130,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
           />
         </div>
         {usage.cycleResetDate && (
-          <p className="text-[10px] text-[var(--color-text-muted)] mt-2">
+          <p className="cx-type-xs text-[var(--color-text-muted)] mt-2">
             Resets on {usage.cycleResetDate}
           </p>
         )}
@@ -2160,7 +2160,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
                 );
               })}
             </div>
-            <div className="mt-2 flex justify-between text-[10px] text-[var(--color-text-muted)]">
+            <div className="mt-2 flex justify-between cx-type-xs text-[var(--color-text-muted)]">
               <span>{fillByDay[0]?.d}</span>
               <span>{fillByDay[fillByDay.length - 1]?.d}</span>
             </div>
@@ -2251,16 +2251,16 @@ function UsageTab({ usage }: { usage: UsageData }) {
               return (
                 <div key={stat.provider} className="flex items-center justify-between px-5 py-3.5 gap-4">
                   <div>
-                    <p className="text-[var(--color-text)] text-[13px]">{label}</p>
-                    <p className="text-[var(--color-text-muted)] text-[11px] mt-0.5">
+                    <p className="text-[var(--color-text)] cx-type-sm">{label}</p>
+                    <p className="text-[var(--color-text-muted)] cx-type-xs mt-0.5">
                       Last fetched: {lastFetched}
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-[var(--color-text)] text-[13px] font-medium tabular-nums">
+                    <p className="text-[var(--color-text)] cx-type-sm font-medium tabular-nums">
                       {stat.fetch_count.toLocaleString()}
                     </p>
-                    <p className="text-[var(--color-text-muted)] text-[11px]">fetches</p>
+                    <p className="text-[var(--color-text-muted)] cx-type-xs">fetches</p>
                   </div>
                 </div>
               );
@@ -2390,7 +2390,7 @@ function BillingTab({
     return (
       <div className="space-y-6 text-sm">
         <div className="conduit-card p-6">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
+          <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
             Internal Account · Conduit AI Team
           </div>
           {/* Conduit AI (the parent company) intentional — internal team badge. */}
@@ -2552,7 +2552,7 @@ function BillingTab({
       {/* Current plan */}
       <div className="conduit-card p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+          <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
             Current plan ·{" "}
             {isCanceling
               ? "cancels at period end"
@@ -2569,12 +2569,12 @@ function BillingTab({
               : ""}
           </div>
           {cycleResetDate && (
-            <div className="text-[var(--color-text-muted)] text-[11px] mt-1">
+            <div className="text-[var(--color-text-muted)] cx-type-xs mt-1">
               Cycle resets {cycleResetDate}
             </div>
           )}
           {trialDaysLeft !== null && trialDaysLeft > 0 && (
-            <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium"
+            <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full cx-type-xs font-medium"
               style={{
                 background: "color-mix(in srgb, var(--color-amber) 12%, transparent)",
                 color: "var(--color-amber)",
@@ -2586,14 +2586,14 @@ function BillingTab({
             </div>
           )}
           {isCanceling && (
-            <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium"
+            <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full cx-type-xs font-medium"
               style={{
-                background: "color-mix(in srgb, var(--color-destructive, #ef4444) 10%, transparent)",
-                color: "var(--color-destructive, #ef4444)",
-                border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 30%, transparent)",
+                background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 10%, transparent)",
+                color: "var(--color-destructive, var(--cx-danger))",
+                border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 30%, transparent)",
               }}
             >
-              <span aria-hidden className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-destructive, #ef4444)" }} />
+              <span aria-hidden className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-destructive, var(--cx-danger))" }} />
               {cancelAt
                 ? `Cancels ${new Date(cancelAt * 1000).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`
                 : "Cancels at end of billing period"}
@@ -2619,7 +2619,7 @@ function BillingTab({
                 type="button"
                 onClick={() => handleCancelOrReactivate("reactivate")}
                 disabled={busy !== null}
-                className="text-[11px] underline underline-offset-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors disabled:opacity-40 text-center"
+                className="cx-type-xs underline underline-offset-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors disabled:opacity-40 text-center"
               >
                 {busy === "reactivate" ? "Reactivating…" : "Reactivate plan"}
               </button>
@@ -2628,7 +2628,7 @@ function BillingTab({
                 type="button"
                 onClick={() => setShowCancelModal(true)}
                 disabled={busy !== null}
-                className="text-[11px] underline underline-offset-2 text-[var(--color-text-muted)] hover:text-[var(--color-destructive,#ef4444)] transition-colors disabled:opacity-40 text-center"
+                className="cx-type-xs underline underline-offset-2 text-[var(--color-text-muted)] hover:text-[var(--color-destructive,var(--cx-danger))] transition-colors disabled:opacity-40 text-center"
               >
                 Cancel subscription
               </button>
@@ -2658,7 +2658,7 @@ function BillingTab({
                 . After that, your workspace reverts to the free tier.
               </p>
             </div>
-            <ul className="text-[11px] text-[var(--color-text-muted)] space-y-1 list-disc list-inside">
+            <ul className="cx-type-xs text-[var(--color-text-muted)] space-y-1 list-disc list-inside">
               <li>All 9 specialists become read-only after downgrade</li>
               <li>Memory, conversations, and integrations are preserved</li>
               <li>You can reactivate any time before the period ends</li>
@@ -2677,9 +2677,9 @@ function BillingTab({
                 disabled={busy === "cancel"}
                 className="px-4 py-2 text-sm rounded-lg transition-colors disabled:opacity-40"
                 style={{
-                  background: "color-mix(in srgb, var(--color-destructive, #ef4444) 12%, transparent)",
-                  color: "var(--color-destructive, #ef4444)",
-                  border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 35%, transparent)",
+                  background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 12%, transparent)",
+                  color: "var(--color-destructive, var(--cx-danger))",
+                  border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 35%, transparent)",
                 }}
               >
                 {busy === "cancel" ? "Cancelling…" : "Yes, cancel"}
@@ -2725,7 +2725,7 @@ function BillingTab({
                     {["Date", "Amount", "Status", ""].map((h) => (
                       <th
                         key={h}
-                        className="px-4 py-2.5 text-left text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] font-normal"
+                        className="px-4 py-2.5 text-left cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] font-normal"
                       >
                         {h}
                       </th>
@@ -2757,7 +2757,7 @@ function BillingTab({
                       </td>
                       <td className="px-4 py-3">
                         <span
-                          className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] uppercase tracking-[0.1em]"
+                          className="inline-flex items-center px-2 py-0.5 rounded-full cx-type-xs uppercase tracking-[0.1em]"
                           style={{
                             background:
                               inv.status === "paid"
@@ -2819,7 +2819,7 @@ function BillingTab({
                     : ""
                 }`}
               >
-                <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                   {isCurrent ? "Current" : t.name}
                 </div>
                 <div className="serif text-2xl mt-1">{t.name}</div>
@@ -2919,13 +2919,13 @@ function BillingTab({
             </button>
           ))}
         </div>
-        <p className="mt-2 text-[10px] text-[var(--color-text-muted)]">
+        <p className="mt-2 cx-type-xs text-[var(--color-text-muted)]">
           Bonus tokens stack on top of your monthly allowance and roll over
           until used.
         </p>
       </div>
 
-      <p className="text-[10px] text-[var(--color-text-muted)]">
+      <p className="cx-type-xs text-[var(--color-text-muted)]">
         Allowance: {allowance.toLocaleString()} this cycle.
       </p>
 
@@ -3061,13 +3061,13 @@ function UsageSummary({
             style={{ width: `${pct}%`, background: barColor }}
           />
         </div>
-        <div className="mt-1.5 flex items-baseline justify-between text-[11px] text-[var(--color-text-muted)] tabular-nums">
+        <div className="mt-1.5 flex items-baseline justify-between cx-type-xs text-[var(--color-text-muted)] tabular-nums">
           <span>{used.toLocaleString()} used</span>
           <span>{total.toLocaleString()} total</span>
         </div>
       </div>
 
-      <div className="flex items-center justify-between text-[12px]">
+      <div className="flex items-center justify-between text-xs">
         <span
           className="font-medium"
           style={{ color: remaining === 0 ? "var(--color-pink)" : "var(--color-text)" }}
@@ -3098,7 +3098,7 @@ function Stat({
       </div>
       <div className="serif text-2xl mt-1">{value}</div>
       {sub && (
-        <div className="text-[11px] text-[var(--color-text-muted)] mt-0.5">
+        <div className="cx-type-xs text-[var(--color-text-muted)] mt-0.5">
           {sub}
         </div>
       )}
@@ -3505,7 +3505,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             </div>
             {isConnected("google_calendar") ? (
               <span
-                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                 style={{
                   background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
                   color: "var(--color-success, #22c55e)",
@@ -3516,7 +3516,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               </span>
             ) : (
               <span
-                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                 style={{
                   background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
                   color: "var(--color-accent)",
@@ -3540,9 +3540,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               disabled={disconnecting === "google_calendar"}
               className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
               style={{
-                background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
-                border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
-                color: "var(--color-destructive, #ef4444)",
+                background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 8%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 25%, transparent)",
+                color: "var(--color-destructive, var(--cx-danger))",
               }}
             >
               <Link2Off size={12} />
@@ -3590,7 +3590,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             </div>
             {isConnected("slack") ? (
               <span
-                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                 style={{
                   background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
                   color: "var(--color-success, #22c55e)",
@@ -3601,7 +3601,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               </span>
             ) : (
               <span
-                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                 style={{
                   background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
                   color: "var(--color-accent)",
@@ -3658,9 +3658,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                 disabled={disconnecting === "slack"}
                 className="w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
                 style={{
-                  background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
-                  border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
-                  color: "var(--color-destructive, #ef4444)",
+                  background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 8%, var(--color-surface-elevated))",
+                  border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 25%, transparent)",
+                  color: "var(--color-destructive, var(--cx-danger))",
                 }}
               >
                 <Link2Off size={12} />
@@ -3722,7 +3722,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             </div>
             {isConnected("hubspot") ? (
               <span
-                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                 style={{
                   background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
                   color: "var(--color-success, #22c55e)",
@@ -3733,7 +3733,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               </span>
             ) : (
               <span
-                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                 style={{
                   background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
                   color: "var(--color-accent)",
@@ -3757,9 +3757,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               disabled={disconnecting === "hubspot"}
               className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
               style={{
-                background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
-                border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
-                color: "var(--color-destructive, #ef4444)",
+                background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 8%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 25%, transparent)",
+                color: "var(--color-destructive, var(--cx-danger))",
               }}
             >
               <Link2Off size={12} />
@@ -3808,7 +3808,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             </div>
             {isConnected("google_drive") ? (
               <span
-                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                 style={{
                   background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
                   color: "var(--color-success, #22c55e)",
@@ -3819,7 +3819,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               </span>
             ) : (
               <span
-                className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                 style={{
                   background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
                   color: "var(--color-accent)",
@@ -3842,13 +3842,13 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               {/* Selected files list */}
               {driveSelectedFiles.length > 0 && (
                 <div className="flex flex-col gap-1.5">
-                  <p className="text-[11px] text-[var(--color-text-muted)]">
+                  <p className="cx-type-xs text-[var(--color-text-muted)]">
                     Synced files ({driveSelectedFiles.length}/5):
                   </p>
                   {driveSelectedFiles.map((f) => (
                     <div key={f.id} className="flex items-center justify-between gap-2 text-xs">
                       <span className="truncate text-[var(--color-text)]">{f.name}</span>
-                      <span className="shrink-0 text-[10px] text-[var(--color-text-muted)]">
+                      <span className="shrink-0 cx-type-xs text-[var(--color-text-muted)]">
                         {f.mimeType === "application/vnd.google-apps.spreadsheet" ? "Sheet" : "Doc"}
                       </span>
                     </div>
@@ -3923,7 +3923,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                               borderBottom: "1px solid var(--color-border)",
                             }}
                           >
-                            <span className="shrink-0 text-[10px] opacity-60">
+                            <span className="shrink-0 cx-type-xs opacity-60">
                               {f.mimeType === "application/vnd.google-apps.spreadsheet" ? "Sheet" : "Doc"}
                             </span>
                             <span className="truncate">{f.name}</span>
@@ -3934,7 +3934,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                     </div>
                   )}
                   {driveSearchResults.length === 0 && !driveSearching && driveSearchQuery && (
-                    <p className="text-[11px] text-[var(--color-text-muted)] text-center py-2">No Docs or Sheets found.</p>
+                    <p className="cx-type-xs text-[var(--color-text-muted)] text-center py-2">No Docs or Sheets found.</p>
                   )}
                   <div className="flex gap-2">
                     <button
@@ -3954,9 +3954,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                         disabled={driveSaving}
                         className="flex-1 py-2 rounded-lg text-xs font-medium"
                         style={{
-                          background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
-                          border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
-                          color: "var(--color-destructive, #ef4444)",
+                          background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 8%, var(--color-surface-elevated))",
+                          border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 25%, transparent)",
+                          color: "var(--color-destructive, var(--cx-danger))",
                         }}
                       >
                         Clear all
@@ -3986,9 +3986,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                   disabled={disconnecting === "google_drive"}
                   className="flex-1 py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
                   style={{
-                    background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
-                    border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
-                    color: "var(--color-destructive, #ef4444)",
+                    background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 8%, var(--color-surface-elevated))",
+                    border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 25%, transparent)",
+                    color: "var(--color-destructive, var(--cx-danger))",
                   }}
                 >
                   <Link2Off size={12} />
@@ -4051,7 +4051,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           </div>
           {isConnected("github") ? (
             <span
-              className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+              className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
               style={{
                 background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
                 color: "var(--color-success, #22c55e)",
@@ -4062,7 +4062,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             </span>
           ) : (
             <span
-              className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+              className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
               style={{
                 background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
                 color: "var(--color-accent)",
@@ -4098,9 +4098,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               disabled={disconnecting === "github"}
               className="w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5"
               style={{
-                background: "color-mix(in srgb, var(--color-destructive, #ef4444) 8%, var(--color-surface-elevated))",
-                border: "1px solid color-mix(in srgb, var(--color-destructive, #ef4444) 25%, transparent)",
-                color: "var(--color-destructive, #ef4444)",
+                background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 8%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 25%, transparent)",
+                color: "var(--color-destructive, var(--cx-danger))",
               }}
             >
               <Link2Off size={12} />
@@ -4137,7 +4137,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
 
       {/* Coming soon — Notion */}
       <div>
-        <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-3">
+        <p className="cx-type-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-3">
           Coming soon
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -4161,7 +4161,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                   <Icon size={20} />
                 </div>
                 <span
-                  className="text-[10px] uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
+                  className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                   style={{
                     background: "color-mix(in srgb, var(--color-amber) 12%, transparent)",
                     color: "var(--color-amber)",
@@ -4200,7 +4200,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             "linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-elevated)), var(--color-surface-elevated))",
         }}
       >
-        <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
+        <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
           More coming
         </div>
         <p className="serif text-xl">Zapier, Airtable, Linear, and more.</p>
@@ -4316,7 +4316,7 @@ function AppearanceTab({
                   }}
                 />
                 <span
-                  className="text-[10px] uppercase tracking-[0.1em]"
+                  className="cx-type-xs uppercase tracking-[0.1em]"
                   style={{
                     color: active ? preset.accent : "var(--color-text-muted)",
                     fontWeight: active ? 600 : 400,
@@ -4329,10 +4329,10 @@ function AppearanceTab({
           })}
         </div>
         {accentSaving && (
-          <p className="text-[11px] text-[var(--color-text-muted)]">Saving…</p>
+          <p className="cx-type-xs text-[var(--color-text-muted)]">Saving…</p>
         )}
         {accentError && (
-          <p className="text-[11px] text-[var(--color-pink)]">{accentError}</p>
+          <p className="cx-type-xs text-[var(--color-pink)]">{accentError}</p>
         )}
       </div>
     </div>
@@ -4694,7 +4694,7 @@ function ReferralsTab() {
             Your referral code is being generated — refresh in a moment.
           </p>
         )}
-        <p className="text-[11px] text-[var(--color-text-muted)]">
+        <p className="cx-type-xs text-[var(--color-text-muted)]">
           Share this link with founders and operators. They get bonus tokens on their first session; you get bonus tokens once they&apos;re active.
         </p>
       </div>
@@ -4726,15 +4726,15 @@ function ReferralsTab() {
         </div>
         <ol className="space-y-2 text-[var(--color-text-muted)]">
           <li className="flex gap-3">
-            <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: "color-mix(in srgb, var(--color-accent) 15%, transparent)", color: "var(--color-accent)" }}>1</span>
+            <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center cx-type-xs font-bold" style={{ background: "color-mix(in srgb, var(--color-accent) 15%, transparent)", color: "var(--color-accent)" }}>1</span>
             Share your link with another founder or operator.
           </li>
           <li className="flex gap-3">
-            <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: "color-mix(in srgb, var(--color-accent) 15%, transparent)", color: "var(--color-accent)" }}>2</span>
+            <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center cx-type-xs font-bold" style={{ background: "color-mix(in srgb, var(--color-accent) 15%, transparent)", color: "var(--color-accent)" }}>2</span>
             They sign up and activate their workspace.
           </li>
           <li className="flex gap-3">
-            <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: "color-mix(in srgb, var(--color-accent) 15%, transparent)", color: "var(--color-accent)" }}>3</span>
+            <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center cx-type-xs font-bold" style={{ background: "color-mix(in srgb, var(--color-accent) 15%, transparent)", color: "var(--color-accent)" }}>3</span>
             You both receive bonus tokens — added to your allowance automatically.
           </li>
         </ol>
@@ -4886,7 +4886,7 @@ function LabelsTab() {
                     type="button"
                     onClick={() => void handleSave(label.id)}
                     disabled={!editName.trim() || saving}
-                    className="px-3 py-1 rounded-lg text-[12px] font-medium text-white disabled:opacity-50"
+                    className="px-3 py-1 rounded-lg text-xs font-medium text-white disabled:opacity-50"
                     style={{ background: editColor }}
                   >
                     {saving ? "Saving…" : "Save"}
@@ -4894,7 +4894,7 @@ function LabelsTab() {
                   <button
                     type="button"
                     onClick={() => setEditingId(null)}
-                    className="px-2 py-1 rounded-lg text-[12px]"
+                    className="px-2 py-1 rounded-lg text-xs"
                     style={{ color: "var(--color-text-muted)" }}
                   >
                     Cancel
@@ -4926,7 +4926,7 @@ function LabelsTab() {
                   style={{ background: label.color }}
                 />
                 <span
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full cx-type-xs font-medium"
                   style={{
                     background: `color-mix(in srgb, ${label.color} 15%, var(--color-surface-elevated))`,
                     color: label.color,
@@ -4981,7 +4981,7 @@ function LabelsTab() {
                 <button
                   type="submit"
                   disabled={!newName.trim() || creating}
-                  className="px-3 py-1 rounded-lg text-[12px] font-medium text-white disabled:opacity-50"
+                  className="px-3 py-1 rounded-lg text-xs font-medium text-white disabled:opacity-50"
                   style={{ background: newColor }}
                 >
                   {creating ? "Creating…" : "Create"}
@@ -4989,7 +4989,7 @@ function LabelsTab() {
                 <button
                   type="button"
                   onClick={() => { setShowCreate(false); setNewName(""); }}
-                  className="px-2 py-1 rounded-lg text-[12px]"
+                  className="px-2 py-1 rounded-lg text-xs"
                   style={{ color: "var(--color-text-muted)" }}
                 >
                   Cancel
@@ -5026,7 +5026,7 @@ function LabelsTab() {
               Create label
             </button>
           ) : (
-            <p className="text-[12px] text-[var(--color-text-muted)]">Label limit reached (10 max).</p>
+            <p className="text-xs text-[var(--color-text-muted)]">Label limit reached (10 max).</p>
           )}
         </div>
       )}

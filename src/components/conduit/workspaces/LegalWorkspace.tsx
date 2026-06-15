@@ -77,7 +77,7 @@ export default function LegalWorkspace() {
                   </span>
                 </span>
                 <span
-                  className="text-[10px] uppercase tracking-[0.15em]"
+                  className="cx-type-xs uppercase tracking-[0.15em]"
                   style={{
                     color:
                       e.daysLeft <= 7
@@ -103,12 +103,12 @@ export default function LegalWorkspace() {
       {/* Contract list */}
       <div>
         <div className="flex items-baseline justify-between mb-3">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
+          <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
             <ScrollText size={11} /> Contract library
           </div>
           <Link
             href={`/app?pin=legal&prompt=${encodeURIComponent("Draft a new service agreement")}`}
-            className="text-[10px] uppercase tracking-[0.15em]"
+            className="cx-type-xs uppercase tracking-[0.15em]"
             style={{ color: dept }}
           >
             Draft a contract →
@@ -126,12 +126,12 @@ export default function LegalWorkspace() {
                   <div className="text-sm text-[var(--color-text)]">
                     {c.title}
                   </div>
-                  <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-0.5">
+                  <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-0.5">
                     {c.counterparty} · {c.signedAgo}
                   </div>
                 </div>
                 <span
-                  className="text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full shrink-0"
+                  className="cx-type-xs uppercase tracking-[0.15em] px-2 py-0.5 rounded-full shrink-0"
                   style={{
                     color: statusColor(c.status),
                     background: `color-mix(in srgb, ${statusColor(c.status)} 14%, transparent)`,

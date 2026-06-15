@@ -89,12 +89,12 @@ export function SidebarBuildsSection({ initial, accountId }: Props) {
           style={{ color: DEPT_COLOR_ENG }}
           aria-hidden
         />
-        <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+        <span className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
           Building
         </span>
         {active.length > 1 && (
           <span
-            className="ml-auto text-[10px] tabular-nums px-1.5 py-0.5 rounded-full"
+            className="ml-auto cx-type-xs tabular-nums px-1.5 py-0.5 rounded-full"
             style={{
               background: `color-mix(in srgb, ${DEPT_COLOR_ENG} 14%, transparent)`,
               color: DEPT_COLOR_ENG,
@@ -118,7 +118,7 @@ export function SidebarBuildsSection({ initial, accountId }: Props) {
                 {truncate(build.prompt)}
               </span>
               <span
-                className="shrink-0 tabular-nums text-[10px]"
+                className="shrink-0 tabular-nums cx-type-xs"
                 style={{ color: DEPT_COLOR_ENG }}
                 aria-label={`Elapsed: ${formatElapsed(build.startedAt, build.createdAt, nowMs)}`}
               >
@@ -131,7 +131,7 @@ export function SidebarBuildsSection({ initial, accountId }: Props) {
           <li>
             <Link
               href="/app/builds"
-              className="flex items-center gap-2 px-3 py-1 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+              className="flex items-center gap-2 px-3 py-1 cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
             >
               +{overflow} more
             </Link>

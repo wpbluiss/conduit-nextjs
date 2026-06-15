@@ -104,7 +104,7 @@ export default function EnterTheRoomCard({
           <Lock size={20} className="text-[var(--color-accent-hi)]" />
         </div>
         <div className="flex-1">
-          <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-accent-hi)] mb-1">
+          <div className="cx-type-xs uppercase tracking-[0.2em] text-[var(--color-accent-hi)] mb-1">
             Pro perk
           </div>
           <h2 className="serif text-2xl mb-1">Enter the room</h2>
@@ -135,7 +135,7 @@ export default function EnterTheRoomCard({
       >
         <AvatarStack displays={displays} />
         <div className="flex-1 min-w-0">
-          <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)] mb-1 inline-flex items-center gap-2">
+          <div className="cx-type-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)] mb-1 inline-flex items-center gap-2">
             <span className="live-dot" aria-hidden /> {tierLabel}
           </div>
           <h2 className="serif text-2xl md:text-3xl mb-1">Enter the room</h2>

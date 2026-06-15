@@ -194,7 +194,7 @@ export function PaywallModal({
               }
             >
               Annual
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: "color-mix(in srgb, var(--cx-reward) 15%, transparent)", color: "var(--cx-reward)" }}>
+              <span className="cx-type-xs px-1.5 py-0.5 rounded-full font-medium" style={{ background: "color-mix(in srgb, var(--cx-reward) 15%, transparent)", color: "var(--cx-reward)" }}>
                 −20%
               </span>
             </button>
@@ -215,7 +215,7 @@ export function PaywallModal({
               <div
                 className="px-4 py-3 text-center font-medium uppercase tracking-[0.12em]"
                 style={{
-                  borderLeft: "1px solid rgba(52,211,153,0.30)",
+                  borderLeft: "1px solid color-mix(in srgb, var(--cx-reward) 30%, transparent)",
                   background: "color-mix(in srgb, var(--cx-reward) 8%, transparent)",
                   color: "var(--cx-reward)",
                 }}
@@ -241,7 +241,7 @@ export function PaywallModal({
                 <div
                   className="px-4 py-2.5 text-center text-[var(--color-text)]"
                   style={{
-                    borderLeft: "1px solid rgba(52,211,153,0.30)",
+                    borderLeft: "1px solid color-mix(in srgb, var(--cx-reward) 30%, transparent)",
                     background: "color-mix(in srgb, var(--cx-reward) 5%, transparent)",
                   }}
                 >
@@ -280,7 +280,7 @@ export function PaywallModal({
             style={{
               background: busy ? "var(--color-border)" : "var(--cx-reward)",
               color: busy ? "var(--color-text-muted)" : "#fff",
-              boxShadow: busy ? "none" : "0 4px 16px rgba(52,211,153,0.35)",
+              boxShadow: busy ? "none" : "0 4px 16px color-mix(in srgb, var(--cx-reward) 35%, transparent)",
             }}
           >
             {busy ? "Opening checkout…" : "Upgrade to Pro"}

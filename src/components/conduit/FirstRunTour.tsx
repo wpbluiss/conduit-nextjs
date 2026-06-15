@@ -177,9 +177,9 @@ export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
             className="conduit-card p-6"
             style={{
               background: "var(--color-ink-surface-elevated)",
-              border: "1px solid rgba(124,108,255,0.30)",
+              border: "1px solid color-mix(in srgb, var(--cx-accent) 30%, transparent)",
               boxShadow:
-                "0 0 0 1px rgba(124,108,255,0.12), 0 16px 48px rgba(0,0,0,0.40)",
+                "0 0 0 1px var(--cx-accent-tint), 0 16px 48px rgba(0,0,0,0.40)",
             }}
           >
             {/* Header */}
@@ -204,7 +204,7 @@ export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
                     />
                   ))}
                 </div>
-                <span className="text-[11px] uppercase tracking-wider text-[var(--color-cream-mute)]">
+                <span className="cx-type-xs uppercase tracking-wider text-[var(--color-cream-mute)]">
                   {step + 1} / {STEPS.length}
                 </span>
               </div>
@@ -218,10 +218,10 @@ export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
               </button>
             </div>
 
-            <h3 className="text-[15px] font-semibold text-[var(--color-cream)] leading-snug mb-2">
+            <h3 className="text-sm font-semibold text-[var(--color-cream)] leading-snug mb-2">
               {current.title}
             </h3>
-            <p className="text-[13px] text-[var(--color-cream-soft)] leading-[1.6] mb-5">
+            <p className="cx-type-sm text-[var(--color-cream-soft)] leading-[1.6] mb-5">
               {current.body}
             </p>
 
@@ -230,7 +230,7 @@ export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
               <button
                 type="button"
                 onClick={dismiss}
-                className="text-[12px] text-[var(--color-cream-mute)] hover:text-[var(--color-cream)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-indigo-500)] rounded"
+                className="text-xs text-[var(--color-cream-mute)] hover:text-[var(--color-cream)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-indigo-500)] rounded"
               >
                 Skip tour
               </button>

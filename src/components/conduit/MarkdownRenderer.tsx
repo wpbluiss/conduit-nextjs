@@ -113,6 +113,20 @@ function SyntaxLine({ line }: { line: string }) {
 }
 
 // ---------------------------------------------------------------------------
+// Streaming caret
+// ---------------------------------------------------------------------------
+
+function StreamingCaret({ color }: { color: string }) {
+  return (
+    <span
+      aria-hidden
+      className="inline-block w-[2px] h-4 -mb-1 ml-0.5 caret"
+      style={{ background: color }}
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Code block with language label + copy button (appears on hover)
 // ---------------------------------------------------------------------------
 
@@ -136,7 +150,7 @@ function CopyButton({ text, alwaysVisible }: { text: string; alwaysVisible?: boo
       aria-label={copied ? "Copied!" : "Copy code"}
       title={copied ? "Copied!" : "Copy code"}
       className={[
-        "flex items-center gap-1.5 px-2 py-1 rounded text-[11px] transition-all duration-150",
+        "flex items-center gap-1.5 px-2 py-1 rounded cx-type-xs transition-all duration-150",
         alwaysVisible || copied
           ? "opacity-100"
           : "opacity-0 group-hover:opacity-100 focus:opacity-100",
@@ -162,7 +176,17 @@ function CopyButton({ text, alwaysVisible }: { text: string; alwaysVisible?: boo
   );
 }
 
-function HighlightedCodeBlock({ lang, code }: { lang: string; code: string }) {
+function HighlightedCodeBlock({
+  lang,
+  code,
+  streaming = false,
+  caretColor,
+}: {
+  lang: string;
+  code: string;
+  streaming?: boolean;
+  caretColor?: string;
+}) {
   const lines = code.split("\n");
   // Remove trailing empty line that split often produces
   if (lines[lines.length - 1] === "") lines.pop();
@@ -184,25 +208,37 @@ function HighlightedCodeBlock({ lang, code }: { lang: string; code: string }) {
         }}
       >
         <span
-          className="text-[11px] uppercase tracking-[0.15em]"
+          className="cx-type-xs uppercase tracking-[0.15em]"
           style={{ fontFamily: "var(--font-mono, monospace)", color: "var(--cx-text-faint, #6B6B7B)" }}
         >
           {lang || "code"}
         </span>
-        <CopyButton text={code} />
+        {/* Hide copy button while still streaming — no complete content yet */}
+        {!streaming && <CopyButton text={code} />}
       </div>
 
       {/* Code body */}
       <pre
-        className="overflow-x-auto px-4 py-3 text-[13px] leading-[1.7]"
+        className="overflow-x-auto px-4 py-3 cx-type-sm leading-[1.7]"
         style={{ fontFamily: "var(--font-mono, monospace)", margin: 0 }}
       >
         <code>
-          {lines.map((line, i) => (
-            <span key={i} className="block">
-              <SyntaxLine line={line} />
-            </span>
-          ))}
+          {lines.map((line, i) => {
+            const isLastLine = i === lines.length - 1;
+            return (
+              <span key={i} className="block">
+                <SyntaxLine line={line} />
+                {/* Caret on the last partial line while streaming */}
+                {streaming && isLastLine && caretColor && (
+                  <StreamingCaret color={caretColor} />
+                )}
+              </span>
+            );
+          })}
+          {/* Caret when code block is empty (just opened the fence) */}
+          {streaming && lines.length === 0 && caretColor && (
+            <StreamingCaret color={caretColor} />
+          )}
         </code>
       </pre>
     </div>
@@ -494,14 +530,220 @@ function parseBlocks(text: string): Block[] {
 }
 
 // ---------------------------------------------------------------------------
+// Shared block-to-JSX renderer
+// caretColor: if set, place a blinking caret at the end of this block
+// ---------------------------------------------------------------------------
+
+function renderBlock(block: Block, bi: number, caretColor?: string): React.ReactNode {
+  if (block.type === "code") {
+    return (
+      <HighlightedCodeBlock
+        key={bi}
+        lang={block.lang ?? ""}
+        code={block.code ?? ""}
+        streaming={!!caretColor}
+        caretColor={caretColor}
+      />
+    );
+  }
+
+  if (block.type === "hr") {
+    return (
+      <hr
+        key={bi}
+        style={{
+          border: "none",
+          borderTop: "1px solid var(--cx-border, #262630)",
+          margin: "var(--cx-space-4, 16px) 0",
+        }}
+      />
+    );
+  }
+
+  if (block.type === "heading") {
+    const segs = parseInline(block.content ?? "");
+    const rendered = renderSegments(segs, `h${bi}`);
+    const [fontSize, margin] =
+      block.level === 1
+        ? ["var(--cx-type-lg, 20px)", "mt-5 mb-2"]
+        : block.level === 2
+        ? ["var(--cx-type-md, 16px)", "mt-4 mb-1"]
+        : ["var(--cx-type-base, 14px)", "mt-3 mb-0.5"];
+    return (
+      <p
+        key={bi}
+        className={margin}
+        style={{
+          fontSize,
+          fontWeight: 600,
+          lineHeight: "var(--cx-lh-heading, 1.10)",
+          letterSpacing: "var(--cx-ls-tight, -0.01em)",
+          color: "var(--cx-text, #F4F4F7)",
+        }}
+      >
+        {rendered}
+        {caretColor && <StreamingCaret color={caretColor} />}
+      </p>
+    );
+  }
+
+  if (block.type === "blockquote") {
+    const items = block.items ?? [];
+    return (
+      <blockquote
+        key={bi}
+        className="my-2 py-2 pr-3 rounded-r-lg"
+        style={{
+          paddingLeft: "var(--cx-space-4, 16px)",
+          borderLeft: "3px solid var(--cx-accent, #7C6CFF)",
+          background: "var(--cx-accent-tint, rgba(124, 108, 255, 0.12))",
+        }}
+      >
+        {items.map((line, li) => {
+          const isLast = li === items.length - 1;
+          return (
+            <p
+              key={li}
+              className="text-sm leading-relaxed"
+              style={{ color: "var(--cx-text-muted, #A0A0B0)" }}
+            >
+              {renderSegments(parseInline(line), `bq${bi}-${li}`)}
+              {caretColor && isLast && <StreamingCaret color={caretColor} />}
+            </p>
+          );
+        })}
+      </blockquote>
+    );
+  }
+
+  if (block.type === "list") {
+    const Tag = block.ordered ? "ol" : "ul";
+    const items = block.items ?? [];
+    return (
+      <Tag
+        key={bi}
+        className={block.ordered ? "list-decimal space-y-1" : "list-disc space-y-1"}
+        style={{
+          color: "var(--cx-text, #F4F4F7)",
+          paddingLeft: "var(--cx-space-4, 16px)",
+          margin: "var(--cx-space-2, 8px) 0",
+        }}
+      >
+        {items.map((item, li) => {
+          const isLast = li === items.length - 1;
+          const segs = parseInline(item);
+          return (
+            <li
+              key={li}
+              style={{
+                fontSize: "var(--cx-type-sm, 13px)",
+                lineHeight: "var(--cx-lh-body, 1.60)",
+              }}
+            >
+              {renderSegments(segs, `li${bi}-${li}`)}
+              {caretColor && isLast && <StreamingCaret color={caretColor} />}
+            </li>
+          );
+        })}
+      </Tag>
+    );
+  }
+
+  if (block.type === "table") {
+    return (
+      <div key={bi} className="overflow-x-auto my-3">
+        <table
+          className="w-full text-sm border-collapse"
+          style={{ borderColor: "var(--cx-border, #262630)" }}
+        >
+          <thead>
+            <tr>
+              {(block.headers ?? []).map((h, ci) => (
+                <th
+                  key={ci}
+                  className="px-4 py-2.5 text-left text-[11px] uppercase tracking-[0.12em] font-semibold"
+                  style={{
+                    background: "var(--cx-surface-overlay, #23232E)",
+                    borderBottom: "1px solid var(--cx-border-strong, #33333F)",
+                    borderRight:
+                      ci < (block.headers ?? []).length - 1
+                        ? "1px solid var(--cx-border, #262630)"
+                        : "none",
+                    color: "var(--cx-text-muted, #A0A0B0)",
+                  }}
+                >
+                  {renderSegments(parseInline(h), `th${bi}-${ci}`)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {(block.rows ?? []).map((row, ri) => {
+              const isLastRow = ri === (block.rows ?? []).length - 1;
+              return (
+                <tr
+                  key={ri}
+                  style={{
+                    background:
+                      ri % 2 === 0
+                        ? "transparent"
+                        : "var(--cx-surface-raised, #1C1C26)",
+                  }}
+                >
+                  {row.map((cell, ci) => {
+                    const isLastCell = ci === row.length - 1;
+                    return (
+                      <td
+                        key={ci}
+                        className="px-4 py-2"
+                        style={{
+                          border: "1px solid var(--cx-border, #262630)",
+                          color: "var(--cx-text, #F4F4F7)",
+                          fontSize: "var(--cx-type-sm, 13px)",
+                        }}
+                      >
+                        {renderSegments(parseInline(cell), `td${bi}-${ri}-${ci}`)}
+                        {caretColor && isLastRow && isLastCell && (
+                          <StreamingCaret color={caretColor} />
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  // paragraph
+  const segs = parseInline(block.content ?? "");
+  return (
+    <p
+      key={bi}
+      style={{
+        fontSize: "var(--cx-type-sm, 13px)",
+        lineHeight: "var(--cx-lh-body, 1.60)",
+        color: "var(--cx-text, #F4F4F7)",
+      }}
+    >
+      {renderSegments(segs, `p${bi}`)}
+      {caretColor && <StreamingCaret color={caretColor} />}
+    </p>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
 
 interface Props {
   content: string;
-  /** When true, render as plain pre-wrap text (streaming in progress). */
+  /** When true, render as progressive markdown with a blinking caret. */
   streaming?: boolean;
-  /** Accent color for the blinking caret. */
+  /** Accent color for the blinking caret (used only when streaming=true). */
   caretColor?: string;
 }
 
@@ -511,17 +753,35 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
   caretColor,
 }: Props) {
   if (streaming) {
+    // Progressive streaming: parse as markdown and place the caret at the end
+    // of the last block. This gives users live formatting (headings, lists, code)
+    // as tokens arrive, without waiting for stream completion.
+    const blocks = parseBlocks(content);
+
+    if (blocks.length === 0) {
+      // No complete blocks yet — show raw tail with caret
+      return (
+        <span
+          className="whitespace-pre-wrap leading-relaxed"
+          style={{
+            fontSize: "var(--cx-type-sm, 13px)",
+            lineHeight: "var(--cx-lh-body, 1.60)",
+            color: "var(--cx-text, #F4F4F7)",
+          }}
+        >
+          {content}
+          {caretColor && <StreamingCaret color={caretColor} />}
+        </span>
+      );
+    }
+
     return (
-      <span className="whitespace-pre-wrap leading-relaxed">
-        {content}
-        {caretColor && (
-          <span
-            aria-hidden
-            className="inline-block w-[2px] h-4 -mb-1 ml-1 caret"
-            style={{ background: caretColor }}
-          />
-        )}
-      </span>
+      <div className="markdown-body leading-relaxed space-y-2">
+        {blocks.map((block, bi) => {
+          const isLast = bi === blocks.length - 1;
+          return renderBlock(block, bi, isLast ? caretColor : undefined);
+        })}
+      </div>
     );
   }
 
@@ -529,185 +789,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
 
   return (
     <div className="markdown-body leading-relaxed space-y-2">
-      {blocks.map((block, bi) => {
-        if (block.type === "code") {
-          return (
-            <HighlightedCodeBlock
-              key={bi}
-              lang={block.lang ?? ""}
-              code={block.code ?? ""}
-            />
-          );
-        }
-
-        if (block.type === "hr") {
-          return (
-            <hr
-              key={bi}
-              style={{
-                border: "none",
-                borderTop: "1px solid var(--cx-border, #262630)",
-                margin: "var(--cx-space-4, 16px) 0",
-              }}
-            />
-          );
-        }
-
-        if (block.type === "heading") {
-          const segs = parseInline(block.content ?? "");
-          const rendered = renderSegments(segs, `h${bi}`);
-          const [fontSize, margin] =
-            block.level === 1
-              ? ["var(--cx-type-lg, 20px)", "mt-5 mb-2"]
-              : block.level === 2
-              ? ["var(--cx-type-md, 16px)", "mt-4 mb-1"]
-              : ["var(--cx-type-base, 14px)", "mt-3 mb-0.5"];
-          return (
-            <p
-              key={bi}
-              className={margin}
-              style={{
-                fontSize,
-                fontWeight: 600,
-                lineHeight: "var(--cx-lh-heading, 1.10)",
-                letterSpacing: "var(--cx-ls-tight, -0.01em)",
-                color: "var(--cx-text, #F4F4F7)",
-              }}
-            >
-              {rendered}
-            </p>
-          );
-        }
-
-        if (block.type === "blockquote") {
-          return (
-            <blockquote
-              key={bi}
-              className="my-2 py-2 pr-3 rounded-r-lg"
-              style={{
-                paddingLeft: "var(--cx-space-4, 16px)",
-                borderLeft: "3px solid var(--cx-accent, #7C6CFF)",
-                background: "var(--cx-accent-tint, rgba(124, 108, 255, 0.12))",
-              }}
-            >
-              {(block.items ?? []).map((line, li) => (
-                <p
-                  key={li}
-                  className="text-sm leading-relaxed"
-                  style={{ color: "var(--cx-text-muted, #A0A0B0)" }}
-                >
-                  {renderSegments(parseInline(line), `bq${bi}-${li}`)}
-                </p>
-              ))}
-            </blockquote>
-          );
-        }
-
-        if (block.type === "list") {
-          const Tag = block.ordered ? "ol" : "ul";
-          return (
-            <Tag
-              key={bi}
-              className={block.ordered ? "list-decimal space-y-1" : "list-disc space-y-1"}
-              style={{
-                color: "var(--cx-text, #F4F4F7)",
-                paddingLeft: "var(--cx-space-4, 16px)",
-                margin: "var(--cx-space-2, 8px) 0",
-              }}
-            >
-              {block.items!.map((item, li) => {
-                const segs = parseInline(item);
-                return (
-                  <li
-                    key={li}
-                    style={{
-                      fontSize: "var(--cx-type-sm, 13px)",
-                      lineHeight: "var(--cx-lh-body, 1.60)",
-                    }}
-                  >
-                    {renderSegments(segs, `li${bi}-${li}`)}
-                  </li>
-                );
-              })}
-            </Tag>
-          );
-        }
-
-        if (block.type === "table") {
-          return (
-            <div key={bi} className="overflow-x-auto my-3">
-              <table
-                className="w-full text-sm border-collapse"
-                style={{ borderColor: "var(--cx-border, #262630)" }}
-              >
-                <thead>
-                  <tr>
-                    {(block.headers ?? []).map((h, ci) => (
-                      <th
-                        key={ci}
-                        className="px-4 py-2.5 text-left text-[11px] uppercase tracking-[0.12em] font-semibold"
-                        style={{
-                          background: "var(--cx-surface-overlay, #23232E)",
-                          borderBottom: "1px solid var(--cx-border-strong, #33333F)",
-                          borderRight:
-                            ci < (block.headers ?? []).length - 1
-                              ? "1px solid var(--cx-border, #262630)"
-                              : "none",
-                          color: "var(--cx-text-muted, #A0A0B0)",
-                        }}
-                      >
-                        {renderSegments(parseInline(h), `th${bi}-${ci}`)}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {(block.rows ?? []).map((row, ri) => (
-                    <tr
-                      key={ri}
-                      style={{
-                        background:
-                          ri % 2 === 0
-                            ? "transparent"
-                            : "var(--cx-surface-raised, #1C1C26)",
-                      }}
-                    >
-                      {row.map((cell, ci) => (
-                        <td
-                          key={ci}
-                          className="px-4 py-2"
-                          style={{
-                            border: "1px solid var(--cx-border, #262630)",
-                            color: "var(--cx-text, #F4F4F7)",
-                            fontSize: "var(--cx-type-sm, 13px)",
-                          }}
-                        >
-                          {renderSegments(parseInline(cell), `td${bi}-${ri}-${ci}`)}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          );
-        }
-
-        // paragraph
-        const segs = parseInline(block.content ?? "");
-        return (
-          <p
-            key={bi}
-            style={{
-              fontSize: "var(--cx-type-sm, 13px)",
-              lineHeight: "var(--cx-lh-body, 1.60)",
-              color: "var(--cx-text, #F4F4F7)",
-            }}
-          >
-            {renderSegments(segs, `p${bi}`)}
-          </p>
-        );
-      })}
+      {blocks.map((block, bi) => renderBlock(block, bi))}
     </div>
   );
 });

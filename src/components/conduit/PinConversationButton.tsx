@@ -77,7 +77,7 @@ export function PinConversationButton({ conversationId, pinned, atLimit }: Props
       </button>
       {error && (
         <span
-          className="absolute right-0 top-full mt-1 whitespace-nowrap text-[11px] px-2 py-0.5 rounded pointer-events-none z-10"
+          className="absolute right-0 top-full mt-1 whitespace-nowrap cx-type-xs px-2 py-0.5 rounded pointer-events-none z-10"
           style={{
             background: "var(--color-surface-elevated)",
             border: "1px solid var(--color-border)",

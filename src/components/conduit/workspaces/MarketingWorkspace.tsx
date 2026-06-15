@@ -58,12 +58,12 @@ export default function MarketingWorkspace({
       {/* Content calendar — 7-day strip */}
       <div>
         <div className="flex items-baseline justify-between mb-3">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
+          <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
             <CalendarDays size={11} /> Content calendar · next 7 days
           </div>
           <Link
             href={`/app?pin=marketing&prompt=${encodeURIComponent("Plan the week of content")}`}
-            className="text-[10px] uppercase tracking-[0.15em]"
+            className="cx-type-xs uppercase tracking-[0.15em]"
             style={{ color: dept }}
           >
             Plan the week →
@@ -81,12 +81,12 @@ export default function MarketingWorkspace({
                 background: d.isToday ? deptSoft : undefined,
               }}
             >
-              <span className="text-[9px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+              <span className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
                 {d.dow}
               </span>
               <span className="serif text-lg leading-none mt-1">{d.dom}</span>
               <span
-                className="mt-2 inline-flex items-center justify-center w-6 h-6 rounded-md text-[10px] font-medium"
+                className="mt-2 inline-flex items-center justify-center w-6 h-6 rounded-md cx-type-xs font-medium"
                 style={{ background: deptSoft, color: dept }}
                 title={d.planned.label}
               >
@@ -95,7 +95,7 @@ export default function MarketingWorkspace({
             </div>
           ))}
         </div>
-        <p className="mt-2 text-[10px] text-[var(--color-text-muted)]">
+        <p className="mt-2 cx-type-xs text-[var(--color-text-muted)]">
           Scaffold — pin a real plan with Marketing and it&apos;ll replace these
           channel hints.
         </p>
@@ -103,7 +103,7 @@ export default function MarketingWorkspace({
 
       {/* Recent posts */}
       <div>
-        <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-3 inline-flex items-center gap-1.5">
+        <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-3 inline-flex items-center gap-1.5">
           <Megaphone size={11} /> Recent posts
         </div>
         {recent.length === 0 ? (
@@ -135,7 +135,7 @@ export default function MarketingWorkspace({
                   style={{ borderLeftColor: dept }}
                 >
                   <div className="min-w-0">
-                    <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                    <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                       {s.status} · {relativeDay(s.created_at)}
                     </div>
                     <div className="text-sm text-[var(--color-text)] line-clamp-1">

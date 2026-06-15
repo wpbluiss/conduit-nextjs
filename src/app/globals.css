@@ -568,12 +568,10 @@ body {
 }
 .scroll-hint { animation: scrollHint 2s ease-in-out infinite; }
 
-/* Terminal caret */
-@keyframes caret { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
-.caret { animation: caret 900ms step-end infinite; }
-@media (prefers-reduced-motion: reduce) {
-  .caret { animation: none; opacity: 1; }
-}
+/* Terminal caret — soft blink, ease-in-out per design spec */
+@keyframes caret-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+.caret { animation: caret-blink 1.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .caret { animation: none; opacity: 1; } }
 
 /* Hairline divider */
 .divider { height: 1px; background: var(--color-border-default); width: 100%; }
@@ -715,28 +713,7 @@ body {
   .typing-dot { animation: none; opacity: 0.7; }
 }
 
-/* Premium thinking indicator — issue #802 */
-@keyframes thinkingPulse {
-  0%, 100% {
-    opacity: 0.25;
-    transform: scale(0.85);
-    box-shadow: 0 0 0 0 transparent;
-  }
-  40% {
-    opacity: 1;
-    transform: scale(1);
-    box-shadow: 0 0 6px 2px color-mix(in srgb, var(--dept, var(--color-accent)) 40%, transparent);
-  }
-}
-.thinking-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 9999px;
-  background: var(--dept, var(--color-accent));
-  animation: thinkingPulse 1.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-}
-.thinking-dot:nth-child(2) { animation-delay: 200ms; }
-.thinking-dot:nth-child(3) { animation-delay: 400ms; }
+/* Thinking indicator bubble + status — animated dots handled by framer-motion in TypingIndicator.tsx */
 
 /* Accent shimmer bar across the bottom of the active thinking bubble */
 @keyframes thinkingShimmer {
@@ -777,11 +754,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .thinking-dot {
-    animation: none;
-    opacity: 0.6;
-    box-shadow: none;
-  }
   .thinking-bubble::before {
     animation: none;
     opacity: 0;
