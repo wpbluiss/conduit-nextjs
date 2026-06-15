@@ -1,10 +1,10 @@
 "use client";
 
 import { type ReactNode } from "react";
-import { motion, type HTMLMotionProps } from "framer-motion";
+import { motion, useReducedMotion, type HTMLMotionProps } from "framer-motion";
 
 export type PraxisButtonVariant = "primary" | "secondary" | "ghost" | "danger";
-export type PraxisButtonSize = "sm" | "md" | "lg";
+export type PraxisButtonSize = "sm" | "md" | "lg" | "icon" | "icon-sm";
 
 interface PraxisButtonProps extends HTMLMotionProps<"button"> {
   children: ReactNode;
@@ -23,10 +23,15 @@ const VARIANT_CLASS: Record<PraxisButtonVariant, string> = {
 };
 
 const SIZE_OVERRIDE: Record<PraxisButtonSize, string> = {
-  sm: "!px-4 !py-2.5 !text-[13px] !gap-1.5",
+  sm: "!px-4 !py-2 !text-[13px] !gap-1.5",
   md: "",
-  lg: "!px-10 !py-4 !text-base",
+  lg: "!px-8 !py-4 !text-base",
+  icon: "!p-2 !gap-0 !justify-center",
+  "icon-sm": "!p-1.5 !gap-0 !justify-center",
 };
+
+/* Spec: 120–220ms, easing [0.22,1,0.36,1] "snappy spring" */
+const SPRING = { duration: 0.15, ease: [0.22, 1, 0.36, 1] as const };
 
 export function SpinnerIcon({ size = 14 }: { size?: number }) {
   return (
@@ -63,6 +68,7 @@ export function PraxisButton({
   type = "button",
   ...props
 }: PraxisButtonProps) {
+  const prefersReduced = useReducedMotion();
   const variantClass = VARIANT_CLASS[variant];
   const sizeClass = SIZE_OVERRIDE[size];
   const isActuallyDisabled = isDisabled || isLoading || disabled;
@@ -73,8 +79,11 @@ export function PraxisButton({
       type={type}
       disabled={isActuallyDisabled}
       aria-busy={isLoading || undefined}
-      whileTap={isActuallyDisabled ? {} : { scale: 0.97 }}
-      transition={{ duration: 0.12, ease: [0.25, 1, 0.5, 1] }}
+      /* Hover lift — CSS handles bg/border/shadow, framer-motion handles transform */
+      whileHover={isActuallyDisabled || prefersReduced ? undefined : { y: -1 }}
+      /* Press: scale down + snap back to y=0 (overrides hover lift) */
+      whileTap={isActuallyDisabled || prefersReduced ? undefined : { scale: 0.97, y: 0 }}
+      transition={SPRING}
       className={`${variantClass} ${sizeClass} disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
       {isLoading && <SpinnerIcon />}
