@@ -11,37 +11,14 @@ import { MarketingMotionProvider } from "@/components/MarketingMotionProvider";
 // is deferred. loading: () => null prevents layout shift while chunks
 // load — these sections are entirely out of the initial viewport.
 const SocialProofBar = dynamic(() => import("@/components/landing/TrustBar"));
-const SocialProofSection = dynamic(
-  () => import("@/components/landing/SocialProofSection"),
-);
-const StatsBar = dynamic(() => import("@/components/StatsBar"));
-const DemoStrip = dynamic(() => import("@/components/DemoStrip"));
 const HowItWorks = dynamic(() => import("@/components/HowItWorks"));
-const ProductTiles = dynamic(() => import("@/components/ProductTiles"));
-const FeatureGrid = dynamic(() => import("@/components/FeatureGrid"));
-const SpecialistSpotlight = dynamic(
-  () => import("@/components/SpecialistSpotlight"),
-);
-const Cinematic = dynamic(() => import("@/components/Cinematic"));
-const Vision = dynamic(() => import("@/components/Vision"));
-const Customers = dynamic(() => import("@/components/Customers"));
-const EngineeringProof = dynamic(() => import("@/components/EngineeringProof"));
-const SocialProof = dynamic(() => import("@/components/SocialProof"));
-const FounderScenarios = dynamic(() => import("@/components/FounderScenarios"));
-const TestimonialsCarousel = dynamic(
-  () => import("@/components/TestimonialsCarousel"),
-);
 const SpecialistShowcase = dynamic(
   () => import("@/components/SpecialistShowcase"),
 );
-const WhyPraxisTable = dynamic(() =>
-  import("@/components/marketing/WhyPraxisTable").then((m) => ({ default: m.WhyPraxisTable })),
+const TestimonialsCarousel = dynamic(
+  () => import("@/components/TestimonialsCarousel"),
 );
-const RoiCalculator = dynamic(() => import("@/components/RoiCalculator"));
 const Pricing = dynamic(() => import("@/components/Pricing"));
-const FounderTestimonials = dynamic(
-  () => import("@/components/FounderTestimonials"),
-);
 const TrustBar = dynamic(() => import("@/components/TrustBar"));
 const FAQ = dynamic(() => import("@/components/FAQ"));
 const FinalCTA = dynamic(() => import("@/components/FinalCTA"));
@@ -103,28 +80,26 @@ export default function Home() {
       <AnalyticsPageView />
       <Navbar />
       <Hero />
+      {/* Logo / social proof bar — immediately after hero */}
       <SocialProofBar />
-      <SocialProofSection />
-      <StatsBar />
-      <DemoStrip />
-      <HowItWorks />
-      <ProductTiles />
-      <FeatureGrid />
-      <SpecialistSpotlight />
-      <Cinematic />
-      <Vision />
-      <Customers />
-      <EngineeringProof />
-      <SocialProof />
-      <FounderScenarios />
-      <TestimonialsCarousel />
+      {/* How it works — tinted surface for visual separation from logo bar */}
+      <div className="home-section-tinted">
+        <HowItWorks />
+      </div>
+      {/* Specialist showcase — dark inverse band, the depth differentiator */}
       <SpecialistShowcase />
-      <WhyPraxisTable />
-      <RoiCalculator />
-      <Pricing />
-      <FounderTestimonials />
+      {/* Single testimonial moment */}
+      <TestimonialsCarousel />
+      {/* Pricing — tinted surface to separate from testimonials */}
+      <div className="home-section-tinted">
+        <Pricing />
+      </div>
+      {/* Trust / security — back to canvas before FAQ */}
       <TrustBar />
-      <FAQ />
+      {/* FAQ — tinted surface so it reads as distinct from TrustBar */}
+      <div className="home-section-tinted">
+        <FAQ />
+      </div>
       <FinalCTA />
       <Footer />
     </main>

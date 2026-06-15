@@ -795,6 +795,13 @@ body {
 .conduit-bg-surface-sunken { background: var(--color-bg-surface-sunken); color: var(--color-ink-primary); }
 .conduit-bg-surface-elevated { background: var(--color-bg-surface-sunken); color: var(--color-ink-primary); }
 
+/* Home-page rhythm wrapper — elevates a child section's canvas bg to the
+   subtle-surface tone, enabling cream → tint → dark → cream alternation
+   without modifying individual section components. */
+.home-section-tinted > section.conduit-bg-canvas {
+  background: var(--color-bg-surface-subtle);
+}
+
 /* Inverse — for hero band, CTA band, cinematic anchor sections */
 .conduit-bg-inverse {
   background: var(--color-bg-inverse);
