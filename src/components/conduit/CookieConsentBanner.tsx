@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
 
 const STORAGE_KEY = "praxis.cookie_consent";
@@ -15,6 +16,10 @@ export function getCookieConsent(): ConsentValue | null {
 
 export function CookieConsentBanner() {
   const [visible, setVisible] = useState(false);
+  const pathname = usePathname();
+  // On auth pages the logo anchors the top — keep banner at the bottom on all
+  // breakpoints so it never obscures the wordmark.
+  const isAuthPage = pathname?.startsWith("/auth");
 
   useEffect(() => {
     if (!getCookieConsent()) setVisible(true);
@@ -40,7 +45,7 @@ export function CookieConsentBanner() {
       role="dialog"
       aria-modal="false"
       aria-label="Cookie consent"
-      className="fixed bottom-0 left-0 right-0 z-[55] px-4 pb-4 md:top-0 md:bottom-auto md:pt-6 md:pb-0 md:px-6"
+      className={`fixed bottom-0 left-0 right-0 z-[55] px-4 pb-4 md:px-6 ${isAuthPage ? "md:pb-6" : "md:top-0 md:bottom-auto md:pt-6 md:pb-0"}`}
     >
       <div
         className="mx-auto max-w-3xl conduit-card flex flex-row items-center gap-2 p-3 md:flex-row md:items-center md:gap-6 md:p-4"
