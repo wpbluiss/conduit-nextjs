@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
 import PraxisLiveRoom from "@/components/conduit/voice/PraxisLiveRoom";
 import type { VoiceTokenResponse } from "@/components/conduit/voice/VoiceRoom";
+import { PaywallModal, type PaywallPayload } from "@/components/conduit/PaywallModal";
 
 type Icon = React.ComponentType<{ className?: string }>;
 const ICON: Record<EmployeeId, Icon> = {
@@ -97,6 +98,7 @@ export function LiveChat({
   const [roomToken, setRoomToken] = React.useState<VoiceTokenResponse | null>(null);
   const [launching, setLaunching] = React.useState(false);
   const [voiceErr, setVoiceErr] = React.useState<string | null>(null);
+  const [paywall, setPaywall] = React.useState<PaywallPayload | null>(null);
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [editText, setEditText] = React.useState("");
   const [editSaving, setEditSaving] = React.useState(false);
@@ -262,7 +264,7 @@ export function LiveChat({
         else if (event === "done") { const cid = data.conversation_id as string; if (cid && cid !== convoId) { setConvoId(cid); window.history.replaceState({}, "", `/chat?c=${cid}`); } }
         else if (event === "error") { const errMsg = (data.message as string) || "Try again in a moment."; setMessages((p) => { const n = [...p]; const last = n[n.length - 1]; if (last && last.role === "assistant" && last.pending) { last.pending = false; last.content = last.content || errMsg; last.error = true; } return n; }); }
         else if (event === "artifact") { const a = { id: data.id as string, title: (data.title as string) || "Untitled", type: (data.type as string) || "doc", by: ((data.employee as EmployeeId) || current) }; setMessages((p) => { const n = [...p]; for (let j = n.length - 1; j >= 0; j--) { if (n[j].role === "assistant" && n[j].employee === a.by) { n[j] = { ...n[j], artifacts: [...(n[j].artifacts ?? []), a] }; break; } } return n; }); }
-        else if (event === "paywall_required") { finish(current); setMessages((p) => [...p, { role: "system", content: (data.message as string) || "Upgrade required to continue." }]); }
+        else if (event === "paywall_required") { finish(current); setPaywall({ reason: (data.reason as PaywallPayload["reason"]) || "cap_reached", message: (data.message as string) || "Upgrade required to continue.", employee: data.employee as string | undefined, tier_id: data.tier_id as PaywallPayload["tier_id"] }); }
       };
       while (true) {
         const { done, value } = await reader.read(); if (done) break;
@@ -325,6 +327,7 @@ export function LiveChat({
   );
 
   return (
+    <>
     <div className="wm-rebrand flex h-[100dvh] w-full overflow-hidden text-foreground">
       <aside className="hidden w-72 shrink-0 border-r border-white/8 bg-card/40 backdrop-blur-xl lg:block">{Rail}</aside>
       <AnimatePresence>
@@ -555,5 +558,9 @@ export function LiveChat({
         </div>
       </div>
     </div>
+    {paywall && (
+      <PaywallModal payload={paywall} onClose={() => setPaywall(null)} />
+    )}
+    </>
   );
 }
