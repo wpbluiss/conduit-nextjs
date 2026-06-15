@@ -17,15 +17,27 @@ const FAQ: { q: string; a: string }[] = [
     a: "Each specialist is a pre-built AI employee tuned for its domain — Marketing, Sales, Engineering, Finance, Compliance, and more. There's no setup or prompt engineering required. Describe your task in plain language; Atlas routes it to the right specialist automatically.",
   },
   {
+    q: "Which AI models power the specialists?",
+    a: "Praxis specialists run on Claude by Anthropic — frontier models selected for accuracy, speed, and reasoning depth. We handle all model management and continuously update specialists as better models become available. You never need to choose or configure a model.",
+  },
+  {
+    q: "Do I need to bring my own API keys?",
+    a: "No. Praxis is fully managed — no Anthropic key, no third-party accounts to set up, no infrastructure to configure. Your subscription covers all AI usage across every specialist. Sign up and you're ready in under a minute.",
+  },
+  {
     q: "Is my data private?",
-    a: "Yes. Your data lives in a dedicated database with row-level security — only your account can access it. We never use your conversations to train models. All data is encrypted in transit and at rest.",
+    a: "Yes. Your data lives in a dedicated database with row-level security — only your account can access it. We never use your conversations to train AI models. All data is encrypted in transit and at rest.",
   },
   {
     q: "Can I cancel anytime?",
     a: "Yes. Cancel from Settings → Billing at any time with no cancellation fees. You keep full access through the end of your billing period — no proration penalties.",
   },
   {
-    q: "What happens when I hit the token cap?",
+    q: "Is there a setup fee or contract?",
+    a: "None. No setup fee, no annual commitment, no cancellation penalty. The Free tier starts immediately with no credit card. Paid plans bill monthly and can be cancelled anytime from Settings → Billing.",
+  },
+  {
+    q: "What happens when I hit the message limit on the free tier?",
     a: "You'll see an in-chat upgrade prompt. No conversations are lost and all your data stays intact. You can upgrade your plan or add a one-time token top-up ($10 / $25 / $50) that never expires.",
   },
   {
@@ -33,7 +45,7 @@ const FAQ: { q: string; a: string }[] = [
     a: "No. The specialists are autonomous agents. Atlas, your chief of staff, decides which specialist handles each task and routes work automatically. You just describe what you need — the team figures out the rest.",
   },
   {
-    q: "Can I add my own team members?",
+    q: "Can I invite my co-founder or team members?",
     a: "Team collaboration is coming on the Enterprise plan. Today Praxis is a single-seat product optimized for the solo founder. You can join the waitlist by emailing luis@conduitai.io.",
   },
 ];
