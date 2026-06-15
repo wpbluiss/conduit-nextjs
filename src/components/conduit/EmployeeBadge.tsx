@@ -37,6 +37,17 @@ export const EMPLOYEE_ICON: Record<EmployeeKey, LucideIcon> = {
   legal: Scale,
 };
 
+// Fallback for any employee id that isn't one of the current specialists
+// (e.g. an old conversation/message tagged with a since-removed id). Prevents
+// `EMPLOYEES[unknownId].name` from throwing and crashing the whole /app tree.
+const FALLBACK_EMPLOYEE = {
+  name: "Specialist",
+  role: "",
+  initial: "?",
+  color: "var(--color-text-muted, #8a8a8a)",
+  colorSoft: "rgba(138,138,138,0.12)",
+};
+
 export function EmployeeAvatar({
   employee,
   size = 28,
@@ -49,8 +60,8 @@ export function EmployeeAvatar({
   /** "icon" → R14 role icon (default). "letter" → legacy initial. */
   variant?: "icon" | "letter";
 }) {
-  const m = EMPLOYEES[employee];
-  const Icon = EMPLOYEE_ICON[employee];
+  const m = EMPLOYEES[employee] ?? FALLBACK_EMPLOYEE;
+  const Icon = EMPLOYEE_ICON[employee] ?? Compass;
   // Glyph scales with the chip; gives the icon enough breathing room.
   const glyphSize = Math.max(10, Math.round(size * 0.5));
   return (
@@ -84,7 +95,7 @@ export function EmployeeBadge({
   employee: EmployeeKey;
   withRole?: boolean;
 }) {
-  const m = EMPLOYEES[employee];
+  const m = EMPLOYEES[employee] ?? FALLBACK_EMPLOYEE;
   return (
     <div className="inline-flex items-center gap-2 relative">
       <EmployeeAvatar employee={employee} size={26} />
@@ -105,10 +116,33 @@ export function EmployeeBadge({
   );
 }
 
+/** Dept-tinted pill showing the specialist name — used in chat message headers. */
+export function SpecialistChip({
+  employee,
+  label,
+}: {
+  employee: EmployeeKey;
+  label?: string;
+}) {
+  const m = EMPLOYEES[employee] ?? FALLBACK_EMPLOYEE;
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold leading-none tracking-tight select-none"
+      style={{
+        background: m.colorSoft,
+        color: m.color,
+        border: `1px solid color-mix(in srgb, ${m.color} 28%, transparent)`,
+      }}
+    >
+      {label ?? m.name}
+    </span>
+  );
+}
+
 export function employeeLabel(employee: EmployeeKey): string {
-  return EMPLOYEES[employee].name;
+  return EMPLOYEES[employee]?.name ?? "Specialist";
 }
 
 export function employeeRole(employee: EmployeeKey): string {
-  return EMPLOYEES[employee].role;
+  return EMPLOYEES[employee]?.role ?? "";
 }

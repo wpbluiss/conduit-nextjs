@@ -3,56 +3,30 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FinalCTA from "@/components/FinalCTA";
 import { PageHeader } from "@/components/marketing/PageHeader";
+import { CHANGELOG_ENTRIES } from "@/lib/conduit/changelog-entries";
 
 export const metadata: Metadata = {
   title: "Changelog — Conduit AI",
   description:
     "Every shipped change to Praxis. Date-stamped, factual, no marketing.",
+  openGraph: {
+    title: "Changelog — Conduit AI",
+    description:
+      "Every shipped change to Praxis. Date-stamped, factual, no marketing.",
+    url: "https://conduitai.io/changelog",
+    siteName: "Conduit AI",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Changelog — Conduit AI",
+    description:
+      "Every shipped change to Praxis. Date-stamped, factual, no marketing.",
+  },
+  alternates: {
+    canonical: "https://conduitai.io/changelog",
+  },
 };
-
-const ENTRIES: {
-  date: string;
-  title: string;
-  tag: "feature" | "fix" | "infra";
-  body: string;
-}[] = [
-  {
-    date: "May 8, 2026",
-    title: "Visual overhaul v3 — light-first, indigo accent",
-    tag: "feature",
-    body: "Rebrand to a light-first institutional palette. Indigo replaces ember as primary; ember demoted to celebration moments only. New BrandMark, scroll-aware nav, customer proof bar.",
-  },
-  {
-    date: "May 7, 2026",
-    title: "Praxis Engineering — full-team builds",
-    tag: "feature",
-    body: "Engineering employee can now open builds for anyone, not just internal users. Daily caps enforced server-side; usage banner inside the Builds tab.",
-  },
-  {
-    date: "May 6, 2026",
-    title: "Voice room — Atlas + the full team",
-    tag: "feature",
-    body: "Walk into the voice room and the whole team is already there. Atlas hands the floor to specialists by intent; LiveKit handles the audio layer.",
-  },
-  {
-    date: "May 5, 2026",
-    title: "Build session — reopen + replay",
-    tag: "feature",
-    body: "Engineering builds now persist as resumable sessions. Click any past build and step through the diff log.",
-  },
-  {
-    date: "May 3, 2026",
-    title: "Voice — disable AGC on mic publish",
-    tag: "fix",
-    body: "LiveKit was applying browser AGC to the mic track, causing volume drift. Disabled on publish; voices come through at native gain.",
-  },
-  {
-    date: "Apr 30, 2026",
-    title: "Lunaro Insurance — first vertical live",
-    tag: "feature",
-    body: "Praxis is now running production traffic for Lunaro Insurance. 200+ contacts, 6 pipelines, 9 specialist employees on standby.",
-  },
-];
 
 const TAG_STYLES: Record<string, { bg: string; color: string; label: string }> = {
   feature: {
@@ -91,7 +65,7 @@ export default function ChangelogPage() {
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-border-subtle)]">
         <div className="conduit-container">
           <div className="max-w-[820px] space-y-12">
-            {ENTRIES.map((e) => {
+            {CHANGELOG_ENTRIES.map((e) => {
               const tag = TAG_STYLES[e.tag];
               return (
                 <article

@@ -71,7 +71,7 @@ export default async function VoiceHistoryPage() {
           >
             <ArrowLeft size={12} /> Settings
           </Link>
-          <h1 className="serif text-3xl mt-2">Voice History</h1>
+          <h1 className="cx-heading-2xl mt-2">Voice History</h1>
           <p className="text-sm text-[var(--color-text-muted)] mt-1">
             Your past voice conversations. Transcripts stay private to your
             account.

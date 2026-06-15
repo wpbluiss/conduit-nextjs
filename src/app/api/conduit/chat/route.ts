@@ -1,14 +1,17 @@
 import { NextResponse, type NextRequest } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   getOrCreateAccount,
   rollBillingCycleIfDue,
   userDisplayName,
 } from "@/lib/conduit/account";
+import { resolveApiKeyAuth } from "@/lib/conduit/api-key-auth";
 import {
   type ChatMessage,
   type EmployeeKey,
   friendlyErrorFor,
+  isCapacityError,
   maxTokensFor,
   streamComplete,
 } from "@/lib/ai/provider";
@@ -17,6 +20,7 @@ import type { AccountContext } from "@/lib/ai/employees/jarvis";
 import { parseHandoff, parseArtifacts } from "@/lib/ai/parse";
 import { estimateCostCents } from "@/lib/ai/pricing";
 import { classifyIntent, type IntentClass } from "@/lib/ai/intent-classifier";
+import { checkChatRateLimit } from "@/lib/ai/chat-rate-limit";
 import { tierById } from "@/lib/billing/tiers";
 import {
   executeBuild,
@@ -27,6 +31,7 @@ import {
 import { getTemplate } from "@/lib/builds/templates";
 import { complete } from "@/lib/ai/provider";
 import { withTimeAware } from "@/lib/ai/employees/time-aware";
+import { insertNotification } from "@/lib/conduit/notifications";
 import {
   checkRateLimit,
   isTeamQuery,
@@ -41,6 +46,32 @@ import {
   trimMemoriesForPrompt,
   type MemoryRecord,
 } from "@/lib/ai/memory";
+import {
+  getConnectorToken,
+  getUpcomingEvents,
+  renderCalendarBlock,
+} from "@/lib/connectors/google-calendar";
+import {
+  getSlackToken,
+  getRecentMessages,
+  renderSlackBlock,
+} from "@/lib/connectors/slack";
+import {
+  getHubSpotToken,
+  getRecentContacts,
+  getOpenDeals,
+  renderHubSpotBlock,
+} from "@/lib/connectors/hubspot";
+import {
+  getGithubToken,
+  fetchGithubContext,
+  renderGithubBlock,
+} from "@/lib/connectors/github";
+import {
+  getGoogleDriveToken,
+  getSelectedFiles,
+  renderGoogleDriveBlock,
+} from "@/lib/connectors/google-drive";
 import {
   prepareChatTts,
   streamForEmployee,
@@ -68,11 +99,22 @@ function sseEvent(event: string, data: unknown): string {
 
 export async function POST(request: NextRequest) {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  // Accept either a session cookie OR an API key (Authorization: Bearer prx_…).
+  const apiKeyResult = await resolveApiKeyAuth(request);
+
+  let user: Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"] | null = null;
+  let initialAccount: Awaited<ReturnType<typeof getOrCreateAccount>>;
+
+  if (apiKeyResult) {
+    initialAccount = apiKeyResult.account;
+  } else {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+    if (!user) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
+    initialAccount = await getOrCreateAccount(supabase, user);
   }
 
   let body: {
@@ -90,8 +132,6 @@ export async function POST(request: NextRequest) {
   if (!message) {
     return NextResponse.json({ error: "empty_message" }, { status: 400 });
   }
-
-  const initialAccount = await getOrCreateAccount(supabase, user);
   if (!initialAccount.business_type || !initialAccount.business_description) {
     return NextResponse.json(
       { error: "onboarding_required" },
@@ -99,12 +139,38 @@ export async function POST(request: NextRequest) {
     );
   }
   const account = await rollBillingCycleIfDue(supabase, initialAccount);
+
+  // Per-account request-rate limit (issue #19). Runs before any conversation
+  // insert or model call so a hammering account costs us nothing. Internal
+  // accounts (e.g. Luis) are exempt so dogfooding/automation isn't throttled.
+  if (!account.internal_account) {
+    const rl = checkChatRateLimit(account.id);
+    if (!rl.ok) {
+      return NextResponse.json(
+        {
+          error: "rate_limited",
+          message: `You're sending messages too quickly. Give the team a moment and try again in ~${rl.retryInSeconds}s.`,
+          retry_after_seconds: rl.retryInSeconds,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rl.retryInSeconds),
+            "X-RateLimit-Limit": String(rl.limit),
+            "X-RateLimit-Remaining": String(rl.remaining),
+          },
+        },
+      );
+    }
+  }
+
   const businessType = account.business_type ?? initialAccount.business_type;
   const businessDescription =
     account.business_description ?? initialAccount.business_description;
 
   // Get or create conversation
   let conversationId = body.conversation_id;
+  const isNewConversation = !conversationId;
   if (!conversationId) {
     const title = message.slice(0, 60);
     const { data, error } = await supabase
@@ -134,11 +200,12 @@ export async function POST(request: NextRequest) {
     content: message,
   });
 
-  // Load last 10 messages of context
+  // Load last 10 messages of context (exclude soft-hidden edit branches)
   const { data: history } = await supabase
     .from("conduit_messages")
     .select("role, employee, content, created_at")
     .eq("conversation_id", conversationId)
+    .is("hidden_at", null)
     .order("created_at", { ascending: false })
     .limit(11);
 
@@ -185,11 +252,84 @@ export async function POST(request: NextRequest) {
       ),
     );
 
+  // Load Google Calendar context for ops specialist (and Atlas who routes to ops).
+  // Only fetches if a token exists; silently skips on error.
+  const calendarEmployees = new Set<EmployeeKey>(["ops", "jarvis"]);
+  let calendarBlock = "";
+  const gcalToken = await getConnectorToken(supabase, account.id, "google_calendar");
+  if (gcalToken) {
+    try {
+      const events = await getUpcomingEvents(supabase, gcalToken, 10);
+      calendarBlock = renderCalendarBlock(events);
+    } catch {
+      // Non-fatal: continue without calendar context.
+    }
+  }
+
+  // Load Slack channel context for all specialists when connected + channel is configured.
+  let slackBlock = "";
+  const slackToken = await getSlackToken(supabase, account.id);
+  if (slackToken && slackToken.meta && (slackToken.meta as Record<string, unknown>).channel_id) {
+    const channelId = (slackToken.meta as Record<string, unknown>).channel_id as string;
+    const channelName = ((slackToken.meta as Record<string, unknown>).channel_name as string | undefined) ?? channelId;
+    try {
+      const msgs = await getRecentMessages(slackToken.access_token, channelId, 20);
+      slackBlock = renderSlackBlock(msgs, channelName);
+    } catch {
+      // Non-fatal: continue without Slack context.
+    }
+  }
+
+  // Load HubSpot CRM context for Sales specialist when connected.
+  let hubspotBlock = "";
+  const hubspotToken = await getHubSpotToken(supabase, account.id);
+  if (hubspotToken) {
+    try {
+      const [contacts, deals] = await Promise.all([
+        getRecentContacts(supabase, hubspotToken, 10),
+        getOpenDeals(supabase, hubspotToken, 5),
+      ]);
+      hubspotBlock = renderHubSpotBlock(contacts, deals);
+    } catch {
+      // Non-fatal: continue without HubSpot context.
+    }
+  }
+
+  // Load GitHub context for Engineering specialist when connected.
+  let githubBlock = "";
+  const githubToken = await getGithubToken(supabase, account.id);
+  if (githubToken) {
+    const meta = githubToken.meta as { repos?: string[] } | null;
+    const repos = meta?.repos ?? [];
+    if (repos.length > 0) {
+      try {
+        const contexts = await fetchGithubContext(githubToken.access_token, repos);
+        githubBlock = renderGithubBlock(contexts);
+      } catch {
+        // Non-fatal: continue without GitHub context.
+      }
+    }
+  }
+
+  // Load Google Drive context for all specialists when connected + files are selected.
+  // Serves cached text — no live fetch on each turn.
+  let googleDriveBlock = "";
+  const googleDriveToken = await getGoogleDriveToken(supabase, account.id);
+  if (googleDriveToken) {
+    try {
+      const driveFiles = getSelectedFiles(googleDriveToken);
+      googleDriveBlock = renderGoogleDriveBlock(driveFiles);
+    } catch {
+      // Non-fatal: continue without Drive context.
+    }
+  }
+
   const ctx: AccountContext = {
-    user_name: userDisplayName(user),
+    user_name: user ? userDisplayName(user) : (initialAccount.display_name ?? initialAccount.name ?? "there"),
     account_name: account.name,
     business_type: businessType,
     business_description: businessDescription,
+    company_brief: account.company_brief ?? null,
     allowed_employees: account.internal_account
       ? [
           "jarvis",
@@ -204,6 +344,8 @@ export async function POST(request: NextRequest) {
         ]
       : tierById(account.tier_id).allowedEmployees,
     tier_id: account.tier_id,
+    onboarding_goals: account.onboarding_goals ?? null,
+    specialist_prefs: account.specialist_prefs ?? null,
   };
 
   const employeeOverride = body.employee_override;
@@ -426,6 +568,19 @@ export async function POST(request: NextRequest) {
             });
           }
         }
+        // Fire-and-forget notification so it never blocks the stream response.
+        insertNotification(supabase, {
+          accountId,
+          type: result.ok ? "build_complete" : "build_complete",
+          title: result.ok
+            ? `Build live: ${ctx.account_name} ${tmpl.meta.name}`
+            : `Build failed: ${ctx.account_name} ${tmpl.meta.name}`,
+          body: result.ok
+            ? `Deployed at ${result.liveUrl}`
+            : result.error ?? "Unknown error",
+          href: result.ok ? result.liveUrl ?? "/app/builds" : "/app/builds",
+        }).catch(() => {});
+
         send("message_end", { employee: "engineering" });
         return true;
       };
@@ -505,7 +660,15 @@ export async function POST(request: NextRequest) {
         // so the model has context before it sees the user's turn.
         // R17: per-employee filter — Atlas sees all; others see global +
         // their-scope only.
-        const systemPrompt = memoryBlockFor(employee) + withTime;
+        // R-561: prepend Google Calendar block for ops + Atlas when connected.
+        // R-542: prepend Slack block for all employees when a channel is selected.
+        // #589: prepend HubSpot CRM block for Sales specialist when connected.
+        // #573: prepend GitHub block for Engineering specialist when connected.
+        // #613: prepend Google Drive block for all employees (brand guides, specs).
+        const calendarPrefix = calendarEmployees.has(employee) ? calendarBlock : "";
+        const hubspotPrefix = employee === "sales" ? hubspotBlock : "";
+        const githubPrefix = employee === "engineering" ? githubBlock : "";
+        const systemPrompt = googleDriveBlock + slackBlock + calendarPrefix + hubspotPrefix + githubPrefix + memoryBlockFor(employee) + withTime;
 
         let fullText = "";
         let inputTokens = 0;
@@ -585,9 +748,18 @@ export async function POST(request: NextRequest) {
             }
           }
         } catch (err) {
-          console.error(`[${employee}] stream error`, err);
           ttsTurn?.cancel();
-          send("error", { employee, message: friendlyErrorFor(employee) });
+          if (isCapacityError(err)) {
+            send("error", {
+              employee,
+              message: "Your specialists are at capacity right now — try again in a moment.",
+              capacity: true,
+            });
+          } else {
+            console.error(`[${employee}] stream error`, err);
+            Sentry.captureException(err, { extra: { employee, accountId } });
+            send("error", { employee, message: friendlyErrorFor(employee) });
+          }
           return { ok: false };
         }
 
@@ -982,10 +1154,15 @@ export async function POST(request: NextRequest) {
                 content,
               });
             } catch (err) {
-              console.error(`[round_table:${emp}]`, err);
+              if (!isCapacityError(err)) {
+                console.error(`[round_table:${emp}]`, err);
+                Sentry.captureException(err, { extra: { employee: emp, accountId } });
+              }
               send("round_table_response", {
                 employee: emp,
-                content: friendlyErrorFor(emp),
+                content: isCapacityError(err)
+                  ? "At capacity right now — try again in a moment."
+                  : friendlyErrorFor(emp),
                 errored: true,
               });
             }
@@ -1064,9 +1241,14 @@ export async function POST(request: NextRequest) {
 
           send("round_table_synthesis", { content: synthContent });
         } catch (err) {
-          console.error("round_table_synthesis", err);
+          if (!isCapacityError(err)) {
+            console.error("round_table_synthesis", err);
+            Sentry.captureException(err, { extra: { accountId } });
+          }
           send("round_table_synthesis", {
-            content: friendlyErrorFor("jarvis"),
+            content: isCapacityError(err)
+              ? "Your specialists are at capacity right now — try again in a moment."
+              : friendlyErrorFor("jarvis"),
             errored: true,
           });
         }
@@ -1085,11 +1267,60 @@ export async function POST(request: NextRequest) {
           .update({ updated_at: new Date().toISOString() })
           .eq("id", finalConvId);
 
-        send("done", { conversation_id: finalConvId });
+        // Follow-up suggestions: single-specialist turns only (round-table out of scope).
+        if (!teamRequested) {
+          const lastAssistantMsg = ordered.slice().reverse().find(
+            (m) => m.role === "assistant",
+          );
+          if (lastAssistantMsg?.content) {
+            try {
+              const sugRes = await complete({
+                systemPrompt:
+                  "You generate exactly 3 short follow-up prompt suggestions for a business user. Return ONLY a JSON array of 3 strings. Each string is ≤ 10 words. No markdown, no explanation, just the array. Example: [\"Draft a one-pager on this\",\"Build me a template for this\",\"What are the next steps?\"]",
+                messages: [
+                  {
+                    role: "user",
+                    content: `${lastAssistantMsg.employee ?? "Praxis"} just said:\n\n${lastAssistantMsg.content.slice(0, 800)}\n\nGenerate 3 follow-up suggestions.`,
+                  },
+                ],
+                metadata: {
+                  accountId,
+                  intent: "routing",
+                  tierCeiling: "haiku",
+                  internalAccount: false,
+                },
+                maxTokens: 120,
+              });
+              const raw = sugRes.content.trim();
+              const match = raw.match(/\[[\s\S]*\]/);
+              if (match) {
+                const parsed = JSON.parse(match[0]) as unknown[];
+                const suggestions = parsed
+                  .slice(0, 3)
+                  .filter((s): s is string => typeof s === "string");
+                if (suggestions.length > 0) {
+                  send("follow_up_suggestions", { suggestions });
+                }
+              }
+            } catch {
+              // Non-fatal — suggestions are best-effort.
+            }
+          }
+        }
+
+        send("done", { conversation_id: finalConvId, new_conversation: isNewConversation });
         controller.close();
       } catch (err) {
-        console.error("chat fatal", err);
-        send("error", { message: friendlyErrorFor(initialEmployee) });
+        if (isCapacityError(err)) {
+          send("error", {
+            message: "Your specialists are at capacity right now — try again in a moment.",
+            capacity: true,
+          });
+        } else {
+          console.error("chat fatal", err);
+          Sentry.captureException(err, { extra: { accountId, conversationId: finalConvId } });
+          send("error", { message: friendlyErrorFor(initialEmployee) });
+        }
         controller.close();
       }
     },

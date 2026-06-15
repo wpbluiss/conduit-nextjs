@@ -113,7 +113,7 @@ export default async function VoiceRoomLanding() {
           <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
             Praxis Console · Voice Room
           </p>
-          <h1 className="serif text-4xl md:text-5xl mt-2 inline-flex items-center gap-3">
+          <h1 className="cx-heading-3xl mt-2 inline-flex items-center gap-3">
             <Mic className="text-[var(--color-accent)]" size={32} />
             Voice Room
           </h1>
@@ -147,7 +147,7 @@ export default async function VoiceRoomLanding() {
             <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
               Today
             </div>
-            <div className="serif text-3xl mt-2">
+            <div className="cx-stat mt-2">
               {usedTodayMin}{" "}
               <span className="text-base text-[var(--color-text-muted)]">
                 / {ceilings.dailyMinutes} min
@@ -175,7 +175,7 @@ export default async function VoiceRoomLanding() {
             <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
               Per-session cap
             </div>
-            <div className="serif text-3xl mt-2">
+            <div className="cx-stat mt-2">
               {Math.floor(ceilings.maxSeconds / 60)} min
             </div>
             <div className="text-[11px] text-[var(--color-text-muted)] mt-1.5">

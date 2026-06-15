@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { PLANS } from "@/lib/finance/plan";
 import {
@@ -21,8 +22,7 @@ export default function CadenceLanding() {
       {/* Nav */}
       <header className="flex items-center justify-between px-5 sm:px-8 py-5 max-w-6xl mx-auto">
         <div className="flex items-center gap-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/cadence-icon.svg" alt="Cadence" width={28} height={28} className="rounded-lg" />
+          <Image src="/cadence-icon.svg" alt="Cadence" width={28} height={28} className="rounded-lg" />
           <span className="fin-display text-lg"><span className="fin-gradient-text">Cadence</span></span>
         </div>
         <div className="flex items-center gap-3 text-sm">

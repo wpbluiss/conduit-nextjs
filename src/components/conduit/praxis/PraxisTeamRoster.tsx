@@ -203,8 +203,8 @@ export function PraxisTeamRoster({
 
   return (
     <div
-      className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
-      style={{ gap: "var(--space-3)" }}
+      className="flex sm:grid sm:grid-cols-3 lg:grid-cols-5 overflow-x-auto sm:overflow-x-visible snap-x snap-mandatory sm:snap-none pb-1 sm:pb-0 [&::-webkit-scrollbar]:hidden"
+      style={{ gap: "var(--space-3)", scrollbarWidth: "none" }}
       role="list"
       aria-label="Your Praxis team"
     >
@@ -270,7 +270,7 @@ export function PraxisTeamRoster({
             onMouseLeave={() => c.isAllowed && tint.setHoverDept(null)}
             onFocus={() => c.isAllowed && tint.setHoverDept(c.employee)}
             onBlur={() => c.isAllowed && tint.setHoverDept(null)}
-            className="praxis-team-card"
+            className="praxis-team-card snap-start shrink-0 w-40 sm:w-auto"
           >
             <ClickInterceptor href={href} onClick={onCardClick}>
               <div

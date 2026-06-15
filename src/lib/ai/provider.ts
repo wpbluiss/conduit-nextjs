@@ -1,4 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
+import Anthropic, {
+  APIError,
+  APIConnectionError,
+} from "@anthropic-ai/sdk";
 import type { IntentClass } from "./intent-classifier";
 import type { ModelCeiling } from "@/lib/billing/tiers";
 
@@ -281,6 +284,27 @@ export async function* streamComplete(
     model,
     provider,
   };
+}
+
+/**
+ * Returns true for errors that mean the AI provider is unavailable right now
+ * (no key, rate limited, out of credits, or server-side outage).
+ * These are shown as friendly "at capacity" messages rather than logged as bugs.
+ */
+export function isCapacityError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  // No API key configured at all.
+  if (err.message === "UPSTREAM_NOT_CONFIGURED") return true;
+  // Network / timeout errors from the SDK (no HTTP status).
+  if (err instanceof APIConnectionError) return true;
+  // HTTP errors: invalid key (401), payment required (402), rate limit (429),
+  // or any server-side 5xx. All of these mean "try again later" from the user's
+  // perspective; they are not programming bugs.
+  if (err instanceof APIError && err.status !== undefined) {
+    const s = err.status;
+    return s === 401 || s === 402 || s === 429 || s >= 500;
+  }
+  return false;
 }
 
 export function friendlyErrorFor(employee: EmployeeKey | undefined): string {

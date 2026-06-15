@@ -1,142 +1,132 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Check,
-  Minus,
-} from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Pricing from "@/components/Pricing";
+import { AnalyticsPageView } from "@/components/conduit/AnalyticsPageView";
+import { MarketingMotionProvider } from "@/components/MarketingMotionProvider";
+import { PageHeader } from "@/components/marketing/PageHeader";
+import { PricingFAQ } from "@/components/marketing/PricingFAQ";
+import { PricingComparisonTable } from "@/components/marketing/PricingComparisonTable";
+import { ScrollRevealCards, ScrollRevealItem } from "@/components/marketing/ScrollRevealCards";
 
 export const metadata: Metadata = {
-  title: "Pricing — Three tiers, one workforce",
+  title: "Praxis Pricing — One flat subscription, nine AI specialists",
   description:
-    "Free, Pro $29/mo, Enterprise $199/mo. Praxis Flow on every tier; Praxis Depth on Enterprise. Top up tokens any time.",
+    "Free to start. Pro $29/mo. Enterprise $199/mo. One subscription replaces a marketing manager, sales rep, engineer, ops lead, and more — running 24/7.",
+  openGraph: {
+    title: "Praxis Pricing — One flat subscription, nine AI specialists",
+    description:
+      "Free to start. Pro $29/mo. Enterprise $199/mo. One subscription replaces a marketing manager, sales rep, engineer, ops lead, and more — running 24/7.",
+    url: "https://conduitai.io/pricing",
+    siteName: "Praxis by Conduit AI",
+    type: "website",
+    images: [
+      {
+        url: "/api/og?title=Praxis+Pricing+%E2%80%94+One+flat+subscription%2C+nine+AI+specialists&description=Free%2C+Pro+%2429%2Fmo%2C+Enterprise+%24199%2Fmo.+Nine+specialists+running+24%2F7.",
+        width: 1200,
+        height: 630,
+        alt: "Praxis Pricing — One flat subscription, nine AI specialists",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Praxis Pricing — One flat subscription, nine AI specialists",
+    description:
+      "Free to start. Pro $29/mo. Enterprise $199/mo. One subscription, nine AI specialists running 24/7.",
+    images: [
+      "/api/og?title=Praxis+Pricing+%E2%80%94+One+flat+subscription%2C+nine+AI+specialists&description=Free%2C+Pro+%2429%2Fmo%2C+Enterprise+%24199%2Fmo.+Nine+specialists+running+24%2F7.",
+    ],
+  },
+  alternates: {
+    canonical: "https://conduitai.io/pricing",
+  },
 };
 
-type Cell = boolean | string;
 
-const COMPARISON: { row: string; values: [Cell, Cell, Cell] }[] = [
-  { row: "Praxis Flow (fast model)", values: [true, true, true] },
-  { row: "Praxis Depth (extended thinking)", values: [false, false, true] },
-  {
-    row: "Atlas Chief of Staff",
-    values: [true, true, true],
-  },
-  {
-    row: "Specialist employees",
-    values: ["Marketing", "+ Sales, Engineering", "All 9 incl. Finance, Compliance, HR, Ops, Legal"],
-  },
-  {
-    row: "Monthly token allowance",
-    values: ["50k", "1M", "5M"],
-  },
-  {
-    row: "Voice mode",
-    values: ["Voice input only", "30 min/day", "Unlimited"],
-  },
-  {
-    row: "Roundtable mode",
-    values: [false, "2-4 employees", "2-8 employees"],
-  },
-  {
-    row: "Real lead pipelines (Sales)",
-    values: [false, true, true],
-  },
-  {
-    row: "Real builds (Engineering)",
-    values: [false, true, true],
-  },
-  {
-    row: "Memory rows",
-    values: ["100", "500", "1,000"],
-  },
-  {
-    row: "Multi-user workspace",
-    values: [false, false, true],
-  },
-  {
-    row: "Priority routing",
-    values: [false, false, true],
-  },
-  {
-    row: "Token top-ups",
-    values: ["—", "$10/$25/$50", "$10/$25/$50"],
-  },
-];
-
-const FAQ: { q: string; a: string }[] = [
-  {
-    q: "Can I top up tokens?",
-    a: "Yes. Pro and Enterprise can buy $10, $25, or $50 token packs from /app/settings/billing. Top-ups never expire. Free is allowance-only — upgrade to Pro to enable top-ups.",
-  },
-  {
-    q: "What is Praxis Depth?",
-    a: "Praxis Flow is the fast model — the one running on most turns. Praxis Depth is the extended-thinking variant: longer reasoning, harder problems, deeper analysis. Atlas decides when Depth is worth it, and it's available on Enterprise. Free and Pro both run Flow.",
-  },
-  {
-    q: "How does multi-user work?",
-    a: "Enterprise unlocks multi-user workspaces — invite teammates with role-based access, share memory, run roundtable as a team. The implementation is rolling out across Q3 2026; today it's a single-seat with the upgrade path stamped in.",
-  },
-  {
-    q: "Can I cancel anytime?",
-    a: "Yes — through /app/settings/billing or by emailing luis@conduitai.io. We'll prorate the unused portion. No multi-month contracts on Pro; Enterprise is month-to-month or annual at your choice.",
-  },
-  {
-    q: "What happens when I hit the token cap?",
-    a: "Free tier turns off the chat with a friendly notice when you hit the cap. Pro and Enterprise prompt you to top up. The cap rolls over automatically at the start of your next billing cycle.",
-  },
-  {
-    q: "Do you offer custom enterprise plans?",
-    a: "Yes — for teams replacing whole departments or running on-prem-style isolation, email luis@conduitai.io. We'll talk through token volume, employee customization, and SLA.",
-  },
-];
-
-function CellRender({ value, popular }: { value: Cell; popular?: boolean }) {
-  if (value === true) {
-    return (
-      <Check
-        size={18}
-        weight="bold"
-        color={popular ? "#5B63E8" : "#9DD8B1"}
-      />
-    );
-  }
-  if (value === false) {
-    return <Minus size={16} weight="regular" color="#5A5248" />;
-  }
-  return (
-    <span className="text-[13px] text-[var(--color-cream-soft)] leading-[1.5]">
-      {value}
-    </span>
-  );
-}
+const PRICING_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: "Praxis — AI specialist team",
+  description:
+    "Nine AI specialists covering marketing, sales, engineering, ops, finance, legal, HR, compliance, and voice — running 24/7 for your business.",
+  url: "https://conduitai.io/pricing",
+  brand: { "@type": "Brand", name: "Conduit AI" },
+  offers: [
+    {
+      "@type": "Offer",
+      name: "Free",
+      price: "0",
+      priceCurrency: "USD",
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: "0",
+        priceCurrency: "USD",
+        billingDuration: "P1M",
+      },
+      availability: "https://schema.org/InStock",
+      url: "https://conduitai.io/auth/sign-up",
+      description:
+        "Get started free — Marketing specialist, 50k monthly tokens, voice input, 100 memory rows.",
+    },
+    {
+      "@type": "Offer",
+      name: "Pro",
+      price: "29",
+      priceCurrency: "USD",
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: "29",
+        priceCurrency: "USD",
+        billingDuration: "P1M",
+      },
+      availability: "https://schema.org/InStock",
+      url: "https://conduitai.io/auth/sign-up?tier=pro",
+      description:
+        "Solo founders running a real business — Marketing, Sales, Engineering, 1M tokens/mo, real builds, real leads.",
+    },
+    {
+      "@type": "Offer",
+      name: "Enterprise",
+      price: "199",
+      priceCurrency: "USD",
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: "199",
+        priceCurrency: "USD",
+        billingDuration: "P1M",
+      },
+      availability: "https://schema.org/InStock",
+      url: "https://conduitai.io/auth/sign-up?tier=enterprise",
+      description:
+        "Teams replacing whole departments — all 9 specialists including Finance, Compliance, HR, Ops, Legal, 5M tokens/mo, Praxis Depth, multi-user workspace.",
+    },
+  ],
+};
 
 export default function PricingPage() {
   return (
+    <MarketingMotionProvider>
     <main className="conduit-bg-canvas">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(PRICING_JSONLD) }}
+      />
+      <AnalyticsPageView />
       <Navbar />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden conduit-hero-section">
-        <div className="conduit-mesh" aria-hidden />
-        <div className="conduit-ember-radial" aria-hidden />
-        <div className="relative conduit-container">
-          <div className="max-w-[820px]">
-            <p className="conduit-caption conduit-caption-ember">Pricing</p>
-            <h1 className="conduit-display-hero mt-6">
-              Three tiers.{" "}
-              <span className="conduit-ember-text">One workforce.</span>
-            </h1>
-            <p className="conduit-body-lg mt-7 max-w-[640px]">
-              Free to start. Pro for solo founders running a real business.
-              Enterprise for teams replacing whole departments. Top up tokens
-              any time, no commitment.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHeader
+        caption="Pricing"
+        title={
+          <>
+            Three tiers.{" "}
+            <span className="conduit-ember-text">One workforce.</span>
+          </>
+        }
+        subtitle="Free to start. Pro for solo founders running a real business. Enterprise for teams replacing whole departments. Top up tokens any time, no commitment."
+      />
 
       {/* Tier cards (reuses homepage Pricing section) */}
       <Pricing />
@@ -144,132 +134,19 @@ export default function PricingPage() {
       {/* Comparison table */}
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
-          <div className="max-w-[760px] mb-12 md:mb-16">
-            <p className="conduit-caption conduit-caption-ember">Compare</p>
-            <h2 className="conduit-display-2xl mt-5">
-              Every line, side by side.
-            </h2>
-          </div>
-
-          <div className="overflow-x-auto -mx-6 md:mx-0">
-            <table className="w-full min-w-[720px]">
-              <thead>
-                <tr className="border-b border-[var(--color-edge)]">
-                  <th className="text-left p-5 text-[13px] uppercase tracking-[0.06em] text-[var(--color-cream-mute)] font-semibold w-1/3">
-                    Feature
-                  </th>
-                  <th className="text-center p-5 w-[20%]">
-                    <span className="conduit-caption text-[var(--color-cream-mute)]">
-                      Free
-                    </span>
-                    <p
-                      className="text-[20px] mt-1 text-[var(--color-cream)]"
-                      style={{
-                        fontFamily: "var(--font-serif)",
-                        fontWeight: 500,
-                      }}
-                    >
-                      $0
-                    </p>
-                  </th>
-                  <th
-                    className="text-center p-5 w-[20%] relative"
-                    style={{
-                      background: "rgba(91, 99, 232,0.04)",
-                      borderRadius: "12px 12px 0 0",
-                    }}
-                  >
-                    <span className="conduit-caption text-[var(--color-indigo-500)]">
-                      Pro
-                    </span>
-                    <p
-                      className="text-[20px] mt-1 text-[var(--color-cream)]"
-                      style={{
-                        fontFamily: "var(--font-serif)",
-                        fontWeight: 500,
-                      }}
-                    >
-                      $29/mo
-                    </p>
-                  </th>
-                  <th className="text-center p-5 w-[27%]">
-                    <span className="conduit-caption text-[var(--color-cream-mute)]">
-                      Enterprise
-                    </span>
-                    <p
-                      className="text-[20px] mt-1 text-[var(--color-cream)]"
-                      style={{
-                        fontFamily: "var(--font-serif)",
-                        fontWeight: 500,
-                      }}
-                    >
-                      $199/mo
-                    </p>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {COMPARISON.map((row) => (
-                  <tr
-                    key={row.row}
-                    className="border-b border-[var(--color-edge-subtle)]"
-                  >
-                    <td className="p-5 text-[14px] text-[var(--color-cream)] align-top">
-                      {row.row}
-                    </td>
-                    <td className="p-5 text-center align-top">
-                      <CellRender value={row.values[0]} />
-                    </td>
-                    <td
-                      className="p-5 text-center align-top"
-                      style={{ background: "rgba(91, 99, 232,0.04)" }}
-                    >
-                      <CellRender value={row.values[1]} popular />
-                    </td>
-                    <td className="p-5 text-center align-top">
-                      <CellRender value={row.values[2]} />
-                    </td>
-                  </tr>
-                ))}
-                <tr>
-                  <td />
-                  <td className="p-5 text-center">
-                    <Link
-                      href="/auth/sign-up"
-                      className="text-[13px] text-[var(--color-indigo-500)] inline-flex items-center gap-1 hover:gap-2 transition-[gap]"
-                    >
-                      Start free
-                      <ArrowRight size={12} weight="bold" />
-                    </Link>
-                  </td>
-                  <td
-                    className="p-5 text-center"
-                    style={{
-                      background: "rgba(91, 99, 232,0.04)",
-                      borderRadius: "0 0 12px 12px",
-                    }}
-                  >
-                    <Link
-                      href="/auth/sign-up?tier=pro"
-                      className="conduit-btn-primary"
-                      style={{ padding: "10px 16px", fontSize: "13px" }}
-                    >
-                      Start Pro
-                    </Link>
-                  </td>
-                  <td className="p-5 text-center">
-                    <Link
-                      href="mailto:luis@conduitai.io?subject=Praxis%20Enterprise"
-                      className="text-[13px] text-[var(--color-indigo-500)] inline-flex items-center gap-1 hover:gap-2 transition-[gap]"
-                    >
-                      Talk to founder
-                      <ArrowRight size={12} weight="bold" />
-                    </Link>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <ScrollRevealCards margin="30%">
+            <ScrollRevealItem>
+              <div className="max-w-[760px] mb-12 md:mb-16">
+                <p className="conduit-caption conduit-caption-ember">Compare</p>
+                <h2 className="conduit-display-2xl mt-5">
+                  Every line, side by side.
+                </h2>
+              </div>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <PricingComparisonTable />
+            </ScrollRevealItem>
+          </ScrollRevealCards>
         </div>
       </section>
 
@@ -277,41 +154,17 @@ export default function PricingPage() {
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
           <div className="conduit-prose">
-            <p className="conduit-caption conduit-caption-ember">FAQ</p>
-            <h2 className="conduit-display-2xl mt-5">
-              Common questions, answered straight.
-            </h2>
-
-            <dl className="mt-12 space-y-3">
-              {FAQ.map((item) => (
-                <details
-                  key={item.q}
-                  className="conduit-card group p-6 md:p-7 cursor-pointer [&_summary]:list-none"
-                >
-                  <summary className="flex items-start justify-between gap-4">
-                    <dt
-                      className="text-[18px] md:text-[20px] tracking-[-0.01em] text-[var(--color-cream)]"
-                      style={{
-                        fontFamily: "var(--font-serif)",
-                        fontWeight: 500,
-                      }}
-                    >
-                      {item.q}
-                    </dt>
-                    <span
-                      aria-hidden
-                      className="shrink-0 mt-1.5 w-6 h-6 rounded-full bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge)] flex items-center justify-center text-[var(--color-cream-mute)] group-hover:text-[var(--color-indigo-500)] group-hover:border-[var(--color-indigo-500)] transition-colors group-open:rotate-45 duration-300"
-                      style={{ fontSize: "14px" }}
-                    >
-                      +
-                    </span>
-                  </summary>
-                  <dd className="text-[15px] md:text-[16px] mt-4 text-[var(--color-cream-soft)] leading-[1.7]">
-                    {item.a}
-                  </dd>
-                </details>
-              ))}
-            </dl>
+            <ScrollRevealCards margin="30%">
+              <ScrollRevealItem>
+                <p className="conduit-caption conduit-caption-ember">FAQ</p>
+                <h2 className="conduit-display-2xl mt-5">
+                  Common questions, answered straight.
+                </h2>
+              </ScrollRevealItem>
+              <ScrollRevealItem>
+                <PricingFAQ />
+              </ScrollRevealItem>
+            </ScrollRevealCards>
           </div>
         </div>
       </section>
@@ -319,29 +172,36 @@ export default function PricingPage() {
       {/* Enterprise CTA */}
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
-          <div className="conduit-prose text-center">
-            <p className="conduit-caption conduit-caption-ember">
-              Need more?
-            </p>
-            <h2 className="conduit-display-xl mt-5">
-              Custom token volumes, isolation, SLAs.
-            </h2>
-            <p className="conduit-body-lg mt-5">
-              For teams replacing whole departments, ask about custom
-              enterprise plans. Direct line, no sales gauntlet.
-            </p>
-            <Link
-              href="mailto:luis@conduitai.io?subject=Praxis%20custom%20enterprise"
-              className="conduit-btn-primary mt-9 inline-flex"
-            >
-              Email luis@conduitai.io
-              <ArrowRight size={16} weight="bold" />
-            </Link>
-          </div>
+          <ScrollRevealCards margin="30%" className="conduit-prose text-center">
+            <ScrollRevealItem>
+              <p className="conduit-caption conduit-caption-ember">
+                Need more?
+              </p>
+              <h2 className="conduit-display-xl mt-5">
+                Custom token volumes, isolation, SLAs.
+              </h2>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <p className="conduit-body-lg mt-5">
+                For teams replacing whole departments, ask about custom
+                enterprise plans. Direct line, no sales gauntlet.
+              </p>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <Link
+                href="mailto:luis@conduitai.io?subject=Praxis%20custom%20enterprise"
+                className="conduit-btn-primary mt-9 inline-flex"
+              >
+                Email luis@conduitai.io
+                <ArrowRight size={16} weight="bold" />
+              </Link>
+            </ScrollRevealItem>
+          </ScrollRevealCards>
         </div>
       </section>
 
       <Footer />
     </main>
+    </MarketingMotionProvider>
   );
 }

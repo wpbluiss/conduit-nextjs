@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
     name?: string;
     business_type?: string;
     business_description?: string;
+    goals?: string[];
   };
   try {
     body = await request.json();
@@ -36,6 +37,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });
   }
 
+  const goals = Array.isArray(body.goals)
+    ? body.goals
+        .map((g) => String(g).trim())
+        .filter((g) => g.length > 0 && g.length < 100)
+        .slice(0, 3)
+    : [];
+
   const account = await getOrCreateAccount(supabase, user);
   const { error: updateErr } = await supabase
     .from("conduit_accounts")
@@ -43,6 +51,8 @@ export async function POST(request: NextRequest) {
       name,
       business_type: businessType,
       business_description: businessDescription,
+      onboarding_goals: goals.length > 0 ? goals : null,
+      onboarding_complete: true,
       updated_at: new Date().toISOString(),
     })
     .eq("id", account.id);
@@ -56,6 +66,7 @@ export async function POST(request: NextRequest) {
     account_name: name,
     business_type: businessType,
     business_description: businessDescription,
+    onboarding_goals: goals.length > 0 ? goals : null,
   };
 
   const { data: convo } = await supabase

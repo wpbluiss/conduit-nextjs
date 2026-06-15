@@ -14,16 +14,32 @@
 // Contract: specs/praxis-design-language/contracts/memory-canvas.md §3
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { MemoryRecord } from "@/lib/ai/memory";
+import { useRouter } from "next/navigation";
+import { Download, Search, X } from "lucide-react";
+import type { MemoryRecord, MemoryKind } from "@/lib/ai/memory";
 import { Canvas } from "@/components/conduit/pdl/Canvas";
 import { Edge } from "@/components/conduit/pdl/Edge";
 import { autoLayout } from "./auto-layout";
 import { MemoryNode } from "./MemoryNode";
 import { MemoryNodeComposer } from "./MemoryNodeComposer";
+import { EmptyState, MemoryEmptySVG } from "@/components/conduit/EmptyState";
+import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
+
+const ALL_KINDS: MemoryKind[] = ["fact", "preference", "decision", "goal", "context"];
+const KIND_LABEL: Record<MemoryKind, string> = {
+  fact: "Fact",
+  preference: "Preference",
+  decision: "Decision",
+  goal: "Goal",
+  context: "Context",
+};
 
 interface Props {
   initial: MemoryRecord[];
   cap: number;
+  initialQ?: string;
+  initialDept?: string;
+  initialKinds?: string[];
 }
 
 interface ComposerState {
@@ -34,10 +50,123 @@ interface ComposerState {
 
 const CLOSED: ComposerState = { open: false, anchor: null, editingId: null };
 
-export function MemoryCanvas({ initial, cap }: Props) {
+export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all", initialKinds = [] }: Props) {
   const [memories, setMemories] = useState<MemoryRecord[]>(initial);
   const [composer, setComposer] = useState<ComposerState>(CLOSED);
   const [freshId, setFreshId] = useState<string | null>(null);
+  const router = useRouter();
+
+  // Filter state
+  const [query, setQuery] = useState(initialQ);
+  const [deptFilter, setDeptFilter] = useState(initialDept);
+  const [kindFilter, setKindFilter] = useState<Set<MemoryKind>>(
+    () => new Set(initialKinds.filter((k): k is MemoryKind => ALL_KINDS.includes(k as MemoryKind))),
+  );
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const syncUrl = useCallback(
+    (q: string, dept: string, kinds: Set<MemoryKind>) => {
+      const params = new URLSearchParams();
+      if (q) params.set("q", q);
+      if (dept !== "all") params.set("dept", dept);
+      if (kinds.size > 0) params.set("kind", [...kinds].join(","));
+      const search = params.toString();
+      router.replace(`/app/memory${search ? `?${search}` : ""}`, { scroll: false });
+    },
+    [router],
+  );
+
+  const handleQueryChange = useCallback(
+    (val: string) => {
+      setQuery(val);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => syncUrl(val, deptFilter, kindFilter), 100);
+    },
+    [deptFilter, kindFilter, syncUrl],
+  );
+
+  const handleDeptChange = useCallback(
+    (dept: string) => {
+      setDeptFilter(dept);
+      syncUrl(query, dept, kindFilter);
+    },
+    [query, kindFilter, syncUrl],
+  );
+
+  const handleKindToggle = useCallback(
+    (kind: MemoryKind) => {
+      setKindFilter((prev) => {
+        const next = new Set(prev);
+        if (next.has(kind)) next.delete(kind);
+        else next.add(kind);
+        syncUrl(query, deptFilter, next);
+        return next;
+      });
+    },
+    [query, deptFilter, syncUrl],
+  );
+
+  const clearFilters = useCallback(() => {
+    setQuery("");
+    setDeptFilter("all");
+    setKindFilter(new Set());
+    router.replace("/app/memory", { scroll: false });
+  }, [router]);
+
+  const hasFilters = query.trim() !== "" || deptFilter !== "all" || kindFilter.size > 0;
+
+  const [exportingMemories, setExportingMemories] = useState(false);
+  const exportMemories = useCallback(() => {
+    if (exportingMemories || memories.length === 0) return;
+    setExportingMemories(true);
+    try {
+      const rows = memories.map(({ kind, scope, content, tags, created_at }) => ({
+        kind,
+        dept: scope.length > 0 ? scope[0] : "global",
+        content,
+        tags,
+        created_at,
+      }));
+      const json = JSON.stringify(rows, null, 2);
+      const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const date = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `praxis-memory-${date}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } finally {
+      setExportingMemories(false);
+    }
+  }, [memories, exportingMemories]);
+
+  // Compute matching IDs for dimming
+  const matchingIds = useMemo<Set<string> | null>(() => {
+    if (!hasFilters) return null;
+    const q = query.trim().toLowerCase();
+    return new Set(
+      memories
+        .filter((m) => {
+          if (q) {
+            const matches =
+              m.content.toLowerCase().includes(q) ||
+              m.tags.some((t) => t.toLowerCase().includes(q));
+            if (!matches) return false;
+          }
+          if (deptFilter !== "all") {
+            const isGlobal = m.scope.length === 0;
+            const inScope = m.scope.includes(deptFilter as EmployeeId);
+            if (!isGlobal && !inScope) return false;
+          }
+          if (kindFilter.size > 0 && !kindFilter.has(m.kind)) return false;
+          return true;
+        })
+        .map((m) => m.id),
+    );
+  }, [memories, query, deptFilter, kindFilter, hasFilters]);
 
   // Measure the canvas shell so auto-layout has real dimensions.
   const shellRef = useRef<HTMLDivElement | null>(null);
@@ -48,7 +177,6 @@ export function MemoryCanvas({ initial, cap }: Props) {
     if (!el) return;
     const measure = () => {
       const rect = el.getBoundingClientRect();
-      // Fallback for SSR / pre-paint: keep prior values if rect collapses.
       if (rect.width > 0 && rect.height > 0) {
         setViewport({ width: rect.width, height: rect.height });
       }
@@ -63,24 +191,19 @@ export function MemoryCanvas({ initial, cap }: Props) {
     };
   }, []);
 
-  // Run auto-layout each render. Deterministic; bounded by tier cap.
   const layout = useMemo(
     () => autoLayout(memories, viewport),
     [memories, viewport],
   );
 
-  // Fresh-id pulse: clear after one render cycle.
   useEffect(() => {
     if (!freshId) return;
     const t = setTimeout(() => setFreshId(null), 700);
     return () => clearTimeout(t);
   }, [freshId]);
 
-  // Canvas click → open composer at the clicked point (in canvas coords).
   const onCanvasClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      // Only open composer when clicking the canvas surface itself, not
-      // a child node / tooltip / composer.
       if (e.target !== e.currentTarget) return;
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -132,20 +255,190 @@ export function MemoryCanvas({ initial, cap }: Props) {
     ? memories.find((m) => m.id === composer.editingId)
     : undefined;
 
+  const searchQuery = query.trim();
+
   return (
     <div className="mem-canvas-page">
-      <header className="mem-canvas-header">
-        <h1 className="mem-canvas-title">What Praxis knows</h1>
-        <span className="mem-canvas-count">
-          {memories.length} / {cap}
-        </span>
-      </header>
+      {/* Filter toolbar */}
+      <div
+        style={{
+          background: "var(--pdl-surface-glass, var(--color-surface-elevated))",
+          backdropFilter: "blur(16px)",
+          borderBottom: "1px solid var(--pdl-border-hairline, var(--color-border))",
+          zIndex: 20,
+          position: "relative",
+        }}
+      >
+        {/* Search row */}
+        <div className="flex items-center gap-2 px-4 py-2">
+          <div
+            className="flex items-center gap-2 flex-1 max-w-sm rounded-lg px-3 py-1.5"
+            style={{
+              background: "var(--pdl-canvas, var(--color-surface))",
+              border: "1px solid var(--pdl-border-hairline, var(--color-border))",
+            }}
+          >
+            <Search size={13} style={{ color: "var(--pdl-text-muted, var(--color-text-muted))", flexShrink: 0 }} />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => handleQueryChange(e.target.value)}
+              placeholder="Search memories…"
+              aria-label="Search memories"
+              className="flex-1 bg-transparent outline-none text-[13px] placeholder:text-[var(--pdl-text-muted,var(--color-text-muted))]"
+              style={{ color: "var(--pdl-text, var(--color-text))", minWidth: 0 }}
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => handleQueryChange("")}
+                aria-label="Clear search"
+                className="shrink-0"
+                style={{ color: "var(--pdl-text-muted, var(--color-text-muted))" }}
+              >
+                <X size={12} />
+              </button>
+            )}
+          </div>
+          {hasFilters && (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="text-[11px] px-2.5 py-1.5 rounded-lg transition-colors"
+              style={{
+                color: "var(--pdl-text-muted, var(--color-text-muted))",
+                border: "1px solid var(--pdl-border-hairline, var(--color-border))",
+              }}
+            >
+              Clear
+            </button>
+          )}
+          {memories.length > 0 && (
+            <button
+              type="button"
+              onClick={exportMemories}
+              disabled={exportingMemories}
+              title={`Export all ${memories.length} memories as JSON`}
+              aria-label="Export memories as JSON"
+              className="ml-auto flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg transition-colors shrink-0"
+              style={{
+                color: "var(--pdl-text-muted, var(--color-text-muted))",
+                border: "1px solid var(--pdl-border-hairline, var(--color-border))",
+                opacity: exportingMemories ? 0.5 : 1,
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "var(--pdl-text, var(--color-text))";
+                (e.currentTarget as HTMLElement).style.borderColor = "var(--pdl-border, var(--color-border))";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "var(--pdl-text-muted, var(--color-text-muted))";
+                (e.currentTarget as HTMLElement).style.borderColor = "var(--pdl-border-hairline, var(--color-border))";
+              }}
+            >
+              <Download size={12} />
+              <span className="hidden sm:inline">Export</span>
+            </button>
+          )}
+        </div>
+
+        {/* Dept + Kind chips row */}
+        <div
+          className="flex items-center gap-1.5 px-4 pb-2 overflow-x-auto"
+          style={{ scrollbarWidth: "none" }}
+        >
+          {/* Dept chips */}
+          <button
+            type="button"
+            onClick={() => handleDeptChange("all")}
+            className="shrink-0 text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded-full transition-colors"
+            style={{
+              background: deptFilter === "all"
+                ? "color-mix(in srgb, var(--pdl-accent, var(--color-accent)) 15%, transparent)"
+                : "var(--pdl-surface, var(--color-surface))",
+              border: deptFilter === "all"
+                ? "1px solid color-mix(in srgb, var(--pdl-accent, var(--color-accent)) 40%, transparent)"
+                : "1px solid var(--pdl-border-hairline, var(--color-border))",
+              color: deptFilter === "all"
+                ? "var(--pdl-accent, var(--color-accent))"
+                : "var(--pdl-text-muted, var(--color-text-muted))",
+              fontWeight: deptFilter === "all" ? 600 : 400,
+            }}
+          >
+            All
+          </button>
+          {(EMPLOYEE_ORDER as EmployeeId[]).map((empId) => {
+            const emp = EMPLOYEES[empId];
+            const active = deptFilter === empId;
+            return (
+              <button
+                key={empId}
+                type="button"
+                onClick={() => handleDeptChange(active ? "all" : empId)}
+                className="shrink-0 text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded-full transition-colors"
+                style={{
+                  background: active
+                    ? `color-mix(in srgb, ${emp.color} 15%, transparent)`
+                    : "var(--pdl-surface, var(--color-surface))",
+                  border: active
+                    ? `1px solid color-mix(in srgb, ${emp.color} 40%, transparent)`
+                    : "1px solid var(--pdl-border-hairline, var(--color-border))",
+                  color: active ? emp.color : "var(--pdl-text-muted, var(--color-text-muted))",
+                  fontWeight: active ? 600 : 400,
+                }}
+              >
+                {emp.name}
+              </button>
+            );
+          })}
+
+          {/* Divider */}
+          <span
+            className="shrink-0 w-px h-4 mx-1"
+            style={{ background: "var(--pdl-border-hairline, var(--color-border))" }}
+            aria-hidden
+          />
+
+          {/* Kind pills */}
+          {ALL_KINDS.map((kind) => {
+            const active = kindFilter.has(kind);
+            return (
+              <button
+                key={kind}
+                type="button"
+                onClick={() => handleKindToggle(kind)}
+                className="shrink-0 text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded-full transition-colors"
+                style={{
+                  background: active
+                    ? "color-mix(in srgb, var(--pdl-accent, var(--color-accent)) 12%, transparent)"
+                    : "transparent",
+                  border: active
+                    ? "1px solid color-mix(in srgb, var(--pdl-accent, var(--color-accent)) 35%, transparent)"
+                    : "1px solid var(--pdl-border-hairline, var(--color-border))",
+                  color: active
+                    ? "var(--pdl-accent, var(--color-accent))"
+                    : "var(--pdl-text-muted, var(--color-text-muted))",
+                  fontWeight: active ? 600 : 400,
+                }}
+              >
+                {KIND_LABEL[kind]}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       <div
         ref={shellRef}
         className="mem-canvas-shell pdl-canvas-grid"
         onClick={onCanvasClick}
       >
+        <header className="mem-canvas-header">
+          <h1 className="mem-canvas-title">What Praxis knows</h1>
+          <span className="mem-canvas-count">
+            {matchingIds !== null ? `${matchingIds.size} / ${memories.length}` : `${memories.length} / ${cap}`}
+          </span>
+        </header>
+
         {/* Edges layer — non-interactive SVG overlay */}
         <svg
           className="mem-edge-layer"
@@ -169,6 +462,8 @@ export function MemoryCanvas({ initial, cap }: Props) {
             memory={n}
             position={{ x: n.layoutX, y: n.layoutY }}
             fresh={n.id === freshId}
+            dimmed={matchingIds !== null && !matchingIds.has(n.id)}
+            searchQuery={searchQuery}
             onPatched={onPatched}
             onArchived={onArchived}
             onEdit={() => onNodeEdit(n.id, { x: n.layoutX, y: n.layoutY })}
@@ -183,6 +478,18 @@ export function MemoryCanvas({ initial, cap }: Props) {
             onSubmit={onComposerSubmit}
             existingMemory={editingMemory}
           />
+        )}
+
+        {/* Empty canvas hint */}
+        {memories.length === 0 && !composer.open && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <EmptyState
+              icon={<MemoryEmptySVG />}
+              headline="Praxis learns as you work"
+              body="Memory nodes appear here as your specialists accumulate context about your business — goals, preferences, and decisions. Click anywhere on the canvas to add a node manually."
+              className="max-w-sm pointer-events-auto bg-[var(--color-surface-elevated)]/80 backdrop-blur-sm"
+            />
+          </div>
         )}
       </div>
     </div>

@@ -188,6 +188,10 @@
   --conduit-gradient-ember-radial: var(--conduit-gradient-indigo-radial);
   --conduit-gradient-ember-line: var(--conduit-gradient-indigo-line);
   --conduit-gradient-text-warm: var(--conduit-gradient-text);
+
+  /* Accordion animations — used by PricingFAQ via Radix Accordion Content */
+  --animate-accordion-down: accordion-down 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  --animate-accordion-up: accordion-up 0.25s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 html {
@@ -240,39 +244,177 @@ body {
   border: 1px solid var(--color-border-default);
 }
 
-/* Legacy /app buttons — still target dark Console surface */
-.btn-primary {
+/* Auth pages — ember CTA on dark inverse background */
+.conduit-auth-btn {
   background: var(--color-accent);
-  color: #0A0908;
+  color: #FFFFFF;
   padding: 14px 32px;
   font-weight: 500;
+  font-size: 0.9375rem;
   letter-spacing: -0.005em;
-  transition: background 200ms ease, transform 200ms ease;
+  transition: background 200ms var(--conduit-ease-out-quart), box-shadow 200ms var(--conduit-ease-out-quart), transform 200ms var(--conduit-ease-out-quart);
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  border-radius: 14px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.conduit-auth-btn:hover {
+  background: #FFAA6B;
+  box-shadow: 0 0 40px rgba(255, 138, 61, 0.40);
+  transform: translateY(-1px);
+}
+.conduit-auth-btn:active { transform: translateY(0); }
+.conduit-auth-btn:focus-visible {
+  outline: 2px solid var(--color-ember-300);
+  outline-offset: 2px;
+}
+
+/* Console button system — electric violet dark palette (CONSOLE_REDESIGN.md spec)
+ * Four variants: primary (accent fill), secondary (bordered), ghost (transparent), danger (red).
+ * All tokens resolve from --cx-* (defined in console-tokens.css inside .praxis-root).
+ * Framer-motion (PraxisButton) controls transform; CSS handles colour/shadow transitions. */
+.btn-primary {
+  background: var(--cx-accent, #7C6CFF);
+  color: #FFFFFF;
+  padding: var(--cx-space-3, 12px) var(--cx-space-6, 24px);
+  font-size: var(--cx-type-base, 14px);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  transition:
+    background var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
+    box-shadow var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
+    transform var(--cx-dur-fast, 120ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1));
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cx-space-2, 8px);
+  border-radius: var(--cx-radius-sm, 8px);
+  cursor: pointer;
 }
 .btn-primary:hover {
-  background: var(--color-accent-hi);
+  background: var(--cx-accent-bright, #9B8CFF);
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--cx-accent, #7C6CFF) 40%, transparent);
+  transform: translateY(-1px);
+}
+.btn-primary:active { transform: translateY(0); box-shadow: none; }
+.btn-primary:focus-visible {
+  outline: none;
+  box-shadow: var(--cx-accent-glow, 0 0 0 3px rgba(124,108,255,0.25));
 }
 
 .btn-secondary {
   background: transparent;
-  color: var(--color-text);
-  padding: 14px 32px;
+  color: var(--cx-text, #F4F4F7);
+  padding: var(--cx-space-3, 12px) var(--cx-space-6, 24px);
+  font-size: var(--cx-type-base, 14px);
   font-weight: 500;
   letter-spacing: -0.005em;
-  border: 1px solid var(--color-border);
-  transition: border-color 200ms ease, color 200ms ease;
+  border: 1px solid var(--cx-border-strong, #33333F);
+  transition:
+    background var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
+    border-color var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
+    color var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
+    transform var(--cx-dur-fast, 120ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1));
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  border-radius: 14px;
+  gap: var(--cx-space-2, 8px);
+  border-radius: var(--cx-radius-sm, 8px);
+  cursor: pointer;
 }
 .btn-secondary:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent-hi);
+  border-color: var(--cx-accent, #7C6CFF);
+  background: var(--cx-accent-tint, rgba(124,108,255,0.12));
+  color: var(--cx-accent-bright, #9B8CFF);
+  transform: translateY(-1px);
+}
+.btn-secondary:active { transform: translateY(0); }
+.btn-secondary:focus-visible {
+  outline: none;
+  box-shadow: var(--cx-accent-glow, 0 0 0 3px rgba(124,108,255,0.25));
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--cx-text-muted, #A0A0B0);
+  padding: var(--cx-space-3, 12px) var(--cx-space-6, 24px);
+  font-size: var(--cx-type-base, 14px);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  border: 1px solid transparent;
+  transition:
+    background var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
+    color var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
+    border-color var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
+    transform var(--cx-dur-fast, 120ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1));
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cx-space-2, 8px);
+  border-radius: var(--cx-radius-sm, 8px);
+  cursor: pointer;
+}
+.btn-ghost:hover {
+  background: var(--cx-surface-raised, #1C1C26);
+  color: var(--cx-text, #F4F4F7);
+  border-color: var(--cx-border, #262630);
+  transform: translateY(-1px);
+}
+.btn-ghost:active { transform: translateY(0); }
+.btn-ghost:focus-visible {
+  outline: none;
+  box-shadow: var(--cx-accent-glow, 0 0 0 3px rgba(124,108,255,0.25));
+}
+
+.btn-danger {
+  background: var(--cx-danger, #F4607D);
+  color: #FFFFFF;
+  padding: var(--cx-space-3, 12px) var(--cx-space-6, 24px);
+  font-size: var(--cx-type-base, 14px);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  transition:
+    background var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
+    box-shadow var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
+    transform var(--cx-dur-fast, 120ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1));
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cx-space-2, 8px);
+  border-radius: var(--cx-radius-sm, 8px);
+  cursor: pointer;
+}
+.btn-danger:hover {
+  background: color-mix(in srgb, var(--cx-danger, #F4607D) 85%, #fff);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--cx-danger, #F4607D) 40%, transparent);
+  transform: translateY(-1px);
+}
+.btn-danger:active { transform: translateY(0); box-shadow: none; }
+.btn-danger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(244, 96, 125, 0.30);
+}
+
+/* Reduced-motion: keep colour transitions, remove all transforms */
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary, .btn-secondary, .btn-ghost, .btn-danger {
+    transition:
+      background var(--cx-dur-fast, 120ms) ease,
+      border-color var(--cx-dur-fast, 120ms) ease,
+      color var(--cx-dur-fast, 120ms) ease,
+      box-shadow var(--cx-dur-fast, 120ms) ease;
+  }
+  .btn-primary:hover, .btn-secondary:hover, .btn-ghost:hover, .btn-danger:hover,
+  .btn-primary:active, .btn-secondary:active, .btn-ghost:active, .btn-danger:active {
+    transform: none;
+  }
+}
+
+/* Accordion (Radix) — height driven by --radix-accordion-content-height */
+@keyframes accordion-down {
+  from { height: 0; opacity: 0; }
+  to { height: var(--radix-accordion-content-height); opacity: 1; }
+}
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); opacity: 1; }
+  to { height: 0; opacity: 0; }
 }
 
 /* Word cycler */
@@ -349,16 +491,20 @@ body {
 }
 
 .conduit-bubble-user {
-  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
-  /* tl, tr, br, bl — large everywhere, small bottom-left = speech-bubble feel */
+  background: color-mix(in srgb, var(--color-accent) 11%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
   border-radius: 22px 22px 22px 6px;
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--color-accent) 12%, transparent);
+  font-size: 14px;
+  line-height: 1.7;
 }
 .conduit-bubble-assistant {
-  background: var(--color-surface-elevated);
+  background: color-mix(in srgb, var(--dept, var(--color-accent)) 4%, var(--color-surface-elevated));
   border-left: 2px solid var(--dept, var(--color-border));
-  /* mirrored: small bottom-right */
   border-radius: 22px 22px 6px 22px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
+  font-size: 14px;
+  line-height: 1.75;
 }
 
 .conduit-suggestion {
@@ -404,6 +550,12 @@ body {
 @keyframes wave2 { 0%,100% { height:12px; } 50% { height:6px; } }
 @keyframes wave3 { 0%,100% { height:6px; } 50% { height:13px; } }
 
+/* Whisper recording waveform — 3 phases for 5 bars */
+@keyframes whisperWave1 { 0%,100% { height:4px; } 50% { height:12px; } }
+@keyframes whisperWave2 { 0%,100% { height:8px; } 50% { height:4px; } }
+@keyframes whisperWave3 { 0%,100% { height:6px; } 50% { height:14px; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
 @keyframes presenceFade {
   0% { opacity: 0; transform: translateY(2px); }
   20%, 80% { opacity: 1; transform: translateY(0); }
@@ -424,8 +576,11 @@ body {
   background: var(--dept, var(--color-text-muted));
   animation: typingDot 1.2s ease-in-out infinite;
 }
-.typing-dot:nth-child(2) { animation-delay: 150ms; }
-.typing-dot:nth-child(3) { animation-delay: 300ms; }
+.typing-dot:nth-child(2) { animation-delay: 200ms; }
+.typing-dot:nth-child(3) { animation-delay: 400ms; }
+@media (prefers-reduced-motion: reduce) {
+  .typing-dot { animation: none; opacity: 0.7; }
+}
 
 @keyframes handoffSlide {
   from { opacity: 0; transform: translateY(-4px); }
@@ -683,6 +838,13 @@ body {
 .conduit-bg-surface-sunken { background: var(--color-bg-surface-sunken); color: var(--color-ink-primary); }
 .conduit-bg-surface-elevated { background: var(--color-bg-surface-sunken); color: var(--color-ink-primary); }
 
+/* Home-page rhythm wrapper — elevates a child section's canvas bg to the
+   subtle-surface tone, enabling cream → tint → dark → cream alternation
+   without modifying individual section components. */
+.home-section-tinted > section.conduit-bg-canvas {
+  background: var(--color-bg-surface-subtle);
+}
+
 /* Inverse — for hero band, CTA band, cinematic anchor sections */
 .conduit-bg-inverse {
   background: var(--color-bg-inverse);
@@ -801,6 +963,10 @@ body {
   transform: translateY(-1px);
 }
 .conduit-btn-primary:active { transform: translateY(0); }
+.conduit-btn-primary:focus-visible {
+  outline: 2px solid var(--color-ember-500);
+  outline-offset: 2px;
+}
 
 .conduit-btn-secondary {
   background: transparent;
@@ -824,6 +990,10 @@ body {
   border-color: var(--color-indigo-500);
   color: var(--color-indigo-700);
   background: var(--color-indigo-50);
+}
+.conduit-btn-secondary:focus-visible {
+  outline: 2px solid var(--color-ember-500);
+  outline-offset: 2px;
 }
 
 /* Inverse-section buttons (dark bg, hero/cta band) */
@@ -853,6 +1023,10 @@ body {
   transform: translateY(-1px);
 }
 .conduit-btn-primary-inverse:active { transform: translateY(0); }
+.conduit-btn-primary-inverse:focus-visible {
+  outline: 2px solid var(--color-ember-300);
+  outline-offset: 2px;
+}
 
 .conduit-btn-secondary-inverse {
   background: transparent;
@@ -877,6 +1051,19 @@ body {
   color: var(--color-indigo-300);
   background: rgba(91, 99, 232, 0.08);
 }
+.conduit-btn-secondary-inverse:focus-visible {
+  outline: 2px solid var(--color-ember-300);
+  outline-offset: 2px;
+}
+
+/* Ember-identity focus ring — keyboard-only (:focus-visible, not :focus) */
+.conduit-btn-primary:focus-visible,
+.conduit-btn-secondary:focus-visible,
+.conduit-btn-primary-inverse:focus-visible,
+.conduit-btn-secondary-inverse:focus-visible {
+  outline: 2px solid var(--color-ember-500);
+  outline-offset: 3px;
+}
 
 /* Marketing card — indigo-glow ring on hover (light bg) */
 .conduit-card {
@@ -884,6 +1071,7 @@ body {
   border: 1px solid var(--color-border-subtle);
   border-radius: 16px;
   position: relative;
+  box-shadow: 0 1px 3px rgba(15, 17, 21, 0.04), 0 0 0 1px rgba(15, 17, 21, 0.03);
   transition:
     border-color 400ms var(--conduit-ease-out-quart),
     box-shadow 400ms var(--conduit-ease-out-quart),
@@ -898,10 +1086,11 @@ body {
   transform: translateY(-4px);
 }
 .conduit-card.is-featured {
-  border-color: rgba(91, 99, 232, 0.35);
+  border-color: rgba(255, 138, 61, 0.35);
   box-shadow:
-    0 0 0 1px rgba(91, 99, 232, 0.12),
-    0 0 48px rgba(91, 99, 232, 0.14);
+    0 0 40px rgba(255, 138, 61, 0.14),
+    0 0 0 1.5px rgba(255, 138, 61, 0.28),
+    0 24px 56px rgba(15, 17, 21, 0.10);
 }
 /* Customer celebration card — keeps the ember energy */
 .conduit-card.is-celebration {
@@ -1070,30 +1259,43 @@ body {
   font-weight: 500;
 }
 
-/* Pull-quote — italic Fraunces with indigo accent line */
+/* Pull-quote — editorial ember identity: large italic Fraunces, ember accent border */
 .conduit-pullquote {
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: clamp(1.5rem, 2.5vw + 0.5rem, 1.875rem);
-  line-height: 1.4;
-  letter-spacing: -0.015em;
-  color: inherit;
-  border-left: 2px solid var(--color-indigo-500);
-  padding-left: 24px;
+  font-size: clamp(1.625rem, 2.5vw + 0.5rem, 2.25rem);
+  line-height: 1.35;
+  letter-spacing: -0.022em;
+  color: var(--color-ink-primary);
+  border-left: 3px solid var(--color-ember-500);
+  padding: 32px 36px 32px 44px;
   position: relative;
-}
-.conduit-pullquote::before {
-  content: "";
-  position: absolute;
-  left: -2px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
   background: linear-gradient(
-    to bottom,
-    var(--color-indigo-500),
-    rgba(91, 99, 232, 0.2)
+    108deg,
+    rgba(214, 120, 23, 0.07) 0%,
+    rgba(214, 120, 23, 0.025) 50%,
+    transparent 100%
   );
+  border-radius: 0 14px 14px 0;
+  overflow: visible;
+  box-shadow: inset 2px 0 12px rgba(214, 120, 23, 0.06);
+}
+/* Large decorative opening mark — ember, clearly visible at the new ember identity */
+.conduit-pullquote::before {
+  content: "\201C";
+  position: absolute;
+  top: -0.18em;
+  left: 26px;
+  font-family: var(--font-serif);
+  font-size: 5em;
+  line-height: 1;
+  font-style: normal;
+  font-weight: 700;
+  color: var(--color-ember-500);
+  opacity: 0.36;
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: normal;
 }
 
 /* Section + container helpers */
@@ -1204,9 +1406,10 @@ body {
   border: 1px solid rgba(37, 99, 235, 0.25);
 }
 .conduit-badge-popular {
-  background: var(--color-indigo-500);
-  color: #FFFFFF;
+  background: var(--color-accent);
+  color: #0A0908;
   border: none;
+  font-weight: 700;
 }
 .conduit-badge .conduit-badge-dot {
   width: 6px;
@@ -1295,6 +1498,17 @@ body {
   top: 12px;
   outline: 2px solid var(--color-indigo-700);
   outline-offset: 2px;
+}
+
+/* App shell — catch-all focus ring for elements without explicit focus styles.
+   More specific rules (btn-primary:focus-visible etc.) take precedence via
+   CSS cascade. Uses the same indigo accent so focus is visible throughout. */
+.praxis-root a:focus-visible,
+.praxis-root button:focus-visible,
+.praxis-root [role="option"]:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* Mobile-tighter section padding override */
@@ -1405,3 +1619,17 @@ body {
   z-index: -1;
 }
 .conduit-indigo-bloom:hover::after { opacity: 1; }
+
+@keyframes voiceRecordPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+
+/* Coach mark highlight — applied by FirstRunTour to the active step's target */
+[data-tour-active="true"] {
+  position: relative;
+  z-index: 10000;
+  border-radius: 8px;
+  box-shadow: 0 0 0 3px rgba(91, 99, 232, 0.7), 0 0 0 6px rgba(91, 99, 232, 0.2);
+  transition: box-shadow 250ms ease;
+}

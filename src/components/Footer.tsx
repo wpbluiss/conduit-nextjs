@@ -21,7 +21,7 @@ const COLS: {
       { href: "/products/praxis-mobile", label: "Mobile" },
       { href: "/products/praxis-hq", label: "HQ" },
       { href: "/pricing", label: "Pricing" },
-      { href: "#", label: "Status", soon: true },
+      { href: "/status", label: "Status" },
       { href: "/changelog", label: "Changelog" },
     ],
   },
@@ -48,7 +48,7 @@ const COLS: {
         external: true,
       },
       { href: "#", label: "API docs", soon: true },
-      { href: "#", label: "System status", soon: true },
+      { href: "/status", label: "System status" },
       { href: "/approach", label: "Architecture" },
     ],
   },
@@ -278,23 +278,23 @@ export default function Footer() {
             <span>&copy; 2026 Conduit AI. West Palm Beach, FL.</span>
             <div className="flex items-center gap-5">
               <Link
-                href="/privacy-policy.html"
+                href="/legal/privacy"
                 className="hover:text-[var(--color-cream)] transition-colors"
               >
                 Privacy
               </Link>
               <Link
-                href="/terms.html"
+                href="/legal/terms"
                 className="hover:text-[var(--color-cream)] transition-colors"
               >
                 Terms
               </Link>
-              <span
-                className="cursor-default"
-                title="Coming soon"
+              <Link
+                href="/legal/acceptable-use"
+                className="hover:text-[var(--color-cream)] transition-colors"
               >
                 Acceptable use
-              </span>
+              </Link>
             </div>
           </div>
 

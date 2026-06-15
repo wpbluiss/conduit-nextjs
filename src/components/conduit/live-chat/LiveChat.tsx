@@ -9,7 +9,9 @@
  */
 
 import * as React from "react";
+import { useUser } from "@/context/UserContext";
 import { useRouter } from "next/navigation";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, Code2, TrendingUp, Megaphone, DollarSign, Wrench, ShieldCheck,
@@ -20,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
 import PraxisLiveRoom from "@/components/conduit/voice/PraxisLiveRoom";
 import type { VoiceTokenResponse } from "@/components/conduit/voice/VoiceRoom";
+import { PaywallModal, type PaywallPayload } from "@/components/conduit/PaywallModal";
 
 type Icon = React.ComponentType<{ className?: string }>;
 const ICON: Record<EmployeeId, Icon> = {
@@ -48,22 +51,27 @@ export type LiveMsg = {
   employee?: EmployeeId | null;
   content: string;
   pending?: boolean;
+  error?: boolean;
   artifacts?: { id: string; title: string; type: string; by: EmployeeId }[];
+  created_at?: string;
 };
 type Convo = { id: string; title: string; updated_at: string };
 type OpenArt = { id: string; title: string; type: string; by: EmployeeId };
 
 export function LiveChat({
-  firstName, conversations, activeConversationId, initialMessages, allowedEmployees, initialPin,
+  firstName, conversations, activeConversationId, initialMessages, initialHasMore, allowedEmployees, initialPin,
 }: {
   firstName: string;
   conversations: Convo[];
   activeConversationId: string | null;
   initialMessages: LiveMsg[];
+  initialHasMore?: boolean;
   allowedEmployees: EmployeeId[];
   initialPin: EmployeeId | null;
 }) {
   const router = useRouter();
+  const ctxUser = useUser();
+  const reducedMotion = useReducedMotion();
   const allowedSet = new Set<EmployeeId>(allowedEmployees);
   const roster = EMPLOYEE_ORDER.filter((id) => id === "jarvis" || allowedSet.has(id));
 
@@ -76,6 +84,9 @@ export function LiveChat({
   const [input, setInput] = React.useState("");
   const [drawer, setDrawer] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [hasOlderMessages, setHasOlderMessages] = React.useState(Boolean(initialHasMore));
+  const [loadingOlder, setLoadingOlder] = React.useState(false);
+  const skipAutoScroll = React.useRef(false);
   const [palette, setPalette] = React.useState(false);
   const [paletteQ, setPaletteQ] = React.useState("");
   const [reactions, setReactions] = React.useState<Record<string, string>>({});
@@ -87,8 +98,14 @@ export function LiveChat({
   const [roomToken, setRoomToken] = React.useState<VoiceTokenResponse | null>(null);
   const [launching, setLaunching] = React.useState(false);
   const [voiceErr, setVoiceErr] = React.useState<string | null>(null);
+  const [paywall, setPaywall] = React.useState<PaywallPayload | null>(null);
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [editText, setEditText] = React.useState("");
+  const [editSaving, setEditSaving] = React.useState(false);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const taRef = React.useRef<HTMLTextAreaElement>(null);
+  const editTaRef = React.useRef<HTMLTextAreaElement>(null);
+  const lastSentMsg = React.useRef<string>("");
   const emp = EMPLOYEES[pin];
   const EmpIcon = ICON[pin] ?? Sparkles;
 
@@ -98,7 +115,8 @@ export function LiveChat({
   React.useEffect(() => {
     setMessages(initialMessages);
     setConvoId(activeConversationId);
-  }, [activeConversationId, initialMessages]);
+    setHasOlderMessages(Boolean(initialHasMore));
+  }, [activeConversationId, initialMessages, initialHasMore]);
 
   const slashOpen = input.startsWith("/") && !input.includes(" ");
   const mentionMatch = input.match(/(^|\s)@(\w*)$/);
@@ -115,6 +133,10 @@ export function LiveChat({
     return () => window.removeEventListener("keydown", onKey);
   }, []);
   React.useEffect(() => {
+    if (skipAutoScroll.current) {
+      skipAutoScroll.current = false;
+      return;
+    }
     const t = setTimeout(() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }), 60);
     return () => clearTimeout(t);
   }, [messages, loading]);
@@ -133,13 +155,85 @@ export function LiveChat({
   function applyMention(id: EmployeeId) { setInput((v) => v.replace(/(^|\s)@\w*$/, (_m, p1) => `${p1}@${EMPLOYEES[id].name} `)); setPin(id); setUserPinned(true); taRef.current?.focus(); }
   function react(id: string, e: string) { setReactions((r) => ({ ...r, [id]: r[id] === e ? "" : e })); }
   function copyMsg(m: LiveMsg) { navigator.clipboard?.writeText(m.content).catch(() => {}); const k = m.id ?? ""; setCopiedId(k); setTimeout(() => setCopiedId((c) => (c === k ? null : c)), 1400); }
+
+  function startEdit(m: LiveMsg) {
+    if (!m.id) return;
+    setEditingId(m.id);
+    setEditText(m.content);
+    setTimeout(() => { editTaRef.current?.focus(); editTaRef.current?.select(); }, 0);
+  }
+
+  function cancelEdit() { setEditingId(null); setEditText(""); }
+
+  async function submitEdit(msgId: string) {
+    const trimmed = editText.trim();
+    if (!trimmed || editSaving) return;
+    setEditSaving(true);
+    try {
+      const r = await fetch(`/api/conduit/messages/${msgId}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "edit", content: trimmed }),
+      });
+      if (!r.ok) { setEditSaving(false); return; }
+      // Optimistically: update message content + strip all subsequent messages
+      setMessages((prev) => {
+        const idx = prev.findIndex((m) => m.id === msgId);
+        if (idx === -1) return prev;
+        const updated = prev.slice(0, idx + 1).map((m, i) =>
+          i === idx ? { ...m, content: trimmed } : m
+        );
+        return updated;
+      });
+      setEditingId(null);
+      setEditText("");
+      // Re-send the edited message to get a fresh reply
+      send(trimmed);
+    } finally {
+      setEditSaving(false);
+    }
+  }
   function copyArt() { if (!artContent) return; navigator.clipboard?.writeText(artContent).catch(() => {}); setArtCopied(true); setTimeout(() => setArtCopied(false), 1400); }
   function downloadArt() { if (!openArtifact || !artContent) return; const blob = new Blob([artContent], { type: "text/plain;charset=utf-8" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `${slugify(openArtifact.title)}.${extFor(openArtifact.type)}`; a.click(); URL.revokeObjectURL(url); }
   function pdfArt() { if (!openArtifact || !artContent) return; const w = window.open("", "_blank"); if (!w) return; w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(openArtifact.title)}</title><style>body{font-family:Georgia,serif;max-width:680px;margin:48px auto;padding:0 24px;color:#111;line-height:1.6}.k{color:#888;text-transform:uppercase;letter-spacing:.14em;font-size:11px;font-family:system-ui,sans-serif}h1{font-family:system-ui,sans-serif;font-size:22px;margin:.2em 0 1em}pre{white-space:pre-wrap;font-family:inherit;margin:0}</style></head><body><div class="k">${escapeHtml(openArtifact.type)} · by ${escapeHtml(EMPLOYEES[openArtifact.by]?.name ?? "Praxis")} · Praxis</div><h1>${escapeHtml(openArtifact.title)}</h1><pre>${escapeHtml(artContent)}</pre></body></html>`); w.document.close(); w.focus(); setTimeout(() => { try { w.print(); } catch { /* ignore */ } }, 350); }
 
+  const loadOlderMessages = React.useCallback(async () => {
+    if (!convoId || loadingOlder || !hasOlderMessages) return;
+    const oldestMsg = messages.find((m) => m.created_at);
+    if (!oldestMsg?.created_at) return;
+    setLoadingOlder(true);
+    skipAutoScroll.current = true;
+    try {
+      const res = await fetch(
+        `/api/conduit/conversations/${convoId}?before=${encodeURIComponent(oldestMsg.created_at)}&limit=50`,
+      );
+      if (!res.ok) return;
+      const j = (await res.json()) as {
+        messages: Array<{ id: string; role: string; employee: string | null; content: string; created_at: string }>;
+        hasMore: boolean;
+      };
+      const older: LiveMsg[] = j.messages
+        .filter((m) => m.role === "user" || m.role === "assistant")
+        .map((m) => ({
+          id: m.id,
+          role: m.role as LiveMsg["role"],
+          employee: (m.employee as EmployeeId | null) ?? null,
+          content: m.content ?? "",
+          created_at: m.created_at,
+        }));
+      if (older.length > 0) {
+        setMessages((prev) => [...older, ...prev]);
+      }
+      setHasOlderMessages(j.hasMore);
+    } finally {
+      setLoadingOlder(false);
+    }
+  }, [convoId, loadingOlder, hasOlderMessages, messages]);
+
   const send = React.useCallback(async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
+    lastSentMsg.current = trimmed;
     setLoading(true); setInput("");
     if (taRef.current) taRef.current.style.height = "auto";
     setMessages((p) => [...p, { role: "user", content: trimmed }, { role: "assistant", employee: pin, content: "", pending: true }]);
@@ -154,7 +248,12 @@ export function LiveChat({
       const resp = await fetch("/api/conduit/chat", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
       if (!resp.ok || !resp.body) {
         if (resp.status === 409) { router.refresh(); return; }
-        setMessages((p) => { const n = [...p]; const last = n[n.length - 1]; if (last?.pending) { last.pending = false; last.content = "Something hiccuped. Try that again in a moment."; } return n; });
+        let fallback = "Something hiccuped. Try that again in a moment.";
+        if (resp.status === 429) {
+          const j = (await resp.json().catch(() => ({}))) as { message?: string };
+          fallback = j.message || "You're sending messages too quickly. Give it a moment and try again.";
+        }
+        setMessages((p) => { const n = [...p]; const last = n[n.length - 1]; if (last?.pending) { last.pending = false; last.content = fallback; last.error = true; } return n; });
         return;
       }
       const reader = resp.body.getReader(); const dec = new TextDecoder(); let buf = "";
@@ -163,9 +262,9 @@ export function LiveChat({
         else if (event === "handoff") { const to = data.to as EmployeeId; finish(current); setMessages((p) => [...p, { role: "system", content: `→ ${EMPLOYEES[to]?.name ?? to} taking this` }]); current = to; }
         else if (event === "message_end") { finish((data.employee as EmployeeId) || current); }
         else if (event === "done") { const cid = data.conversation_id as string; if (cid && cid !== convoId) { setConvoId(cid); window.history.replaceState({}, "", `/chat?c=${cid}`); } }
-        else if (event === "error") { append((data.employee as EmployeeId) || current, `\n\n${(data.message as string) || "Try again in a moment."}`); finish(current); }
+        else if (event === "error") { const errMsg = (data.message as string) || "Try again in a moment."; setMessages((p) => { const n = [...p]; const last = n[n.length - 1]; if (last && last.role === "assistant" && last.pending) { last.pending = false; last.content = last.content || errMsg; last.error = true; } return n; }); }
         else if (event === "artifact") { const a = { id: data.id as string, title: (data.title as string) || "Untitled", type: (data.type as string) || "doc", by: ((data.employee as EmployeeId) || current) }; setMessages((p) => { const n = [...p]; for (let j = n.length - 1; j >= 0; j--) { if (n[j].role === "assistant" && n[j].employee === a.by) { n[j] = { ...n[j], artifacts: [...(n[j].artifacts ?? []), a] }; break; } } return n; }); }
-        else if (event === "paywall_required") { finish(current); setMessages((p) => [...p, { role: "system", content: (data.message as string) || "Upgrade required to continue." }]); }
+        else if (event === "paywall_required") { finish(current); setPaywall({ reason: (data.reason as PaywallPayload["reason"]) || "cap_reached", message: (data.message as string) || "Upgrade required to continue.", employee: data.employee as string | undefined, tier_id: data.tier_id as PaywallPayload["tier_id"] }); }
       };
       while (true) {
         const { done, value } = await reader.read(); if (done) break;
@@ -223,11 +322,12 @@ export function LiveChat({
           </button>
         ); })}
       </div>
-      <div className="flex items-center gap-3 border-t border-white/8 p-3"><span className="grid size-8 place-items-center rounded-full bg-secondary text-sm font-semibold">{firstName[0]?.toUpperCase() ?? "U"}</span><span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{firstName}</span><span className="block truncate text-xs text-muted-foreground">Praxis</span></span><Settings className="size-4 text-muted-foreground" /></div>
+      <div className="flex items-center gap-3 border-t border-white/8 p-3"><span className="grid size-8 place-items-center rounded-full bg-secondary text-sm font-semibold">{firstName[0]?.toUpperCase() ?? "U"}</span><span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{firstName}</span><span className="block truncate text-xs text-muted-foreground">{ctxUser?.email ?? "Praxis"}</span></span><Settings className="size-4 text-muted-foreground" /></div>
     </div>
   );
 
   return (
+    <>
     <div className="wm-rebrand flex h-[100dvh] w-full overflow-hidden text-foreground">
       <aside className="hidden w-72 shrink-0 border-r border-white/8 bg-card/40 backdrop-blur-xl lg:block">{Rail}</aside>
       <AnimatePresence>
@@ -301,6 +401,20 @@ export function LiveChat({
 
         <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
           <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-7">
+            {hasOlderMessages && (
+              <div className="flex justify-center">
+                <button
+                  onClick={loadOlderMessages}
+                  disabled={loadingOlder}
+                  className="flex items-center gap-2 rounded-full border border-white/10 bg-secondary/50 px-4 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-secondary disabled:opacity-50"
+                >
+                  {loadingOlder ? (
+                    <span className="animate-spin inline-block size-3 rounded-full border border-current border-t-transparent" />
+                  ) : null}
+                  {loadingOlder ? "Loading…" : "Load older messages"}
+                </button>
+              </div>
+            )}
             {messages.length === 0 && (
               <div className="flex flex-col items-center gap-4 py-16 text-center">
                 <span className="grid size-14 place-items-center rounded-2xl bg-secondary text-primary"><EmpIcon className="size-7" /></span>
@@ -308,11 +422,58 @@ export function LiveChat({
                 <p className="max-w-sm text-muted-foreground">Pick a teammate above, type <span className="font-mono text-foreground">/</span> for commands, or just start — Atlas routes it to whoever&apos;s right.</p>
               </div>
             )}
-            {messages.map((m, i) => {
+            {(() => {
+              // Last persisted user message — the only one that gets an edit affordance.
+              const lastUserIdx = messages.reduce((acc, m, idx) => m.role === "user" && m.id && !loading ? idx : acc, -1);
+              return messages.map((m, i) => {
               if (m.role === "system") return <div key={m.id ?? i} className="flex items-center gap-3 py-1"><div className="h-px flex-1 bg-white/8" /><span className="wm-label">{m.content}</span><div className="h-px flex-1 bg-white/8" /></div>;
-              if (m.role === "user") return (
-                <motion.div key={m.id ?? i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 28 }} className="flex justify-end"><div className="max-w-[82%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-secondary px-4 py-2.5 text-[15px] leading-relaxed">{m.content}</div></motion.div>
-              );
+              if (m.role === "user") {
+                const isLastUser = i === lastUserIdx;
+                const isEditing = isLastUser && editingId === m.id;
+                return (
+                  <motion.div key={m.id ?? i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 28 }} className="group/user flex justify-end">
+                    {isEditing ? (
+                      <div className="w-full max-w-[82%] space-y-2">
+                        <textarea
+                          ref={editTaRef}
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submitEdit(m.id!); }
+                            if (e.key === "Escape") cancelEdit();
+                          }}
+                          rows={3}
+                          className="w-full resize-none rounded-2xl rounded-br-md bg-secondary px-4 py-2.5 text-[15px] leading-relaxed outline-none ring-1 ring-primary/50 focus:ring-primary"
+                        />
+                        <div className="flex justify-end gap-2">
+                          <button onClick={cancelEdit} className="rounded-lg px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">Cancel</button>
+                          <button
+                            onClick={() => submitEdit(m.id!)}
+                            disabled={editSaving || !editText.trim()}
+                            className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                          >
+                            {editSaving ? <span className="animate-spin inline-block size-3 rounded-full border border-current border-t-transparent" /> : null}
+                            {editSaving ? "Saving…" : "Save & resubmit"}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="relative flex items-start gap-2 max-w-[82%]">
+                        {isLastUser && m.id && (
+                          <button
+                            onClick={() => startEdit(m)}
+                            title="Edit message"
+                            className="mt-1.5 shrink-0 rounded-md p-1 text-muted-foreground opacity-0 transition-opacity group-hover/user:opacity-100 hover:text-foreground hover:bg-secondary"
+                          >
+                            <SquarePen className="size-3.5" />
+                          </button>
+                        )}
+                        <div className="whitespace-pre-wrap rounded-2xl rounded-br-md bg-secondary px-4 py-2.5 text-[15px] leading-relaxed">{m.content}</div>
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              }
               const e = (m.employee as EmployeeId) ?? "jarvis"; const I = ICON[e] ?? Sparkles; const k = m.id ?? String(i);
               return (
                 <motion.div key={m.id ?? i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 28 }} className="group flex gap-3">
@@ -320,9 +481,32 @@ export function LiveChat({
                   <div className="min-w-0 flex-1">
                     <p className="mb-1 text-sm font-semibold">{EMPLOYEES[e]?.name ?? "Atlas"}</p>
                     {m.pending && !m.content ? (
-                      <div className="flex items-center gap-1 py-2">{[0, 1, 2].map((j) => (<motion.span key={j} className="size-1.5 rounded-full bg-muted-foreground" animate={{ opacity: [0.3, 1, 0.3], y: [0, -2, 0] }} transition={{ duration: 1, repeat: Infinity, delay: j * 0.18 }} />))}</div>
+                      <div className="flex items-center gap-1 py-2" aria-label="Typing…" aria-live="polite">
+                        {[0, 1, 2].map((j) => (
+                          <motion.span
+                            key={j}
+                            className="size-1.5 rounded-full bg-muted-foreground"
+                            animate={reducedMotion ? {} : { opacity: [0.3, 1, 0.3], y: [0, -2, 0] }}
+                            transition={{ duration: 1, repeat: Infinity, delay: j * 0.18 }}
+                            style={reducedMotion ? { opacity: 0.6 } : undefined}
+                          />
+                        ))}
+                      </div>
+                    ) : m.error ? (
+                      <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3">
+                        <p className="text-[14px] text-destructive/90 leading-relaxed">{m.content}</p>
+                        {lastSentMsg.current && (
+                          <button
+                            onClick={() => send(lastSentMsg.current)}
+                            disabled={loading}
+                            className="mt-2 flex items-center gap-1.5 rounded-lg bg-destructive/15 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/25 transition-colors disabled:opacity-50"
+                          >
+                            <RefreshCw className="size-3" /> Retry
+                          </button>
+                        )}
+                      </div>
                     ) : (
-                      <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">{m.content}{m.pending && <span className="ml-0.5 inline-block h-4 w-[3px] translate-y-0.5 animate-pulse rounded-full bg-primary align-middle" />}</div>
+                      <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">{m.content}{m.pending && <span className={`ml-0.5 inline-block h-4 w-[3px] translate-y-0.5 rounded-full bg-primary align-middle${reducedMotion ? "" : " animate-pulse"}`} />}</div>
                     )}
                     {m.artifacts?.map((a) => (
                       <button key={a.id} onClick={() => setOpenArtifact(a)} className="mt-3 flex w-full max-w-sm items-center gap-3 rounded-xl border border-white/10 bg-secondary/40 p-3 text-left transition-colors hover:border-primary/40 hover:bg-secondary">
@@ -343,7 +527,8 @@ export function LiveChat({
                   </div>
                 </motion.div>
               );
-            })}
+            });
+            })()}
           </div>
         </div>
 
@@ -363,7 +548,7 @@ export function LiveChat({
                 </motion.div>
               )}
             </AnimatePresence>
-            <div className="flex items-end gap-2 rounded-2xl border border-white/10 bg-secondary/60 p-2 transition-all focus-within:border-primary/50 focus-within:bg-secondary focus-within:wm-glow">
+            <div data-tour-target="chat-input" className="flex items-end gap-2 rounded-2xl border border-white/10 bg-secondary/60 p-2 transition-all focus-within:border-primary/50 focus-within:bg-secondary focus-within:wm-glow">
               <Button type="button" size="icon" variant="ghost" className="size-9 shrink-0 rounded-xl text-muted-foreground hover:bg-input hover:text-foreground"><Paperclip className="size-4" /></Button>
               <textarea ref={taRef} value={input} rows={1} onChange={(e) => { setInput(e.target.value); grow(); }} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !menu) { e.preventDefault(); send(input); } }} placeholder={`Message ${emp.name}…  ·  / for commands  ·  @ to route`} className="max-h-40 flex-1 resize-none bg-transparent py-2 text-[15px] leading-relaxed outline-none placeholder:text-muted-foreground" />
               <motion.div whileTap={{ scale: 0.9 }}><Button type="submit" size="icon" disabled={!input.trim() || loading} className="size-9 shrink-0 rounded-xl wm-glow disabled:opacity-40"><ArrowUp className="size-4" /></Button></motion.div>
@@ -373,5 +558,9 @@ export function LiveChat({
         </div>
       </div>
     </div>
+    {paywall && (
+      <PaywallModal payload={paywall} onClose={() => setPaywall(null)} />
+    )}
+    </>
   );
 }

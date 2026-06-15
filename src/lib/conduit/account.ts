@@ -35,6 +35,22 @@ export interface ConduitAccount {
   // Hydrated only after migration 021 runs; falls back to 'system' for
   // older rows that don't have the column yet.
   theme_preference?: "system" | "light" | "dark" | null;
+  // R20 notification prefs — nullable until migration 030 runs.
+  notification_prefs?: { product_updates?: boolean; weekly_digest?: boolean } | null;
+  // R21 onboarding checklist — nullable until migration 032 runs.
+  onboarding_checklist?: Record<string, boolean> | null;
+  // R22 profile — nullable until migration 033 runs.
+  display_name?: string | null;
+  avatar_url?: string | null;
+  // R-462 accent preference — nullable until migration 037 runs.
+  accent_preference?: string | null;
+  // R-463 company brief — nullable until migration 036 runs.
+  company_brief?: string | null;
+  // R461 onboarding goals — nullable until migration 038 runs.
+  onboarding_goals?: string[] | null;
+  onboarding_complete?: boolean;
+  // R544 specialist prefs — nullable until migration 044 runs.
+  specialist_prefs?: Record<string, { response_length?: "short" | "balanced" | "detailed" }> | null;
   created_at: string;
   updated_at: string;
 }

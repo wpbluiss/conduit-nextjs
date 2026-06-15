@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SettingsTabs } from "@/components/conduit/SettingsTabs";
+import { PraxisDangerZone } from "@/components/conduit/PraxisDangerZone";
 import { loadSettingsData } from "@/lib/conduit/settings-data";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +17,7 @@ export default async function ProfileSettings() {
   return (
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8">
       <div className="mx-auto max-w-3xl">
-        <h1 className="serif text-3xl mb-8">Settings</h1>
+        <h1 className="cx-heading-2xl mb-8">Settings</h1>
         <SettingsTabs
           email={data.email}
           fullName={data.fullName}
@@ -24,6 +25,7 @@ export default async function ProfileSettings() {
           usage={data.usage}
           defaultTab="profile"
         />
+        <PraxisDangerZone />
       </div>
     </div>
   );

@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+
+const LandingWaitlist = dynamic(() => import("@/components/LandingWaitlist"), { ssr: false });
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 /* Institutional pacing — slower than v2's 80ms stagger. Reads as gravitas. */
@@ -15,6 +19,13 @@ const PACE = {
 } as const;
 
 export default function Hero() {
+  const shouldReduceMotion = useReducedMotion();
+  const { scrollY } = useScroll();
+  const consoleY = useTransform(scrollY, [0, 600], [0, -40]);
+  // Background drifts at ~83% of scroll speed (17% slower) creating depth.
+  // Extended bounds (-120px top/bottom) prevent edge gaps during parallax.
+  const bgY = useTransform(scrollY, [0, 600], [0, 100]);
+
   // Stable dust-mote positions (deterministic per seed)
   const dust = Array.from({ length: 14 }, (_, i) => {
     const seed = i * 137;
@@ -33,8 +44,25 @@ export default function Hero() {
       id="top"
       className="relative overflow-hidden conduit-bg-canvas min-h-[100vh] pt-32 md:pt-44 pb-24"
     >
-      <div className="conduit-mesh" aria-hidden />
-      <div className="conduit-ember-radial" aria-hidden />
+      {/* Parallax background: extends 120px beyond section bounds so the
+          upward y-offset never reveals a gap. overflow-hidden on the section
+          clips the overhang. Disabled when prefers-reduced-motion is set. */}
+      <motion.div
+        aria-hidden
+        className="pointer-events-none"
+        style={{
+          position: "absolute",
+          top: "-120px",
+          left: 0,
+          right: 0,
+          bottom: "-120px",
+          y: shouldReduceMotion ? 0 : bgY,
+          zIndex: 0,
+        }}
+      >
+        <div className="conduit-mesh" />
+        <div className="conduit-ember-radial" />
+      </motion.div>
       <div
         aria-hidden
         className="absolute inset-0 pointer-events-none overflow-hidden"
@@ -102,13 +130,25 @@ export default function Hero() {
               transition={{ duration: PACE.ctas.duration, ease: EASE, delay: PACE.ctas.delay }}
               className="flex flex-col sm:flex-row gap-3 mt-8"
             >
-              <Link href="/auth/sign-up" className="conduit-btn-primary">
+              <Link id="hero-cta" href="/auth/sign-up" prefetch className="conduit-btn-primary">
                 Open Praxis Console
                 <ArrowRight size={16} weight="bold" />
               </Link>
               <Link href="/products" className="conduit-btn-secondary">
                 See the product family
               </Link>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: EASE, delay: 1.1 }}
+              className="mt-6 max-w-[440px]"
+            >
+              <p className="text-[12px] uppercase tracking-[0.06em] font-semibold text-[var(--color-cream-mute)]">
+                Not ready to sign up yet?
+              </p>
+              <LandingWaitlist />
             </motion.div>
 
             <motion.div
@@ -121,8 +161,6 @@ export default function Hero() {
                 Already running on Praxis
               </span>
               <LunaroMark />
-              <CustomerSlot label="Slot 02" />
-              <CustomerSlot label="Slot 03" />
             </motion.div>
           </div>
 
@@ -130,6 +168,7 @@ export default function Hero() {
           <motion.div
             initial={{ opacity: 0, x: 32, scale: 0.97 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
+            style={{ y: shouldReduceMotion ? 0 : consoleY }}
             transition={{ duration: 1.2, ease: EASE, delay: 0.2 }}
             className="relative hidden lg:block"
           >
@@ -158,14 +197,6 @@ function LunaroMark() {
   );
 }
 
-function CustomerSlot({ label }: { label: string }) {
-  return (
-    <div className="px-3 py-1.5 border border-dashed border-[var(--color-edge)] rounded-md text-[11px] tracking-wider uppercase text-[var(--color-cream-faint)]">
-      {label}
-    </div>
-  );
-}
-
 function ConsolePreview() {
   const team = [
     { name: "Atlas", color: "#C8C5BD", active: true },
@@ -189,21 +220,21 @@ function ConsolePreview() {
         }}
       />
       <div
-        className="relative bg-[var(--color-ink-surface)] border border-[var(--color-edge)] rounded-2xl overflow-hidden"
+        className="relative bg-[var(--color-bg-inverse)] border border-[var(--color-border-on-inverse-strong)] rounded-2xl overflow-hidden"
         style={{
           boxShadow:
             "inset 0 0 0 1px rgba(91, 99, 232, 0.14), 0 0 60px rgba(91, 99, 232, 0.20), 0 24px 64px rgba(15, 17, 21, 0.20)",
         }}
       >
         {/* Window chrome */}
-        <div className="px-4 py-3 border-b border-[var(--color-edge-subtle)] flex items-center gap-3 bg-[var(--color-ink-surface-elevated)]">
+        <div className="px-4 py-3 border-b border-[var(--color-border-on-inverse)] flex items-center gap-3 bg-[var(--color-bg-inverse-elevated)]">
           <div className="flex gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-[#FF6058]/60" />
             <span className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]/60" />
             <span className="w-2.5 h-2.5 rounded-full bg-[#28C940]/60" />
           </div>
           <span
-            className="text-[11px] text-[var(--color-cream-mute)] truncate"
+            className="text-[11px] text-[var(--color-ink-on-inverse-mute)] truncate"
             style={{ fontFamily: "var(--font-mono)" }}
           >
             conduitai.io/app/workspace
@@ -217,8 +248,8 @@ function ConsolePreview() {
         {/* Body */}
         <div className="flex h-[460px]">
           {/* Sidebar */}
-          <div className="w-[148px] border-r border-[var(--color-edge-subtle)] bg-[var(--color-ink-surface)] py-4 px-2.5">
-            <p className="text-[10px] uppercase tracking-wider text-[var(--color-cream-mute)] mb-2.5 px-2 font-semibold">
+          <div className="w-[148px] border-r border-[var(--color-border-on-inverse)] bg-[var(--color-bg-inverse-elevated)] py-4 px-2.5">
+            <p className="text-[10px] uppercase tracking-wider text-[var(--color-ink-on-inverse-mute)] mb-2.5 px-2 font-semibold">
               Team
             </p>
             <div className="space-y-0.5">
@@ -231,8 +262,8 @@ function ConsolePreview() {
                       ? "rgba(91, 99, 232,0.07)"
                       : "transparent",
                     color: e.active
-                      ? "var(--color-cream)"
-                      : "var(--color-cream-soft)",
+                      ? "var(--color-ink-on-inverse)"
+                      : "var(--color-ink-on-inverse-soft)",
                   }}
                 >
                   <span
@@ -246,7 +277,7 @@ function ConsolePreview() {
                 </div>
               ))}
             </div>
-            <p className="text-[10px] uppercase tracking-wider text-[var(--color-cream-mute)] mt-5 mb-2 px-2 font-semibold">
+            <p className="text-[10px] uppercase tracking-wider text-[var(--color-ink-on-inverse-mute)] mt-5 mb-2 px-2 font-semibold">
               Recent
             </p>
             <div className="space-y-1.5 px-2">
@@ -257,7 +288,7 @@ function ConsolePreview() {
               ].map((t) => (
                 <p
                   key={t}
-                  className="text-[11px] text-[var(--color-cream-mute)] truncate"
+                  className="text-[11px] text-[var(--color-ink-on-inverse-mute)] truncate"
                 >
                   {t}
                 </p>
@@ -266,11 +297,11 @@ function ConsolePreview() {
           </div>
 
           {/* Chat */}
-          <div className="flex-1 flex flex-col bg-[var(--color-ink-canvas)]">
+          <div className="flex-1 flex flex-col bg-[var(--color-bg-inverse)]">
             <div className="flex-1 px-5 py-4 overflow-hidden space-y-4">
               <div className="flex justify-end">
                 <div
-                  className="max-w-[78%] px-3.5 py-2 text-[13px] text-[var(--color-cream)]"
+                  className="max-w-[78%] px-3.5 py-2 text-[13px] text-[var(--color-ink-on-inverse)]"
                   style={{
                     background: "rgba(91, 99, 232, 0.12)",
                     border: "1px solid rgba(91, 99, 232, 0.28)",
@@ -287,21 +318,21 @@ function ConsolePreview() {
                     className="w-1.5 h-1.5 rounded-full"
                     style={{ background: "#C8C5BD" }}
                   />
-                  <span className="text-[10px] uppercase tracking-wider text-[var(--color-cream-mute)]">
+                  <span className="text-[10px] uppercase tracking-wider text-[var(--color-ink-on-inverse-mute)]">
                     Atlas · Chief of Staff
                   </span>
                 </div>
                 <div
-                  className="text-[13px] text-[var(--color-cream)] px-3.5 py-2.5 max-w-[88%] leading-[1.6]"
+                  className="text-[13px] text-[var(--color-ink-on-inverse)] px-3.5 py-2.5 max-w-[88%] leading-[1.6]"
                   style={{
-                    background: "var(--color-ink-surface-elevated)",
+                    background: "var(--color-bg-inverse-elevated)",
                     borderLeft: "2px solid #C8C5BD",
                     borderRadius: "0 16px 16px 16px",
                   }}
                 >
                   Here&apos;s where everyone is right now —
                   <br />
-                  <span className="text-[var(--color-cream-soft)]">
+                  <span className="text-[var(--color-ink-on-inverse-soft)]">
                     Marketing has three drafts staged. Sales pipeline is up 12%
                     week-over-week. Engineering is mid-build on lunaro-v3,
                     deploy ETA seven minutes.
@@ -310,7 +341,7 @@ function ConsolePreview() {
               </div>
 
               <div
-                className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-[var(--color-cream-mute)] py-1.5 px-3 rounded-md w-fit"
+                className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-[var(--color-ink-on-inverse-mute)] py-1.5 px-3 rounded-md w-fit"
                 style={{
                   background: "rgba(96, 165, 250, 0.05)",
                   border: "1px solid rgba(96, 165, 250, 0.15)",
@@ -324,12 +355,12 @@ function ConsolePreview() {
               </div>
             </div>
 
-            <div className="px-5 py-3 border-t border-[var(--color-edge-subtle)] bg-[var(--color-ink-surface)]">
+            <div className="px-5 py-3 border-t border-[var(--color-border-on-inverse)] bg-[var(--color-bg-inverse-elevated)]">
               <div
-                className="flex items-center gap-2 px-4 py-2 rounded-full border bg-[var(--color-ink-canvas)]"
-                style={{ borderColor: "var(--color-edge)" }}
+                className="flex items-center gap-2 px-4 py-2 rounded-full border bg-[var(--color-bg-inverse)]"
+                style={{ borderColor: "var(--color-border-on-inverse)" }}
               >
-                <span className="text-[12px] text-[var(--color-cream-mute)] flex-1">
+                <span className="text-[12px] text-[var(--color-ink-on-inverse-mute)] flex-1">
                   Talk to your team…
                 </span>
                 <span

@@ -3,8 +3,22 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, EnvelopeSimple, CheckCircle } from "@phosphor-icons/react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { PraxisLogo } from "@/components/conduit/PraxisLogo";
+import { OAuthButtons } from "@/components/conduit/OAuthButtons";
+
+const EASE = [0.25, 1, 0.5, 1] as const;
+
+const CONTAINER = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.2 } },
+};
+const ITEM = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } },
+};
 
 export default function SignInPage() {
   return (
@@ -16,20 +30,47 @@ export default function SignInPage() {
 
 function SignInShell() {
   return (
-    <main className="praxis-root min-h-screen flex items-center justify-center bg-[var(--color-surface)]" />
+    <main className="praxis-root conduit-bg-canvas min-h-screen" />
   );
 }
+
+const QUERY_ERROR_MESSAGES: Record<string, string> = {
+  confirmation_failed:
+    "Email confirmation failed. Please try signing up again or contact support.",
+};
+
+type Mode = "password" | "magic-link";
 
 function SignInForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/app/workspace";
+  const rawNext = params.get("next") ?? "/app";
+  // Sanitize to prevent open-redirect: must be relative and not an auth route.
+  const next =
+    rawNext.startsWith("/") && !rawNext.startsWith("/auth")
+      ? rawNext
+      : "/app";
+  const queryError = params.get("error");
+
+  const [mode, setMode] = useState<Mode>("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    queryError
+      ? (QUERY_ERROR_MESSAGES[queryError] ??
+          "An error occurred. Please try again.")
+      : null,
+  );
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
 
-  async function onSubmit(e: React.FormEvent) {
+  function switchMode(next: Mode) {
+    setMode(next);
+    setError(null);
+    setMagicLinkSent(false);
+  }
+
+  async function onPasswordSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -43,14 +84,56 @@ function SignInForm() {
       setLoading(false);
       return;
     }
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal?.currentLevel === "aal1" && aal?.nextLevel === "aal2") {
+      router.replace(`/auth/mfa?next=${encodeURIComponent(next)}`);
+      return;
+    }
     router.replace(next);
     router.refresh();
   }
 
+  async function onMagicLinkSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    const supabase = createSupabaseBrowserClient();
+    const emailRedirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo },
+    });
+    setLoading(false);
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    setMagicLinkSent(true);
+  }
+
   return (
-    <main className="praxis-root min-h-screen flex items-center justify-center px-6 py-16 bg-[var(--color-surface)]">
-      <div className="w-full max-w-sm">
-        <div className="mb-10 text-center">
+    <main className="conduit-bg-inverse min-h-screen relative overflow-hidden flex items-center justify-center px-6 pt-16 pb-32 sm:pb-16">
+      <div className="conduit-mesh" aria-hidden />
+      <div className="conduit-ember-radial" aria-hidden />
+
+      <div
+        aria-hidden
+        className="absolute left-1/2 bottom-0 -translate-x-1/2 w-[700px] h-[320px] pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse at center bottom, rgba(255,138,61,0.14) 0%, transparent 65%)",
+          filter: "blur(48px)",
+        }}
+      />
+
+      <motion.div
+        initial="hidden"
+        animate="show"
+        variants={CONTAINER}
+        className="relative w-full max-w-[400px]"
+      >
+        {/* Logo */}
+        <motion.div variants={ITEM} className="mb-10 text-center">
           <Link
             href="/"
             className="inline-flex items-center justify-center"
@@ -58,66 +141,289 @@ function SignInForm() {
           >
             <PraxisLogo size={48} withWordmark glow />
           </Link>
-          <p className="mt-4 text-sm text-[var(--color-text-muted)]">
-            Sign in to Praxis
+          <p className="mt-3 text-sm text-[var(--color-ink-on-inverse-soft)]">
+            Sign in to your Praxis workspace{" "}
+            <span className="text-[var(--color-ink-on-inverse-mute)] text-xs">
+              — by Conduit AI
+            </span>
           </p>
-        </div>
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2"
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-[var(--color-surface-elevated)] hairline px-4 py-3 text-[var(--color-text)] outline-none focus:border-[var(--color-accent)]"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2"
+        </motion.div>
+
+        {/* Form card */}
+        <motion.div
+          variants={ITEM}
+          className="rounded-2xl border border-[rgba(255,255,255,0.08)] p-8"
+          style={{
+            background: "var(--color-bg-inverse-elevated)",
+            boxShadow:
+              "inset 0 0 0 1px rgba(255,138,61,0.07), 0 24px 64px rgba(10,9,8,0.55)",
+          }}
+        >
+          <OAuthButtons redirectTo={next} />
+
+          {/* Mode tabs */}
+          <div className="flex rounded-lg overflow-hidden border border-[rgba(255,255,255,0.08)] mb-6 mt-1">
+            <button
+              type="button"
+              onClick={() => switchMode("password")}
+              className={`flex-1 py-2 text-[13px] font-medium transition-colors ${
+                mode === "password"
+                  ? "bg-[rgba(255,255,255,0.06)] text-[var(--color-ink-on-inverse)]"
+                  : "text-[var(--color-ink-on-inverse-mute)] hover:text-[var(--color-ink-on-inverse-soft)]"
+              }`}
             >
               Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-[var(--color-surface-elevated)] hairline px-4 py-3 text-[var(--color-text)] outline-none focus:border-[var(--color-accent)]"
-            />
+            </button>
+            <button
+              type="button"
+              onClick={() => switchMode("magic-link")}
+              className={`flex-1 py-2 text-[13px] font-medium transition-colors border-l border-[rgba(255,255,255,0.08)] ${
+                mode === "magic-link"
+                  ? "bg-[rgba(255,255,255,0.06)] text-[var(--color-ink-on-inverse)]"
+                  : "text-[var(--color-ink-on-inverse-mute)] hover:text-[var(--color-ink-on-inverse-soft)]"
+              }`}
+            >
+              Email link
+            </button>
           </div>
-          {error && (
-            <p className="text-sm text-[var(--color-pink)]">{error}</p>
-          )}
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full justify-center disabled:opacity-50"
-          >
-            {loading ? "Signing in..." : "Sign in"}
-          </button>
-        </form>
-        <p className="mt-6 text-center text-sm text-[var(--color-text-muted)]">
+
+          <AnimatePresence mode="wait">
+            {mode === "password" ? (
+              <motion.form
+                key="password"
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.18, ease: EASE }}
+                onSubmit={onPasswordSubmit}
+                className="space-y-5"
+              >
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-xs uppercase tracking-[0.14em] text-[var(--color-ink-on-inverse-soft)] mb-2"
+                  >
+                    Email
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@company.com"
+                    className="w-full rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] text-[15px] outline-none transition-all duration-200 focus:border-[rgba(255,138,61,0.55)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.10)] placeholder:text-[var(--color-ink-on-inverse-mute)]"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label
+                      htmlFor="password"
+                      className="block text-xs uppercase tracking-[0.14em] text-[var(--color-ink-on-inverse-soft)]"
+                    >
+                      Password
+                    </label>
+                    <Link
+                      href="/auth/forgot-password"
+                      className="text-[11px] text-[var(--color-ink-on-inverse-mute)] hover:text-[var(--color-ember-300)] transition-colors"
+                      tabIndex={-1}
+                    >
+                      Forgot?
+                    </Link>
+                  </div>
+                  <input
+                    id="password"
+                    type="password"
+                    required
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] text-[15px] outline-none transition-all duration-200 focus:border-[rgba(255,138,61,0.55)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.10)]"
+                  />
+                </div>
+
+                {error && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-sm text-red-400 leading-[1.5]"
+                  >
+                    {error}
+                  </motion.p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="conduit-auth-btn w-full justify-center disabled:opacity-60"
+                >
+                  {loading ? (
+                    <>
+                      <SpinnerIcon />
+                      Signing in…
+                    </>
+                  ) : (
+                    <>
+                      Sign in
+                      <ArrowRight size={15} weight="bold" />
+                    </>
+                  )}
+                </button>
+              </motion.form>
+            ) : magicLinkSent ? (
+              <motion.div
+                key="sent"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, ease: EASE }}
+                className="flex flex-col items-center text-center py-4 gap-4"
+              >
+                <div
+                  className="grid place-items-center w-14 h-14 rounded-2xl"
+                  style={{
+                    background: "rgba(255,138,61,0.08)",
+                    border: "1px solid rgba(255,138,61,0.22)",
+                  }}
+                >
+                  <CheckCircle
+                    size={28}
+                    weight="duotone"
+                    style={{ color: "var(--color-accent, #FF8A3D)" }}
+                  />
+                </div>
+                <div>
+                  <p
+                    className="text-[15px] font-semibold mb-1"
+                    style={{ color: "var(--color-ink-on-inverse)" }}
+                  >
+                    Check your email
+                  </p>
+                  <p
+                    className="text-sm leading-relaxed"
+                    style={{ color: "var(--color-ink-on-inverse-soft)" }}
+                  >
+                    We sent a magic link to{" "}
+                    <span style={{ color: "var(--color-ink-on-inverse)" }}>
+                      {email}
+                    </span>
+                    . Click it to sign in instantly.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMagicLinkSent(false)}
+                  className="text-xs text-[var(--color-ink-on-inverse-mute)] hover:text-[var(--color-ink-on-inverse-soft)] transition-colors"
+                >
+                  Use a different email
+                </button>
+              </motion.div>
+            ) : (
+              <motion.form
+                key="magic-link"
+                initial={{ opacity: 0, x: 8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 8 }}
+                transition={{ duration: 0.18, ease: EASE }}
+                onSubmit={onMagicLinkSubmit}
+                className="space-y-5"
+              >
+                <div>
+                  <label
+                    htmlFor="ml-email"
+                    className="block text-xs uppercase tracking-[0.14em] text-[var(--color-ink-on-inverse-soft)] mb-2"
+                  >
+                    Email
+                  </label>
+                  <input
+                    id="ml-email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@company.com"
+                    className="w-full rounded-lg bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[var(--color-ink-on-inverse)] text-[15px] outline-none transition-all duration-200 focus:border-[rgba(255,138,61,0.55)] focus:shadow-[0_0_0_3px_rgba(255,138,61,0.10)] placeholder:text-[var(--color-ink-on-inverse-mute)]"
+                  />
+                </div>
+
+                {error && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-sm text-red-400 leading-[1.5]"
+                  >
+                    {error}
+                  </motion.p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="conduit-auth-btn w-full justify-center disabled:opacity-60"
+                >
+                  {loading ? (
+                    <>
+                      <SpinnerIcon />
+                      Sending link…
+                    </>
+                  ) : (
+                    <>
+                      <EnvelopeSimple size={15} weight="bold" />
+                      Send magic link
+                    </>
+                  )}
+                </button>
+
+                <p
+                  className="text-[12px] text-center leading-relaxed"
+                  style={{ color: "var(--color-ink-on-inverse-mute)" }}
+                >
+                  We&apos;ll email you a one-click sign-in link. No password needed.
+                </p>
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        <motion.p
+          variants={ITEM}
+          className="mt-6 text-center text-sm text-[var(--color-ink-on-inverse-soft)]"
+        >
           New here?{" "}
           <Link
             href="/auth/sign-up"
-            className="text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+            className="text-[var(--color-ember-500)] hover:text-[var(--color-ember-300)] transition-colors font-medium"
           >
             Create an account
           </Link>
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
     </main>
+  );
+}
+
+function SpinnerIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+      className="animate-spin"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="9"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeDasharray="30 28"
+      />
+    </svg>
   );
 }

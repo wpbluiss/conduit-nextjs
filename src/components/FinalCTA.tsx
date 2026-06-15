@@ -3,10 +3,16 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
+const HOVER_TRANSITION = { duration: 0.18, ease: EASE };
+
+const MotionLink = motion(Link);
 
 export default function FinalCTA() {
+  const reduced = useReducedMotion();
+
   return (
     <section
       id="cta"
@@ -57,7 +63,7 @@ export default function FinalCTA() {
           }}
           className="conduit-display-2xl"
         >
-          Stop hiring. <span className="conduit-ember-text">Start deploying.</span>
+          Nine specialists. <span className="conduit-ember-text">Zero payroll.</span>
         </motion.h2>
 
         <motion.p
@@ -85,21 +91,28 @@ export default function FinalCTA() {
           }}
           className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3"
         >
-          <Link
+          <MotionLink
             href="/auth/sign-up"
+            prefetch
             className="conduit-btn-primary justify-center"
             style={{ padding: "16px 32px", fontSize: "15px" }}
+            whileHover={reduced ? {} : { y: -2, boxShadow: "0 8px 32px rgba(91,99,232,0.40)" }}
+            whileTap={reduced ? {} : { scale: 0.97 }}
+            transition={HOVER_TRANSITION}
           >
             Open Praxis Console
             <ArrowRight size={16} weight="bold" />
-          </Link>
-          <Link
+          </MotionLink>
+          <MotionLink
             href="/products"
             className="conduit-btn-secondary justify-center"
             style={{ padding: "16px 28px", fontSize: "15px" }}
+            whileHover={reduced ? {} : { y: -2 }}
+            whileTap={reduced ? {} : { scale: 0.97 }}
+            transition={HOVER_TRANSITION}
           >
             See the product family
-          </Link>
+          </MotionLink>
         </motion.div>
 
         <motion.p

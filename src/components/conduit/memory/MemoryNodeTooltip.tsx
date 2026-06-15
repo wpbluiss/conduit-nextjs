@@ -27,13 +27,37 @@ const KIND_LABEL: Record<MemoryKind, string> = {
 
 interface Props {
   memory: MemoryRecord;
+  searchQuery?: string;
   onPatched: (next: Partial<MemoryRecord> & { id: string }) => void;
   onArchived: (id: string) => void;
   onEdit: () => void;
 }
 
+function HighlightedText({ text, query }: { text: string; query: string }) {
+  if (!query) return <>{text}</>;
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark
+        style={{
+          background: "color-mix(in srgb, var(--pdl-accent, #7C6CFF) 25%, transparent)",
+          color: "inherit",
+          borderRadius: "2px",
+          padding: "0 1px",
+        }}
+      >
+        {text.slice(idx, idx + query.length)}
+      </mark>
+      {text.slice(idx + query.length)}
+    </>
+  );
+}
+
 export function MemoryNodeTooltip({
   memory,
+  searchQuery = "",
   onPatched,
   onArchived,
   onEdit,
@@ -76,7 +100,9 @@ export function MemoryNodeTooltip({
     <div className="mem-tooltip" role="dialog" aria-label="Memory details">
       <div className="mem-tooltip-kind">{KIND_LABEL[memory.kind] ?? memory.kind}</div>
 
-      <p className="mem-tooltip-content">{memory.content}</p>
+      <p className="mem-tooltip-content">
+        <HighlightedText text={memory.content} query={searchQuery} />
+      </p>
 
       <div className="mem-tooltip-scope">
         {memory.scope.length === 0 ? (

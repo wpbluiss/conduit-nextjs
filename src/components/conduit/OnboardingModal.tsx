@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { PraxisLogo } from "./PraxisLogo";
+import { track } from "@/lib/analytics/track";
+
+const DISMISS_KEY = "conduit_onboarding_skip_v1";
 
 const BUSINESS_TYPES = [
   "cleaning",
@@ -18,26 +21,72 @@ const BUSINESS_TYPES = [
   "other",
 ];
 
+const GOAL_OPTIONS = [
+  "Grow sales & revenue",
+  "Launch a new product or service",
+  "Raise funding",
+  "Build out the team",
+  "Cut costs & improve margins",
+  "Enter a new market",
+  "Streamline operations",
+  "Build brand awareness",
+];
+
+const MAX_GOALS = 3;
+
 export function OnboardingModal({
   defaultName,
 }: {
   defaultName: string;
 }) {
   const router = useRouter();
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  // null = not yet determined (avoid SSR flash). true = show. false = hidden.
+  const [visible, setVisible] = useState<boolean | null>(null);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [name, setName] = useState("");
   const [businessType, setBusinessType] = useState("");
   const [customType, setCustomType] = useState("");
+  const [goals, setGoals] = useState<string[]>([]);
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    try {
+      setVisible(!localStorage.getItem(DISMISS_KEY));
+    } catch {
+      setVisible(true);
+    }
+  }, []);
+
+  const dismiss = () => {
+    try {
+      localStorage.setItem(DISMISS_KEY, "1");
+    } catch {
+      /* ignore */
+    }
+    setVisible(false);
+  };
+
   const finalType = businessType === "other" ? customType : businessType;
+
+  const toggleGoal = (goal: string) => {
+    setGoals((prev) => {
+      if (prev.includes(goal)) return prev.filter((g) => g !== goal);
+      if (prev.length >= MAX_GOALS) return prev;
+      return [...prev, goal];
+    });
+  };
+
+  if (!visible) return null;
+
+  const TOTAL_STEPS = 4;
+  const displayStep = Math.min(step, TOTAL_STEPS);
 
   async function submit() {
     setSubmitting(true);
     setError(null);
-    setStep(4);
+    setStep(5);
     const res = await fetch("/api/conduit/onboarding", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -45,16 +94,19 @@ export function OnboardingModal({
         name: name.trim(),
         business_type: finalType.trim(),
         business_description: description.trim(),
+        goals,
       }),
     });
     if (!res.ok) {
       const j = await res.json().catch(() => ({}));
       setError(j.error || "Something went wrong, try again.");
       setSubmitting(false);
-      setStep(3);
+      setStep(4);
       return;
     }
     const j = await res.json();
+    try { localStorage.setItem("conduit_post_onboarding_nudge_v1", "1"); } catch { /* ignore */ }
+    track("onboarding_completed", { business_type: finalType.trim() });
     router.replace(j.conversation_id ? `/app?c=${j.conversation_id}` : "/app");
     router.refresh();
   }
@@ -64,16 +116,27 @@ export function OnboardingModal({
       {/* Step indicator */}
       <div className="px-8 md:px-12 pt-8">
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center gap-2 mb-2">
-            <PraxisLogo size={24} />
-            <span className="text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
-              Praxis · Step {Math.min(step, 3)} of 3
-            </span>
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center gap-2">
+              <PraxisLogo size={24} />
+              <span className="text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
+                Praxis · Step {displayStep} of {TOTAL_STEPS}
+              </span>
+            </div>
+            {step < 5 && (
+              <button
+                type="button"
+                onClick={dismiss}
+                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+              >
+                Skip for now
+              </button>
+            )}
           </div>
           <div className="h-[2px] bg-[var(--color-border)] relative rounded-full overflow-hidden">
             <div
               className="absolute left-0 top-0 h-[2px] bg-[var(--color-accent)] transition-all duration-300"
-              style={{ width: `${(Math.min(step, 3) / 3) * 100}%` }}
+              style={{ width: `${(displayStep / TOTAL_STEPS) * 100}%` }}
             />
           </div>
         </div>
@@ -165,10 +228,67 @@ export function OnboardingModal({
           {step === 3 && (
             <div className="onboarding-step">
               <h2 className="serif text-3xl md:text-5xl leading-[1.05]">
+                What are you working toward?
+              </h2>
+              <p className="mt-3 text-sm md:text-base text-[var(--color-text-muted)]">
+                Pick up to {MAX_GOALS}. Your team will keep these front of mind.
+              </p>
+              <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {GOAL_OPTIONS.map((goal) => {
+                  const selected = goals.includes(goal);
+                  const atMax = goals.length >= MAX_GOALS && !selected;
+                  return (
+                    <button
+                      key={goal}
+                      type="button"
+                      onClick={() => toggleGoal(goal)}
+                      disabled={atMax}
+                      className={`flex items-center gap-3 px-4 py-3 text-sm rounded-xl border text-left transition-colors ${
+                        selected
+                          ? "border-[var(--color-accent)] text-[var(--color-accent-hi)] bg-[color-mix(in_srgb,var(--color-accent)_10%,transparent)]"
+                          : atMax
+                            ? "border-[var(--color-border)] text-[var(--color-text-muted)] opacity-40 cursor-not-allowed"
+                            : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-text)] hover:text-[var(--color-text)]"
+                      }`}
+                    >
+                      <span
+                        className={`flex-shrink-0 w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
+                          selected
+                            ? "border-[var(--color-accent)] bg-[var(--color-accent)]"
+                            : "border-[var(--color-border)]"
+                        }`}
+                      >
+                        {selected && <Check size={12} strokeWidth={3} className="text-white" />}
+                      </span>
+                      {goal}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-4 text-xs text-[var(--color-text-muted)]">
+                {goals.length}/{MAX_GOALS} selected
+              </p>
+              <div className="mt-10 flex justify-between">
+                <button onClick={() => setStep(2)} className="btn-secondary">
+                  Back
+                </button>
+                <button
+                  onClick={() => setStep(4)}
+                  className="btn-primary"
+                >
+                  Continue <ArrowRight size={16} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 4 && (
+            <div className="onboarding-step">
+              <h2 className="serif text-3xl md:text-5xl leading-[1.05]">
                 Tell Atlas what you&apos;re working on.
               </h2>
               <p className="mt-3 text-sm md:text-base text-[var(--color-text-muted)]">
-                A sentence or two. Goals, problems, what success looks like.
+                A sentence or two. Context, constraints, what success looks like.
               </p>
               <textarea
                 value={description}
@@ -184,7 +304,7 @@ export function OnboardingModal({
                 </p>
               )}
               <div className="mt-10 flex justify-between">
-                <button onClick={() => setStep(2)} className="btn-secondary">
+                <button onClick={() => setStep(3)} className="btn-secondary">
                   Back
                 </button>
                 <button
@@ -198,7 +318,7 @@ export function OnboardingModal({
             </div>
           )}
 
-          {step === 4 && (
+          {step === 5 && (
             <div className="onboarding-step text-center">
               <div className="flex justify-center gap-2 mb-6">
                 <span

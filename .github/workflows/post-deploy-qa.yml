@@ -1,0 +1,50 @@
+name: Post-Deploy QA
+
+# After anything lands on main, Vercel auto-deploys production (conduitai.io).
+# This smoke-tests the live site; if it's unhealthy it files a claude-queue issue so
+# the fleet fixes forward, and fails the run (red check) as a loud signal.
+# NOTE: this is a plain curl check, NOT claude-code-action — that action does not
+# support `push` events (it errors "Unsupported event type: push").
+
+permissions:
+  contents: read
+  issues: write
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      # Give Vercel time to build & promote the new production deploy.
+      - run: sleep 120
+      - name: Smoke test production
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -uo pipefail
+          BASE="https://conduitai.io"
+          PATHS=("/" "/api/health")
+          fail=""
+          for u in "${PATHS[@]}"; do
+            ok=""
+            last=""
+            for attempt in 1 2 3 4 5 6 7 8; do
+              code=$(curl -sL -o /dev/null -w "%{http_code}" --max-time 25 "$BASE$u" || echo 000)
+              last="$code"
+              if [ "$code" = "200" ]; then ok=1; break; fi
+              echo "try $attempt: $BASE$u -> $code"; sleep 20
+            done
+            [ -z "$ok" ] && fail="$fail $u(last=$last)"
+          done
+          if [ -n "$fail" ]; then
+            echo "PROD SMOKE FAILED:$fail"
+            gh issue create -R "$GITHUB_REPOSITORY" --label claude-queue \
+              --title "Production smoke test failed after deploy ${GITHUB_SHA:0:7}" \
+              --body "Post-deploy smoke test failed for:$fail (commit $GITHUB_SHA). Check the latest Vercel deploy; if it is broken, revert $GITHUB_SHA and fix forward." || true
+            exit 1
+          fi
+          echo "Production healthy ✅"

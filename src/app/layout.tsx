@@ -5,9 +5,12 @@ import "./globals.css";
 import "@/styles/praxis-tokens.css";
 import "@/styles/praxis-system.css";
 import "@/styles/praxis-design-language.css";
-import "@/styles/engineering-cinema.css";
-import "@/styles/memory-canvas.css";
+// engineering-cinema.css and memory-canvas.css are app-console-only —
+// imported in src/app/app/layout.tsx so marketing pages don't pay the ~36 KB.
 import { ThemeBoot } from "@/components/conduit/ThemeBoot";
+import { PwaInstaller } from "@/components/conduit/PwaInstaller";
+import { CookieConsentBanner } from "@/components/conduit/CookieConsentBanner";
+import { PostHogProvider } from "@/components/PostHogProvider";
 
 // R18 Slice 0: body sans switched from Inter to Geist Sans per the
 // design-language spec (frontend-design skill forbids Inter as generic
@@ -43,6 +46,7 @@ export const metadata: Metadata = {
   title: "Conduit AI — Intelligence at work",
   description:
     "Conduit AI builds Praxis, the operating system for autonomous AI workforces. Voice, sales, engineering, ops, finance — running 24/7.",
+  manifest: "/manifest.json",
   icons: {
     icon: "/praxis-mark.png",
     apple: "/praxis-mark.png",
@@ -55,7 +59,12 @@ export const metadata: Metadata = {
     siteName: "Conduit AI",
     type: "website",
     images: [
-      { url: "/praxis-mark.png", width: 632, height: 961, alt: "Praxis" },
+      {
+        url: "/api/og",
+        width: 1200,
+        height: 630,
+        alt: "Praxis — Your AI-powered business team",
+      },
     ],
   },
   twitter: {
@@ -63,7 +72,7 @@ export const metadata: Metadata = {
     title: "Conduit AI — Intelligence at work",
     description:
       "Conduit AI builds Praxis, the operating system for autonomous AI workforces.",
-    images: ["/praxis-mark.png"],
+    images: ["/api/og"],
   },
 };
 
@@ -83,7 +92,11 @@ export default function RootLayout({
         <a href="#main-content" className="conduit-skip-link">
           Skip to content
         </a>
-        <div id="main-content">{children}</div>
+        <PostHogProvider>
+          <div id="main-content">{children}</div>
+        </PostHogProvider>
+        <PwaInstaller />
+        <CookieConsentBanner />
       </body>
     </html>
   );

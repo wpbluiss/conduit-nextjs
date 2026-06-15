@@ -1,17 +1,58 @@
+import type { Metadata } from "next";
+import "@/styles/engineering-cinema.css";
+import "@/styles/memory-canvas.css";
+import "@/styles/console-tokens.css";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentAccount } from "@/lib/conduit/account";
 import { Sidebar } from "@/components/conduit/Sidebar";
 import { OnboardingModal } from "@/components/conduit/OnboardingModal";
 import { UpgradeNudge } from "@/components/conduit/UpgradeNudge";
+import { TokenBudgetNudge } from "@/components/conduit/TokenBudgetNudge";
 import { RouteProgress } from "@/components/conduit/RouteProgress";
 import { PraxisCanvasTintProvider } from "@/components/conduit/praxis/PraxisCanvasTintProvider";
+import { ToastProvider } from "@/context/ToastContext";
+import { UserProvider } from "@/context/UserContext";
 import { tierById } from "@/lib/billing/tiers";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { getInFlightBuilds } from "@/lib/engineering/in-flight";
+import { PostOnboardingNudge } from "@/components/conduit/PostOnboardingNudge";
+import { FirstRunTour } from "@/components/conduit/FirstRunTour";
+import { KeyboardShortcutsOverlay } from "@/components/conduit/KeyboardShortcutsOverlay";
+import { CommandPalette } from "@/components/conduit/CommandPalette";
+import { WelcomeChecklist } from "@/components/conduit/WelcomeChecklist";
+import { Suspense } from "react";
+import { ReferralClaimer } from "@/components/conduit/ReferralClaimer";
+import { NicknameProvider } from "@/context/NicknameContext";
+import { PostHogIdentify } from "@/components/PostHogIdentify";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const current = await getCurrentAccount();
+  const wsName =
+    (current?.account as unknown as { workspace_name?: string | null })
+      ?.workspace_name ?? null;
+  const title = wsName ? `${wsName} — Praxis` : "Praxis Workspace";
+  return {
+    title,
+    robots: { index: false, follow: false },
+    openGraph: {
+      title,
+      description: "Your AI-powered business team — voice, sales, engineering, ops, finance.",
+      images: [
+        {
+          url: `/api/og?title=${encodeURIComponent(title)}&description=Your+AI-powered+business+team`,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+  };
+}
 
 export default async function AppLayout({
   children,
@@ -20,9 +61,20 @@ export default async function AppLayout({
 }) {
   const current = await getCurrentAccount();
   if (!current) {
-    redirect("/auth/sign-in?next=/app");
+    const reqHeaders = await headers();
+    const pathname = reqHeaders.get("x-next-pathname") ?? "/app";
+    redirect(`/auth/sign-in?next=${encodeURIComponent(pathname)}`);
   }
   const { account, user } = current;
+
+  // Email verification guard — only active when Supabase email confirmation
+  // is enabled. If email_confirmed_at is null the user has not yet verified
+  // their email; send them to the holding page so they can resend the link.
+  if (user.email && !user.email_confirmed_at) {
+    redirect(
+      `/auth/check-your-email?email=${encodeURIComponent(user.email)}`,
+    );
+  }
   const supabase = await createSupabaseServerClient();
   const onboarded = Boolean(
     account.business_type && account.business_description,
@@ -38,22 +90,55 @@ export default async function AppLayout({
     getInFlightBuilds(supabase, account.id),
   ]);
 
-  // Last activity per employee (for team status dots)
-  const { data: latestPerEmployee } = await supabase
-    .from("conduit_messages")
-    .select("employee, created_at")
-    .eq("role", "assistant")
-    .in(
-      "conversation_id",
-      (convos ?? []).map((c) => c.id),
-    )
-    .order("created_at", { ascending: false })
-    .limit(50);
+  const convoIds = (convos ?? []).map((c) => c.id as string);
+
+  // Last activity per employee (for team status dots) + last message preview (for sidebar quick-peek)
+  // Label assignments for sidebar dots — run in parallel with messages query
+  const [{ data: latestPerEmployee }, labelAssignmentsResult, { data: labelDefs }] =
+    await Promise.all([
+      supabase
+        .from("conduit_messages")
+        .select("employee, created_at, content, conversation_id")
+        .eq("role", "assistant")
+        .in("conversation_id", convoIds)
+        .order("created_at", { ascending: false })
+        .limit(100),
+      convoIds.length
+        ? supabase
+            .from("conduit_conversation_label_assignments")
+            .select("conversation_id, label_id")
+            .in("conversation_id", convoIds)
+        : { data: [] as { conversation_id: string; label_id: string }[] },
+      supabase
+        .from("conduit_conversation_labels")
+        .select("id, name, color")
+        .eq("account_id", account.id),
+    ]);
+  const labelAssignments = labelAssignmentsResult.data;
+
+  // Build label lookup map: conversationId → label[]
+  type LabelShape = { id: string; name: string; color: string };
+  const labelById: Record<string, LabelShape> = {};
+  for (const l of labelDefs ?? []) {
+    const id = l.id as string;
+    labelById[id] = { id, name: l.name as string, color: l.color as string };
+  }
+  const sidebarLabelMap: Record<string, LabelShape[]> = {};
+  for (const a of labelAssignments ?? []) {
+    const cid = a.conversation_id as string;
+    const lbl = labelById[a.label_id as string];
+    if (!lbl) continue;
+    if (!sidebarLabelMap[cid]) sidebarLabelMap[cid] = [];
+    sidebarLabelMap[cid].push(lbl);
+  }
 
   const lastActiveMap: Record<string, string> = {};
+  const previewMap: Record<string, string> = {};
   for (const m of latestPerEmployee ?? []) {
     const e = m.employee as string | null;
     if (e && !lastActiveMap[e]) lastActiveMap[e] = m.created_at as string;
+    const cid = m.conversation_id as string | null;
+    if (cid && !previewMap[cid]) previewMap[cid] = (m.content as string) ?? "";
   }
   const team = (EMPLOYEE_ORDER as EmployeeKey[]).map((emp) => ({
     employee: emp,
@@ -66,19 +151,50 @@ export default async function AppLayout({
       : (tierById(account.tier_id).allowedEmployees as EmployeeKey[])
   ) as EmployeeKey[];
 
+  const tier = tierById(account.tier_id);
+  const effectiveAllowance = account.internal_account
+    ? Math.max(tier.monthlyTokenAllowance, account.monthly_token_cap)
+    : tier.monthlyTokenAllowance + (account.bonus_tokens ?? 0);
+
   const userName =
     (user.user_metadata?.full_name as string | undefined) ||
     user.email?.split("@")[0] ||
     "you";
 
+  // Show welcome checklist only to accounts created within the last 7 days.
+  const accountAgeMs = Date.now() - new Date(account.created_at).getTime();
+  const isNewAccount = accountAgeMs < 7 * 24 * 60 * 60 * 1000;
+  const checklistDismissed = Boolean(
+    (account.onboarding_checklist as Record<string, boolean> | null)?.dismissed,
+  );
+  const gsDismissed = Boolean(
+    (account.onboarding_checklist as Record<string, boolean> | null)?.gs_dismissed,
+  );
+
+  const initialUser = {
+    id: user.id,
+    email: user.email ?? "",
+    plan: account.tier_id,
+  };
+
+  const specialistNicknames = (
+    (account as unknown as { specialist_nicknames?: Record<string, string> })
+      .specialist_nicknames ?? {}
+  ) as Partial<Record<EmployeeKey, string>>;
+
   return (
     <div className="praxis-root h-screen flex bg-[var(--color-surface)] text-[var(--color-text)]">
+      <a href="#app-main" className="conduit-skip-link">Skip to main content</a>
+      <UserProvider initialUser={initialUser}>
+      <NicknameProvider initialNicknames={specialistNicknames}>
+      <ToastProvider>
       <PraxisCanvasTintProvider>
         <RouteProgress />
         <Sidebar
           userEmail={user.email ?? ""}
           accountName={account.name}
-          conversations={convos ?? []}
+          workspaceName={(account as unknown as { workspace_name?: string | null }).workspace_name ?? null}
+          conversations={(convos ?? []).map((c) => ({ ...c, last_message: previewMap[c.id as string] ?? null, labels: sidebarLabelMap[c.id as string] ?? [] }))}
           team={team}
           allowedEmployees={allowedEmployees}
           tierName={
@@ -86,18 +202,50 @@ export default async function AppLayout({
               ? "Internal"
               : tierById(account.tier_id).name
           }
+          tierId={account.tier_id ?? "free"}
+          tokensUsed={account.monthly_tokens_used}
+          tokensAllowance={effectiveAllowance}
+          internalAccount={Boolean(account.internal_account)}
           accountId={account.id}
           inFlightBuildsInitial={inFlightBuildsInitial}
+          avatarUrl={account.avatar_url ?? null}
+          displayName={account.display_name ?? null}
+          showGettingStarted={onboarded && isNewAccount && !gsDismissed}
+          hasContext={onboarded}
         />
-        <main className="conduit-canvas praxis-canvas-tint flex-1 flex flex-col min-w-0">
+        <main id="app-main" className="conduit-canvas praxis-canvas-tint flex-1 flex flex-col min-w-0 pt-12 md:pt-0">
           <UpgradeNudge
+            tierId={account.tier_id ?? "free"}
+            internalAccount={Boolean(account.internal_account)}
+          />
+          <TokenBudgetNudge
+            tokensUsed={account.monthly_tokens_used}
+            tokensAllowance={effectiveAllowance}
             tierId={account.tier_id ?? "free"}
             internalAccount={Boolean(account.internal_account)}
           />
           {children}
         </main>
         {!onboarded && <OnboardingModal defaultName={userName} />}
+        <PostOnboardingNudge />
+        {onboarded && (
+          <FirstRunTour
+            isFirstRun={(account as unknown as { onboarded_at?: string | null }).onboarded_at == null}
+          />
+        )}
+        <PostHogIdentify userId={user.id} />
+        <KeyboardShortcutsOverlay />
+        <CommandPalette recentConvos={(convos ?? []).slice(0, 5)} />
+        {onboarded && isNewAccount && !checklistDismissed && (
+          <WelcomeChecklist hasConversations={(convos ?? []).length > 0} />
+        )}
+        <Suspense>
+          <ReferralClaimer />
+        </Suspense>
       </PraxisCanvasTintProvider>
+      </ToastProvider>
+      </NicknameProvider>
+      </UserProvider>
     </div>
   );
 }

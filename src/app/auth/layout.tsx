@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Praxis — Sign in",
+  // Neutral default so it's correct across all auth routes (sign-in, sign-up,
+  // forgot-password, etc.). Client pages can't export their own metadata, so a
+  // page-specific title would require per-route server layouts.
+  title: "Praxis — Your AI workforce",
   description:
-    "Praxis is the operating system for autonomous AI workforces. Sign in to your workspace.",
+    "Praxis is the operating system for autonomous AI workforces. Sign in or create your workspace.",
   openGraph: {
-    title: "Praxis — Sign in",
+    title: "Praxis — Your AI workforce",
     description:
       "Praxis is the operating system for autonomous AI workforces.",
     siteName: "Praxis",
@@ -15,7 +18,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: "Praxis — Sign in",
+    title: "Praxis — Your AI workforce",
     description:
       "Praxis is the operating system for autonomous AI workforces.",
     images: ["/praxis-mark.png"],

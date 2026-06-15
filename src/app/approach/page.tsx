@@ -3,14 +3,36 @@ import Link from "next/link";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { MarketingMotionProvider } from "@/components/MarketingMotionProvider";
+import { PageHeader } from "@/components/marketing/PageHeader";
+import { ScrollRevealCards, ScrollRevealItem } from "@/components/marketing/ScrollRevealCards";
+import { ApproachSections } from "@/components/ApproachSections";
+import type { ApproachSection } from "@/components/ApproachSections";
+import { ApproachProgressNav } from "@/components/marketing/ApproachProgressNav";
 
 export const metadata: Metadata = {
   title: "Approach — How we think about workforces",
   description:
     "Praxis isn't an AI product. It's a position on what work looks like next. The full thesis on specialization, memory, voice, execution.",
+  openGraph: {
+    title: "Approach — How we think about workforces",
+    description:
+      "Praxis isn't an AI product. It's a position on what work looks like next. The full thesis on specialization, memory, voice, execution.",
+    url: "https://conduitai.io/approach",
+    siteName: "Conduit AI",
+    type: "website",
+    images: [{ url: "/praxis-mark.png", width: 632, height: 961, alt: "Praxis" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Approach — How we think about workforces",
+    description:
+      "The full thesis on specialization, memory, voice, and execution. Why generality is a recipe for shallowness.",
+    images: ["/praxis-mark.png"],
+  },
 };
 
-const SECTIONS: Section[] = [
+const SECTIONS: ApproachSection[] = [
   {
     n: "01",
     title: "On specialization",
@@ -66,85 +88,35 @@ const SECTIONS: Section[] = [
   },
 ];
 
-type Section = {
-  n: string;
-  title: string;
-  body: string[];
-  quote?: string;
-};
-
 export default function ApproachPage() {
   return (
+    <MarketingMotionProvider>
     <main className="conduit-bg-canvas">
       <Navbar />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden conduit-hero-section">
-        <div className="conduit-mesh" aria-hidden />
-        <div className="conduit-ember-radial" aria-hidden />
-        <div className="relative conduit-container">
-          <div className="conduit-prose text-center">
-            <p className="conduit-caption conduit-caption-ember">
-              The Conduit AI approach
-            </p>
-            <h1 className="conduit-display-hero mt-6">
-              How we think about{" "}
-              <span className="conduit-ember-text">workforces.</span>
-            </h1>
-            <p className="conduit-body-lg mt-7">
-              Praxis isn&rsquo;t an AI product. It&rsquo;s a position on what
-              work looks like next.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHeader
+        caption="The Conduit AI approach"
+        title={
+          <>
+            How we think about{" "}
+            <span className="conduit-ember-text">workforces.</span>
+          </>
+        }
+        subtitle="Praxis isn't an AI product. It's a position on what work looks like next."
+      />
 
-      {/* Sections */}
+      {/* Sections — 2-column on xl: sticky nav rail + prose */}
       <article className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
-          <div className="conduit-prose">
-            {SECTIONS.map((s, i) => (
-              <section
-                key={s.n}
-                className={`${i > 0 ? "pt-16 md:pt-20 mt-16 md:mt-20" : ""}`}
-              >
-                {i > 0 && (
-                  <div
-                    aria-hidden
-                    className="h-px mb-16 md:mb-20"
-                    style={{
-                      background:
-                        "linear-gradient(90deg, transparent, rgba(91, 99, 232,0.4), transparent)",
-                    }}
-                  />
-                )}
-
-                <div className="flex items-baseline gap-5 mb-6">
-                  <span
-                    className="text-[44px] md:text-[56px] tracking-[-0.04em] text-[var(--color-indigo-500)] leading-[0.85]"
-                    style={{
-                      fontFamily: "var(--font-serif)",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {s.n}
-                  </span>
-                  <h2 className="conduit-display-xl">{s.title}</h2>
-                </div>
-
-                <div className="space-y-6 text-[18px] md:text-[19px] text-[var(--color-cream-soft)] leading-[1.75]">
-                  {s.body.map((p, pi) => (
-                    <p key={pi}>{p}</p>
-                  ))}
-                </div>
-
-                {s.quote && (
-                  <blockquote className="conduit-pullquote my-12 md:my-14">
-                    {s.quote}
-                  </blockquote>
-                )}
-              </section>
-            ))}
+          <div className="flex gap-10 xl:gap-16">
+            {/* Left rail — sticky progress nav, xl+ only */}
+            <ApproachProgressNav
+              sections={SECTIONS.map((s) => ({ n: s.n, title: s.title }))}
+            />
+            {/* Right — prose */}
+            <div className="min-w-0 flex-1">
+              <ApproachSections sections={SECTIONS} hasRail />
+            </div>
           </div>
         </div>
       </article>
@@ -152,30 +124,37 @@ export default function ApproachPage() {
       {/* Closing CTA */}
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
-          <div className="conduit-prose text-center">
-            <h2 className="conduit-display-2xl">
-              Praxis is the operating system for that workforce.
-            </h2>
-            <p className="conduit-body-lg mt-6">
-              Free to start. The Console is the door.
-            </p>
-            <div className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
-              <Link
-                href="/auth/sign-up"
-                className="conduit-btn-primary justify-center"
-              >
-                Open Praxis Console
-                <ArrowRight size={16} weight="bold" />
-              </Link>
-              <Link href="/products" className="conduit-btn-secondary justify-center">
-                See the product family
-              </Link>
-            </div>
-          </div>
+          <ScrollRevealCards className="conduit-prose text-center">
+            <ScrollRevealItem>
+              <h2 className="conduit-display-2xl">
+                Praxis is the operating system for that workforce.
+              </h2>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <p className="conduit-body-lg mt-6">
+                Free to start. The Console is the door.
+              </p>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <div className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
+                <Link
+                  href="/auth/sign-up"
+                  className="conduit-btn-primary justify-center"
+                >
+                  Open Praxis Console
+                  <ArrowRight size={16} weight="bold" />
+                </Link>
+                <Link href="/products" className="conduit-btn-secondary justify-center">
+                  See the product family
+                </Link>
+              </div>
+            </ScrollRevealItem>
+          </ScrollRevealCards>
         </div>
       </section>
 
       <Footer />
     </main>
+    </MarketingMotionProvider>
   );
 }

@@ -2,16 +2,21 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, FileText } from "lucide-react";
+import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Link, Pin, Search, Share2, Tag, ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { UpgradeCTABanner } from "./UpgradeCTABanner";
+import { motion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
   DEPT_COLOR,
   DEPT_COLOR_SOFT,
   EmployeeAvatar,
   employeeLabel,
+  SpecialistChip,
 } from "./EmployeeBadge";
 import { PaywallModal, type PaywallPayload } from "./PaywallModal";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { useVoiceRecorder } from "@/hooks/useVoiceRecorder";
+import { useWhisperRecorder } from "@/hooks/useWhisperRecorder";
 import { PraxisAvatar } from "./praxis/PraxisAvatar";
 import { PraxisSuggestionTile } from "./praxis/PraxisSuggestionTile";
 import { PraxisHandoffBaton } from "./praxis/PraxisHandoffBaton";
@@ -20,7 +25,24 @@ import {
   type PinValue as PraxisPinValue,
 } from "./praxis/PraxisComposerPill";
 import { composeChatEmptyCopy, timeOfDayBucket } from "@/lib/conduit/welcome-copy";
-import type { EmployeeId } from "@/lib/conduit/employees";
+import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
+import { TypingIndicator } from "./TypingIndicator";
+import { MarkdownRenderer } from "./MarkdownRenderer";
+import {
+  SpecialistSelectorModal,
+  useSpecialistChoice,
+} from "./SpecialistSelectorModal";
+import {
+  PinnedMessagesBanner,
+  type PinnedMessage,
+} from "./PinnedMessagesBanner";
+import { useToast } from "@/context/ToastContext";
+import { useNicknames } from "@/context/NicknameContext";
+import { SaveOutputButton } from "./SaveOutputButton";
+import { track } from "@/lib/analytics/track";
+import { ConversationLabelManager, type ConversationLabel } from "./ConversationLabels";
+import { Tooltip } from "./pdl/Tooltip";
+import { SpecialistEmptyArt } from "./SpecialistEmptyArt";
 
 export interface VoicePrefs {
   enabled: boolean;
@@ -38,7 +60,10 @@ export interface MessageRow {
   pending?: boolean;
   artifacts?: { id: string; title: string; type: string; preview?: string }[];
   handoffTo?: EmployeeKey;
+  handoffFrom?: EmployeeKey;
   memories?: { id: string; kind: string; content: string; tags?: string[] }[];
+  feedback?: 1 | -1 | null;
+  created_at?: string | null;
 }
 
 interface Suggestion {
@@ -111,6 +136,69 @@ function suggestionsForTier(allowed: Set<EmployeeKey>): Suggestion[] {
   return [...base, ...extras].slice(0, 4);
 }
 
+const SPECIALIST_PROMPTS: Record<EmployeeId, string> = {
+  jarvis: "Help me prioritize what to work on this week across my business",
+  marketing: "Draft a LinkedIn post announcing our new product feature",
+  sales: "Write a cold email sequence targeting e-commerce founders",
+  engineering: "Help me design a CRM system for my small business",
+  finance: "Analyze my business's cash flow and suggest cost-saving measures",
+  compliance: "What are my main compliance requirements for handling customer data?",
+  hr: "Draft a job description for a part-time customer support specialist",
+  ops: "Create an SOP for onboarding new clients to my consulting business",
+  legal: "Review this SaaS contract clause for potential liability risks",
+};
+
+// Three contextual starter prompts shown when a user opens a fresh conversation
+// with a specific pinned specialist. Tapping inserts the text into the input
+// so the user can edit before sending.
+const SPECIALIST_STARTER_PROMPTS: Record<EmployeeId, [string, string, string]> = {
+  jarvis: [
+    "Give me a weekly execution brief",
+    "What should I be focused on this quarter?",
+    "Review my biggest open risks",
+  ],
+  marketing: [
+    "Write a launch email for our new product",
+    "Draft a LinkedIn post announcing our funding",
+    "Build a content calendar for Q3",
+  ],
+  sales: [
+    "Write a cold outreach sequence for SaaS founders",
+    "Help me handle the 'too expensive' objection",
+    "Create a battle card vs. a competitor",
+  ],
+  engineering: [
+    "Design a CRM system for my small business",
+    "Review my tech stack and suggest improvements",
+    "Write a technical spec for a new feature",
+  ],
+  finance: [
+    "Analyze my revenue and suggest cost-saving measures",
+    "Build a 12-month cash flow projection",
+    "Help me set up a budget for a new hire",
+  ],
+  compliance: [
+    "What are my GDPR obligations as a SaaS company?",
+    "Review my privacy policy for gaps",
+    "Walk me through SOC 2 readiness basics",
+  ],
+  hr: [
+    "Draft a job description for a customer success manager",
+    "Write an offer letter for a full-time engineer",
+    "Create an employee onboarding checklist",
+  ],
+  ops: [
+    "Create an SOP for onboarding new clients",
+    "Design a project management workflow for my team",
+    "Write a vendor evaluation scorecard",
+  ],
+  legal: [
+    "Draft a basic NDA for a contractor",
+    "Review this SaaS contract clause for liability risks",
+    "Explain the difference between an employee and a contractor",
+  ],
+};
+
 type PinValue = EmployeeKey | "auto" | "team";
 
 const ALL_PIN_OPTIONS: { value: PinValue; label: string }[] = [
@@ -129,18 +217,30 @@ const ALL_PIN_OPTIONS: { value: PinValue; label: string }[] = [
 
 export function Chat({
   conversationId: initialId,
+  conversationTitle: initialTitle = null,
   initialMessages,
+  initialHasMore = false,
   firstName,
   internalAccount = false,
   voice = { enabled: false, autoPlay: true, ttsAllowed: false },
   allowedEmployees,
+  isFirstRun = false,
+  companyBrief = null,
+  handoffConversationId: initialHandoffConvId = null,
+  handoffEmployee: initialHandoffEmployee = null,
 }: {
   conversationId: string | null;
+  conversationTitle?: string | null;
   initialMessages: MessageRow[];
+  initialHasMore?: boolean;
   firstName: string;
   internalAccount?: boolean;
   voice?: VoicePrefs;
   allowedEmployees: EmployeeKey[];
+  isFirstRun?: boolean;
+  companyBrief?: string | null;
+  handoffConversationId?: string | null;
+  handoffEmployee?: string | null;
 }) {
   const allowedSet = new Set(allowedEmployees);
   // "team" requires at least 2 non-Atlas employees on the tier.
@@ -153,20 +253,382 @@ export function Chat({
       (o.value !== "team" && allowedSet.has(o.value as EmployeeKey)),
   );
   const suggestions = suggestionsForTier(allowedSet);
+  const { labelFor } = useNicknames();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [conversationId, setConversationId] = useState<string | null>(
     initialId,
   );
+  const [currentTitle, setCurrentTitle] = useState<string | null>(initialTitle);
   const [messages, setMessages] = useState<MessageRow[]>(initialMessages);
   const [input, setInput] = useState("");
   const [pin, setPin] = useState<PinValue>("auto");
+  const [mentionOverride, setMentionOverride] = useState<EmployeeKey | null>(null);
+  const [pinnedMessages, setPinnedMessages] = useState<PinnedMessage[]>([]);
+  const { hasChosen, persist: persistSpecialistChoice } = useSpecialistChoice();
+  const showSpecialistSelector =
+    hasChosen === false && messages.length === 0 && !conversationId;
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const toast = useToast();
   const [drawerArtifactId, setDrawerArtifactId] = useState<string | null>(null);
   const [paywall, setPaywall] = useState<PaywallPayload | null>(null);
+  // Message edit: id of the user message currently being edited inline.
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [streamingEmployee, setStreamingEmployee] =
     useState<EmployeeKey | null>(null);
+  const [sendError, setSendError] = useState<{
+    text: string;
+    retryText: string;
+    capacity?: boolean;
+  } | null>(null);
+  const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
+
+  // In-conversation message search
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Handoff state
+  const [handoffInfo, setHandoffInfo] = useState<{
+    conversationId: string;
+    employee: string;
+  } | null>(
+    initialHandoffConvId && initialHandoffEmployee
+      ? { conversationId: initialHandoffConvId, employee: initialHandoffEmployee }
+      : null,
+  );
+  const [showHandoffPicker, setShowHandoffPicker] = useState(false);
+  const [handoffLoading, setHandoffLoading] = useState(false);
+
+  // Conversation labels
+  const [assignedLabels, setAssignedLabels] = useState<ConversationLabel[]>([]);
+  const [allLabels, setAllLabels] = useState<ConversationLabel[]>([]);
+
+  // SSE connection resilience: tracks offline / reconnecting / reconnected state.
+  const [connStatus, setConnStatus] = useState<'connected' | 'reconnecting' | 'reconnected' | 'failed'>('connected');
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const clear = () => {
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
+    };
+
+    const scheduleAttempt = (attempt: number) => {
+      if (navigator.onLine) {
+        setConnStatus('reconnected');
+        reconnectTimerRef.current = setTimeout(() => setConnStatus('connected'), 2000);
+        return;
+      }
+      if (attempt >= 5) {
+        setConnStatus('failed');
+        return;
+      }
+      const delay = Math.min(1000 * Math.pow(2, attempt), 30000);
+      reconnectTimerRef.current = setTimeout(() => scheduleAttempt(attempt + 1), delay);
+    };
+
+    const handleOffline = () => {
+      clear();
+      setConnStatus('reconnecting');
+      scheduleAttempt(0);
+    };
+
+    const handleOnline = () => {
+      clear();
+      setConnStatus('reconnected');
+      reconnectTimerRef.current = setTimeout(() => setConnStatus('connected'), 2000);
+    };
+
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+      clear();
+    };
+  }, []);
+
+  // Rate-limit countdown: epoch ms when the ban lifts; null = not limited.
+  const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
+  const [rateLimitSecondsLeft, setRateLimitSecondsLeft] = useState(0);
+  useEffect(() => {
+    if (!rateLimitUntil) return;
+    const tick = () => {
+      const left = Math.max(0, Math.ceil((rateLimitUntil - Date.now()) / 1000));
+      setRateLimitSecondsLeft(left);
+      if (left === 0) setRateLimitUntil(null);
+    };
+    tick();
+    const id = setInterval(tick, 250);
+    return () => clearInterval(id);
+  }, [rateLimitUntil]);
+
+  // Track conversation title — updated by auto-generation and manual renames.
+  useEffect(() => {
+    const onTitleUpdated = (e: Event) => {
+      const { conversation_id, title } = (e as CustomEvent<{ conversation_id: string; title: string }>).detail;
+      if (conversation_id === conversationId && title) {
+        setCurrentTitle(title);
+      }
+    };
+    window.addEventListener("praxis:title_updated", onTitleUpdated);
+    return () => window.removeEventListener("praxis:title_updated", onTitleUpdated);
+  }, [conversationId]);
+
+  // Sync browser tab title when the conversation title is set or updated.
+  useEffect(() => {
+    if (currentTitle) {
+      document.title = `${currentTitle} — Praxis`;
+    }
+  }, [currentTitle]);
+
+  // Focus search input when opened; close on Escape.
+  useEffect(() => {
+    if (searchOpen) {
+      searchInputRef.current?.focus();
+    } else {
+      setSearchQuery("");
+    }
+  }, [searchOpen]);
+
+  // Scroll to first search match when query changes.
+  useEffect(() => {
+    if (!searchQuery.trim()) return;
+    const el = document.querySelector<HTMLElement>("[data-search-match='true']");
+    el?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [searchQuery]);
+
+  // Derive matching message indices — recalculated on query or messages change.
+  const searchNeedle = searchQuery.trim().toLowerCase();
+  const searchMatchSet = new Set<number>(
+    searchNeedle
+      ? messages.reduce<number[]>((acc, m, i) => {
+          if (m.content.toLowerCase().includes(searchNeedle)) acc.push(i);
+          return acc;
+        }, [])
+      : [],
+  );
+
+  // Export conversation as Markdown — client-side, no backend needed.
+  const exportConversation = useCallback(() => {
+    const visibleMessages = messages.filter(
+      (m) => m.role === "user" || m.role === "assistant",
+    );
+    if (visibleMessages.length === 0) return;
+
+    const now = new Date();
+    const today = now.toISOString().slice(0, 10);
+    const exported = now.toISOString();
+    const title = currentTitle || "Praxis Conversation";
+
+    // Derive specialist slug from the first assistant message.
+    const firstAssistant = visibleMessages.find(
+      (m) => m.role === "assistant" && m.employee,
+    );
+    const specialistSlug = firstAssistant?.employee
+      ? employeeLabel(firstAssistant.employee as EmployeeKey)
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "")
+      : "conversation";
+
+    const lines: string[] = [
+      "---",
+      `title: "${title.replace(/"/g, '\\"')}"`,
+      `date: ${today}`,
+      `exported: ${exported}`,
+      "---",
+      "",
+      `# ${title}`,
+      "",
+    ];
+
+    for (const msg of visibleMessages) {
+      if (msg.role === "user") {
+        lines.push("**You**", "", msg.content.trim(), "", "---", "");
+      } else if (msg.role === "assistant" && msg.employee) {
+        const label = employeeLabel(msg.employee as EmployeeKey);
+        lines.push(`**${label}**`, "", msg.content.trim(), "", "---", "");
+      }
+    }
+
+    const md = lines.join("\n");
+    const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `praxis-${specialistSlug}-${today}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("Conversation downloaded");
+  }, [messages, currentTitle, toast]);
+
+  // Copy a permalink to this conversation to the clipboard.
+  const [linkCopied, setLinkCopied] = useState(false);
+  const copyPermalink = useCallback(async () => {
+    if (!conversationId) return;
+    const url = `${window.location.origin}/app?c=${conversationId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      // Fallback for HTTP contexts where Clipboard API is blocked.
+      const ta = document.createElement("textarea");
+      ta.value = url;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+    setLinkCopied(true);
+    toast.success("Link copied!");
+    setTimeout(() => setLinkCopied(false), 1500);
+  }, [conversationId, toast]);
+
+  // Load pinned messages when conversation is available.
+  const loadPins = useCallback(async (convId: string) => {
+    try {
+      const res = await fetch(`/api/conduit/conversations/${convId}/pins`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setPinnedMessages(data.pins ?? []);
+    } catch {
+      // Network error — silently ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    if (conversationId) void loadPins(conversationId);
+    else setPinnedMessages([]);
+  }, [conversationId, loadPins]);
+
+  useEffect(() => {
+    if (!conversationId) { setAssignedLabels([]); return; }
+    Promise.all([
+      fetch(`/api/conduit/labels`).then((r) => r.json()),
+      fetch(`/api/conduit/conversations/${conversationId}/labels`).then((r) => r.json()),
+    ])
+      .then(([allData, assignedData]: [{ labels?: ConversationLabel[] }, { labels?: ConversationLabel[] }]) => {
+        setAllLabels(allData.labels ?? []);
+        setAssignedLabels(assignedData.labels ?? []);
+      })
+      .catch(() => {});
+  }, [conversationId]);
+
+  const performHandoff = useCallback(
+    async (targetEmployee: EmployeeKey) => {
+      if (!conversationId || handoffLoading) return;
+      setHandoffLoading(true);
+      setShowHandoffPicker(false);
+      try {
+        const res = await fetch(
+          `/api/conduit/conversations/${conversationId}/handoff`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ targetEmployee }),
+          },
+        );
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          if (err.error === "already_handed_off") {
+            toast.info("This conversation is already handed off.");
+          } else {
+            toast.error("Handoff failed. Please try again.");
+          }
+          return;
+        }
+        const { newConversationId } = await res.json();
+        setHandoffInfo({ conversationId: newConversationId, employee: targetEmployee });
+        router.push(`/app?c=${newConversationId}`);
+      } catch {
+        toast.error("Handoff failed. Please try again.");
+      } finally {
+        setHandoffLoading(false);
+      }
+    },
+    [conversationId, handoffLoading, router, toast],
+  );
+
+  const handlePinToggle = useCallback(
+    async (messageId: string, shouldPin: boolean) => {
+      if (!conversationId) return;
+      if (shouldPin) {
+        // Optimistic: fetch the message content for the preview
+        const msg = messages.find((m) => m.id === messageId);
+        if (msg) {
+          const tempPin: PinnedMessage = {
+            id: `temp-${messageId}`,
+            message_id: messageId,
+            content: msg.content,
+            role: msg.role,
+            employee: msg.employee ?? null,
+            pinned_at: new Date().toISOString(),
+          };
+          setPinnedMessages((prev) => [...prev, tempPin]);
+        }
+        const res = await fetch(
+          `/api/conduit/conversations/${conversationId}/pins`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message_id: messageId }),
+          },
+        );
+        if (res.ok) {
+          void loadPins(conversationId); // refresh with real data
+        } else if (res.status === 422) {
+          // Revert optimistic + show limit
+          setPinnedMessages((prev) =>
+            prev.filter((p) => p.message_id !== messageId),
+          );
+        } else {
+          setPinnedMessages((prev) =>
+            prev.filter((p) => p.message_id !== messageId),
+          );
+        }
+      } else {
+        // Optimistic unpin
+        setPinnedMessages((prev) =>
+          prev.filter((p) => p.message_id !== messageId),
+        );
+        const res = await fetch(
+          `/api/conduit/conversations/${conversationId}/pins/${messageId}`,
+          { method: "DELETE" },
+        );
+        if (!res.ok) {
+          void loadPins(conversationId); // revert by reloading
+        }
+      }
+    },
+    [conversationId, messages, loadPins],
+  );
+
+  const handleScrollToMessage = useCallback((messageId: string) => {
+    const el = document.querySelector(`[data-message-id="${messageId}"]`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      // Brief highlight
+      (el as HTMLElement).style.transition = "background 0.3s";
+      (el as HTMLElement).style.background = "var(--color-surface-raised)";
+      setTimeout(() => {
+        (el as HTMLElement).style.background = "";
+      }, 1200);
+    }
+  }, []);
+
+  // Pagination: infinite-scroll-up for message history.
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const topSentinelRef = useRef<HTMLDivElement>(null);
 
   // R8: workspace handoff. ?pin=<employee>&prompt=<text> from /app/team/* —
   // apply once on mount, then strip from URL so refresh doesn't re-trigger.
@@ -196,6 +658,23 @@ export function Chat({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Scroll to a specific message when arriving from conversation search (?msg=).
+  useEffect(() => {
+    const msgId = searchParams.get("msg");
+    if (!msgId) return;
+    // Give the DOM a moment to render messages, then scroll.
+    const timer = setTimeout(() => {
+      handleScrollToMessage(msgId);
+      // Strip ?msg= so refresh doesn't re-trigger.
+      const cid = searchParams.get("c");
+      const path = cid ? `/app?c=${cid}` : "/app";
+      window.history.replaceState({}, "", path);
+    }, 350);
+    return () => clearTimeout(timer);
+    // Run only on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Voice input (browser STT)
   const speech = useSpeechRecognition();
   const lastTranscriptRef = useRef("");
@@ -205,6 +684,52 @@ export function Chat({
     setInput(speech.transcript);
     lastTranscriptRef.current = speech.transcript;
   }, [speech.transcript, speech.listening]);
+
+  // Voice message recording (MediaRecorder → Supabase Storage)
+  const sendVoiceMessage = useCallback(
+    async (blob: Blob, mimeType: string) => {
+      const form = new FormData();
+      form.append("audio", blob, `voice.${mimeType.split("/")[1]?.split(";")[0] ?? "webm"}`);
+      form.append("mime_type", mimeType);
+      if (conversationId) form.append("conversation_id", conversationId);
+
+      const resp = await fetch("/api/conduit/voice/message", {
+        method: "POST",
+        body: form,
+      });
+      if (!resp.ok) throw new Error("upload_failed");
+
+      const json = (await resp.json()) as {
+        message_id: string;
+        conversation_id: string;
+        url: string;
+      };
+
+      if (!conversationId && json.conversation_id) {
+        setConversationId(json.conversation_id);
+        window.history.replaceState({}, "", `/app?c=${json.conversation_id}`);
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: json.message_id,
+          role: "user" as const,
+          content: "[Voice message]",
+          metadata: { type: "voice", attachment_url: json.url },
+        },
+      ]);
+
+      router.refresh();
+    },
+    [conversationId, router],
+  );
+  const voiceRecorder = useVoiceRecorder(sendVoiceMessage);
+
+  // Whisper STT — fills the text input from server-side transcription.
+  const whisperRecorder = useWhisperRecorder(useCallback((text: string) => {
+    setInput((prev) => (prev ? `${prev} ${text}` : text));
+  }, []));
 
   // Voice output (TTS)
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -241,6 +766,26 @@ export function Chat({
       window.removeEventListener("conduit:stopAudio", onStop);
     };
   }, [playingMessageIdx, stopAudio]);
+
+  // Specialist quick-switch: digit keys 1–9 route to the nth specialist in sidebar order.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const digit = parseInt(e.key, 10);
+      if (isNaN(digit) || digit < 1 || digit > 9) return;
+      // Don't intercept keys while the user is typing.
+      const el = document.activeElement as HTMLElement | null;
+      if (!el) return;
+      const tag = el.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || el.isContentEditable) return;
+      const empKey = EMPLOYEE_ORDER[digit - 1] as EmployeeKey;
+      if (!empKey || !allowedEmployees.includes(empKey)) return;
+      setPin(empKey);
+      toast.info(`→ ${labelFor(empKey)}`);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [allowedEmployees, labelFor, toast]);
+
   const playTTS = useCallback(
     async (text: string, employee: EmployeeKey, idx: number) => {
       if (!voice.ttsAllowed || !text.trim()) return;
@@ -291,26 +836,123 @@ export function Chat({
     };
   }, []);
 
-  useEffect(() => {
-    setMessages(initialMessages);
-    setConversationId(initialId);
-  }, [initialId, initialMessages]);
+  // Track previous conversation so we can trigger auto-summary on switch.
+  const prevConvIdRef = useRef<string | null>(initialId);
+  const prevMsgLenRef = useRef<number>(initialMessages.length);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    const prevId = prevConvIdRef.current;
+    const prevLen = prevMsgLenRef.current;
+    // When the user navigates to a different conversation, summarize the one they left.
+    if (prevId && prevId !== initialId && prevLen >= 4) {
+      fetch(`/api/conduit/conversations/${prevId}/summarize`, { method: "POST" }).catch(
+        () => {/* fire-and-forget */},
+      );
     }
-  }, [messages]);
+    prevConvIdRef.current = initialId;
+    prevMsgLenRef.current = initialMessages.length;
+    setMessages(initialMessages);
+    setConversationId(initialId);
+    setHasMore(initialHasMore);
+  }, [initialId, initialMessages, initialHasMore]);
+
+  // Scroll to bottom when new messages arrive at the bottom (not when prepending older ones).
+  const prevMsgCountRef = useRef(initialMessages.length);
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const prev = prevMsgCountRef.current;
+    const curr = messages.length;
+    // Only auto-scroll when messages were appended (new turn), not prepended (older history).
+    if (curr > prev && !loadingOlder) {
+      el.scrollTop = el.scrollHeight;
+    }
+    prevMsgCountRef.current = curr;
+  }, [messages, loadingOlder]);
+
+  const loadOlderMessages = useCallback(async () => {
+    if (!conversationId || loadingOlder || !hasMore) return;
+    const oldestId = messages.find((m) => m.id)?.id;
+    if (!oldestId) return;
+
+    setLoadingOlder(true);
+    try {
+      const params = new URLSearchParams({
+        conversation_id: conversationId,
+        before_id: oldestId,
+      });
+      const res = await fetch(`/api/conduit/messages?${params.toString()}`);
+      if (!res.ok) return;
+      const json = (await res.json()) as {
+        messages: MessageRow[];
+        hasMore: boolean;
+      };
+
+      if (json.messages.length === 0) {
+        setHasMore(false);
+        return;
+      }
+
+      // Preserve scroll position: capture height before prepend, restore after.
+      const el = scrollRef.current;
+      const prevHeight = el?.scrollHeight ?? 0;
+
+      setMessages((prev) => [...json.messages, ...prev]);
+      setHasMore(json.hasMore);
+
+      // After React has flushed the DOM update, restore the scroll offset.
+      requestAnimationFrame(() => {
+        if (el) {
+          el.scrollTop = el.scrollHeight - prevHeight;
+        }
+      });
+    } finally {
+      setLoadingOlder(false);
+    }
+  }, [conversationId, hasMore, loadingOlder, messages]);
+
+  // Watch the top sentinel; fire loadOlderMessages when it enters the viewport.
+  useEffect(() => {
+    const sentinel = topSentinelRef.current;
+    if (!sentinel || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          void loadOlderMessages();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, loadOlderMessages]);
 
   const send = useCallback(
     async (text: string, employeePin?: EmployeeKey) => {
       const trimmed = text.trim();
       if (!trimmed || loading) return;
+      setSendError(null);
+      setFollowUpSuggestions([]);
       setLoading(true);
       setInput("");
+      const wasNewConversation = !conversationId;
+      // Capture and clear the one-off @mention override before the async send.
+      const capturedMentionOverride = mentionOverride;
+      setMentionOverride(null);
 
+      // Track the first AI message ever sent — localStorage guards against repeat fires.
+      try {
+        const key = "praxis_first_ai_msg_v1";
+        if (!localStorage.getItem(key)) {
+          localStorage.setItem(key, "1");
+          track("first_ai_message_sent");
+        }
+      } catch { /* ignore — storage may be unavailable */ }
+
+      // @mention override takes priority over the parameter pin and the persistent pin.
       const explicitPin: PinValue | undefined =
-        employeePin ?? (pin === "auto" ? undefined : pin);
+        capturedMentionOverride ?? (employeePin ?? (pin === "auto" ? undefined : pin));
       const isTeam = explicitPin === "team";
       const placeholderEmp: EmployeeKey = isTeam
         ? "jarvis"
@@ -357,16 +999,26 @@ export function Chat({
           router.refresh();
           return;
         }
+        if (resp.status === 429) {
+          const retryHeader = resp.headers.get("Retry-After");
+          const seconds = retryHeader ? Math.max(1, parseInt(retryHeader, 10)) || 60 : 60;
+          setRateLimitUntil(Date.now() + seconds * 1000);
+          setMessages((prev) => {
+            const next = [...prev];
+            if (next[next.length - 1]?.pending) next.pop();
+            return next;
+          });
+          setLoading(false);
+          return;
+        }
+        const fallback =
+          "Something hiccuped on my end. Try that again in a moment.";
         setMessages((prev) => {
           const next = [...prev];
-          const last = next[next.length - 1];
-          if (last && last.pending) {
-            last.pending = false;
-            last.content =
-              "Something hiccuped on my end. Try that again in a moment.";
-          }
+          if (next[next.length - 1]?.pending) next.pop();
           return next;
         });
+        setSendError({ text: fallback, retryText: trimmed });
         setLoading(false);
         return;
       }
@@ -376,7 +1028,7 @@ export function Chat({
       let buf = "";
       let currentEmployee: EmployeeKey = placeholderEmp;
 
-      const ensurePendingFor = (employee: EmployeeKey) => {
+      const ensurePendingFor = (employee: EmployeeKey, handoffFrom?: EmployeeKey) => {
         setMessages((prev) => {
           const next = [...prev];
           const last = next[next.length - 1];
@@ -393,6 +1045,7 @@ export function Chat({
             employee,
             content: "",
             pending: true,
+            ...(handoffFrom ? { handoffFrom } : {}),
           });
           return next;
         });
@@ -474,8 +1127,9 @@ export function Chat({
           ensurePendingFor(employee);
           appendTo(employee, (data.delta as string) || "");
         } else if (event === "handoff") {
+          const from = currentEmployee;
           const to = data.to as EmployeeKey;
-          finishCurrent(currentEmployee);
+          finishCurrent(from);
           setMessages((prev) => [
             ...prev,
             {
@@ -486,7 +1140,7 @@ export function Chat({
           ]);
           currentEmployee = to;
           setStreamingEmployee(to);
-          ensurePendingFor(to);
+          ensurePendingFor(to, from);
         } else if (event === "message_end") {
           const employee = (data.employee as EmployeeKey) || currentEmployee;
           finishCurrent(employee);
@@ -514,6 +1168,11 @@ export function Chat({
               }
               return prev;
             });
+          }
+        } else if (event === "follow_up_suggestions") {
+          const sugs = data.suggestions as string[] | undefined;
+          if (Array.isArray(sugs) && sugs.length > 0) {
+            setFollowUpSuggestions(sugs);
           }
         } else if (event === "artifact") {
           recordArtifact(
@@ -664,64 +1323,403 @@ export function Chat({
           ) {
             finishCurrent(currentEmployee);
           }
+        } else if (event === "title_updated") {
+          window.dispatchEvent(
+            new CustomEvent("praxis:title_updated", {
+              detail: {
+                conversation_id: data.conversation_id as string,
+                title: data.title as string,
+              },
+            }),
+          );
         } else if (event === "done") {
           const cid = data.conversation_id as string;
           if (cid && cid !== conversationId) {
             setConversationId(cid);
             window.history.replaceState({}, "", `/app?c=${cid}`);
           }
+          if (wasNewConversation && cid) {
+            fetch(`/api/conduit/conversations/${cid}/auto-title`, { method: "PATCH" })
+              .then((r) => (r.ok ? r.json() : null))
+              .then((d: { ok: boolean; title?: string } | null) => {
+                if (d?.title) {
+                  window.dispatchEvent(
+                    new CustomEvent("praxis:title_updated", {
+                      detail: { conversation_id: cid, title: d.title },
+                    }),
+                  );
+                }
+              })
+              .catch(() => {/* silent — title stays as first-message excerpt */});
+          }
         } else if (event === "error") {
-          appendTo(
-            (data.employee as EmployeeKey) || currentEmployee,
-            `\n\n${(data.message as string) || "Try again in a moment."}`,
-          );
-          finishCurrent(currentEmployee);
+          setMessages((prev) => {
+            const next = [...prev];
+            if (next[next.length - 1]?.pending) next.pop();
+            return next;
+          });
+          setSendError({
+            text: (data.message as string) || "Try again in a moment.",
+            retryText: trimmed,
+            capacity: Boolean(data.capacity),
+          });
         }
       };
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-        const parts = buf.split("\n\n");
-        buf = parts.pop() ?? "";
-        for (const part of parts) {
-          const lines = part.split("\n");
-          let event = "message";
-          let dataLine = "";
-          for (const line of lines) {
-            if (line.startsWith("event: ")) event = line.slice(7).trim();
-            else if (line.startsWith("data: ")) dataLine = line.slice(6);
-          }
-          if (!dataLine) continue;
-          try {
-            const data = JSON.parse(dataLine);
-            handleEvent(event, data);
-          } catch {
-            // ignore malformed event
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          const parts = buf.split("\n\n");
+          buf = parts.pop() ?? "";
+          for (const part of parts) {
+            const lines = part.split("\n");
+            let event = "message";
+            let dataLine = "";
+            for (const line of lines) {
+              if (line.startsWith("event: ")) event = line.slice(7).trim();
+              else if (line.startsWith("data: ")) dataLine = line.slice(6);
+            }
+            if (!dataLine) continue;
+            try {
+              const data = JSON.parse(dataLine);
+              handleEvent(event, data);
+            } catch {
+              // ignore malformed event
+            }
           }
         }
+      } catch {
+        // Stream dropped mid-response — mark the in-flight message as incomplete.
+        setMessages((prev) => {
+          const next = [...prev];
+          const last = next[next.length - 1];
+          if (last?.pending) {
+            last.pending = false;
+            last.metadata = { ...((last.metadata as Record<string, unknown>) ?? {}), incomplete: true };
+          }
+          return next;
+        });
+      } finally {
+        setStreamingEmployee(null);
+        setLoading(false);
+        router.refresh();
       }
-
-      setStreamingEmployee(null);
-      setLoading(false);
-      router.refresh();
     },
-    [conversationId, loading, pin, router],
+    [conversationId, loading, mentionOverride, pin, router],
+  );
+
+  // Handle edit submit: soft-hide from the edited message onwards, then resend.
+  const submitEdit = useCallback(
+    async (messageId: string, newText: string) => {
+      if (!newText.trim() || loading) return;
+      setEditingMessageId(null);
+
+      // Optimistically remove messages from the edit point in the local state.
+      setMessages((prev) => {
+        const idx = prev.findIndex((m) => m.id === messageId);
+        if (idx === -1) return prev;
+        return prev.slice(0, idx);
+      });
+
+      // Soft-hide on the server (fire-and-forget; chat will rehydrate on refresh).
+      void fetch(`/api/conduit/messages/${messageId}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "hide_from" }),
+      });
+
+      await send(newText);
+    },
+    [loading, send],
   );
 
   return (
     <>
+      {showSpecialistSelector && (
+        <SpecialistSelectorModal
+          allowedEmployees={allowedEmployees}
+          onSelect={(specialist) => {
+            persistSpecialistChoice(
+              (specialist as EmployeeId | null) ?? "auto",
+            );
+            if (specialist) setPin(specialist as PinValue);
+          }}
+        />
+      )}
       <div
         ref={scrollRef}
         className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-8"
       >
         <div className="mx-auto max-w-3xl space-y-6">
+          {/* Pinned messages banner */}
+          {pinnedMessages.length > 0 && (
+            <PinnedMessagesBanner
+              pins={pinnedMessages}
+              onUnpin={(msgId) => void handlePinToggle(msgId, false)}
+              onJumpTo={handleScrollToMessage}
+            />
+          )}
+          {/* Top sentinel + pagination state — only shown when a conversation is loaded */}
+          {conversationId && (
+            <div className="flex items-center justify-between pb-2">
+              <div ref={topSentinelRef} className="flex-1 flex justify-center">
+                {loadingOlder ? (
+                  <span
+                    className="text-[11px] uppercase tracking-wider"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
+                    Loading older messages…
+                  </span>
+                ) : !hasMore && messages.length > 0 ? (
+                  <span
+                    className="text-[11px] uppercase tracking-wider"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
+                    All messages loaded
+                  </span>
+                ) : null}
+              </div>
+              {messages.length > 0 && (
+                <div className="shrink-0 flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setSearchOpen((v) => !v)}
+                    title="Search messages"
+                    aria-label="Search messages"
+                    aria-pressed={searchOpen}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
+                    style={{
+                      color: searchOpen ? "var(--color-text)" : "var(--color-text-muted)",
+                      border: searchOpen ? "1px solid var(--color-border)" : "1px solid transparent",
+                    }}
+                  >
+                    <Search size={12} />
+                    <span className="hidden sm:inline">Search</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={exportConversation}
+                    title="Export as Markdown"
+                    aria-label="Export conversation as Markdown"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
+                    style={{
+                      color: "var(--color-text-muted)",
+                      border: "1px solid transparent",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
+                      (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
+                      (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                    }}
+                  >
+                    <Download size={12} />
+                    <span className="hidden sm:inline">Markdown</span>
+                  </button>
+                  {conversationId && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        window.open(
+                          `/api/conduit/conversations/${conversationId}/export`,
+                          "_blank",
+                        )
+                      }
+                      title="Print / Save as PDF"
+                      aria-label="Print conversation or save as PDF"
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
+                      style={{
+                        color: "var(--color-text-muted)",
+                        border: "1px solid transparent",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
+                        (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
+                        (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                      }}
+                    >
+                      <FileText size={12} />
+                      <span className="hidden sm:inline">PDF</span>
+                    </button>
+                  )}
+                  {/* Tag button — only when a conversation exists */}
+                  {conversationId && (
+                    <ConversationLabelManager
+                      conversationId={conversationId}
+                      assignedLabels={assignedLabels}
+                      allLabels={allLabels}
+                      onUpdate={setAssignedLabels}
+                      compact
+                    />
+                  )}
+                  {/* Copy permalink button — only when a conversation exists */}
+                  {conversationId && (
+                    <button
+                      type="button"
+                      onClick={() => void copyPermalink()}
+                      title="Copy link to this conversation"
+                      aria-label="Copy link to this conversation"
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
+                      style={{
+                        color: linkCopied ? "var(--color-text)" : "var(--color-text-muted)",
+                        border: linkCopied ? "1px solid var(--color-border)" : "1px solid transparent",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!linkCopied) {
+                          (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
+                          (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!linkCopied) {
+                          (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
+                          (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                        }
+                      }}
+                    >
+                      <Link size={12} />
+                      <span className="hidden sm:inline">{linkCopied ? "Copied!" : "Copy link"}</span>
+                    </button>
+                  )}
+                  {/* Handoff button — only when conversation has messages and no existing handoff */}
+                  {conversationId && !handoffInfo && (
+                    <button
+                      type="button"
+                      onClick={() => setShowHandoffPicker(true)}
+                      disabled={handoffLoading}
+                      title="Hand off to another specialist"
+                      aria-label="Hand off to another specialist"
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors disabled:opacity-50"
+                      style={{
+                        color: "var(--color-text-muted)",
+                        border: "1px solid transparent",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
+                        (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
+                        (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                      }}
+                    >
+                      <Share2 size={12} />
+                      <span className="hidden sm:inline">
+                        {handoffLoading ? "Handing off…" : "Handoff"}
+                      </span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Inline search bar — shown when searchOpen is true */}
+          {searchOpen && conversationId && (
+            <div
+              className="flex items-center gap-2 px-2 py-2 mb-2 rounded-xl border"
+              style={{
+                background: "var(--color-surface-elevated)",
+                borderColor: "var(--color-border)",
+              }}
+            >
+              <Search size={13} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} aria-hidden />
+              <input
+                ref={searchInputRef}
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") { setSearchOpen(false); }
+                }}
+                placeholder="Search messages…"
+                aria-label="Search messages in this conversation"
+                className="flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--color-text-muted)]"
+              />
+              {searchQuery && (
+                <span className="text-[11px] shrink-0" style={{ color: "var(--color-text-muted)" }}>
+                  {searchMatchSet.size} match{searchMatchSet.size !== 1 ? "es" : ""}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => setSearchOpen(false)}
+                aria-label="Close search"
+                className="shrink-0 p-0.5 rounded transition-colors"
+                style={{ color: "var(--color-text-muted)" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
+              >
+                <X size={13} />
+              </button>
+            </div>
+          )}
+
+          {companyBrief && messages.length === 0 && (
+            <div
+              className="flex items-start gap-2 px-3 py-2 rounded-lg text-xs"
+              style={{
+                background: "color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)",
+                color: "var(--color-text-muted)",
+              }}
+            >
+              <span
+                aria-hidden
+                className="mt-0.5 inline-block w-1.5 h-1.5 rounded-full shrink-0"
+                style={{ background: "var(--color-accent)" }}
+              />
+              <span>
+                <span style={{ color: "var(--color-accent-hi)", fontWeight: 500 }}>Brief active</span>
+                {" — "}
+                {companyBrief.length > 80 ? companyBrief.slice(0, 80) + "…" : companyBrief}
+              </span>
+            </div>
+          )}
+
           {messages.length === 0 && (
             <EmptyState
               firstName={firstName}
               onSend={send}
               suggestions={suggestions}
+              isFirstRun={isFirstRun}
+              pin={pin}
+              onPinSelect={(emp) => {
+                setPin(emp);
+                requestAnimationFrame(() => {
+                  document
+                    .querySelector<HTMLTextAreaElement>(
+                      ".praxis-composer-pill textarea",
+                    )
+                    ?.focus();
+                });
+              }}
+              onPromptInsert={(text) => {
+                setInput(text);
+                requestAnimationFrame(() => {
+                  document
+                    .querySelector<HTMLTextAreaElement>(
+                      ".praxis-composer-pill textarea",
+                    )
+                    ?.focus();
+                });
+              }}
+              onFocusInput={() => {
+                requestAnimationFrame(() => {
+                  document
+                    .querySelector<HTMLTextAreaElement>(
+                      ".praxis-composer-pill textarea",
+                    )
+                    ?.focus();
+                });
+              }}
             />
           )}
 
@@ -737,10 +1735,202 @@ export function Chat({
                   ? () => playTTS(m.content, m.employee as EmployeeKey, i)
                   : undefined
               }
+              isEditing={editingMessageId === m.id}
+              onEditStart={
+                m.role === "user" && m.id && !loading
+                  ? () => setEditingMessageId(m.id!)
+                  : undefined
+              }
+              onEditCancel={() => setEditingMessageId(null)}
+              onEditSubmit={
+                m.id ? (text) => void submitEdit(m.id!, text) : undefined
+              }
+              pinned={m.id ? pinnedMessages.some((p) => p.message_id === m.id) : false}
+              onPinToggle={
+                m.role === "assistant" && m.id && conversationId
+                  ? (shouldPin) => void handlePinToggle(m.id!, shouldPin)
+                  : undefined
+              }
+              searchMatch={searchMatchSet.has(i)}
+              conversationId={conversationId}
             />
           ))}
+
+          {/* Handoff banner — shown when this conversation was handed off */}
+          {handoffInfo && (
+            <div
+              className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-sm mt-2"
+              style={{
+                background: "color-mix(in srgb, var(--color-accent) 7%, var(--color-surface-elevated))",
+                border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)",
+              }}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <Share2 size={14} style={{ color: "var(--color-accent-hi)", flexShrink: 0 }} />
+                <span style={{ color: "var(--color-text-muted)" }}>
+                  Continued by{" "}
+                  <span style={{ color: "var(--color-accent-hi)", fontWeight: 500 }}>
+                    {EMPLOYEES[handoffInfo.employee as EmployeeId]?.name ?? handoffInfo.employee}
+                  </span>
+                </span>
+              </div>
+              <a
+                href={`/app?c=${handoffInfo.conversationId}`}
+                className="flex items-center gap-1 text-xs font-medium shrink-0 transition-opacity hover:opacity-80"
+                style={{ color: "var(--color-accent-hi)" }}
+              >
+                Open <ArrowRight size={11} />
+              </a>
+            </div>
+          )}
+
+          {/* Follow-up suggestion chips — shown after the latest assistant reply */}
+          {followUpSuggestions.length > 0 && !loading && (
+            <div className="mx-auto px-2 pb-1" style={{ maxWidth: "48rem" }}>
+              <div className="flex flex-wrap gap-2 pt-1">
+                {followUpSuggestions.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => {
+                      setFollowUpSuggestions([]);
+                      void send(s);
+                    }}
+                    className="px-3 py-1.5 text-xs rounded-full border transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+                    style={{
+                      borderColor: "var(--color-border)",
+                      background: "var(--color-surface-elevated)",
+                      color: "var(--color-text-muted)",
+                    }}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {sendError && (
+            <div
+              className="conduit-card flex items-start gap-3 p-4"
+              style={
+                sendError.capacity
+                  ? {
+                      borderColor: "rgba(202, 138, 4, 0.25)",
+                      background: "rgba(202, 138, 4, 0.06)",
+                    }
+                  : {
+                      borderColor: "rgba(248, 113, 113, 0.25)",
+                      background: "rgba(248, 113, 113, 0.06)",
+                    }
+              }
+            >
+              <AlertCircle
+                size={16}
+                className="shrink-0 mt-0.5"
+                style={{ color: sendError.capacity ? "#ca8a04" : "#f87171" }}
+              />
+              <p
+                className="flex-1 text-sm leading-relaxed"
+                style={{ color: "var(--color-text)" }}
+              >
+                {sendError.text}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  const retry = sendError.retryText;
+                  setSendError(null);
+                  void send(retry);
+                }}
+                className="shrink-0 text-sm font-medium transition-colors hover:opacity-80"
+                style={{ color: "var(--color-ember-500)" }}
+              >
+                Try again
+              </button>
+            </div>
+          )}
+          {rateLimitUntil && (
+            <motion.div
+              role="status"
+              aria-live="polite"
+              className="conduit-card flex items-center gap-3 p-4"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+              style={{
+                borderColor: "rgba(202, 138, 4, 0.30)",
+                background: "rgba(202, 138, 4, 0.06)",
+              }}
+            >
+              <AlertCircle
+                size={16}
+                className="shrink-0"
+                style={{ color: "var(--color-amber, #ca8a04)" }}
+              />
+              <p className="flex-1 text-sm" style={{ color: "var(--color-text)" }}>
+                Ready again in{" "}
+                <span className="font-medium tabular-nums">{rateLimitSecondsLeft} s</span>
+              </p>
+            </motion.div>
+          )}
         </div>
       </div>
+
+      {connStatus !== 'connected' && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex items-center justify-between gap-3 px-4 md:px-8 py-2 text-xs"
+          style={{
+            background: connStatus === 'reconnected'
+              ? 'rgba(34, 197, 94, 0.08)'
+              : connStatus === 'failed'
+              ? 'rgba(248, 113, 113, 0.08)'
+              : 'rgba(202, 138, 4, 0.08)',
+            borderTop: `1px solid ${
+              connStatus === 'reconnected'
+                ? 'rgba(34, 197, 94, 0.2)'
+                : connStatus === 'failed'
+                ? 'rgba(248, 113, 113, 0.2)'
+                : 'rgba(202, 138, 4, 0.2)'
+            }`,
+          }}
+        >
+          <div
+            className="flex items-center gap-2"
+            style={{
+              color: connStatus === 'reconnected'
+                ? '#22c55e'
+                : connStatus === 'failed'
+                ? '#f87171'
+                : '#ca8a04',
+            }}
+          >
+            <AlertCircle size={12} aria-hidden />
+            <span>
+              {connStatus === 'reconnecting' && 'Connection lost — reconnecting…'}
+              {connStatus === 'reconnected' && 'Reconnected'}
+              {connStatus === 'failed' && 'Failed to reconnect — refresh the page'}
+            </span>
+          </div>
+          {(connStatus === 'reconnecting' || connStatus === 'reconnected') && (
+            <button
+              type="button"
+              onClick={() => setConnStatus('connected')}
+              aria-label="Dismiss"
+              className="shrink-0 p-0.5 rounded transition-colors"
+              style={{ color: 'var(--color-text-muted)' }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--color-text)'; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'; }}
+            >
+              <X size={11} />
+            </button>
+          )}
+        </div>
+      )}
+
+      <UpgradeCTABanner internalAccount={internalAccount} />
 
       <div
         className="px-4 md:px-8 py-3 md:py-4"
@@ -768,6 +1958,8 @@ export function Chat({
             pin={pin as PraxisPinValue}
             pinOptions={pinOptions as { value: PraxisPinValue; label: string }[]}
             onPinChange={(next) => setPin(next as PinValue)}
+            mentionOverride={mentionOverride}
+            onMentionOverrideChange={(id) => setMentionOverride(id as EmployeeKey | null)}
             speechSupported={speech.supported}
             speechListening={speech.listening}
             onSpeechToggle={() => {
@@ -780,9 +1972,20 @@ export function Chat({
                 speech.start();
               }
             }}
-            loading={loading}
+            loading={loading || Boolean(rateLimitUntil)}
             streamingEmployee={streamingEmployee as EmployeeId | null}
             placeholder={speech.listening ? "Listening…" : "Talk to your team…"}
+            voiceMessageSupported={voiceRecorder.supported}
+            voiceRecordingState={voiceRecorder.state}
+            voiceRecordingSeconds={voiceRecorder.elapsedSeconds}
+            onVoiceRecordStart={() => void voiceRecorder.start()}
+            onVoiceRecordStop={() => voiceRecorder.stop()}
+            onVoiceRecordCancel={() => voiceRecorder.cancel()}
+            whisperSupported={whisperRecorder.supported}
+            whisperState={whisperRecorder.state}
+            onWhisperStart={() => void whisperRecorder.start()}
+            onWhisperStop={() => whisperRecorder.stop()}
+            onWhisperCancel={() => whisperRecorder.cancel()}
           />
           <div
             className="mt-2 h-4 text-center"
@@ -793,12 +1996,17 @@ export function Chat({
                 className="presence-line"
                 style={{ color: DEPT_COLOR[streamingEmployee] }}
               >
-                {employeeLabel(streamingEmployee)} is thinking…
+                {labelFor(streamingEmployee)} is thinking…
               </span>
             ) : (
-              <span style={{ color: "var(--color-text-muted)" }}>
-                Shift+Enter for newline
-              </span>
+              <>
+                <span className="hidden sm:inline" style={{ color: "var(--color-text-muted)" }}>
+                  Shift+Enter for newline
+                </span>
+                <span className="sm:hidden" style={{ color: "var(--color-text-muted)" }}>
+                  Tap send to submit
+                </span>
+              </>
             )}
           </div>
         </div>
@@ -816,6 +2024,117 @@ export function Chat({
           payload={paywall}
           onClose={() => setPaywall(null)}
         />
+      )}
+
+      {/* Handoff specialist picker */}
+      {showHandoffPicker && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            aria-hidden
+            onClick={() => setShowHandoffPicker(false)}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Hand off to a specialist"
+            className="fixed inset-0 z-50 flex items-center justify-center px-4"
+          >
+            <div
+              className="w-full max-w-md rounded-2xl border p-6 shadow-2xl"
+              style={{
+                background: "var(--color-surface-elevated)",
+                borderColor: "var(--color-border)",
+              }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p
+                    className="text-[11px] uppercase tracking-[0.15em] mb-1"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
+                    Hand off to…
+                  </p>
+                  <h2 className="text-base font-semibold" style={{ color: "var(--color-text)" }}>
+                    Choose a specialist
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowHandoffPicker(false)}
+                  aria-label="Close"
+                  className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors"
+                  style={{
+                    color: "var(--color-text-muted)",
+                    background: "var(--color-surface)",
+                  }}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {EMPLOYEE_ORDER.map((empId) => {
+                  const emp = EMPLOYEES[empId];
+                  const isAllowed = allowedSet.has(empId as EmployeeKey);
+                  return (
+                    <button
+                      key={empId}
+                      type="button"
+                      disabled={!isAllowed}
+                      onClick={() => void performHandoff(empId as EmployeeKey)}
+                      className="flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{
+                        background: isAllowed
+                          ? "var(--color-surface)"
+                          : "transparent",
+                        borderColor: "var(--color-border)",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (isAllowed) {
+                          (e.currentTarget as HTMLElement).style.borderColor = emp.color;
+                          (e.currentTarget as HTMLElement).style.background = emp.colorSoft;
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
+                        (e.currentTarget as HTMLElement).style.background = isAllowed ? "var(--color-surface)" : "transparent";
+                      }}
+                    >
+                      <span
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
+                        style={{
+                          background: emp.colorSoft,
+                          color: emp.color,
+                          border: `1px solid ${emp.color}30`,
+                        }}
+                      >
+                        {emp.initial}
+                      </span>
+                      <span
+                        className="text-[11px] font-medium text-center leading-tight"
+                        style={{ color: "var(--color-text)" }}
+                      >
+                        {emp.name}
+                      </span>
+                      <span
+                        className="text-[9px] text-center leading-tight"
+                        style={{ color: "var(--color-text-muted)" }}
+                      >
+                        {emp.role}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] mt-4" style={{ color: "var(--color-text-muted)" }}>
+                A new conversation will open with context from this thread.
+                {allowedEmployees.length < EMPLOYEE_ORDER.length && (
+                  <> Dimmed specialists require a higher plan.</>
+                )}
+              </p>
+            </div>
+          </div>
+        </>
       )}
 
       {playingMessageIdx !== null && (() => {
@@ -851,72 +2170,573 @@ function EmptyState({
   firstName,
   onSend,
   suggestions,
+  isFirstRun = false,
+  pin = "auto",
+  onPinSelect,
+  onPromptInsert,
+  onFocusInput,
 }: {
   firstName: string;
   onSend: (text: string, pin?: EmployeeKey) => void;
   suggestions: Suggestion[];
+  isFirstRun?: boolean;
+  pin?: PinValue;
+  onPinSelect?: (emp: EmployeeKey) => void;
+  onPromptInsert?: (text: string) => void;
+  onFocusInput?: () => void;
 }) {
   const copy = composeChatEmptyCopy({
     firstName,
     timeOfDay: timeOfDayBucket(),
   });
+
+  const showSpecialistGrid = pin === "auto";
+  // true when user has pinned a specific specialist (not auto-route or team)
+  const isSpecialistPin = pin !== "auto" && pin !== "team" && pin in EMPLOYEES;
+
   return (
     <div
       style={{
         paddingTop: "var(--space-8)",
       }}
     >
-      <p className="praxis-eyebrow">
-        <span
-          aria-hidden
-          style={{
-            width: 6,
-            height: 6,
-            borderRadius: 9999,
-            background: "var(--color-green)",
-            boxShadow:
-              "0 0 6px color-mix(in srgb, var(--color-green) 70%, transparent)",
-            display: "inline-block",
-          }}
-        />
-        {copy.eyebrow} · {firstName}
-      </p>
-      <div
-        style={{
-          marginTop: "var(--space-4)",
-          display: "flex",
-          alignItems: "flex-start",
-          gap: "var(--space-3)",
-        }}
-      >
-        <PraxisAvatar employee="jarvis" size="xl" pulse="ambient" />
-        <h1 className="praxis-display-1">{copy.headline}</h1>
-      </div>
-      <p
-        className="praxis-body-lg"
-        style={{ marginTop: "var(--space-4)", maxWidth: "36rem" }}
-      >
-        {copy.subline}
-      </p>
-      <div
-        className="grid grid-cols-1 sm:grid-cols-2"
-        style={{
-          marginTop: "var(--space-8)",
-          gap: "var(--space-3)",
-        }}
-      >
-        {suggestions.map((s) => (
-          <PraxisSuggestionTile
-            key={s.text}
-            dept={s.dept}
-            hint={s.hint}
-            prompt={s.text}
-            pin={s.pin}
-            onSelect={(text, pin) => onSend(text, pin)}
-          />
-        ))}
-      </div>
+      {showSpecialistGrid ? (
+        <>
+          <p className="praxis-eyebrow">
+            <span
+              aria-hidden
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: 9999,
+                background: "var(--color-green)",
+                boxShadow:
+                  "0 0 6px color-mix(in srgb, var(--color-green) 70%, transparent)",
+                display: "inline-block",
+              }}
+            />
+            {isFirstRun ? `Your team is ready · ${firstName}` : `${copy.eyebrow} · ${firstName}`}
+          </p>
+          <div
+            style={{
+              marginTop: "var(--space-4)",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "var(--space-3)",
+            }}
+          >
+            <PraxisAvatar employee="jarvis" size="xl" pulse="ambient" />
+            <h1 className="praxis-display-1">
+              {isFirstRun ? "Meet your nine specialists" : copy.headline}
+            </h1>
+          </div>
+          <p
+            className="praxis-body-lg"
+            style={{ marginTop: "var(--space-4)", maxWidth: "36rem" }}
+          >
+            {isFirstRun
+              ? "Click any specialist to start with a sample prompt, or type anything below and Atlas will route it."
+              : copy.subline}
+          </p>
+          <div
+            className="grid grid-cols-2 lg:grid-cols-3"
+            style={{
+              marginTop: "var(--space-8)",
+              gap: "var(--space-3)",
+            }}
+          >
+            {EMPLOYEE_ORDER.map((id) => {
+              const emp = EMPLOYEES[id];
+              const prompt = SPECIALIST_PROMPTS[id];
+              return (
+                <button
+                  key={emp.id}
+                  type="button"
+                  onClick={() => {
+                    onPinSelect?.(emp.id as EmployeeKey);
+                    onPromptInsert?.(prompt);
+                  }}
+                  className="praxis-card praxis-card-team text-left"
+                  data-dept={emp.id}
+                  style={{ cursor: "pointer", width: "100%" }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "var(--space-3)",
+                      marginBottom: "var(--space-2)",
+                    }}
+                  >
+                    <PraxisAvatar employee={emp.id} size="md" pulse="ambient" />
+                    <div>
+                      <p
+                        style={{
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: "var(--color-text)",
+                          lineHeight: 1.3,
+                        }}
+                      >
+                        {emp.name}
+                      </p>
+                      <p
+                        className="praxis-microlabel"
+                        style={{ color: "var(--color-text-muted)" }}
+                      >
+                        {emp.role}
+                      </p>
+                    </div>
+                  </div>
+                  <p
+                    style={{
+                      fontSize: 12,
+                      color: "var(--color-text-muted)",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {prompt}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      ) : isSpecialistPin ? (
+        /* Illustrated zero-state for a pinned specialist (issue #755) */
+        <>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              textAlign: "center",
+              paddingTop: "var(--space-6)",
+              paddingBottom: "var(--space-2)",
+            }}
+          >
+            <SpecialistEmptyArt employeeId={pin as EmployeeId} size={220} />
+            <h1
+              className="praxis-display-1"
+              style={{
+                marginTop: "var(--space-5)",
+                color: EMPLOYEES[pin as EmployeeId].color,
+              }}
+            >
+              {pin === "jarvis"
+                ? "Atlas is ready"
+                : `Your ${EMPLOYEES[pin as EmployeeId].name.toLowerCase()} specialist is ready`}
+            </h1>
+            <p
+              className="praxis-body-lg"
+              style={{
+                marginTop: "var(--space-2)",
+                maxWidth: "28rem",
+                color: "var(--color-text-muted)",
+              }}
+            >
+              {EMPLOYEES[pin as EmployeeId].tagline}
+            </p>
+          </div>
+          <div
+            className="flex flex-col sm:flex-row flex-wrap"
+            style={{
+              marginTop: "var(--space-6)",
+              gap: "var(--space-2)",
+              justifyContent: "center",
+            }}
+          >
+            {SPECIALIST_STARTER_PROMPTS[pin as EmployeeId].map((prompt) => (
+              <button
+                key={prompt}
+                type="button"
+                onClick={() => onPromptInsert?.(prompt)}
+                className="px-4 py-2.5 rounded-xl text-sm text-left transition-all"
+                style={{
+                  border: `1px solid color-mix(in srgb, ${EMPLOYEES[pin as EmployeeId].color} 30%, var(--color-border))`,
+                  background: `color-mix(in srgb, ${EMPLOYEES[pin as EmployeeId].color} 6%, var(--color-surface-elevated))`,
+                  color: "var(--color-text)",
+                  cursor: "pointer",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = EMPLOYEES[pin as EmployeeId].color;
+                  (e.currentTarget as HTMLElement).style.background = `color-mix(in srgb, ${EMPLOYEES[pin as EmployeeId].color} 12%, var(--color-surface-elevated))`;
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = `color-mix(in srgb, ${EMPLOYEES[pin as EmployeeId].color} 30%, var(--color-border))`;
+                  (e.currentTarget as HTMLElement).style.background = `color-mix(in srgb, ${EMPLOYEES[pin as EmployeeId].color} 6%, var(--color-surface-elevated))`;
+                }}
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+        </>
+      ) : (
+        /* Fallback: team round-table or other non-auto, non-specialist pin */
+        <>
+          <p className="praxis-eyebrow">
+            <span
+              aria-hidden
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: 9999,
+                background: "var(--color-green)",
+                boxShadow:
+                  "0 0 6px color-mix(in srgb, var(--color-green) 70%, transparent)",
+                display: "inline-block",
+              }}
+            />
+            {copy.eyebrow} · {firstName}
+          </p>
+          <div
+            style={{
+              marginTop: "var(--space-4)",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "var(--space-3)",
+            }}
+          >
+            <PraxisAvatar employee="jarvis" size="xl" pulse="ambient" />
+            <h1 className="praxis-display-1">{copy.headline}</h1>
+          </div>
+          <p
+            className="praxis-body-lg"
+            style={{ marginTop: "var(--space-4)", maxWidth: "36rem" }}
+          >
+            {copy.subline}
+          </p>
+          <div
+            className="grid grid-cols-1 sm:grid-cols-2"
+            style={{
+              marginTop: "var(--space-8)",
+              gap: "var(--space-3)",
+            }}
+          >
+            {suggestions.map((s) => (
+              <PraxisSuggestionTile
+                key={s.text}
+                dept={s.dept}
+                hint={s.hint}
+                prompt={s.text}
+                pin={s.pin}
+                onSelect={(text, p) => onSend(text, p)}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
+  );
+}
+
+function stripMarkdown(md: string): string {
+  return md
+    .replace(/```[^\n]*\n?([\s\S]*?)```/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\*{3}(.+?)\*{3}/g, "$1")
+    .replace(/_{3}(.+?)_{3}/g, "$1")
+    .replace(/\*{2}(.+?)\*{2}/g, "$1")
+    .replace(/_{2}(.+?)_{2}/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
+    .replace(/~~(.+?)~~/g, "$1")
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/^>\s*/gm, "")
+    .replace(/^[-*_]{3,}\s*$/gm, "")
+    .replace(/^[ \t]*[-*+]\s+/gm, "")
+    .replace(/^[ \t]*\d+\.\s+/gm, "")
+    .replace(/^\|(.+)\|$/gm, (_, inner: string) =>
+      inner.split("|").map((c) => c.trim()).filter(Boolean).join("  ")
+    )
+    .replace(/^\|[-|\s:]+\|$/gm, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function CopyButton({ content }: { content: string }) {
+  const [copied, setCopied] = useState(false);
+  const toast = useToast();
+
+  const handleCopy = useCallback(async () => {
+    const plain = stripMarkdown(content);
+    const succeed = () => {
+      setCopied(true);
+      toast.success("Copied!");
+      setTimeout(() => setCopied(false), 1500);
+    };
+    try {
+      await navigator.clipboard.writeText(plain);
+      succeed();
+    } catch {
+      // execCommand fallback for older browsers / non-HTTPS contexts
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = plain;
+        ta.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        succeed();
+      } catch {
+        toast.error("Copy failed");
+      }
+    }
+  }, [content, toast]);
+
+  const Icon = copied ? Check : Copy;
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      aria-label={copied ? "Copied!" : "Copy message"}
+      title={copied ? "Copied!" : "Copy message"}
+      className="flex items-center gap-1 p-1 rounded transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100"
+      style={{ color: copied ? "var(--color-accent)" : "var(--color-text-muted)" }}
+      onMouseEnter={(e) => {
+        if (!copied) (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
+      }}
+      onMouseLeave={(e) => {
+        if (!copied) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
+      }}
+    >
+      <Icon size={13} />
+      <span className="hidden md:inline text-[11px]">{copied ? "Copied" : "Copy"}</span>
+    </button>
+  );
+}
+
+function MessageFeedbackButtons({
+  messageId,
+  initialRating = null,
+}: {
+  messageId: string;
+  initialRating?: 1 | -1 | null;
+}) {
+  const [rating, setRating] = useState<1 | -1 | null>(initialRating);
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (value: 1 | -1) => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const res = await fetch("/api/conduit/chat/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message_id: messageId, rating: value }),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { action: string };
+        setRating(data.action === "removed" ? null : value);
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-150">
+      <button
+        type="button"
+        aria-label="Helpful"
+        aria-pressed={rating === 1}
+        onClick={() => void submit(1)}
+        disabled={busy}
+        className="min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center p-1 rounded transition-colors disabled:pointer-events-none"
+        style={{
+          color: rating === 1 ? "var(--color-accent)" : "var(--color-text-muted)",
+        }}
+        onMouseEnter={(e) => { if (rating !== 1) (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
+        onMouseLeave={(e) => { if (rating !== 1) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
+      >
+        <ThumbsUp size={13} fill={rating === 1 ? "currentColor" : "none"} />
+      </button>
+      <button
+        type="button"
+        aria-label="Not helpful"
+        aria-pressed={rating === -1}
+        onClick={() => void submit(-1)}
+        disabled={busy}
+        className="min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center p-1 rounded transition-colors disabled:pointer-events-none"
+        style={{
+          color: rating === -1 ? "#f87171" : "var(--color-text-muted)",
+        }}
+        onMouseEnter={(e) => { if (rating !== -1) (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
+        onMouseLeave={(e) => { if (rating !== -1) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
+      >
+        <ThumbsDown size={13} fill={rating === -1 ? "currentColor" : "none"} />
+      </button>
+    </div>
+  );
+}
+
+function MessageHandoffButton({
+  messageId,
+  conversationId,
+  sourceEmployee,
+}: {
+  messageId: string;
+  conversationId: string;
+  sourceEmployee: EmployeeKey;
+}) {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+  const router = useRouter();
+  const toast = useToast();
+  const { labelFor } = useNicknames();
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside.
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  const handoff = async (targetEmployee: EmployeeKey) => {
+    setOpen(false);
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/conduit/messages/${messageId}/handoff`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetEmployee }),
+      });
+      if (!res.ok) {
+        toast.error("Handoff failed. Please try again.");
+        return;
+      }
+      const { newConversationId } = (await res.json()) as { newConversationId: string };
+      setDone(true);
+      toast.success(`Handed off to ${labelFor(targetEmployee)}.`);
+      router.push(`/app?c=${newConversationId}&pin=${targetEmployee}`);
+    } catch {
+      toast.error("Handoff failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (done) return null;
+
+  const targets = EMPLOYEE_ORDER.filter((e) => e !== sourceEmployee) as EmployeeKey[];
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        aria-label="Hand off to another specialist"
+        title="Hand off to another specialist"
+        disabled={loading}
+        onClick={() => setOpen((o) => !o)}
+        className="p-1 rounded transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
+        style={{ color: "var(--color-text-muted)" }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
+      >
+        <Share2 size={13} />
+      </button>
+      {open && (
+        <div
+          className="absolute left-0 top-full mt-1 z-20 rounded-xl shadow-xl py-1 min-w-[170px]"
+          style={{
+            background: "var(--color-surface-elevated)",
+            border: "1px solid var(--color-border)",
+          }}
+        >
+          <p className="px-3 py-1.5 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+            Hand off to…
+          </p>
+          {targets.map((emp) => (
+            <button
+              key={emp}
+              onClick={() => handoff(emp)}
+              className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 transition-colors"
+              style={{ color: "var(--color-text)" }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "color-mix(in srgb, var(--color-accent) 8%, transparent)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "transparent";
+              }}
+            >
+              <span
+                className="w-5 h-5 rounded-full shrink-0 flex items-center justify-center text-[8px] font-bold uppercase"
+                style={{ background: DEPT_COLOR[emp], color: "#fff" }}
+              >
+                {labelFor(emp).slice(0, 2)}
+              </span>
+              {labelFor(emp)}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function formatMessageTimestamp(iso: string): string {
+  return new Date(iso).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function MessageTimestamp({
+  createdAt,
+  touchVisible,
+  side = "top",
+}: {
+  createdAt: string;
+  touchVisible: boolean;
+  side?: "top" | "bottom";
+}) {
+  const full = formatMessageTimestamp(createdAt);
+  const short = new Date(createdAt).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+  if (touchVisible) {
+    return (
+      <time
+        dateTime={createdAt}
+        className="text-[11px] select-none"
+        style={{ color: "var(--color-text-muted)" }}
+      >
+        {full}
+      </time>
+    );
+  }
+
+  return (
+    <Tooltip
+      trigger={
+        <time
+          dateTime={createdAt}
+          className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity text-[11px] cursor-default select-none"
+          style={{ color: "var(--color-text-muted)" }}
+        >
+          {short}
+        </time>
+      }
+      side={side}
+      delay={300}
+    >
+      <span className="text-xs whitespace-nowrap">{full}</span>
+    </Tooltip>
   );
 }
 
@@ -926,37 +2746,197 @@ const MessageBubble = memo(function MessageBubble({
   playing = false,
   onStopAudio,
   onReplayAudio,
+  isEditing = false,
+  onEditStart,
+  onEditCancel,
+  onEditSubmit,
+  pinned = false,
+  onPinToggle,
+  searchMatch = false,
+  conversationId,
 }: {
   message: MessageRow;
   onOpenArtifact: (id: string) => void;
   playing?: boolean;
   onStopAudio?: () => void;
   onReplayAudio?: () => void;
+  isEditing?: boolean;
+  onEditStart?: () => void;
+  onEditCancel?: () => void;
+  onEditSubmit?: (text: string) => void;
+  pinned?: boolean;
+  onPinToggle?: (shouldPin: boolean) => void;
+  searchMatch?: boolean;
+  conversationId?: string | null;
 }) {
+  const [editDraft, setEditDraft] = useState(message.content);
+  const editRef = useRef<HTMLTextAreaElement>(null);
+  const { labelFor: nickLabelFor } = useNicknames();
+  const [touchTimestamp, setTouchTimestamp] = useState(false);
+  const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchDismissRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleTouchStart = useCallback(() => {
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current);
+    touchTimerRef.current = setTimeout(() => {
+      setTouchTimestamp(true);
+      touchDismissRef.current = setTimeout(() => setTouchTimestamp(false), 2000);
+    }, 600);
+  }, []);
+
+  const cancelTouchTimer = useCallback(() => {
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current);
+  }, []);
+
+  // Reset draft to current content when entering edit mode.
+  useEffect(() => {
+    if (isEditing) {
+      setEditDraft(message.content);
+    }
+  }, [isEditing, message.content]);
+
+  // Focus the textarea when entering edit mode.
+  useEffect(() => {
+    if (isEditing && editRef.current) {
+      editRef.current.focus();
+      const len = editRef.current.value.length;
+      editRef.current.setSelectionRange(len, len);
+    }
+  }, [isEditing]);
+
   if (message.role === "user") {
+    const meta = (message.metadata ?? {}) as Record<string, unknown>;
+    const isVoice = meta.type === "voice";
+    const voiceUrl = (meta.attachment_url as string | undefined) ?? null;
+
+    if (isEditing && !isVoice) {
+      return (
+        <motion.div
+          className="flex justify-end"
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+        >
+          <div className="w-full max-w-[85%] space-y-2">
+            <textarea
+              ref={editRef}
+              value={editDraft}
+              onChange={(e) => setEditDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  if (editDraft.trim()) onEditSubmit?.(editDraft.trim());
+                }
+                if (e.key === "Escape") onEditCancel?.();
+              }}
+              rows={Math.max(2, editDraft.split("\n").length)}
+              className="w-full px-4 py-3 rounded-xl text-sm leading-relaxed resize-none outline-none"
+              style={{
+                background: "var(--color-surface-elevated)",
+                border: "1px solid var(--color-accent)",
+                color: "var(--color-text)",
+                fontFamily: "inherit",
+              }}
+              aria-label="Edit message"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={onEditCancel}
+                className="px-3 py-1.5 text-xs rounded-lg transition-colors"
+                style={{
+                  color: "var(--color-text-muted)",
+                  border: "1px solid var(--color-border)",
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!editDraft.trim()}
+                onClick={() => { if (editDraft.trim()) onEditSubmit?.(editDraft.trim()); }}
+                className="px-3 py-1.5 text-xs rounded-lg transition-colors disabled:opacity-40"
+                style={{
+                  background: "var(--color-accent)",
+                  color: "#0A0908",
+                  fontWeight: 600,
+                }}
+              >
+                Save &amp; resend
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      );
+    }
+
     return (
-      <div className="flex justify-end">
-        <div className="max-w-[85%] conduit-bubble-user px-4 py-3 text-[var(--color-text)] whitespace-pre-wrap">
-          {message.content}
+      <motion.div
+        data-search-match={searchMatch || undefined}
+        className="flex justify-end group"
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+        style={searchMatch ? { outline: "2px solid var(--color-accent)", outlineOffset: "3px", borderRadius: "12px" } : undefined}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={cancelTouchTimer}
+        onTouchMove={cancelTouchTimer}
+      >
+        <div className="flex flex-col items-end gap-1 max-w-[85%]">
+          <div className="conduit-bubble-user px-4 py-3 text-[var(--color-text)]">
+            {isVoice && voiceUrl ? (
+              <audio
+                controls
+                src={voiceUrl}
+                aria-label="Voice message"
+                style={{ maxWidth: "260px", outline: "none" }}
+              />
+            ) : (
+              <span className="whitespace-pre-wrap">{message.content}</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {onEditStart && !isVoice && (
+              <button
+                type="button"
+                onClick={onEditStart}
+                className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-[11px] px-2 py-0.5 rounded"
+                style={{ color: "var(--color-text-muted)" }}
+                aria-label="Edit message"
+              >
+                Edit
+              </button>
+            )}
+            {message.created_at && !message.pending && (
+              <MessageTimestamp
+                createdAt={message.created_at}
+                touchVisible={touchTimestamp}
+                side="top"
+              />
+            )}
+          </div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   if (message.role === "system" && message.handoffTo) {
-    // Note: `from` would ideally be the previous assistant message's employee,
-    // but the MessageBubble doesn't have prev-message context. Default to
-    // Atlas (jarvis) as the routing source — accurate for the vast majority
-    // of handoffs since Atlas IS the router.
     const from: EmployeeId = "jarvis";
     return (
-      <div style={{ marginTop: "var(--space-3)", marginBottom: "var(--space-3)" }}>
+      <motion.div
+        style={{ marginTop: "var(--space-3)", marginBottom: "var(--space-3)" }}
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
+      >
         <PraxisHandoffBaton
           from={from}
           to={message.handoffTo as EmployeeId}
-          label={`${employeeLabel("jarvis" as EmployeeKey)} → ${employeeLabel(message.handoffTo)}`}
+          label={`${nickLabelFor("jarvis" as EmployeeKey)} → ${nickLabelFor(message.handoffTo)}`}
         />
-      </div>
+      </motion.div>
     );
   }
 
@@ -979,27 +2959,69 @@ const MessageBubble = memo(function MessageBubble({
   const employee = (message.employee as EmployeeKey) ?? "jarvis";
   const empty = !message.content && message.pending;
 
+  // Before any tokens arrive: render a dedicated accessible typing indicator.
+  if (empty) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
+      >
+        <TypingIndicator employee={employee} />
+      </motion.div>
+    );
+  }
+
   return (
-    <div
-      className="flex gap-3"
-      style={{ ["--dept" as string]: DEPT_COLOR[employee] }}
+    <motion.div
+      data-message-id={message.id}
+      data-search-match={searchMatch || undefined}
+      className="flex gap-3 group"
+      style={{
+        ["--dept" as string]: DEPT_COLOR[employee],
+        ...(searchMatch
+          ? { outline: "2px solid var(--color-accent)", outlineOffset: "3px", borderRadius: "12px" }
+          : {}),
+      }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={cancelTouchTimer}
+      onTouchMove={cancelTouchTimer}
     >
       <div className="pt-1 shrink-0">
         <EmployeeAvatar employee={employee} size={32} active={message.pending} />
       </div>
       <div className="min-w-0 flex-1 space-y-1">
-        <div className="flex items-baseline gap-2">
-          <span
-            className="text-[12px] font-medium"
-            style={{ color: DEPT_COLOR[employee] }}
-          >
-            {employeeLabel(employee)}
-          </span>
+        <div className="flex items-center gap-2 flex-wrap">
+          <SpecialistChip employee={employee} label={nickLabelFor(employee)} />
+          {message.created_at && !message.pending && (
+            <MessageTimestamp
+              createdAt={message.created_at}
+              touchVisible={touchTimestamp}
+              side="top"
+            />
+          )}
+          {message.handoffFrom && (
+            <motion.span
+              initial={{ opacity: 0, x: -6 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
+              aria-label={`Handed off from ${nickLabelFor(message.handoffFrom as EmployeeKey)}`}
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] uppercase tracking-[0.1em]"
+              style={{
+                background: `color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 12%, var(--color-surface-elevated))`,
+                color: DEPT_COLOR[message.handoffFrom as EmployeeKey],
+                border: `1px solid color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 28%, transparent)`,
+              }}
+            >
+              ← {nickLabelFor(message.handoffFrom as EmployeeKey)}
+            </motion.span>
+          )}
           {message.pending && (
             <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-              {empty
-                ? `${employeeLabel(employee)} is thinking…`
-                : "writing…"}
+              writing…
             </span>
           )}
           {playing && (
@@ -1048,26 +3070,23 @@ const MessageBubble = memo(function MessageBubble({
             </button>
           )}
         </div>
-        <div className="conduit-bubble-assistant px-4 py-3 text-[var(--color-text)] whitespace-pre-wrap leading-relaxed">
-          {empty ? (
-            <span className="inline-flex items-center gap-1 py-1">
-              <span className="typing-dot" />
-              <span className="typing-dot" />
-              <span className="typing-dot" />
-            </span>
-          ) : (
-            <>
-              {message.content}
-              {message.pending && (
-                <span
-                  aria-hidden
-                  className="inline-block w-[2px] h-4 -mb-1 ml-1 caret"
-                  style={{ background: DEPT_COLOR[employee] }}
-                />
-              )}
-            </>
-          )}
+        <div className="conduit-bubble-assistant px-4 py-3 text-[var(--color-text)]">
+          <MarkdownRenderer
+            content={message.content}
+            streaming={message.pending}
+            caretColor={message.pending ? DEPT_COLOR[employee] : undefined}
+          />
         </div>
+        {!!(message.metadata as Record<string, unknown>)?.incomplete && (
+          <div
+            className="flex items-center gap-1.5 mt-2 text-[11px]"
+            style={{ color: '#ca8a04' }}
+            aria-label="Response was cut short due to a connection drop"
+          >
+            <AlertCircle size={11} aria-hidden />
+            <span>⚠ Incomplete response</span>
+          </div>
+        )}
         {message.memories?.map((mem) => (
           <div
             key={mem.id}
@@ -1107,7 +3126,7 @@ const MessageBubble = memo(function MessageBubble({
             </span>
             <span className="min-w-0 flex-1">
               <span className="block text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-                {a.type.replace("_", " ")} · by {employeeLabel(employee)}
+                {a.type.replace("_", " ")} · by {nickLabelFor(employee)}
               </span>
               <span className="block text-sm text-[var(--color-text)] mt-0.5 truncate">
                 {a.title}
@@ -1119,8 +3138,50 @@ const MessageBubble = memo(function MessageBubble({
             </span>
           </button>
         ))}
+        {message.id && !message.pending && (
+          <div className="flex items-center gap-2">
+            <CopyButton content={message.content} />
+            <MessageFeedbackButtons messageId={message.id} initialRating={message.feedback ?? null} />
+            {onPinToggle && (
+              <button
+                type="button"
+                aria-label={pinned ? "Unpin message" : "Pin message"}
+                title={pinned ? "Unpin" : "Pin message (max 5)"}
+                onClick={() => onPinToggle(!pinned)}
+                className="p-1 rounded transition-colors opacity-0 group-hover:opacity-100"
+                style={{
+                  color: pinned ? "var(--color-accent)" : "var(--color-text-muted)",
+                }}
+                onMouseEnter={(e) => {
+                  if (!pinned) (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
+                }}
+                onMouseLeave={(e) => {
+                  if (!pinned) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
+                }}
+              >
+                <Pin size={13} fill={pinned ? "currentColor" : "none"} />
+              </button>
+            )}
+            {message.employee && message.content && (
+              <SaveOutputButton
+                messageId={message.id}
+                content={message.content}
+                specialist={message.employee}
+                conversationId={conversationId ?? undefined}
+                suggestedTitle=""
+              />
+            )}
+            {message.id && message.employee && conversationId && !message.metadata?.handoff && (
+              <MessageHandoffButton
+                messageId={message.id}
+                conversationId={conversationId}
+                sourceEmployee={message.employee as EmployeeKey}
+              />
+            )}
+          </div>
+        )}
       </div>
-    </div>
+    </motion.div>
   );
 });
 

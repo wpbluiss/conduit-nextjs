@@ -10,11 +10,42 @@ import {
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FinalCTA from "@/components/FinalCTA";
+import { MarketingMotionProvider } from "@/components/MarketingMotionProvider";
+import { PageHeader } from "@/components/marketing/PageHeader";
+import { ScrollRevealCards, ScrollRevealItem } from "@/components/marketing/ScrollRevealCards";
 
 export const metadata: Metadata = {
-  title: "About — Conduit AI",
+  title: "About Praxis — Conduit AI",
   description:
-    "Conduit AI is the company. Praxis is the product. We're building the operating system for businesses that won't be staffed.",
+    "Conduit AI is the company. Praxis is the product — nine AI specialists running 24/7 for businesses that won't be staffed.",
+  openGraph: {
+    title: "About Praxis — Conduit AI",
+    description:
+      "Conduit AI is the company. Praxis is the product — nine AI specialists running 24/7 for businesses that won't be staffed.",
+    url: "https://conduitai.io/about",
+    siteName: "Praxis by Conduit AI",
+    type: "website",
+    images: [
+      {
+        url: "/api/og?title=About+Praxis+%E2%80%94+Conduit+AI&description=Nine+AI+specialists+for+businesses+that+won%27t+be+staffed.",
+        width: 1200,
+        height: 630,
+        alt: "About Praxis — Conduit AI",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About Praxis — Conduit AI",
+    description:
+      "Nine AI specialists running 24/7 for businesses that won't be staffed. Conduit AI is the company. Praxis is the product.",
+    images: [
+      "/api/og?title=About+Praxis+%E2%80%94+Conduit+AI&description=Nine+AI+specialists+for+businesses+that+won%27t+be+staffed.",
+    ],
+  },
+  alternates: {
+    canonical: "https://conduitai.io/about",
+  },
 };
 
 const APPROACH = [
@@ -22,110 +53,145 @@ const APPROACH = [
     Icon: Wrench,
     title: "Specialist over generalist",
     body: "Each employee is purpose-built with a real domain. Sales has pipelines. Engineering has builds. Marketing has its own briefs. Generality is a recipe for shallowness.",
+    iconColor: "#5B63E8",
+    iconBg: "rgba(91,99,232,0.10)",
+    iconBorder: "rgba(91,99,232,0.24)",
+    iconGlow: "rgba(91,99,232,0.18)",
+    radial: "radial-gradient(ellipse 80% 70% at 0% 0%, rgba(91,99,232,0.08) 0%, transparent 70%)",
   },
   {
     Icon: Brain,
     title: "Memory over context",
     body: "Atlas remembers what was said three weeks ago — across conversations, across employees. The compounding effect of memory is what separates a workforce from a chat product.",
+    iconColor: "#A855F7",
+    iconBg: "rgba(168,85,247,0.10)",
+    iconBorder: "rgba(168,85,247,0.24)",
+    iconGlow: "rgba(168,85,247,0.18)",
+    radial: "radial-gradient(ellipse 80% 70% at 0% 0%, rgba(168,85,247,0.08) 0%, transparent 70%)",
   },
   {
     Icon: Lightning,
     title: "Execution over advice",
     body: "Praxis ships work, not summaries of work that should be done. Engineering deploys, Sales touches the lead, Marketing publishes the draft. Output is the only thing that matters.",
+    iconColor: "#D67817",
+    iconBg: "rgba(214,120,23,0.10)",
+    iconBorder: "rgba(214,120,23,0.24)",
+    iconGlow: "rgba(214,120,23,0.18)",
+    radial: "radial-gradient(ellipse 80% 70% at 0% 0%, rgba(214,120,23,0.08) 0%, transparent 70%)",
   },
 ];
 
 export default function AboutPage() {
   return (
+    <MarketingMotionProvider>
     <main className="conduit-bg-canvas">
       <Navbar />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden conduit-hero-section">
-        <div className="conduit-mesh" aria-hidden />
-        <div className="conduit-ember-radial" aria-hidden />
-        <div className="relative conduit-container">
-          <div className="max-w-[820px]">
-            <p className="conduit-caption conduit-caption-ember">
-              About Conduit AI
-            </p>
-            <h1 className="conduit-display-hero mt-6">
-              We&rsquo;re building the operating system for{" "}
-              <span className="conduit-ember-text">
-                the businesses that won&rsquo;t be staffed.
-              </span>
-            </h1>
-            <p className="conduit-body-lg mt-6 max-w-[640px]">
-              Conduit AI is the company. Praxis is the product. Here&rsquo;s
-              where we&rsquo;re headed and why.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHeader
+        caption="About Conduit AI"
+        title={
+          <>
+            We&rsquo;re building the operating system for{" "}
+            <span className="conduit-ember-text">
+              the businesses that won&rsquo;t be staffed.
+            </span>
+          </>
+        }
+        subtitle="Conduit AI is the company. Praxis is the product. Here's where we're headed and why."
+      />
 
       {/* Mission */}
       <section
         id="vision"
-        className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]"
+        className="relative overflow-hidden conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]"
       >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 60% 50% at 100% 0%, rgba(214,120,23,0.07) 0%, transparent 65%)",
+          }}
+        />
         <div className="conduit-container">
-          <div className="conduit-prose">
-            <p className="conduit-caption conduit-caption-ember">Mission</p>
-            <h2 className="conduit-display-xl mt-5">
-              Replace payroll with software that{" "}
-              <span className="conduit-ember-text">actually works.</span>
-            </h2>
-            <div className="space-y-6 mt-10 text-[17px] md:text-[18px] text-[var(--color-cream-soft)] leading-[1.7]">
-              <p>
-                Most companies treat AI as a tool inside their existing stack.
-                We think that&rsquo;s a category error. AI shouldn&rsquo;t be a
-                tool — it should be the team.
-              </p>
-              <p>
-                Praxis isn&rsquo;t a copilot or a chat product. It&rsquo;s a
-                workforce. Nine specialist employees, one shared brain, voice +
-                text + execution. The same way you&rsquo;d build a team of
-                humans, but the team works 24/7 without payroll, benefits, or
-                coordination overhead.
-              </p>
-              <p>
-                We believe the next decade of business will be defined by the
-                founders who deploy this kind of workforce, not the founders
-                who scale headcount.
-              </p>
-            </div>
-          </div>
+          <ScrollRevealCards className="conduit-prose">
+            <ScrollRevealItem>
+              <p className="conduit-caption conduit-caption-ember">Mission</p>
+              <h2 className="conduit-display-xl mt-5">
+                Replace payroll with software that{" "}
+                <span className="conduit-ember-text">actually works.</span>
+              </h2>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <div className="space-y-6 mt-10 text-[17px] md:text-[18px] text-[var(--color-cream-soft)] leading-[1.7]">
+                <p>
+                  Most companies treat AI as a tool inside their existing stack.
+                  We think that&rsquo;s a category error. AI shouldn&rsquo;t be
+                  a tool — it should be the team.
+                </p>
+                <p>
+                  Praxis isn&rsquo;t a copilot or a chat product. It&rsquo;s a
+                  workforce. Nine specialist employees, one shared brain, voice +
+                  text + execution. The same way you&rsquo;d build a team of
+                  humans, but the team works 24/7 without payroll, benefits, or
+                  coordination overhead.
+                </p>
+                <p>
+                  We believe the next decade of business will be defined by the
+                  founders who deploy this kind of workforce, not the founders
+                  who scale headcount.
+                </p>
+              </div>
+            </ScrollRevealItem>
+          </ScrollRevealCards>
         </div>
       </section>
 
       {/* Approach */}
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
-          <div className="max-w-[760px] mb-14 md:mb-16">
-            <p className="conduit-caption conduit-caption-ember">Approach</p>
-            <h2 className="conduit-display-2xl mt-5">
-              Three principles we won&rsquo;t bend on.
-            </h2>
-          </div>
+          <ScrollRevealCards margin="25%" className="max-w-[760px] mb-14 md:mb-16">
+            <ScrollRevealItem>
+              <p className="conduit-caption conduit-caption-ember">Approach</p>
+              <h2 className="conduit-display-2xl mt-5">
+                Three principles we won&rsquo;t bend on.
+              </h2>
+            </ScrollRevealItem>
+          </ScrollRevealCards>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <ScrollRevealCards margin="30%" className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {APPROACH.map((a) => (
-              <div key={a.title} className="conduit-card p-7 md:p-8">
-                <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-[var(--color-ink-surface-elevated)] border border-[var(--color-edge-subtle)] mb-6">
-                  <a.Icon size={22} weight="regular" color="#5B63E8" />
+              <ScrollRevealItem key={a.title}>
+                <div className="conduit-card relative overflow-hidden p-7 md:p-8 h-full">
+                  {/* Per-principle corner radial accent */}
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ background: a.radial }}
+                  />
+                  <div
+                    className="relative w-12 h-12 flex items-center justify-center rounded-xl mb-6"
+                    style={{
+                      background: a.iconBg,
+                      border: `1px solid ${a.iconBorder}`,
+                      boxShadow: `0 0 16px ${a.iconGlow}`,
+                    }}
+                  >
+                    <a.Icon size={22} weight="duotone" color={a.iconColor} />
+                  </div>
+                  <h3
+                    className="relative text-[22px] leading-[1.15] tracking-[-0.015em] text-[var(--color-cream)]"
+                    style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
+                  >
+                    {a.title}
+                  </h3>
+                  <p className="relative text-[14px] mt-3 text-[var(--color-cream-soft)] leading-[1.65]">
+                    {a.body}
+                  </p>
                 </div>
-                <h3
-                  className="text-[22px] leading-[1.15] tracking-[-0.015em] text-[var(--color-cream)]"
-                  style={{ fontFamily: "var(--font-serif)", fontWeight: 500 }}
-                >
-                  {a.title}
-                </h3>
-                <p className="text-[14px] mt-3 text-[var(--color-cream-soft)] leading-[1.65]">
-                  {a.body}
-                </p>
-              </div>
+              </ScrollRevealItem>
             ))}
-          </div>
+          </ScrollRevealCards>
 
           <div className="mt-12 text-center">
             <Link
@@ -142,17 +208,20 @@ export default function AboutPage() {
       {/* Customers */}
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
-          <div className="max-w-[760px] mb-14 md:mb-16">
-            <p className="conduit-caption conduit-caption-ember">Customers</p>
-            <h2 className="conduit-display-2xl mt-5">
-              Currently running on Praxis.
-            </h2>
-          </div>
+          <ScrollRevealCards margin="25%" className="max-w-[760px] mb-14 md:mb-16">
+            <ScrollRevealItem>
+              <p className="conduit-caption conduit-caption-ember">Customers</p>
+              <h2 className="conduit-display-2xl mt-5">
+                Currently running on Praxis.
+              </h2>
+            </ScrollRevealItem>
+          </ScrollRevealCards>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <ScrollRevealCards margin="30%" className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <ScrollRevealItem className="md:col-span-2">
             <Link
               href="/customers/lunaro"
-              className="conduit-card group block p-7 md:p-8 md:col-span-2"
+              className="conduit-card group block p-7 md:p-8 h-full"
             >
               <div className="flex items-center gap-3 mb-5">
                 <svg width="32" height="32" viewBox="0 0 16 16" aria-hidden>
@@ -177,54 +246,73 @@ export default function AboutPage() {
                 <ArrowRight size={14} weight="bold" />
               </div>
             </Link>
+            </ScrollRevealItem>
 
-            <div className="conduit-card p-7 md:p-8 border-dashed border-[var(--color-edge)] flex items-center justify-center">
-              <p className="conduit-caption text-[var(--color-cream-faint)] text-center">
-                More customers · soon
-              </p>
-            </div>
-          </div>
+            <ScrollRevealItem>
+              <div
+                className="conduit-card p-7 md:p-8 h-full flex flex-col items-center justify-center gap-6 text-center"
+                style={{
+                  border: "1px dashed color-mix(in srgb, var(--color-accent) 30%, var(--color-edge))",
+                  background: "radial-gradient(ellipse 80% 60% at 100% 100%, rgba(255,138,61,0.08) 0%, transparent 65%)",
+                }}
+              >
+                <div className="space-y-3">
+                  <p className="conduit-display-sm">Ship your workforce.</p>
+                  <p className="conduit-body text-[var(--color-cream-muted)]">
+                    Get nine AI specialists running before your next sprint ends.
+                  </p>
+                </div>
+                <Link href="/auth/sign-up" className="conduit-btn-primary">
+                  Get started free
+                </Link>
+              </div>
+            </ScrollRevealItem>
+          </ScrollRevealCards>
         </div>
       </section>
 
       {/* Contact */}
       <section className="conduit-section conduit-bg-canvas border-t border-[var(--color-edge-subtle)]">
         <div className="conduit-container">
-          <div className="conduit-prose">
-            <p className="conduit-caption conduit-caption-ember">Contact</p>
-            <h2 className="conduit-display-xl mt-5">
-              Where to reach us.
-            </h2>
-
-            <div className="mt-10 space-y-1">
-              <ContactRow
-                label="Partnership inquiries"
-                value="luis@conduitai.io"
-                href="mailto:luis@conduitai.io?subject=Partnership%20inquiry"
-                live
-              />
-              <ContactRow
-                label="Press"
-                value="press@conduitai.io"
-                href="mailto:press@conduitai.io"
-                live
-              />
-              <ContactRow
-                label="Headquarters"
-                value="West Palm Beach, FL"
-              />
-              <ContactRow
-                label="Working hours"
-                value="Always — Praxis runs 24/7. Humans respond M-F."
-              />
-            </div>
-          </div>
+          <ScrollRevealCards className="conduit-prose">
+            <ScrollRevealItem>
+              <p className="conduit-caption conduit-caption-ember">Contact</p>
+              <h2 className="conduit-display-xl mt-5">
+                Where to reach us.
+              </h2>
+            </ScrollRevealItem>
+            <ScrollRevealItem>
+              <div className="mt-10 space-y-1">
+                <ContactRow
+                  label="Partnership inquiries"
+                  value="luis@conduitai.io"
+                  href="mailto:luis@conduitai.io?subject=Partnership%20inquiry"
+                  live
+                />
+                <ContactRow
+                  label="Press"
+                  value="press@conduitai.io"
+                  href="mailto:press@conduitai.io"
+                  live
+                />
+                <ContactRow
+                  label="Headquarters"
+                  value="West Palm Beach, FL"
+                />
+                <ContactRow
+                  label="Working hours"
+                  value="Always — Praxis runs 24/7. Humans respond M-F."
+                />
+              </div>
+            </ScrollRevealItem>
+          </ScrollRevealCards>
         </div>
       </section>
 
       <FinalCTA />
       <Footer />
     </main>
+    </MarketingMotionProvider>
   );
 }
 

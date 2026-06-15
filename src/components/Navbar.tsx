@@ -259,6 +259,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<MenuKey>(null);
+  const [showStickyCTA, setShowStickyCTA] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -266,6 +267,17 @@ export default function Navbar() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const target = document.getElementById("hero-cta");
+    if (!target) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyCTA(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -347,8 +359,30 @@ export default function Navbar() {
             >
               Sign in
             </Link>
+            <AnimatePresence>
+              {showStickyCTA && (
+                <motion.div
+                  key="sticky-cta"
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                >
+                  <Link
+                    href="/auth/sign-up"
+                    prefetch
+                    className="conduit-btn-primary text-[13px]"
+                    style={{ padding: "8px 16px" }}
+                  >
+                    Start free
+                    <ArrowRight size={13} weight="bold" />
+                  </Link>
+                </motion.div>
+              )}
+            </AnimatePresence>
             <Link
               href="/auth/sign-up"
+              prefetch
               className="conduit-btn-primary text-[14px]"
               style={{ padding: "10px 20px" }}
             >
@@ -357,14 +391,36 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Mobile hamburger */}
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="md:hidden flex items-center justify-center min-w-[44px] min-h-[44px] -mr-2 text-[var(--color-cream)]"
-            aria-label="Open menu"
-          >
-            <List size={22} weight="regular" />
-          </button>
+          {/* Mobile: hamburger + sticky CTA when hero CTA is off-screen */}
+          <div className="md:hidden flex items-center gap-2 -mr-2">
+            <AnimatePresence>
+              {showStickyCTA && (
+                <motion.div
+                  key="sticky-cta-mobile"
+                  initial={{ opacity: 0, scale: 0.88 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.88 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                >
+                  <Link
+                    href="/auth/sign-up"
+                    prefetch
+                    className="conduit-btn-primary text-[13px]"
+                    style={{ padding: "7px 14px" }}
+                  >
+                    Start free
+                  </Link>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="flex items-center justify-center min-w-[44px] min-h-[44px] text-[var(--color-cream)]"
+              aria-label="Open menu"
+            >
+              <List size={22} weight="regular" />
+            </button>
+          </div>
         </div>
 
         {/* Mega-menu drawer */}
@@ -521,6 +577,7 @@ export default function Navbar() {
                   </Link>
                   <Link
                     href="/auth/sign-up"
+                    prefetch
                     onClick={() => setMobileOpen(false)}
                     className="conduit-btn-primary justify-center w-full"
                   >

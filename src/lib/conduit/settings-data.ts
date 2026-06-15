@@ -79,6 +79,17 @@ export async function loadSettingsData(
       byDay[d] = byDay[d] + (r.input_tokens ?? 0) + (r.output_tokens ?? 0);
   }
 
+  const cycleResetDate = account.billing_cycle_start
+    ? new Date(
+        new Date(account.billing_cycle_start).getTime() +
+          30 * 24 * 60 * 60 * 1000,
+      ).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : null;
+
   return {
     account: {
       id: account.id,
@@ -92,8 +103,17 @@ export async function loadSettingsData(
       bonus_tokens: account.bonus_tokens,
       internal_account: account.internal_account,
       has_stripe_customer: Boolean(account.stripe_customer_id),
+      billing_cycle_start: account.billing_cycle_start,
+      account_created_at: account.created_at,
       timezone: account.timezone,
       theme_preference: account.theme_preference ?? "system",
+      display_name: account.display_name ?? null,
+      avatar_url: account.avatar_url ?? null,
+      accent_preference: account.accent_preference ?? null,
+      company_brief: account.company_brief ?? null,
+      specialist_nicknames: ((account as unknown as { specialist_nicknames?: Record<string, string> }).specialist_nicknames ?? null),
+      specialist_prefs: account.specialist_prefs ?? null,
+      workspace_name: (account as unknown as { workspace_name?: string | null }).workspace_name ?? null,
     },
     usage: {
       totals,
@@ -106,6 +126,7 @@ export async function loadSettingsData(
         limit: account.monthly_token_cap,
       },
       buildsThisCycle: buildsThisCycle ?? 0,
+      cycleResetDate,
     },
     fullName: (user.user_metadata?.full_name as string) ?? "",
     email: user.email ?? "",
