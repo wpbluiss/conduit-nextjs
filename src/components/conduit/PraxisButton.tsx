@@ -30,8 +30,20 @@ const SIZE_CLASS: Record<PraxisButtonSize, string> = {
   "icon-sm": "btn-sz-icon-sm",
 };
 
-/* Spec: 120–220ms, easing [0.22,1,0.36,1] "snappy spring" */
-const SPRING = { duration: 0.15, ease: [0.22, 1, 0.36, 1] as const };
+/*
+ * Press transition: fast spring that physically collapses on tap and
+ * rebounds with a touch of overshoot on release — the "Apple button" feel.
+ * stiffness/damping tuned for snappy <120ms press, springy ~200ms release.
+ */
+const PRESS_SPRING = {
+  type: "spring" as const,
+  stiffness: 500,
+  damping: 30,
+  mass: 0.8,
+};
+
+/* Hover lift — subtle, sub-100ms, eased */
+const HOVER_EASE = { duration: 0.12, ease: [0.22, 1, 0.36, 1] as const };
 
 export function SpinnerIcon({ size = 14 }: { size?: number }) {
   return (
@@ -79,11 +91,12 @@ export function PraxisButton({
       type={type}
       disabled={isActuallyDisabled}
       aria-busy={isLoading || undefined}
-      /* Hover lift — CSS handles bg/border/shadow, framer-motion handles transform */
+      /* Hover: CSS handles bg/border/shadow; framer-motion handles the lift transform */
       whileHover={isActuallyDisabled || prefersReduced ? undefined : { y: -1 }}
-      /* Press: scale down + snap back to y=0 (overrides hover lift) */
-      whileTap={isActuallyDisabled || prefersReduced ? undefined : { scale: 0.97, y: 0 }}
-      transition={SPRING}
+      /* Press: scale 0.96 + return to baseline y; springy release on pointer-up */
+      whileTap={isActuallyDisabled || prefersReduced ? undefined : { scale: 0.96, y: 0 }}
+      /* Per-property: scale gets the spring (tactile snap+rebound); y gets a quick ease (hover lift) */
+      transition={prefersReduced ? HOVER_EASE : { scale: PRESS_SPRING, y: HOVER_EASE }}
       className={`${variantClass} ${sizeClass} disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
       {/* Relative wrapper so spinner can overlay without shifting button width */}

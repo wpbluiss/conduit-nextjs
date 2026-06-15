@@ -287,7 +287,12 @@ body {
  * Apple-grade recipe: layered depth, hairline inner top highlight, ≥44px touch target,
  * springy press via framer-motion whileTap scale(0.97), snappy 120–180ms ease. */
 .btn-primary {
-  background: var(--cx-accent, #7C6CFF);
+  /* Subtle top-light gradient — simulates a light source from above (spec: "top-light gradient") */
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--cx-accent, #7C6CFF) 88%, #fff 12%) 0%,
+    var(--cx-accent, #7C6CFF) 100%
+  );
   color: #FFFFFF;
   padding: var(--cx-space-3, 12px) var(--cx-space-6, 24px);
   font-size: var(--cx-type-base, 14px);
@@ -295,9 +300,9 @@ body {
   letter-spacing: -0.005em;
   /* hairline inner top highlight + soft resting depth */
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.18),
     0 1px 3px rgba(0,0,0,0.3),
-    0 0 0 1px rgba(124,108,255,0.15);
+    0 0 0 1px rgba(124,108,255,0.20);
   transition:
     background var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
     box-shadow var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
@@ -311,7 +316,11 @@ body {
   cursor: pointer;
 }
 .btn-primary:hover {
-  background: var(--cx-accent-bright, #9B8CFF);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--cx-accent-bright, #9B8CFF) 88%, #fff 12%) 0%,
+    var(--cx-accent-bright, #9B8CFF) 100%
+  );
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.15),
     0 6px 24px color-mix(in srgb, var(--cx-accent, #7C6CFF) 40%, transparent),
@@ -331,15 +340,17 @@ body {
 
 /* secondary = glass surface (frosted, translucent) */
 .btn-secondary {
-  background: rgba(255,255,255,0.05);
+  background: var(--cx-glass-bg, rgba(255,255,255,0.04));
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
   color: var(--cx-text, #F4F4F7);
   padding: var(--cx-space-3, 12px) var(--cx-space-6, 24px);
   font-size: var(--cx-type-base, 14px);
   font-weight: 500;
   letter-spacing: -0.005em;
-  border: 1px solid rgba(255,255,255,0.09);
+  border: 1px solid var(--cx-glass-border, rgba(255,255,255,0.08));
   /* glass edge highlight */
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 1px 2px rgba(0,0,0,0.2);
   transition:
     background var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
     border-color var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
@@ -397,7 +408,10 @@ body {
   border-color: var(--cx-border, #262630);
   transform: translateY(-1px);
 }
-.btn-ghost:active { transform: translateY(0); }
+.btn-ghost:active {
+  transform: translateY(0);
+  background: color-mix(in srgb, var(--cx-surface-raised, #1C1C26) 80%, var(--cx-border, #262630));
+}
 .btn-ghost:focus-visible {
   outline: none;
   box-shadow: var(--cx-accent-glow, 0 0 0 3px rgba(124,108,255,0.25));
@@ -437,6 +451,22 @@ body {
   box-shadow: 0 0 0 3px rgba(244, 96, 125, 0.30), inset 0 1px 0 rgba(255,255,255,0.12);
 }
 
+/* Opaque fallback for .btn-secondary when backdrop-filter is unsupported */
+@supports not (backdrop-filter: blur(1px)) {
+  .btn-secondary {
+    background: var(--cx-surface-raised, #1C1C26);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .btn-secondary {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--cx-surface-raised, #1C1C26);
+  }
+}
+
 /* Reduced-motion: keep colour/shadow transitions, remove all transforms */
 @media (prefers-reduced-motion: reduce) {
   .btn-primary, .btn-secondary, .btn-ghost, .btn-danger {
@@ -474,7 +504,7 @@ body {
   min-height: 48px;
   height: 48px;
   padding: 0 var(--cx-space-6, 24px);
-  font-size: 15px;
+  font-size: var(--cx-type-md, 16px);
   gap: var(--cx-space-2, 8px);
 }
 .btn-sz-icon {
