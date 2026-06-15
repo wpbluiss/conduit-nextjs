@@ -22,12 +22,12 @@ const VARIANT_CLASS: Record<PraxisButtonVariant, string> = {
   danger: "btn-danger",
 };
 
-const SIZE_OVERRIDE: Record<PraxisButtonSize, string> = {
-  sm: "!px-4 !py-2 !text-[13px] !gap-1.5",
-  md: "",
-  lg: "!px-8 !py-4 !text-base",
-  icon: "!p-2 !gap-0 !justify-center",
-  "icon-sm": "!p-1.5 !gap-0 !justify-center",
+const SIZE_CLASS: Record<PraxisButtonSize, string> = {
+  sm: "btn-sz-sm",
+  md: "btn-sz-md",
+  lg: "btn-sz-lg",
+  icon: "btn-sz-icon",
+  "icon-sm": "btn-sz-icon-sm",
 };
 
 /* Spec: 120–220ms, easing [0.22,1,0.36,1] "snappy spring" */
@@ -70,7 +70,7 @@ export function PraxisButton({
 }: PraxisButtonProps) {
   const prefersReduced = useReducedMotion();
   const variantClass = VARIANT_CLASS[variant];
-  const sizeClass = SIZE_OVERRIDE[size];
+  const sizeClass = SIZE_CLASS[size];
   const isActuallyDisabled = isDisabled || isLoading || disabled;
 
   return (
