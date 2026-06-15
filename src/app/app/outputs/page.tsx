@@ -159,7 +159,7 @@ export default function OutputsPage() {
                         type="button"
                         onClick={() => void handleDelete(output.id)}
                         disabled={deletingId === output.id}
-                        className="shrink-0 p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-destructive,#ef4444)] transition-colors disabled:opacity-40"
+                        className="shrink-0 p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-destructive,var(--cx-danger))] transition-colors disabled:opacity-40"
                         aria-label="Delete output"
                       >
                         <Trash2 size={13} />
