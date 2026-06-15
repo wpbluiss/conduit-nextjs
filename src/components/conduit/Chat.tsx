@@ -137,6 +137,19 @@ function suggestionsForTier(allowed: Set<EmployeeKey>): Suggestion[] {
   return [...base, ...extras].slice(0, 4);
 }
 
+// Mono micro-copy shown in the composer presence line while a specialist is active.
+const SPECIALIST_THINKING_HINT: Partial<Record<EmployeeKey, string>> = {
+  jarvis:      "is routing to your team…",
+  marketing:   "is reviewing your brief…",
+  engineering: "is analyzing the problem…",
+  sales:       "is building the play…",
+  finance:     "is reviewing the numbers…",
+  compliance:  "is checking requirements…",
+  hr:          "is reviewing your request…",
+  ops:         "is mapping the process…",
+  legal:       "is reviewing the brief…",
+};
+
 const SPECIALIST_PROMPTS: Record<EmployeeId, string> = {
   jarvis: "Help me prioritize what to work on this week across my business",
   marketing: "Draft a LinkedIn post announcing our new product feature",
@@ -1989,15 +2002,27 @@ export function Chat({
             onWhisperCancel={() => whisperRecorder.cancel()}
           />
           <div
-            className="mt-2 h-4 text-center"
+            className="mt-2 h-4 flex items-center justify-center"
             style={{ fontSize: "11px" }}
           >
             {streamingEmployee ? (
-              <span
-                className="presence-line"
-                style={{ color: DEPT_COLOR[streamingEmployee] }}
-              >
-                {labelFor(streamingEmployee)} is thinking…
+              <span className="presence-line flex items-center gap-1.5">
+                <span
+                  aria-hidden="true"
+                  className="presence-dot inline-block w-1.5 h-1.5 rounded-full shrink-0"
+                  style={{ background: DEPT_COLOR[streamingEmployee] }}
+                />
+                <span style={{ color: DEPT_COLOR[streamingEmployee], fontWeight: 500 }}>
+                  {labelFor(streamingEmployee)}
+                </span>
+                <span
+                  style={{
+                    color: "var(--color-text-muted)",
+                    fontFamily: "var(--font-mono, monospace)",
+                  }}
+                >
+                  {SPECIALIST_THINKING_HINT[streamingEmployee] ?? "is thinking…"}
+                </span>
               </span>
             ) : (
               <>
@@ -2959,6 +2984,7 @@ const MessageBubble = memo(function MessageBubble({
 
   const employee = (message.employee as EmployeeKey) ?? "jarvis";
   const empty = !message.content && message.pending;
+  const isRoundTable = Boolean((message.metadata as Record<string, unknown>)?.round_table);
 
   // Before any tokens arrive: render a dedicated accessible typing indicator.
   if (empty) {
@@ -2968,7 +2994,7 @@ const MessageBubble = memo(function MessageBubble({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
       >
-        <TypingIndicator employee={employee} />
+        <TypingIndicator employee={employee} roundTable={isRoundTable} />
       </motion.div>
     );
   }
