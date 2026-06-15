@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { X, ArrowRight } from "lucide-react";
 import { track } from "@/lib/analytics/track";
+import { Button } from "@/components/conduit/ui/Button";
 
 const STORAGE_KEY = "conduit_post_onboarding_nudge_v1";
 const AUTO_DISMISS_MS = 8000;
@@ -60,13 +61,12 @@ export function PostOnboardingNudge() {
       </p>
 
       <div className="flex flex-col gap-2">
-        <button
-          type="button"
+        <Button
           onClick={() => setVisible(false)}
-          className="btn-primary w-full justify-center text-xs"
+          className="w-full justify-center text-xs"
         >
           Explore your team
-        </button>
+        </Button>
         <button
           type="button"
           onClick={handleSeePlans}

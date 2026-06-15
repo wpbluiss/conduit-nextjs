@@ -43,6 +43,7 @@ import { track } from "@/lib/analytics/track";
 import { ConversationLabelManager, type ConversationLabel } from "./ConversationLabels";
 import { Tooltip } from "./pdl/Tooltip";
 import { SpecialistEmptyArt } from "./SpecialistEmptyArt";
+import { Button } from "@/components/conduit/ui/Button";
 
 export interface VoicePrefs {
   enabled: boolean;
@@ -3227,15 +3228,17 @@ function ArtifactDrawer({
                 </h2>
               </div>
               <div className="flex gap-2 shrink-0">
-                <button
+                <Button
+                  variant="secondary"
                   onClick={() =>
                     navigator.clipboard?.writeText(data.content)
                   }
-                  className="btn-secondary !px-3 !py-2 !text-xs"
+                  className="!px-3 !py-2 !text-xs"
                 >
                   Copy
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="secondary"
                   onClick={() => {
                     const blob = new Blob([data.content], {
                       type: "text/markdown",
@@ -3249,10 +3252,10 @@ function ArtifactDrawer({
                     a.click();
                     URL.revokeObjectURL(url);
                   }}
-                  className="btn-secondary !px-3 !py-2 !text-xs"
+                  className="!px-3 !py-2 !text-xs"
                 >
                   Download
-                </button>
+                </Button>
                 <button
                   onClick={onClose}
                   className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] px-2"

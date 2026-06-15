@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Check } from "lucide-react";
 import { PraxisLogo } from "./PraxisLogo";
 import { track } from "@/lib/analytics/track";
+import { Button } from "@/components/conduit/ui/Button";
 
 const DISMISS_KEY = "conduit_onboarding_skip_v1";
 
@@ -165,13 +166,13 @@ export function OnboardingModal({
                 className="mt-8 w-full bg-transparent border-b border-[var(--color-border)] focus:border-[var(--color-accent)] outline-none px-1 py-3 text-2xl md:text-3xl serif placeholder:text-[var(--color-text-muted)]"
               />
               <div className="mt-10 flex justify-end">
-                <button
+                <Button
                   onClick={() => name.trim() && setStep(2)}
                   disabled={!name.trim()}
-                  className="btn-primary disabled:opacity-40"
+                  className="disabled:opacity-40"
                 >
                   Continue <ArrowRight size={16} />
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -211,16 +212,16 @@ export function OnboardingModal({
                 />
               )}
               <div className="mt-10 flex justify-between">
-                <button onClick={() => setStep(1)} className="btn-secondary">
+                <Button variant="secondary" onClick={() => setStep(1)}>
                   Back
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => finalType.trim() && setStep(3)}
                   disabled={!finalType.trim()}
-                  className="btn-primary disabled:opacity-40"
+                  className="disabled:opacity-40"
                 >
                   Continue <ArrowRight size={16} />
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -269,15 +270,12 @@ export function OnboardingModal({
                 {goals.length}/{MAX_GOALS} selected
               </p>
               <div className="mt-10 flex justify-between">
-                <button onClick={() => setStep(2)} className="btn-secondary">
+                <Button variant="secondary" onClick={() => setStep(2)}>
                   Back
-                </button>
-                <button
-                  onClick={() => setStep(4)}
-                  className="btn-primary"
-                >
+                </Button>
+                <Button onClick={() => setStep(4)}>
                   Continue <ArrowRight size={16} />
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -304,16 +302,16 @@ export function OnboardingModal({
                 </p>
               )}
               <div className="mt-10 flex justify-between">
-                <button onClick={() => setStep(3)} className="btn-secondary">
+                <Button variant="secondary" onClick={() => setStep(3)}>
                   Back
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={submit}
                   disabled={!description.trim() || submitting}
-                  className="btn-primary disabled:opacity-40"
+                  className="disabled:opacity-40"
                 >
                   Meet Atlas <ArrowRight size={16} />
-                </button>
+                </Button>
               </div>
             </div>
           )}

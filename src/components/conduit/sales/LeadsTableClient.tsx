@@ -10,6 +10,7 @@ import {
   X,
   Check,
 } from "lucide-react";
+import { Button } from "@/components/conduit/ui/Button";
 import {
   VERTICALS,
   VERTICAL_LABELS,
@@ -160,15 +161,14 @@ export default function LeadsTableClient({
               </span>
             </h2>
           </div>
-          <button
-            type="button"
+          <Button
             onClick={() => setShowModal(true)}
-            className="btn-primary !text-sm inline-flex items-center gap-2"
+            className="!text-sm inline-flex items-center gap-2"
             style={{ background: deptColor, color: "#0A0908" }}
           >
             <Search size={14} />
             Run Discovery
-          </button>
+          </Button>
         </div>
 
         {/* Filters */}
@@ -597,14 +597,13 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
 
         <div className="flex justify-end gap-2 pt-2">
           {result ? (
-            <button
-              type="button"
+            <Button
               onClick={onComplete}
-              className="btn-primary !text-sm"
+              className="!text-sm"
               style={{ background: deptColor, color: "#0A0908" }}
             >
               Done
-            </button>
+            </Button>
           ) : (
             <>
               <button
@@ -615,15 +614,14 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
               >
                 Cancel
               </button>
-              <button
-                type="button"
+              <Button
                 onClick={start}
                 disabled={running || (!useOverpass && !useReddit && !useMaps)}
-                className="btn-primary !text-sm disabled:opacity-50"
+                className="!text-sm disabled:opacity-50"
                 style={{ background: deptColor, color: "#0A0908" }}
               >
                 {running ? "Running…" : "Start"}
-              </button>
+              </Button>
             </>
           )}
         </div>
