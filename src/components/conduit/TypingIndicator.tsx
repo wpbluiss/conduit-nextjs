@@ -33,15 +33,30 @@ const dotVariants = {
   }),
 };
 
+// Routing micro-copy shown when Atlas has determined which specialist to route to.
+const ROUTING_TO_STATUS: Partial<Record<EmployeeKey, string>> = {
+  marketing:   "routing to Marketing…",
+  engineering: "routing to Engineering…",
+  sales:       "routing to Sales…",
+  finance:     "routing to Finance…",
+  compliance:  "routing to Compliance…",
+  hr:          "routing to HR…",
+  ops:         "routing to Operations…",
+  legal:       "routing to Legal…",
+};
+
 export function TypingIndicator({
   employee,
   roundTable = false,
   isActive = true,
+  routingTarget = null,
 }: {
   employee: EmployeeKey;
   roundTable?: boolean;
   /** false = another specialist is active; this one is waiting its turn (round-table only) */
   isActive?: boolean;
+  /** When Atlas has resolved routing, shows "routing to Engineering…" instead of the generic copy. */
+  routingTarget?: EmployeeKey | null;
 }) {
   const reduced = useReducedMotion();
   const name = employeeLabel(employee);
@@ -49,6 +64,8 @@ export function TypingIndicator({
 
   const statusText = !isActive
     ? "waiting…"
+    : routingTarget && employee === "jarvis"
+    ? (ROUTING_TO_STATUS[routingTarget] ?? `routing to ${employeeLabel(routingTarget)}…`)
     : roundTable
     ? "contributing to the discussion…"
     : (THINKING_STATUS[employee] ?? "thinking…");
@@ -74,7 +91,7 @@ export function TypingIndicator({
           className="thinking-bubble inline-flex flex-col gap-2 px-4 py-3"
         >
           {reduced ? (
-            /* prefers-reduced-motion: static "thinking…" label, no animation */
+            /* prefers-reduced-motion: static label, no animation */
             <span className="thinking-status">{statusText}</span>
           ) : (
             <>
@@ -97,7 +114,17 @@ export function TypingIndicator({
                   />
                 ))}
               </div>
-              <span className="thinking-status" aria-hidden="true">{statusText}</span>
+              {/* Micro-copy: animates when routing target is revealed */}
+              <motion.span
+                key={statusText}
+                className="thinking-status"
+                aria-hidden="true"
+                initial={{ opacity: 0, y: 3 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+              >
+                {statusText}
+              </motion.span>
             </>
           )}
         </div>

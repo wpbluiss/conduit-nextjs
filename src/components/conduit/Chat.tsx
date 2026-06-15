@@ -294,6 +294,9 @@ export function Chat({
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [streamingEmployee, setStreamingEmployee] =
     useState<EmployeeKey | null>(null);
+  // Routing target: set briefly during a handoff so the Atlas thinking bubble
+  // can show "routing to Engineering…" before the new specialist slot appears.
+  const [routingTarget, setRoutingTarget] = useState<EmployeeKey | null>(null);
   // Reward beat: set on message_end, auto-cleared after 700ms
   const [rewardEmployee, setRewardEmployee] = useState<EmployeeKey | null>(null);
   const rewardClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1178,7 +1181,7 @@ export function Chat({
         });
       };
 
-      const handleEvent = (event: string, data: Record<string, unknown>) => {
+      const handleEvent = (event: string, data: Record<string, unknown>): Promise<void> | void => {
         if (event === "audio") {
           // R13: PCM16 chunk piggybacking on the chat SSE stream. Decode +
           // queue into the Web Audio scheduler so playback overlaps with
@@ -1214,18 +1217,40 @@ export function Chat({
           flushTokenBufNow();
           const from = currentEmployee;
           const to = data.to as EmployeeKey;
-          finishCurrent(from);
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: "system",
-              content: `→ ${employeeLabel(to)} taking this`,
-              handoffTo: to,
-            },
-          ]);
-          currentEmployee = to;
-          setStreamingEmployee(to);
-          ensurePendingFor(to, from);
+          // Stage 3: show "routing to Engineering…" in Atlas's bubble for 350ms
+          // before transitioning to the new specialist's pending slot.
+          return new Promise<void>((resolve) => {
+            // Mark Atlas's pending message with the routing target so TypingIndicator
+            // can render "routing to Engineering…" instead of "routing to your team…"
+            setMessages((prev) => {
+              const next = [...prev];
+              const last = next[next.length - 1];
+              if (last?.role === "assistant" && last.pending && last.employee === from) {
+                next[next.length - 1] = {
+                  ...last,
+                  metadata: { ...(last.metadata ?? {}), routingTo: to },
+                };
+              }
+              return next;
+            });
+            setRoutingTarget(to);
+            setTimeout(() => {
+              finishCurrent(from);
+              setMessages((prev) => [
+                ...prev,
+                {
+                  role: "system",
+                  content: `→ ${employeeLabel(to)} taking this`,
+                  handoffTo: to,
+                },
+              ]);
+              currentEmployee = to;
+              setStreamingEmployee(to);
+              setRoutingTarget(null);
+              ensurePendingFor(to, from);
+              resolve();
+            }, 350);
+          });
         } else if (event === "message_end") {
           flushTokenBufNow();
           const employee = (data.employee as EmployeeKey) || currentEmployee;
@@ -1477,7 +1502,10 @@ export function Chat({
             if (!dataLine) continue;
             try {
               const data = JSON.parse(dataLine);
-              handleEvent(event, data);
+              // Handoff events return a Promise (350ms routing pause); await it
+              // so the routing micro-copy is visible before the transition.
+              const maybePromise = handleEvent(event, data);
+              if (maybePromise) await maybePromise;
             } catch {
               // ignore malformed event
             }
@@ -1498,6 +1526,7 @@ export function Chat({
       } finally {
         flushTokenBufNow();
         setStreamingEmployee(null);
+        setRoutingTarget(null);
         setRoundTableActiveEmployee(null);
         setLoading(false);
         router.refresh();
@@ -2120,7 +2149,9 @@ export function Chat({
                     fontFamily: "var(--font-mono, monospace)",
                   }}
                 >
-                  {SPECIALIST_THINKING_HINT[streamingEmployee] ?? "is thinking…"}
+                  {routingTarget && streamingEmployee === "jarvis"
+                    ? `is routing to ${labelFor(routingTarget)}…`
+                    : (SPECIALIST_THINKING_HINT[streamingEmployee] ?? "is thinking…")}
                 </span>
               </span>
             ) : (
@@ -3090,6 +3121,8 @@ const MessageBubble = memo(function MessageBubble({
   // Before any tokens arrive: render a dedicated accessible typing indicator.
   // exit plays when the key changes (typing-X → X) as content starts streaming.
   if (empty) {
+    const msgMeta = (message.metadata ?? {}) as Record<string, unknown>;
+    const routingTo = msgMeta.routingTo as EmployeeKey | undefined;
     return (
       <motion.div
         initial={{ opacity: 0, y: 8 }}
@@ -3097,7 +3130,12 @@ const MessageBubble = memo(function MessageBubble({
         exit={{ opacity: 0, y: -6, transition: { duration: 0.15, ease: [0.4, 0, 0.2, 1] } }}
         transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
       >
-        <TypingIndicator employee={employee} roundTable={isRoundTable} isActive={isActive} />
+        <TypingIndicator
+          employee={employee}
+          roundTable={isRoundTable}
+          isActive={isActive}
+          routingTarget={routingTo ?? null}
+        />
       </motion.div>
     );
   }
