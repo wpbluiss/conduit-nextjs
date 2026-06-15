@@ -124,3 +124,32 @@ export async function getAiMessages(limit = 40) {
     .limit(limit);
   return data ?? [];
 }
+
+// Records today's net worth (once/day) and returns the recent history for charting.
+export async function recordAndGetNetWorth(snapshot: {
+  net_worth: number; cash: number; debt: number; investments: number;
+}): Promise<{ date: string; value: number }[]> {
+  const hh = await getUserHouseholdId();
+  if (!hh) return [];
+  const supabase = await createSupabaseServerClient();
+  await supabase.from("fin_networth_snapshots").upsert(
+    {
+      household_id: hh,
+      date: new Date().toISOString().slice(0, 10),
+      net_worth: Math.round(snapshot.net_worth),
+      cash: Math.round(snapshot.cash),
+      debt: Math.round(snapshot.debt),
+      investments: Math.round(snapshot.investments),
+    },
+    { onConflict: "household_id,date" },
+  );
+  const { data } = await supabase
+    .from("fin_networth_snapshots")
+    .select("date, net_worth")
+    .order("date", { ascending: true })
+    .limit(60);
+  return (data ?? []).map((r) => ({
+    date: new Date(r.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    value: Number(r.net_worth),
+  }));
+}

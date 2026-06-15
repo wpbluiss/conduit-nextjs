@@ -1,8 +1,13 @@
-import { getSnapshot } from "@/lib/finance/data";
-import { safeToSpend, monthSpending, monthlyRecap } from "@/lib/finance/compute";
+import { getSnapshot, recordAndGetNetWorth } from "@/lib/finance/data";
+import {
+  safeToSpend, monthSpending, monthlyRecap, netWorth, pooledCash,
+  investmentsValue, totalDebt, daysBetween, todayISO,
+} from "@/lib/finance/compute";
 import { fmtMoney } from "@/lib/finance/constants";
 import { Card, SectionTitle, EmptyState, GradientText } from "@/components/finance/ui";
 import { AnimatedNumber } from "@/components/finance/AnimatedNumber";
+import { NetWorthAreaChart } from "@/components/finance/Charts";
+import { BillCalendar, type DayMark } from "@/components/finance/BillCalendar";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +27,37 @@ export default async function InsightsPage() {
   const totalSpend = spend.reduce((s, c) => s + c.amount, 0);
   const max = spend[0]?.amount ?? 1;
   const monthName = new Date().toLocaleDateString("en-US", { month: "long" });
+
+  // Net worth trend (records today, returns history)
+  const nwHistory = await recordAndGetNetWorth({
+    net_worth: netWorth(snap),
+    cash: pooledCash(snap.accounts),
+    debt: totalDebt(snap.debts),
+    investments: investmentsValue(snap.investments),
+  });
+
+  // Bill calendar marks for the current month
+  const now = new Date();
+  const ymKey = now.toISOString().slice(0, 7);
+  const markMap = new Map<number, DayMark>();
+  const addMark = (day: number, amount: number, overdue: boolean) => {
+    const ex = markMap.get(day);
+    markMap.set(day, { day, amount: (ex?.amount ?? 0) + amount, overdue: (ex?.overdue ?? false) || overdue });
+  };
+  for (const e of snap.expenses) {
+    if (e.paid) continue;
+    if (e.due_date && e.due_date.slice(0, 7) === ymKey) {
+      const day = Number(e.due_date.slice(8, 10));
+      addMark(day, Number(e.amount), daysBetween(todayISO(), e.due_date) < 0);
+    } else if (e.recurring && e.recurrence === "monthly" && e.due_day) {
+      addMark(e.due_day, Number(e.amount), false);
+    }
+  }
+  if (snap.childSupport && Number(snap.childSupport.remaining_balance) > 0) {
+    const paidThis = snap.payments.some((p) => p.kind === "child_support" && p.date.slice(0, 7) === ymKey);
+    if (!paidThis) addMark(15, Number(snap.childSupport.monthly_amount), now.getDate() > 15);
+  }
+  const marks = Array.from(markMap.values());
 
   return (
     <div className="space-y-5">
@@ -61,6 +97,22 @@ export default async function InsightsPage() {
           </Card>
         </div>
       </div>
+
+      {/* Net worth over time */}
+      <Card>
+        <SectionTitle eyebrow="Trend" title="Net worth over time" />
+        {nwHistory.length < 2 ? (
+          <EmptyState>Building your history — check back daily and watch the line climb. 📈</EmptyState>
+        ) : (
+          <NetWorthAreaChart data={nwHistory} />
+        )}
+      </Card>
+
+      {/* Bill calendar */}
+      <Card>
+        <SectionTitle eyebrow="Calendar" title="Bills this month" />
+        <BillCalendar year={now.getFullYear()} month={now.getMonth()} marks={marks} todayDay={now.getDate()} />
+      </Card>
 
       {/* Where it goes */}
       <Card>
