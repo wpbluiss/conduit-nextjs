@@ -23,6 +23,7 @@ import {
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, EMPLOYEE_ICON, employeeLabel } from "./EmployeeBadge";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 interface PaletteItem {
   id: string;
@@ -365,9 +366,10 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
                   <span className="hidden sm:inline">
                     <kbd className="font-mono">⌘K</kbd> to reopen
                   </span>
-                  <button
-                    type="button"
-                    className="sm:hidden flex items-center gap-1.5 transition-colors hover:text-[var(--color-text)]"
+                  <PraxisButton
+                    variant="ghost"
+                    size="sm"
+                    className="sm:hidden"
                     onClick={() => {
                       close();
                       window.dispatchEvent(new CustomEvent("praxis:shortcuts:open"));
@@ -376,7 +378,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
                   >
                     <Keyboard size={12} />
                     Shortcuts
-                  </button>
+                  </PraxisButton>
                 </span>
               </div>
             </div>

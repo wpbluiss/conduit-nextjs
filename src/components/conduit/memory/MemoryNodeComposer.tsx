@@ -14,6 +14,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 import type { MemoryKind, MemoryRecord } from "@/lib/ai/memory";
 import type { EmployeeId } from "@/lib/conduit/employees";
 import { MemoryKindPicker } from "./MemoryKindPicker";
@@ -193,16 +194,18 @@ export function MemoryNodeComposer({
       {error && <p className="mem-composer-error">{error}</p>}
 
       <div className="mem-composer-actions">
-        <button
-          type="button"
+        <PraxisButton
+          variant="ghost"
+          size="sm"
           onClick={onClose}
           disabled={busy}
           className="mem-composer-cancel"
         >
           Cancel
-        </button>
-        <button
-          type="button"
+        </PraxisButton>
+        <PraxisButton
+          variant="primary"
+          size="sm"
           onClick={submit}
           disabled={busy || content.trim().length < 4}
           className="mem-composer-save"
@@ -215,7 +218,7 @@ export function MemoryNodeComposer({
             />
           )}
           {editing ? "Save" : "Add memory"}
-        </button>
+        </PraxisButton>
       </div>
     </div>
   );

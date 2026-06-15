@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Check, X } from "lucide-react";
 import Link from "next/link";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 type GsKey = "gs_msg" | "gs_connector" | "gs_template" | "gs_invite";
 type GsState = Partial<Record<GsKey | "gs_dismissed", boolean>>;
@@ -112,15 +113,15 @@ export function GettingStartedChecklist({
               {done} of {ITEMS.length} complete
             </div>
           </div>
-          <button
+          <PraxisButton
             type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={dismiss}
             aria-label="Dismiss getting started checklist"
-            className="transition-colors p-0.5 rounded hover:opacity-70"
-            style={{ color: "var(--color-text-muted)" }}
           >
             <X size={12} />
-          </button>
+          </PraxisButton>
         </div>
 
         <div

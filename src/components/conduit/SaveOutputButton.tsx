@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Bookmark, BookmarkCheck, X } from "lucide-react";
 import { Button } from "@/components/conduit/ui/Button";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 interface Props {
   messageId: string;
@@ -52,26 +53,22 @@ export function SaveOutputButton({ messageId, content, specialist, conversationI
 
   return (
     <span className="relative">
-      <button
+      <PraxisButton
         type="button"
+        variant="ghost"
+        size="icon-sm"
         onClick={() => {
           if (saved) return;
           setOpen((v) => !v);
         }}
         aria-label={saved ? "Saved to Outputs" : "Save as output"}
         title={saved ? "Saved to Outputs" : "Save as output"}
-        className="flex items-center gap-1 p-1 rounded transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100"
-        style={{ color: saved ? "var(--color-accent)" : "var(--color-text-muted)" }}
-        onMouseEnter={(e) => {
-          if (!saved) (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
-        }}
-        onMouseLeave={(e) => {
-          if (!saved) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-        }}
+        className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100"
+        style={{ color: saved ? "var(--color-accent)" : undefined }}
       >
         {saved ? <BookmarkCheck size={13} /> : <Bookmark size={13} />}
         <span className="hidden md:inline cx-type-xs">{saved ? "Saved" : "Save"}</span>
-      </button>
+      </PraxisButton>
 
       {open && (
         <div
@@ -81,14 +78,16 @@ export function SaveOutputButton({ messageId, content, specialist, conversationI
             <span className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
               Save as output
             </span>
-            <button
+            <PraxisButton
               type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => setOpen(false)}
-              className="p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
               aria-label="Close"
+              className="p-0.5"
             >
               <X size={12} />
-            </button>
+            </PraxisButton>
           </div>
           <input
             ref={inputRef}

@@ -152,13 +152,16 @@ export function PaywallModal({
       >
         {/* Header */}
         <div className="px-6 pt-6 pb-4">
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={onClose}
             aria-label="Close"
-            className="absolute top-4 right-4 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+            className="absolute top-4 right-4"
           >
             <X size={18} />
-          </button>
+          </Button>
 
           <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-[var(--cx-reward)] mb-2">
             <Sparkles size={13} />

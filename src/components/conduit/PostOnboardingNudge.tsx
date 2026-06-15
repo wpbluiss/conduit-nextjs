@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { X, ArrowRight } from "lucide-react";
 import { track } from "@/lib/analytics/track";
 import { Button } from "@/components/conduit/ui/Button";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 const STORAGE_KEY = "conduit_post_onboarding_nudge_v1";
 const AUTO_DISMISS_MS = 8000;
@@ -44,14 +45,9 @@ export function PostOnboardingNudge() {
       aria-live="polite"
       className="fixed bottom-6 right-6 z-40 w-72 cx-glass-float cx-glass-border p-5 animate-in slide-in-from-bottom-4 fade-in duration-300"
     >
-      <button
-        type="button"
-        onClick={() => setVisible(false)}
-        aria-label="Dismiss"
-        className="absolute top-3 right-3 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-      >
+      <PraxisButton type="button" variant="ghost" size="icon-sm" onClick={() => setVisible(false)} aria-label="Dismiss" className="absolute top-3 right-3">
         <X size={14} />
-      </button>
+      </PraxisButton>
 
       <p className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
         You&apos;re all set
@@ -67,13 +63,9 @@ export function PostOnboardingNudge() {
         >
           Explore your team
         </Button>
-        <button
-          type="button"
-          onClick={handleSeePlans}
-          className="inline-flex items-center justify-center gap-1 text-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hi)] transition-colors"
-        >
+        <PraxisButton type="button" variant="ghost" size="sm" onClick={handleSeePlans} className="text-[var(--cx-accent)] hover:text-[var(--cx-accent-bright)]">
           See plans <ArrowRight size={12} />
-        </button>
+        </PraxisButton>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CheckCircle, X, Info, Sparkles } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 type BannerType =
   | "checkout_success"
@@ -64,14 +65,9 @@ export function BillingReturnBanner({ type }: { type: BannerType }) {
     >
       <Icon size={16} style={{ color, flexShrink: 0 }} />
       <span className="flex-1">{text}</span>
-      <button
-        type="button"
-        aria-label="Dismiss"
-        onClick={() => setVisible(false)}
-        className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-      >
+      <PraxisButton type="button" variant="ghost" size="icon-sm" aria-label="Dismiss" onClick={() => setVisible(false)}>
         <X size={14} />
-      </button>
+      </PraxisButton>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Mic, AlertCircle } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 import VoiceRoom, {
   type ParticipantDisplay,
   type VoiceTokenResponse,
@@ -96,16 +97,17 @@ export default function VoiceModeButton({
 
   return (
     <>
-      <button
+      <PraxisButton
         type="button"
+        variant="secondary"
+        size="sm"
         onClick={start}
         disabled={requesting}
-        className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md border border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-accent)] disabled:opacity-50"
         title="Live voice conversation"
       >
         <Mic size={14} style={{ color: deptColor }} />
         {requesting ? "Connecting…" : (label ?? "Voice Mode")}
-      </button>
+      </PraxisButton>
 
       {error && (
         <div
@@ -115,13 +117,14 @@ export default function VoiceModeButton({
           <AlertCircle size={14} className="mt-0.5 shrink-0" />
           <div>
             <div>{error}</div>
-            <button
+            <PraxisButton
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => setError(null)}
-              className="text-xs underline mt-0.5 text-red-200/70"
             >
               dismiss
-            </button>
+            </PraxisButton>
           </div>
         </div>
       )}

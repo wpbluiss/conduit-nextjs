@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Keyboard, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 interface ShortcutGroup {
   title: string;
@@ -56,7 +57,6 @@ export function KeyboardShortcutsOverlay() {
   const [isMac, setIsMac] = useState(false);
   const router = useRouter();
   const panelRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     setIsMac(navigator.platform.toUpperCase().startsWith("MAC"));
@@ -72,7 +72,7 @@ export function KeyboardShortcutsOverlay() {
   // Focus management + trap
   useEffect(() => {
     if (!open) return;
-    closeButtonRef.current?.focus();
+    panelRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
     const panel = panelRef.current;
     if (!panel) return;
     const onTab = (e: KeyboardEvent) => {
@@ -226,15 +226,15 @@ export function KeyboardShortcutsOverlay() {
                   <Keyboard size={15} className="text-[var(--color-text-muted)]" />
                   <span className="text-sm font-medium">Keyboard shortcuts</span>
                 </div>
-                <button
-                  ref={closeButtonRef}
+                <PraxisButton
                   type="button"
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => setOpen(false)}
                   aria-label="Close"
-                  className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
                 >
                   <X size={15} />
-                </button>
+                </PraxisButton>
               </div>
 
               {/* Groups */}

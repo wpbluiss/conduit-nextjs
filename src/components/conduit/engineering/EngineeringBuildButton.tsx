@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Hammer, Lock, Loader2, X } from "lucide-react";
 import { Button } from "@/components/conduit/ui/Button";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 interface Props {
   internalAccount: boolean;
@@ -108,14 +109,15 @@ export default function EngineeringBuildButton({
                 </div>
                 <h2 className="serif text-xl mt-1">Start a build</h2>
               </div>
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="icon-sm"
                 onClick={() => setOpen(false)}
-                className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                 aria-label="Close"
               >
                 <X size={16} />
-              </button>
+              </PraxisButton>
             </div>
 
             <label className="block cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-1.5">
@@ -165,13 +167,14 @@ export default function EngineeringBuildButton({
             )}
 
             <div className="mt-5 flex justify-end gap-2">
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => setOpen(false)}
-                className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] px-3 py-1.5"
               >
                 Cancel
-              </button>
+              </PraxisButton>
               <Button
                 onClick={submit}
                 disabled={submitting || prompt.trim().length < 8}
