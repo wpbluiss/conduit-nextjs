@@ -1,15 +1,10 @@
 "use client";
 
 import { Compass } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, DEPT_COLOR_SOFT, EMPLOYEE_ICON } from "./EmployeeBadge";
 import { SPECIALIST_ICON_STROKE } from "@/lib/ui/specialist-icons";
-import { CX_REWARD, CX_ACCENT, CX_ACCENT_BRIGHT } from "@/lib/design-system/cx-tokens";
-
-// Spark burst geometry for the reward beat (5 evenly-spaced angles)
-const SPARK_ANGLES_DEG = [0, 72, 144, 216, 288];
-const SPARK_COLORS = [CX_REWARD, CX_ACCENT, CX_REWARD, CX_ACCENT_BRIGHT, CX_REWARD];
+import { RewardBurst } from "./RewardBurst";
 
 interface BuiltinProps {
   employee: EmployeeKey;
@@ -61,7 +56,6 @@ export function SpecialistAvatar({
   rewarded = false,
   className = "",
 }: SpecialistAvatarProps) {
-  const prefersReducedMotion = useReducedMotion();
   const isBuiltin = employee !== undefined;
 
   const deptColor = isBuiltin
@@ -87,8 +81,6 @@ export function SpecialistAvatar({
 
   const Icon = isBuiltin ? (EMPLOYEE_ICON[employee!] ?? Compass) : null;
 
-  const sparkRadius = Math.round(size * 0.8);
-
   return (
     <span
       aria-hidden
@@ -113,57 +105,8 @@ export function SpecialistAvatar({
         </span>
       )}
 
-      {/* Reward beat — ring pulse + spark burst. Skipped when prefers-reduced-motion. */}
-      {!prefersReducedMotion && (
-        <AnimatePresence>
-          {rewarded && (
-            <>
-              {/* Expanding ring */}
-              <motion.span
-                key="reward-ring"
-                className="absolute inset-0 pointer-events-none"
-                initial={{ opacity: 0.9, scale: 0.85 }}
-                animate={{ opacity: 0, scale: 2.2 }}
-                exit={{}}
-                transition={{ duration: 0.52, ease: [0.22, 1, 0.36, 1] }}
-                style={{
-                  borderRadius: radius,
-                  boxShadow: "0 0 0 2px var(--cx-reward)",
-                }}
-              />
-              {/* Spark particles */}
-              {SPARK_ANGLES_DEG.map((deg, i) => {
-                const rad = (deg * Math.PI) / 180;
-                const tx = Math.cos(rad) * sparkRadius;
-                const ty = Math.sin(rad) * sparkRadius;
-                return (
-                  <motion.span
-                    key={`spark-${i}`}
-                    className="absolute pointer-events-none rounded-full"
-                    initial={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-                    animate={{ opacity: 0, x: tx, y: ty, scale: 0 }}
-                    exit={{}}
-                    transition={{
-                      duration: 0.42,
-                      ease: [0.22, 1, 0.36, 1],
-                      delay: i * 0.018,
-                    }}
-                    style={{
-                      width: 4,
-                      height: 4,
-                      left: "50%",
-                      top: "50%",
-                      marginLeft: -2,
-                      marginTop: -2,
-                      background: SPARK_COLORS[i],
-                    }}
-                  />
-                );
-              })}
-            </>
-          )}
-        </AnimatePresence>
-      )}
+      {/* Reward beat — delegates to RewardBurst (handles reduced-motion internally) */}
+      <RewardBurst rewarded={rewarded} size={size} />
     </span>
   );
 }
