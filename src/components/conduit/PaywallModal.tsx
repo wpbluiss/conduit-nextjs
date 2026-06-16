@@ -141,7 +141,7 @@ export function PaywallModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-sm bg-black/65"
+      className="fixed inset-0 z-50 flex items-center justify-center px-4 cx-scrim bg-black/65"
       aria-modal="true"
       role="dialog"
       aria-labelledby="paywall-title"

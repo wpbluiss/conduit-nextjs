@@ -830,3 +830,27 @@ html[data-praxis-theme="light"] {
 .cx-glass-border {
   border: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08));
 }
+
+/* ---- Scrim utility — modal/dialog overlay backdrop ----
+ * NOT a glass surface: intentionally lighter blur (2px) so the
+ * floating panel reads clearly against it. Background opacity set
+ * per-use-case via bg-black/xx Tailwind class or inline style.
+ * Max 2 stacked backdrop-filter layers at once (e.g. scrim + modal
+ * panel) — never add a third glass layer behind these.
+ * ------------------------------------------------------------ */
+.cx-scrim {
+  backdrop-filter: var(--cx-scrim-blur, blur(2px));
+  -webkit-backdrop-filter: var(--cx-scrim-blur, blur(2px));
+}
+@media (prefers-reduced-transparency: reduce) {
+  .cx-scrim {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .cx-scrim {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
