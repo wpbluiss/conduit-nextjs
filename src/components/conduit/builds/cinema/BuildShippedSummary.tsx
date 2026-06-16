@@ -142,7 +142,7 @@ export function BuildShippedSummary({ session, logs, internalAccount }: Props) {
             href={session.deploy_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-primary inline-flex items-center gap-1.5"
+            className="btn-primary btn-sz-sm inline-flex items-center gap-1.5"
           >
             Open live site <ExternalLink size={13} />
           </a>
@@ -152,7 +152,7 @@ export function BuildShippedSummary({ session, logs, internalAccount }: Props) {
             href={session.github_repo}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md border border-[var(--color-border)] hover:border-[var(--color-accent)] text-sm text-[var(--color-text)] transition-colors"
+            className="btn-secondary btn-sz-sm inline-flex items-center gap-1.5"
           >
             <Code2 size={13} /> View repo
           </a>
@@ -160,7 +160,7 @@ export function BuildShippedSummary({ session, logs, internalAccount }: Props) {
         {isSuccess && (
           <Link
             href={`/app/team/engineering`}
-            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md border border-[var(--color-border)] hover:border-[var(--color-accent)] text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+            className="btn-secondary btn-sz-sm inline-flex items-center gap-1.5"
             title="Iterate on this build by talking to Engineering"
           >
             Continue with Engineering <ArrowRight size={13} />
@@ -169,7 +169,7 @@ export function BuildShippedSummary({ session, logs, internalAccount }: Props) {
         {recovery && recovery.kind === "retry" && (
           <Link
             href="/app/team/engineering"
-            className="btn-primary inline-flex items-center gap-1.5"
+            className="btn-primary btn-sz-sm inline-flex items-center gap-1.5"
             title={
               recovery.promptSeed ? `Will reuse: ${recovery.promptSeed}` : undefined
             }
@@ -180,7 +180,7 @@ export function BuildShippedSummary({ session, logs, internalAccount }: Props) {
         {recovery && recovery.kind === "continue-from" && (
           <Link
             href={`/app/builds?continue=${recovery.parentSessionId}`}
-            className="btn-primary inline-flex items-center gap-1.5"
+            className="btn-primary btn-sz-sm inline-flex items-center gap-1.5"
           >
             {recovery.label} <ArrowRight size={13} />
           </Link>
@@ -195,7 +195,7 @@ export function BuildShippedSummary({ session, logs, internalAccount }: Props) {
             href={recovery.href}
             target={recovery.href.startsWith("http") ? "_blank" : undefined}
             rel="noopener noreferrer"
-            className="btn-primary inline-flex items-center gap-1.5"
+            className="btn-primary btn-sz-sm inline-flex items-center gap-1.5"
           >
             {recovery.label} <ExternalLink size={13} />
           </a>

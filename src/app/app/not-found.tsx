@@ -19,8 +19,7 @@ export default function AppNotFound() {
       <div className="flex flex-col sm:flex-row items-center gap-3">
         <Link
           href="/app/workspace"
-          className="btn-primary inline-flex items-center gap-2"
-          style={{ padding: "10px 20px", fontSize: "var(--cx-type-base)" }}
+          className="btn-primary btn-sz-md inline-flex items-center gap-2"
         >
           <Home size={14} />
           Workspace
