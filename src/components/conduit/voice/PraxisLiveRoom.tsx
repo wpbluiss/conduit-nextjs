@@ -153,15 +153,32 @@ export default function PraxisLiveRoom({
   const lastAgent = [...transcript].reverse().find((t) => t.role === "agent");
 
   return (
-    <div className="wm-rebrand fixed inset-0 z-[70] flex flex-col items-center justify-between overflow-hidden px-6 py-10 text-center text-foreground"
-      style={{ background: "radial-gradient(60% 55% at 50% 26%, color-mix(in srgb, var(--wm-ember) 13%, var(--wm-background)), var(--wm-background) 72%)", transform: "translateZ(0)" }}>
+    <div
+      className="fixed inset-0 z-[70] flex flex-col items-center justify-between overflow-hidden px-6 py-10 text-center"
+      style={{
+        background: `radial-gradient(60% 55% at 50% 26%, color-mix(in srgb, var(--cx-accent) 13%, var(--cx-canvas)), var(--cx-canvas) 72%)`,
+        color: "var(--cx-text)",
+        transform: "translateZ(0)",
+      }}
+    >
       <div className="flex flex-col items-center gap-3">
-        <p className="wm-label flex items-center gap-1.5"><span className="size-1.5 animate-pulse rounded-full bg-primary" /> Live room · {ids.length} in the room</p>
+        <p className="cx-meta flex items-center gap-1.5">
+          <span className="size-1.5 animate-pulse rounded-full" style={{ background: "var(--cx-accent)" }} />
+          Live room · {ids.length} in the room
+        </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           {ids.map((id) => { const I = ICON[id] ?? Sparkles; const on = id === activeSpeaker; return (
             <div key={id} className="flex flex-col items-center gap-1">
-              <span className={`grid size-12 place-items-center rounded-full bg-secondary text-primary transition-all ${on ? "scale-110 ring-2 ring-primary wm-glow" : "border border-white/10 opacity-50"}`}><I className="size-5" /></span>
-              <span className="cx-type-xs text-muted-foreground">{EMPLOYEES[id].name}</span>
+              <span
+                className={`grid size-12 place-items-center rounded-full transition-all ${on ? "scale-110" : "opacity-50"}`}
+                style={{
+                  background: on ? "var(--cx-accent-tint)" : "var(--cx-surface-raised)",
+                  color: "var(--cx-accent)",
+                  border: on ? "1px solid var(--cx-accent)" : "1px solid var(--cx-border)",
+                  boxShadow: on ? "0 0 0 2px var(--cx-canvas), 0 0 0 4px var(--cx-accent), 0 10px 34px -16px color-mix(in srgb, var(--cx-accent) 65%, transparent)" : "none",
+                }}
+              ><I className="size-5" /></span>
+              <span className="cx-meta">{EMPLOYEES[id].name}</span>
             </div>
           ); })}
         </div>
@@ -169,35 +186,58 @@ export default function PraxisLiveRoom({
 
       <div className="relative grid place-items-center">
         {connected && agentPresent && [0, 1].map((r) => (
-          <span key={r} className="absolute size-40 animate-ping rounded-full border border-primary/25" style={{ animationDuration: "2.6s", animationDelay: `${r * 1.1}s` }} />
+          <span
+            key={r}
+            className="absolute size-40 animate-ping rounded-full"
+            style={{ border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)", animationDuration: "2.6s", animationDelay: `${r * 1.1}s` }}
+          />
         ))}
-        <div className="grid size-40 place-items-center rounded-full wm-glow" style={{ background: "radial-gradient(circle at 50% 32%, var(--wm-ember-hi), var(--wm-ember-deep))" }}>
-          <ActiveIcon className="size-14 text-primary-foreground" />
+        <div
+          className="grid size-40 place-items-center rounded-full"
+          style={{
+            background: `radial-gradient(circle at 50% 32%, var(--cx-accent-bright), var(--cx-accent))`,
+            boxShadow: "0 10px 34px -16px color-mix(in srgb, var(--cx-accent) 65%, transparent)",
+          }}
+        >
+          <ActiveIcon className="size-14 text-white" />
         </div>
       </div>
 
       <div className="flex w-full max-w-md flex-col gap-4">
         <div>
-          <p className="wm-label mb-1 text-left">You {muted && "· muted"}</p>
-          <Waveform analyserRef={userAnalyserRef} color="var(--wm-ember)" />
+          <p className="cx-meta mb-1 text-left">You {muted && "· muted"}</p>
+          <Waveform analyserRef={userAnalyserRef} color="var(--cx-accent)" />
         </div>
         <div>
-          <p className="wm-label mb-1 text-left">{EMPLOYEES[activeSpeaker]?.name ?? "Team"}</p>
-          <Waveform analyserRef={agentAnalyserRef} color="var(--wm-ember-hi)" />
+          <p className="cx-meta mb-1 text-left">{EMPLOYEES[activeSpeaker]?.name ?? "Team"}</p>
+          <Waveform analyserRef={agentAnalyserRef} color="var(--cx-accent-bright)" />
         </div>
         <div className="min-h-10 text-sm leading-relaxed">
-          {!connected && !error && <span className="text-muted-foreground">Connecting…</span>}
-          {connected && !agentPresent && <span className="text-muted-foreground">The room is joining…</span>}
-          {error && <span className="inline-flex items-center gap-1.5 text-destructive"><AlertCircle className="size-3.5" /> {error}</span>}
+          {!connected && !error && <span style={{ color: "var(--cx-text-muted)" }}>Connecting…</span>}
+          {connected && !agentPresent && <span style={{ color: "var(--cx-text-muted)" }}>The room is joining…</span>}
+          {error && <span className="inline-flex items-center gap-1.5" style={{ color: "var(--cx-danger)" }}><AlertCircle className="size-3.5" /> {error}</span>}
           {connected && agentPresent && lastAgent && (
-            <span><span className="font-semibold text-primary">{EMPLOYEES[(lastAgent.speakerId as EmployeeId) ?? activeSpeaker]?.name ?? "Team"}:</span> {lastAgent.text}</span>
+            <span><span className="font-semibold" style={{ color: "var(--cx-accent)" }}>{EMPLOYEES[(lastAgent.speakerId as EmployeeId) ?? activeSpeaker]?.name ?? "Team"}:</span> {lastAgent.text}</span>
           )}
         </div>
       </div>
 
       <div className="flex items-center gap-5">
-        <button onClick={toggleMute} disabled={!connected} className={`grid size-14 place-items-center rounded-full border border-white/10 disabled:opacity-40 ${muted ? "bg-secondary text-primary" : "bg-secondary/60 text-foreground hover:bg-secondary"}`} aria-label={muted ? "Unmute" : "Mute"}>{muted ? <MicOff className="size-6" /> : <Mic className="size-6" />}</button>
-        <div className={`rounded-full px-3 py-1 font-mono text-sm tabular-nums ${inWarn ? "bg-amber-400/10 text-amber-300" : "bg-white/5 text-muted-foreground"}`}>{fmtTime(elapsedSec)} / {fmtTime(tokenResponse.max_seconds)}</div>
+        <button
+          onClick={toggleMute}
+          disabled={!connected}
+          className="grid size-14 place-items-center rounded-full disabled:opacity-40 transition-colors"
+          style={{
+            background: muted ? "var(--cx-accent-tint)" : "var(--cx-surface-raised)",
+            color: muted ? "var(--cx-accent)" : "var(--cx-text)",
+            border: "1px solid var(--cx-border)",
+          }}
+          aria-label={muted ? "Unmute" : "Mute"}
+        >{muted ? <MicOff className="size-6" /> : <Mic className="size-6" />}</button>
+        <div
+          className="rounded-full px-3 py-1 font-mono text-sm tabular-nums"
+          style={inWarn ? { background: "rgba(234,179,8,0.10)", color: "#FBBF24" } : { background: "var(--cx-surface-raised)", color: "var(--cx-text-muted)" }}
+        >{fmtTime(elapsedSec)} / {fmtTime(tokenResponse.max_seconds)}</div>
         <PraxisButton variant="danger" size="icon" onClick={end} aria-label="End call"><PhoneOff className="size-7" /></PraxisButton>
       </div>
     </div>
