@@ -25,13 +25,14 @@ const TIERS: { max: number; picks: Dest[] }[] = [
     picks: [
       { destination: "Aruba", blurb: "White sand, steady trade winds, happy island.", emoji: "🐠" },
       { destination: "Costa Rica", blurb: "Rainforest, volcanoes, and Pura Vida.", emoji: "🦥" },
-      { destination: "Maui, Hawaii", blurb: "Road to Hana, black-sand beaches, luaus.", emoji: "🌺" },
+      { destination: "Cancún, Mexico", blurb: "Turquoise water, all-inclusive, zero worries.", emoji: "🏝️" },
       { destination: "Turks & Caicos", blurb: "The clearest water you'll ever float in.", emoji: "🐚" },
     ],
   },
   {
     max: Infinity,
     picks: [
+      { destination: "Maui, Hawaii", blurb: "Road to Hana, black-sand beaches, luaus.", emoji: "🌺" },
       { destination: "Santorini, Greece", blurb: "Whitewashed cliffs over the bluest sea.", emoji: "🇬🇷" },
       { destination: "Amalfi Coast, Italy", blurb: "Lemon groves, cliffside towns, pasta by the sea.", emoji: "🍋" },
       { destination: "Bora Bora", blurb: "Overwater bungalow. Need we say more.", emoji: "🏖️" },
