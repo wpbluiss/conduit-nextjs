@@ -62,7 +62,7 @@ export function PinConversationButton({ conversationId, pinned, atLimit }: Props
               ? "Unpin"
               : "Pin"
         }
-        className="p-1.5 rounded-md transition-colors hover:bg-[var(--color-surface-raised)] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
+        className="cx-icon-btn cx-focus-ring disabled:opacity-50"
       >
         <Star
           size={14}

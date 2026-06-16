@@ -11,7 +11,6 @@ import {
   Check,
 } from "lucide-react";
 import { Button } from "@/components/conduit/ui/Button";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
 import {
   VERTICALS,
   VERTICAL_LABELS,
@@ -238,14 +237,14 @@ export default function LeadsTableClient({
             <p className="text-[var(--color-text)]">
               No leads match these filters.
             </p>
-            <PraxisButton
+            <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={() => setShowModal(true)}
             >
               Run Discovery →
-            </PraxisButton>
+            </Button>
           </div>
         ) : (
           <ul className="space-y-2">
@@ -376,7 +375,7 @@ function LeadCard({
           </div>
           {!isDead && (
             <div className="flex flex-wrap items-center gap-1.5 shrink-0">
-              <PraxisButton
+              <Button
                 type="button"
                 variant="ghost"
                 size="sm"
@@ -385,8 +384,8 @@ function LeadCard({
               >
                 <Send size={12} />
                 <span className="hidden sm:inline">Draft</span>
-              </PraxisButton>
-              <PraxisButton
+              </Button>
+              <Button
                 type="button"
                 variant="ghost"
                 size="sm"
@@ -402,8 +401,8 @@ function LeadCard({
                 <span className="hidden sm:inline">
                   {lead.status === "contacted" ? "Contacted" : "Mark contacted"}
                 </span>
-              </PraxisButton>
-              <PraxisButton
+              </Button>
+              <Button
                 type="button"
                 variant="ghost"
                 size="icon-sm"
@@ -411,7 +410,7 @@ function LeadCard({
                 title="Discard"
               >
                 <Trash2 size={12} />
-              </PraxisButton>
+              </Button>
             </div>
           )}
         </div>
@@ -482,7 +481,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
       <div className="conduit-card max-w-md w-full p-5 space-y-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between">
           <h3 className="serif text-xl">Run Discovery</h3>
-          <PraxisButton
+          <Button
             type="button"
             variant="ghost"
             size="icon-sm"
@@ -491,7 +490,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
             aria-label="Close"
           >
             <X size={18} />
-          </PraxisButton>
+          </Button>
         </div>
 
         <div className="space-y-3 text-sm">
@@ -611,7 +610,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
             </Button>
           ) : (
             <>
-              <PraxisButton
+              <Button
                 type="button"
                 variant="ghost"
                 size="sm"
@@ -619,7 +618,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
                 disabled={running}
               >
                 Cancel
-              </PraxisButton>
+              </Button>
               <Button
                 onClick={start}
                 disabled={running || (!useOverpass && !useReddit && !useMaps)}

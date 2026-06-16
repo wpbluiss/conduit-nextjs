@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { Button } from "@/components/conduit/ui/Button";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 interface Props {
   error: Error & { digest?: string };
@@ -66,10 +65,7 @@ export default function CinemaError({ error, unstable_retry, reset }: Props) {
           </p>
         </div>
         <div className="eng-cinema-summary-actions">
-          <Button
-            onClick={onReopen}
-            className="inline-flex items-center gap-1.5"
-          >
+          <Button onClick={onReopen}>
             Reopen the live view <ArrowRight size={13} />
           </Button>
           {deployUrl && (
@@ -77,18 +73,18 @@ export default function CinemaError({ error, unstable_retry, reset }: Props) {
               href={deployUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md border border-[var(--color-border)] hover:border-[var(--color-accent)] text-sm text-[var(--color-text)] transition-colors"
+              className="btn-secondary btn-sz-sm inline-flex items-center gap-1.5"
             >
               Open last-known preview <ExternalLink size={13} />
             </a>
           )}
-          <PraxisButton
+          <Button
             variant="ghost"
             size="sm"
             onClick={() => router.push("/app/builds")}
           >
             Back to all builds
-          </PraxisButton>
+          </Button>
         </div>
       </section>
     </div>

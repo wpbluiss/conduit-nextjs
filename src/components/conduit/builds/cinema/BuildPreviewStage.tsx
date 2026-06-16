@@ -44,7 +44,7 @@ export function BuildPreviewStage({ session }: Props) {
             href={state.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-primary inline-flex items-center gap-1.5"
+            className="btn-primary btn-sz-sm inline-flex items-center gap-1.5"
           >
             Open in new tab <ExternalLink size={13} />
           </a>

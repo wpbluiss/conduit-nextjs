@@ -82,7 +82,7 @@ export default async function SalesWorkspace({ supabase, account }: Props) {
             />
             <Link
               href="/app?pin=sales"
-              className="btn-primary !text-sm"
+              className="btn-primary btn-sz-sm"
               style={{ background: employee.color, color: "var(--cx-canvas)" }}
             >
               Talk to Sales <ArrowRight size={14} />
