@@ -262,14 +262,7 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
     <div className="mem-canvas-page">
       {/* Filter toolbar */}
       <div
-        style={{
-          background: "var(--pdl-surface-glass, var(--color-surface-elevated))",
-          backdropFilter: "var(--cx-glass-blur, blur(20px) saturate(140%))",
-          WebkitBackdropFilter: "var(--cx-glass-blur, blur(20px) saturate(140%))",
-          borderBottom: "1px solid var(--pdl-border-hairline, var(--color-border))",
-          zIndex: 20,
-          position: "relative",
-        }}
+        className="cx-glass relative z-20 border-b border-[var(--cx-glass-border,rgba(255,255,255,0.08))]"
       >
         {/* Search row */}
         <div className="flex items-center gap-2 px-4 py-2">
@@ -473,7 +466,7 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
               icon={<MemoryEmptySVG />}
               headline="Praxis learns as you work"
               body="Memory nodes appear here as your specialists accumulate context about your business — goals, preferences, and decisions. Click anywhere on the canvas to add a node manually."
-              className="max-w-sm pointer-events-auto bg-[var(--color-surface-elevated)]/80 backdrop-blur-sm"
+              className="max-w-sm pointer-events-auto cx-glass cx-glass-border"
             />
           </div>
         )}

@@ -2133,7 +2133,7 @@ export function Chat({
       {showHandoffPicker && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-black/40 cx-scrim"
             aria-hidden
             onClick={() => setShowHandoffPicker(false)}
           />
