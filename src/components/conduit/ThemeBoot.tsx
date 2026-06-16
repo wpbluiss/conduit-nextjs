@@ -10,7 +10,7 @@
  * unaffected because they don't carry the praxis-root class.
  */
 
-export { ACCENT_PRESETS, ACCENT_STORAGE_KEY } from "@/lib/conduit/accent-presets";
+export { ACCENT_PRESETS, ACCENT_STORAGE_KEY, DEFAULT_ACCENT } from "@/lib/conduit/accent-presets";
 
 export function ThemeBoot() {
   const code = `
@@ -24,9 +24,9 @@ export function ThemeBoot() {
   document.documentElement.setAttribute('data-praxis-theme-pref','system');
 }
 try{
-  var ACCENTS={ember:{a:'#FF8A3D',h:'#FFA876',d:'#D9532A'},blue:{a:'#4E8EFF',h:'#7DAEFF',d:'#2563EB'},sage:{a:'#5F9E6E',h:'#7EB88D',d:'#3A6B47'},rose:{a:'#F43F5E',h:'#FB7185',d:'#BE123C'},amber:{a:'#F59E0B',h:'#FCD34D',d:'#D97706'},slate:{a:'#6B7A8D',h:'#8FA0B5',d:'#3D4F63'}};
-  var ak=localStorage.getItem('praxis.accent')||'ember';
-  var ac=ACCENTS[ak]||ACCENTS.ember;
+  var ACCENTS={violet:{a:'#7C6CFF',h:'#9B8CFF',d:'#5548CC'},blue:{a:'#4E8EFF',h:'#7DAEFF',d:'#2563EB'},rose:{a:'#F43F5E',h:'#FB7185',d:'#BE123C'},sage:{a:'#5F9E6E',h:'#7EB88D',d:'#3A6B47'},amber:{a:'#F59E0B',h:'#FCD34D',d:'#D97706'},slate:{a:'#6B7A8D',h:'#8FA0B5',d:'#3D4F63'},ember:{a:'#FF8A3D',h:'#FFA876',d:'#D9532A'}};
+  var ak=localStorage.getItem('praxis.accent')||'violet';
+  var ac=ACCENTS[ak]||ACCENTS.violet;
   var s=document.documentElement.style;
   s.setProperty('--color-accent',ac.a);
   s.setProperty('--color-accent-hi',ac.h);

@@ -267,7 +267,7 @@ export function SettingsTabs({
         {tab === "appearance" && (
           <AppearanceTab
             themePref={account.theme_preference ?? "system"}
-            accentPref={account.accent_preference ?? "ember"}
+            accentPref={account.accent_preference ?? "violet"}
           />
         )}
         {tab === "api" && (
@@ -4300,9 +4300,9 @@ function AppearanceTab({
   useEffect(() => {
     try {
       const stored = localStorage.getItem(ACCENT_STORAGE_KEY);
-      if (!stored && accentPref !== "ember") {
+      if (!stored && accentPref !== "violet") {
         localStorage.setItem(ACCENT_STORAGE_KEY, accentPref);
-        const preset = ACCENT_PRESETS[accentPref] ?? ACCENT_PRESETS.ember;
+        const preset = ACCENT_PRESETS[accentPref] ?? ACCENT_PRESETS.violet;
         const s = document.documentElement.style;
         s.setProperty("--color-accent", preset.accent);
         s.setProperty("--color-accent-hi", preset.hi);
@@ -4313,7 +4313,7 @@ function AppearanceTab({
   }, []);
 
   const applyAccent = (key: string) => {
-    const preset = ACCENT_PRESETS[key] ?? ACCENT_PRESETS.ember;
+    const preset = ACCENT_PRESETS[key] ?? ACCENT_PRESETS.violet;
     const s = document.documentElement.style;
     s.setProperty("--color-accent", preset.accent);
     s.setProperty("--color-accent-hi", preset.hi);

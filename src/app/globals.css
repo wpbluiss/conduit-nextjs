@@ -37,14 +37,20 @@
   --color-surface: #0B0B0F;
   --color-surface-elevated: #131319;
   --color-surface-raised: #1C1C26;
+  --color-surface-overlay: #23232E;
   --color-border: #262630;
   --color-border-soft: #33333F;
   --color-border-default: #262630;
   --color-text: #F4F4F7;
   --color-text-muted: #A0A0B0;
+  --color-text-faint: #6B6B7B;
   --color-accent: #7C6CFF;
   --color-accent-hi: #9B8CFF;
   --color-accent-deep: #5548CC;
+  --color-accent-soft: rgba(124, 108, 255, 0.12);
+  --color-reward: #34D399;
+  --color-danger: #F4607D;
+  --color-yellow: #EAB308;
   --color-cyan: #22D3EE;
   --color-purple: #A855F7;
   --color-green: #34D399;
@@ -195,6 +201,42 @@
   /* Accordion animations — used by PricingFAQ via Radix Accordion Content */
   --animate-accordion-down: accordion-down 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   --animate-accordion-up: accordion-up 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* ============================================================
+ * Ember retirement — remap wm-rebrand tokens to the console
+ * electric violet palette.
+ *
+ * This rule cascades AFTER the watermelon.css import (same
+ * specificity, later position = wins). LiveChat.tsx uses
+ * .wm-rebrand as its root; overriding the --wm-* vars here
+ * retires the warm/ember palette from all console surfaces
+ * without touching the component itself.
+ * ============================================================ */
+.wm-rebrand {
+  background: #0B0B0F;              /* = cx-canvas */
+  --wm-background:           #0B0B0F;
+  --wm-foreground:           #F4F4F7;
+  --wm-card:                 #131319;
+  --wm-card-foreground:      #F4F4F7;
+  --wm-popover:              #1C1C26;
+  --wm-popover-foreground:   #F4F4F7;
+  --wm-primary:              #7C6CFF;   /* was: #ff8a3d (ember) */
+  --wm-primary-foreground:   #FFFFFF;
+  --wm-secondary:            #1C1C26;
+  --wm-secondary-foreground: #F4F4F7;
+  --wm-muted:                #131319;
+  --wm-muted-foreground:     #A0A0B0;
+  --wm-accent-foreground:    #9B8CFF;
+  --wm-destructive:          #F4607D;   /* = cx-danger */
+  --wm-destructive-foreground: #FFFFFF;
+  --wm-input:                #1C1C26;
+  --wm-ring:                 #7C6CFF;   /* was: ember */
+  --wm-ember:                #7C6CFF;   /* retired → cx-accent */
+  --wm-ember-hi:             #9B8CFF;   /* retired → cx-accent-bright */
+  --wm-ember-deep:           #5548CC;   /* retired → cx-accent-deep */
+  --wm-ok:                   #34D399;   /* = cx-reward */
+  --wm-idle:                 #6B6B7B;   /* = cx-text-faint */
 }
 
 html {

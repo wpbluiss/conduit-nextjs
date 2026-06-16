@@ -41,8 +41,8 @@ export function PraxisDangerZone() {
     <div
       className="mt-10 rounded-xl p-5"
       style={{
-        border: "1px solid color-mix(in srgb, #e5484d 35%, var(--color-border))",
-        background: "color-mix(in srgb, #e5484d 5%, transparent)",
+        border: "1px solid color-mix(in srgb, var(--cx-danger) 35%, var(--color-border))",
+        background: "color-mix(in srgb, var(--cx-danger) 5%, transparent)",
       }}
     >
       <h2 className="text-sm font-semibold" style={{ color: "var(--cx-danger)" }}>
