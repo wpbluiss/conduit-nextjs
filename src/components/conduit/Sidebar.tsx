@@ -631,7 +631,7 @@ export function Sidebar({
           className={`px-3 py-3 flex items-center border-b ${
             collapsed ? "justify-center" : "justify-between"
           }`}
-          style={{ borderColor: "var(--cx-border, var(--color-border))" }}
+          style={{ borderColor: "var(--cx-border)" }}
         >
           {!collapsed && (
             <Link
@@ -646,9 +646,9 @@ export function Sidebar({
                     src={avatarUrl}
                     alt="Workspace logo"
                     className="w-7 h-7 rounded-lg object-cover shrink-0"
-                    style={{ border: "1px solid var(--cx-border, var(--color-border))" }}
+                    style={{ border: "1px solid var(--cx-border)" }}
                   />
-                  <span className="cx-type-sm font-semibold truncate" style={{ color: "var(--cx-text, var(--color-text))" }}>
+                  <span className="cx-type-sm font-semibold truncate" style={{ color: "var(--cx-text)" }}>
                     {workspaceName || accountName}
                   </span>
                 </>
@@ -669,7 +669,7 @@ export function Sidebar({
                 <img
                   src={avatarUrl}
                   alt="Workspace logo"
-                  className="w-7 h-7 rounded-lg object-cover border border-[var(--color-border)]"
+                  className="w-7 h-7 rounded-lg object-cover border border-[var(--cx-border)]"
                 />
               ) : (
                 <PraxisLogo size={28} glow />
@@ -706,7 +706,7 @@ export function Sidebar({
 
         {/* Expand button when collapsed — desktop only */}
         {collapsed && (
-          <div className="hidden md:flex justify-center py-2 border-b border-[var(--color-border)]">
+          <div className="hidden md:flex justify-center py-2 border-b border-[var(--cx-border)]">
             <button
               type="button"
               onClick={toggleCollapsed}
@@ -735,9 +735,9 @@ export function Sidebar({
             transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
             className="mx-auto my-2 flex items-center justify-center w-8 h-8 rounded-lg"
             style={{
-              background: "color-mix(in srgb, var(--color-accent) 12%, var(--color-surface-elevated))",
-              border: "1px solid color-mix(in srgb, var(--color-accent) 25%, var(--color-border))",
-              color: "var(--color-accent)",
+              background: "var(--cx-accent-tint)",
+              border: "1px solid color-mix(in srgb, var(--cx-accent) 30%, var(--cx-border))",
+              color: "var(--cx-accent)",
             }}
           >
             <Plus size={14} />
@@ -755,9 +755,9 @@ export function Sidebar({
             transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
             className="mx-3 my-2 flex items-center gap-2 px-3 py-2 rounded-lg cx-type-sm font-medium"
             style={{
-              background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
-              border: "1px solid color-mix(in srgb, var(--color-accent) 22%, var(--color-border))",
-              color: "var(--color-accent-hi, var(--color-accent))",
+              background: "var(--cx-accent-tint)",
+              border: "1px solid color-mix(in srgb, var(--cx-accent) 28%, var(--cx-border))",
+              color: "var(--cx-accent-bright)",
             }}
           >
             <Plus size={14} /> New chat
@@ -806,10 +806,13 @@ export function Sidebar({
                   const allowed = allowedEmployees.includes(emp);
                   const active = pathname === `/app/team/${emp}`;
                   const rowInner = (
-                    <span
-                      className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-[120ms] ${!active ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]" : ""}`}
+                    <motion.span
+                      whileHover={shouldReduceMotion ? undefined : { scale: 1.01 }}
+                      whileTap={shouldReduceMotion ? undefined : { scale: 0.99 }}
+                      transition={{ duration: 0.15, ease: [...CX_EASE] }}
+                      className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-[120ms] ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)]" : ""}`}
                       style={{
-                        background: active ? "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))" : undefined,
+                        background: active ? "var(--cx-accent-tint)" : undefined,
                       }}
                       onContextMenu={(e) => handleSpecialistContextMenu(e, emp)}
                       onTouchStart={(e) => handleSpecialistTouchStart(e, emp)}
@@ -819,13 +822,14 @@ export function Sidebar({
                       {active && (
                         <span
                           aria-hidden
-                          className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-[var(--cx-accent,var(--color-accent))]"
+                          className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full"
+                          style={{ background: "var(--cx-accent)" }}
                         />
                       )}
                       <SpecialistAvatar employee={emp} size={28} active={active} streaming={isStreaming} />
                       <span
                         className="truncate flex-1 cx-type-sm"
-                        style={{ color: active ? "var(--cx-text, var(--color-text))" : "var(--cx-text-muted, var(--color-text-muted))", fontWeight: active ? 500 : 400 }}
+                        style={{ color: active ? "var(--cx-text)" : "var(--cx-text-muted)", fontWeight: active ? 500 : 400 }}
                       >
                         {labelFor(emp)}
                       </span>
@@ -833,20 +837,20 @@ export function Sidebar({
                         <Lock
                           size={10}
                           aria-label="Locked — upgrade to unlock"
-                          className="text-[var(--color-text-muted)]"
+                          style={{ color: "var(--cx-text-muted)" }}
                         />
                       ) : (
                         <span
                           className="w-1.5 h-1.5 rounded-full shrink-0"
                           style={{
-                            background: isStreaming ? "var(--cx-accent, var(--color-accent))" : DEPT_COLOR[emp],
+                            background: isStreaming ? "var(--cx-accent)" : DEPT_COLOR[emp],
                             opacity: isStreaming ? 1 : 0.5,
-                            boxShadow: isStreaming ? "0 0 6px var(--cx-accent, var(--color-accent))" : "none",
+                            boxShadow: isStreaming ? "0 0 6px var(--cx-accent)" : "none",
                           }}
                           aria-label={isStreaming ? "Active" : "Online"}
                         />
                       )}
-                    </span>
+                    </motion.span>
                   );
                   return (
                     <li key={emp} title={allowed ? undefined : "Available on a higher plan"}>
@@ -885,10 +889,13 @@ export function Sidebar({
                     const allowed = allowedEmployees.includes(emp);
                     const active = pathname === `/app/team/${emp}`;
                     const rowInner = (
-                      <span
-                        className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-[120ms] ${!active ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]" : ""}`}
+                      <motion.span
+                        whileHover={shouldReduceMotion ? undefined : { scale: 1.01 }}
+                        whileTap={shouldReduceMotion ? undefined : { scale: 0.99 }}
+                        transition={{ duration: 0.15, ease: [...CX_EASE] }}
+                        className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-[120ms] ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)]" : ""}`}
                         style={{
-                          background: active ? "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))" : undefined,
+                          background: active ? "var(--cx-accent-tint)" : undefined,
                         }}
                         onContextMenu={(e) => handleSpecialistContextMenu(e, emp)}
                         onTouchStart={(e) => handleSpecialistTouchStart(e, emp)}
@@ -898,13 +905,14 @@ export function Sidebar({
                         {active && (
                           <span
                             aria-hidden
-                            className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-[var(--cx-accent,var(--color-accent))]"
+                            className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full"
+                            style={{ background: "var(--cx-accent)" }}
                           />
                         )}
                         <SpecialistAvatar employee={emp} size={28} active={active} streaming={isStreaming} />
                         <span
                           className="truncate flex-1 cx-type-sm"
-                          style={{ color: active ? "var(--cx-text, var(--color-text))" : "var(--cx-text-muted, var(--color-text-muted))", fontWeight: active ? 500 : 400 }}
+                          style={{ color: active ? "var(--cx-text)" : "var(--cx-text-muted)", fontWeight: active ? 500 : 400 }}
                         >
                           {labelFor(emp)}
                         </span>
@@ -912,20 +920,20 @@ export function Sidebar({
                           <Lock
                             size={10}
                             aria-label="Locked — upgrade to unlock"
-                            className="text-[var(--color-text-muted)]"
+                            style={{ color: "var(--cx-text-muted)" }}
                           />
                         ) : (
                           <span
                             className="w-1.5 h-1.5 rounded-full shrink-0"
                             style={{
-                              background: isStreaming ? "var(--cx-accent, var(--color-accent))" : DEPT_COLOR[emp],
+                              background: isStreaming ? "var(--cx-accent)" : DEPT_COLOR[emp],
                               opacity: isStreaming ? 1 : 0.5,
-                              boxShadow: isStreaming ? "0 0 6px var(--cx-accent, var(--color-accent))" : "none",
+                              boxShadow: isStreaming ? "0 0 6px var(--cx-accent)" : "none",
                             }}
                             aria-label={isStreaming ? "Active" : "Online"}
                           />
                         )}
-                      </span>
+                      </motion.span>
                     );
                     return (
                       <li
@@ -966,7 +974,10 @@ export function Sidebar({
                 const active = pathname === `/app/team/${emp}`;
                 const isPinned = pinned.includes(emp);
                 const btn = (
-                  <span
+                  <motion.span
+                    whileHover={shouldReduceMotion ? undefined : { scale: 1.06 }}
+                    whileTap={shouldReduceMotion ? undefined : { scale: 0.94 }}
+                    transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
                     className="relative flex items-center justify-center"
                     onContextMenu={(e) => handleSpecialistContextMenu(e, emp)}
                     onTouchStart={(e) => handleSpecialistTouchStart(e, emp)}
@@ -976,18 +987,19 @@ export function Sidebar({
                     {active && (
                       <span
                         aria-hidden
-                        className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)] z-10"
+                        className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full z-10"
+                        style={{ background: "var(--cx-accent)" }}
                       />
                     )}
                     <SpecialistAvatar employee={emp} size={32} active={active} streaming={isStreaming} />
                     {!allowed && (
                       <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 flex items-center justify-center z-10">
-                        <Lock size={8} className="text-[var(--color-text-muted)]" />
+                        <Lock size={8} style={{ color: "var(--cx-text-muted)" }} />
                       </span>
                     )}
                     {allowed && !isPinned && (
                       <span
-                        className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full border border-[var(--color-surface)] z-10"
+                        className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full border border-[var(--cx-canvas)] z-10"
                         style={{
                           background: DEPT_COLOR[emp],
                           opacity: isStreaming ? 1 : 0.55,
@@ -997,14 +1009,14 @@ export function Sidebar({
                     )}
                     {allowed && isPinned && (
                       <span
-                        className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 flex items-center justify-center rounded-full border border-[var(--color-surface)] z-10"
+                        className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 flex items-center justify-center rounded-full border border-[var(--cx-canvas)] z-10"
                         style={{ background: DEPT_COLOR[emp] }}
                         aria-label="Pinned"
                       >
-                        <Pin size={7} style={{ color: "var(--color-canvas)" }} strokeWidth={2.5} />
+                        <Pin size={7} style={{ color: "var(--cx-canvas)" }} strokeWidth={2.5} />
                       </span>
                     )}
-                  </span>
+                  </motion.span>
                 );
                 return (
                   <li key={emp} className="list-none flex justify-center" title={labelFor(emp)}>
@@ -1078,9 +1090,10 @@ export function Sidebar({
                   "relative flex items-center rounded-lg transition-colors duration-100",
                   collapsed ? "justify-center mx-auto w-8 h-8" : "gap-2 px-3 py-2 text-sm",
                   isActive("/app/builds")
-                    ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
-                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]",
+                    ? "text-[var(--cx-text)]"
+                    : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)]",
                 ].join(" ")}
+                style={{ background: isActive("/app/builds") ? "var(--cx-accent-tint)" : undefined }}
               >
                 {isActive("/app/builds") && (
                   <span
@@ -1088,12 +1101,12 @@ export function Sidebar({
                     className={`absolute left-0 rounded-full ${
                       collapsed ? "top-1.5 bottom-1.5 w-0.5" : "top-2 bottom-2 w-[3px]"
                     }`}
-                    style={{ background: "var(--cx-accent, var(--color-accent))" }}
+                    style={{ background: "var(--cx-accent)" }}
                   />
                 )}
                 <span
                   className="relative inline-flex shrink-0"
-                  style={{ color: isActive("/app/builds") ? "var(--cx-accent, var(--color-accent))" : undefined }}
+                  style={{ color: isActive("/app/builds") ? "var(--cx-accent)" : undefined }}
                 >
                   <Hammer size={collapsed ? 20 : 16} strokeWidth={1.75} />
                   <SidebarBuildPip
@@ -1319,9 +1332,9 @@ export function Sidebar({
                             key={c.id}
                             href={`/app?c=${c.id}`}
                             onClick={close}
-                            className={`relative flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-lg transition-colors duration-[120ms] group ${!active ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]" : ""}`}
+                            className={`relative flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-lg transition-colors duration-[120ms] group ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)]" : ""}`}
                             style={{
-                              background: active ? "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))" : undefined,
+                              background: active ? "var(--cx-accent-tint)" : undefined,
                             }}
                             onMouseEnter={(e) => openPeek(c.id, e.currentTarget)}
                             onMouseLeave={closePeek}
@@ -1331,7 +1344,8 @@ export function Sidebar({
                             {active && (
                               <span
                                 aria-hidden
-                                className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-[var(--cx-accent,var(--color-accent))]"
+                                className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full"
+                                style={{ background: "var(--cx-accent)" }}
                               />
                             )}
                             {isTeam ? (
@@ -1347,17 +1361,17 @@ export function Sidebar({
                               <SpecialistAvatar employee={empKey} size={16} active={active} />
                             )}
                             <span
-                              className="truncate flex-1 cx-type-sm leading-snug"
+                              className="truncate flex-1 cx-type-base leading-snug"
                               style={{
-                                color: active ? "var(--cx-text, var(--color-text))" : "var(--cx-text-muted, var(--color-text-muted))",
-                                fontWeight: active ? 500 : 400,
+                                color: active ? "var(--cx-text)" : "var(--cx-text-muted)",
+                                fontWeight: 500,
                               }}
                             >
                               {titleOverrides[c.id] ?? c.title ?? "Untitled chat"}
                             </span>
                             <span
                               className="shrink-0 cx-mono cx-type-xs opacity-40 group-hover:opacity-80 transition-opacity duration-[120ms]"
-                              style={{ color: "var(--cx-text-faint, var(--color-text-muted))" }}
+                              style={{ color: "var(--cx-text-faint)" }}
                             >
                               {relativeDate(c.updated_at)}
                             </span>
@@ -1432,7 +1446,7 @@ export function Sidebar({
         <div
           className="pt-2 pb-3 space-y-0.5"
           style={{
-            borderTop: "1px solid var(--cx-border, var(--color-border))",
+            borderTop: "1px solid var(--cx-border)",
             paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0.75rem))",
           }}
         >
@@ -1453,33 +1467,33 @@ export function Sidebar({
               </PraxisButton>
               <SidebarThemeButton collapsed />
               <Link href="/app/settings" title="Settings" aria-label="Settings" onClick={close} data-tour-target="settings"
-                className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-[120ms] ${isActive("/app/settings") ? "" : ""}`}
+                className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-[120ms]"
                 style={{
-                  background: isActive("/app/settings") ? "color-mix(in srgb, var(--cx-accent, var(--color-accent)) 12%, var(--color-surface-elevated))" : undefined,
-                  color: isActive("/app/settings") ? "var(--cx-accent, var(--color-accent))" : "var(--cx-text-muted, var(--color-text-muted))",
+                  background: isActive("/app/settings") ? "var(--cx-accent-tint)" : undefined,
+                  color: isActive("/app/settings") ? "var(--cx-accent)" : "var(--cx-text-muted)",
                 }}>
                 <Settings size={16} />
               </Link>
               <Link href="/app/settings/billing" title="Billing" aria-label="Billing" onClick={close}
                 className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-[120ms]"
                 style={{
-                  background: isActive("/app/settings/billing") ? "color-mix(in srgb, var(--cx-accent, var(--color-accent)) 12%, var(--color-surface-elevated))" : undefined,
-                  color: isActive("/app/settings/billing") ? "var(--cx-accent, var(--color-accent))" : "var(--cx-text-muted, var(--color-text-muted))",
+                  background: isActive("/app/settings/billing") ? "var(--cx-accent-tint)" : undefined,
+                  color: isActive("/app/settings/billing") ? "var(--cx-accent)" : "var(--cx-text-muted)",
                 }}>
                 <CreditCard size={16} />
               </Link>
               <form action="/auth/sign-out" method="post">
                 <button type="submit" title="Sign out" aria-label="Sign out"
                   className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-[120ms]"
-                  style={{ color: "var(--cx-text-muted, var(--color-text-muted))" }}>
+                  style={{ color: "var(--cx-text-muted)" }}>
                   <LogOut size={16} />
                 </button>
               </form>
               <div
                 className="w-6 h-6 rounded-full flex items-center justify-center cx-type-xs font-semibold shrink-0 overflow-hidden mt-1"
                 style={{
-                  background: "color-mix(in srgb, var(--cx-accent, var(--color-accent)) 15%, var(--cx-surface, var(--color-surface-elevated)))",
-                  border: "1px solid color-mix(in srgb, var(--cx-accent, var(--color-accent)) 25%, var(--cx-border, var(--color-border)))",
+                  background: "color-mix(in srgb, var(--cx-accent) 15%, var(--cx-surface))",
+                  border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, var(--cx-border))",
                 }}
                 title={displayName || userEmail}
               >
@@ -1541,24 +1555,24 @@ export function Sidebar({
                 <div
                   className="w-6 h-6 rounded-full flex items-center justify-center cx-type-xs font-semibold shrink-0 overflow-hidden"
                   style={{
-                    background: "color-mix(in srgb, var(--color-accent) 15%, var(--color-surface-elevated))",
-                    border: "1px solid color-mix(in srgb, var(--color-accent) 25%, var(--color-border))",
+                    background: "color-mix(in srgb, var(--cx-accent) 15%, var(--cx-surface))",
+                    border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, var(--cx-border))",
                   }}
                 >
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <span style={{ color: "var(--color-accent-hi, var(--color-accent))" }}>
+                    <span style={{ color: "var(--cx-accent-bright)" }}>
                       {(displayName || userEmail)[0]?.toUpperCase() ?? "?"}
                     </span>
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="cx-type-xs font-medium truncate" style={{ color: "var(--color-text)" }}>
+                  <div className="cx-type-xs font-medium truncate" style={{ color: "var(--cx-text)" }}>
                     {displayName || userEmail.split("@")[0]}
                   </div>
-                  <div className="cx-type-xs truncate" style={{ color: "var(--color-text-muted)" }}>
+                  <div className="cx-type-xs truncate" style={{ color: "var(--cx-text-muted)" }}>
                     {tierName ? tierName : "Free"}{" "}
                     {workspaceName || accountName ? `· ${(workspaceName || accountName).slice(0, 16)}` : ""}
                   </div>
@@ -1714,15 +1728,13 @@ function NavLink({
             ? "justify-center mx-auto w-8 h-8"
             : `gap-2 px-3 ${small ? "py-1.5" : "py-2"}`,
           !active
-            ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] hover:text-[var(--color-text)]"
+            ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)] hover:text-[var(--cx-text)]"
             : "",
         ].join(" ")}
         style={{
           fontSize: !collapsed && small ? "var(--cx-type-xs)" : "var(--cx-type-sm)",
-          background: active
-            ? `color-mix(in srgb, var(--color-accent) ${collapsed ? 12 : 10}%, var(--color-surface-elevated))`
-            : undefined,
-          color: active ? "var(--color-text)" : "var(--color-text-muted)",
+          background: active ? "var(--cx-accent-tint)" : undefined,
+          color: active ? "var(--cx-text)" : "var(--cx-text-muted)",
           fontWeight: active ? 500 : 400,
         }}
       >
@@ -1732,7 +1744,7 @@ function NavLink({
             className={`absolute left-0 rounded-full ${
               collapsed ? "top-1.5 bottom-1.5 w-0.5" : "top-2 bottom-2 w-[3px]"
             }`}
-            style={{ background: "var(--cx-accent, var(--color-accent))" }}
+            style={{ background: "var(--cx-accent)" }}
           />
         )}
         <motion.span
@@ -1740,7 +1752,7 @@ function NavLink({
           whileTap={shouldReduceMotion ? undefined : { scale: 0.92 }}
           transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
           className="shrink-0 inline-flex"
-          style={{ color: active ? "var(--cx-accent, var(--color-accent))" : undefined }}
+          style={{ color: active ? "var(--cx-accent)" : undefined }}
         >
           {icon}
         </motion.span>
