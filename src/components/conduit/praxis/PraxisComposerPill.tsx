@@ -418,6 +418,7 @@ export function PraxisComposerPill({
           )}
           <textarea
             value={value}
+            readOnly={loading}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={(e) => {
               // Backspace on empty input clears the @mention chip.
@@ -457,7 +458,9 @@ export function PraxisComposerPill({
             }}
           rows={1}
           placeholder={
-            placeholder ?? (speechListening ? "Listening…" : "Talk to your team…")
+            loading
+              ? "Specialist is responding…"
+              : (placeholder ?? (speechListening ? "Listening…" : "Talk to your team…"))
           }
           style={{
             flex: 1,
@@ -472,6 +475,8 @@ export function PraxisComposerPill({
             maxHeight: "8rem",
             color: "var(--color-text)",
             fontFamily: "var(--font-sans)",
+            cursor: loading ? "not-allowed" : "text",
+            transition: "opacity 150ms ease",
           }}
         />
         </div>

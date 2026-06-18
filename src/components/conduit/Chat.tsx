@@ -3199,7 +3199,7 @@ const MessageBubble = memo(function MessageBubble({
             <MarkdownRenderer
               content={message.content}
               streaming={message.pending}
-              caretColor={message.pending ? DEPT_COLOR[employee] : undefined}
+              caretColor={message.pending ? "var(--cx-accent)" : undefined}
             />
           </div>
         </div>
