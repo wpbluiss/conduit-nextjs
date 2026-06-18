@@ -311,7 +311,7 @@ function TemplatesTab({ builds }: { builds: R7Build[] }) {
           Ask Engineering for a landing page, CRM, blog, lead-capture page, or
           contact form.
         </p>
-        <Link href="/app" className="btn-primary">
+        <Link href="/app" className="btn-primary btn-sz-md">
           Go to chat →
         </Link>
       </div>
@@ -380,7 +380,7 @@ function EngineeringTab({
         <p className="text-[var(--color-text)] mb-4">
           Open Engineering and click <span className="font-medium">Start a build</span>.
         </p>
-        <Link href="/app/team/engineering" className="btn-primary">
+        <Link href="/app/team/engineering" className="btn-primary btn-sz-md">
           Open Engineering →
         </Link>
       </div>

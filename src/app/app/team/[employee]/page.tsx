@@ -296,7 +296,7 @@ export default async function WorkspacePage({ params }: PageProps) {
             )}
             <Link
               href={`/app?pin=${employeeId}`}
-              className="btn-primary !text-sm"
+              className="btn-primary btn-sz-sm"
               style={{ background: dept, color: "var(--color-surface)" }}
             >
               Talk to {employee.name} <ArrowRight size={14} />

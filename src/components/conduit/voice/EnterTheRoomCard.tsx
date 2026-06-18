@@ -117,7 +117,7 @@ export default function EnterTheRoomCard({
         </div>
         <a
           href="/app/settings/billing"
-          className="btn-primary !text-sm shrink-0"
+          className="btn-primary btn-sz-sm shrink-0"
         >
           Upgrade
         </a>
