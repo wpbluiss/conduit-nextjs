@@ -1020,10 +1020,6 @@ function ToggleRow({
             : "bg-[var(--cx-border-strong)]"
         }`}
         style={undefined}
-        onFocus={(e) => {
-          if (e.target === e.currentTarget) e.currentTarget.style.boxShadow = "var(--cx-accent-glow)";
-        }}
-        onBlur={(e) => { e.currentTarget.style.boxShadow = ""; }}
       >
         <span
           className={`inline-block h-5 w-5 transform rounded-full shadow-sm transition-transform motion-safe:duration-150 motion-safe:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${

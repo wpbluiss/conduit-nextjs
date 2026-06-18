@@ -68,6 +68,9 @@
   --cx-accent-glow:     0 0 0 3px rgba(124, 108, 255, 0.25);
   /* Raw alpha for color-mix() and box-shadow consumers */
   --cx-accent-glow-raw: rgba(124, 108, 255, 0.25);
+  /* Spec-precise focus ring: 2px solid accent ring + 4px soft halo.
+   * Use this — not --cx-accent-glow — for keyboard focus indicators. */
+  --cx-focus-ring:      0 0 0 2px var(--cx-accent), 0 0 0 4px rgba(124, 108, 255, 0.20);
 
   /* ---- Semantic signal colors ---- */
   --cx-reward:          #34D399;
@@ -154,6 +157,12 @@
   --color-accent-hi:    var(--cx-accent-bright);
   --color-accent-deep:  #5548CC;
   --color-accent-soft:  var(--cx-accent-tint);
+
+  /* -- Tailwind v4 ring bridge — routes shadcn focus-visible:ring-ring/50
+     utilities to the console accent so shadcn components (Switch, Tabs,
+     Input, Button etc.) automatically show the electric-violet ring
+     without per-component edits. -- */
+  --color-ring:         var(--cx-accent);
 
   /* -- Existing --color-green / --color-danger -- */
   --color-green:  var(--cx-reward);
@@ -350,31 +359,61 @@
 }
 
 /* ------------------------------------------------------------
- * Focus-visible ring utility — accent glow ring
+ * Global focus-visible ring — all interactive console elements
  *
- * Apply .cx-focus-ring on interactive elements for a premium
- * focus experience matching the spec's accent glow definition.
+ * A single source of truth: every button, link, input, textarea,
+ * select, and interactive element inside .praxis-root gets the
+ * spec-precise two-layer focus ring automatically.
+ *
+ *   layer 1: 2px solid violet ring (WCAG-visible, crisp edge)
+ *   layer 2: 4px soft halo         (premium glow depth)
+ *
+ * :focus-visible fires only on keyboard / programmatic focus —
+ * never on mouse clicks. :focus:not(:focus-visible) suppresses
+ * the fallback outline so mouse users see no ring.
+ *
+ * Specificity: (0,1,0) — deliberately low so element-specific
+ * overrides (form inputs that also need border-color, buttons
+ * that combine the ring with a glass highlight) win naturally.
  * ------------------------------------------------------------ */
 
-.praxis-root .cx-focus-ring:focus-visible {
+.praxis-root :focus-visible {
   outline: none;
-  box-shadow: var(--cx-accent-glow);
+  box-shadow: var(--cx-focus-ring);
 }
 
-/* Fallback for elements that don't support :focus-visible */
-.praxis-root .cx-focus-ring:focus:not(:focus-visible) {
+.praxis-root :focus:not(:focus-visible) {
   outline: none;
+  box-shadow: none;
+}
+
+/* .cx-focus-ring: standalone utility for elements rendered outside
+ * .praxis-root (portals, overlays) that still need the console ring. */
+.cx-focus-ring:focus-visible {
+  outline: none;
+  box-shadow: var(--cx-focus-ring, 0 0 0 2px #7C6CFF, 0 0 0 4px rgba(124, 108, 255, 0.20));
+}
+.cx-focus-ring:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Reduced-motion: swap the glow box-shadow for a plain solid outline.
+ * Keeps WCAG-visible keyboard focus without any visual complexity. */
+@media (prefers-reduced-motion: reduce) {
+  .praxis-root :focus-visible,
+  .cx-focus-ring:focus-visible {
+    outline: 2px solid var(--cx-accent, #7C6CFF);
+    outline-offset: 2px;
+    box-shadow: none;
+  }
 }
 
 /* ------------------------------------------------------------
- * Form control focus — global accent-glow ring
+ * Form control focus — same ring + accent border-color signal
  *
- * Replaces the per-element Tailwind `ring-*` approach with a
- * consistent spec-aligned focus treatment across all console forms.
- * Scoped to .praxis-root so marketing / /finance are unaffected.
- *
- * Specificity: (0,2,1) beats the Tailwind ring (0,2,0) so our
- * rule wins in the cascade without !important.
+ * These rules have higher specificity (0,2,1) than the global
+ * rule so they add border-color on top of the inherited ring.
  * ------------------------------------------------------------ */
 
 .praxis-root input[type="text"]:focus-visible,
@@ -387,11 +426,11 @@
 .praxis-root textarea:focus-visible,
 .praxis-root select:focus-visible {
   outline: none;
-  box-shadow: var(--cx-accent-glow);
+  box-shadow: var(--cx-focus-ring);
   border-color: var(--cx-accent) !important;
 }
 
-/* Reduced-motion: keep border-color feedback, drop the box-shadow glow */
+/* Reduced-motion: swap glow for outline; keep border-color signal */
 @media (prefers-reduced-motion: reduce) {
   .praxis-root input[type="text"]:focus-visible,
   .praxis-root input[type="password"]:focus-visible,
@@ -402,7 +441,10 @@
   .praxis-root input[type="tel"]:focus-visible,
   .praxis-root textarea:focus-visible,
   .praxis-root select:focus-visible {
+    outline: 2px solid var(--cx-accent, #7C6CFF);
+    outline-offset: 2px;
     box-shadow: none;
+    border-color: var(--cx-accent) !important;
   }
 }
 
@@ -571,7 +613,7 @@
 }
 .praxis-root .cx-icon-btn:focus-visible {
   outline: none;
-  box-shadow: var(--cx-accent-glow);
+  box-shadow: var(--cx-focus-ring);
 }
 .praxis-root .cx-icon-btn.cx-icon-btn--accent:hover {
   background: var(--cx-accent-tint);
@@ -612,7 +654,7 @@
 }
 .praxis-root .cx-interactive:focus-visible {
   outline: none;
-  box-shadow: var(--cx-accent-glow);
+  box-shadow: var(--cx-focus-ring);
 }
 
 /* Selected / active state within a list */
