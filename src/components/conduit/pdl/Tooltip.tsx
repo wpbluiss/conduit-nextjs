@@ -29,6 +29,8 @@ interface Props {
   /** Open delay in ms; default 200. */
   delay?: number;
   className?: string;
+  /** className applied to the trigger wrapper element (default: inline span). */
+  triggerClassName?: string;
 }
 
 interface Anchor {
@@ -48,6 +50,7 @@ export function Tooltip({
   maxWidth = 280,
   delay = 200,
   className,
+  triggerClassName,
 }: Props) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -130,6 +133,7 @@ export function Tooltip({
     <>
       <span
         ref={triggerRef}
+        className={triggerClassName}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         onFocus={onMouseEnter}
