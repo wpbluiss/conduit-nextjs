@@ -4,7 +4,7 @@ import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
-// Praxis-canonical Button — use this in /app surfaces
+// Console-canonical Button for /app surfaces — import from @/components/conduit/ui/Button
 export { PraxisButton, SpinnerIcon } from "@/components/conduit/PraxisButton";
 export type { PraxisButtonVariant, PraxisButtonSize } from "@/components/conduit/PraxisButton";
 
