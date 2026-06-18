@@ -130,15 +130,15 @@ function SidebarUpgradeBanner({
     <div
       className="mx-3 mb-2 rounded-xl"
       style={{
-        background: "color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-elevated))",
-        border: "1px solid color-mix(in srgb, var(--color-accent) 20%, var(--color-border))",
+        background: "color-mix(in srgb, var(--cx-accent) 6%, var(--cx-surface))",
+        border: "1px solid color-mix(in srgb, var(--cx-accent) 20%, var(--cx-border))",
       }}
     >
       <div className="px-3 pt-2.5 pb-2.5">
         <div className="flex items-start justify-between gap-1 mb-2">
           <div className="flex items-center gap-1.5">
-            <Sparkles size={11} style={{ color: "var(--color-accent)", flexShrink: 0 }} />
-            <span className="cx-type-xs font-semibold" style={{ color: "var(--color-text)" }}>
+            <Sparkles size={11} style={{ color: "var(--cx-accent)", flexShrink: 0 }} />
+            <span className="cx-type-xs font-semibold" style={{ color: "var(--cx-text)" }}>
               Unlock all 9 specialists
             </span>
           </div>
@@ -157,18 +157,18 @@ function SidebarUpgradeBanner({
         <div className="mb-2.5">
           <div
             className="w-full rounded-full overflow-hidden"
-            style={{ height: 4, background: "var(--color-border)" }}
+            style={{ height: 4, background: "var(--cx-border)" }}
           >
             <div
               className="h-full rounded-full"
               style={{
                 width: `${pct * 100}%`,
-                background: pct >= 0.8 ? "var(--cx-danger)" : "var(--color-accent)",
+                background: pct >= 0.8 ? "var(--cx-danger)" : "var(--cx-accent)",
                 transition: "width 0.3s ease",
               }}
             />
           </div>
-          <p className="cx-mono cx-type-xs mt-1" style={{ color: "var(--color-text-muted)" }}>
+          <p className="cx-mono cx-type-xs mt-1" style={{ color: "var(--cx-text-muted)" }}>
             {usedK}k / {capK}k tokens used ({pctDisplay}%)
           </p>
         </div>
@@ -621,17 +621,21 @@ export function Sidebar({
         aria-label="Navigation"
         animate={{ width: collapsed ? 56 : 256 }}
         transition={skipTransition || shouldReduceMotion ? { duration: 0 } : { ...CX_SPRING_SOFT }}
-        className={`cx-glass fixed md:static z-40 inset-y-0 left-0 border-r flex flex-col overflow-hidden transform transition-transform duration-200 ease-in-out ${
+        className={`cx-glass fixed md:static z-40 inset-y-0 left-0 border-r flex flex-col overflow-hidden ${
           open ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
-        style={{ minWidth: collapsed ? 56 : 256, borderColor: "var(--cx-glass-border)" }}
+        style={{
+          minWidth: collapsed ? 56 : 256,
+          borderColor: "var(--cx-glass-border)",
+          transition: shouldReduceMotion ? "none" : "transform 180ms cubic-bezier(0.22,1,0.36,1)",
+        }}
       >
         {/* Header — workspace logo / Praxis wordmark + collapse toggle */}
         <div
           className={`px-3 py-3 flex items-center border-b ${
             collapsed ? "justify-center" : "justify-between"
           }`}
-          style={{ borderColor: "var(--cx-border)" }}
+          style={{ borderColor: "var(--cx-glass-border)" }}
         >
           {!collapsed && (
             <Link
@@ -706,7 +710,7 @@ export function Sidebar({
 
         {/* Expand button when collapsed — desktop only */}
         {collapsed && (
-          <div className="hidden md:flex justify-center py-2 border-b border-[var(--cx-border)]">
+          <div className="hidden md:flex justify-center py-2 border-b border-[var(--cx-glass-border)]">
             <button
               type="button"
               onClick={toggleCollapsed}
@@ -790,7 +794,7 @@ export function Sidebar({
             <div className="mt-3">
               <div
                 className="mx-3 mt-0 mb-1.5 pb-1 flex items-center gap-1.5"
-                style={{ borderBottom: "1px solid var(--cx-border)" }}
+                style={{ borderBottom: "1px solid var(--cx-glass-border)" }}
               >
                 <Pin size={9} aria-hidden style={{ color: "var(--cx-text-faint)" }} />
                 <span
@@ -873,7 +877,7 @@ export function Sidebar({
                 type="button"
                 onClick={() => setTeamExpanded((v) => !v)}
                 className="w-full mx-0 flex items-center justify-between px-3 py-1 cx-type-xs font-semibold uppercase tracking-[0.15em] transition-colors duration-100"
-                style={{ color: "var(--cx-text-faint)", borderBottom: "1px solid var(--cx-border)", paddingBottom: "6px", marginBottom: "4px" }}
+                style={{ color: "var(--cx-text-faint)", borderBottom: "1px solid var(--cx-glass-border)", paddingBottom: "6px", marginBottom: "4px" }}
               >
                 <span className="inline-flex items-center gap-1.5">
                   <Users2 size={9} strokeWidth={2} aria-hidden /> Specialists
@@ -1152,10 +1156,10 @@ export function Sidebar({
           {!collapsed && conversations.length === 0 && (
             <div className="mt-8 px-4 flex flex-col items-center text-center gap-3">
               <PraxisLogo size={28} withWordmark glow />
-              <p className="text-sm font-semibold text-[var(--color-text)] mt-1">
+              <p className="cx-type-base font-semibold mt-1" style={{ color: "var(--cx-text)" }}>
                 Your specialists are ready
               </p>
-              <p className="text-xs text-[var(--color-text-muted)] max-w-[13rem] leading-relaxed">
+              <p className="cx-type-xs max-w-[13rem]" style={{ color: "var(--cx-text-muted)", lineHeight: "var(--cx-lh-body)" }}>
                 Nine specialists. Zero payroll. Start a conversation to put your team to work.
               </p>
               <Link
@@ -1175,7 +1179,7 @@ export function Sidebar({
             <div className="mt-3">
               <div
                 className="mx-3 mt-3 mb-1.5 pb-1.5 flex items-center gap-2"
-                style={{ borderBottom: "1px solid var(--cx-border)" }}
+                style={{ borderBottom: "1px solid var(--cx-glass-border)" }}
               >
                 <span
                   className="cx-type-xs font-semibold uppercase tracking-[0.15em]"
@@ -1194,30 +1198,33 @@ export function Sidebar({
                   aria-label="Filter by specialist"
                 >
                   {/* "All" chip */}
-                  <button
+                  <motion.button
                     type="button"
                     onClick={() => setSpecialistFilter(null)}
-                    className="shrink-0 flex items-center px-2 py-0.5 rounded-full cx-type-xs font-medium transition-colors duration-100 whitespace-nowrap"
+                    whileHover={shouldReduceMotion ? undefined : { scale: 1.04 }}
+                    whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
+                    transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
+                    className="shrink-0 flex items-center px-2 py-0.5 rounded-full cx-type-xs font-medium whitespace-nowrap"
                     style={
                       specialistFilter === null
                         ? {
-                            background: "var(--color-accent)",
+                            background: "var(--cx-accent)",
                             color: "#fff",
                           }
                         : {
-                            background: "var(--color-surface-elevated)",
-                            color: "var(--color-text-muted)",
-                            border: "1px solid var(--color-border)",
+                            background: "var(--cx-surface-raised)",
+                            color: "var(--cx-text-muted)",
+                            border: "1px solid var(--cx-border)",
                           }
                     }
                     aria-pressed={specialistFilter === null}
                   >
                     All
-                  </button>
+                  </motion.button>
                   {activeSpecialists.map((emp) => {
                     const active = specialistFilter === emp;
                     return (
-                      <button
+                      <motion.button
                         key={emp}
                         type="button"
                         onClick={() =>
@@ -1226,24 +1233,27 @@ export function Sidebar({
                         title={labelFor(emp)}
                         aria-label={`Filter by ${labelFor(emp)}`}
                         aria-pressed={active}
-                        className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full cx-type-xs font-medium transition-colors duration-100 whitespace-nowrap"
+                        whileHover={shouldReduceMotion ? undefined : { scale: 1.04 }}
+                        whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
+                        transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
+                        className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full cx-type-xs font-medium whitespace-nowrap"
                         style={
                           active
                             ? {
-                                background: `color-mix(in srgb, ${DEPT_COLOR[emp]} 20%, var(--color-surface-elevated))`,
+                                background: `color-mix(in srgb, ${DEPT_COLOR[emp]} 20%, var(--cx-surface-raised))`,
                                 color: DEPT_COLOR[emp],
                                 border: `1px solid color-mix(in srgb, ${DEPT_COLOR[emp]} 50%, transparent)`,
                               }
                             : {
-                                background: "var(--color-surface-elevated)",
-                                color: "var(--color-text-muted)",
-                                border: "1px solid var(--color-border)",
+                                background: "var(--cx-surface-raised)",
+                                color: "var(--cx-text-muted)",
+                                border: "1px solid var(--cx-border)",
                               }
                         }
                       >
                         <SpecialistAvatar employee={emp} size={12} active={active} />
                         {labelFor(emp)}
-                      </button>
+                      </motion.button>
                     );
                   })}
                 </div>
@@ -1269,14 +1279,14 @@ export function Sidebar({
                 <div
                   className={`${searchExpanded ? "flex" : "hidden md:flex"} items-center gap-1.5 px-2 py-1.5 rounded-lg`}
                   style={{
-                    background: "var(--color-surface-elevated)",
-                    border: "1px solid var(--color-border)",
+                    background: "var(--cx-surface-raised)",
+                    border: "1px solid var(--cx-border)",
                   }}
                 >
                   <Search
                     size={11}
                     className="shrink-0"
-                    style={{ color: "var(--color-text-muted)" }}
+                    style={{ color: "var(--cx-text-muted)" }}
                   />
                   <input
                     ref={searchInputRef}
@@ -1286,8 +1296,8 @@ export function Sidebar({
                     placeholder="Search conversations…"
                     aria-label="Search conversations"
                     autoComplete="off"
-                    className="flex-1 min-w-0 bg-transparent text-xs outline-none placeholder:text-[var(--color-text-muted)]"
-                    style={{ color: "var(--color-text)" }}
+                    className="flex-1 min-w-0 bg-transparent text-xs outline-none placeholder:text-[var(--cx-text-muted)]"
+                    style={{ color: "var(--cx-text)" }}
                   />
                   {convSearch && (
                     <PraxisButton
@@ -1328,8 +1338,13 @@ export function Sidebar({
                           dom && (TEAM as string[]).includes(dom) ? dom : "jarvis"
                         ) as EmployeeKey;
                         return (
-                          <Link
+                          <motion.div
                             key={c.id}
+                            whileHover={shouldReduceMotion ? undefined : { x: 2 }}
+                            whileTap={shouldReduceMotion ? undefined : { x: 0 }}
+                            transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
+                          >
+                          <Link
                             href={`/app?c=${c.id}`}
                             onClick={close}
                             className={`relative flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-lg transition-colors duration-[120ms] group ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)]" : ""}`}
@@ -1389,11 +1404,12 @@ export function Sidebar({
                               </span>
                             )}
                           </Link>
+                          </motion.div>
                         );
                       })}
                     </div>
                     {(q || specialistFilter) && filtered.length === 0 && (
-                      <p className="px-3 py-2 cx-type-xs" style={{ color: "var(--color-text-muted)" }}>
+                      <p className="px-3 py-2 cx-type-xs" style={{ color: "var(--cx-text-muted)" }}>
                         {specialistFilter && !q
                           ? `No conversations with ${labelFor(specialistFilter)} yet`
                           : "No conversations match"}
@@ -1403,13 +1419,13 @@ export function Sidebar({
                       <Link
                         href="/app/conversations"
                         onClick={close}
-                        className="mt-1 flex items-center px-3 py-1.5 cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+                        className="mt-1 flex items-center px-3 py-1.5 cx-type-xs uppercase tracking-[0.15em] text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] transition-colors"
                       >
                         See all ({conversations.length})
                       </Link>
                     )}
                     {filtered.length > 8 && (
-                      <p className="px-3 py-1 cx-type-xs" style={{ color: "var(--color-text-muted)" }}>
+                      <p className="px-3 py-1 cx-type-xs" style={{ color: "var(--cx-text-muted)" }}>
                         Showing 8 of {filtered.length} matches
                       </p>
                     )}
@@ -1446,7 +1462,7 @@ export function Sidebar({
         <div
           className="pt-2 pb-3 space-y-0.5"
           style={{
-            borderTop: "1px solid var(--cx-border)",
+            borderTop: "1px solid var(--cx-glass-border)",
             paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0.75rem))",
           }}
         >
@@ -1501,7 +1517,7 @@ export function Sidebar({
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <span style={{ color: "var(--color-accent-hi)" }}>
+                  <span style={{ color: "var(--cx-accent-bright)" }}>
                     {(displayName || userEmail)[0]?.toUpperCase() ?? "?"}
                   </span>
                 )}
@@ -1622,7 +1638,7 @@ export function Sidebar({
             }}
             className="w-full justify-start"
           >
-            <Pin size={12} style={{ color: "var(--color-text-muted)" }} />
+            <Pin size={12} style={{ color: "var(--cx-text-muted)" }} />
             {pinned.includes(ctxMenu.emp) ? "Unpin specialist" : "Pin specialist"}
           </PraxisButton>
         </div>,
@@ -1671,17 +1687,17 @@ export function Sidebar({
               )}
               <span
                 className="cx-type-xs font-semibold truncate"
-                style={{ color: isTeam ? "var(--color-accent-hi)" : DEPT_COLOR[empKey] }}
+                style={{ color: isTeam ? "var(--cx-accent-bright)" : DEPT_COLOR[empKey] }}
               >
                 {isTeam ? "Team" : employeeLabel(empKey)}
               </span>
             </div>
             {preview ? (
-              <p className="cx-type-xs leading-snug" style={{ color: "var(--pdl-text-muted, var(--color-text-muted))" }}>
+              <p className="cx-type-xs leading-snug" style={{ color: "var(--cx-text-muted)" }}>
                 {preview}
               </p>
             ) : (
-              <p className="cx-type-xs italic" style={{ color: "var(--pdl-text-muted, var(--color-text-muted))" }}>
+              <p className="cx-type-xs italic" style={{ color: "var(--cx-text-muted)" }}>
                 No messages yet
               </p>
             )}
