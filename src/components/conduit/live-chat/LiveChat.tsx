@@ -367,19 +367,19 @@ export function LiveChat({
   return (
     <>
     <div className="wm-rebrand flex h-[100dvh] w-full overflow-hidden text-foreground">
-      <aside className="hidden w-72 shrink-0 border-r border-white/8 bg-card/40 backdrop-blur-xl lg:block">{Rail}</aside>
+      <aside className="cx-glass hidden w-72 shrink-0 border-r lg:block" style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>{Rail}</aside>
       <AnimatePresence>
         {drawer && (<>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDrawer(false)} className="fixed inset-0 z-40 bg-black/60 lg:hidden" />
-          <motion.aside initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", stiffness: 320, damping: 34 }} className="fixed inset-y-0 left-0 z-50 w-[82%] max-w-xs border-r border-white/8 bg-card lg:hidden">{Rail}</motion.aside>
+          <motion.aside initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", stiffness: 320, damping: 34 }} className="cx-glass fixed inset-y-0 left-0 z-50 w-[82%] max-w-xs border-r lg:hidden" style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>{Rail}</motion.aside>
         </>)}
       </AnimatePresence>
 
       <AnimatePresence>
         {palette && (
           <div className="fixed inset-0 z-[60] flex items-start justify-center p-4 pt-[12vh]">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setPalette(false)} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, y: -12, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8, scale: 0.98 }} transition={{ type: "spring", stiffness: 300, damping: 26 }} className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-card wm-glow">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setPalette(false)} className="cx-scrim absolute inset-0 bg-black/60" />
+            <motion.div initial={{ opacity: 0, y: -12, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8, scale: 0.98 }} transition={{ type: "spring", stiffness: 300, damping: 26 }} className="cx-glass-float cx-glass-border relative w-full max-w-lg overflow-hidden rounded-2xl wm-glow">
               <div className="flex items-center gap-2 border-b border-white/8 px-4"><Search className="size-4 text-muted-foreground" /><input autoFocus value={paletteQ} onChange={(e) => setPaletteQ(e.target.value)} placeholder="Jump to a teammate, start a chat…" className="h-12 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground" /><kbd className="rounded border border-white/10 px-1.5 py-0.5 cx-type-xs text-muted-foreground">esc</kbd></div>
               <div className="max-h-72 overflow-y-auto p-2">
                 <p className="wm-label px-2 py-1.5">Actions</p>
@@ -396,7 +396,7 @@ export function LiveChat({
         {openArtifact && (
           <div className="fixed inset-0 z-50 flex">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setOpenArtifact(null)} className="flex-1 bg-black/50" />
-            <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", stiffness: 300, damping: 32 }} className="flex h-full w-full max-w-2xl flex-col border-l border-white/10 bg-card">
+            <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", stiffness: 300, damping: 32 }} className="cx-glass-float flex h-full w-full max-w-2xl flex-col border-l" style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>
               <div className="flex items-center gap-2 border-b border-white/8 px-5 py-4">
                 <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-secondary text-primary"><FileText className="size-5" /></span>
                 <div className="min-w-0 flex-1"><p className="wm-label">{openArtifact.type} · by {EMPLOYEES[openArtifact.by]?.name ?? "Praxis"}</p><h2 className="truncate text-lg font-semibold">{openArtifact.title}</h2></div>
@@ -415,14 +415,14 @@ export function LiveChat({
 
       {roomToken && <PraxisLiveRoom tokenResponse={roomToken} onClose={() => { setRoomToken(null); router.refresh(); }} />}
       {voiceErr && (
-        <div className="fixed top-4 left-1/2 z-[80] -translate-x-1/2 rounded-lg border border-destructive/40 bg-card px-4 py-2.5 text-sm wm-glow">
+        <div className="cx-glass-float fixed top-4 left-1/2 z-[80] -translate-x-1/2 rounded-lg border border-destructive/40 px-4 py-2.5 text-sm wm-glow">
           <span className="text-destructive">{voiceErr}</span>
           <Button variant="ghost" size="sm" onClick={() => setVoiceErr(null)} className="ml-3 text-xs underline">dismiss</Button>
         </div>
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-3 border-b border-white/8 bg-background/70 px-4 py-3 backdrop-blur">
+        <header className="cx-glass flex items-center gap-3 border-b px-4 py-3" style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>
           <Button size="icon-sm" variant="secondary" className="!rounded-lg bg-secondary lg:hidden" onClick={() => setDrawer(true)} aria-label="Open navigation"><Menu className="size-4" /></Button>
           <span className="grid size-9 place-items-center rounded-xl bg-secondary text-primary"><EmpIcon className="size-5" /></span>
           <div className="min-w-0"><p className="truncate font-semibold leading-tight">{emp.name}</p><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="size-1.5 rounded-full bg-primary" /> {emp.role}</p></div>
@@ -577,11 +577,11 @@ export function LiveChat({
           </div>
         </div>
 
-        <div className="border-t border-white/8 bg-background/70 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
+        <div className="cx-glass border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]" style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>
           <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="relative mx-auto w-full max-w-3xl">
             <AnimatePresence>
               {menu && (
-                <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 6 }} className="absolute bottom-full left-0 mb-2 w-72 overflow-hidden rounded-xl border border-white/10 bg-card wm-glow">
+                <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 6 }} className="cx-glass-float cx-glass-border absolute bottom-full left-0 mb-2 w-72 overflow-hidden rounded-xl wm-glow">
                   <p className="wm-label flex items-center gap-1.5 px-3 py-2">{menu === "slash" ? <><Slash className="size-3" /> Commands</> : <><AtSign className="size-3" /> Route to teammate</>}</p>
                   <div className="max-h-60 overflow-y-auto pb-1">
                     {menu === "slash" ? (slashItems.length ? slashItems : SLASH).map((s) => (

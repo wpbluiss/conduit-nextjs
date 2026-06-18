@@ -105,7 +105,10 @@ export default async function EmployeeRightRail({
   const actions = QUICK_ACTIONS[employeeId] ?? [];
 
   return (
-    <aside className="w-full md:w-80 shrink-0 border-l border-[var(--color-border)] bg-[var(--color-surface)] p-5 space-y-6">
+    <aside
+      className="w-full md:w-80 shrink-0 border-l cx-glass p-5 space-y-6"
+      style={{ borderLeftColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}
+    >
       {/* About */}
       <section>
         <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
