@@ -159,7 +159,7 @@ export function BillingDashboard({
             {(account.subscription_status ?? "inactive").replace("_", " ")}
           </div>
           <div className="serif text-3xl mt-1">{tier.name}</div>
-          <div className="cx-mono text-[var(--color-text-muted)] text-xs mt-1.5 tabular-nums">
+          <div className="cx-mono cx-type-xs text-[var(--color-text-muted)] mt-1.5">
             {tier.monthlyPriceCents > 0
               ? `$${tier.monthlyPriceCents / 100} / month`
               : "Free forever"}{" "}

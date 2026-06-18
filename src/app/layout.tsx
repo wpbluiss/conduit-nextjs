@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, JetBrains_Mono } from "next/font/google";
 import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import "@/styles/praxis-tokens.css";
 import "@/styles/praxis-system.css";
@@ -82,7 +83,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${GeistSans.variable} ${fraunces.variable} ${jetbrainsMono.variable}`}
+      className={`${GeistSans.variable} ${GeistMono.variable} ${fraunces.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
       <head>
