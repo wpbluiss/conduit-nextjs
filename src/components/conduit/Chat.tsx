@@ -2085,7 +2085,7 @@ export function Chat({
                 <span
                   aria-hidden="true"
                   className="presence-dot inline-block w-1.5 h-1.5 rounded-full shrink-0"
-                  style={{ background: DEPT_COLOR[streamingEmployee] }}
+                  style={{ background: "var(--cx-accent, #7C6CFF)" }}
                 />
                 <span style={{ color: DEPT_COLOR[streamingEmployee], fontWeight: 500 }}>
                   {labelFor(streamingEmployee)}
