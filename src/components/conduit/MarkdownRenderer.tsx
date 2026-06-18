@@ -668,7 +668,7 @@ function renderBlock(block: Block, bi: number, caretColor?: string): React.React
               {(block.headers ?? []).map((h, ci) => (
                 <th
                   key={ci}
-                  className="px-4 py-2.5 text-left text-[11px] uppercase tracking-[0.12em] font-semibold"
+                  className="px-4 py-2.5 text-left cx-type-xs uppercase tracking-[0.12em] font-semibold"
                   style={{
                     background: "var(--cx-surface-overlay)",
                     borderBottom: "1px solid var(--cx-border-strong)",

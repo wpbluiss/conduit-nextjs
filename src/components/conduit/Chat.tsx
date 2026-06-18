@@ -1962,7 +1962,7 @@ export function Chat({
               />
               <p className="flex-1 text-sm" style={{ color: "var(--color-text)" }}>
                 Ready again in{" "}
-                <span className="font-medium tabular-nums">{rateLimitSecondsLeft} s</span>
+                <span className="cx-mono font-medium">{rateLimitSecondsLeft} s</span>
               </p>
             </motion.div>
           )}

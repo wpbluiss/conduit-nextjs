@@ -235,7 +235,7 @@ export default function PraxisLiveRoom({
           aria-label={muted ? "Unmute" : "Mute"}
         >{muted ? <MicOff className="size-6" /> : <Mic className="size-6" />}</button>
         <div
-          className="rounded-full px-3 py-1 font-mono text-sm tabular-nums"
+          className="rounded-full px-3 py-1 font-mono cx-type-sm tabular-nums"
           style={inWarn ? { background: "rgba(234,179,8,0.10)", color: "#FBBF24" } : { background: "var(--cx-surface-raised)", color: "var(--cx-text-muted)" }}
         >{fmtTime(elapsedSec)} / {fmtTime(tokenResponse.max_seconds)}</div>
         <PraxisButton variant="danger" size="icon" onClick={end} aria-label="End call"><PhoneOff className="size-7" /></PraxisButton>

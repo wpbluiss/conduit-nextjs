@@ -119,6 +119,15 @@
   /* Symmetric — used for exits, fades */
   --cx-ease-inout:  cubic-bezier(0.4, 0, 0.2, 1);
 
+  /* ---- Typography: console mono font (Geist Mono) ----
+   * Scoped to .praxis-root so marketing pages keep JetBrains Mono.
+   * --font-geist-mono is bound in layout.tsx via GeistMono.variable.
+   * Overriding --font-mono here means every existing font-mono / cx-mono /
+   * cx-meta / cx-stat and var(--font-mono) reference in the console
+   * automatically resolves to Geist Mono without per-component changes. */
+  --cx-font-mono: var(--font-geist-mono, ui-monospace, "SFMono-Regular", "Roboto Mono", Menlo, monospace);
+  --font-mono:    var(--cx-font-mono);
+
   /* ================================================================
    * Bridge: remap existing semantic tokens → --cx-* values
    *

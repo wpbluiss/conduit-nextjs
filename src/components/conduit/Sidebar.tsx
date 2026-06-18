@@ -878,7 +878,7 @@ export function Sidebar({
                 <span className="inline-flex items-center gap-1.5">
                   <Users2 size={9} strokeWidth={2} aria-hidden /> Specialists
                 </span>
-                <span aria-hidden style={{ fontSize: 10 }}>
+                <span aria-hidden style={{ fontSize: "var(--cx-type-xs)" }}>
                   {teamExpanded ? "−" : "+"}
                 </span>
               </button>

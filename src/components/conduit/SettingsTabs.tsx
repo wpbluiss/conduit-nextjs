@@ -665,7 +665,7 @@ function SpecialistMetrics() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-baseline justify-between gap-2 flex-wrap">
                         <span className="font-medium text-[var(--color-text)]">{label}</span>
-                        <div className="flex items-center gap-3 cx-mono text-xs text-[var(--color-text-muted)] tabular-nums shrink-0">
+                        <div className="flex items-center gap-3 cx-mono cx-type-xs text-[var(--color-text-muted)] shrink-0">
                           <span title="Responses in period">
                             <span className="font-semibold text-[var(--color-text)]">{m.totalMessages.toLocaleString()}</span>
                             {" "}responses
@@ -2339,7 +2339,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-[var(--color-text)] cx-type-sm font-medium tabular-nums">
+                    <p className="text-[var(--color-text)] cx-mono cx-type-sm font-medium">
                       {stat.fetch_count.toLocaleString()}
                     </p>
                     <p className="text-[var(--color-text-muted)] cx-type-xs">fetches</p>
@@ -3131,7 +3131,7 @@ function UsageSummary({
           Usage this cycle
         </span>
         <span
-          className="text-xs font-medium tabular-nums"
+          className="cx-mono cx-type-xs font-medium"
           style={{ color: barColor }}
         >
           {pct}%
@@ -4768,7 +4768,7 @@ function ReferralsTab() {
           <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
             Successful referrals
           </div>
-          <div className="text-3xl font-semibold tabular-nums" style={{ color: "var(--color-accent)" }}>
+          <div className="cx-stat" style={{ color: "var(--color-accent)" }}>
             {data?.referral_count ?? 0}
           </div>
         </div>
@@ -4776,7 +4776,7 @@ function ReferralsTab() {
           <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
             Bonus tokens earned
           </div>
-          <div className="text-3xl font-semibold tabular-nums" style={{ color: "var(--color-accent)" }}>
+          <div className="cx-stat" style={{ color: "var(--color-accent)" }}>
             {(data?.total_earned ?? 0).toLocaleString()}
           </div>
         </div>

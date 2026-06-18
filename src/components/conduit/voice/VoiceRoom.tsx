@@ -431,7 +431,7 @@ export default function VoiceRoom({
           {muted ? <MicOff size={20} /> : <Mic size={20} />}
         </button>
         <div
-          className={`px-3 py-1 rounded-full text-sm tabular-nums transition-colors ${
+          className={`px-3 py-1 rounded-full cx-type-sm font-mono tabular-nums transition-colors ${
             inWarn ? "text-amber-300 bg-amber-300/10" : "text-white/70 bg-white/5"
           }`}
           title={`${remainingSec}s remaining`}
