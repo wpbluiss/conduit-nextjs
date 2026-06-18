@@ -299,10 +299,10 @@ function TeamTab() {
         className="conduit-card p-5"
         style={{
           background:
-            "linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-elevated)), var(--color-surface-elevated))",
+            "linear-gradient(135deg, color-mix(in srgb, var(--cx-accent) 6%, var(--cx-surface)), var(--cx-surface))",
         }}
       >
-        <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
+        <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--cx-accent-bright)] mb-2">
           Coming soon
         </div>
         <p className="cx-heading-xl">Personality tuning</p>
@@ -438,7 +438,7 @@ function SpecialistsTab({
                 <span
                   className="flex items-center justify-center w-8 h-8 rounded-full shrink-0"
                   style={{
-                    background: `color-mix(in srgb, ${color} 18%, var(--color-surface-elevated))`,
+                    background: `color-mix(in srgb, ${color} 18%, var(--cx-surface))`,
                     boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 32%, transparent)`,
                   }}
                 >
@@ -447,10 +447,10 @@ function SpecialistsTab({
                 <div className="flex-1 min-w-0">
                   <label
                     htmlFor={`nick-${emp}`}
-                    className="block cx-type-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-1"
+                    className="block cx-type-xs uppercase tracking-[0.12em] text-[var(--cx-text-muted)] mb-1"
                   >
                     {canonical}
-                    <span className="ml-1 text-[var(--color-text-muted)] normal-case tracking-normal">
+                    <span className="ml-1 text-[var(--cx-text-muted)] normal-case tracking-normal">
                       · {EMPLOYEES[emp].role}
                     </span>
                   </label>
@@ -501,14 +501,14 @@ function SpecialistsTab({
                 <span
                   className="flex items-center justify-center w-8 h-8 rounded-full shrink-0"
                   style={{
-                    background: `color-mix(in srgb, ${color} 18%, var(--color-surface-elevated))`,
+                    background: `color-mix(in srgb, ${color} 18%, var(--cx-surface))`,
                     boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 32%, transparent)`,
                   }}
                 >
                   <Icon size={14} style={{ color }} strokeWidth={2} />
                 </span>
                 <div className="flex-1 min-w-0">
-                  <span className="block cx-type-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-1.5">
+                  <span className="block cx-type-xs uppercase tracking-[0.12em] text-[var(--cx-text-muted)] mb-1.5">
                     {canonical}
                   </span>
                   <div className="flex gap-1" role="group" aria-label={`${canonical} response length`}>
@@ -520,8 +520,8 @@ function SpecialistsTab({
                         title={hint}
                         className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                           current === value
-                            ? "bg-[var(--color-accent)] text-white"
-                            : "border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-text-muted)]"
+                            ? "bg-[var(--cx-accent)] text-white"
+                            : "border border-[var(--cx-border)] text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:border-[var(--cx-text-muted)]"
                         }`}
                       >
                         {label}
@@ -613,19 +613,19 @@ function SpecialistMetrics() {
           ))}
         </div>
         {loading && (
-          <span className="cx-type-xs text-[var(--color-text-muted)] animate-pulse">Loading…</span>
+          <span className="cx-type-xs text-[var(--cx-text-muted)] animate-pulse">Loading…</span>
         )}
       </div>
 
       {error && (
-        <p className="text-[var(--color-text-muted)] text-sm">
+        <p className="text-[var(--cx-text-muted)] text-sm">
           Failed to load metrics. Please try again.
         </p>
       )}
 
       {!loading && !error && metrics !== null && metrics.length === 0 && (
         <div className="conduit-card p-8 text-center">
-          <p className="text-[var(--color-text-muted)]">No specialist activity in this period.</p>
+          <p className="text-[var(--cx-text-muted)]">No specialist activity in this period.</p>
           <p className="cx-type-xs text-[var(--cx-text-muted)] mt-1">
             Start a conversation with any specialist to see usage here.
           </p>
@@ -637,7 +637,7 @@ function SpecialistMetrics() {
           {/* Summary stat */}
           <div className="flex items-baseline gap-1.5">
             <AnimatedStat value={totalMessages} />
-            <span className="text-[var(--color-text-muted)]">
+            <span className="text-[var(--cx-text-muted)]">
               specialist {totalMessages === 1 ? "response" : "responses"} in this period
             </span>
           </div>
@@ -657,7 +657,7 @@ function SpecialistMetrics() {
                     <span
                       className="flex items-center justify-center w-7 h-7 rounded-full shrink-0"
                       style={{
-                        background: `color-mix(in srgb, ${color} 18%, var(--color-surface-elevated))`,
+                        background: `color-mix(in srgb, ${color} 18%, var(--cx-surface))`,
                         boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 32%, transparent)`,
                       }}
                     >
@@ -665,24 +665,24 @@ function SpecialistMetrics() {
                     </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-baseline justify-between gap-2 flex-wrap">
-                        <span className="font-medium text-[var(--color-text)]">{label}</span>
-                        <div className="flex items-center gap-3 cx-mono cx-type-xs text-[var(--color-text-muted)] shrink-0">
+                        <span className="font-medium text-[var(--cx-text)]">{label}</span>
+                        <div className="flex items-center gap-3 cx-mono cx-type-xs text-[var(--cx-text-muted)] shrink-0">
                           <span title="Responses in period">
-                            <span className="font-semibold text-[var(--color-text)]">{m.totalMessages.toLocaleString()}</span>
+                            <span className="font-semibold text-[var(--cx-text)]">{m.totalMessages.toLocaleString()}</span>
                             {" "}responses
                           </span>
                           <span title="Responses this calendar month">
-                            <span className="font-semibold text-[var(--color-text)]">{m.thisMonth.toLocaleString()}</span>
+                            <span className="font-semibold text-[var(--cx-text)]">{m.thisMonth.toLocaleString()}</span>
                             {" "}this month
                           </span>
                           <span title="Average words per response">
-                            ~<span className="font-semibold text-[var(--color-text)]">{m.avgWordCount}</span>
+                            ~<span className="font-semibold text-[var(--cx-text)]">{m.avgWordCount}</span>
                             {" "}words/reply
                           </span>
                           <span
                             className="cx-type-xs px-1.5 py-0.5 rounded-full"
                             style={{
-                              background: `color-mix(in srgb, ${color} 14%, var(--color-surface-elevated))`,
+                              background: `color-mix(in srgb, ${color} 14%, var(--cx-surface))`,
                               color,
                             }}
                           >
@@ -693,7 +693,7 @@ function SpecialistMetrics() {
                     </div>
                   </div>
                   {/* Usage bar */}
-                  <div className="h-1.5 rounded-full bg-[var(--color-border)] overflow-hidden">
+                  <div className="h-1.5 rounded-full bg-[var(--cx-border)] overflow-hidden">
                     <div
                       className="h-1.5 rounded-full transition-all duration-500"
                       style={{
@@ -769,7 +769,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
     return (
       <div className="space-y-4">
         <div className="conduit-card p-6 text-center relative">
-          <div className="flex items-center justify-center gap-2 text-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
+          <div className="flex items-center justify-center gap-2 text-xs uppercase tracking-[0.18em] text-[var(--cx-accent-bright)] mb-2">
             <Lock size={12} /> Pro feature
           </div>
           <p className="cx-heading-xl">Voice mode is a Pro perk</p>
@@ -852,7 +852,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
   return (
     <div className="space-y-6">
       {!voiceConfigured && (
-        <div className="conduit-card p-4 text-xs text-[var(--color-amber)] border-[var(--color-amber)]/40">
+        <div className="conduit-card p-4 cx-type-xs text-[var(--color-amber)] border-[var(--color-amber)]/40">
           Voice provider not connected yet. Settings save, previews are
           disabled until upstream keys land.
         </div>
@@ -894,7 +894,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
               setPref({ voice_speed: parseFloat(e.target.value) })
             }
             onPointerUp={() => save({ voice_speed: prefs.voice_speed })}
-            className="w-full accent-[var(--color-accent)]"
+            className="w-full accent-[var(--cx-accent)]"
           />
         </div>
       </div>
@@ -943,7 +943,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
                 <select
                   value={current}
                   onChange={(e) => setEmployeeVoice(emp, e.target.value)}
-                  className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
+                  className="w-full bg-[var(--cx-surface-raised)] border border-[var(--cx-border)] rounded-lg px-3 py-2 cx-type-sm text-[var(--cx-text)] outline-none"
                 >
                   {/* Always offer the default first */}
                   <option value={DEFAULT_EMPLOYEE_VOICES[emp]}>
@@ -983,7 +983,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
       {saving && (
         <p className="cx-type-xs text-[var(--cx-text-muted)]">Saving…</p>
       )}
-      {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
+      {error && <p className="text-sm text-[var(--cx-danger)]">{error}</p>}
     </div>
   );
 }
@@ -1053,10 +1053,10 @@ function checkPasswordStrength(pw: string): PwStrength {
 
 const STRENGTH_COLORS = [
   "",
-  "var(--color-pink)",
-  "var(--color-yellow, #f59e0b)",
-  "var(--color-green)",
-  "var(--color-green)",
+  "var(--cx-danger)",
+  "var(--color-amber)",
+  "var(--cx-reward)",
+  "var(--cx-reward)",
 ] as const;
 
 function PwMeter({ pw }: { pw: string }) {
@@ -1069,7 +1069,7 @@ function PwMeter({ pw }: { pw: string }) {
           key={n}
           className="h-1 flex-1 rounded-full transition-colors"
           style={{
-            background: score >= n ? STRENGTH_COLORS[score] : "var(--color-border)",
+            background: score >= n ? STRENGTH_COLORS[score] : "var(--cx-border)",
           }}
         />
       ))}
@@ -1198,7 +1198,7 @@ function WorkspaceTab({
         <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
           Workspace logo
         </div>
-        <p className="cx-type-xs text-[var(--color-text-muted)] mb-3">
+        <p className="cx-type-xs text-[var(--cx-text-muted)] mb-3">
           Shown in the sidebar header. JPEG or PNG, max 2 MB.
         </p>
         <div className="flex items-center gap-5">
@@ -1210,8 +1210,8 @@ function WorkspaceTab({
             aria-label="Upload workspace logo"
           >
             <div
-              className="w-16 h-16 rounded-xl flex items-center justify-center overflow-hidden border-2 border-[var(--color-border)] group-hover:border-[var(--color-accent)] transition-colors"
-              style={{ background: "var(--color-surface-elevated)" }}
+              className="w-16 h-16 rounded-xl flex items-center justify-center overflow-hidden border-2 border-[var(--cx-border)] group-hover:border-[var(--cx-accent)] transition-colors"
+              style={{ background: "var(--cx-surface)" }}
             >
               {logoPreview ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -1221,7 +1221,7 @@ function WorkspaceTab({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-2xl font-bold" style={{ color: "var(--color-accent-hi)" }}>
+                <span className="text-2xl font-bold" style={{ color: "var(--cx-accent-bright)" }}>
                   {(wsName || workspaceName || "P")[0]?.toUpperCase() ?? "P"}
                 </span>
               )}
@@ -1231,7 +1231,7 @@ function WorkspaceTab({
                 <SpinnerIcon size={18} />
               </div>
             )}
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[var(--color-accent)] flex items-center justify-center shadow">
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[var(--cx-accent)] flex items-center justify-center shadow">
               <svg width="10" height="10" viewBox="0 0 10 10" fill="white">
                 <path d="M5 2v6M2 5h6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
@@ -1261,7 +1261,7 @@ function WorkspaceTab({
               </PraxisButton>
             )}
             {logoError && (
-              <p className="cx-type-xs text-[var(--color-pink)]">{logoError}</p>
+              <p className="cx-type-xs text-[var(--cx-danger)]">{logoError}</p>
             )}
           </div>
           <input
@@ -1280,7 +1280,7 @@ function WorkspaceTab({
         <label className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block">
           Workspace name
         </label>
-        <p className="cx-type-xs text-[var(--color-text-muted)] -mt-1">
+        <p className="cx-type-xs text-[var(--cx-text-muted)] -mt-1">
           Shown in the sidebar. Leave blank to use your account name.
         </p>
         <div className="relative">
@@ -1300,14 +1300,14 @@ function WorkspaceTab({
             style={{
               color:
                 wsName.length >= WS_NAME_MAX
-                  ? "var(--color-pink)"
-                  : "var(--color-text-muted)",
+                  ? "var(--cx-danger)"
+                  : "var(--cx-text-muted)",
             }}
           >
             {wsName.length}/{WS_NAME_MAX}
           </span>
         </div>
-        {wsNameError && <p className="cx-type-xs text-[var(--color-pink)]">{wsNameError}</p>}
+        {wsNameError && <p className="cx-type-xs text-[var(--cx-danger)]">{wsNameError}</p>}
         <PraxisButton
           type="submit"
           isLoading={wsNameSaving}
@@ -2177,7 +2177,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
           ))}
         </div>
         {monthLoading && (
-          <span className="cx-type-xs text-[var(--color-text-muted)] animate-pulse">Loading…</span>
+          <span className="cx-type-xs text-[var(--cx-text-muted)] animate-pulse">Loading…</span>
         )}
       </div>
 
@@ -2206,27 +2206,27 @@ function UsageTab({ usage }: { usage: UsageData }) {
           <span className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
             Token cap (current cycle)
           </span>
-          <span className="text-sm">
+          <span className="cx-type-sm cx-mono">
             {usage.cap.used.toLocaleString()} /{" "}
             {usage.cap.limit.toLocaleString()}
           </span>
         </div>
-        <div className="h-2 rounded-full bg-[var(--color-border)] overflow-hidden">
+        <div className="h-2 rounded-full bg-[var(--cx-border)] overflow-hidden">
           <div
             className="h-2 rounded-full"
             style={{
               width: `${capPct}%`,
               background:
                 capPct >= 100
-                  ? "var(--color-pink)"
+                  ? "var(--cx-danger)"
                   : capPct >= 80
                     ? "var(--color-amber)"
-                    : "var(--color-accent)",
+                    : "var(--cx-accent)",
             }}
           />
         </div>
         {usage.cycleResetDate && (
-          <p className="cx-type-xs text-[var(--color-text-muted)] mt-2">
+          <p className="cx-type-xs text-[var(--cx-text-muted)] mt-2">
             Resets on {usage.cycleResetDate}
           </p>
         )}
@@ -2238,9 +2238,9 @@ function UsageTab({ usage }: { usage: UsageData }) {
           Tokens · daily
         </div>
         {monthLoading ? (
-          <p className="text-[var(--color-text-muted)]">Loading…</p>
+          <p className="text-[var(--cx-text-muted)]">Loading…</p>
         ) : fillByDay.length === 0 ? (
-          <p className="text-[var(--color-text-muted)]">No usage yet.</p>
+          <p className="text-[var(--cx-text-muted)]">No usage yet.</p>
         ) : (
           <div className="conduit-card p-4">
             <div className="flex items-end gap-px h-32">
@@ -2250,13 +2250,13 @@ function UsageTab({ usage }: { usage: UsageData }) {
                   <div
                     key={d}
                     title={`${d}: ${v.toLocaleString()} tokens`}
-                    className="flex-1 rounded-t bg-[var(--color-accent)] opacity-70 hover:opacity-100 transition-opacity"
+                    className="flex-1 rounded-t bg-[var(--cx-accent)] opacity-70 hover:opacity-100 transition-opacity"
                     style={{ height: `${Math.max(2, h)}%` }}
                   />
                 );
               })}
             </div>
-            <div className="mt-2 flex justify-between cx-type-xs text-[var(--color-text-muted)]">
+            <div className="mt-2 flex justify-between cx-type-xs text-[var(--cx-text-muted)]">
               <span>{fillByDay[0]?.d}</span>
               <span>{fillByDay[fillByDay.length - 1]?.d}</span>
             </div>
@@ -2271,7 +2271,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
             Share by employee
           </div>
           {monthLoading || empTotal === 1 ? (
-            <p className="text-[var(--color-text-muted)]">
+            <p className="text-[var(--cx-text-muted)]">
               {monthLoading ? "Loading…" : "No usage yet."}
             </p>
           ) : (
@@ -2296,7 +2296,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
                     />
                     {employeeLabel(emp)}
                   </span>
-                  <span className="text-[var(--color-text-muted)] text-xs">
+                  <span className="cx-type-xs cx-mono text-[var(--cx-text-muted)]">
                     {(v.input + v.output).toLocaleString()} · $
                     {(v.cost / 100).toFixed(2)}
                   </span>
@@ -2304,7 +2304,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
               );
             })}
             {empNames.every((e) => !displayData.byEmployee[e]) && (
-              <p className="text-[var(--color-text-muted)] text-xs">
+              <p className="cx-type-xs text-[var(--cx-text-muted)]">
                 No usage yet.
               </p>
             )}
@@ -2318,14 +2318,14 @@ function UsageTab({ usage }: { usage: UsageData }) {
           Connector context fetches (all time)
         </div>
         {connectorStats.length === 0 ? (
-          <div className="conduit-card p-5 text-[var(--color-text-muted)] text-xs">
+          <div className="conduit-card p-5 text-[var(--cx-text-muted)] text-xs">
             No connectors connected.{" "}
-            <a href="/app/settings?tab=integrations" className="underline hover:text-[var(--color-accent)]">
+            <a href="/app/settings?tab=integrations" className="underline hover:text-[var(--cx-accent)]">
               Connect one in Integrations →
             </a>
           </div>
         ) : (
-          <div className="conduit-card divide-y divide-[var(--color-border)]">
+          <div className="conduit-card divide-y divide-[var(--cx-border)]">
             {connectorStats.map((stat) => {
               const label =
                 stat.provider === "google_calendar"
@@ -2347,16 +2347,16 @@ function UsageTab({ usage }: { usage: UsageData }) {
               return (
                 <div key={stat.provider} className="flex items-center justify-between px-5 py-3.5 gap-4">
                   <div>
-                    <p className="text-[var(--color-text)] cx-type-sm">{label}</p>
-                    <p className="text-[var(--color-text-muted)] cx-type-xs mt-0.5">
+                    <p className="text-[var(--cx-text)] cx-type-sm">{label}</p>
+                    <p className="text-[var(--cx-text-muted)] cx-type-xs mt-0.5">
                       Last fetched: {lastFetched}
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-[var(--color-text)] cx-mono cx-type-sm font-medium">
+                    <p className="text-[var(--cx-text)] cx-mono cx-type-sm font-medium">
                       {stat.fetch_count.toLocaleString()}
                     </p>
-                    <p className="text-[var(--color-text-muted)] cx-type-xs">fetches</p>
+                    <p className="text-[var(--cx-text-muted)] cx-type-xs">fetches</p>
                   </div>
                 </div>
               );
@@ -2408,7 +2408,7 @@ function Donut({
           cy="60"
           r={r}
           fill="transparent"
-          stroke="var(--color-border)"
+          stroke="var(--cx-border)"
           strokeWidth="14"
         />
         {segments}
@@ -2424,7 +2424,7 @@ function Donut({
                 style={{ background: DEPT_COLOR[d.emp] }}
               />
               <span>{employeeLabel(d.emp)}</span>
-              <span className="text-[var(--color-text-muted)]">
+              <span className="text-[var(--cx-text-muted)]">
                 {Math.round((d.val / total) * 100)}%
               </span>
             </div>
@@ -2486,12 +2486,12 @@ function BillingTab({
     return (
       <div className="space-y-6">
         <div className="conduit-card p-6">
-          <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
+          <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--cx-accent-bright)] mb-1">
             Internal Account · Conduit AI Team
           </div>
           {/* Conduit AI (the parent company) intentional — internal team badge. */}
           <div className="cx-heading-xl">No charge, full access</div>
-          <p className="mt-2 text-[var(--color-text-muted)]">
+          <p className="mt-2 text-[var(--cx-text-muted)]">
             You&apos;re on the internal team account. All tiers, all
             employees, no token cap. Subscription UI is hidden.
           </p>
@@ -2648,14 +2648,14 @@ function BillingTab({
       {/* Current plan */}
       <div className="conduit-card p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+          <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--cx-text-muted)]">
             Current plan ·{" "}
             {isCanceling
               ? "cancels at period end"
               : (account.subscription_status ?? "inactive").replace("_", " ")}
           </div>
           <div className="cx-heading-xl mt-1">{tier.name}</div>
-          <div className="text-[var(--color-text-muted)] text-xs mt-1">
+          <div className="cx-type-xs cx-mono text-[var(--cx-text-muted)] mt-1">
             {tier.monthlyPriceCents > 0
               ? `$${tier.monthlyPriceCents / 100} / month`
               : "Free forever"}{" "}
@@ -2665,7 +2665,7 @@ function BillingTab({
               : ""}
           </div>
           {cycleResetDate && (
-            <div className="text-[var(--color-text-muted)] cx-type-xs mt-1">
+            <div className="text-[var(--cx-text-muted)] cx-type-xs mt-1">
               Cycle resets {cycleResetDate}
             </div>
           )}
@@ -2684,12 +2684,12 @@ function BillingTab({
           {isCanceling && (
             <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full cx-type-xs font-medium"
               style={{
-                background: "color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 10%, transparent)",
-                color: "var(--color-destructive, var(--cx-danger))",
-                border: "1px solid color-mix(in srgb, var(--color-destructive, var(--cx-danger)) 30%, transparent)",
+                background: "color-mix(in srgb, var(--cx-danger) 10%, transparent)",
+                color: "var(--cx-danger)",
+                border: "1px solid color-mix(in srgb, var(--cx-danger) 30%, transparent)",
               }}
             >
-              <span aria-hidden className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-destructive, var(--cx-danger))" }} />
+              <span aria-hidden className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "var(--cx-danger)" }} />
               {cancelAt
                 ? `Cancels ${new Date(cancelAt * 1000).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`
                 : "Cancels at end of billing period"}
@@ -2757,7 +2757,7 @@ function BillingTab({
                 . After that, your workspace reverts to the free tier.
               </p>
             </div>
-            <ul className="cx-type-xs text-[var(--color-text-muted)] space-y-1 list-disc list-inside">
+            <ul className="cx-type-xs text-[var(--cx-text-muted)] space-y-1 list-disc list-inside">
               <li>All 9 specialists become read-only after downgrade</li>
               <li>Memory, conversations, and integrations are preserved</li>
               <li>You can reactivate any time before the period ends</li>
@@ -2802,10 +2802,10 @@ function BillingTab({
             <div className="conduit-card p-4 space-y-2">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex items-center justify-between gap-4">
-                  <div className="h-3 rounded w-24 animate-pulse bg-[var(--color-border)]" />
-                  <div className="h-3 rounded w-16 animate-pulse bg-[var(--color-border)]" />
-                  <div className="h-3 rounded w-12 animate-pulse bg-[var(--color-border)]" />
-                  <div className="h-3 rounded w-20 animate-pulse bg-[var(--color-border)]" />
+                  <div className="h-3 rounded w-24 animate-pulse bg-[var(--cx-border)]" />
+                  <div className="h-3 rounded w-16 animate-pulse bg-[var(--cx-border)]" />
+                  <div className="h-3 rounded w-12 animate-pulse bg-[var(--cx-border)]" />
+                  <div className="h-3 rounded w-20 animate-pulse bg-[var(--cx-border)]" />
                 </div>
               ))}
             </div>
@@ -2817,11 +2817,11 @@ function BillingTab({
             <div className="conduit-card overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-[var(--color-border)]">
+                  <tr className="border-b border-[var(--cx-border)]">
                     {["Date", "Amount", "Status", ""].map((h) => (
                       <th
                         key={h}
-                        className="px-4 py-2.5 text-left cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] font-normal"
+                        className="px-4 py-2.5 text-left cx-type-xs uppercase tracking-[0.15em] text-[var(--cx-text-muted)] font-normal"
                       >
                         {h}
                       </th>
@@ -2834,11 +2834,11 @@ function BillingTab({
                       key={inv.id}
                       className={
                         i < invoices.length - 1
-                          ? "border-b border-[var(--color-border)]"
+                          ? "border-b border-[var(--cx-border)]"
                           : ""
                       }
                     >
-                      <td className="px-4 py-3 text-[var(--color-text-muted)]">
+                      <td className="px-4 py-3 text-[var(--cx-text-muted)]">
                         {new Date(inv.date * 1000).toLocaleDateString(undefined, {
                           month: "short",
                           day: "numeric",
@@ -2857,12 +2857,12 @@ function BillingTab({
                           style={{
                             background:
                               inv.status === "paid"
-                                ? "color-mix(in srgb, var(--color-accent) 12%, transparent)"
-                                : "color-mix(in srgb, var(--color-text-muted) 15%, transparent)",
+                                ? "color-mix(in srgb, var(--cx-accent) 12%, transparent)"
+                                : "color-mix(in srgb, var(--cx-text-muted) 15%, transparent)",
                             color:
                               inv.status === "paid"
-                                ? "var(--color-accent)"
-                                : "var(--color-text-muted)",
+                                ? "var(--cx-accent)"
+                                : "var(--cx-text-muted)",
                           }}
                         >
                           {inv.status}
@@ -2874,7 +2874,7 @@ function BillingTab({
                             href={inv.pdf_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-[var(--color-accent)] hover:underline"
+                            className="inline-flex items-center gap-1 text-xs text-[var(--cx-accent)] hover:underline"
                           >
                             Download PDF
                             <ExternalLink size={11} />
@@ -2891,7 +2891,7 @@ function BillingTab({
       )}
 
       {error && (
-        <p className="text-sm text-[var(--color-pink)]">{error}</p>
+        <p className="text-sm text-[var(--cx-danger)]">{error}</p>
       )}
 
       {/* Tier comparison */}
@@ -2911,11 +2911,11 @@ function BillingTab({
                 key={t.id}
                 className={`conduit-card p-5 ${
                   isCurrent
-                    ? "border-[var(--color-accent)]"
+                    ? "border-[var(--cx-accent)]"
                     : ""
                 }`}
               >
-                <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--cx-text-muted)]">
                   {isCurrent ? "Current" : t.name}
                 </div>
                 <div className="cx-heading-xl mt-1">{t.name}</div>
@@ -2931,7 +2931,7 @@ function BillingTab({
                   <li className="flex items-start gap-1.5">
                     <Check
                       size={12}
-                      className="mt-0.5 shrink-0 text-[var(--color-accent)]"
+                      className="mt-0.5 shrink-0 text-[var(--cx-accent)]"
                     />
                     {(t.monthlyTokenAllowance / 1000).toLocaleString()}k
                     tokens / month
@@ -2939,7 +2939,7 @@ function BillingTab({
                   <li className="flex items-start gap-1.5">
                     <Check
                       size={12}
-                      className="mt-0.5 shrink-0 text-[var(--color-accent)]"
+                      className="mt-0.5 shrink-0 text-[var(--cx-accent)]"
                     />
                     {t.modelCeiling === "haiku"
                       ? "Fast routing model"
@@ -2950,7 +2950,7 @@ function BillingTab({
                   <li className="flex items-start gap-1.5">
                     <Check
                       size={12}
-                      className="mt-0.5 shrink-0 text-[var(--color-accent)]"
+                      className="mt-0.5 shrink-0 text-[var(--cx-accent)]"
                     />
                     {t.allowedEmployees.length} employees
                   </li>
@@ -2958,7 +2958,7 @@ function BillingTab({
                     <li className="flex items-start gap-1.5">
                       <Check
                         size={12}
-                        className="mt-0.5 shrink-0 text-[var(--color-accent)]"
+                        className="mt-0.5 shrink-0 text-[var(--cx-accent)]"
                       />
                       Multi-user (when shipped)
                     </li>
@@ -2993,13 +2993,13 @@ function BillingTab({
               key={t.id}
               onClick={() => buyTopup(t.id)}
               disabled={busy !== null}
-              className="conduit-card p-4 text-left hover:border-[var(--color-accent)] transition-colors disabled:opacity-50"
+              className="conduit-card p-4 text-left hover:border-[var(--cx-accent)] transition-colors disabled:opacity-50"
             >
               <div className="cx-heading-lg">${t.amountCents / 100}</div>
               <div className="mt-1 text-sm">
                 {(t.tokensGranted / 1000).toLocaleString()}k tokens
               </div>
-              <span className="mt-3 inline-flex items-center gap-1 text-xs text-[var(--color-accent)]">
+              <span className="mt-3 inline-flex items-center gap-1 text-xs text-[var(--cx-accent)]">
                 {busy === t.id ? (
                   <>
                     <SpinnerIcon size={11} />
@@ -3015,13 +3015,13 @@ function BillingTab({
             </button>
           ))}
         </div>
-        <p className="mt-2 cx-type-xs text-[var(--color-text-muted)]">
+        <p className="mt-2 cx-type-xs text-[var(--cx-text-muted)]">
           Bonus tokens stack on top of your monthly allowance and roll over
           until used.
         </p>
       </div>
 
-      <p className="cx-type-xs text-[var(--color-text-muted)]">
+      <p className="cx-type-xs text-[var(--cx-text-muted)]">
         Allowance: {allowance.toLocaleString()} this cycle.
       </p>
 
@@ -3069,13 +3069,13 @@ function ReferralSection() {
         </div>
         <p className="cx-type-sm text-[var(--cx-text-muted)]">
           Share your link. When a friend signs up,{" "}
-          <strong className="text-[var(--color-text)]">both of you get 50 bonus tokens</strong>.
+          <strong className="text-[var(--cx-text)]">both of you get 50 bonus tokens</strong>.
         </p>
       </div>
 
       {data?.referral_code ? (
         <div className="flex items-center gap-2">
-          <code className="flex-1 text-xs font-mono bg-[var(--color-surface)] rounded-lg px-3 py-2 text-[var(--color-text)] truncate">
+          <code className="flex-1 text-xs font-mono bg-[var(--cx-canvas)] rounded-lg px-3 py-2 text-[var(--cx-text)] truncate">
             {link}
           </code>
           <PraxisButton
@@ -3090,24 +3090,24 @@ function ReferralSection() {
           </PraxisButton>
         </div>
       ) : (
-        <div className="h-8 rounded-lg animate-pulse bg-[var(--color-border)] w-48" />
+        <div className="h-8 rounded-lg animate-pulse bg-[var(--cx-border)] w-48" />
       )}
 
       {data && data.referral_count > 0 && (
-        <div className="flex items-center gap-6 text-sm pt-2 border-t border-[var(--color-border)]">
+        <div className="flex items-center gap-6 cx-type-sm pt-2 border-t border-[var(--cx-border)]">
           <div>
-            <span className="font-semibold text-[var(--color-text)]">
+            <span className="font-semibold text-[var(--cx-text)]">
               {data.referral_count}
             </span>
-            <span className="text-[var(--color-text-muted)] ml-1">
+            <span className="text-[var(--cx-text-muted)] ml-1">
               {data.referral_count === 1 ? "referral" : "referrals"}
             </span>
           </div>
           <div>
-            <span className="font-semibold text-[var(--color-text)]">
+            <span className="font-semibold text-[var(--cx-text)]">
               +{data.total_earned}
             </span>
-            <span className="text-[var(--color-text-muted)] ml-1">bonus tokens earned</span>
+            <span className="text-[var(--cx-text-muted)] ml-1">bonus tokens earned</span>
           </div>
         </div>
       )}
@@ -3133,10 +3133,10 @@ function UsageSummary({
 
   const barColor =
     pct >= 100
-      ? "var(--color-pink)"
+      ? "var(--cx-danger)"
       : pct >= 80
         ? "var(--color-amber)"
-        : "var(--color-accent)";
+        : "var(--cx-accent)";
 
   return (
     <div className="conduit-card p-5 space-y-3">
@@ -3153,13 +3153,13 @@ function UsageSummary({
       </div>
 
       <div>
-        <div className="h-2 rounded-full bg-[var(--color-border)] overflow-hidden">
+        <div className="h-2 rounded-full bg-[var(--cx-border)] overflow-hidden">
           <div
             className="h-2 rounded-full transition-all duration-500"
             style={{ width: `${pct}%`, background: barColor }}
           />
         </div>
-        <div className="mt-1.5 flex items-baseline justify-between cx-type-xs text-[var(--color-text-muted)] tabular-nums">
+        <div className="mt-1.5 flex items-baseline justify-between cx-type-xs text-[var(--cx-text-muted)] tabular-nums">
           <span>{used.toLocaleString()} used</span>
           <span>{total.toLocaleString()} total</span>
         </div>
@@ -3168,12 +3168,12 @@ function UsageSummary({
       <div className="flex items-center justify-between text-xs">
         <span
           className="font-medium"
-          style={{ color: remaining === 0 ? "var(--color-pink)" : "var(--color-text)" }}
+          style={{ color: remaining === 0 ? "var(--cx-danger)" : "var(--cx-text)" }}
         >
           {remaining.toLocaleString()} tokens remaining
         </span>
         {resetDate && (
-          <span className="text-[var(--color-text-muted)]">Resets {resetDate}</span>
+          <span className="text-[var(--cx-text-muted)]">Resets {resetDate}</span>
         )}
       </div>
     </div>
@@ -3196,7 +3196,7 @@ function Stat({
       </div>
       <div className="cx-heading-xl mt-1">{value}</div>
       {sub && (
-        <div className="cx-type-xs text-[var(--color-text-muted)] mt-0.5">
+        <div className="cx-type-xs text-[var(--cx-text-muted)] mt-0.5">
           {sub}
         </div>
       )}
@@ -3265,7 +3265,7 @@ function NotificationsTab() {
 
   return (
     <div className="space-y-6">
-      <p className="text-[var(--color-text-muted)]">
+      <p className="text-[var(--cx-text-muted)]">
         Choose which emails you receive from Praxis. Billing receipts and
         security alerts are always sent regardless of these settings.
       </p>
@@ -3310,7 +3310,7 @@ function NotificationsTab() {
       {saving && (
         <p className="cx-type-xs text-[var(--cx-text-muted)]">Saving…</p>
       )}
-      {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
+      {error && <p className="text-sm text-[var(--cx-danger)]">{error}</p>}
     </div>
   );
 }
@@ -3582,7 +3582,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
 
   return (
     <div className="space-y-6">
-      <p className="text-[var(--color-text-muted)] max-w-xl">
+      <p className="text-[var(--cx-text-muted)] max-w-xl">
         Connect your tools so Praxis specialists can act with full context —
         aware of your calendar, messages, and data.
       </p>
@@ -3595,8 +3595,8 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             <div
               className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
               style={{
-                background: "var(--color-surface-elevated)",
-                border: "1px solid var(--color-border)",
+                background: "var(--cx-surface)",
+                border: "1px solid var(--cx-border)",
               }}
             >
               <Calendar size={20} style={{ color: "#4285F4" }} />
@@ -3605,9 +3605,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               <span
                 className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                 style={{
-                  background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
-                  color: "var(--color-success, #22c55e)",
-                  border: "1px solid color-mix(in srgb, var(--color-success, #22c55e) 28%, transparent)",
+                  background: "color-mix(in srgb, var(--cx-reward) 12%, transparent)",
+                  color: "var(--cx-reward)",
+                  border: "1px solid color-mix(in srgb, var(--cx-reward) 28%, transparent)",
                 }}
               >
                 Connected
@@ -3616,9 +3616,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               <span
                 className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                 style={{
-                  background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
-                  color: "var(--color-accent)",
-                  border: "1px solid color-mix(in srgb, var(--color-accent) 28%, transparent)",
+                  background: "color-mix(in srgb, var(--cx-accent) 12%, transparent)",
+                  color: "var(--cx-accent)",
+                  border: "1px solid color-mix(in srgb, var(--cx-accent) 28%, transparent)",
                 }}
               >
                 Not connected
@@ -3626,7 +3626,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             )}
           </div>
           <div>
-            <div className="font-medium text-[var(--color-text)]">Google Calendar</div>
+            <div className="font-medium text-[var(--cx-text)]">Google Calendar</div>
             <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)] leading-relaxed">
               Gives your Operations specialist awareness of upcoming meetings and
               blocked time when answering scheduling questions.
@@ -3649,9 +3649,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               href="/api/conduit/connectors/google-calendar/auth"
               className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
               style={{
-                background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
-                border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
-                color: "var(--color-accent)",
+                background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
+                border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
+                color: "var(--cx-accent)",
               }}
             >
               <Link size={12} />
@@ -3662,9 +3662,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               disabled
               className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
               style={{
-                background: "var(--color-surface-elevated)",
-                border: "1px solid var(--color-border)",
-                color: "var(--color-text-muted)",
+                background: "var(--cx-surface)",
+                border: "1px solid var(--cx-border)",
+                color: "var(--cx-text-muted)",
               }}
             >
               Not configured
@@ -3678,8 +3678,8 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             <div
               className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
               style={{
-                background: "var(--color-surface-elevated)",
-                border: "1px solid var(--color-border)",
+                background: "var(--cx-surface)",
+                border: "1px solid var(--cx-border)",
               }}
             >
               <BrandMarkSlack size={20} />
@@ -3688,9 +3688,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               <span
                 className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                 style={{
-                  background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
-                  color: "var(--color-success, #22c55e)",
-                  border: "1px solid color-mix(in srgb, var(--color-success, #22c55e) 28%, transparent)",
+                  background: "color-mix(in srgb, var(--cx-reward) 12%, transparent)",
+                  color: "var(--cx-reward)",
+                  border: "1px solid color-mix(in srgb, var(--cx-reward) 28%, transparent)",
                 }}
               >
                 Connected
@@ -3699,9 +3699,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               <span
                 className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                 style={{
-                  background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
-                  color: "var(--color-accent)",
-                  border: "1px solid color-mix(in srgb, var(--color-accent) 28%, transparent)",
+                  background: "color-mix(in srgb, var(--cx-accent) 12%, transparent)",
+                  color: "var(--cx-accent)",
+                  border: "1px solid color-mix(in srgb, var(--cx-accent) 28%, transparent)",
                 }}
               >
                 Not connected
@@ -3709,7 +3709,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             )}
           </div>
           <div>
-            <div className="font-medium text-[var(--color-text)]">Slack</div>
+            <div className="font-medium text-[var(--cx-text)]">Slack</div>
             <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)] leading-relaxed">
               Surface recent channel messages as context for all specialists.
               Pick one channel — your team's activity becomes AI-accessible.
@@ -3725,9 +3725,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                     onChange={(e) => setSelectedChannel(e.target.value)}
                     className="flex-1 text-xs rounded-lg px-2 py-2"
                     style={{
-                      background: "var(--color-surface-elevated)",
-                      border: "1px solid var(--color-border)",
-                      color: "var(--color-text)",
+                      background: "var(--cx-surface)",
+                      border: "1px solid var(--cx-border)",
+                      color: "var(--cx-text)",
                     }}
                   >
                     <option value="">Pick a channel…</option>
@@ -3764,9 +3764,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               href="/app/settings?tab=billing"
               className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
               style={{
-                background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
-                border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
-                color: "var(--color-accent)",
+                background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
+                border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
+                color: "var(--cx-accent)",
               }}
             >
               <Lock size={12} />
@@ -3777,9 +3777,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               href="/api/conduit/connectors/slack/auth"
               className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
               style={{
-                background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
-                border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
-                color: "var(--color-accent)",
+                background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
+                border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
+                color: "var(--cx-accent)",
               }}
             >
               <Link size={12} />
@@ -3790,9 +3790,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               disabled
               className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
               style={{
-                background: "var(--color-surface-elevated)",
-                border: "1px solid var(--color-border)",
-                color: "var(--color-text-muted)",
+                background: "var(--cx-surface)",
+                border: "1px solid var(--cx-border)",
+                color: "var(--cx-text-muted)",
               }}
             >
               Not configured
@@ -3806,8 +3806,8 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             <div
               className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
               style={{
-                background: "var(--color-surface-elevated)",
-                border: "1px solid var(--color-border)",
+                background: "var(--cx-surface)",
+                border: "1px solid var(--cx-border)",
               }}
             >
               <Database size={20} style={{ color: "#FF7A59" }} />
@@ -3816,9 +3816,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               <span
                 className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                 style={{
-                  background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
-                  color: "var(--color-success, #22c55e)",
-                  border: "1px solid color-mix(in srgb, var(--color-success, #22c55e) 28%, transparent)",
+                  background: "color-mix(in srgb, var(--cx-reward) 12%, transparent)",
+                  color: "var(--cx-reward)",
+                  border: "1px solid color-mix(in srgb, var(--cx-reward) 28%, transparent)",
                 }}
               >
                 Connected
@@ -3827,9 +3827,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               <span
                 className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                 style={{
-                  background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
-                  color: "var(--color-accent)",
-                  border: "1px solid color-mix(in srgb, var(--color-accent) 28%, transparent)",
+                  background: "color-mix(in srgb, var(--cx-accent) 12%, transparent)",
+                  color: "var(--cx-accent)",
+                  border: "1px solid color-mix(in srgb, var(--cx-accent) 28%, transparent)",
                 }}
               >
                 Not connected
@@ -3837,7 +3837,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             )}
           </div>
           <div>
-            <div className="font-medium text-[var(--color-text)]">HubSpot</div>
+            <div className="font-medium text-[var(--cx-text)]">HubSpot</div>
             <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)] leading-relaxed">
               Gives your Sales specialist real-time awareness of recent contacts
               and open deals so every response reflects your live CRM.
@@ -3860,9 +3860,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               href="/api/conduit/connectors/hubspot/auth"
               className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
               style={{
-                background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
-                border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
-                color: "var(--color-accent)",
+                background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
+                border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
+                color: "var(--cx-accent)",
               }}
             >
               <Link size={12} />
@@ -3873,9 +3873,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               disabled
               className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
               style={{
-                background: "var(--color-surface-elevated)",
-                border: "1px solid var(--color-border)",
-                color: "var(--color-text-muted)",
+                background: "var(--cx-surface)",
+                border: "1px solid var(--cx-border)",
+                color: "var(--cx-text-muted)",
               }}
             >
               Not configured
@@ -3890,8 +3890,8 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             <div
               className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
               style={{
-                background: "var(--color-surface-elevated)",
-                border: "1px solid var(--color-border)",
+                background: "var(--cx-surface)",
+                border: "1px solid var(--cx-border)",
               }}
             >
               <BrandMarkDrive size={20} />
@@ -3900,9 +3900,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               <span
                 className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                 style={{
-                  background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
-                  color: "var(--color-success, #22c55e)",
-                  border: "1px solid color-mix(in srgb, var(--color-success, #22c55e) 28%, transparent)",
+                  background: "color-mix(in srgb, var(--cx-reward) 12%, transparent)",
+                  color: "var(--cx-reward)",
+                  border: "1px solid color-mix(in srgb, var(--cx-reward) 28%, transparent)",
                 }}
               >
                 Connected
@@ -3911,9 +3911,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               <span
                 className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                 style={{
-                  background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
-                  color: "var(--color-accent)",
-                  border: "1px solid color-mix(in srgb, var(--color-accent) 28%, transparent)",
+                  background: "color-mix(in srgb, var(--cx-accent) 12%, transparent)",
+                  color: "var(--cx-accent)",
+                  border: "1px solid color-mix(in srgb, var(--cx-accent) 28%, transparent)",
                 }}
               >
                 Not connected
@@ -3921,7 +3921,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             )}
           </div>
           <div>
-            <div className="font-medium text-[var(--color-text)]">Google Drive</div>
+            <div className="font-medium text-[var(--cx-text)]">Google Drive</div>
             <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)] leading-relaxed">
               Select up to 5 Docs or Sheets — brand guides, product specs, customer
               lists — and every specialist references them automatically.
@@ -3932,13 +3932,13 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               {/* Selected files list */}
               {driveSelectedFiles.length > 0 && (
                 <div className="flex flex-col gap-1.5">
-                  <p className="cx-type-xs text-[var(--color-text-muted)]">
+                  <p className="cx-type-xs text-[var(--cx-text-muted)]">
                     Synced files ({driveSelectedFiles.length}/5):
                   </p>
                   {driveSelectedFiles.map((f) => (
                     <div key={f.id} className="flex items-center justify-between gap-2 text-xs">
-                      <span className="truncate text-[var(--color-text)]">{f.name}</span>
-                      <span className="shrink-0 cx-type-xs text-[var(--color-text-muted)]">
+                      <span className="truncate text-[var(--cx-text)]">{f.name}</span>
+                      <span className="shrink-0 cx-type-xs text-[var(--cx-text-muted)]">
                         {f.mimeType === "application/vnd.google-apps.spreadsheet" ? "Sheet" : "Doc"}
                       </span>
                     </div>
@@ -3968,9 +3968,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                       placeholder="Search Docs & Sheets…"
                       className="flex-1 text-xs rounded-lg px-2 py-2"
                       style={{
-                        background: "var(--color-surface-elevated)",
-                        border: "1px solid var(--color-border)",
-                        color: "var(--color-text)",
+                        background: "var(--cx-surface)",
+                        border: "1px solid var(--cx-border)",
+                        color: "var(--cx-text)",
                         outline: "none",
                       }}
                     />
@@ -3986,7 +3986,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                     </PraxisButton>
                   </div>
                   {driveSearchResults.length > 0 && (
-                    <div className="flex flex-col gap-1 max-h-40 overflow-y-auto rounded-lg" style={{ border: "1px solid var(--color-border)" }}>
+                    <div className="flex flex-col gap-1 max-h-40 overflow-y-auto rounded-lg" style={{ border: "1px solid var(--cx-border)" }}>
                       {driveSearchResults.map((f) => {
                         const isSelected = driveSelectedFiles.some((s) => s.id === f.id);
                         return (
@@ -4004,9 +4004,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                             disabled={isSelected || driveSaving}
                             className="text-left px-3 py-2 text-xs flex items-center gap-2"
                             style={{
-                              background: isSelected ? "color-mix(in srgb, var(--color-success, #22c55e) 8%, transparent)" : "transparent",
-                              color: isSelected ? "var(--color-success, #22c55e)" : "var(--color-text)",
-                              borderBottom: "1px solid var(--color-border)",
+                              background: isSelected ? "color-mix(in srgb, var(--cx-reward) 8%, transparent)" : "transparent",
+                              color: isSelected ? "var(--cx-reward)" : "var(--cx-text)",
+                              borderBottom: "1px solid var(--cx-border)",
                             }}
                           >
                             <span className="shrink-0 cx-type-xs opacity-60">
@@ -4020,7 +4020,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                     </div>
                   )}
                   {driveSearchResults.length === 0 && !driveSearching && driveSearchQuery && (
-                    <p className="cx-type-xs text-[var(--color-text-muted)] text-center py-2">No Docs or Sheets found.</p>
+                    <p className="cx-type-xs text-[var(--cx-text-muted)] text-center py-2">No Docs or Sheets found.</p>
                   )}
                   <div className="flex gap-2">
                     <PraxisButton
@@ -4079,9 +4079,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               href="/app/settings?tab=billing"
               className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
               style={{
-                background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
-                border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
-                color: "var(--color-accent)",
+                background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
+                border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
+                color: "var(--cx-accent)",
               }}
             >
               <Lock size={12} />
@@ -4092,9 +4092,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               href="/api/conduit/connectors/google-drive/auth"
               className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
               style={{
-                background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
-                border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
-                color: "var(--color-accent)",
+                background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
+                border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
+                color: "var(--cx-accent)",
               }}
             >
               <Link size={12} />
@@ -4105,9 +4105,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               disabled
               className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
               style={{
-                background: "var(--color-surface-elevated)",
-                border: "1px solid var(--color-border)",
-                color: "var(--color-text-muted)",
+                background: "var(--cx-surface)",
+                border: "1px solid var(--cx-border)",
+                color: "var(--cx-text-muted)",
               }}
             >
               Not configured
@@ -4121,8 +4121,8 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           <div
             className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
             style={{
-              background: "var(--color-surface-elevated)",
-              border: "1px solid var(--color-border)",
+              background: "var(--cx-surface)",
+              border: "1px solid var(--cx-border)",
             }}
           >
             <BrandMarkGithub size={20} />
@@ -4131,9 +4131,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             <span
               className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
               style={{
-                background: "color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent)",
-                color: "var(--color-success, #22c55e)",
-                border: "1px solid color-mix(in srgb, var(--color-success, #22c55e) 28%, transparent)",
+                background: "color-mix(in srgb, var(--cx-reward) 12%, transparent)",
+                color: "var(--cx-reward)",
+                border: "1px solid color-mix(in srgb, var(--cx-reward) 28%, transparent)",
               }}
             >
               Connected
@@ -4142,9 +4142,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             <span
               className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
               style={{
-                background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
-                color: "var(--color-accent)",
-                border: "1px solid color-mix(in srgb, var(--color-accent) 28%, transparent)",
+                background: "color-mix(in srgb, var(--cx-accent) 12%, transparent)",
+                color: "var(--cx-accent)",
+                border: "1px solid color-mix(in srgb, var(--cx-accent) 28%, transparent)",
               }}
             >
               Not connected
@@ -4152,7 +4152,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           )}
         </div>
         <div>
-          <div className="font-medium text-[var(--color-text)]">GitHub</div>
+          <div className="font-medium text-[var(--cx-text)]">GitHub</div>
           <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)] leading-relaxed">
             Gives your Engineering specialist live awareness of open PRs, issues,
             and CI status from your repos — no copy-pasting required.
@@ -4162,7 +4162,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           <div className="space-y-3">
             {githubConnectedMeta && (
               <div className="cx-type-xs text-[var(--cx-text-muted)] space-y-1">
-                <p>Connected as <span className="font-medium text-[var(--color-text)]">@{githubConnectedMeta.login}</span></p>
+                <p>Connected as <span className="font-medium text-[var(--cx-text)]">@{githubConnectedMeta.login}</span></p>
                 {githubConnectedMeta.repos.length > 0 && (
                   <p>Repos: {githubConnectedMeta.repos.join(", ")}</p>
                 )}
@@ -4188,9 +4188,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             href="/api/conduit/connectors/github/auth"
             className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
             style={{
-              background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
-              border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
-              color: "var(--color-accent)",
+              background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
+              border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
+              color: "var(--cx-accent)",
             }}
           >
             <Link size={12} />
@@ -4201,9 +4201,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             disabled
             className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
             style={{
-              background: "var(--color-surface-elevated)",
-              border: "1px solid var(--color-border)",
-              color: "var(--color-text-muted)",
+              background: "var(--cx-surface)",
+              border: "1px solid var(--cx-border)",
+              color: "var(--cx-text-muted)",
             }}
           >
             Not configured
@@ -4213,7 +4213,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
 
       {/* Coming soon — Notion */}
       <div>
-        <p className="cx-type-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-3">
+        <p className="cx-type-xs uppercase tracking-[0.12em] text-[var(--cx-text-muted)] mb-3">
           Coming soon
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -4230,8 +4230,8 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                 <div
                   className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
                   style={{
-                    background: "var(--color-surface-elevated)",
-                    border: "1px solid var(--color-border)",
+                    background: "var(--cx-surface)",
+                    border: "1px solid var(--cx-border)",
                   }}
                 >
                   <Icon size={20} />
@@ -4248,7 +4248,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                 </span>
               </div>
               <div>
-                <div className="font-medium text-[var(--color-text)]">{name}</div>
+                <div className="font-medium text-[var(--cx-text)]">{name}</div>
                 <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)] leading-relaxed">
                   {description}
                 </p>
@@ -4257,9 +4257,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                 disabled
                 className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed"
                 style={{
-                  background: "var(--color-surface-elevated)",
-                  border: "1px solid var(--color-border)",
-                  color: "var(--color-text-muted)",
+                  background: "var(--cx-surface)",
+                  border: "1px solid var(--cx-border)",
+                  color: "var(--cx-text-muted)",
                 }}
               >
                 Connect {name}
@@ -4273,10 +4273,10 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
         className="conduit-card p-5"
         style={{
           background:
-            "linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-elevated)), var(--color-surface-elevated))",
+            "linear-gradient(135deg, color-mix(in srgb, var(--cx-accent) 6%, var(--cx-surface)), var(--cx-surface))",
         }}
       >
-        <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
+        <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--cx-accent-bright)] mb-2">
           More coming
         </div>
         <p className="cx-heading-lg">Zapier, Airtable, Linear, and more.</p>
@@ -4285,7 +4285,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           webhooks. Want one prioritized?{" "}
           <a
             href="mailto:hello@conduitai.io"
-            className="text-[var(--color-accent)] hover:underline"
+            className="text-[var(--cx-accent)] hover:underline"
           >
             Let us know.
           </a>
@@ -4355,7 +4355,7 @@ function AppearanceTab({
 
   return (
     <div className="space-y-6">
-      <p className="text-[var(--color-text-muted)] max-w-xl">
+      <p className="text-[var(--cx-text-muted)] max-w-xl">
         Choose how Praxis looks on this device. Changes apply immediately.
       </p>
 
@@ -4387,14 +4387,14 @@ function AppearanceTab({
                     outline: active ? `3px solid ${preset.accent}` : "3px solid transparent",
                     outlineOffset: "2px",
                     boxShadow: active
-                      ? `0 0 0 2px var(--color-surface), 0 0 0 4px ${preset.accent}`
+                      ? `0 0 0 2px var(--cx-canvas), 0 0 0 4px ${preset.accent}`
                       : "none",
                   }}
                 />
                 <span
                   className="cx-type-xs uppercase tracking-[0.1em]"
                   style={{
-                    color: active ? preset.accent : "var(--color-text-muted)",
+                    color: active ? preset.accent : "var(--cx-text-muted)",
                     fontWeight: active ? 600 : 400,
                   }}
                 >
@@ -4405,10 +4405,10 @@ function AppearanceTab({
           })}
         </div>
         {accentSaving && (
-          <p className="cx-type-xs text-[var(--color-text-muted)]">Saving…</p>
+          <p className="cx-type-xs text-[var(--cx-text-muted)]">Saving…</p>
         )}
         {accentError && (
-          <p className="cx-type-xs text-[var(--color-pink)]">{accentError}</p>
+          <p className="cx-type-xs text-[var(--cx-danger)]">{accentError}</p>
         )}
       </div>
     </div>
@@ -4423,7 +4423,7 @@ function AlwaysOnRow({ label, desc }: { label: string; desc: string }) {
           {label}
           <span
             title={desc}
-            className="cursor-help text-[var(--color-text-muted)]"
+            className="cursor-help text-[var(--cx-text-muted)]"
           >
             <Info size={12} />
           </span>
@@ -4436,7 +4436,7 @@ function AlwaysOnRow({ label, desc }: { label: string; desc: string }) {
       <div
         aria-label="Always on — cannot be disabled"
         title="Cannot be disabled"
-        className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full cursor-not-allowed bg-[var(--color-accent)]"
+        className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full cursor-not-allowed bg-[var(--cx-accent)]"
       >
         <span className="inline-block h-5 w-5 transform rounded-full bg-white translate-x-5" />
       </div>
@@ -4537,10 +4537,10 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
           className="conduit-card p-6 text-center"
           style={{
             background:
-              "linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-elevated)), var(--color-surface-elevated))",
+              "linear-gradient(135deg, color-mix(in srgb, var(--cx-accent) 6%, var(--cx-surface)), var(--cx-surface))",
           }}
         >
-          <div className="flex items-center justify-center gap-2 text-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
+          <div className="flex items-center justify-center gap-2 text-xs uppercase tracking-[0.18em] text-[var(--cx-accent-bright)] mb-2">
             <Lock size={12} /> Pro feature
           </div>
           <p className="cx-heading-xl">Programmatic access</p>
@@ -4564,12 +4564,12 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
 
       {/* New key banner (shown once after creation) */}
       {revealedKey && (
-        <div className="conduit-card p-4 border border-[var(--color-accent)] rounded-xl">
-          <p className="text-xs uppercase tracking-[0.12em] text-[var(--color-accent)] mb-2 font-semibold">
+        <div className="conduit-card p-4 border border-[var(--cx-accent)] rounded-xl">
+          <p className="cx-type-xs uppercase tracking-[0.12em] text-[var(--cx-accent)] mb-2 font-semibold">
             New API key — copy it now
           </p>
           <div className="flex items-center gap-2">
-            <code className="flex-1 text-xs font-mono bg-[var(--color-surface)] rounded-lg px-3 py-2 text-[var(--color-text)] break-all">
+            <code className="flex-1 text-xs font-mono bg-[var(--cx-canvas)] rounded-lg px-3 py-2 text-[var(--cx-text)] break-all">
               {revealedKey}
             </code>
             <PraxisButton
@@ -4598,7 +4598,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
           placeholder="Key name (e.g. CI/CD Pipeline)"
           maxLength={80}
           required
-          className="flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm text-[var(--color-text)] outline-none focus:border-[var(--color-accent)] placeholder:text-[var(--color-text-muted)] transition-colors"
+          className="flex-1 rounded-xl border border-[var(--cx-border)] bg-[var(--cx-surface-raised)] px-4 py-2.5 cx-type-sm text-[var(--cx-text)] outline-none placeholder:text-[var(--cx-text-muted)] transition-colors"
         />
         <PraxisButton
           type="submit"
@@ -4617,7 +4617,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
         <p className="cx-type-sm text-[var(--cx-text-muted)]">No active API keys.</p>
       ) : (
         <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)] font-semibold">
+          <p className="cx-type-xs uppercase tracking-[0.12em] text-[var(--cx-text-muted)] font-semibold">
             Active keys
           </p>
           {activeKeys.map((k) => (
@@ -4626,7 +4626,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
               className="conduit-card flex items-center gap-4 px-4 py-3 rounded-xl"
             >
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[var(--color-text)] truncate">{k.name}</p>
+                <p className="cx-type-sm font-medium text-[var(--cx-text)] truncate">{k.name}</p>
                 <p className="cx-type-xs text-[var(--cx-text-muted)] mt-0.5">
                   <code className="font-mono">{k.key_preview}</code>
                   {" · Created "}
@@ -4657,7 +4657,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
       {/* Revoked keys */}
       {revokedKeys.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)] font-semibold">
+          <p className="text-xs uppercase tracking-[0.12em] text-[var(--cx-text-muted)] font-semibold">
             Revoked keys
           </p>
           {revokedKeys.map((k) => (
@@ -4666,7 +4666,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
               className="conduit-card flex items-center gap-4 px-4 py-3 rounded-xl opacity-50"
             >
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[var(--color-text)] truncate line-through">
+                <p className="text-sm font-medium text-[var(--cx-text)] truncate line-through">
                   {k.name}
                 </p>
                 <p className="cx-type-xs text-[var(--cx-text-muted)] mt-0.5">
@@ -4681,12 +4681,12 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
       )}
 
       <div className="conduit-card p-4 rounded-xl cx-type-sm text-[var(--cx-text-muted)] space-y-1">
-        <p className="font-medium text-[var(--color-text)]">Using API keys</p>
-        <p>Include your key in the <code className="font-mono text-xs">Authorization</code> header:</p>
-        <code className="block text-xs font-mono bg-[var(--color-surface)] rounded-lg px-3 py-2 mt-1">
+        <p className="font-medium text-[var(--cx-text)]">Using API keys</p>
+        <p>Include your key in the <code className="font-mono cx-type-xs">Authorization</code> header:</p>
+        <code className="block cx-type-xs font-mono bg-[var(--cx-canvas)] rounded-lg px-3 py-2 mt-1">
           Authorization: Bearer prx_…
         </code>
-        <p className="text-xs mt-2">Maximum 20 active keys per account.</p>
+        <p className="cx-type-xs mt-2">Maximum 20 active keys per account.</p>
       </div>
     </div>
   );
@@ -4736,7 +4736,7 @@ function ReferralsTab() {
     <div className="space-y-8">
       <div>
         <h2 className="cx-type-md font-semibold mb-1">Refer &amp; Earn</h2>
-        <p className="text-[var(--color-text-muted)] max-w-xl">
+        <p className="text-[var(--cx-text-muted)] max-w-xl">
           Share your personal link. When someone signs up and starts using Praxis,
           you both get bonus tokens.
         </p>
@@ -4753,7 +4753,7 @@ function ReferralsTab() {
               readOnly
               value={referralUrl}
               aria-label="Your referral link"
-              className="flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] outline-none select-all cursor-text"
+              className="flex-1 rounded-lg border border-[var(--cx-border)] bg-[var(--cx-surface-raised)] px-3 py-2 cx-type-sm text-[var(--cx-text)] outline-none select-all cursor-text"
               onFocus={(e) => e.currentTarget.select()}
             />
             <PraxisButton
@@ -4767,11 +4767,11 @@ function ReferralsTab() {
             </PraxisButton>
           </div>
         ) : (
-          <p className="text-[var(--color-text-muted)] text-xs">
+          <p className="text-[var(--cx-text-muted)] text-xs">
             Your referral code is being generated — refresh in a moment.
           </p>
         )}
-        <p className="cx-type-xs text-[var(--color-text-muted)]">
+        <p className="cx-type-xs text-[var(--cx-text-muted)]">
           Share this link with founders and operators. They get bonus tokens on their first session; you get bonus tokens once they&apos;re active.
         </p>
       </div>
@@ -4784,7 +4784,7 @@ function ReferralsTab() {
           </div>
           <AnimatedStat
             value={data?.referral_count ?? 0}
-            style={{ color: "var(--color-accent)" }}
+            style={{ color: "var(--cx-accent)" }}
           />
         </div>
         <div className="conduit-card p-5">
@@ -4793,7 +4793,7 @@ function ReferralsTab() {
           </div>
           <AnimatedStat
             value={data?.total_earned ?? 0}
-            style={{ color: "var(--color-accent)" }}
+            style={{ color: "var(--cx-accent)" }}
           />
         </div>
       </div>
@@ -4803,17 +4803,17 @@ function ReferralsTab() {
         <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
           How it works
         </div>
-        <ol className="space-y-2 text-[var(--color-text-muted)]">
+        <ol className="space-y-2 text-[var(--cx-text-muted)]">
           <li className="flex gap-3">
-            <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center cx-type-xs font-bold" style={{ background: "color-mix(in srgb, var(--color-accent) 15%, transparent)", color: "var(--color-accent)" }}>1</span>
+            <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center cx-type-xs font-bold" style={{ background: "color-mix(in srgb, var(--cx-accent) 15%, transparent)", color: "var(--cx-accent)" }}>1</span>
             Share your link with another founder or operator.
           </li>
           <li className="flex gap-3">
-            <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center cx-type-xs font-bold" style={{ background: "color-mix(in srgb, var(--color-accent) 15%, transparent)", color: "var(--color-accent)" }}>2</span>
+            <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center cx-type-xs font-bold" style={{ background: "color-mix(in srgb, var(--cx-accent) 15%, transparent)", color: "var(--cx-accent)" }}>2</span>
             They sign up and activate their workspace.
           </li>
           <li className="flex gap-3">
-            <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center cx-type-xs font-bold" style={{ background: "color-mix(in srgb, var(--color-accent) 15%, transparent)", color: "var(--color-accent)" }}>3</span>
+            <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center cx-type-xs font-bold" style={{ background: "color-mix(in srgb, var(--cx-accent) 15%, transparent)", color: "var(--cx-accent)" }}>3</span>
             You both receive bonus tokens — added to your allowance automatically.
           </li>
         </ol>
@@ -4932,7 +4932,7 @@ function LabelsTab() {
         <div className="space-y-2">
           {labels.length === 0 && !showCreate && (
             <div className="conduit-card p-6 flex flex-col items-center gap-3 text-center">
-              <Tag size={20} style={{ color: "var(--color-text-muted)" }} />
+              <Tag size={20} style={{ color: "var(--cx-text-muted)" }} />
               <p className="cx-type-sm text-[var(--cx-text-muted)]">No labels yet. Create one to start organizing conversations.</p>
             </div>
           )}
@@ -4954,11 +4954,11 @@ function LabelsTab() {
                       if (e.key === "Escape") setEditingId(null);
                     }}
                     maxLength={32}
-                    className="flex-1 px-2 py-1 text-sm rounded-lg border outline-none"
+                    className="flex-1 px-2 py-1 cx-type-sm rounded-lg border outline-none"
                     style={{
-                      background: "var(--color-surface)",
-                      borderColor: "var(--color-border)",
-                      color: "var(--color-text)",
+                      background: "var(--cx-surface-raised)",
+                      borderColor: "var(--cx-border)",
+                      color: "var(--cx-text)",
                     }}
                   />
                   <button
@@ -5008,7 +5008,7 @@ function LabelsTab() {
                 <span
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full cx-type-xs font-medium"
                   style={{
-                    background: `color-mix(in srgb, ${label.color} 15%, var(--color-surface-elevated))`,
+                    background: `color-mix(in srgb, ${label.color} 15%, var(--cx-surface))`,
                     color: label.color,
                     border: `1px solid color-mix(in srgb, ${label.color} 40%, transparent)`,
                   }}
@@ -5051,11 +5051,11 @@ function LabelsTab() {
                   value={newName}
                   onChange={(e) => setNewName(e.target.value.slice(0, 32))}
                   maxLength={32}
-                  className="flex-1 px-2 py-1 text-sm rounded-lg border outline-none"
+                  className="flex-1 px-2 py-1 cx-type-sm rounded-lg border outline-none"
                   style={{
-                    background: "var(--color-surface)",
-                    borderColor: "var(--color-border)",
-                    color: "var(--color-text)",
+                    background: "var(--cx-surface-raised)",
+                    borderColor: "var(--cx-border)",
+                    color: "var(--cx-text)",
                   }}
                 />
                 <button
@@ -5099,7 +5099,7 @@ function LabelsTab() {
               variant="ghost"
               size="sm"
               className="w-full justify-start gap-2"
-              style={{ border: "1px dashed var(--color-border)" }}
+              style={{ border: "1px dashed var(--cx-border)" }}
             >
               <Plus size={14} />
               Create label
