@@ -29,6 +29,7 @@ import { ReferralClaimer } from "@/components/conduit/ReferralClaimer";
 import { NicknameProvider } from "@/context/NicknameContext";
 import { PostHogIdentify } from "@/components/PostHogIdentify";
 import { ConsoleMotionProvider } from "@/components/conduit/ConsoleMotionProvider";
+import { TopBarProvider } from "@/context/TopBarContext";
 
 export const dynamic = "force-dynamic";
 
@@ -188,6 +189,7 @@ export default async function AppLayout({
     <div className="praxis-root h-screen flex bg-[var(--cx-canvas)] text-[var(--cx-text)]">
       <a href="#app-main" className="conduit-skip-link">Skip to main content</a>
       <ConsoleMotionProvider>
+      <TopBarProvider>
       <UserProvider initialUser={initialUser}>
       <NicknameProvider initialNicknames={specialistNicknames}>
       <ToastProvider>
@@ -217,7 +219,11 @@ export default async function AppLayout({
           hasContext={onboarded}
         />
         <main id="app-main" className="conduit-canvas praxis-canvas-tint flex-1 flex flex-col min-w-0">
-          <ConsoleTopBar />
+          <ConsoleTopBar
+            avatarUrl={account.avatar_url ?? null}
+            displayName={account.display_name ?? null}
+            userEmail={user.email ?? ""}
+          />
           <UpgradeNudge
             tierId={account.tier_id ?? "free"}
             internalAccount={Boolean(account.internal_account)}
@@ -250,6 +256,7 @@ export default async function AppLayout({
       </ToastProvider>
       </NicknameProvider>
       </UserProvider>
+      </TopBarProvider>
       </ConsoleMotionProvider>
     </div>
   );
