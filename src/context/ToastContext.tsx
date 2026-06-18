@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CheckCircle, WarningCircle, Info, X } from "@phosphor-icons/react";
 
 // ---------------------------------------------------------------
@@ -86,7 +86,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 }
 
 // ---------------------------------------------------------------
-// Visual Toast container — fixed bottom-right, slide-in/fade-out
+// Visual Toast container — fixed bottom-right, glass floating tier
 // ---------------------------------------------------------------
 
 const ICON = {
@@ -101,6 +101,34 @@ const COLOR = {
   info: "var(--cx-accent)",
 } as const;
 
+// Enter: slide up from bottom-right (x+y drift → origin)
+const ENTER = {
+  initial: { opacity: 0, x: 10, y: 8, scale: 0.95 },
+  animate: {
+    opacity: 1,
+    x: 0,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+// Exit: fade + scale down (no slide — feels like it vanishes cleanly)
+const EXIT = {
+  exit: {
+    opacity: 0,
+    scale: 0.93,
+    transition: { duration: 0.15, ease: [0.4, 0, 0.2, 1] },
+  },
+};
+
+// Reduced-motion: instant appear/disappear, no animation
+const REDUCED = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1, transition: { duration: 0 } },
+  exit: { opacity: 0, transition: { duration: 0 } },
+};
+
 function ToastContainer({
   toasts,
   onDismiss,
@@ -108,6 +136,9 @@ function ToastContainer({
   toasts: ToastItem[];
   onDismiss: (id: number) => void;
 }) {
+  const prefersReduced = useReducedMotion();
+  const motionVariants = prefersReduced ? REDUCED : { ...ENTER, ...EXIT };
+
   return (
     <div
       aria-live="polite"
@@ -122,15 +153,12 @@ function ToastContainer({
             <motion.div
               key={toast.id}
               layout
-              initial={{ opacity: 0, x: 24, scale: 0.96 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 24, scale: 0.96 }}
-              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-              className="cx-glass pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-[12px]"
+              {...motionVariants}
+              className="cx-glass-float cx-glass-border pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-[12px]"
               style={{
                 maxWidth: 320,
                 color: "var(--cx-text)",
-                border: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))",
+                // Colored left accent edge — wider than the hairline glass border
                 borderLeftWidth: "3px",
                 borderLeftColor: color,
               }}
@@ -141,17 +169,16 @@ function ToastContainer({
                 color={color}
                 className="shrink-0 mt-0.5"
               />
-              <p
-                className="flex-1 text-[14px] leading-[1.5]"
-              >
+              <p className="cx-type-sm flex-1 leading-[1.6]">
                 {toast.message}
               </p>
               <button
                 onClick={() => onDismiss(toast.id)}
                 aria-label="Dismiss"
-                className="shrink-0 mt-0.5 text-[var(--pdl-text-muted,#8A88A4)] hover:text-[var(--pdl-text,#F5F1EA)] transition-colors"
+                className="cx-icon-btn shrink-0 -mt-0.5 -mr-1"
+                style={{ width: 24, height: 24, padding: 0 }}
               >
-                <X size={14} />
+                <X size={13} />
               </button>
             </motion.div>
           );
