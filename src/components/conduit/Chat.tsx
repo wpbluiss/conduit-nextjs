@@ -1881,13 +1881,16 @@ export function Chat({
             <div className="mx-auto px-2 pb-1" style={{ maxWidth: "48rem" }}>
               <div className="flex flex-wrap gap-2 pt-1">
                 {followUpSuggestions.map((s) => (
-                  <button
+                  <motion.button
                     key={s}
                     type="button"
                     onClick={() => {
                       setFollowUpSuggestions([]);
                       void send(s);
                     }}
+                    whileHover={{ y: -1 }}
+                    whileTap={{ scale: 0.96 }}
+                    transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
                     className="px-3 py-1.5 text-xs rounded-full border transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
                     style={{
                       borderColor: "var(--color-border)",
@@ -1896,7 +1899,7 @@ export function Chat({
                     }}
                   >
                     {s}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -2173,11 +2176,14 @@ export function Chat({
                   const emp = EMPLOYEES[empId];
                   const isAllowed = allowedSet.has(empId as EmployeeKey);
                   return (
-                    <button
+                    <motion.button
                       key={empId}
                       type="button"
                       disabled={!isAllowed}
                       onClick={() => void performHandoff(empId as EmployeeKey)}
+                      whileHover={isAllowed ? { y: -1 } : undefined}
+                      whileTap={isAllowed ? { scale: 0.96 } : undefined}
+                      transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
                       className="flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       style={{
                         background: isAllowed
@@ -2218,7 +2224,7 @@ export function Chat({
                       >
                         {emp.role}
                       </span>
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
@@ -2345,13 +2351,16 @@ function EmptyState({
               const emp = EMPLOYEES[id];
               const prompt = SPECIALIST_PROMPTS[id];
               return (
-                <button
+                <motion.button
                   key={emp.id}
                   type="button"
                   onClick={() => {
                     onPinSelect?.(emp.id as EmployeeKey);
                     onPromptInsert?.(prompt);
                   }}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
                   className="praxis-card praxis-card-team text-left"
                   data-dept={emp.id}
                   style={{ cursor: "pointer", width: "100%" }}
@@ -2393,7 +2402,7 @@ function EmptyState({
                   >
                     {prompt}
                   </p>
-                </button>
+                </motion.button>
               );
             })}
           </div>
@@ -2443,10 +2452,13 @@ function EmptyState({
             }}
           >
             {SPECIALIST_STARTER_PROMPTS[pin as EmployeeId].map((prompt) => (
-              <button
+              <motion.button
                 key={prompt}
                 type="button"
                 onClick={() => onPromptInsert?.(prompt)}
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
                 className="px-4 py-2.5 rounded-xl text-sm text-left transition-all"
                 style={{
                   border: `1px solid color-mix(in srgb, ${EMPLOYEES[pin as EmployeeId].color} 30%, var(--color-border))`,
@@ -2464,7 +2476,7 @@ function EmptyState({
                 }}
               >
                 {prompt}
-              </button>
+              </motion.button>
             ))}
           </div>
         </>

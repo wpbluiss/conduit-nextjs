@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentAccount } from "@/lib/conduit/account";
+import { AnimatedStat } from "@/components/conduit/ui/AnimatedStat";
 
 export const dynamic = "force-dynamic";
 
@@ -73,17 +74,18 @@ export default async function AnalyticsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10">
           <Card
             label="Conversations this week"
-            value={conversationCount.toLocaleString()}
+            numericValue={conversationCount}
             sub="User-initiated turns across all employees"
           />
           <Card
             label="Voice minutes this week"
-            value={voiceMinutes.toLocaleString()}
+            numericValue={voiceMinutes}
+            format={(n) => `${n.toLocaleString()} min`}
             sub="Talk time across solo + roundtable rooms"
           />
           <Card
             label="Memory notes saved"
-            value={memoryNotes.toLocaleString()}
+            numericValue={memoryNotes}
             sub="Cross-conversation context Atlas tracks"
           />
         </div>
@@ -109,11 +111,13 @@ export default async function AnalyticsPage() {
 
 function Card({
   label,
-  value,
+  numericValue,
+  format,
   sub,
 }: {
   label: string;
-  value: string;
+  numericValue: number;
+  format?: (n: number) => string;
   sub: string;
 }) {
   return (
@@ -121,7 +125,9 @@ function Card({
       <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
         {label}
       </div>
-      <div className="cx-stat mt-2">{value}</div>
+      <div className="mt-2">
+        <AnimatedStat value={numericValue} format={format} />
+      </div>
       <div className="cx-type-xs text-[var(--color-text-muted)] mt-1.5 leading-snug">
         {sub}
       </div>

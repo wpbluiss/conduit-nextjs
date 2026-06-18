@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Mic, Lock } from "lucide-react";
+import { AnimatedStat } from "@/components/conduit/ui/AnimatedStat";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentAccount } from "@/lib/conduit/account";
 import { tierById } from "@/lib/billing/tiers";
@@ -147,8 +148,8 @@ export default async function VoiceRoomLanding() {
             <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
               Today
             </div>
-            <div className="cx-stat mt-2">
-              {usedTodayMin}{" "}
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <AnimatedStat value={usedTodayMin} format={(n) => String(n)} />
               <span className="text-base text-[var(--color-text-muted)]">
                 / {ceilings.dailyMinutes} min
               </span>
@@ -175,8 +176,11 @@ export default async function VoiceRoomLanding() {
             <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
               Per-session cap
             </div>
-            <div className="cx-stat mt-2">
-              {Math.floor(ceilings.maxSeconds / 60)} min
+            <div className="mt-2">
+              <AnimatedStat
+                value={Math.floor(ceilings.maxSeconds / 60)}
+                format={(n) => `${n} min`}
+              />
             </div>
             <div className="cx-type-xs text-[var(--color-text-muted)] mt-1.5">
               You&apos;ll hear a soft warning at{" "}

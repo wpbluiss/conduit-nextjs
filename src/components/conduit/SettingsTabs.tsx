@@ -36,6 +36,7 @@ import { BrandMarkGithub } from "./brand-marks/BrandMarkGithub";
 import { BrandMarkSlack } from "./brand-marks/BrandMarkSlack";
 import { BrandMarkNotion } from "./brand-marks/BrandMarkNotion";
 import { BrandMarkDrive } from "./brand-marks/BrandMarkDrive";
+import { AnimatedStat } from "@/components/conduit/ui/AnimatedStat";
 
 interface UsageData {
   totals: { input: number; output: number; cost: number };
@@ -635,7 +636,7 @@ function SpecialistMetrics() {
         <>
           {/* Summary stat */}
           <div className="flex items-baseline gap-1.5">
-            <span className="cx-stat">{totalMessages.toLocaleString()}</span>
+            <AnimatedStat value={totalMessages} />
             <span className="text-[var(--color-text-muted)]">
               specialist {totalMessages === 1 ? "response" : "responses"} in this period
             </span>
@@ -4768,17 +4769,19 @@ function ReferralsTab() {
           <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
             Successful referrals
           </div>
-          <div className="cx-stat" style={{ color: "var(--color-accent)" }}>
-            {data?.referral_count ?? 0}
-          </div>
+          <AnimatedStat
+            value={data?.referral_count ?? 0}
+            style={{ color: "var(--color-accent)" }}
+          />
         </div>
         <div className="conduit-card p-5">
           <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
             Bonus tokens earned
           </div>
-          <div className="cx-stat" style={{ color: "var(--color-accent)" }}>
-            {(data?.total_earned ?? 0).toLocaleString()}
-          </div>
+          <AnimatedStat
+            value={data?.total_earned ?? 0}
+            style={{ color: "var(--color-accent)" }}
+          />
         </div>
       </div>
 
