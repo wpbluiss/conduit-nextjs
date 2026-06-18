@@ -287,9 +287,9 @@ export function SettingsTabs({
 
 function TeamTab() {
   return (
-    <div className="space-y-6 text-sm">
+    <div className="space-y-6">
       <div>
-        <p className="text-[var(--color-text-muted)] max-w-xl">
+        <p className="cx-type-sm text-[var(--cx-text-muted)] max-w-xl">
           Per-employee voice picks live in the <strong>Voice</strong> tab. This
           tab will also gain personality tuning (tone sliders, custom system
           prompt overrides) in a future update.
@@ -305,8 +305,8 @@ function TeamTab() {
         <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
           Coming soon
         </div>
-        <p className="serif text-2xl">Personality tuning</p>
-        <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+        <p className="cx-heading-xl">Personality tuning</p>
+        <p className="mt-2 cx-type-sm text-[var(--cx-text-muted)]">
           Dial each employee&apos;s tone, verbosity, and risk appetite. Pin
           custom system prompt addenda that ride along with every turn.
         </p>
@@ -398,16 +398,16 @@ function SpecialistsTab({
   return (
     <div className="space-y-6">
       {/* Sub-view toggle */}
-      <div className="flex gap-1 border-b border-[var(--color-border)] -mb-2">
+      <div className="flex gap-1 border-b border-[var(--cx-border)] -mb-2">
         {(["settings", "usage"] as const).map((v) => (
           <button
             key={v}
             type="button"
             onClick={() => setView(v)}
-            className={`px-4 py-2.5 text-sm transition-colors border-b-2 -mb-px capitalize ${
+            className={`px-4 py-2.5 cx-type-sm transition-colors border-b-2 -mb-px capitalize ${
               view === v
-                ? "border-[var(--color-accent)] text-[var(--color-text)]"
-                : "border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                ? "border-[var(--cx-accent)] text-[var(--cx-text)]"
+                : "border-transparent text-[var(--cx-text-muted)] hover:text-[var(--cx-text)]"
             }`}
           >
             {v === "usage" ? "Usage metrics" : "Settings"}
@@ -418,13 +418,13 @@ function SpecialistsTab({
       {view === "usage" ? (
         <SpecialistMetrics />
       ) : (
-    <form onSubmit={handleSave} className="space-y-8 text-sm">
+    <form onSubmit={handleSave} className="space-y-8">
       {/* Nicknames */}
       <div>
-        <h3 className="cx-type-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-3">
+        <h3 className="cx-type-md font-medium tracking-[-0.01em] mb-2">
           Custom nicknames
         </h3>
-        <p className="text-[var(--color-text-muted)] max-w-xl mb-4">
+        <p className="cx-type-sm text-[var(--cx-text-muted)] max-w-xl mb-4">
           Give each specialist a custom nickname. Leave blank to use the default name.
           Nicknames appear in the sidebar, chat, and specialist picker.
         </p>
@@ -461,7 +461,7 @@ function SpecialistsTab({
                     onChange={(e: ChangeEvent<HTMLInputElement>) => handleNicknameChange(emp, e.target.value)}
                     placeholder={canonical}
                     maxLength={32}
-                    className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 ring-[var(--color-accent)]"
+                    className="w-full rounded-lg border border-[var(--cx-border)] bg-[var(--cx-surface-raised)] px-3 py-2 cx-type-sm text-[var(--cx-text)] placeholder:text-[var(--cx-text-muted)] outline-none"
                   />
                 </div>
                 {nicknames[emp] && (
@@ -484,10 +484,10 @@ function SpecialistsTab({
 
       {/* Response length */}
       <div>
-        <h3 className="cx-type-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)] mb-3">
+        <h3 className="cx-type-md font-medium tracking-[-0.01em] mb-2">
           Response length
         </h3>
-        <p className="text-[var(--color-text-muted)] max-w-xl mb-4">
+        <p className="cx-type-sm text-[var(--cx-text-muted)] max-w-xl mb-4">
           Control how verbose each specialist is. Short is best for quick answers; Detailed for research and complex tasks.
         </p>
         <div className="space-y-3">
@@ -535,7 +535,7 @@ function SpecialistsTab({
         </div>
       </div>
 
-      <div className="flex justify-end pt-2 border-t border-[var(--color-border)]">
+      <div className="flex justify-end pt-4 border-t border-[var(--cx-border)]">
         <PraxisButton type="submit" disabled={busy}>
           {busy ? <SpinnerIcon /> : <Check size={14} />}
           Save settings
@@ -591,21 +591,21 @@ function SpecialistMetrics() {
   const totalMessages = (metrics ?? []).reduce((s, m) => s + m.totalMessages, 0);
 
   return (
-    <div className="space-y-5 text-sm">
+    <div className="space-y-5">
       {/* Date range picker */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">Period</span>
+        <span className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">Period</span>
         <div className="flex flex-wrap gap-1.5">
           {RANGE_OPTIONS.map(({ value, label }) => (
             <button
               key={value}
               type="button"
               onClick={() => setRange(value)}
-              className="px-3 py-1 rounded-full text-xs transition-colors"
+              className="px-3 py-1 rounded-full cx-type-xs font-medium transition-colors"
               style={{
-                background: range === value ? "var(--color-accent)" : "var(--color-surface-elevated)",
-                color: range === value ? "#fff" : "var(--color-text-muted)",
-                border: `1px solid ${range === value ? "var(--color-accent)" : "var(--color-border)"}`,
+                background: range === value ? "var(--cx-accent)" : "var(--cx-surface-raised)",
+                color: range === value ? "var(--cx-text)" : "var(--cx-text-muted)",
+                border: `1px solid ${range === value ? "var(--cx-accent)" : "var(--cx-border)"}`,
               }}
             >
               {label}
@@ -626,7 +626,7 @@ function SpecialistMetrics() {
       {!loading && !error && metrics !== null && metrics.length === 0 && (
         <div className="conduit-card p-8 text-center">
           <p className="text-[var(--color-text-muted)]">No specialist activity in this period.</p>
-          <p className="text-xs text-[var(--color-text-muted)] mt-1">
+          <p className="cx-type-xs text-[var(--cx-text-muted)] mt-1">
             Start a conversation with any specialist to see usage here.
           </p>
         </div>
@@ -772,8 +772,8 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
           <div className="flex items-center justify-center gap-2 text-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
             <Lock size={12} /> Pro feature
           </div>
-          <p className="serif text-2xl">Voice mode is a Pro perk</p>
-          <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+          <p className="cx-heading-xl">Voice mode is a Pro perk</p>
+          <p className="mt-2 cx-type-sm text-[var(--cx-text-muted)]">
             Free accounts can still use voice <em>input</em> in chat. Upgrade
             to hear your team talk back.
           </p>
@@ -784,7 +784,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
 
   if (!prefs) {
     return (
-      <p className="text-sm text-[var(--color-text-muted)]">Loading…</p>
+      <p className="cx-type-sm text-[var(--cx-text-muted)]">Loading…</p>
     );
   }
 
@@ -850,7 +850,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
   };
 
   return (
-    <div className="space-y-6 text-sm">
+    <div className="space-y-6">
       {!voiceConfigured && (
         <div className="conduit-card p-4 text-xs text-[var(--color-amber)] border-[var(--color-amber)]/40">
           Voice provider not connected yet. Settings save, previews are
@@ -880,7 +880,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
         <div>
           <div className="flex items-baseline justify-between mb-1">
             <span>Playback speed</span>
-            <span className="text-xs text-[var(--color-text-muted)]">
+            <span className="cx-type-xs text-[var(--cx-text-muted)]">
               {prefs.voice_speed.toFixed(2)}×
             </span>
           </div>
@@ -900,7 +900,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
       </div>
 
       <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+        <div className="cx-type-md font-medium tracking-[-0.01em] mb-3">
           Voices
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -918,7 +918,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
               >
                 <div className="flex items-center justify-between">
                   <span
-                    className="text-xs font-medium"
+                    className="cx-type-xs font-medium"
                     style={{ color: DEPT_COLOR[emp] }}
                   >
                     {employeeLabel(emp)}
@@ -981,7 +981,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
       </div>
 
       {saving && (
-        <p className="text-xs text-[var(--color-text-muted)]">Saving…</p>
+        <p className="cx-type-xs text-[var(--cx-text-muted)]">Saving…</p>
       )}
       {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
     </div>
@@ -1005,7 +1005,7 @@ function ToggleRow({
       <div>
         <div>{label}</div>
         {desc && (
-          <div className="text-xs text-[var(--color-text-muted)] mt-0.5">
+          <div className="cx-type-xs text-[var(--cx-text-muted)] mt-0.5">
             {desc}
           </div>
         )}
@@ -1192,10 +1192,10 @@ function WorkspaceTab({
   };
 
   return (
-    <div className="space-y-8 text-sm">
+    <div className="space-y-8">
       {/* ── Workspace logo ── */}
       <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
+        <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
           Workspace logo
         </div>
         <p className="cx-type-xs text-[var(--color-text-muted)] mb-3">
@@ -1244,7 +1244,7 @@ function WorkspaceTab({
               isDisabled={logoUploading}
               variant="ghost"
               size="sm"
-              className="!text-xs"
+              className=""
             >
               {logoUploading ? "Uploading…" : "Choose logo"}
             </PraxisButton>
@@ -1255,7 +1255,7 @@ function WorkspaceTab({
                 isDisabled={logoRemoving}
                 variant="ghost"
                 size="sm"
-                className="!text-xs"
+                className=""
               >
                 {logoRemoving ? "Removing…" : "Remove logo"}
               </PraxisButton>
@@ -1277,7 +1277,7 @@ function WorkspaceTab({
 
       {/* ── Workspace name ── */}
       <form onSubmit={saveWsName} className="space-y-2 max-w-sm">
-        <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block">
+        <label className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block">
           Workspace name
         </label>
         <p className="cx-type-xs text-[var(--color-text-muted)] -mt-1">
@@ -1293,7 +1293,7 @@ function WorkspaceTab({
             }}
             maxLength={WS_NAME_MAX}
             placeholder="e.g. Acme AI Team"
-            className="w-full conduit-card px-4 py-2.5 outline-none focus:border-[var(--color-accent)] text-sm pr-12"
+            className="w-full conduit-card px-4 py-2.5 outline-none cx-type-sm pr-12"
           />
           <span
             className="absolute right-3 top-1/2 -translate-y-1/2 cx-type-xs tabular-nums"
@@ -1313,7 +1313,7 @@ function WorkspaceTab({
           isLoading={wsNameSaving}
           isDisabled={wsNameSaving}
           variant="secondary"
-          className="!text-xs"
+          className=""
         >
           {wsNameSaved ? <><Check size={12} /> Saved</> : "Save name"}
         </PraxisButton>
@@ -1568,303 +1568,316 @@ function ProfileTab({
     .join("") || "?";
 
   return (
-    <div className="space-y-8 text-sm">
-      {/* ── Avatar ── */}
-      <div className="flex items-center gap-5">
-        <button
-          type="button"
-          onClick={() => avatarInputRef.current?.click()}
-          disabled={avatarUploading}
-          className="relative group shrink-0"
-          aria-label="Upload avatar"
-        >
-          <div
-            className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-semibold overflow-hidden border-2 border-[var(--color-border)] group-hover:border-[var(--color-accent)] transition-colors"
-            style={{ background: "var(--color-surface-elevated)" }}
-          >
-            {avatarPreview ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={avatarPreview}
-                alt="Your avatar"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span style={{ color: "var(--color-accent-hi)" }}>{initials}</span>
-            )}
-          </div>
-          {avatarUploading && (
-            <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
-              <SpinnerIcon size={18} />
-            </div>
-          )}
-          <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[var(--color-accent)] flex items-center justify-center shadow">
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="white">
-              <path d="M5 2v6M2 5h6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-          </div>
-        </button>
-        <div>
-          <PraxisButton
+    <div className="space-y-6">
+      {/* ── Identity card ── */}
+      <section className="conduit-card p-6 space-y-6">
+        <h2 className="cx-type-md font-medium tracking-[-0.01em]">Profile</h2>
+
+        {/* Avatar */}
+        <div className="flex items-center gap-5">
+          <button
             type="button"
             onClick={() => avatarInputRef.current?.click()}
-            isDisabled={avatarUploading}
-            variant="ghost"
-            size="sm"
-            className="!text-xs"
+            disabled={avatarUploading}
+            className="relative group shrink-0"
+            aria-label="Upload avatar"
           >
-            {avatarUploading ? "Uploading…" : "Choose photo"}
-          </PraxisButton>
-          <p className="mt-0.5 cx-type-xs text-[var(--color-text-muted)]">
-            JPEG, PNG, WebP or GIF · max 5 MB
+            <div
+              className="w-16 h-16 rounded-full flex items-center justify-center cx-type-md font-semibold overflow-hidden border-2 border-[var(--cx-border)] group-hover:border-[var(--cx-accent)] transition-colors"
+              style={{ background: "var(--cx-surface-raised)" }}
+            >
+              {avatarPreview ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatarPreview}
+                  alt="Your avatar"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span style={{ color: "var(--cx-accent-bright)" }}>{initials}</span>
+              )}
+            </div>
+            {avatarUploading && (
+              <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
+                <SpinnerIcon size={18} />
+              </div>
+            )}
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[var(--cx-accent)] flex items-center justify-center shadow">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="white">
+                <path d="M5 2v6M2 5h6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </div>
+          </button>
+          <div>
+            <PraxisButton
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              isDisabled={avatarUploading}
+              variant="ghost"
+              size="sm"
+            >
+              {avatarUploading ? "Uploading…" : "Choose photo"}
+            </PraxisButton>
+            <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)]">
+              JPEG, PNG, WebP or GIF · max 5 MB
+            </p>
+            {avatarError && (
+              <p className="mt-1 cx-type-xs text-[var(--cx-danger)]">{avatarError}</p>
+            )}
+          </div>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="hidden"
+            onChange={handleAvatarChange}
+            aria-hidden
+          />
+        </div>
+
+        {/* Display name */}
+        <form onSubmit={saveName} className="space-y-2 max-w-sm">
+          <label className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block">
+            Display name
+          </label>
+          <div className="flex gap-2">
+            <input
+              value={nameValue}
+              onChange={(e) => { setNameValue(e.target.value); setNameSaved(false); setNameError(""); }}
+              maxLength={100}
+              placeholder={fullName || "Your name"}
+              className="flex-1 conduit-card px-4 py-2.5 outline-none cx-type-sm"
+            />
+            <PraxisButton
+              type="submit"
+              isLoading={nameSaving}
+              isDisabled={!nameValue.trim() || nameSaving}
+              variant="secondary"
+              className="shrink-0"
+            >
+              {nameSaved ? <><Check size={12} /> Saved</> : "Save"}
+            </PraxisButton>
+          </div>
+          {nameError && <p className="cx-type-xs text-[var(--cx-danger)]">{nameError}</p>}
+        </form>
+
+        {/* Workspace name */}
+        <form onSubmit={saveWsName} className="space-y-2 max-w-sm">
+          <label className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block">
+            Workspace name
+          </label>
+          <p className="cx-type-xs text-[var(--cx-text-muted)] -mt-1">
+            Shown in the sidebar header. Leave blank to use your account name.
           </p>
-          {avatarError && (
-            <p className="mt-1 cx-type-xs text-[var(--color-pink)]">{avatarError}</p>
+          <div className="flex gap-2">
+            <input
+              value={wsName}
+              onChange={(e) => { setWsName(e.target.value); setWsNameSaved(false); setWsNameError(""); }}
+              maxLength={80}
+              placeholder="e.g. Acme AI Team"
+              className="flex-1 conduit-card px-4 py-2.5 outline-none cx-type-sm"
+            />
+            <PraxisButton
+              type="submit"
+              isLoading={wsNameSaving}
+              isDisabled={wsNameSaving}
+              variant="secondary"
+              className="shrink-0"
+            >
+              {wsNameSaved ? <><Check size={12} /> Saved</> : "Save"}
+            </PraxisButton>
+          </div>
+          {wsNameError && <p className="cx-type-xs text-[var(--cx-danger)]">{wsNameError}</p>}
+        </form>
+      </section>
+
+      {/* ── Account card ── */}
+      <section className="conduit-card p-6 space-y-6">
+        <h2 className="cx-type-md font-medium tracking-[-0.01em]">Account</h2>
+        <div className="space-y-5">
+          <div>
+            <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
+              Email
+            </div>
+            <div className="cx-type-sm">{email}</div>
+          </div>
+          <ThemeToggle initialPref={themePref} />
+          <div>
+            <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-2">
+              Timezone
+            </div>
+            <select
+              value={tz}
+              onChange={(e) => saveTz(e.target.value)}
+              className="w-full max-w-sm bg-[var(--cx-surface-raised)] border border-[var(--cx-border)] px-3 py-2 outline-none rounded-lg cx-type-sm"
+            >
+              {[...new Set([tz, ...COMMON_TIMEZONES])].map((z) => (
+                <option key={z} value={z}>
+                  {z}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)]">
+              {tzSaving ? "Saving…" : tzSaved ? "Saved" : "Used so the team knows what time of day it is for you."}
+            </p>
+          </div>
+          {creatorMode && (
+            <div>
+              <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
+                Mode
+              </div>
+              <span
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full border cx-type-xs"
+                style={{
+                  borderColor: "var(--cx-accent)",
+                  color: "var(--cx-accent-bright)",
+                  background: "var(--cx-accent-tint)",
+                }}
+              >
+                <span
+                  aria-hidden
+                  className="inline-block w-1.5 h-1.5 rounded-full"
+                  style={{ background: "var(--cx-accent)" }}
+                />
+                Creator Mode v{creatorModeVersion}
+                {creatorModeVersion >= 2 ? " — premium routing" : ""}
+              </span>
+            </div>
           )}
         </div>
-        <input
-          ref={avatarInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
-          className="hidden"
-          onChange={handleAvatarChange}
-          aria-hidden
-        />
-      </div>
+      </section>
 
-      {/* ── Display name ── */}
-      <form onSubmit={saveName} className="space-y-2 max-w-sm">
-        <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block">
-          Display name
-        </label>
-        <div className="flex gap-2">
-          <input
-            value={nameValue}
-            onChange={(e) => { setNameValue(e.target.value); setNameSaved(false); setNameError(""); }}
-            maxLength={100}
-            placeholder={fullName || "Your name"}
-            className="flex-1 conduit-card px-4 py-2.5 outline-none focus:border-[var(--color-accent)] text-sm"
-          />
-          <PraxisButton
-            type="submit"
-            isLoading={nameSaving}
-            isDisabled={!nameValue.trim() || nameSaving}
-            variant="secondary"
-            className="!text-xs shrink-0"
-          >
-            {nameSaved ? <><Check size={12} /> Saved</> : "Save"}
-          </PraxisButton>
-        </div>
-        {nameError && <p className="cx-type-xs text-[var(--color-pink)]">{nameError}</p>}
-      </form>
+      {/* ── Security card ── */}
+      <section className="conduit-card p-6 space-y-6">
+        <h2 className="cx-type-md font-medium tracking-[-0.01em]">Security</h2>
 
-      {/* ── Workspace name ── */}
-      <form onSubmit={saveWsName} className="space-y-2 max-w-sm">
-        <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block">
-          Workspace name
-        </label>
-        <p className="cx-type-xs text-[var(--color-text-muted)] -mt-1">
-          Shown in the sidebar header. Leave blank to use your account name.
-        </p>
-        <div className="flex gap-2">
-          <input
-            value={wsName}
-            onChange={(e) => { setWsName(e.target.value); setWsNameSaved(false); setWsNameError(""); }}
-            maxLength={80}
-            placeholder="e.g. Acme AI Team"
-            className="flex-1 conduit-card px-4 py-2.5 outline-none focus:border-[var(--color-accent)] text-sm"
-          />
-          <PraxisButton
-            type="submit"
-            isLoading={wsNameSaving}
-            isDisabled={wsNameSaving}
-            variant="secondary"
-            className="!text-xs shrink-0"
-          >
-            {wsNameSaved ? <><Check size={12} /> Saved</> : "Save"}
-          </PraxisButton>
-        </div>
-        {wsNameError && <p className="cx-type-xs text-[var(--color-pink)]">{wsNameError}</p>}
-      </form>
-
-      {/* ── Account info ── */}
-      <div className="space-y-4">
+        {/* Update email */}
         <div>
-          <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
-            Email
+          <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+            Update email
           </div>
-          <div>{email}</div>
-        </div>
-        <ThemeToggle initialPref={themePref} />
-        <div>
-          <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2">
-            Timezone
-          </div>
-          <select
-            value={tz}
-            onChange={(e) => saveTz(e.target.value)}
-            className="w-full max-w-sm bg-[var(--color-surface-elevated)] hairline px-3 py-2 outline-none focus:border-[var(--color-accent)] rounded-lg"
-          >
-            {[...new Set([tz, ...COMMON_TIMEZONES])].map((z) => (
-              <option key={z} value={z}>
-                {z}
-              </option>
-            ))}
-          </select>
-          <p className="mt-1 cx-type-xs text-[var(--color-text-muted)]">
-            {tzSaving ? "Saving…" : tzSaved ? "Saved" : "Used so the team knows what time of day it is for you."}
-          </p>
-        </div>
-        {creatorMode && (
-          <div>
-            <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
-              Mode
-            </div>
-            <span
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs"
-              style={{
-                borderColor: "var(--color-accent)",
-                color: "var(--color-accent-hi)",
-                background:
-                  "color-mix(in srgb, var(--color-accent) 8%, transparent)",
-              }}
-            >
-              <span
-                aria-hidden
-                className="inline-block w-1.5 h-1.5 rounded-full"
-                style={{ background: "var(--color-accent)" }}
+          {emailSent ? (
+            <p className="cx-type-xs text-[var(--cx-reward)]">
+              Confirmation email sent to {newEmail || "your new address"} — check your inbox to confirm the change.
+            </p>
+          ) : (
+            <form onSubmit={submitEmailChange} className="space-y-3 max-w-sm">
+              <input
+                type="email"
+                placeholder="New email address"
+                value={newEmail}
+                onChange={(e) => { setNewEmail(e.target.value); setEmailError(""); }}
+                autoComplete="email"
+                required
+                className="w-full conduit-card px-4 py-2.5 outline-none cx-type-sm"
               />
-              Creator Mode v{creatorModeVersion}
-              {creatorModeVersion >= 2 ? " — premium routing" : ""}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* ── Change email ── */}
-      <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
-          Update email
+              {emailError && (
+                <p className="cx-type-xs text-[var(--cx-danger)]">{emailError}</p>
+              )}
+              <PraxisButton
+                type="submit"
+                isLoading={emailSaving}
+                isDisabled={!newEmail.trim() || newEmail.trim() === email}
+                variant="secondary"
+              >
+                Send confirmation
+              </PraxisButton>
+            </form>
+          )}
         </div>
-        {emailSent ? (
-          <p className="text-xs text-[var(--color-green)]">
-            Confirmation email sent to {newEmail || "your new address"} — check your inbox to confirm the change.
-          </p>
-        ) : (
-          <form onSubmit={submitEmailChange} className="space-y-3 max-w-sm">
-            <input
-              type="email"
-              placeholder="New email address"
-              value={newEmail}
-              onChange={(e) => { setNewEmail(e.target.value); setEmailError(""); }}
-              autoComplete="email"
-              required
-              className="w-full conduit-card px-4 py-2.5 outline-none focus:border-[var(--color-accent)] text-sm"
-            />
-            {emailError && (
-              <p className="text-xs text-[var(--color-pink)]">{emailError}</p>
+
+        {/* Change password */}
+        <div className="pt-4 border-t border-[var(--cx-border)]">
+          <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+            Change password
+          </div>
+          <form onSubmit={submitPasswordChange} className="space-y-3 max-w-sm">
+            <div>
+              <input
+                type="password"
+                placeholder="Current password"
+                value={currentPw}
+                onChange={(e) => { setCurrentPw(e.target.value); setPwError(""); }}
+                autoComplete="current-password"
+                required
+                className="w-full conduit-card px-4 py-2.5 outline-none cx-type-sm"
+              />
+            </div>
+            <div>
+              <input
+                type="password"
+                placeholder="New password"
+                value={newPw}
+                onChange={(e) => { setNewPw(e.target.value); setPwError(""); }}
+                autoComplete="new-password"
+                required
+                className="w-full conduit-card px-4 py-2.5 outline-none cx-type-sm"
+              />
+              <PwMeter pw={newPw} />
+            </div>
+            <div>
+              <input
+                type="password"
+                placeholder="Confirm new password"
+                value={confirmPw}
+                onChange={(e) => { setConfirmPw(e.target.value); setPwError(""); }}
+                autoComplete="new-password"
+                required
+                className="w-full conduit-card px-4 py-2.5 outline-none cx-type-sm"
+              />
+            </div>
+            {pwError && (
+              <p className="cx-type-xs text-[var(--cx-danger)]">{pwError}</p>
             )}
             <PraxisButton
               type="submit"
-              isLoading={emailSaving}
-              isDisabled={!newEmail.trim() || newEmail.trim() === email}
+              isLoading={pwSaving}
+              isDisabled={!currentPw || !newPw || !confirmPw}
               variant="secondary"
-              className="!text-xs"
             >
-              Send confirmation
+              Update password
             </PraxisButton>
           </form>
-        )}
-      </div>
-
-      {/* ── Change password ── */}
-      <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
-          Change password
         </div>
-        <form onSubmit={submitPasswordChange} className="space-y-3 max-w-sm">
-          <div>
-            <input
-              type="password"
-              placeholder="Current password"
-              value={currentPw}
-              onChange={(e) => { setCurrentPw(e.target.value); setPwError(""); }}
-              autoComplete="current-password"
-              required
-              className="w-full conduit-card px-4 py-2.5 outline-none focus:border-[var(--color-accent)] text-sm"
-            />
+      </section>
+
+      {/* ── Actions card ── */}
+      <section className="conduit-card p-6 space-y-6">
+        <h2 className="cx-type-md font-medium tracking-[-0.01em]">Account actions</h2>
+
+        {/* Guided Tour */}
+        <div>
+          <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-2">
+            Guided tour
           </div>
-          <div>
-            <input
-              type="password"
-              placeholder="New password"
-              value={newPw}
-              onChange={(e) => { setNewPw(e.target.value); setPwError(""); }}
-              autoComplete="new-password"
-              required
-              className="w-full conduit-card px-4 py-2.5 outline-none focus:border-[var(--color-accent)] text-sm"
-            />
-            <PwMeter pw={newPw} />
+          <p className="cx-type-xs text-[var(--cx-text-muted)] mb-3 max-w-sm">
+            Replay the step-by-step walkthrough of Praxis specialists and key features.
+          </p>
+          <RestartTourButton />
+        </div>
+
+        {/* Data & Privacy */}
+        <div className="pt-4 border-t border-[var(--cx-border)]">
+          <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-2">
+            Data &amp; privacy
           </div>
-          <div>
-            <input
-              type="password"
-              placeholder="Confirm new password"
-              value={confirmPw}
-              onChange={(e) => { setConfirmPw(e.target.value); setPwError(""); }}
-              autoComplete="new-password"
-              required
-              className="w-full conduit-card px-4 py-2.5 outline-none focus:border-[var(--color-accent)] text-sm"
-            />
-          </div>
-          {pwError && (
-            <p className="text-xs text-[var(--color-pink)]">{pwError}</p>
-          )}
+          <p className="cx-type-xs text-[var(--cx-text-muted)] mb-3 max-w-sm">
+            Download a JSON bundle of all your data — profile, conversation
+            history, and AI memory. Your data is yours.
+          </p>
           <PraxisButton
-            type="submit"
-            isLoading={pwSaving}
-            isDisabled={!currentPw || !newPw || !confirmPw}
+            onClick={downloadExport}
+            isLoading={exporting}
+            loadingText="Preparing export…"
             variant="secondary"
-            className="!text-xs"
           >
-            Update password
+            Download my data
           </PraxisButton>
-        </form>
-      </div>
-
-      {/* ── Guided Tour ── */}
-      <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
-          Guided Tour
+          {exportError && (
+            <p className="mt-2 cx-type-xs text-[var(--cx-danger)]">{exportError}</p>
+          )}
         </div>
-        <p className="text-xs text-[var(--color-text-muted)] mb-3 max-w-sm">
-          Replay the step-by-step walkthrough of Praxis specialists and key features.
-        </p>
-        <RestartTourButton />
-      </div>
-
-      {/* ── Data & Privacy ── */}
-      <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
-          Data &amp; Privacy
-        </div>
-        <p className="text-xs text-[var(--color-text-muted)] mb-3 max-w-sm">
-          Download a JSON bundle of all your data — profile, conversation
-          history, and AI memory. Your data is yours.
-        </p>
-        <PraxisButton
-          onClick={downloadExport}
-          isLoading={exporting}
-          loadingText="Preparing export…"
-          variant="secondary"
-          className="!text-xs"
-        >
-          Download my data
-        </PraxisButton>
-        {exportError && (
-          <p className="mt-2 text-xs text-[var(--color-pink)]">{exportError}</p>
-        )}
-      </div>
+      </section>
     </div>
   );
 }
@@ -1895,7 +1908,7 @@ function RestartTourButton() {
       isLoading={restarting}
       loadingText="Resetting…"
       variant="secondary"
-      className="!text-xs"
+      className=""
     >
       Restart guided tour
     </PraxisButton>
@@ -1962,40 +1975,42 @@ function BusinessTab({ account }: { account: AccountData }) {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Business info card */}
+      <section className="conduit-card p-6 space-y-5">
+        <h2 className="cx-type-md font-medium tracking-[-0.01em]">Business info</h2>
         <div>
-          <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block mb-2">
+          <label className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block mb-2">
             Business name
           </label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)]"
+            className="w-full conduit-card px-4 py-3 outline-none cx-type-sm"
           />
         </div>
         <div>
-          <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block mb-2">
+          <label className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block mb-2">
             Business type
           </label>
           <input
             value={businessType}
             onChange={(e) => setBusinessType(e.target.value)}
-            className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)]"
+            className="w-full conduit-card px-4 py-3 outline-none cx-type-sm"
           />
         </div>
         <div>
-          <label className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] block mb-2">
+          <label className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block mb-2">
             What you&apos;re working on
           </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
-            className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)] resize-none"
+            className="w-full conduit-card px-4 py-3 outline-none resize-none cx-type-sm"
           />
         </div>
-        {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
+        {error && <p className="cx-type-xs text-[var(--cx-danger)]">{error}</p>}
         <PraxisButton
           onClick={save}
           isLoading={saving}
@@ -2003,17 +2018,17 @@ function BusinessTab({ account }: { account: AccountData }) {
         >
           Save
         </PraxisButton>
-      </div>
+      </section>
 
-      {/* Company brief */}
-      <div className="conduit-card p-5">
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
-          Company brief
+      {/* Company brief card */}
+      <section className="conduit-card p-6 space-y-4">
+        <div>
+          <h2 className="cx-type-md font-medium tracking-[-0.01em] mb-1">Company brief</h2>
+          <p className="cx-type-xs text-[var(--cx-text-muted)]">
+            A short context block Atlas shares with your whole team. All 9 specialists
+            read this on every turn — no more repeating yourself.
+          </p>
         </div>
-        <p className="text-xs text-[var(--color-text-muted)] mb-3">
-          A short context block Atlas shares with your whole team. All 9 specialists
-          read this on every turn — no more repeating yourself.
-        </p>
         <form onSubmit={saveBrief} className="space-y-3">
           <div className="relative">
             <textarea
@@ -2025,22 +2040,22 @@ function BusinessTab({ account }: { account: AccountData }) {
               rows={4}
               maxLength={COMPANY_BRIEF_MAX}
               placeholder="e.g. Acme builds B2B SaaS for HR teams in the US mid-market. We're pre-revenue, 2 founders, focused on getting our first 10 design partners this quarter."
-              className="w-full conduit-card px-4 py-3 outline-none focus:border-[var(--color-accent)] resize-none text-sm"
+              className="w-full conduit-card px-4 py-3 outline-none resize-none cx-type-sm"
             />
             <span
               className="absolute bottom-3 right-3 cx-type-xs tabular-nums"
               style={{
                 color:
                   brief.length >= COMPANY_BRIEF_MAX
-                    ? "var(--color-pink)"
-                    : "var(--color-text-muted)",
+                    ? "var(--cx-danger)"
+                    : "var(--cx-text-muted)",
               }}
             >
               {brief.length}/{COMPANY_BRIEF_MAX}
             </span>
           </div>
           {briefError && (
-            <p className="text-xs text-[var(--color-pink)]">{briefError}</p>
+            <p className="cx-type-xs text-[var(--cx-danger)]">{briefError}</p>
           )}
           <div className="flex items-center gap-3">
             <PraxisButton
@@ -2048,7 +2063,6 @@ function BusinessTab({ account }: { account: AccountData }) {
               isLoading={briefSaving}
               isDisabled={briefSaving}
               variant="secondary"
-              className="!text-xs"
             >
               {briefSaved ? <><Check size={12} /> Saved</> : "Save brief"}
             </PraxisButton>
@@ -2058,14 +2072,13 @@ function BusinessTab({ account }: { account: AccountData }) {
                 onClick={() => { setBrief(""); setBriefSaved(false); }}
                 variant="ghost"
                 size="sm"
-                className="!text-xs"
               >
                 Clear
               </PraxisButton>
             )}
           </div>
         </form>
-      </div>
+      </section>
     </div>
   );
 }
@@ -2138,25 +2151,25 @@ function UsageTab({ usage }: { usage: UsageData }) {
   );
 
   return (
-    <div className="space-y-8 text-sm">
+    <div className="space-y-8">
       {/* Month selector */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">Period</span>
+        <span className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">Period</span>
         <div className="flex flex-wrap gap-1.5">
           {monthOptions.map((opt) => (
             <button
               key={opt.value}
               type="button"
               onClick={() => setSelectedMonth(opt.value)}
-              className="px-3 py-1 rounded-full text-xs transition-colors"
+              className="px-3 py-1 rounded-full cx-type-xs font-medium transition-colors"
               style={{
                 background: selectedMonth === opt.value
-                  ? "var(--color-accent)"
-                  : "var(--color-surface-elevated)",
+                  ? "var(--cx-accent)"
+                  : "var(--cx-surface-raised)",
                 color: selectedMonth === opt.value
-                  ? "#fff"
-                  : "var(--color-text-muted)",
-                border: `1px solid ${selectedMonth === opt.value ? "var(--color-accent)" : "var(--color-border)"}`,
+                  ? "var(--cx-text)"
+                  : "var(--cx-text-muted)",
+                border: `1px solid ${selectedMonth === opt.value ? "var(--cx-accent)" : "var(--cx-border)"}`,
               }}
             >
               {opt.label}
@@ -2190,7 +2203,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
       {/* Billing cycle cap — always shows current cycle data */}
       <div className="conduit-card px-5 py-4">
         <div className="flex items-baseline justify-between gap-3 mb-2">
-          <span className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+          <span className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
             Token cap (current cycle)
           </span>
           <span className="text-sm">
@@ -2221,7 +2234,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
 
       {/* Daily token bar chart */}
       <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+        <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
           Tokens · daily
         </div>
         {monthLoading ? (
@@ -2254,7 +2267,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
       {/* Per-employee breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="conduit-card p-5">
-          <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+          <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
             Share by employee
           </div>
           {monthLoading || empTotal === 1 ? (
@@ -2266,7 +2279,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
           )}
         </div>
         <div className="conduit-card p-5">
-          <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+          <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
             By employee
           </div>
           <div className="space-y-2">
@@ -2301,7 +2314,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
 
       {/* Connector call totals */}
       <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+        <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
           Connector context fetches (all time)
         </div>
         {connectorStats.length === 0 ? (
@@ -2471,13 +2484,13 @@ function BillingTab({
 
   if (internal) {
     return (
-      <div className="space-y-6 text-sm">
+      <div className="space-y-6">
         <div className="conduit-card p-6">
           <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
             Internal Account · Conduit AI Team
           </div>
           {/* Conduit AI (the parent company) intentional — internal team badge. */}
-          <div className="serif text-2xl">No charge, full access</div>
+          <div className="cx-heading-xl">No charge, full access</div>
           <p className="mt-2 text-[var(--color-text-muted)]">
             You&apos;re on the internal team account. All tiers, all
             employees, no token cap. Subscription UI is hidden.
@@ -2631,7 +2644,7 @@ function BillingTab({
     : null;
 
   return (
-    <div className="space-y-6 text-sm">
+    <div className="space-y-6">
       {/* Current plan */}
       <div className="conduit-card p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -2641,7 +2654,7 @@ function BillingTab({
               ? "cancels at period end"
               : (account.subscription_status ?? "inactive").replace("_", " ")}
           </div>
-          <div className="serif text-2xl mt-1">{tier.name}</div>
+          <div className="cx-heading-xl mt-1">{tier.name}</div>
           <div className="text-[var(--color-text-muted)] text-xs mt-1">
             {tier.monthlyPriceCents > 0
               ? `$${tier.monthlyPriceCents / 100} / month`
@@ -2690,7 +2703,7 @@ function BillingTab({
               isLoading={busy === "portal"}
               isDisabled={busy !== null && busy !== "portal"}
               variant="secondary"
-              className="!text-xs"
+              className=""
             >
               Manage subscription
               <ExternalLink size={12} />
@@ -2735,8 +2748,8 @@ function BillingTab({
             className="cx-glass-float cx-glass-border p-6 max-w-sm w-full space-y-4"
           >
             <div>
-              <div className="serif text-xl mb-1">Cancel subscription?</div>
-              <p className="text-sm text-[var(--color-text-muted)]">
+              <div className="cx-heading-lg mb-1">Cancel subscription?</div>
+              <p className="cx-type-sm text-[var(--cx-text-muted)]">
                 You&apos;ll keep full access to Praxis until{" "}
                 {cancelAt
                   ? new Date(cancelAt * 1000).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })
@@ -2782,7 +2795,7 @@ function BillingTab({
       {/* Invoice history — only shown on paid accounts with a Stripe customer */}
       {account.has_stripe_customer && (
         <div>
-          <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+          <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
             Invoice history
           </div>
           {invoices === null ? (
@@ -2797,7 +2810,7 @@ function BillingTab({
               ))}
             </div>
           ) : invoices.length === 0 ? (
-            <div className="conduit-card p-5 text-center text-sm text-[var(--color-text-muted)]">
+            <div className="conduit-card p-5 text-center cx-type-sm text-[var(--cx-text-muted)]">
               No invoices yet
             </div>
           ) : (
@@ -2883,7 +2896,7 @@ function BillingTab({
 
       {/* Tier comparison */}
       <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+        <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
           Plans
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -2905,16 +2918,16 @@ function BillingTab({
                 <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                   {isCurrent ? "Current" : t.name}
                 </div>
-                <div className="serif text-2xl mt-1">{t.name}</div>
+                <div className="cx-heading-xl mt-1">{t.name}</div>
                 <div className="mt-1">
                   <span className="text-2xl font-medium">
                     ${t.monthlyPriceCents / 100}
                   </span>
-                  <span className="text-xs text-[var(--color-text-muted)]">
+                  <span className="cx-type-xs text-[var(--cx-text-muted)]">
                     {" "}/mo
                   </span>
                 </div>
-                <ul className="mt-3 space-y-1.5 text-xs text-[var(--color-text-muted)]">
+                <ul className="mt-3 space-y-1.5 cx-type-xs text-[var(--cx-text-muted)]">
                   <li className="flex items-start gap-1.5">
                     <Check
                       size={12}
@@ -2957,7 +2970,7 @@ function BillingTab({
                     isLoading={busy === t.id}
                     isDisabled={busy !== null && busy !== t.id}
                     variant="primary"
-                    className="mt-4 w-full justify-center !text-xs !py-2"
+                    className="mt-4 w-full justify-center !py-2"
                   >
                     {`Upgrade to ${t.name}`}
                     <ArrowRight size={12} />
@@ -2971,7 +2984,7 @@ function BillingTab({
 
       {/* Top-ups */}
       <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+        <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
           Buy more tokens
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -2982,7 +2995,7 @@ function BillingTab({
               disabled={busy !== null}
               className="conduit-card p-4 text-left hover:border-[var(--color-accent)] transition-colors disabled:opacity-50"
             >
-              <div className="serif text-xl">${t.amountCents / 100}</div>
+              <div className="cx-heading-lg">${t.amountCents / 100}</div>
               <div className="mt-1 text-sm">
                 {(t.tokensGranted / 1000).toLocaleString()}k tokens
               </div>
@@ -3051,10 +3064,10 @@ function ReferralSection() {
   return (
     <div className="conduit-card p-5 space-y-4">
       <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
+        <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
           Refer & Earn
         </div>
-        <p className="text-sm text-[var(--color-text-muted)]">
+        <p className="cx-type-sm text-[var(--cx-text-muted)]">
           Share your link. When a friend signs up,{" "}
           <strong className="text-[var(--color-text)]">both of you get 50 bonus tokens</strong>.
         </p>
@@ -3070,7 +3083,7 @@ function ReferralSection() {
             onClick={copyLink}
             variant="primary"
             size="sm"
-            className="shrink-0 !text-xs"
+            className="shrink-0"
           >
             {copied ? <Check size={12} /> : <ExternalLink size={12} />}
             {copied ? "Copied!" : "Copy link"}
@@ -3128,7 +3141,7 @@ function UsageSummary({
   return (
     <div className="conduit-card p-5 space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+        <span className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
           Usage this cycle
         </span>
         <span
@@ -3178,10 +3191,10 @@ function Stat({
 }) {
   return (
     <div className="conduit-card px-4 py-3">
-      <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+      <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
         {label}
       </div>
-      <div className="serif text-2xl mt-1">{value}</div>
+      <div className="cx-heading-xl mt-1">{value}</div>
       {sub && (
         <div className="cx-type-xs text-[var(--color-text-muted)] mt-0.5">
           {sub}
@@ -3247,11 +3260,11 @@ function NotificationsTab() {
   };
 
   if (!prefs) {
-    return <p className="text-sm text-[var(--color-text-muted)]">Loading…</p>;
+    return <p className="cx-type-sm text-[var(--cx-text-muted)]">Loading…</p>;
   }
 
   return (
-    <div className="space-y-6 text-sm">
+    <div className="space-y-6">
       <p className="text-[var(--color-text-muted)]">
         Choose which emails you receive from Praxis. Billing receipts and
         security alerts are always sent regardless of these settings.
@@ -3295,7 +3308,7 @@ function NotificationsTab() {
       </div>
 
       {saving && (
-        <p className="text-xs text-[var(--color-text-muted)]">Saving…</p>
+        <p className="cx-type-xs text-[var(--cx-text-muted)]">Saving…</p>
       )}
       {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
     </div>
@@ -3568,7 +3581,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               : false;
 
   return (
-    <div className="space-y-6 text-sm">
+    <div className="space-y-6">
       <p className="text-[var(--color-text-muted)] max-w-xl">
         Connect your tools so Praxis specialists can act with full context —
         aware of your calendar, messages, and data.
@@ -3614,7 +3627,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           </div>
           <div>
             <div className="font-medium text-[var(--color-text)]">Google Calendar</div>
-            <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
+            <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)] leading-relaxed">
               Gives your Operations specialist awareness of upcoming meetings and
               blocked time when answering scheduling questions.
             </p>
@@ -3626,7 +3639,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               isDisabled={disconnecting === "google_calendar"}
               variant="danger"
               size="sm"
-              className="mt-auto w-full justify-center !text-xs"
+              className="mt-auto w-full justify-center"
             >
               <Link2Off size={12} />
               {disconnecting === "google_calendar" ? "Disconnecting…" : "Disconnect"}
@@ -3697,7 +3710,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           </div>
           <div>
             <div className="font-medium text-[var(--color-text)]">Slack</div>
-            <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
+            <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)] leading-relaxed">
               Surface recent channel messages as context for all specialists.
               Pick one channel — your team's activity becomes AI-accessible.
             </p>
@@ -3728,7 +3741,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                     isDisabled={!selectedChannel || savingChannel}
                     variant="secondary"
                     size="sm"
-                    className="!text-xs"
+                    className=""
                   >
                     {savingChannel ? "…" : "Save"}
                   </PraxisButton>
@@ -3740,7 +3753,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                 isDisabled={disconnecting === "slack"}
                 variant="danger"
                 size="sm"
-                className="w-full justify-center !text-xs"
+                className="w-full justify-center"
               >
                 <Link2Off size={12} />
                 {disconnecting === "slack" ? "Disconnecting…" : "Disconnect"}
@@ -3825,7 +3838,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           </div>
           <div>
             <div className="font-medium text-[var(--color-text)]">HubSpot</div>
-            <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
+            <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)] leading-relaxed">
               Gives your Sales specialist real-time awareness of recent contacts
               and open deals so every response reflects your live CRM.
             </p>
@@ -3837,7 +3850,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               isDisabled={disconnecting === "hubspot"}
               variant="danger"
               size="sm"
-              className="mt-auto w-full justify-center !text-xs"
+              className="mt-auto w-full justify-center"
             >
               <Link2Off size={12} />
               {disconnecting === "hubspot" ? "Disconnecting…" : "Disconnect"}
@@ -3909,7 +3922,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           </div>
           <div>
             <div className="font-medium text-[var(--color-text)]">Google Drive</div>
-            <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
+            <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)] leading-relaxed">
               Select up to 5 Docs or Sheets — brand guides, product specs, customer
               lists — and every specialist references them automatically.
             </p>
@@ -3939,7 +3952,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                   onClick={() => { setDriveSearchResults([]); }}
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-center !text-xs"
+                  className="w-full justify-center"
                 >
                   <Link size={12} />
                   {driveSelectedFiles.length > 0 ? "Change files" : "Pick files"}
@@ -3967,7 +3980,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                       isDisabled={driveSearching}
                       variant="secondary"
                       size="sm"
-                      className="shrink-0 !text-xs"
+                      className="shrink-0"
                     >
                       {driveSearching ? "…" : "Search"}
                     </PraxisButton>
@@ -4015,7 +4028,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                       onClick={() => setDriveSearchResults(null)}
                       variant="secondary"
                       size="sm"
-                      className="flex-1 justify-center !text-xs"
+                      className="flex-1 justify-center"
                     >
                       Done
                     </PraxisButton>
@@ -4026,7 +4039,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                         isDisabled={driveSaving}
                         variant="danger"
                         size="sm"
-                        className="flex-1 justify-center !text-xs"
+                        className="flex-1 justify-center"
                       >
                         Clear all
                       </PraxisButton>
@@ -4043,7 +4056,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                     isDisabled={driveRefreshing}
                     variant="ghost"
                     size="sm"
-                    className="flex-1 justify-center !text-xs"
+                    className="flex-1 justify-center"
                   >
                     {driveRefreshing ? "Syncing…" : "Refresh"}
                   </PraxisButton>
@@ -4054,7 +4067,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                   isDisabled={disconnecting === "google_drive"}
                   variant="danger"
                   size="sm"
-                  className="flex-1 justify-center !text-xs"
+                  className="flex-1 justify-center"
                 >
                   <Link2Off size={12} />
                   {disconnecting === "google_drive" ? "Disconnecting…" : "Disconnect"}
@@ -4140,7 +4153,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
         </div>
         <div>
           <div className="font-medium text-[var(--color-text)]">GitHub</div>
-          <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
+          <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)] leading-relaxed">
             Gives your Engineering specialist live awareness of open PRs, issues,
             and CI status from your repos — no copy-pasting required.
           </p>
@@ -4148,7 +4161,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
         {isConnected("github") ? (
           <div className="space-y-3">
             {githubConnectedMeta && (
-              <div className="text-xs text-[var(--color-text-muted)] space-y-1">
+              <div className="cx-type-xs text-[var(--cx-text-muted)] space-y-1">
                 <p>Connected as <span className="font-medium text-[var(--color-text)]">@{githubConnectedMeta.login}</span></p>
                 {githubConnectedMeta.repos.length > 0 && (
                   <p>Repos: {githubConnectedMeta.repos.join(", ")}</p>
@@ -4164,7 +4177,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               isDisabled={disconnecting === "github"}
               variant="danger"
               size="sm"
-              className="w-full justify-center !text-xs"
+              className="w-full justify-center"
             >
               <Link2Off size={12} />
               {disconnecting === "github" ? "Disconnecting…" : "Disconnect"}
@@ -4236,7 +4249,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               </div>
               <div>
                 <div className="font-medium text-[var(--color-text)]">{name}</div>
-                <p className="mt-1 text-xs text-[var(--color-text-muted)] leading-relaxed">
+                <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)] leading-relaxed">
                   {description}
                 </p>
               </div>
@@ -4266,8 +4279,8 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
         <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
           More coming
         </div>
-        <p className="serif text-xl">Zapier, Airtable, Linear, and more.</p>
-        <p className="mt-2 text-xs text-[var(--color-text-muted)]">
+        <p className="cx-heading-lg">Zapier, Airtable, Linear, and more.</p>
+        <p className="mt-2 cx-type-xs text-[var(--cx-text-muted)]">
           Every integration ships with native Praxis actions — not generic
           webhooks. Want one prioritized?{" "}
           <a
@@ -4341,7 +4354,7 @@ function AppearanceTab({
   };
 
   return (
-    <div className="space-y-6 text-sm">
+    <div className="space-y-6">
       <p className="text-[var(--color-text-muted)] max-w-xl">
         Choose how Praxis looks on this device. Changes apply immediately.
       </p>
@@ -4351,7 +4364,7 @@ function AppearanceTab({
       </div>
 
       <div className="conduit-card p-5 space-y-4">
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+        <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
           Accent colour
         </div>
         <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Accent colour">
@@ -4415,7 +4428,7 @@ function AlwaysOnRow({ label, desc }: { label: string; desc: string }) {
             <Info size={12} />
           </span>
         </div>
-        <div className="text-xs text-[var(--color-text-muted)] mt-0.5">
+        <div className="cx-type-xs text-[var(--cx-text-muted)] mt-0.5">
           {desc}
         </div>
       </div>
@@ -4515,8 +4528,8 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-lg font-semibold mb-1">API Keys</h2>
-          <p className="text-sm text-[var(--color-text-muted)]">
+          <h2 className="cx-type-md font-semibold mb-1">API Keys</h2>
+          <p className="cx-type-sm text-[var(--cx-text-muted)]">
             Integrate Praxis into your own tools and workflows via REST API.
           </p>
         </div>
@@ -4530,8 +4543,8 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
           <div className="flex items-center justify-center gap-2 text-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
             <Lock size={12} /> Pro feature
           </div>
-          <p className="serif text-2xl">Programmatic access</p>
-          <p className="mt-2 text-sm text-[var(--color-text-muted)] max-w-md mx-auto">
+          <p className="cx-heading-xl">Programmatic access</p>
+          <p className="mt-2 cx-type-sm text-[var(--cx-text-muted)] max-w-md mx-auto">
             Generate API keys to call Praxis specialists from your own code,
             automations, and integrations. Upgrade to Pro to unlock.
           </p>
@@ -4543,8 +4556,8 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-lg font-semibold mb-1">API Keys</h2>
-        <p className="text-sm text-[var(--color-text-muted)]">
+        <h2 className="cx-type-md font-semibold mb-1">API Keys</h2>
+        <p className="cx-type-sm text-[var(--cx-text-muted)]">
           Generate keys to access Praxis programmatically. Keys are shown once — store them securely.
         </p>
       </div>
@@ -4564,13 +4577,13 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
               onClick={copyKey}
               variant="primary"
               size="sm"
-              className="shrink-0 !text-xs"
+              className="shrink-0"
             >
               {copied ? <Check size={12} /> : <Lock size={12} />}
               {copied ? "Copied!" : "Copy"}
             </PraxisButton>
           </div>
-          <p className="text-xs text-[var(--color-text-muted)] mt-2">
+          <p className="cx-type-xs text-[var(--cx-text-muted)] mt-2">
             This key will not be shown again. Dismiss by creating another key or refreshing.
           </p>
         </div>
@@ -4599,9 +4612,9 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
 
       {/* Active keys */}
       {loading ? (
-        <div className="text-sm text-[var(--color-text-muted)]">Loading…</div>
+        <div className="cx-type-sm text-[var(--cx-text-muted)]">Loading…</div>
       ) : activeKeys.length === 0 ? (
-        <p className="text-sm text-[var(--color-text-muted)]">No active API keys.</p>
+        <p className="cx-type-sm text-[var(--cx-text-muted)]">No active API keys.</p>
       ) : (
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)] font-semibold">
@@ -4614,7 +4627,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
             >
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-[var(--color-text)] truncate">{k.name}</p>
-                <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+                <p className="cx-type-xs text-[var(--cx-text-muted)] mt-0.5">
                   <code className="font-mono">{k.key_preview}</code>
                   {" · Created "}
                   {new Date(k.created_at).toLocaleDateString()}
@@ -4631,7 +4644,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
                 aria-label={`Revoke key ${k.name}`}
                 variant="danger"
                 size="sm"
-                className="shrink-0 !text-xs"
+                className="shrink-0"
               >
                 <X size={12} />
                 Revoke
@@ -4656,7 +4669,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
                 <p className="text-sm font-medium text-[var(--color-text)] truncate line-through">
                   {k.name}
                 </p>
-                <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+                <p className="cx-type-xs text-[var(--cx-text-muted)] mt-0.5">
                   <code className="font-mono">{k.key_preview}</code>
                   {" · Revoked "}
                   {k.revoked_at ? new Date(k.revoked_at).toLocaleDateString() : ""}
@@ -4667,7 +4680,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
         </div>
       )}
 
-      <div className="conduit-card p-4 rounded-xl text-sm text-[var(--color-text-muted)] space-y-1">
+      <div className="conduit-card p-4 rounded-xl cx-type-sm text-[var(--cx-text-muted)] space-y-1">
         <p className="font-medium text-[var(--color-text)]">Using API keys</p>
         <p>Include your key in the <code className="font-mono text-xs">Authorization</code> header:</p>
         <code className="block text-xs font-mono bg-[var(--color-surface)] rounded-lg px-3 py-2 mt-1">
@@ -4716,13 +4729,13 @@ function ReferralsTab() {
   };
 
   if (loading) {
-    return <p className="text-sm text-[var(--color-text-muted)]">Loading…</p>;
+    return <p className="cx-type-sm text-[var(--cx-text-muted)]">Loading…</p>;
   }
 
   return (
-    <div className="space-y-8 text-sm">
+    <div className="space-y-8">
       <div>
-        <h2 className="text-lg font-semibold mb-1">Refer &amp; Earn</h2>
+        <h2 className="cx-type-md font-semibold mb-1">Refer &amp; Earn</h2>
         <p className="text-[var(--color-text-muted)] max-w-xl">
           Share your personal link. When someone signs up and starts using Praxis,
           you both get bonus tokens.
@@ -4731,7 +4744,7 @@ function ReferralsTab() {
 
       {/* Referral link */}
       <div className="conduit-card p-5 space-y-3">
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+        <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
           Your referral link
         </div>
         {referralUrl ? (
@@ -4748,7 +4761,7 @@ function ReferralsTab() {
               onClick={copyLink}
               variant="primary"
               size="sm"
-              className="shrink-0 !text-xs"
+              className="shrink-0"
             >
               {copied ? <><Check size={12} /> Copied!</> : <><Link size={12} /> Copy link</>}
             </PraxisButton>
@@ -4766,7 +4779,7 @@ function ReferralsTab() {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
         <div className="conduit-card p-5">
-          <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
+          <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
             Successful referrals
           </div>
           <AnimatedStat
@@ -4775,7 +4788,7 @@ function ReferralsTab() {
           />
         </div>
         <div className="conduit-card p-5">
-          <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
+          <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
             Bonus tokens earned
           </div>
           <AnimatedStat
@@ -4787,7 +4800,7 @@ function ReferralsTab() {
 
       {/* How it works */}
       <div className="conduit-card p-5 space-y-3">
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+        <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
           How it works
         </div>
         <ol className="space-y-2 text-[var(--color-text-muted)]">
@@ -4907,20 +4920,20 @@ function LabelsTab() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-lg font-semibold mb-1">Labels</h2>
-        <p className="text-sm text-[var(--color-text-muted)]">
+        <h2 className="cx-type-md font-semibold mb-1">Labels</h2>
+        <p className="cx-type-sm text-[var(--cx-text-muted)]">
           Color-coded labels to organize conversations by project, client, or status.
         </p>
       </div>
 
       {loading ? (
-        <div className="text-sm text-[var(--color-text-muted)]">Loading labels…</div>
+        <div className="cx-type-sm text-[var(--cx-text-muted)]">Loading labels…</div>
       ) : (
         <div className="space-y-2">
           {labels.length === 0 && !showCreate && (
             <div className="conduit-card p-6 flex flex-col items-center gap-3 text-center">
               <Tag size={20} style={{ color: "var(--color-text-muted)" }} />
-              <p className="text-sm text-[var(--color-text-muted)]">No labels yet. Create one to start organizing conversations.</p>
+              <p className="cx-type-sm text-[var(--cx-text-muted)]">No labels yet. Create one to start organizing conversations.</p>
             </div>
           )}
 
@@ -4962,7 +4975,7 @@ function LabelsTab() {
                     onClick={() => setEditingId(null)}
                     variant="ghost"
                     size="sm"
-                    className="!text-xs"
+                    className=""
                   >
                     Cancel
                   </PraxisButton>
@@ -5058,7 +5071,7 @@ function LabelsTab() {
                   onClick={() => { setShowCreate(false); setNewName(""); }}
                   variant="ghost"
                   size="sm"
-                  className="!text-xs"
+                  className=""
                 >
                   Cancel
                 </PraxisButton>
@@ -5092,7 +5105,7 @@ function LabelsTab() {
               Create label
             </PraxisButton>
           ) : (
-            <p className="text-xs text-[var(--color-text-muted)]">Label limit reached (10 max).</p>
+            <p className="cx-type-xs text-[var(--cx-text-muted)]">Label limit reached (10 max).</p>
           )}
         </div>
       )}
