@@ -1257,10 +1257,10 @@ export function Chat({
           flushTokenBufNow();
           const employee = (data.employee as EmployeeKey) || currentEmployee;
           finishCurrent(employee);
-          // Reward beat — brief green pulse on the specialist avatar
+          // Reward beat — ring pulse on every completion (sparks computed in render for significant)
           if (rewardClearTimerRef.current) clearTimeout(rewardClearTimerRef.current);
           setRewardEmployee(employee);
-          rewardClearTimerRef.current = setTimeout(() => setRewardEmployee(null), 700);
+          rewardClearTimerRef.current = setTimeout(() => setRewardEmployee(null), 750);
           // Auto-play the just-finished message if voice is on AND R13's
           // streaming TTS didn't already produce audio for this turn.
           const streamingPlayed = streamingAudioActiveRef.current;
@@ -1795,13 +1795,16 @@ export function Chat({
 
           <AnimatePresence mode="sync">
             {(() => {
-              // Index of the last completed assistant message from the rewarded specialist
+              // Index + significance of the last completed assistant message from the rewarded specialist.
+              // Significance (> 300 chars) controls whether sparks fire in addition to the ring pulse.
               let lastRewardIdx = -1;
+              let lastRewardSignificant = false;
               if (rewardEmployee) {
                 for (let j = 0; j < messages.length; j++) {
                   const msg = messages[j];
                   if (msg.role === "assistant" && msg.employee === rewardEmployee && !msg.pending) {
                     lastRewardIdx = j;
+                    lastRewardSignificant = msg.content.length > 300;
                   }
                 }
               }
@@ -1842,6 +1845,7 @@ export function Chat({
                     conversationId={conversationId}
                     roundTableActiveEmployee={roundTableActiveEmployee}
                     rewarded={i === lastRewardIdx}
+                    rewardSignificant={i === lastRewardIdx && lastRewardSignificant}
                   />
                 );
               });
@@ -2854,6 +2858,7 @@ const MessageBubble = memo(function MessageBubble({
   conversationId,
   roundTableActiveEmployee = null,
   rewarded = false,
+  rewardSignificant = false,
 }: {
   message: MessageRow;
   onOpenArtifact: (id: string) => void;
@@ -2870,6 +2875,7 @@ const MessageBubble = memo(function MessageBubble({
   conversationId?: string | null;
   roundTableActiveEmployee?: EmployeeKey | null;
   rewarded?: boolean;
+  rewardSignificant?: boolean;
 }) {
   const [editDraft, setEditDraft] = useState(message.content);
   const editRef = useRef<HTMLTextAreaElement>(null);
@@ -3082,7 +3088,7 @@ const MessageBubble = memo(function MessageBubble({
       onTouchMove={cancelTouchTimer}
     >
       <div className="pt-1 shrink-0">
-        <SpecialistAvatar employee={employee} size={32} streaming={message.pending} rewarded={rewarded} />
+        <SpecialistAvatar employee={employee} size={32} streaming={message.pending} rewarded={rewarded} rewardSignificant={rewardSignificant} />
       </div>
       {/* Inner content area — AnimatePresence crossfades thinking↔streaming
           within a stable layout shell, eliminating the layout-jump that occurred
