@@ -19,16 +19,17 @@ const THINKING_STATUS: Record<EmployeeKey, string> = {
   legal:       "reviewing the brief…",
 };
 
-// Per-dot framer-motion variants — stagger is applied via delay in transition
+// Per-dot framer-motion variants — stagger is applied via delay in transition.
+// Uses accent color (#7C6CFF) per spec: thinking animation is accent, not dept color.
 const dotVariants = {
   pulse: (i: number) => ({
-    scale: [0.82, 1, 1, 0.82],
-    opacity: [0.2, 1, 1, 0.2],
+    scale: [0.75, 1, 1, 0.75],
+    opacity: [0.15, 1, 1, 0.15],
     transition: {
-      duration: 1.4,
+      duration: 1.2,
       ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
       repeat: Infinity,
-      delay: i * 0.18,
+      delay: i * 0.16,
     },
   }),
 };
@@ -98,10 +99,10 @@ export function ThinkingBubble({
                   animate="pulse"
                   style={{
                     display: "inline-block",
-                    width: 7,
-                    height: 7,
+                    width: 6,
+                    height: 6,
                     borderRadius: 9999,
-                    background: "var(--dept, var(--cx-accent))",
+                    background: "var(--cx-accent)",
                     flexShrink: 0,
                   }}
                 />

@@ -799,13 +799,14 @@ body {
   100% { transform: translateX(350%); opacity: 0; }
 }
 
-/* Subtle ambient glow breathe on the thinking bubble (low-alpha, not distracting) */
+/* Subtle ambient glow breathe on the thinking bubble — uses accent (#7C6CFF) per spec */
 @keyframes thinkingBreath {
   0%, 100% { box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18), var(--cx-glass-highlight, inset 0 1px 0 rgba(255,255,255,0.10)); }
   50% {
     box-shadow:
-      0 2px 12px rgba(0, 0, 0, 0.22),
-      0 0 0 1px color-mix(in srgb, var(--dept, var(--cx-accent, #7C6CFF)) 18%, transparent),
+      0 2px 16px rgba(0, 0, 0, 0.24),
+      0 0 0 1px color-mix(in srgb, var(--cx-accent, #7C6CFF) 22%, transparent),
+      0 0 20px color-mix(in srgb, var(--cx-accent, #7C6CFF) 6%, transparent),
       var(--cx-glass-highlight, inset 0 1px 0 rgba(255,255,255,0.10));
   }
 }
@@ -813,6 +814,7 @@ body {
 .thinking-bubble {
   position: relative;
   overflow: hidden;
+  /* Dept-tinted bg identifies which specialist is thinking; accent drives the animation */
   background: color-mix(in srgb, var(--dept, var(--cx-accent, var(--color-accent))) 5%, var(--cx-surface-raised, var(--color-surface-elevated)));
   border: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08));
   border-left: 2px solid var(--dept, var(--cx-accent, var(--color-border)));
@@ -822,24 +824,24 @@ body {
     var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
   backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
   -webkit-backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
-  animation: thinkingBreath 2.8s ease-in-out infinite;
+  animation: thinkingBreath 2.4s ease-in-out infinite;
 }
-/* Bottom sweep — the active "thinking" progress shimmer */
+/* Bottom sweep — accent shimmer per spec: "thin accent progress shimmer (#7C6CFF)" */
 .thinking-bubble::before {
   content: '';
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 35%;
+  width: 40%;
   height: 2px;
   border-radius: 9999px;
   background: linear-gradient(
     90deg,
     transparent 0%,
-    color-mix(in srgb, var(--dept, var(--cx-accent, var(--color-accent))) 80%, transparent) 50%,
+    color-mix(in srgb, var(--cx-accent, #7C6CFF) 90%, transparent) 50%,
     transparent 100%
   );
-  animation: thinkingShimmer 2s linear infinite;
+  animation: thinkingShimmer 1.8s linear infinite;
 }
 /* Top hairline — static accent gradient, gives "pane of glass" depth */
 .thinking-bubble::after {
@@ -852,7 +854,7 @@ body {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    color-mix(in srgb, var(--dept, var(--cx-accent, var(--color-accent))) 45%, transparent) 50%,
+    color-mix(in srgb, var(--cx-accent, #7C6CFF) 45%, transparent) 50%,
     transparent 100%
   );
   border-radius: 9999px;
@@ -884,13 +886,13 @@ body {
   }
 }
 
-/* Presence line dot — pulses in dept color while specialist is active */
+/* Presence line dot — pulses in accent color while specialist is thinking (per spec) */
 @keyframes presenceDot {
-  0%, 100% { opacity: 0.6; transform: scale(0.9); }
-  50% { opacity: 1; transform: scale(1.2); }
+  0%, 100% { opacity: 0.5; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.25); box-shadow: 0 0 6px color-mix(in srgb, var(--cx-accent, #7C6CFF) 60%, transparent); }
 }
 .presence-dot {
-  animation: presenceDot 1.2s ease-in-out infinite;
+  animation: presenceDot 1.1s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .presence-dot { animation: none; opacity: 0.8; }
