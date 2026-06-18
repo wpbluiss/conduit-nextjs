@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 const STORAGE_KEY = "praxis.cookie_consent";
 
@@ -61,29 +62,20 @@ export function CookieConsentBanner() {
           .
         </p>
         <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={decline}
-            className="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors border border-[var(--color-border)] hover:border-[var(--color-accent)]"
-          >
+          <PraxisButton onClick={decline} variant="ghost" size="sm">
             Decline
-          </button>
-          <button
-            onClick={accept}
-            className="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium transition-colors"
-            style={{
-              background: "var(--color-accent)",
-              color: "#fff",
-            }}
-          >
+          </PraxisButton>
+          <PraxisButton onClick={accept} variant="primary" size="sm">
             Accept
-          </button>
-          <button
+          </PraxisButton>
+          <PraxisButton
             onClick={decline}
+            variant="ghost"
+            size="icon-sm"
             aria-label="Dismiss"
-            className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
           >
-            <X size={16} />
-          </button>
+            <X size={14} />
+          </PraxisButton>
         </div>
       </div>
     </div>
