@@ -29,6 +29,8 @@ export type SpecialistAvatarProps = (BuiltinProps | CustomProps) & {
   streaming?: boolean;
   /** Reward beat — brief green ring pulse + spark burst on specialist turn completion. */
   rewarded?: boolean;
+  /** When true, include the radial spark burst (fires only for significant completions). */
+  rewardSignificant?: boolean;
   className?: string;
 };
 
@@ -54,6 +56,7 @@ export function SpecialistAvatar({
   active = false,
   streaming = false,
   rewarded = false,
+  rewardSignificant = false,
   className = "",
 }: SpecialistAvatarProps) {
   const isBuiltin = employee !== undefined;
@@ -106,7 +109,7 @@ export function SpecialistAvatar({
       )}
 
       {/* Reward beat — delegates to RewardBurst (handles reduced-motion internally) */}
-      <RewardBurst rewarded={rewarded} size={size} />
+      <RewardBurst rewarded={rewarded} significant={rewardSignificant} size={size} />
     </span>
   );
 }
