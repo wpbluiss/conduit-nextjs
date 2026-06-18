@@ -243,6 +243,42 @@
   --color-border-strong:          var(--cx-border-strong);
   --color-border-on-inverse:      var(--cx-border);
   --color-border-on-inverse-strong: var(--cx-border-strong);
+
+  /* ================================================================
+   * Spec-exact public API — CONSOLE_REDESIGN.md § Color system
+   *
+   * These names are the canonical API exposed to all subsequent
+   * [REDESIGN] surface PRs. Always alias to --cx-* so the single
+   * source of truth stays in the raw token block above.
+   *
+   * Rule: every new /app surface must use these names (or --cx-*)
+   * and must NEVER introduce a one-off hex value.
+   * ================================================================ */
+
+  /* -- Ink: background tiers -- */
+  --ink-canvas:  var(--cx-canvas);
+  --ink-surface: var(--cx-surface);
+  --ink-raised:  var(--cx-surface-raised);
+  --ink-overlay: var(--cx-surface-overlay);
+
+  /* -- Borders / hairlines -- */
+  --border-subtle: var(--cx-border);
+  --border-strong: var(--cx-border-strong);
+
+  /* -- Text scale -- */
+  --text-primary: var(--cx-text);
+  --text-muted:   var(--cx-text-muted);
+  --text-faint:   var(--cx-text-faint);
+
+  /* -- Accent (electric violet — the ONE accent) -- */
+  --accent-base:   var(--cx-accent);
+  --accent-bright: var(--cx-accent-bright);
+  --accent-tint:   var(--cx-accent-tint);
+  --accent-glow:   var(--cx-accent-glow);
+
+  /* -- Semantic signals -- */
+  --reward-green: var(--cx-reward);
+  --danger:       var(--cx-danger);
 }
 
 /* ------------------------------------------------------------
@@ -680,6 +716,24 @@ html[data-praxis-theme="light"] .praxis-root {
   --pdl-elev-1: 0 1px 2px rgba(15, 15, 20, 0.06);
   --pdl-elev-2: 0 4px 16px rgba(15, 15, 20, 0.08);
   --pdl-elev-3: 0 16px 48px rgba(15, 15, 20, 0.12);
+
+  /* Spec-exact aliases inherit from --cx-* (already overridden above),
+     so these cascade automatically. Restated explicitly for clarity. */
+  --ink-canvas:  var(--cx-canvas);
+  --ink-surface: var(--cx-surface);
+  --ink-raised:  var(--cx-surface-raised);
+  --ink-overlay: var(--cx-surface-overlay);
+  --border-subtle: var(--cx-border);
+  --border-strong: var(--cx-border-strong);
+  --text-primary: var(--cx-text);
+  --text-muted:   var(--cx-text-muted);
+  --text-faint:   var(--cx-text-faint);
+  --accent-base:   var(--cx-accent);
+  --accent-bright: var(--cx-accent-bright);
+  --accent-tint:   var(--cx-accent-tint);
+  --accent-glow:   var(--cx-accent-glow);
+  --reward-green: var(--cx-reward);
+  --danger:       var(--cx-danger);
 }
 
 html[data-praxis-theme="light"] .praxis-root .conduit-canvas {
