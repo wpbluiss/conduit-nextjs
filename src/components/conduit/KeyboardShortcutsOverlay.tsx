@@ -198,7 +198,7 @@ export function KeyboardShortcutsOverlay() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
+            transition={{ duration: 0.14 }}
             className="fixed inset-0 z-[100] bg-black/50"
             aria-hidden="true"
             onClick={() => setOpen(false)}
@@ -211,14 +211,13 @@ export function KeyboardShortcutsOverlay() {
             aria-label="Keyboard shortcuts"
             aria-modal="true"
             initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.96 }}
-            transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
+            animate={{ opacity: 1, scale: 1, transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] } }}
+            exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.12, ease: [0.22, 1, 0.36, 1] } }}
             className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none"
           >
             <div
               ref={panelRef}
-              className="cx-glass-float cx-glass-border pointer-events-auto w-full max-w-sm rounded-2xl overflow-hidden"
+              className="cx-glass-overlay cx-glass-border pointer-events-auto w-full max-w-sm rounded-2xl overflow-hidden"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">

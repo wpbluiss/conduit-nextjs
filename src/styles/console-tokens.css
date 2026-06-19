@@ -1103,3 +1103,57 @@ html[data-praxis-theme="light"] {
   .cx-bar-anim  { animation: none !important; }
   .cx-chart-anim { animation: none !important; }
 }
+
+/* ============================================================
+ * Modal / dialog enter–exit animation
+ *
+ * cx-modal-animate  — centered panel: scale 0.96⇄1 + fade
+ * cx-overlay-animate — scrim: fade 140ms
+ *
+ * Enter: 180ms (--cx-dur-default) with spec ease [0.22,1,0.36,1]
+ * Exit:  120ms (--cx-dur-fast)    with same ease
+ * Applied via data-state="open"/"closed" (Radix sets these).
+ * Uses standalone `scale` property to avoid conflicting with
+ * translate-x/y centering transforms on the same element.
+ * ============================================================ */
+
+@keyframes cx-modal-in {
+  from { opacity: 0; scale: 0.96; }
+  to   { opacity: 1; scale: 1; }
+}
+
+@keyframes cx-modal-out {
+  from { opacity: 1; scale: 1; }
+  to   { opacity: 0; scale: 0.96; }
+}
+
+@keyframes cx-overlay-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes cx-overlay-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+.cx-modal-animate[data-state="open"] {
+  animation: cx-modal-in var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+
+.cx-modal-animate[data-state="closed"] {
+  animation: cx-modal-out var(--cx-dur-fast, 120ms) var(--cx-ease, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+
+.cx-overlay-animate[data-state="open"] {
+  animation: cx-overlay-fade-in 140ms ease-out both;
+}
+
+.cx-overlay-animate[data-state="closed"] {
+  animation: cx-overlay-fade-out 140ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cx-modal-animate,
+  .cx-overlay-animate { animation: none !important; }
+}

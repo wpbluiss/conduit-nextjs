@@ -209,7 +209,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
+            transition={{ duration: 0.14 }}
             className="fixed inset-0 z-[200] bg-black/50"
             aria-hidden
             onClick={close}
@@ -218,10 +218,9 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
           {/* Panel */}
           <motion.div
             key="cmd-palette-panel"
-            initial={{ opacity: 0, scale: 0.97, y: -8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.97, y: -8 }}
-            transition={{ duration: 0.15, ease: [0.25, 1, 0.5, 1] }}
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1, transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] } }}
+            exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.12, ease: [0.22, 1, 0.36, 1] } }}
             className="fixed inset-0 z-[201] flex items-start justify-center pt-[12vh] px-4 pointer-events-none"
             aria-live="off"
           >
@@ -229,7 +228,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
               role="dialog"
               aria-label="Command palette"
               aria-modal="true"
-              className="cx-glass-float cx-glass-border pointer-events-auto w-full max-w-lg rounded-2xl overflow-hidden"
+              className="cx-glass-overlay cx-glass-border pointer-events-auto w-full max-w-lg rounded-2xl overflow-hidden"
             >
               {/* Search input */}
               <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[var(--color-border)]">
