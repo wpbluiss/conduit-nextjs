@@ -864,8 +864,8 @@ export function Sidebar({
                   const empRole = EMPLOYEES[emp]?.role ?? "";
                   const rowInner = (
                     <motion.span
-                      whileHover={shouldReduceMotion ? undefined : { scale: 1.01 }}
-                      whileTap={shouldReduceMotion ? undefined : { scale: 0.99 }}
+                      whileHover={shouldReduceMotion ? undefined : { y: -1 }}
+                      whileTap={shouldReduceMotion ? undefined : { scale: 0.98, y: 0 }}
                       transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
                       className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]" : ""}`}
                       style={{
@@ -887,7 +887,10 @@ export function Sidebar({
                       <div className="min-w-0 flex-1">
                         <span
                           className="block truncate cx-type-sm"
-                          style={{ color: "var(--cx-text)", fontWeight: active ? 600 : 400 }}
+                          style={{
+                            color: active ? "var(--cx-accent-bright)" : "var(--cx-text-muted)",
+                            fontWeight: active ? 600 : 400,
+                          }}
                         >
                           {labelFor(emp)}
                         </span>
@@ -959,8 +962,8 @@ export function Sidebar({
                     const empRole = EMPLOYEES[emp]?.role ?? "";
                     const rowInner = (
                       <motion.span
-                        whileHover={shouldReduceMotion ? undefined : { scale: 1.01 }}
-                        whileTap={shouldReduceMotion ? undefined : { scale: 0.99 }}
+                        whileHover={shouldReduceMotion ? undefined : { y: -1 }}
+                        whileTap={shouldReduceMotion ? undefined : { scale: 0.98, y: 0 }}
                         transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
                         className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]" : ""}`}
                         style={{
@@ -982,7 +985,10 @@ export function Sidebar({
                         <div className="min-w-0 flex-1">
                           <span
                             className="block truncate cx-type-sm"
-                            style={{ color: "var(--cx-text)", fontWeight: active ? 600 : 400 }}
+                            style={{
+                              color: active ? "var(--cx-accent-bright)" : "var(--cx-text-muted)",
+                              fontWeight: active ? 600 : 400,
+                            }}
                           >
                             {labelFor(emp)}
                           </span>
