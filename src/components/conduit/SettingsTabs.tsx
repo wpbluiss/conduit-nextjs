@@ -518,7 +518,7 @@ function SpecialistsTab({
                         type="button"
                         onClick={() => handleLengthChange(emp, value)}
                         title={hint}
-                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                        className={`px-3 py-1.5 rounded-md cx-type-xs font-medium transition-all ${
                           current === value
                             ? "bg-[var(--cx-accent)] text-white"
                             : "border border-[var(--cx-border)] text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:border-[var(--cx-text-muted)]"
@@ -618,7 +618,7 @@ function SpecialistMetrics() {
       </div>
 
       {error && (
-        <p className="text-[var(--cx-text-muted)] text-sm">
+        <p className="text-[var(--cx-text-muted)] cx-type-sm">
           Failed to load metrics. Please try again.
         </p>
       )}
@@ -1705,7 +1705,7 @@ function ProfileTab({
             <select
               value={tz}
               onChange={(e) => saveTz(e.target.value)}
-              className="w-full max-w-sm bg-[var(--cx-surface-raised)] border border-[var(--cx-border)] px-3 py-2 outline-none rounded-lg cx-type-sm"
+              className="w-full max-w-sm bg-[var(--cx-surface-raised)] border border-[var(--cx-border)] px-3 py-2 outline-none rounded-lg cx-type-sm text-[var(--cx-text)]"
             >
               {[...new Set([tz, ...COMMON_TIMEZONES])].map((z) => (
                 <option key={z} value={z}>
@@ -2409,7 +2409,7 @@ function Donut({
         />
         {segments}
       </svg>
-      <div className="text-xs space-y-1">
+      <div className="cx-type-xs space-y-1">
         {data
           .filter((d) => d.val > 0)
           .map((d) => (
@@ -2811,7 +2811,7 @@ function BillingTab({
             </div>
           ) : (
             <div className="conduit-card overflow-hidden">
-              <table className="w-full text-sm">
+              <table className="w-full cx-type-sm">
                 <thead>
                   <tr className="border-b border-[var(--cx-border)]">
                     {["Date", "Amount", "Status", ""].map((h) => (
@@ -2992,10 +2992,10 @@ function BillingTab({
               className="conduit-card p-4 text-left hover:border-[var(--cx-accent)] transition-colors disabled:opacity-50"
             >
               <div className="cx-heading-lg">${t.amountCents / 100}</div>
-              <div className="mt-1 text-sm">
+              <div className="mt-1 cx-type-sm text-[var(--cx-text-muted)]">
                 {(t.tokensGranted / 1000).toLocaleString()}k tokens
               </div>
-              <span className="mt-3 inline-flex items-center gap-1 text-xs text-[var(--cx-accent)]">
+              <span className="mt-3 inline-flex items-center gap-1 cx-type-xs text-[var(--cx-accent)]">
                 {busy === t.id ? (
                   <>
                     <SpinnerIcon size={11} />
@@ -3643,7 +3643,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : isAvailable("google_calendar") ? (
             <a
               href="/api/conduit/connectors/google-calendar/auth"
-              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-1.5 no-underline hover:opacity-90 transition-opacity duration-150"
               style={{
                 background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
                 border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
@@ -3656,7 +3656,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : (
             <button
               disabled
-              className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
               style={{
                 background: "var(--cx-surface)",
                 border: "1px solid var(--cx-border)",
@@ -3719,12 +3719,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                   <select
                     value={selectedChannel}
                     onChange={(e) => setSelectedChannel(e.target.value)}
-                    className="flex-1 text-xs rounded-lg px-2 py-2"
-                    style={{
-                      background: "var(--cx-surface)",
-                      border: "1px solid var(--cx-border)",
-                      color: "var(--cx-text)",
-                    }}
+                    className="flex-1 cx-type-xs rounded-lg px-2 py-2 bg-[var(--cx-surface)] border border-[var(--cx-border)] text-[var(--cx-text)] outline-none"
                   >
                     <option value="">Pick a channel…</option>
                     {slackChannels.map((c) => (
@@ -3758,7 +3753,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : isFreeUser ? (
             <a
               href="/app/settings?tab=billing"
-              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-1.5 no-underline hover:opacity-90 transition-opacity duration-150"
               style={{
                 background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
                 border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
@@ -3771,7 +3766,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : isAvailable("slack") ? (
             <a
               href="/api/conduit/connectors/slack/auth"
-              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-1.5 no-underline hover:opacity-90 transition-opacity duration-150"
               style={{
                 background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
                 border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
@@ -3784,7 +3779,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : (
             <button
               disabled
-              className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
               style={{
                 background: "var(--cx-surface)",
                 border: "1px solid var(--cx-border)",
@@ -3854,7 +3849,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : isAvailable("hubspot") ? (
             <a
               href="/api/conduit/connectors/hubspot/auth"
-              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-1.5 no-underline hover:opacity-90 transition-opacity duration-150"
               style={{
                 background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
                 border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
@@ -3867,7 +3862,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : (
             <button
               disabled
-              className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
               style={{
                 background: "var(--cx-surface)",
                 border: "1px solid var(--cx-border)",
@@ -3962,13 +3957,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                       onChange={(e) => setDriveSearchQuery(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") searchDriveFiles(); }}
                       placeholder="Search Docs & Sheets…"
-                      className="flex-1 text-xs rounded-lg px-2 py-2"
-                      style={{
-                        background: "var(--cx-surface)",
-                        border: "1px solid var(--cx-border)",
-                        color: "var(--cx-text)",
-                        outline: "none",
-                      }}
+                      className="flex-1 cx-type-xs rounded-lg px-2 py-2 bg-[var(--cx-surface)] border border-[var(--cx-border)] text-[var(--cx-text)] outline-none"
                     />
                     <PraxisButton
                       type="button"
@@ -3998,7 +3987,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                               saveDriveFiles(updated);
                             }}
                             disabled={isSelected || driveSaving}
-                            className="text-left px-3 py-2 text-xs flex items-center gap-2"
+                            className="text-left px-3 py-2 cx-type-xs flex items-center gap-2 transition-opacity duration-100 disabled:opacity-60"
                             style={{
                               background: isSelected ? "color-mix(in srgb, var(--cx-reward) 8%, transparent)" : "transparent",
                               color: isSelected ? "var(--cx-reward)" : "var(--cx-text)",
@@ -4073,7 +4062,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : isFreeUser ? (
             <a
               href="/app/settings?tab=billing"
-              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-1.5 no-underline hover:opacity-90 transition-opacity duration-150"
               style={{
                 background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
                 border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
@@ -4086,7 +4075,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : isAvailable("google_drive") ? (
             <a
               href="/api/conduit/connectors/google-drive/auth"
-              className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-1.5 no-underline hover:opacity-90 transition-opacity duration-150"
               style={{
                 background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
                 border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
@@ -4099,7 +4088,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : (
             <button
               disabled
-              className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
               style={{
                 background: "var(--cx-surface)",
                 border: "1px solid var(--cx-border)",
@@ -4182,7 +4171,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
         ) : isAvailable("github") ? (
           <a
             href="/api/conduit/connectors/github/auth"
-            className="mt-auto w-full py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 no-underline"
+            className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-1.5 no-underline hover:opacity-90 transition-opacity duration-150"
             style={{
               background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
               border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
@@ -4195,7 +4184,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
         ) : (
           <button
             disabled
-            className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
+            className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
             style={{
               background: "var(--cx-surface)",
               border: "1px solid var(--cx-border)",
@@ -4251,7 +4240,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               </div>
               <button
                 disabled
-                className="mt-auto w-full py-2 rounded-lg text-xs font-medium cursor-not-allowed"
+                className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40"
                 style={{
                   background: "var(--cx-surface)",
                   border: "1px solid var(--cx-border)",
@@ -4961,7 +4950,7 @@ function LabelsTab() {
                     type="button"
                     onClick={() => void handleSave(label.id)}
                     disabled={!editName.trim() || saving}
-                    className="px-3 py-1 rounded-lg text-xs font-medium text-white disabled:opacity-50"
+                    className="px-3 py-1 rounded-lg cx-type-xs font-medium text-white disabled:opacity-50 hover:opacity-80 transition-opacity duration-150"
                     style={{ background: editColor }}
                   >
                     {saving ? "Saving…" : "Save"}
@@ -5057,7 +5046,7 @@ function LabelsTab() {
                 <button
                   type="submit"
                   disabled={!newName.trim() || creating}
-                  className="px-3 py-1 rounded-lg text-xs font-medium text-white disabled:opacity-50"
+                  className="px-3 py-1 rounded-lg cx-type-xs font-medium text-white disabled:opacity-50 hover:opacity-80 transition-opacity duration-150"
                   style={{ background: newColor }}
                 >
                   {creating ? "Creating…" : "Create"}
