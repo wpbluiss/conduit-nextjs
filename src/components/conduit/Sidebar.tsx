@@ -5,7 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { CX_EASE, CX_DUR_FAST, CX_DUR_BASE, TX_BASE } from "@/lib/ui/motion";
+import { CX_EASE, CX_DUR_FAST, CX_DUR_BASE } from "@/lib/ui/motion";
 import {
   Activity,
   BarChart3,
@@ -686,7 +686,7 @@ export function Sidebar({
         aria-modal={open ? "true" : undefined}
         aria-label="Navigation"
         animate={{ width: collapsed ? 52 : 256, minWidth: collapsed ? 52 : 256 }}
-        transition={skipTransition || shouldReduceMotion ? { duration: 0 } : { ...TX_BASE }}
+        transition={skipTransition || shouldReduceMotion ? { duration: 0 } : { duration: 0.2, ease: [...CX_EASE] }}
         className={`cx-glass border-r border-[var(--cx-glass-border)] fixed md:static z-40 inset-y-0 left-0 flex flex-col overflow-hidden ${
           open ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
@@ -883,7 +883,7 @@ export function Sidebar({
                           style={{ background: "var(--cx-accent)" }}
                         />
                       )}
-                      <SpecialistAvatar employee={emp} size={24} active={active} streaming={isStreaming} />
+                      <SpecialistAvatar employee={emp} size={20} active={active} streaming={isStreaming} />
                       <div className="min-w-0 flex-1">
                         <span
                           className="block truncate cx-type-sm"
@@ -989,7 +989,7 @@ export function Sidebar({
                             style={{ background: "var(--cx-accent)" }}
                           />
                         )}
-                        <SpecialistAvatar employee={emp} size={24} active={active} streaming={isStreaming} />
+                        <SpecialistAvatar employee={emp} size={20} active={active} streaming={isStreaming} />
                         <div className="min-w-0 flex-1">
                           <span
                             className="block truncate cx-type-sm"
@@ -1516,7 +1516,7 @@ export function Sidebar({
                               /* Rename inline mode */
                               <div
                                 className="relative flex items-start gap-2 pl-3 pr-2 py-2 rounded-lg"
-                                style={{ background: active ? "var(--cx-accent-tint)" : "var(--cx-glass-bg)" }}
+                                style={{ background: active ? "var(--cx-surface)" : "var(--cx-glass-bg)" }}
                               >
                                 {active && (
                                   <span
@@ -1568,8 +1568,8 @@ export function Sidebar({
                                 <Link
                                   href={`/app?c=${c.id}`}
                                   onClick={close}
-                                  className={`relative flex items-start gap-2 pl-3 pr-9 py-2 rounded-lg transition-[background,box-shadow] duration-150 ${!active ? "hover:bg-[var(--cx-surface-raised)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.22)]" : ""}`}
-                                  style={{ background: active ? "var(--cx-accent-tint)" : undefined, boxShadow: active ? "var(--cx-glass-highlight)" : undefined }}
+                                  className={`relative flex items-start gap-2 pl-3 pr-9 py-2 rounded-lg transition-[background] duration-150 ${!active ? "hover:bg-[var(--cx-surface-raised)]" : ""}`}
+                                  style={{ background: active ? "var(--cx-surface)" : undefined }}
                                   onMouseEnter={(e) => openPeek(c.id, e.currentTarget)}
                                   onMouseLeave={closePeek}
                                   onFocus={(e) => openPeek(c.id, e.currentTarget, true)}
@@ -1594,7 +1594,7 @@ export function Sidebar({
                                       </span>
                                       <span
                                         className="shrink-0 cx-mono cx-type-xs"
-                                        style={{ color: "var(--cx-text-muted)" }}
+                                        style={{ color: "var(--cx-text-faint)" }}
                                       >
                                         {relativeDate(c.updated_at)}
                                       </span>
@@ -1839,6 +1839,21 @@ export function Sidebar({
                     {workspaceName || accountName ? `· ${(workspaceName || accountName).slice(0, 16)}` : ""}
                   </div>
                 </div>
+              </div>
+              {/* Bottom collapse toggle — desktop only, spec-required position */}
+              <div className="hidden md:block">
+                <PraxisButton
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleCollapsed}
+                  aria-label="Collapse sidebar"
+                  title="Collapse sidebar"
+                  className="w-full justify-start"
+                >
+                  <PanelLeftClose size={16} strokeWidth={1.75} />
+                  Collapse
+                </PraxisButton>
               </div>
             </div>
           )}
