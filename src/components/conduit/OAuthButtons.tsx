@@ -95,7 +95,7 @@ export function OAuthButtons({ redirectTo = "/app/workspace" }: { redirectTo?: s
       <div className="relative flex items-center gap-3 my-5">
         <div
           className="flex-1 h-px"
-          style={{ background: "rgba(255,255,255,0.08)" }}
+          style={{ background: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}
         />
         <span
           className="cx-type-xs uppercase tracking-[0.16em] shrink-0"
@@ -105,7 +105,7 @@ export function OAuthButtons({ redirectTo = "/app/workspace" }: { redirectTo?: s
         </span>
         <div
           className="flex-1 h-px"
-          style={{ background: "rgba(255,255,255,0.08)" }}
+          style={{ background: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}
         />
       </div>
     </>

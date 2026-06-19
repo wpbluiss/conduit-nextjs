@@ -153,16 +153,16 @@ function ThinkingIndicator({ employee, reducedMotion }: {
       {/* Thin accent progress shimmer — slides left-to-right, GPU-only (translateX) */}
       <div
         className="relative h-0.5 w-40 overflow-hidden rounded-full"
-        style={{ background: "rgba(124,108,255,0.10)" }}
+        style={{ background: "color-mix(in srgb, var(--cx-accent, #7C6CFF) 10%, transparent)" }}
         role="status"
         aria-label={`${EMPLOYEES[employee]?.name ?? "Specialist"} is thinking`}
       >
         {reducedMotion ? (
-          <div className="absolute inset-y-0 left-0 w-1/2 rounded-full" style={{ background: "rgba(124,108,255,0.4)" }} />
+          <div className="absolute inset-y-0 left-0 w-1/2 rounded-full" style={{ background: "color-mix(in srgb, var(--cx-accent, #7C6CFF) 40%, transparent)" }} />
         ) : (
           <motion.div
             className="absolute inset-y-0 left-0 w-2/5 rounded-full"
-            style={{ background: "linear-gradient(90deg, transparent, rgba(124,108,255,0.75), rgba(124,108,255,0.95), rgba(124,108,255,0.75), transparent)" }}
+            style={{ background: "linear-gradient(90deg, transparent, color-mix(in srgb, var(--cx-accent, #7C6CFF) 75%, transparent), var(--cx-accent, #7C6CFF), color-mix(in srgb, var(--cx-accent, #7C6CFF) 75%, transparent), transparent)" }}
             animate={{ x: ["-100%", "350%"] }}
             transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.1 }}
           />
@@ -738,7 +738,7 @@ export function LiveChat({
               style={{
                 borderColor: loading
                   ? "var(--cx-accent, #7C6CFF)"
-                  : "rgba(255,255,255,0.10)",
+                  : "var(--cx-glass-border, rgba(255,255,255,0.08))",
                 boxShadow: loading
                   ? "0 0 0 3px var(--cx-accent-glow-raw, rgba(124,108,255,0.18))"
                   : undefined,

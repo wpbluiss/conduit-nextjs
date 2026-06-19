@@ -24,7 +24,7 @@ const FALLBACK_EMPLOYEE = {
   role: "",
   initial: "?",
   color: "var(--cx-text-muted)",
-  colorSoft: "rgba(160,160,176,0.12)",
+  colorSoft: "var(--cx-text-muted-tint, rgba(160,160,176,0.12))",
 };
 
 export function EmployeeAvatar({

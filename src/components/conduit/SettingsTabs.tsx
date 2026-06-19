@@ -1044,7 +1044,7 @@ function ToggleRow({
           className={`inline-block h-5 w-5 transform rounded-full shadow-sm transition-transform motion-safe:duration-150 motion-safe:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${
             value ? "translate-x-5" : "translate-x-0.5"
           }`}
-          style={{ background: value ? "rgba(255,255,255,0.95)" : "var(--cx-text-muted)" }}
+          style={{ background: value ? "var(--cx-toggle-thumb, rgba(255,255,255,0.95))" : "var(--cx-text-muted)" }}
         />
       </button>
     </div>
@@ -1242,7 +1242,7 @@ function WorkspaceTab({
               )}
             </div>
             {logoUploading && (
-              <div className="absolute inset-0 rounded-xl flex items-center justify-center" style={{ background: "rgba(11,11,15,0.6)" }}>
+              <div className="absolute inset-0 rounded-xl flex items-center justify-center" style={{ background: "var(--cx-canvas-dim, rgba(11,11,15,0.60))" }}>
                 <SpinnerIcon size={18} />
               </div>
             )}
@@ -1614,7 +1614,7 @@ function ProfileTab({
               )}
             </div>
             {avatarUploading && (
-              <div className="absolute inset-0 rounded-full flex items-center justify-center" style={{ background: "rgba(11,11,15,0.6)" }}>
+              <div className="absolute inset-0 rounded-full flex items-center justify-center" style={{ background: "var(--cx-canvas-dim, rgba(11,11,15,0.60))" }}>
                 <SpinnerIcon size={18} />
               </div>
             )}
@@ -2804,7 +2804,7 @@ function BillingTab({
       {showCancelModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: "rgba(0,0,0,0.5)" }}
+          style={{ background: "var(--cx-modal-scrim, rgba(11,11,15,0.65))" }}
           onClick={(e) => e.target === e.currentTarget && setShowCancelModal(false)}
         >
           <div
@@ -4447,7 +4447,7 @@ function AlwaysOnRow({ label, desc }: { label: string; desc: string }) {
         title="Cannot be disabled"
         className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full cursor-not-allowed bg-[var(--cx-accent)]"
       >
-        <span className="inline-block h-5 w-5 transform rounded-full translate-x-5" style={{ background: "rgba(255,255,255,0.95)" }} />
+        <span className="inline-block h-5 w-5 transform rounded-full translate-x-5" style={{ background: "var(--cx-toggle-thumb, rgba(255,255,255,0.95))" }} />
       </div>
     </div>
   );

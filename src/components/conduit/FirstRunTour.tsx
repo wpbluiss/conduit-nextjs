@@ -150,7 +150,7 @@ export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
           style={{
             position: "absolute",
             inset: 0,
-            background: "rgba(10,9,8,0.55)",
+            background: "var(--cx-canvas-scrim, rgba(11,11,15,0.55))",
             pointerEvents: "auto",
           }}
           onClick={dismiss}
