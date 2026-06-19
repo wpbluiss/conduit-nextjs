@@ -84,6 +84,7 @@ export function PwaInstaller() {
         >
           <Download
             size={18}
+            strokeWidth={1.75}
             style={{ color: "var(--cx-accent)" }}
           />
         </div>
@@ -93,7 +94,7 @@ export function PwaInstaller() {
           </div>
           {iosHint ? (
             <p className="cx-type-xs text-[var(--color-cream-mute)] mt-1 flex items-center gap-1 flex-wrap">
-              Tap <Share2 size={13} className="inline" /> Share →{" "}
+              Tap <Share2 size={13} strokeWidth={1.75} className="inline" /> Share →{" "}
               <span className="text-[var(--color-cream)]">
                 Add to Home Screen
               </span>
@@ -122,7 +123,7 @@ export function PwaInstaller() {
           onClick={dismiss}
           aria-label="Dismiss"
         >
-          <X size={16} />
+          <X size={16} strokeWidth={1.75} />
         </PraxisButton>
       </div>
     </div>

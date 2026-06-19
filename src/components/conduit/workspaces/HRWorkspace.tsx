@@ -50,7 +50,7 @@ export default function HRWorkspace() {
       <div>
         <div className="flex items-baseline justify-between mb-3">
           <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
-            <Users2 size={11} /> Hiring pipeline
+            <Users2 size={11} strokeWidth={1.75} /> Hiring pipeline
           </div>
           <Link
             href={`/app?pin=hr&prompt=${encodeURIComponent("Walk me through this week's pipeline")}`}
@@ -101,7 +101,7 @@ export default function HRWorkspace() {
       <div>
         <div className="flex items-baseline justify-between mb-3">
           <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
-            <Briefcase size={11} /> Open roles
+            <Briefcase size={11} strokeWidth={1.75} /> Open roles
           </div>
           <Link
             href={`/app?pin=hr&prompt=${encodeURIComponent("Open a new role — draft the job description")}`}
@@ -140,6 +140,7 @@ export default function HRWorkspace() {
                 </div>
                 <ArrowRight
                   size={14}
+                  strokeWidth={1.75}
                   className="shrink-0 text-[var(--color-text-muted)]"
                 />
               </Link>

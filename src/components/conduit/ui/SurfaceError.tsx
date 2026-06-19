@@ -50,7 +50,7 @@ export function SurfaceError({
             "1px solid color-mix(in srgb, var(--cx-danger, #F4607D) 24%, transparent)",
         }}
       >
-        <AlertTriangle size={22} />
+        <AlertTriangle size={22} strokeWidth={1.75} />
       </span>
       <h1 className="cx-heading-xl mb-3">Something went wrong</h1>
       <p
@@ -65,11 +65,11 @@ export function SurfaceError({
       </p>
       <div className="flex flex-col sm:flex-row items-center gap-3">
         <Button onClick={onRetry} variant="primary" size="md">
-          <RotateCcw size={14} />
+          <RotateCcw size={14} strokeWidth={1.75} />
           Try again
         </Button>
         <Button onClick={() => router.push(homeHref)} variant="ghost" size="md">
-          <Home size={13} />
+          <Home size={13} strokeWidth={1.75} />
           {homeLabel}
         </Button>
       </div>

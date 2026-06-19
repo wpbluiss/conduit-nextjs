@@ -61,7 +61,7 @@ export default function ComplianceWorkspace() {
     <section className="space-y-4">
       <div className="flex items-baseline justify-between">
         <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
-          <ShieldCheck size={11} /> Framework readiness
+          <ShieldCheck size={11} strokeWidth={1.75} /> Framework readiness
         </div>
         <Link
           href={`/app?pin=compliance&prompt=${encodeURIComponent("What regulations apply to my business?")}`}
@@ -142,7 +142,7 @@ export default function ComplianceWorkspace() {
                 className="cx-type-xs uppercase tracking-[0.15em] inline-flex items-center gap-1 mt-auto"
                 style={{ color: dept }}
               >
-                Open framework <ArrowRight size={10} />
+                Open framework <ArrowRight size={10} strokeWidth={1.75} />
               </span>
             </Link>
           );

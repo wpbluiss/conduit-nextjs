@@ -95,7 +95,7 @@ export default function LegalWorkspace() {
             className="mt-3 inline-flex items-center gap-1 cx-type-xs"
             style={{ color: "var(--color-amber)" }}
           >
-            Review expiring docs <ArrowRight size={11} />
+            Review expiring docs <ArrowRight size={11} strokeWidth={1.75} />
           </Link>
         </div>
       </div>
@@ -104,7 +104,7 @@ export default function LegalWorkspace() {
       <div>
         <div className="flex items-baseline justify-between mb-3">
           <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
-            <ScrollText size={11} /> Contract library
+            <ScrollText size={11} strokeWidth={1.75} /> Contract library
           </div>
           <Link
             href={`/app?pin=legal&prompt=${encodeURIComponent("Draft a new service agreement")}`}

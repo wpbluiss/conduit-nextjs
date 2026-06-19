@@ -61,6 +61,7 @@ export function TokenBudgetNudge({
     >
       <AlertTriangle
         size={14}
+        strokeWidth={1.75}
         style={{ color: "var(--cx-accent)", flexShrink: 0 }}
       />
       <span style={{ color: "var(--color-text)" }}>
@@ -81,7 +82,7 @@ export function TokenBudgetNudge({
         Upgrade →
       </Link>
       <PraxisButton type="button" variant="ghost" size="icon-sm" onClick={close} aria-label="Dismiss">
-        <X size={14} />
+        <X size={14} strokeWidth={1.75} />
       </PraxisButton>
     </div>
   );

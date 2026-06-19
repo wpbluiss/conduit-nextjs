@@ -46,7 +46,7 @@ export function BuildPreviewStage({ session }: Props) {
             rel="noopener noreferrer"
             className="btn-primary btn-sz-sm inline-flex items-center gap-1.5"
           >
-            Open in new tab <ExternalLink size={13} />
+            Open in new tab <ExternalLink size={13} strokeWidth={1.75} />
           </a>
         </div>
       </section>

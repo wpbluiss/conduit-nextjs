@@ -492,7 +492,7 @@ function SpecialistsTab({
                     size="icon-sm"
                     className="shrink-0"
                   >
-                    <X size={13} />
+                    <X size={13} strokeWidth={1.75} />
                   </PraxisButton>
                 )}
               </div>
@@ -554,7 +554,7 @@ function SpecialistsTab({
 
       <div className="flex justify-end pt-4 border-t border-[var(--cx-border)]">
         <PraxisButton type="submit" disabled={busy}>
-          {busy ? <SpinnerIcon /> : <Check size={14} />}
+          {busy ? <SpinnerIcon /> : <Check size={14} strokeWidth={1.75} />}
           Save settings
         </PraxisButton>
       </div>
@@ -787,7 +787,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
       <div className="space-y-4">
         <div className="conduit-card p-6 text-center relative">
           <div className="flex items-center justify-center gap-2 cx-type-xs uppercase tracking-[0.18em] text-[var(--cx-accent-bright)] mb-2">
-            <Lock size={12} /> Pro feature
+            <Lock size={12} strokeWidth={1.75} /> Pro feature
           </div>
           <p className="cx-heading-xl">Voice mode is a Pro perk</p>
           <p className="mt-2 cx-type-sm text-[var(--cx-text-muted)]">
@@ -967,7 +967,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
                       "Playing…"
                     ) : (
                       <>
-                        <Play size={10} /> Preview
+                        <Play size={10} strokeWidth={1.75} /> Preview
                       </>
                     )}
                   </PraxisButton>
@@ -1349,7 +1349,7 @@ function WorkspaceTab({
             variant="secondary"
             className=""
           >
-            {wsNameSaved ? <><Check size={12} /> Saved</> : "Save name"}
+            {wsNameSaved ? <><Check size={12} strokeWidth={1.75} /> Saved</> : "Save name"}
           </PraxisButton>
         </form>
       </section>
@@ -1692,7 +1692,7 @@ function ProfileTab({
               variant="secondary"
               className="shrink-0"
             >
-              {nameSaved ? <><Check size={12} /> Saved</> : "Save"}
+              {nameSaved ? <><Check size={12} strokeWidth={1.75} /> Saved</> : "Save"}
             </PraxisButton>
           </div>
           {nameError && <p className="cx-type-xs text-[var(--cx-danger)]">{nameError}</p>}
@@ -1721,7 +1721,7 @@ function ProfileTab({
               variant="secondary"
               className="shrink-0"
             >
-              {wsNameSaved ? <><Check size={12} /> Saved</> : "Save"}
+              {wsNameSaved ? <><Check size={12} strokeWidth={1.75} /> Saved</> : "Save"}
             </PraxisButton>
           </div>
           {wsNameError && <p className="cx-type-xs text-[var(--cx-danger)]">{wsNameError}</p>}
@@ -2109,7 +2109,7 @@ function BusinessTab({ account }: { account: AccountData }) {
               isDisabled={briefSaving}
               variant="secondary"
             >
-              {briefSaved ? <><Check size={12} /> Saved</> : "Save brief"}
+              {briefSaved ? <><Check size={12} strokeWidth={1.75} /> Saved</> : "Save brief"}
             </PraxisButton>
             {brief && (
               <PraxisButton
@@ -2798,7 +2798,7 @@ function BillingTab({
               className=""
             >
               Manage subscription
-              <ExternalLink size={12} />
+              <ExternalLink size={12} strokeWidth={1.75} />
             </PraxisButton>
           )}
           {account.has_stripe_customer && tier.monthlyPriceCents > 0 && (
@@ -2969,7 +2969,7 @@ function BillingTab({
                             className="inline-flex items-center gap-1 cx-type-xs text-[var(--cx-accent)] hover:underline"
                           >
                             Download PDF
-                            <ExternalLink size={11} />
+                            <ExternalLink size={11} strokeWidth={1.75} />
                           </a>
                         )}
                       </td>
@@ -3023,6 +3023,7 @@ function BillingTab({
                   <li className="flex items-start gap-2">
                     <Check
                       size={12}
+                      strokeWidth={1.75}
                       className="mt-0.5 shrink-0 text-[var(--cx-accent)]"
                     />
                     {(t.monthlyTokenAllowance / 1000).toLocaleString()}k
@@ -3031,6 +3032,7 @@ function BillingTab({
                   <li className="flex items-start gap-2">
                     <Check
                       size={12}
+                      strokeWidth={1.75}
                       className="mt-0.5 shrink-0 text-[var(--cx-accent)]"
                     />
                     {t.modelCeiling === "haiku"
@@ -3042,6 +3044,7 @@ function BillingTab({
                   <li className="flex items-start gap-2">
                     <Check
                       size={12}
+                      strokeWidth={1.75}
                       className="mt-0.5 shrink-0 text-[var(--cx-accent)]"
                     />
                     {t.allowedEmployees.length} employees
@@ -3050,6 +3053,7 @@ function BillingTab({
                     <li className="flex items-start gap-2">
                       <Check
                         size={12}
+                        strokeWidth={1.75}
                         className="mt-0.5 shrink-0 text-[var(--cx-accent)]"
                       />
                       Multi-user (when shipped)
@@ -3065,7 +3069,7 @@ function BillingTab({
                     className="mt-4 w-full justify-center !py-2"
                   >
                     {`Upgrade to ${t.name}`}
-                    <ArrowRight size={12} />
+                    <ArrowRight size={12} strokeWidth={1.75} />
                   </PraxisButton>
                 )}
               </div>
@@ -3100,7 +3104,7 @@ function BillingTab({
                 ) : (
                   <>
                     Buy
-                    <ArrowRight size={11} />
+                    <ArrowRight size={11} strokeWidth={1.75} />
                   </>
                 )}
               </span>
@@ -3177,7 +3181,7 @@ function ReferralSection() {
             size="sm"
             className="shrink-0"
           >
-            {copied ? <Check size={12} /> : <ExternalLink size={12} />}
+            {copied ? <Check size={12} strokeWidth={1.75} /> : <ExternalLink size={12} strokeWidth={1.75} />}
             {copied ? "Copied!" : "Copy link"}
           </PraxisButton>
         </div>
@@ -3713,7 +3717,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                 border: "1px solid var(--cx-border)",
               }}
             >
-              <Calendar size={20} style={{ color: "#4285F4" }} />
+              <Calendar size={20} strokeWidth={1.75} style={{ color: "#4285F4" }} />
             </div>
             {isConnected("google_calendar") ? (
               <span
@@ -3755,7 +3759,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               size="sm"
               className="mt-auto w-full justify-center"
             >
-              <Link2Off size={12} />
+              <Link2Off size={12} strokeWidth={1.75} />
               {disconnecting === "google_calendar" ? "Disconnecting…" : "Disconnect"}
             </PraxisButton>
           ) : isAvailable("google_calendar") ? (
@@ -3763,7 +3767,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               href="/api/conduit/connectors/google-calendar/auth"
               className="mt-auto btn-secondary btn-sz-sm w-full no-underline"
             >
-              <Link size={12} />
+              <Link size={12} strokeWidth={1.75} />
               Connect Google Calendar
             </a>
           ) : (
@@ -3856,7 +3860,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                 size="sm"
                 className="w-full justify-center"
               >
-                <Link2Off size={12} />
+                <Link2Off size={12} strokeWidth={1.75} />
                 {disconnecting === "slack" ? "Disconnecting…" : "Disconnect"}
               </PraxisButton>
             </div>
@@ -3865,7 +3869,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               href="/app/settings?tab=billing"
               className="mt-auto btn-secondary btn-sz-sm w-full no-underline"
             >
-              <Lock size={12} />
+              <Lock size={12} strokeWidth={1.75} />
               Pro feature — Upgrade
             </a>
           ) : isAvailable("slack") ? (
@@ -3873,7 +3877,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               href="/api/conduit/connectors/slack/auth"
               className="mt-auto btn-secondary btn-sz-sm w-full no-underline"
             >
-              <Link size={12} />
+              <Link size={12} strokeWidth={1.75} />
               Connect Slack
             </a>
           ) : (
@@ -3898,7 +3902,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                 border: "1px solid var(--cx-border)",
               }}
             >
-              <Database size={20} style={{ color: "#FF7A59" }} />
+              <Database size={20} strokeWidth={1.75} style={{ color: "#FF7A59" }} />
             </div>
             {isConnected("hubspot") ? (
               <span
@@ -3940,7 +3944,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               size="sm"
               className="mt-auto w-full justify-center"
             >
-              <Link2Off size={12} />
+              <Link2Off size={12} strokeWidth={1.75} />
               {disconnecting === "hubspot" ? "Disconnecting…" : "Disconnect"}
             </PraxisButton>
           ) : isAvailable("hubspot") ? (
@@ -3948,7 +3952,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               href="/api/conduit/connectors/hubspot/auth"
               className="mt-auto btn-secondary btn-sz-sm w-full no-underline"
             >
-              <Link size={12} />
+              <Link size={12} strokeWidth={1.75} />
               Connect HubSpot
             </a>
           ) : (
@@ -4033,7 +4037,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                   size="sm"
                   className="w-full justify-center"
                 >
-                  <Link size={12} />
+                  <Link size={12} strokeWidth={1.75} />
                   {driveSelectedFiles.length > 0 ? "Change files" : "Pick files"}
                 </PraxisButton>
               ) : (
@@ -4086,7 +4090,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                               {f.mimeType === "application/vnd.google-apps.spreadsheet" ? "Sheet" : "Doc"}
                             </span>
                             <span className="truncate">{f.name}</span>
-                            {isSelected && <Check size={10} className="shrink-0 ml-auto" />}
+                            {isSelected && <Check size={10} strokeWidth={1.75} className="shrink-0 ml-auto" />}
                           </button>
                         );
                       })}
@@ -4142,7 +4146,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                   size="sm"
                   className="flex-1 justify-center"
                 >
-                  <Link2Off size={12} />
+                  <Link2Off size={12} strokeWidth={1.75} />
                   {disconnecting === "google_drive" ? "Disconnecting…" : "Disconnect"}
                 </PraxisButton>
               </div>
@@ -4152,7 +4156,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               href="/app/settings?tab=billing"
               className="mt-auto btn-secondary btn-sz-sm w-full no-underline"
             >
-              <Lock size={12} />
+              <Lock size={12} strokeWidth={1.75} />
               Pro feature — Upgrade
             </a>
           ) : isAvailable("google_drive") ? (
@@ -4160,7 +4164,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               href="/api/conduit/connectors/google-drive/auth"
               className="mt-auto btn-secondary btn-sz-sm w-full no-underline"
             >
-              <Link size={12} />
+              <Link size={12} strokeWidth={1.75} />
               Connect Google Drive
             </a>
           ) : (
@@ -4239,7 +4243,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               size="sm"
               className="w-full justify-center"
             >
-              <Link2Off size={12} />
+              <Link2Off size={12} strokeWidth={1.75} />
               {disconnecting === "github" ? "Disconnecting…" : "Disconnect"}
             </PraxisButton>
           </div>
@@ -4248,7 +4252,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             href="/api/conduit/connectors/github/auth"
             className="mt-auto btn-secondary btn-sz-sm w-full no-underline"
           >
-            <Link size={12} />
+            <Link size={12} strokeWidth={1.75} />
             Connect GitHub
           </a>
         ) : (
@@ -4475,7 +4479,7 @@ function AlwaysOnRow({ label, desc }: { label: string; desc: string }) {
             title={desc}
             className="cursor-help text-[var(--cx-text-muted)]"
           >
-            <Info size={12} />
+            <Info size={12} strokeWidth={1.75} />
           </span>
         </div>
         <div className="cx-type-xs text-[var(--cx-text-muted)] mt-0.5">
@@ -4591,7 +4595,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
           }}
         >
           <div className="flex items-center justify-center gap-2 cx-type-xs uppercase tracking-[0.18em] text-[var(--cx-accent-bright)] mb-2">
-            <Lock size={12} /> Pro feature
+            <Lock size={12} strokeWidth={1.75} /> Pro feature
           </div>
           <p className="cx-heading-xl">Programmatic access</p>
           <p className="mt-2 cx-type-sm text-[var(--cx-text-muted)] max-w-md mx-auto">
@@ -4629,7 +4633,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
               size="sm"
               className="shrink-0"
             >
-              {copied ? <Check size={12} /> : <Lock size={12} />}
+              {copied ? <Check size={12} strokeWidth={1.75} /> : <Lock size={12} strokeWidth={1.75} />}
               {copied ? "Copied!" : "Copy"}
             </PraxisButton>
           </div>
@@ -4655,7 +4659,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
           isDisabled={creating || !newName.trim()}
           variant="primary"
         >
-          {creating ? <SpinnerIcon /> : <ArrowRight size={14} />}
+          {creating ? <SpinnerIcon /> : <ArrowRight size={14} strokeWidth={1.75} />}
           Generate
         </PraxisButton>
       </form>
@@ -4706,7 +4710,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
                 size="sm"
                 className="shrink-0"
               >
-                <X size={12} />
+                <X size={12} strokeWidth={1.75} />
                 Revoke
               </PraxisButton>
             </div>
@@ -4834,7 +4838,7 @@ function ReferralsTab() {
               size="sm"
               className="shrink-0"
             >
-              {copied ? <><Check size={12} /> Copied!</> : <><Link size={12} /> Copy link</>}
+              {copied ? <><Check size={12} strokeWidth={1.75} /> Copied!</> : <><Link size={12} strokeWidth={1.75} /> Copy link</>}
             </PraxisButton>
           </div>
         ) : (
@@ -5010,7 +5014,7 @@ function LabelsTab() {
         <div className="space-y-2">
           {labels.length === 0 && !showCreate && (
             <div className="conduit-card p-6 flex flex-col items-center gap-3 text-center">
-              <Tag size={20} style={{ color: "var(--cx-text-muted)" }} />
+              <Tag size={20} strokeWidth={1.75} style={{ color: "var(--cx-text-muted)" }} />
               <p className="cx-type-sm text-[var(--cx-text-muted)]">No labels yet. Create one to start organizing conversations.</p>
             </div>
           )}
@@ -5096,7 +5100,7 @@ function LabelsTab() {
                     variant="ghost"
                     size="icon-sm"
                   >
-                    <Pencil size={12} />
+                    <Pencil size={12} strokeWidth={1.75} />
                   </PraxisButton>
                   <PraxisButton
                     type="button"
@@ -5106,7 +5110,7 @@ function LabelsTab() {
                     variant="danger"
                     size="icon-sm"
                   >
-                    <Trash2 size={12} />
+                    <Trash2 size={12} strokeWidth={1.75} />
                   </PraxisButton>
                 </div>
               </div>
@@ -5169,7 +5173,7 @@ function LabelsTab() {
               className="w-full justify-start gap-2"
               style={{ border: "1px dashed var(--cx-border)" }}
             >
-              <Plus size={14} />
+              <Plus size={14} strokeWidth={1.75} />
               Create label
             </PraxisButton>
           ) : (

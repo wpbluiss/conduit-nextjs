@@ -71,7 +71,7 @@ export function BuildCraftStrip({ files }: Props) {
               data-recent={path === recentPath ? "true" : undefined}
               title={path}
             >
-              <FileCode size={11} aria-hidden />
+              <FileCode size={11} strokeWidth={1.75} aria-hidden />
               <span>{path}</span>
             </span>
           ))}

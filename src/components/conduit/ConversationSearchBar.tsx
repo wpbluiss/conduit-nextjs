@@ -259,7 +259,7 @@ export function ConversationSearchBar() {
                 className="inline-flex items-center gap-2 cx-type-sm font-medium"
                 style={{ color: "var(--cx-accent)" }}
               >
-                <MessageSquarePlus size={13} />
+                <MessageSquarePlus size={13} strokeWidth={1.75} />
                 Start a new one →
               </Link>
             </div>

@@ -1607,7 +1607,7 @@ export function Chat({
                     aria-label="Search messages"
                     aria-pressed={searchOpen}
                   >
-                    <Search size={12} />
+                    <Search size={12} strokeWidth={1.75} />
                     <span className="hidden sm:inline">Search</span>
                   </PraxisButton>
                   <PraxisButton
@@ -1618,7 +1618,7 @@ export function Chat({
                     title="Export as Markdown"
                     aria-label="Export conversation as Markdown"
                   >
-                    <Download size={12} />
+                    <Download size={12} strokeWidth={1.75} />
                     <span className="hidden sm:inline">Markdown</span>
                   </PraxisButton>
                   {conversationId && (
@@ -1635,7 +1635,7 @@ export function Chat({
                       title="Print / Save as PDF"
                       aria-label="Print conversation or save as PDF"
                     >
-                      <FileText size={12} />
+                      <FileText size={12} strokeWidth={1.75} />
                       <span className="hidden sm:inline">PDF</span>
                     </PraxisButton>
                   )}
@@ -1659,7 +1659,7 @@ export function Chat({
                       title="Copy link to this conversation"
                       aria-label="Copy link to this conversation"
                     >
-                      <Link size={12} />
+                      <Link size={12} strokeWidth={1.75} />
                       <span className="hidden sm:inline">{linkCopied ? "Copied!" : "Copy link"}</span>
                     </PraxisButton>
                   )}
@@ -1674,7 +1674,7 @@ export function Chat({
                       title="Hand off to another specialist"
                       aria-label="Hand off to another specialist"
                     >
-                      <Share2 size={12} />
+                      <Share2 size={12} strokeWidth={1.75} />
                       <span className="hidden sm:inline">
                         {handoffLoading ? "Handing off…" : "Handoff"}
                       </span>
@@ -1690,7 +1690,7 @@ export function Chat({
             <div
               className="cx-glass cx-glass-border flex items-center gap-2 px-2 py-2 mb-2 rounded-[8px]"
             >
-              <Search size={13} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} aria-hidden />
+              <Search size={13} strokeWidth={1.75} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} aria-hidden />
               <input
                 ref={searchInputRef}
                 type="search"
@@ -1715,7 +1715,7 @@ export function Chat({
                 onClick={() => setSearchOpen(false)}
                 aria-label="Close search"
               >
-                <X size={13} />
+                <X size={13} strokeWidth={1.75} />
               </PraxisButton>
             </div>
           )}
@@ -1850,7 +1850,7 @@ export function Chat({
               }}
             >
               <div className="flex items-center gap-2 min-w-0">
-                <Share2 size={14} style={{ color: "var(--color-accent-hi)", flexShrink: 0 }} />
+                <Share2 size={14} strokeWidth={1.75} style={{ color: "var(--color-accent-hi)", flexShrink: 0 }} />
                 <span style={{ color: "var(--color-text-muted)" }}>
                   Continued by{" "}
                   <span style={{ color: "var(--color-accent-hi)", fontWeight: 500 }}>
@@ -1863,7 +1863,7 @@ export function Chat({
                 className="flex items-center gap-1 cx-type-xs font-medium shrink-0 transition-opacity hover:opacity-80"
                 style={{ color: "var(--color-accent-hi)" }}
               >
-                Open <ArrowRight size={11} />
+                Open <ArrowRight size={11} strokeWidth={1.75} />
               </a>
             </div>
           )}
@@ -1914,6 +1914,7 @@ export function Chat({
             >
               <AlertCircle
                 size={16}
+                strokeWidth={1.75}
                 className="shrink-0 mt-0.5"
                 style={{ color: sendError.capacity ? "var(--color-yellow)" : "var(--cx-danger)" }}
               />
@@ -1952,6 +1953,7 @@ export function Chat({
             >
               <AlertCircle
                 size={16}
+                strokeWidth={1.75}
                 className="shrink-0"
                 style={{ color: "var(--color-amber)" }}
               />
@@ -1994,7 +1996,7 @@ export function Chat({
                 : 'var(--color-amber)',
             }}
           >
-            <AlertCircle size={12} aria-hidden />
+            <AlertCircle size={12} strokeWidth={1.75} aria-hidden />
             <span>
               {connStatus === 'reconnecting' && 'Connection lost — reconnecting…'}
               {connStatus === 'reconnected' && 'Reconnected'}
@@ -2009,7 +2011,7 @@ export function Chat({
               onClick={() => setConnStatus('connected')}
               aria-label="Dismiss"
             >
-              <X size={11} />
+              <X size={11} strokeWidth={1.75} />
             </PraxisButton>
           )}
         </div>
@@ -2187,7 +2189,7 @@ export function Chat({
                   onClick={() => setShowHandoffPicker(false)}
                   aria-label="Close"
                 >
-                  <X size={14} />
+                  <X size={14} strokeWidth={1.75} />
                 </PraxisButton>
               </div>
               <div className="grid grid-cols-3 gap-2">
@@ -2625,7 +2627,7 @@ function CopyButton({ content }: { content: string }) {
       title={copied ? "Copied!" : "Copy message"}
       className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100"
     >
-      <Icon size={13} />
+      <Icon size={13} strokeWidth={1.75} />
       <span className="hidden md:inline cx-type-xs">{copied ? "Copied" : "Copy"}</span>
     </PraxisButton>
   );
@@ -2674,7 +2676,7 @@ function MessageFeedbackButtons({
         onMouseEnter={(e) => { if (rating !== 1) (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
         onMouseLeave={(e) => { if (rating !== 1) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
       >
-        <ThumbsUp size={13} fill={rating === 1 ? "currentColor" : "none"} />
+        <ThumbsUp size={13} strokeWidth={1.75} fill={rating === 1 ? "currentColor" : "none"} />
       </button>
       <button
         type="button"
@@ -2689,7 +2691,7 @@ function MessageFeedbackButtons({
         onMouseEnter={(e) => { if (rating !== -1) (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
         onMouseLeave={(e) => { if (rating !== -1) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
       >
-        <ThumbsDown size={13} fill={rating === -1 ? "currentColor" : "none"} />
+        <ThumbsDown size={13} strokeWidth={1.75} fill={rating === -1 ? "currentColor" : "none"} />
       </button>
     </div>
   );
@@ -2764,7 +2766,7 @@ function MessageHandoffButton({
         isDisabled={loading}
         className="opacity-0 group-hover:opacity-100 disabled:opacity-50"
       >
-        <Share2 size={13} />
+        <Share2 size={13} strokeWidth={1.75} />
       </PraxisButton>
       {open && (
         <div
@@ -3372,7 +3374,7 @@ const MessageBubble = memo(function MessageBubble({
             style={{ color: "var(--color-amber)" }}
             aria-label="Response was cut short due to a connection drop"
           >
-            <AlertCircle size={11} aria-hidden />
+            <AlertCircle size={11} strokeWidth={1.75} aria-hidden />
             <span>⚠ Incomplete response</span>
           </div>
         )}
@@ -3411,7 +3413,7 @@ const MessageBubble = memo(function MessageBubble({
               className="mt-0.5 inline-flex items-center justify-center w-9 h-9 rounded-lg shrink-0"
               style={{ background: DEPT_COLOR_SOFT[employee] }}
             >
-              <FileText size={16} style={{ color: DEPT_COLOR[employee] }} />
+              <FileText size={16} strokeWidth={1.75} style={{ color: DEPT_COLOR[employee] }} />
             </span>
             <span className="min-w-0 flex-1">
               <span className="block cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
@@ -3422,7 +3424,7 @@ const MessageBubble = memo(function MessageBubble({
               </span>
               <span className="block cx-type-xs text-[var(--color-text-muted)] mt-1 inline-flex items-center gap-1 group-hover:text-[var(--color-text)]">
                 Open in drawer
-                <ArrowRight size={11} />
+                <ArrowRight size={11} strokeWidth={1.75} />
               </span>
             </span>
           </button>
@@ -3447,7 +3449,7 @@ const MessageBubble = memo(function MessageBubble({
                 className="opacity-0 group-hover:opacity-100"
                 style={{ color: pinned ? "var(--color-accent)" : undefined }}
               >
-                <Pin size={13} fill={pinned ? "currentColor" : "none"} />
+                <Pin size={13} strokeWidth={1.75} fill={pinned ? "currentColor" : "none"} />
               </PraxisButton>
             )}
             {message.employee && message.content && (

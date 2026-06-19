@@ -75,9 +75,9 @@ export function ThemeToggle({
   }
 
   const opts: { key: Pref; label: string; icon: React.ReactNode }[] = [
-    { key: "system", label: "System", icon: <Monitor size={14} /> },
-    { key: "light", label: "Light", icon: <Sun size={14} /> },
-    { key: "dark", label: "Dark", icon: <Moon size={14} /> },
+    { key: "system", label: "System", icon: <Monitor size={14} strokeWidth={1.75} /> },
+    { key: "light", label: "Light", icon: <Sun size={14} strokeWidth={1.75} /> },
+    { key: "dark", label: "Dark", icon: <Moon size={14} strokeWidth={1.75} /> },
   ];
 
   return (

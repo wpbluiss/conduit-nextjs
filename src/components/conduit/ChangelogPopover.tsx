@@ -100,7 +100,7 @@ export function ChangelogPopover() {
         aria-label={`What's new${unseen > 0 ? ` — ${unseen} unread` : ""}`}
         className="relative w-full justify-start"
       >
-        <Bell size={14} />
+        <Bell size={14} strokeWidth={1.75} />
         <span>What&apos;s new</span>
         {unseen > 0 && (
           <span
@@ -141,7 +141,7 @@ export function ChangelogPopover() {
                 onClick={() => setOpen(false)}
                 aria-label="Close"
               >
-                <X size={14} />
+                <X size={14} strokeWidth={1.75} />
               </PraxisButton>
             </div>
 

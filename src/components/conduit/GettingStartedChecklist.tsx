@@ -120,7 +120,7 @@ export function GettingStartedChecklist({
             onClick={dismiss}
             aria-label="Dismiss getting started checklist"
           >
-            <X size={12} />
+            <X size={12} strokeWidth={1.75} />
           </PraxisButton>
         </div>
 

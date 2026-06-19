@@ -222,7 +222,7 @@ export function KeyboardShortcutsOverlay() {
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
                 <div className="flex items-center gap-2">
-                  <Keyboard size={15} className="text-[var(--color-text-muted)]" />
+                  <Keyboard size={15} strokeWidth={1.75} className="text-[var(--color-text-muted)]" />
                   <span className="cx-type-base font-medium">Keyboard shortcuts</span>
                 </div>
                 <PraxisButton
@@ -232,7 +232,7 @@ export function KeyboardShortcutsOverlay() {
                   onClick={() => setOpen(false)}
                   aria-label="Close"
                 >
-                  <X size={15} />
+                  <X size={15} strokeWidth={1.75} />
                 </PraxisButton>
               </div>
 

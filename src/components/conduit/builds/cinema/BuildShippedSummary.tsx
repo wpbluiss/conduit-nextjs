@@ -368,7 +368,7 @@ function BuildShippedSummaryInner({
             rel="noopener noreferrer"
             className="btn-secondary btn-sz-sm inline-flex items-center gap-1.5"
           >
-            <Code2 size={13} /> View repo
+            <Code2 size={13} strokeWidth={1.75} /> View repo
           </a>
         )}
         {isSuccess && (

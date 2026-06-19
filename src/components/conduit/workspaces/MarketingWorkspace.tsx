@@ -59,7 +59,7 @@ export default function MarketingWorkspace({
       <div>
         <div className="flex items-baseline justify-between mb-3">
           <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
-            <CalendarDays size={11} /> Content calendar · next 7 days
+            <CalendarDays size={11} strokeWidth={1.75} /> Content calendar · next 7 days
           </div>
           <Link
             href={`/app?pin=marketing&prompt=${encodeURIComponent("Plan the week of content")}`}
@@ -104,7 +104,7 @@ export default function MarketingWorkspace({
       {/* Recent posts */}
       <div>
         <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-3 inline-flex items-center gap-1.5">
-          <Megaphone size={11} /> Recent posts
+          <Megaphone size={11} strokeWidth={1.75} /> Recent posts
         </div>
         {recent.length === 0 ? (
           <div
@@ -122,7 +122,7 @@ export default function MarketingWorkspace({
               className="inline-flex items-center gap-1 cx-type-base"
               style={{ color: dept }}
             >
-              <Sparkles size={13} /> Draft a launch post
+              <Sparkles size={13} strokeWidth={1.75} /> Draft a launch post
             </Link>
           </div>
         ) : (

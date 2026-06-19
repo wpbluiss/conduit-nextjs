@@ -167,7 +167,7 @@ export function MemoryNodeTooltip({
           title="Edit"
           aria-label="Edit memory"
         >
-          <Edit3 size={13} />
+          <Edit3 size={13} strokeWidth={1.75} />
         </PraxisButton>
         <PraxisButton
           variant="danger"
@@ -179,7 +179,7 @@ export function MemoryNodeTooltip({
           title="Archive"
           aria-label="Archive memory"
         >
-          <Archive size={13} />
+          <Archive size={13} strokeWidth={1.75} />
         </PraxisButton>
       </div>
     </div>
