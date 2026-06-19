@@ -234,7 +234,8 @@ export function ConversationSearchBar() {
         )}
         {loading && (
           <span
-            className="shrink-0 w-3 h-3 rounded-full border-t border-[var(--color-accent)] animate-spin"
+            className="shrink-0 w-3 h-3 rounded-full border-t animate-spin"
+            style={{ borderColor: "var(--cx-accent)" }}
             aria-hidden
           />
         )}
@@ -250,13 +251,13 @@ export function ConversationSearchBar() {
         >
           {!loading && searched && results.length === 0 && (
             <div className="px-4 py-4">
-              <p className="cx-type-base text-[var(--color-text-muted)] mb-3">
+              <p className="cx-type-base mb-3" style={{ color: "var(--cx-text-muted)" }}>
                 No conversations match &ldquo;{query}&rdquo;
               </p>
               <Link
                 href="/app"
                 className="inline-flex items-center gap-2 cx-type-sm font-medium"
-                style={{ color: "var(--color-accent)" }}
+                style={{ color: "var(--cx-accent)" }}
               >
                 <MessageSquarePlus size={13} />
                 Start a new one →

@@ -7,6 +7,7 @@ import { Hammer } from "lucide-react";
 import { DEPT_COLOR, EMPLOYEE_ICON, employeeLabel } from "./EmployeeBadge";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import type { ActivityEvent } from "@/app/api/conduit/activity/route";
+import { EmptyState, ActivityEmptySVG } from "./EmptyState";
 
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -140,20 +141,20 @@ export function ActivityFeed({ initial, initialHasMore, initialNextBefore }: Pro
 
   if (events.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-        <p
-          className="cx-type-base"
-          style={{ color: "var(--color-text-muted)" }}
-        >
-          No activity yet. Start a conversation with your Praxis specialists.
-        </p>
+      <div className="flex items-center justify-center py-20 px-6">
+        <EmptyState
+          icon={<ActivityEmptySVG />}
+          title="No activity yet"
+          body="Start a conversation with your Praxis specialists and their work will appear here."
+          className="max-w-sm"
+        />
       </div>
     );
   }
 
   return (
     <div>
-      <div className="divide-y" style={{ borderColor: "var(--color-border)" }}>
+      <div className="divide-y" style={{ borderColor: "var(--cx-border)" }}>
         {events.map((event) => (
           <EventRow key={event.id} event={event} />
         ))}
@@ -162,14 +163,14 @@ export function ActivityFeed({ initial, initialHasMore, initialNextBefore }: Pro
         {loading ? (
           <span
             className="cx-type-xs uppercase tracking-wider"
-            style={{ color: "var(--color-text-muted)" }}
+            style={{ color: "var(--cx-text-faint)" }}
           >
             Loading…
           </span>
         ) : !hasMore ? (
           <span
             className="cx-type-xs uppercase tracking-wider"
-            style={{ color: "var(--color-text-muted)" }}
+            style={{ color: "var(--cx-text-faint)" }}
           >
             All activity loaded
           </span>

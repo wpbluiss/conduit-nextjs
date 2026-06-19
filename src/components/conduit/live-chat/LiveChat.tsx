@@ -490,7 +490,7 @@ export function LiveChat({
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
         <p className="wm-label px-2 py-2">Recent</p>
-        {conversations.length === 0 && <p className="px-2 py-3 text-sm text-muted-foreground">No conversations yet.</p>}
+        {conversations.length === 0 && <p className="px-2 py-3 cx-type-sm" style={{ color: "var(--cx-text-muted)" }}>No conversations yet.</p>}
         {conversations.map((c) => { const on = c.id === convoId; return (
           <button key={c.id} onClick={() => { setDrawer(false); router.push(`/chat?c=${c.id}`); }} className={`mb-1 flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors ${on ? "bg-secondary" : "hover:bg-secondary/60"}`}>
             <span className={`grid size-8 shrink-0 place-items-center rounded-lg bg-card text-primary ${on ? "ring-1 ring-primary/40" : ""}`}><Sparkles className="size-4" /></span>

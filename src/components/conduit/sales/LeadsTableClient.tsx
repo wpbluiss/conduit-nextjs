@@ -234,7 +234,7 @@ export default function LeadsTableClient({
               background: `linear-gradient(180deg, ${deptColorSoft}, transparent 80%)`,
             }}
           >
-            <p className="text-[var(--color-text)]">
+            <p className="cx-type-sm" style={{ color: "var(--cx-text-muted)" }}>
               No leads match these filters.
             </p>
             <Button
