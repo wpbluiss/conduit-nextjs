@@ -170,15 +170,15 @@ export function SettingsTabs({
     <MotionConfig reducedMotion="user">
     <div className="flex flex-col md:flex-row gap-8">
 
-      {/* ── Mobile: horizontal pill strip ──────────────────────────── */}
-      <div className="md:hidden -mx-1 px-1 pb-2 overflow-x-auto">
-        <div className="flex gap-1">
+      {/* ── Mobile: horizontal glass pill strip ──────────────────────────── */}
+      <div className="md:hidden overflow-x-auto pb-4">
+        <div className="cx-glass cx-glass-border rounded-xl p-1 flex gap-0.5" style={{ minWidth: "max-content" }}>
           {ALL_NAV_ITEMS.map(([key, label]) => (
             <button
               key={key}
               type="button"
               onClick={() => setTab(key)}
-              className={`px-3 py-2 rounded-full cx-type-xs whitespace-nowrap shrink-0 transition-all duration-150 ${
+              className={`px-3 py-1.5 rounded-lg cx-type-xs whitespace-nowrap shrink-0 transition-all duration-[var(--cx-dur-fast)] ease-[var(--cx-ease)] ${
                 tab === key
                   ? "bg-[var(--cx-accent-tint)] text-[var(--cx-accent-bright)] font-medium"
                   : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[var(--cx-surface-raised)]"
@@ -311,13 +311,11 @@ export function SettingsTabs({
 function TeamTab() {
   return (
     <div className="space-y-6">
-      <div>
-        <p className="cx-type-sm text-[var(--cx-text-muted)] max-w-xl">
-          Per-employee voice picks live in the <strong>Voice</strong> tab. This
-          tab will also gain personality tuning (tone sliders, custom system
-          prompt overrides) in a future update.
-        </p>
-      </div>
+      <p className="cx-type-sm text-[var(--cx-text-muted)] max-w-xl">
+        Per-employee voice picks live in the <strong>Voice</strong> tab. This
+        tab will also gain personality tuning (tone sliders, custom system
+        prompt overrides) in a future update.
+      </p>
       <div
         className="conduit-card p-5"
         style={{
@@ -444,9 +442,7 @@ function SpecialistsTab({
     <form onSubmit={handleSave} className="space-y-8">
       {/* Nicknames */}
       <div>
-        <h3 className="cx-type-md font-semibold mb-2">
-          Custom nicknames
-        </h3>
+        <h3 className="cx-heading-lg mb-2">Custom nicknames</h3>
         <p className="cx-type-sm text-[var(--cx-text-muted)] max-w-xl mb-4">
           Give each specialist a custom nickname. Leave blank to use the default name.
           Nicknames appear in the sidebar, chat, and specialist picker.
@@ -507,9 +503,7 @@ function SpecialistsTab({
 
       {/* Response length */}
       <div>
-        <h3 className="cx-type-md font-semibold mb-2">
-          Response length
-        </h3>
+        <h3 className="cx-heading-lg mb-2">Response length</h3>
         <p className="cx-type-sm text-[var(--cx-text-muted)] max-w-xl mb-4">
           Control how verbose each specialist is. Short is best for quick answers; Detailed for research and complex tasks.
         </p>
@@ -940,9 +934,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
       </div>
 
       <div>
-        <div className="cx-type-md font-semibold mb-3">
-          Voices
-        </div>
+        <h3 className="cx-heading-lg mb-3">Voices</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {VOICE_EMPLOYEES.map((emp) => {
             const current =
@@ -1229,8 +1221,10 @@ function WorkspaceTab({
 
   return (
     <div className="space-y-6">
-      <section className="conduit-card p-6 space-y-6">
-        <h2 className="cx-type-md font-semibold">Workspace</h2>
+      <section className="conduit-card p-6 space-y-5">
+        <div className="pb-4 border-b border-[var(--cx-border)]">
+          <h2 className="cx-heading-lg">Workspace</h2>
+        </div>
 
         {/* ── Workspace logo ── */}
         <div>
@@ -1611,8 +1605,10 @@ function ProfileTab({
   return (
     <div className="space-y-6">
       {/* ── Identity card ── */}
-      <section className="conduit-card p-6 space-y-6">
-        <h2 className="cx-type-md font-semibold">Profile</h2>
+      <section className="conduit-card p-6 space-y-5">
+        <div className="pb-4 border-b border-[var(--cx-border)]">
+          <h2 className="cx-heading-lg">Profile</h2>
+        </div>
 
         {/* Avatar */}
         <div className="flex items-center gap-5">
@@ -1733,8 +1729,10 @@ function ProfileTab({
       </section>
 
       {/* ── Account card ── */}
-      <section className="conduit-card p-6 space-y-6">
-        <h2 className="cx-type-md font-semibold">Account</h2>
+      <section className="conduit-card p-6 space-y-5">
+        <div className="pb-4 border-b border-[var(--cx-border)]">
+          <h2 className="cx-heading-lg">Account</h2>
+        </div>
         <div className="space-y-5">
           <div>
             <div className="cx-label mb-1">
@@ -1789,8 +1787,10 @@ function ProfileTab({
       </section>
 
       {/* ── Security card ── */}
-      <section className="conduit-card p-6 space-y-6">
-        <h2 className="cx-type-md font-semibold">Security</h2>
+      <section className="conduit-card p-6 space-y-5">
+        <div className="pb-4 border-b border-[var(--cx-border)]">
+          <h2 className="cx-heading-lg">Security</h2>
+        </div>
 
         {/* Update email */}
         <div>
@@ -1883,8 +1883,10 @@ function ProfileTab({
       </section>
 
       {/* ── Actions card ── */}
-      <section className="conduit-card p-6 space-y-6">
-        <h2 className="cx-type-md font-semibold">Account actions</h2>
+      <section className="conduit-card p-6 space-y-5">
+        <div className="pb-4 border-b border-[var(--cx-border)]">
+          <h2 className="cx-heading-lg">Account actions</h2>
+        </div>
 
         {/* Guided Tour */}
         <div>
@@ -2019,7 +2021,9 @@ function BusinessTab({ account }: { account: AccountData }) {
     <div className="space-y-6">
       {/* Business info card */}
       <section className="conduit-card p-6 space-y-5">
-        <h2 className="cx-type-md font-semibold">Business info</h2>
+        <div className="pb-4 border-b border-[var(--cx-border)]">
+          <h2 className="cx-heading-lg">Business info</h2>
+        </div>
         <div>
           <label className="cx-label block mb-2">
             Business name
@@ -2063,8 +2067,8 @@ function BusinessTab({ account }: { account: AccountData }) {
 
       {/* Company brief card */}
       <section className="conduit-card p-6 space-y-4">
-        <div>
-          <h2 className="cx-type-md font-semibold mb-1">Company brief</h2>
+        <div className="pb-4 border-b border-[var(--cx-border)]">
+          <h2 className="cx-heading-lg mb-1">Company brief</h2>
           <p className="cx-type-xs text-[var(--cx-text-muted)]">
             A short context block Atlas shares with your whole team. All 9 specialists
             read this on every turn — no more repeating yourself.
