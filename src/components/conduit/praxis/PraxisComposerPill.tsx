@@ -194,7 +194,7 @@ export function PraxisComposerPill({
           onSubmit();
         }
       }}
-      className="praxis-composer-pill"
+      className="praxis-composer-pill cx-glass"
       data-dept={composerDept}
       data-state={streamingEmployee ? "streaming" : undefined}
       style={{
