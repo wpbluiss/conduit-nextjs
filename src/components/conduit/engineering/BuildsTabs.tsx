@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ExternalLink, ArrowRight, EyeOff, X } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Button, PraxisButton } from "@/components/conduit/ui/Button";
 import type { DailyUsage } from "@/lib/engineering/limits";
 
@@ -155,17 +156,19 @@ export default function BuildsTabs({
         />
       )}
 
-      {continueParent && (
-        <ContinueModal
-          parent={continueParent}
-          onClose={() => setContinueParent(null)}
-          onCreated={(newId) => {
-            setContinueParent(null);
-            // Hand off to the durable cinema URL — same affordance as fresh builds.
-            router.push(`/app/builds/${newId}`);
-          }}
-        />
-      )}
+      <AnimatePresence>
+        {continueParent && (
+          <ContinueModal
+            key="continue-modal"
+            parent={continueParent}
+            onClose={() => setContinueParent(null)}
+            onCreated={(newId) => {
+              setContinueParent(null);
+              router.push(`/app/builds/${newId}`);
+            }}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }
@@ -460,6 +463,7 @@ function ContinueModal({
   onClose: () => void;
   onCreated: (newSessionId: string) => void;
 }) {
+  const reduced = useReducedMotion();
   const [prompt, setPrompt] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -499,8 +503,23 @@ function ContinueModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 cx-scrim p-4">
-      <div className="w-full max-w-lg conduit-card p-6">
+    <motion.div
+      className="fixed inset-0 z-[110] cx-scrim flex items-center justify-center p-4"
+      style={{ background: "var(--cx-modal-scrim, rgba(11,11,15,0.65))" }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.14 }}
+    >
+      <motion.div
+        className="w-full max-w-lg cx-glass-overlay cx-glass-border rounded-[16px] p-6"
+        role="dialog"
+        aria-modal="true"
+        initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
+        animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+        exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
+        transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+      >
         <div className="flex items-start justify-between mb-3">
           <div>
             <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-1">
@@ -551,8 +570,8 @@ function ContinueModal({
             {submitting ? "Starting…" : "Start continuation →"}
           </Button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
