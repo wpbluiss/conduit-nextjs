@@ -193,7 +193,7 @@ export function SettingsTabs({
         {SETTINGS_NAV.map((section, si) => (
           <div key={si} className={si > 0 ? "mt-6" : ""}>
             {section.title && (
-              <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-faint)] px-3 mb-1.5">
+              <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-faint)] px-3 mb-2">
                 {section.title}
               </div>
             )}
@@ -404,7 +404,7 @@ function SpecialistsTab({
             key={v}
             type="button"
             onClick={() => setView(v)}
-            className={`px-4 py-2.5 cx-type-sm transition-colors border-b-2 -mb-px capitalize ${
+            className={`px-4 py-3 cx-type-sm transition-colors border-b-2 -mb-px capitalize ${
               view === v
                 ? "border-[var(--cx-accent)] text-[var(--cx-text)]"
                 : "border-transparent text-[var(--cx-text-muted)] hover:text-[var(--cx-text)]"
@@ -508,7 +508,7 @@ function SpecialistsTab({
                   <Icon size={14} style={{ color }} strokeWidth={2} />
                 </span>
                 <div className="flex-1 min-w-0">
-                  <span className="block cx-type-xs uppercase tracking-[0.12em] text-[var(--cx-text-muted)] mb-1.5">
+                  <span className="block cx-type-xs cx-mono uppercase tracking-[0.12em] text-[var(--cx-text-muted)] mb-2">
                     {canonical}
                   </span>
                   <div className="flex gap-1" role="group" aria-label={`${canonical} response length`}>
@@ -594,8 +594,8 @@ function SpecialistMetrics() {
     <div className="space-y-5">
       {/* Date range picker */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">Period</span>
-        <div className="flex flex-wrap gap-1.5">
+        <span className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">Period</span>
+        <div className="flex flex-wrap gap-2">
           {RANGE_OPTIONS.map(({ value, label }) => (
             <button
               key={value}
@@ -625,7 +625,7 @@ function SpecialistMetrics() {
 
       {!loading && !error && metrics !== null && metrics.length === 0 && (
         <div className="conduit-card p-8 text-center">
-          <p className="text-[var(--cx-text-muted)]">No specialist activity in this period.</p>
+          <p className="cx-type-sm text-[var(--cx-text-muted)]">No specialist activity in this period.</p>
           <p className="cx-type-xs text-[var(--cx-text-muted)] mt-1">
             Start a conversation with any specialist to see usage here.
           </p>
@@ -635,7 +635,7 @@ function SpecialistMetrics() {
       {!error && metrics !== null && metrics.length > 0 && (
         <>
           {/* Summary stat */}
-          <div className="flex items-baseline gap-1.5">
+          <div className="flex items-baseline gap-2">
             <AnimatedStat value={totalMessages} />
             <span className="text-[var(--cx-text-muted)]">
               specialist {totalMessages === 1 ? "response" : "responses"} in this period
@@ -652,7 +652,7 @@ function SpecialistMetrics() {
               const sharePct = Math.round((m.totalMessages / totalMessages) * 100);
 
               return (
-                <div key={m.employee} className="conduit-card px-4 py-3.5">
+                <div key={m.employee} className="conduit-card px-4 py-4">
                   <div className="flex items-center gap-3 mb-2.5">
                     <span
                       className="flex items-center justify-center w-7 h-7 rounded-full shrink-0"
@@ -693,9 +693,9 @@ function SpecialistMetrics() {
                     </div>
                   </div>
                   {/* Usage bar */}
-                  <div className="h-1.5 rounded-full bg-[var(--cx-border)] overflow-hidden">
+                  <div className="h-2 rounded-full bg-[var(--cx-border)] overflow-hidden">
                     <div
-                      className="h-1.5 rounded-full transition-all duration-500"
+                      className="h-2 rounded-full transition-all duration-500"
                       style={{
                         width: `${barPct}%`,
                         background: color,
@@ -1191,7 +1191,7 @@ function WorkspaceTab({
     <div className="space-y-8">
       {/* ── Workspace logo ── */}
       <div>
-        <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
+        <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
           Workspace logo
         </div>
         <p className="cx-type-xs text-[var(--cx-text-muted)] mb-3">
@@ -1273,7 +1273,7 @@ function WorkspaceTab({
 
       {/* ── Workspace name ── */}
       <form onSubmit={saveWsName} className="space-y-2 max-w-sm">
-        <label className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block">
+        <label className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block">
           Workspace name
         </label>
         <p className="cx-type-xs text-[var(--cx-text-muted)] -mt-1">
@@ -1289,7 +1289,7 @@ function WorkspaceTab({
             }}
             maxLength={WS_NAME_MAX}
             placeholder="e.g. Acme AI Team"
-            className="w-full conduit-card px-4 py-2.5 outline-none cx-type-sm pr-12"
+            className="w-full conduit-card px-4 py-3 outline-none cx-type-sm pr-12"
           />
           <span
             className="absolute right-3 top-1/2 -translate-y-1/2 cx-type-xs tabular-nums"
@@ -1633,7 +1633,7 @@ function ProfileTab({
 
         {/* Display name */}
         <form onSubmit={saveName} className="space-y-2 max-w-sm">
-          <label className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block">
+          <label className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block">
             Display name
           </label>
           <div className="flex gap-2">
@@ -1642,7 +1642,7 @@ function ProfileTab({
               onChange={(e) => { setNameValue(e.target.value); setNameSaved(false); setNameError(""); }}
               maxLength={100}
               placeholder={fullName || "Your name"}
-              className="flex-1 conduit-card px-4 py-2.5 outline-none cx-type-sm"
+              className="flex-1 conduit-card px-4 py-3 outline-none cx-type-sm"
             />
             <PraxisButton
               type="submit"
@@ -1659,7 +1659,7 @@ function ProfileTab({
 
         {/* Workspace name */}
         <form onSubmit={saveWsName} className="space-y-2 max-w-sm">
-          <label className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block">
+          <label className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block">
             Workspace name
           </label>
           <p className="cx-type-xs text-[var(--cx-text-muted)] -mt-1">
@@ -1671,7 +1671,7 @@ function ProfileTab({
               onChange={(e) => { setWsName(e.target.value); setWsNameSaved(false); setWsNameError(""); }}
               maxLength={80}
               placeholder="e.g. Acme AI Team"
-              className="flex-1 conduit-card px-4 py-2.5 outline-none cx-type-sm"
+              className="flex-1 conduit-card px-4 py-3 outline-none cx-type-sm"
             />
             <PraxisButton
               type="submit"
@@ -1692,14 +1692,14 @@ function ProfileTab({
         <h2 className="cx-type-md font-medium tracking-[-0.01em]">Account</h2>
         <div className="space-y-5">
           <div>
-            <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
+            <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
               Email
             </div>
             <div className="cx-type-sm">{email}</div>
           </div>
           <ThemeToggle initialPref={themePref} />
           <div>
-            <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-2">
+            <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-2">
               Timezone
             </div>
             <select
@@ -1719,7 +1719,7 @@ function ProfileTab({
           </div>
           {creatorMode && (
             <div>
-              <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
+              <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
                 Mode
               </div>
               <span
@@ -1732,7 +1732,7 @@ function ProfileTab({
               >
                 <span
                   aria-hidden
-                  className="inline-block w-1.5 h-1.5 rounded-full"
+                  className="inline-block w-2 h-2 rounded-full shrink-0"
                   style={{ background: "var(--cx-accent)" }}
                 />
                 Creator Mode v{creatorModeVersion}
@@ -1749,7 +1749,7 @@ function ProfileTab({
 
         {/* Update email */}
         <div>
-          <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+          <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
             Update email
           </div>
           {emailSent ? (
@@ -1765,7 +1765,7 @@ function ProfileTab({
                 onChange={(e) => { setNewEmail(e.target.value); setEmailError(""); }}
                 autoComplete="email"
                 required
-                className="w-full conduit-card px-4 py-2.5 outline-none cx-type-sm"
+                className="w-full conduit-card px-4 py-3 outline-none cx-type-sm"
               />
               {emailError && (
                 <p className="cx-type-xs text-[var(--cx-danger)]">{emailError}</p>
@@ -1784,7 +1784,7 @@ function ProfileTab({
 
         {/* Change password */}
         <div className="pt-4 border-t border-[var(--cx-border)]">
-          <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+          <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
             Change password
           </div>
           <form onSubmit={submitPasswordChange} className="space-y-3 max-w-sm">
@@ -1796,7 +1796,7 @@ function ProfileTab({
                 onChange={(e) => { setCurrentPw(e.target.value); setPwError(""); }}
                 autoComplete="current-password"
                 required
-                className="w-full conduit-card px-4 py-2.5 outline-none cx-type-sm"
+                className="w-full conduit-card px-4 py-3 outline-none cx-type-sm"
               />
             </div>
             <div>
@@ -1807,7 +1807,7 @@ function ProfileTab({
                 onChange={(e) => { setNewPw(e.target.value); setPwError(""); }}
                 autoComplete="new-password"
                 required
-                className="w-full conduit-card px-4 py-2.5 outline-none cx-type-sm"
+                className="w-full conduit-card px-4 py-3 outline-none cx-type-sm"
               />
               <PwMeter pw={newPw} />
             </div>
@@ -1819,7 +1819,7 @@ function ProfileTab({
                 onChange={(e) => { setConfirmPw(e.target.value); setPwError(""); }}
                 autoComplete="new-password"
                 required
-                className="w-full conduit-card px-4 py-2.5 outline-none cx-type-sm"
+                className="w-full conduit-card px-4 py-3 outline-none cx-type-sm"
               />
             </div>
             {pwError && (
@@ -1843,7 +1843,7 @@ function ProfileTab({
 
         {/* Guided Tour */}
         <div>
-          <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-2">
+          <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-2">
             Guided tour
           </div>
           <p className="cx-type-xs text-[var(--cx-text-muted)] mb-3 max-w-sm">
@@ -1854,7 +1854,7 @@ function ProfileTab({
 
         {/* Data & Privacy */}
         <div className="pt-4 border-t border-[var(--cx-border)]">
-          <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-2">
+          <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-2">
             Data &amp; privacy
           </div>
           <p className="cx-type-xs text-[var(--cx-text-muted)] mb-3 max-w-sm">
@@ -1976,7 +1976,7 @@ function BusinessTab({ account }: { account: AccountData }) {
       <section className="conduit-card p-6 space-y-5">
         <h2 className="cx-type-md font-medium tracking-[-0.01em]">Business info</h2>
         <div>
-          <label className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block mb-2">
+          <label className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block mb-2">
             Business name
           </label>
           <input
@@ -1986,7 +1986,7 @@ function BusinessTab({ account }: { account: AccountData }) {
           />
         </div>
         <div>
-          <label className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block mb-2">
+          <label className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block mb-2">
             Business type
           </label>
           <input
@@ -1996,7 +1996,7 @@ function BusinessTab({ account }: { account: AccountData }) {
           />
         </div>
         <div>
-          <label className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block mb-2">
+          <label className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block mb-2">
             What you&apos;re working on
           </label>
           <textarea
@@ -2150,8 +2150,8 @@ function UsageTab({ usage }: { usage: UsageData }) {
     <div className="space-y-8">
       {/* Month selector */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">Period</span>
-        <div className="flex flex-wrap gap-1.5">
+        <span className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">Period</span>
+        <div className="flex flex-wrap gap-2">
           {monthOptions.map((opt) => (
             <button
               key={opt.value}
@@ -2199,7 +2199,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
       {/* Billing cycle cap — always shows current cycle data */}
       <div className="conduit-card px-5 py-4">
         <div className="flex items-baseline justify-between gap-3 mb-2">
-          <span className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
+          <span className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
             Token cap (current cycle)
           </span>
           <span className="cx-type-sm cx-mono">
@@ -2230,7 +2230,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
 
       {/* Daily token bar chart */}
       <div>
-        <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+        <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
           Tokens · daily
         </div>
         {monthLoading ? (
@@ -2245,8 +2245,8 @@ function UsageTab({ usage }: { usage: UsageData }) {
               ))}
             </div>
             <div className="mt-2 flex justify-between cx-type-xs text-[var(--cx-text-muted)]">
-              <div className="h-2.5 w-16 rounded animate-pulse bg-[var(--cx-border)]" />
-              <div className="h-2.5 w-16 rounded animate-pulse bg-[var(--cx-border)]" />
+              <div className="h-3 w-16 rounded animate-pulse bg-[var(--cx-border)]" />
+              <div className="h-3 w-16 rounded animate-pulse bg-[var(--cx-border)]" />
             </div>
           </div>
         ) : fillByDay.length === 0 ? (
@@ -2286,7 +2286,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
       {/* Per-employee breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="conduit-card p-5">
-          <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+          <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
             Share by employee
           </div>
           {monthLoading ? (
@@ -2296,7 +2296,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
                 {Array.from({ length: 4 }, (_, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full animate-pulse bg-[var(--cx-border)]" />
-                    <div className="h-2.5 rounded animate-pulse bg-[var(--cx-border)]" style={{ width: `${55 + i * 12}%` }} />
+                    <div className="h-3 rounded animate-pulse bg-[var(--cx-border)]" style={{ width: `${55 + i * 12}%` }} />
                   </div>
                 ))}
               </div>
@@ -2308,7 +2308,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
           )}
         </div>
         <div className="conduit-card p-5">
-          <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+          <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
             By employee
           </div>
           {monthLoading ? (
@@ -2317,9 +2317,9 @@ function UsageTab({ usage }: { usage: UsageData }) {
                 <div key={i} className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full animate-pulse bg-[var(--cx-border)]" />
-                    <div className="h-2.5 w-20 rounded animate-pulse bg-[var(--cx-border)]" />
+                    <div className="h-3 w-20 rounded animate-pulse bg-[var(--cx-border)]" />
                   </div>
-                  <div className="h-2.5 w-24 rounded animate-pulse bg-[var(--cx-border)]" />
+                  <div className="h-3 w-24 rounded animate-pulse bg-[var(--cx-border)]" />
                 </div>
               ))}
             </div>
@@ -2357,7 +2357,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
 
       {/* Connector call totals */}
       <div>
-        <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+        <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
           Connector context fetches (all time)
         </div>
         {connectorStats.length === 0 ? (
@@ -2388,7 +2388,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
                   })
                 : "Never";
               return (
-                <div key={stat.provider} className="flex items-center justify-between px-5 py-3.5 gap-4">
+                <div key={stat.provider} className="flex items-center justify-between px-5 py-4 gap-4">
                   <div>
                     <p className="text-[var(--cx-text)] cx-type-sm">{label}</p>
                     <p className="text-[var(--cx-text-muted)] cx-type-xs mt-0.5">
@@ -2713,26 +2713,26 @@ function BillingTab({
             </div>
           )}
           {trialDaysLeft !== null && trialDaysLeft > 0 && (
-            <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full cx-type-xs font-medium"
+            <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full cx-type-xs font-medium"
               style={{
                 background: "color-mix(in srgb, var(--color-amber) 12%, transparent)",
                 color: "var(--color-amber)",
                 border: "1px solid color-mix(in srgb, var(--color-amber) 30%, transparent)",
               }}
             >
-              <span aria-hidden className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-amber)" }} />
+              <span aria-hidden className="inline-block w-2 h-2 rounded-full shrink-0" style={{ background: "var(--color-amber)" }} />
               {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} of free period left
             </div>
           )}
           {isCanceling && (
-            <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full cx-type-xs font-medium"
+            <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full cx-type-xs font-medium"
               style={{
                 background: "color-mix(in srgb, var(--cx-danger) 10%, transparent)",
                 color: "var(--cx-danger)",
                 border: "1px solid color-mix(in srgb, var(--cx-danger) 30%, transparent)",
               }}
             >
-              <span aria-hidden className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "var(--cx-danger)" }} />
+              <span aria-hidden className="inline-block w-2 h-2 rounded-full shrink-0" style={{ background: "var(--cx-danger)" }} />
               {cancelAt
                 ? `Cancels ${new Date(cancelAt * 1000).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`
                 : "Cancels at end of billing period"}
@@ -2838,7 +2838,7 @@ function BillingTab({
       {/* Invoice history — only shown on paid accounts with a Stripe customer */}
       {account.has_stripe_customer && (
         <div>
-          <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+          <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
             Invoice history
           </div>
           {invoices === null ? (
@@ -2864,7 +2864,7 @@ function BillingTab({
                     {["Date", "Amount", "Status", ""].map((h) => (
                       <th
                         key={h}
-                        className="px-4 py-2.5 text-left cx-type-xs uppercase tracking-[0.15em] text-[var(--cx-text-muted)] font-normal"
+                        className="px-4 py-3 text-left cx-type-xs cx-mono uppercase tracking-[0.15em] text-[var(--cx-text-muted)] font-normal"
                       >
                         {h}
                       </th>
@@ -2875,20 +2875,20 @@ function BillingTab({
                   {invoices.map((inv, i) => (
                     <tr
                       key={inv.id}
-                      className={
+                      className={`hover:bg-[var(--cx-surface-raised)] transition-colors duration-100 ${
                         i < invoices.length - 1
                           ? "border-b border-[var(--cx-border)]"
                           : ""
-                      }
+                      }`}
                     >
-                      <td className="px-4 py-3 text-[var(--cx-text-muted)]">
+                      <td className="px-4 py-3 text-[var(--cx-text-muted)] cx-mono">
                         {new Date(inv.date * 1000).toLocaleDateString(undefined, {
                           month: "short",
                           day: "numeric",
                           year: "numeric",
                         })}
                       </td>
-                      <td className="px-4 py-3 font-medium">
+                      <td className="px-4 py-3 font-medium cx-mono">
                         {(inv.amount / 100).toLocaleString(undefined, {
                           style: "currency",
                           currency: inv.currency.toUpperCase(),
@@ -2939,7 +2939,7 @@ function BillingTab({
 
       {/* Tier comparison */}
       <div>
-        <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+        <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
           Plans
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -2970,8 +2970,8 @@ function BillingTab({
                     {" "}/mo
                   </span>
                 </div>
-                <ul className="mt-3 space-y-1.5 cx-type-xs text-[var(--cx-text-muted)]">
-                  <li className="flex items-start gap-1.5">
+                <ul className="mt-3 space-y-2 cx-type-xs text-[var(--cx-text-muted)]">
+                  <li className="flex items-start gap-2">
                     <Check
                       size={12}
                       className="mt-0.5 shrink-0 text-[var(--cx-accent)]"
@@ -2979,7 +2979,7 @@ function BillingTab({
                     {(t.monthlyTokenAllowance / 1000).toLocaleString()}k
                     tokens / month
                   </li>
-                  <li className="flex items-start gap-1.5">
+                  <li className="flex items-start gap-2">
                     <Check
                       size={12}
                       className="mt-0.5 shrink-0 text-[var(--cx-accent)]"
@@ -2990,7 +2990,7 @@ function BillingTab({
                         ? "Adaptive routing (Sonnet on reasoning)"
                         : "Premium routing (Opus on reasoning + code)"}
                   </li>
-                  <li className="flex items-start gap-1.5">
+                  <li className="flex items-start gap-2">
                     <Check
                       size={12}
                       className="mt-0.5 shrink-0 text-[var(--cx-accent)]"
@@ -2998,7 +2998,7 @@ function BillingTab({
                     {t.allowedEmployees.length} employees
                   </li>
                   {t.features.multiUser && (
-                    <li className="flex items-start gap-1.5">
+                    <li className="flex items-start gap-2">
                       <Check
                         size={12}
                         className="mt-0.5 shrink-0 text-[var(--cx-accent)]"
@@ -3027,7 +3027,7 @@ function BillingTab({
 
       {/* Top-ups */}
       <div>
-        <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+        <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
           Buy more tokens
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -3107,7 +3107,7 @@ function ReferralSection() {
   return (
     <div className="conduit-card p-5 space-y-4">
       <div>
-        <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
+        <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
           Refer & Earn
         </div>
         <p className="cx-type-sm text-[var(--cx-text-muted)]">
@@ -3118,7 +3118,7 @@ function ReferralSection() {
 
       {data?.referral_code ? (
         <div className="flex items-center gap-2">
-          <code className="flex-1 text-xs font-mono bg-[var(--cx-canvas)] rounded-lg px-3 py-2 text-[var(--cx-text)] truncate">
+          <code className="flex-1 cx-type-xs cx-mono bg-[var(--cx-canvas)] rounded-lg px-3 py-2 text-[var(--cx-text)] truncate">
             {link}
           </code>
           <PraxisButton
@@ -3190,7 +3190,7 @@ function UsageSummary({
   return (
     <div className="conduit-card p-5 space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
+        <span className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
           Usage this cycle
         </span>
         <span
@@ -3212,7 +3212,7 @@ function UsageSummary({
             }}
           />
         </div>
-        <div className="mt-1.5 flex items-baseline justify-between cx-type-xs cx-mono text-[var(--cx-text-muted)]">
+        <div className="mt-2 flex items-baseline justify-between cx-type-xs cx-mono text-[var(--cx-text-muted)]">
           <span>{used.toLocaleString()} used</span>
           <span>{total.toLocaleString()} total</span>
         </div>
@@ -3244,7 +3244,7 @@ function Stat({
 }) {
   return (
     <div className="conduit-card px-4 py-3">
-      <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
+      <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
         {label}
       </div>
       <div className="cx-heading-xl mt-1">{value}</div>
@@ -3318,7 +3318,7 @@ function NotificationsTab() {
 
   return (
     <div className="space-y-6">
-      <p className="text-[var(--cx-text-muted)]">
+      <p className="cx-type-sm text-[var(--cx-text-muted)]">
         Choose which emails you receive from Praxis. Billing receipts and
         security alerts are always sent regardless of these settings.
       </p>
@@ -3635,7 +3635,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
 
   return (
     <div className="space-y-6">
-      <p className="text-[var(--cx-text-muted)] max-w-xl">
+      <p className="cx-type-sm text-[var(--cx-text-muted)] max-w-xl">
         Connect your tools so Praxis specialists can act with full context —
         aware of your calendar, messages, and data.
       </p>
@@ -3700,7 +3700,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : isAvailable("google_calendar") ? (
             <a
               href="/api/conduit/connectors/google-calendar/auth"
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-1.5 no-underline hover:opacity-90 transition-opacity duration-150"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-2 no-underline hover:opacity-90 transition-opacity duration-150"
               style={{
                 background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
                 border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
@@ -3713,7 +3713,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : (
             <button
               disabled
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-2"
               style={{
                 background: "var(--cx-surface)",
                 border: "1px solid var(--cx-border)",
@@ -3810,7 +3810,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : isFreeUser ? (
             <a
               href="/app/settings?tab=billing"
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-1.5 no-underline hover:opacity-90 transition-opacity duration-150"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-2 no-underline hover:opacity-90 transition-opacity duration-150"
               style={{
                 background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
                 border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
@@ -3823,7 +3823,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : isAvailable("slack") ? (
             <a
               href="/api/conduit/connectors/slack/auth"
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-1.5 no-underline hover:opacity-90 transition-opacity duration-150"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-2 no-underline hover:opacity-90 transition-opacity duration-150"
               style={{
                 background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
                 border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
@@ -3836,7 +3836,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : (
             <button
               disabled
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-2"
               style={{
                 background: "var(--cx-surface)",
                 border: "1px solid var(--cx-border)",
@@ -3906,7 +3906,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : isAvailable("hubspot") ? (
             <a
               href="/api/conduit/connectors/hubspot/auth"
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-1.5 no-underline hover:opacity-90 transition-opacity duration-150"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-2 no-underline hover:opacity-90 transition-opacity duration-150"
               style={{
                 background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
                 border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
@@ -3919,7 +3919,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : (
             <button
               disabled
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-2"
               style={{
                 background: "var(--cx-surface)",
                 border: "1px solid var(--cx-border)",
@@ -3979,7 +3979,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             <div className="mt-auto flex flex-col gap-3">
               {/* Selected files list */}
               {driveSelectedFiles.length > 0 && (
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-2">
                   <p className="cx-type-xs text-[var(--cx-text-muted)]">
                     Synced files ({driveSelectedFiles.length}/5):
                   </p>
@@ -4119,7 +4119,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : isFreeUser ? (
             <a
               href="/app/settings?tab=billing"
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-1.5 no-underline hover:opacity-90 transition-opacity duration-150"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-2 no-underline hover:opacity-90 transition-opacity duration-150"
               style={{
                 background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
                 border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
@@ -4132,7 +4132,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : isAvailable("google_drive") ? (
             <a
               href="/api/conduit/connectors/google-drive/auth"
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-1.5 no-underline hover:opacity-90 transition-opacity duration-150"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-2 no-underline hover:opacity-90 transition-opacity duration-150"
               style={{
                 background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
                 border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
@@ -4145,7 +4145,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : (
             <button
               disabled
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
+              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-2"
               style={{
                 background: "var(--cx-surface)",
                 border: "1px solid var(--cx-border)",
@@ -4228,7 +4228,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
         ) : isAvailable("github") ? (
           <a
             href="/api/conduit/connectors/github/auth"
-            className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-1.5 no-underline hover:opacity-90 transition-opacity duration-150"
+            className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-2 no-underline hover:opacity-90 transition-opacity duration-150"
             style={{
               background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
               border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
@@ -4241,7 +4241,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
         ) : (
           <button
             disabled
-            className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-1.5"
+            className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-2"
             style={{
               background: "var(--cx-surface)",
               border: "1px solid var(--cx-border)",
@@ -4397,7 +4397,7 @@ function AppearanceTab({
 
   return (
     <div className="space-y-6">
-      <p className="text-[var(--cx-text-muted)] max-w-xl">
+      <p className="cx-type-sm text-[var(--cx-text-muted)] max-w-xl">
         Choose how Praxis looks on this device. Changes apply immediately.
       </p>
 
@@ -4406,7 +4406,7 @@ function AppearanceTab({
       </div>
 
       <div className="conduit-card p-5 space-y-4">
-        <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
+        <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
           Accent colour
         </div>
         <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Accent colour">
@@ -4420,7 +4420,7 @@ function AppearanceTab({
                 aria-label={preset.label}
                 title={preset.label}
                 onClick={() => chooseAccent(key)}
-                className="flex flex-col items-center gap-1.5 group focus:outline-none"
+                className="flex flex-col items-center gap-2 group focus:outline-none"
               >
                 <span
                   className="w-8 h-8 rounded-full transition-transform group-hover:scale-110"
@@ -4461,7 +4461,7 @@ function AlwaysOnRow({ label, desc }: { label: string; desc: string }) {
   return (
     <div className="flex items-start justify-between gap-4 opacity-60">
       <div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           {label}
           <span
             title={desc}
@@ -4611,7 +4611,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
             New API key — copy it now
           </p>
           <div className="flex items-center gap-2">
-            <code className="flex-1 text-xs font-mono bg-[var(--cx-canvas)] rounded-lg px-3 py-2 text-[var(--cx-text)] break-all">
+            <code className="flex-1 cx-type-xs cx-mono bg-[var(--cx-canvas)] rounded-lg px-3 py-2 text-[var(--cx-text)] break-all">
               {revealedKey}
             </code>
             <PraxisButton
@@ -4640,7 +4640,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
           placeholder="Key name (e.g. CI/CD Pipeline)"
           maxLength={80}
           required
-          className="flex-1 rounded-xl border border-[var(--cx-border)] bg-[var(--cx-surface-raised)] px-4 py-2.5 cx-type-sm text-[var(--cx-text)] outline-none placeholder:text-[var(--cx-text-muted)] transition-colors"
+          className="flex-1 rounded-xl border border-[var(--cx-border)] bg-[var(--cx-surface-raised)] px-4 py-3 cx-type-sm text-[var(--cx-text)] outline-none placeholder:text-[var(--cx-text-muted)] transition-colors"
         />
         <PraxisButton
           type="submit"
@@ -4778,7 +4778,7 @@ function ReferralsTab() {
     <div className="space-y-8">
       <div>
         <h2 className="cx-type-md font-semibold mb-1">Refer &amp; Earn</h2>
-        <p className="text-[var(--cx-text-muted)] max-w-xl">
+        <p className="cx-type-sm text-[var(--cx-text-muted)] max-w-xl">
           Share your personal link. When someone signs up and starts using Praxis,
           you both get bonus tokens.
         </p>
@@ -4786,7 +4786,7 @@ function ReferralsTab() {
 
       {/* Referral link */}
       <div className="conduit-card p-5 space-y-3">
-        <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
+        <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
           Your referral link
         </div>
         {referralUrl ? (
@@ -4809,7 +4809,7 @@ function ReferralsTab() {
             </PraxisButton>
           </div>
         ) : (
-          <p className="text-[var(--cx-text-muted)] text-xs">
+          <p className="cx-type-xs text-[var(--cx-text-muted)]">
             Your referral code is being generated — refresh in a moment.
           </p>
         )}
@@ -4821,7 +4821,7 @@ function ReferralsTab() {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
         <div className="conduit-card p-5">
-          <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
+          <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
             Successful referrals
           </div>
           <AnimatedStat
@@ -4830,7 +4830,7 @@ function ReferralsTab() {
           />
         </div>
         <div className="conduit-card p-5">
-          <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
+          <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
             Bonus tokens earned
           </div>
           <AnimatedStat
@@ -4842,7 +4842,7 @@ function ReferralsTab() {
 
       {/* How it works */}
       <div className="conduit-card p-5 space-y-3">
-        <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
+        <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
           How it works
         </div>
         <ol className="space-y-2 text-[var(--cx-text-muted)]">
@@ -5022,7 +5022,7 @@ function LabelsTab() {
                     Cancel
                   </PraxisButton>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-2">
                   {PRESET_COLORS.map((c) => (
                     <button
                       key={c}
@@ -5118,7 +5118,7 @@ function LabelsTab() {
                   Cancel
                 </PraxisButton>
               </form>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {PRESET_COLORS.map((c) => (
                   <button
                     key={c}
