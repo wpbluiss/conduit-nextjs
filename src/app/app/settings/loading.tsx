@@ -31,13 +31,19 @@ export default function SettingsLoading() {
 
         {/* Two-column layout skeleton */}
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar nav skeleton (desktop only) */}
-          <div className="hidden md:flex flex-col gap-2 w-44 shrink-0 pt-1">
+          {/* Sidebar nav skeleton (desktop only) — matches cx-glass glass panel */}
+          <div
+            className="hidden md:flex flex-col gap-2 w-48 shrink-0 p-3 rounded-xl"
+            style={{
+              background: "var(--cx-glass-bg)",
+              border: "1px solid var(--cx-glass-border)",
+            }}
+          >
             {[56, 72, 52, 64, 60].map((w, i) => (
               <div
                 key={i}
                 style={{
-                  height: 32,
+                  height: 28,
                   width: w,
                   borderRadius: 6,
                   background: "var(--cx-border)",

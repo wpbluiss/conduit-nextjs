@@ -190,17 +190,13 @@ export function SettingsTabs({
 
       {/* ── Desktop: vertical sidebar nav ──────────────────────────── */}
       <nav
-        className="hidden md:flex flex-col w-44 shrink-0 sticky top-8 self-start border-r pr-4"
-        style={{ borderColor: "var(--cx-border)" }}
+        className="hidden md:flex flex-col w-48 shrink-0 sticky top-8 self-start cx-glass cx-glass-border rounded-xl p-3"
         aria-label="Settings navigation"
       >
         {SETTINGS_NAV.map((section, si) => (
-          <div key={si} className={si > 0 ? "mt-6" : ""}>
+          <div key={si} className={si > 0 ? "mt-5" : ""}>
             {section.title && (
-              <div
-                className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-faint)] px-3 mb-2"
-                style={{ letterSpacing: "0.14em" }}
-              >
+              <div className="cx-label text-[var(--cx-text-faint)] px-2 mb-1.5">
                 {section.title}
               </div>
             )}
@@ -210,7 +206,7 @@ export function SettingsTabs({
                   key={key}
                   type="button"
                   onClick={() => setTab(key)}
-                  className={`w-full text-left px-3 py-2 rounded-md cx-type-sm transition-all focus-visible:outline-none ${
+                  className={`w-full text-left px-2 py-1.5 rounded-lg cx-type-sm transition-all duration-[var(--cx-dur-fast)] ease-[var(--cx-ease)] focus-visible:outline-none ${
                     tab === key
                       ? "text-[var(--cx-accent-bright)] font-medium"
                       : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[var(--cx-surface-raised)]"
@@ -219,14 +215,9 @@ export function SettingsTabs({
                     tab === key
                       ? {
                           background: "var(--cx-accent-tint)",
-                          boxShadow: "inset 2px 0 0 var(--cx-accent)",
-                          transitionDuration: "var(--cx-dur-fast)",
-                          transitionTimingFunction: "var(--cx-ease)",
+                          boxShadow: "inset 3px 0 0 var(--cx-accent)",
                         }
-                      : {
-                          transitionDuration: "var(--cx-dur-fast)",
-                          transitionTimingFunction: "var(--cx-ease)",
-                        }
+                      : undefined
                   }
                 >
                   {label}
@@ -440,7 +431,7 @@ function SpecialistsTab({
     <form onSubmit={handleSave} className="space-y-8">
       {/* Nicknames */}
       <div>
-        <h3 className="cx-type-md font-medium tracking-[-0.01em] mb-2">
+        <h3 className="cx-type-md font-semibold mb-2">
           Custom nicknames
         </h3>
         <p className="cx-type-sm text-[var(--cx-text-muted)] max-w-xl mb-4">
@@ -503,7 +494,7 @@ function SpecialistsTab({
 
       {/* Response length */}
       <div>
-        <h3 className="cx-type-md font-medium tracking-[-0.01em] mb-2">
+        <h3 className="cx-type-md font-semibold mb-2">
           Response length
         </h3>
         <p className="cx-type-sm text-[var(--cx-text-muted)] max-w-xl mb-4">
@@ -803,7 +794,24 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
 
   if (!prefs) {
     return (
-      <p className="cx-type-sm text-[var(--cx-text-muted)]">Loading…</p>
+      <div className="space-y-6" aria-busy aria-label="Loading voice settings">
+        <div className="conduit-card p-5 space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex items-center justify-between gap-4">
+              <div className="space-y-1.5">
+                <div className="h-3 w-28 rounded-full animate-pulse bg-[var(--cx-border)]" />
+                <div className="h-2 w-44 rounded-full animate-pulse bg-[var(--cx-border)] opacity-60" />
+              </div>
+              <div className="h-6 w-11 rounded-full shrink-0 animate-pulse bg-[var(--cx-border)]" />
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="conduit-card p-4 h-20 animate-pulse bg-[var(--cx-surface-raised)]" />
+          ))}
+        </div>
+      </div>
     );
   }
 
@@ -919,7 +927,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
       </div>
 
       <div>
-        <div className="cx-type-md font-medium tracking-[-0.01em] mb-3">
+        <div className="cx-type-md font-semibold mb-3">
           Voices
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1587,7 +1595,7 @@ function ProfileTab({
     <div className="space-y-6">
       {/* ── Identity card ── */}
       <section className="conduit-card p-6 space-y-6">
-        <h2 className="cx-type-md font-medium tracking-[-0.01em]">Profile</h2>
+        <h2 className="cx-type-md font-semibold">Profile</h2>
 
         {/* Avatar */}
         <div className="flex items-center gap-5">
@@ -1709,7 +1717,7 @@ function ProfileTab({
 
       {/* ── Account card ── */}
       <section className="conduit-card p-6 space-y-6">
-        <h2 className="cx-type-md font-medium tracking-[-0.01em]">Account</h2>
+        <h2 className="cx-type-md font-semibold">Account</h2>
         <div className="space-y-5">
           <div>
             <div className="cx-label mb-1">
@@ -1765,7 +1773,7 @@ function ProfileTab({
 
       {/* ── Security card ── */}
       <section className="conduit-card p-6 space-y-6">
-        <h2 className="cx-type-md font-medium tracking-[-0.01em]">Security</h2>
+        <h2 className="cx-type-md font-semibold">Security</h2>
 
         {/* Update email */}
         <div>
@@ -1859,7 +1867,7 @@ function ProfileTab({
 
       {/* ── Actions card ── */}
       <section className="conduit-card p-6 space-y-6">
-        <h2 className="cx-type-md font-medium tracking-[-0.01em]">Account actions</h2>
+        <h2 className="cx-type-md font-semibold">Account actions</h2>
 
         {/* Guided Tour */}
         <div>
@@ -1994,7 +2002,7 @@ function BusinessTab({ account }: { account: AccountData }) {
     <div className="space-y-6">
       {/* Business info card */}
       <section className="conduit-card p-6 space-y-5">
-        <h2 className="cx-type-md font-medium tracking-[-0.01em]">Business info</h2>
+        <h2 className="cx-type-md font-semibold">Business info</h2>
         <div>
           <label className="cx-label block mb-2">
             Business name
@@ -2039,7 +2047,7 @@ function BusinessTab({ account }: { account: AccountData }) {
       {/* Company brief card */}
       <section className="conduit-card p-6 space-y-4">
         <div>
-          <h2 className="cx-type-md font-medium tracking-[-0.01em] mb-1">Company brief</h2>
+          <h2 className="cx-type-md font-semibold mb-1">Company brief</h2>
           <p className="cx-type-xs text-[var(--cx-text-muted)]">
             A short context block Atlas shares with your whole team. All 9 specialists
             read this on every turn — no more repeating yourself.
@@ -3333,7 +3341,19 @@ function NotificationsTab() {
   };
 
   if (!prefs) {
-    return <p className="cx-type-sm text-[var(--cx-text-muted)]">Loading…</p>;
+    return (
+      <div className="conduit-card p-5 space-y-4" aria-busy aria-label="Loading notification settings">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="flex items-center justify-between gap-4">
+            <div className="space-y-1.5">
+              <div className="h-3 w-36 rounded-full animate-pulse bg-[var(--cx-border)]" />
+              <div className="h-2 w-52 rounded-full animate-pulse bg-[var(--cx-border)] opacity-60" />
+            </div>
+            <div className="h-6 w-11 rounded-full shrink-0 animate-pulse bg-[var(--cx-border)]" />
+          </div>
+        ))}
+      </div>
+    );
   }
 
   return (
@@ -4537,7 +4557,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="cx-type-md font-semibold mb-1">API Keys</h2>
+          <h2 className="cx-heading-lg mb-1">API Keys</h2>
           <p className="cx-type-sm text-[var(--cx-text-muted)]">
             Integrate Praxis into your own tools and workflows via REST API.
           </p>
@@ -4565,7 +4585,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="cx-type-md font-semibold mb-1">API Keys</h2>
+        <h2 className="cx-heading-lg mb-1">API Keys</h2>
         <p className="cx-type-sm text-[var(--cx-text-muted)]">
           Generate keys to access Praxis programmatically. Keys are shown once — store them securely.
         </p>
@@ -4744,7 +4764,7 @@ function ReferralsTab() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="cx-type-md font-semibold mb-1">Refer &amp; Earn</h2>
+        <h2 className="cx-heading-lg mb-1">Refer &amp; Earn</h2>
         <p className="cx-type-sm text-[var(--cx-text-muted)] max-w-xl">
           Share your personal link. When someone signs up and starts using Praxis,
           you both get bonus tokens.
@@ -4929,7 +4949,7 @@ function LabelsTab() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="cx-type-md font-semibold mb-1">Labels</h2>
+        <h2 className="cx-heading-lg mb-1">Labels</h2>
         <p className="cx-type-sm text-[var(--cx-text-muted)]">
           Color-coded labels to organize conversations by project, client, or status.
         </p>
