@@ -154,7 +154,7 @@ function SidebarUpgradeBanner({
         </div>
 
         {/* Usage meter */}
-        <div className="mb-2.5">
+        <div className="mb-3">
           <div
             className="w-full rounded-full overflow-hidden"
             style={{ height: 4, background: "var(--cx-border)" }}
@@ -639,7 +639,7 @@ export function Sidebar({
             <Link
               href="/app/workspace"
               onClick={close}
-              className="flex items-center gap-2.5 min-w-0"
+              className="flex items-center gap-2 min-w-0"
             >
               {avatarUrl ? (
                 <>
@@ -801,7 +801,7 @@ export function Sidebar({
                       whileHover={shouldReduceMotion ? undefined : { scale: 1.01 }}
                       whileTap={shouldReduceMotion ? undefined : { scale: 0.99 }}
                       transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
-                      className={`relative flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]" : ""}`}
+                      className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]" : ""}`}
                       style={{
                         background: active ? "var(--cx-accent-tint)" : undefined,
                       }}
@@ -895,7 +895,7 @@ export function Sidebar({
                         whileHover={shouldReduceMotion ? undefined : { scale: 1.01 }}
                         whileTap={shouldReduceMotion ? undefined : { scale: 0.99 }}
                         transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
-                        className={`relative flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]" : ""}`}
+                        className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]" : ""}`}
                         style={{
                           background: active ? "var(--cx-accent-tint)" : undefined,
                         }}

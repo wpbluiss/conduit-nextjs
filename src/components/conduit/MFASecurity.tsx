@@ -83,7 +83,7 @@ function BackupCodesGrid({ codes }: { codes: string[] }) {
 
   return (
     <div className="mt-4 space-y-3">
-      <div className="grid grid-cols-2 gap-1.5">
+      <div className="grid grid-cols-2 gap-2">
         {formatted.map((c) => (
           <div
             key={c}
@@ -273,7 +273,7 @@ export function MFASecurity() {
               <div>
                 <div className="flex items-center gap-2">
                   <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 cx-type-xs font-semibold uppercase tracking-[0.12em]"
+                    className="inline-flex items-center gap-2 rounded-full px-2 py-1 cx-type-xs font-semibold uppercase tracking-[0.12em]"
                     style={{ background: "color-mix(in srgb, var(--cx-reward) 15%, transparent)", color: "var(--cx-reward)" }}
                   >
                     <span className="h-1.5 w-1.5 rounded-full bg-current" />
@@ -339,7 +339,7 @@ export function MFASecurity() {
               setSuccess("Two-factor authentication is now enabled.");
               await loadFactors();
             }}
-            className="mt-4 w-full rounded-lg px-4 py-2.5 text-sm font-medium"
+            className="mt-4 w-full rounded-lg px-4 py-3 text-sm font-medium"
           >
             I've saved my codes — done
           </Button>
@@ -461,7 +461,7 @@ export function MFASecurity() {
               className="rounded-lg px-4 py-2 text-sm font-medium transition-opacity disabled:opacity-40"
             >
               {isPending ? (
-                <span className="flex items-center gap-1.5"><SpinnerIcon size={14} />Verifying…</span>
+                <span className="flex items-center gap-2"><SpinnerIcon size={14} />Verifying…</span>
               ) : "Verify & enable"}
             </Button>
           </div>

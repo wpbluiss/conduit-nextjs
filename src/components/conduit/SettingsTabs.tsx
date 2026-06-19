@@ -176,7 +176,7 @@ export function SettingsTabs({
               key={key}
               type="button"
               onClick={() => setTab(key)}
-              className={`px-3 py-1.5 rounded-full cx-type-xs whitespace-nowrap shrink-0 transition-all duration-150 ${
+              className={`px-3 py-2 rounded-full cx-type-xs whitespace-nowrap shrink-0 transition-all duration-150 ${
                 tab === key
                   ? "bg-[var(--cx-accent-tint)] text-[var(--cx-accent-bright)] font-medium"
                   : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[var(--cx-surface-raised)]"
@@ -518,7 +518,7 @@ function SpecialistsTab({
                         type="button"
                         onClick={() => handleLengthChange(emp, value)}
                         title={hint}
-                        className={`px-3 py-1.5 rounded-md cx-type-xs font-medium transition-all ${
+                        className={`px-3 py-2 rounded-md cx-type-xs font-medium transition-all ${
                           current === value
                             ? "bg-[var(--cx-accent)] text-white"
                             : "border border-[var(--cx-border)] text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:border-[var(--cx-text-muted)]"

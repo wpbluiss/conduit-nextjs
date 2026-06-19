@@ -124,7 +124,7 @@ export function NotificationCenter() {
         variant="ghost"
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
         onClick={() => setOpen((v: boolean) => !v)}
-        className="relative flex items-center gap-2 px-3 py-1.5 text-xs w-full"
+        className="relative flex items-center gap-2 px-3 py-2 text-xs w-full"
       >
         <Inbox size={14} className="shrink-0" />
         <span>Notifications</span>
@@ -168,7 +168,7 @@ export function NotificationCenter() {
               className="cx-glass-float cx-glass-border fixed top-0 right-0 bottom-0 z-[199] w-full max-w-sm flex flex-col border-l"
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3.5 border-b border-[var(--color-border)]">
+              <div className="flex items-center justify-between px-4 py-4 border-b border-[var(--color-border)]">
                 <div className="flex items-center gap-2">
                   <Bell size={14} className="text-[var(--color-text-muted)]" />
                   <span className="text-sm font-medium">Notifications</span>
@@ -225,7 +225,7 @@ export function NotificationCenter() {
                         <button
                           type="button"
                           onClick={() => markRead(n)}
-                          className="w-full text-left flex items-start gap-3 px-4 py-3.5 hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)] last:border-b-0"
+                          className="w-full text-left flex items-start gap-3 px-4 py-4 hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)] last:border-b-0"
                           style={{
                             background: n.read_at
                               ? "transparent"

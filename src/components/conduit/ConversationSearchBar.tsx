@@ -255,7 +255,7 @@ export function ConversationSearchBar() {
               </p>
               <Link
                 href="/app"
-                className="inline-flex items-center gap-1.5 cx-type-sm font-medium"
+                className="inline-flex items-center gap-2 cx-type-sm font-medium"
                 style={{ color: "var(--color-accent)" }}
               >
                 <MessageSquarePlus size={13} />

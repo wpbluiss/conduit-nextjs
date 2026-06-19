@@ -231,7 +231,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
               className="cx-glass-overlay cx-glass-border pointer-events-auto w-full max-w-lg rounded-2xl overflow-hidden"
             >
               {/* Search input */}
-              <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[var(--color-border)]">
+              <div className="flex items-center gap-3 px-4 py-4 border-b border-[var(--color-border)]">
                 <Search
                   size={15}
                   className="shrink-0"
@@ -298,7 +298,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
                             type="button"
                             onClick={() => activate(item)}
                             onMouseEnter={() => setActiveIdx(flatIdx)}
-                            className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors"
+                            className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors"
                             style={{
                               background: isActive
                                 ? "color-mix(in srgb, var(--color-accent) 10%, transparent)"
@@ -349,7 +349,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
 
               {/* Footer */}
               <div
-                className="px-4 py-2.5 border-t border-[var(--color-border)] flex items-center gap-4 cx-type-xs"
+                className="px-4 py-3 border-t border-[var(--color-border)] flex items-center gap-4 cx-type-xs"
                 style={{ color: "var(--color-text-muted)" }}
               >
                 <span>

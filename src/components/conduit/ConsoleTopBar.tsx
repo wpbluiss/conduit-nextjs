@@ -101,7 +101,7 @@ export function ConsoleTopBar({
       </PraxisButton>
 
       {/* Breadcrumb */}
-      <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
+      <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
         {/* Accent bar — desktop only */}
         <span
           className="hidden md:block shrink-0 w-0.5 h-4 rounded-full"
@@ -113,7 +113,7 @@ export function ConsoleTopBar({
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={pathname.split("/").slice(0, 3).join("/")}
-            className="flex items-center gap-1.5 min-w-0 shrink-0"
+            className="flex items-center gap-2 min-w-0 shrink-0"
             initial={{ opacity: 0, x: prefersReduced ? 0 : 5 }}
             animate={{ opacity: 1, x: 0, transition: { duration: CX_DUR_BASE, ease: [...CX_EASE] } }}
             exit={{ opacity: 0, x: prefersReduced ? 0 : -3, transition: { duration: CX_DUR_FAST, ease: [...CX_EASE] } }}
@@ -143,7 +143,7 @@ export function ConsoleTopBar({
         <AnimatePresence>
           {breadcrumb?.specialist && (
             <motion.div
-              className="flex items-center gap-1.5 min-w-0"
+              className="flex items-center gap-2 min-w-0"
               initial={{ opacity: 0, x: prefersReduced ? 0 : 6 }}
               animate={{ opacity: 1, x: 0, transition: { duration: CX_DUR_BASE, ease: [...CX_EASE] } }}
               exit={{ opacity: 0, transition: { duration: CX_DUR_FAST } }}
@@ -173,7 +173,7 @@ export function ConsoleTopBar({
         <AnimatePresence>
           {breadcrumb?.conversationTitle && (
             <motion.div
-              className="hidden sm:flex items-center gap-1.5 min-w-0"
+              className="hidden sm:flex items-center gap-2 min-w-0"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { duration: CX_DUR_BASE, delay: 0.04 } }}
               exit={{ opacity: 0, transition: { duration: CX_DUR_FAST } }}

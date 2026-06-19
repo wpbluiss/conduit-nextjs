@@ -55,7 +55,7 @@ function EventRow({ event }: { event: ActivityEvent }) {
         <Icon size={13} strokeWidth={2} />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="flex items-baseline gap-1.5 flex-wrap">
+        <span className="flex items-baseline gap-2 flex-wrap">
           <span
             className="cx-type-xs font-semibold uppercase tracking-[0.1em] shrink-0"
             style={{ color }}
