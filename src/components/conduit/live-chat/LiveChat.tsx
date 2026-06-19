@@ -49,6 +49,20 @@ function escapeHtml(s: string) { return s.replace(/&/g, "&amp;").replace(/</g, "
 const CX_REWARD_RING = "rgba(52,211,153,0.4)";
 const CX_REWARD_RING_FADE = "rgba(52,211,153,0)";
 
+// Mono micro-copy shown while the specialist is thinking/processing.
+// Phrased to feel purposeful — not generic "loading…" — per CONSOLE_REDESIGN.md
+const THINKING_COPY: Record<EmployeeId, string> = {
+  jarvis:      "routing to the right specialist…",
+  engineering: "reviewing the build requirements…",
+  sales:       "reviewing your pipeline…",
+  marketing:   "crafting content strategy…",
+  finance:     "running the numbers…",
+  hr:          "reviewing people strategy…",
+  ops:         "mapping out the process…",
+  compliance:  "checking compliance requirements…",
+  legal:       "reviewing legal considerations…",
+};
+
 function SpecialistChip({ icon: I, complete, reducedMotion }: {
   icon: React.ComponentType<{ className?: string }>;
   complete: boolean;
@@ -80,6 +94,73 @@ function SpecialistChip({ icon: I, complete, reducedMotion }: {
     >
       <I className="size-4" />
     </motion.span>
+  );
+}
+
+// Premium thinking indicator — three accent-violet dots with shimmer wave + mono micro-copy.
+// Replaces the generic gray dots per CONSOLE_REDESIGN.md §"AI is thinking / processing".
+function ThinkingIndicator({ employee, reducedMotion }: {
+  employee: EmployeeId;
+  reducedMotion: boolean;
+}) {
+  const label = THINKING_COPY[employee] ?? "thinking…";
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4, transition: { duration: 0.12, ease: [0.22, 1, 0.36, 1] } }}
+      transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+      className="space-y-2 py-1"
+      aria-live="polite"
+    >
+      <div className="flex items-center gap-1.5" aria-label={`${EMPLOYEES[employee]?.name ?? "Specialist"} is thinking`} role="status">
+        {[0, 1, 2].map((j) => (
+          <motion.span
+            key={j}
+            className="size-2 rounded-full"
+            style={{ backgroundColor: "var(--cx-accent, #7C6CFF)" }}
+            animate={reducedMotion ? { opacity: 0.5 } : {
+              opacity: [0.2, 1, 0.2],
+              scale:   [0.8, 1.2, 0.8],
+            }}
+            transition={{
+              duration: 1.4,
+              repeat: Infinity,
+              delay: j * 0.22,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </div>
+      <motion.p
+        className="cx-mono cx-type-xs"
+        style={{ color: "var(--cx-text-faint, #6B6B7B)" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: reducedMotion ? 0 : 1 }}
+        transition={{ duration: 0.3, delay: 0.15 }}
+      >
+        {label}
+      </motion.p>
+    </motion.div>
+  );
+}
+
+// Streaming caret — soft accent-violet blink while tokens are arriving.
+// Uses framer-motion so it inherits the app's easing system and responds
+// to prefers-reduced-motion without separate CSS keyframes.
+function StreamingCaret({ reducedMotion }: { reducedMotion: boolean }) {
+  return (
+    <motion.span
+      className="ml-0.5 inline-block h-4 w-[3px] translate-y-0.5 rounded-full align-middle"
+      style={{ backgroundColor: "var(--cx-accent, #7C6CFF)" }}
+      animate={reducedMotion ? { opacity: 0.8 } : { opacity: [1, 0] }}
+      transition={reducedMotion ? {} : {
+        duration: 0.7,
+        repeat: Infinity,
+        repeatType: "reverse",
+        ease: "easeInOut",
+      }}
+    />
   );
 }
 
@@ -522,37 +603,38 @@ export function LiveChat({
                   <SpecialistChip icon={I} complete={!m.pending} reducedMotion={reducedMotion} />
                   <div className="min-w-0 flex-1">
                     <p className="mb-1 text-sm font-semibold">{EMPLOYEES[e]?.name ?? "Atlas"}</p>
-                    {m.pending && !m.content ? (
-                      <div className="flex items-center gap-1 py-2" aria-label="Typing…" aria-live="polite">
-                        {[0, 1, 2].map((j) => (
-                          <motion.span
-                            key={j}
-                            className="size-1.5 rounded-full bg-muted-foreground"
-                            animate={reducedMotion ? {} : { opacity: [0.3, 1, 0.3], y: [0, -2, 0] }}
-                            transition={{ duration: 1, repeat: Infinity, delay: j * 0.18 }}
-                            style={reducedMotion ? { opacity: 0.6 } : undefined}
-                          />
-                        ))}
-                      </div>
-                    ) : m.error ? (
-                      <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3">
-                        <p className="text-sm text-destructive/90 leading-relaxed">{m.content}</p>
-                        {lastSentMsg.current && (
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => send(lastSentMsg.current)}
-                            isLoading={loading}
-                            loadingText="Retrying…"
-                            className="mt-2 gap-1.5 text-xs"
-                          >
-                            <RefreshCw className="size-3" /> Retry
-                          </Button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{m.content}{m.pending && <span className={`ml-0.5 inline-block h-4 w-[3px] translate-y-0.5 rounded-full bg-primary align-middle${reducedMotion ? "" : " animate-pulse"}`} />}</div>
-                    )}
+                    <AnimatePresence mode="sync" initial={false}>
+                      {m.pending && !m.content ? (
+                        <ThinkingIndicator key="thinking" employee={e} reducedMotion={reducedMotion} />
+                      ) : m.error ? (
+                        <div key="error" className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3">
+                          <p className="text-sm text-destructive/90 leading-relaxed">{m.content}</p>
+                          {lastSentMsg.current && (
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => send(lastSentMsg.current)}
+                              isLoading={loading}
+                              loadingText="Retrying…"
+                              className="mt-2 gap-1.5 text-xs"
+                            >
+                              <RefreshCw className="size-3" /> Retry
+                            </Button>
+                          )}
+                        </div>
+                      ) : (
+                        <motion.div
+                          key="content"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                          className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90"
+                        >
+                          {m.content}
+                          {m.pending && <StreamingCaret reducedMotion={reducedMotion} />}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                     {m.artifacts?.map((a) => (
                       <button key={a.id} onClick={() => setOpenArtifact(a)} aria-label={`Open artifact: ${a.title}`} className="mt-3 flex w-full max-w-sm items-center gap-3 rounded-xl border border-white/10 bg-secondary/40 p-3 text-left transition-colors hover:border-primary/40 hover:bg-secondary">
                         <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary"><FileText className="size-5" /></span>
@@ -593,9 +675,30 @@ export function LiveChat({
                 </motion.div>
               )}
             </AnimatePresence>
-            <div data-tour-target="chat-input" className="flex items-end gap-2 rounded-2xl border border-white/10 bg-secondary/60 p-2 transition-all focus-within:border-primary/50 focus-within:bg-secondary focus-within:wm-glow">
+            <div
+              data-tour-target="chat-input"
+              className="flex items-end gap-2 rounded-2xl border bg-secondary/60 p-2 transition-all focus-within:bg-secondary focus-within:wm-glow"
+              style={{
+                borderColor: loading
+                  ? "var(--cx-accent, #7C6CFF)"
+                  : "rgba(255,255,255,0.10)",
+                boxShadow: loading
+                  ? "0 0 0 3px var(--cx-accent-glow-raw, rgba(124,108,255,0.18))"
+                  : undefined,
+                transition: "border-color 120ms cubic-bezier(0.22,1,0.36,1), box-shadow 120ms cubic-bezier(0.22,1,0.36,1)",
+              }}
+            >
               <Button type="button" size="icon-sm" variant="ghost" className="!rounded-xl shrink-0 text-muted-foreground hover:bg-input hover:text-foreground" aria-label="Attach file"><Paperclip className="size-4" /></Button>
-              <textarea ref={taRef} value={input} rows={1} onChange={(e) => { setInput(e.target.value); grow(); }} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !menu) { e.preventDefault(); send(input); } }} placeholder={`Message ${emp.name}…  ·  / for commands  ·  @ to route`} className="max-h-40 flex-1 resize-none bg-transparent py-2 text-sm leading-relaxed outline-none placeholder:text-muted-foreground" />
+              <textarea
+                ref={taRef}
+                value={input}
+                rows={1}
+                readOnly={loading}
+                onChange={(e) => { setInput(e.target.value); grow(); }}
+                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !menu) { e.preventDefault(); send(input); } }}
+                placeholder={loading ? "Waiting for response…" : `Message ${emp.name}…  ·  / for commands  ·  @ to route`}
+                className="max-h-40 flex-1 resize-none bg-transparent py-2 text-sm leading-relaxed outline-none placeholder:text-muted-foreground"
+              />
               <Button type="submit" variant="primary" size="icon-sm" isDisabled={!input.trim() || loading} className="!rounded-xl shrink-0 disabled:opacity-40" aria-label="Send message"><ArrowUp className="size-4" /></Button>
             </div>
             <p className="wm-label mt-2 flex items-center justify-center gap-3"><span className="flex items-center gap-1"><Command className="size-3" />K</span><span className="flex items-center gap-1"><Slash className="size-3" />commands</span><span className="flex items-center gap-1"><AtSign className="size-3" />route</span></p>
