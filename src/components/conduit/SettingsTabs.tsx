@@ -1223,7 +1223,7 @@ function WorkspaceTab({
               )}
             </div>
             {logoUploading && (
-              <div className="absolute inset-0 rounded-xl bg-black/40 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-xl flex items-center justify-center" style={{ background: "rgba(11,11,15,0.6)" }}>
                 <SpinnerIcon size={18} />
               </div>
             )}
@@ -1289,7 +1289,7 @@ function WorkspaceTab({
             }}
             maxLength={WS_NAME_MAX}
             placeholder="e.g. Acme AI Team"
-            className="w-full conduit-card px-4 py-3 outline-none cx-type-sm pr-12"
+            className="w-full conduit-card cx-radius-sm px-4 py-3 outline-none cx-type-sm pr-12"
           />
           <span
             className="absolute right-3 top-1/2 -translate-y-1/2 cx-type-xs tabular-nums"
@@ -1594,7 +1594,7 @@ function ProfileTab({
               )}
             </div>
             {avatarUploading && (
-              <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full flex items-center justify-center" style={{ background: "rgba(11,11,15,0.6)" }}>
                 <SpinnerIcon size={18} />
               </div>
             )}
@@ -1642,7 +1642,7 @@ function ProfileTab({
               onChange={(e) => { setNameValue(e.target.value); setNameSaved(false); setNameError(""); }}
               maxLength={100}
               placeholder={fullName || "Your name"}
-              className="flex-1 conduit-card px-4 py-3 outline-none cx-type-sm"
+              className="flex-1 conduit-card cx-radius-sm px-4 py-3 outline-none cx-type-sm"
             />
             <PraxisButton
               type="submit"
@@ -1671,7 +1671,7 @@ function ProfileTab({
               onChange={(e) => { setWsName(e.target.value); setWsNameSaved(false); setWsNameError(""); }}
               maxLength={80}
               placeholder="e.g. Acme AI Team"
-              className="flex-1 conduit-card px-4 py-3 outline-none cx-type-sm"
+              className="flex-1 conduit-card cx-radius-sm px-4 py-3 outline-none cx-type-sm"
             />
             <PraxisButton
               type="submit"
@@ -1765,7 +1765,7 @@ function ProfileTab({
                 onChange={(e) => { setNewEmail(e.target.value); setEmailError(""); }}
                 autoComplete="email"
                 required
-                className="w-full conduit-card px-4 py-3 outline-none cx-type-sm"
+                className="w-full conduit-card cx-radius-sm px-4 py-3 outline-none cx-type-sm"
               />
               {emailError && (
                 <p className="cx-type-xs text-[var(--cx-danger)]">{emailError}</p>
@@ -1796,7 +1796,7 @@ function ProfileTab({
                 onChange={(e) => { setCurrentPw(e.target.value); setPwError(""); }}
                 autoComplete="current-password"
                 required
-                className="w-full conduit-card px-4 py-3 outline-none cx-type-sm"
+                className="w-full conduit-card cx-radius-sm px-4 py-3 outline-none cx-type-sm"
               />
             </div>
             <div>
@@ -1807,7 +1807,7 @@ function ProfileTab({
                 onChange={(e) => { setNewPw(e.target.value); setPwError(""); }}
                 autoComplete="new-password"
                 required
-                className="w-full conduit-card px-4 py-3 outline-none cx-type-sm"
+                className="w-full conduit-card cx-radius-sm px-4 py-3 outline-none cx-type-sm"
               />
               <PwMeter pw={newPw} />
             </div>
@@ -1819,7 +1819,7 @@ function ProfileTab({
                 onChange={(e) => { setConfirmPw(e.target.value); setPwError(""); }}
                 autoComplete="new-password"
                 required
-                className="w-full conduit-card px-4 py-3 outline-none cx-type-sm"
+                className="w-full conduit-card cx-radius-sm px-4 py-3 outline-none cx-type-sm"
               />
             </div>
             {pwError && (
@@ -1982,7 +1982,7 @@ function BusinessTab({ account }: { account: AccountData }) {
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full conduit-card px-4 py-3 outline-none cx-type-sm"
+            className="w-full conduit-card cx-radius-sm px-4 py-3 outline-none cx-type-sm"
           />
         </div>
         <div>
@@ -1992,7 +1992,7 @@ function BusinessTab({ account }: { account: AccountData }) {
           <input
             value={businessType}
             onChange={(e) => setBusinessType(e.target.value)}
-            className="w-full conduit-card px-4 py-3 outline-none cx-type-sm"
+            className="w-full conduit-card cx-radius-sm px-4 py-3 outline-none cx-type-sm"
           />
         </div>
         <div>
@@ -2003,7 +2003,7 @@ function BusinessTab({ account }: { account: AccountData }) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
-            className="w-full conduit-card px-4 py-3 outline-none resize-none cx-type-sm"
+            className="w-full conduit-card cx-radius-sm px-4 py-3 outline-none resize-none cx-type-sm"
           />
         </div>
         {error && <p className="cx-type-xs text-[var(--cx-danger)]">{error}</p>}
@@ -2036,7 +2036,7 @@ function BusinessTab({ account }: { account: AccountData }) {
               rows={4}
               maxLength={COMPANY_BRIEF_MAX}
               placeholder="e.g. Acme builds B2B SaaS for HR teams in the US mid-market. We're pre-revenue, 2 founders, focused on getting our first 10 design partners this quarter."
-              className="w-full conduit-card px-4 py-3 outline-none resize-none cx-type-sm"
+              className="w-full conduit-card cx-radius-sm px-4 py-3 outline-none resize-none cx-type-sm"
             />
             <span
               className="absolute bottom-3 right-3 cx-type-xs tabular-nums"
@@ -3700,12 +3700,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : isAvailable("google_calendar") ? (
             <a
               href="/api/conduit/connectors/google-calendar/auth"
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-2 no-underline hover:opacity-90 transition-opacity duration-150"
-              style={{
-                background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
-                border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
-                color: "var(--cx-accent)",
-              }}
+              className="mt-auto btn-secondary btn-sz-sm w-full no-underline"
             >
               <Link size={12} />
               Connect Google Calendar
@@ -3807,12 +3802,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : isFreeUser ? (
             <a
               href="/app/settings?tab=billing"
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-2 no-underline hover:opacity-90 transition-opacity duration-150"
-              style={{
-                background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
-                border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
-                color: "var(--cx-accent)",
-              }}
+              className="mt-auto btn-secondary btn-sz-sm w-full no-underline"
             >
               <Lock size={12} />
               Pro feature — Upgrade
@@ -3820,12 +3810,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : isAvailable("slack") ? (
             <a
               href="/api/conduit/connectors/slack/auth"
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-2 no-underline hover:opacity-90 transition-opacity duration-150"
-              style={{
-                background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
-                border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
-                color: "var(--cx-accent)",
-              }}
+              className="mt-auto btn-secondary btn-sz-sm w-full no-underline"
             >
               <Link size={12} />
               Connect Slack
@@ -3900,12 +3885,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : isAvailable("hubspot") ? (
             <a
               href="/api/conduit/connectors/hubspot/auth"
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-2 no-underline hover:opacity-90 transition-opacity duration-150"
-              style={{
-                background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
-                border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
-                color: "var(--cx-accent)",
-              }}
+              className="mt-auto btn-secondary btn-sz-sm w-full no-underline"
             >
               <Link size={12} />
               Connect HubSpot
@@ -4110,12 +4090,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : isFreeUser ? (
             <a
               href="/app/settings?tab=billing"
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-2 no-underline hover:opacity-90 transition-opacity duration-150"
-              style={{
-                background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
-                border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
-                color: "var(--cx-accent)",
-              }}
+              className="mt-auto btn-secondary btn-sz-sm w-full no-underline"
             >
               <Lock size={12} />
               Pro feature — Upgrade
@@ -4123,12 +4098,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           ) : isAvailable("google_drive") ? (
             <a
               href="/api/conduit/connectors/google-drive/auth"
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-2 no-underline hover:opacity-90 transition-opacity duration-150"
-              style={{
-                background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
-                border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
-                color: "var(--cx-accent)",
-              }}
+              className="mt-auto btn-secondary btn-sz-sm w-full no-underline"
             >
               <Link size={12} />
               Connect Google Drive
@@ -4216,12 +4186,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
         ) : isAvailable("github") ? (
           <a
             href="/api/conduit/connectors/github/auth"
-            className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium flex items-center justify-center gap-2 no-underline hover:opacity-90 transition-opacity duration-150"
-            style={{
-              background: "color-mix(in srgb, var(--cx-accent) 10%, var(--cx-surface))",
-              border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, transparent)",
-              color: "var(--cx-accent)",
-            }}
+            className="mt-auto btn-secondary btn-sz-sm w-full no-underline"
           >
             <Link size={12} />
             Connect GitHub
@@ -4462,7 +4427,7 @@ function AlwaysOnRow({ label, desc }: { label: string; desc: string }) {
         title="Cannot be disabled"
         className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full cursor-not-allowed bg-[var(--cx-accent)]"
       >
-        <span className="inline-block h-5 w-5 transform rounded-full bg-white translate-x-5" />
+        <span className="inline-block h-5 w-5 transform rounded-full translate-x-5" style={{ background: "rgba(255,255,255,0.95)" }} />
       </div>
     </div>
   );
