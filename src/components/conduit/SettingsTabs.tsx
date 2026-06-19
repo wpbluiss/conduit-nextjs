@@ -3685,7 +3685,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
       </p>
 
       {/* Live connectors */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:grid-flow-dense">
         {/* Google Calendar */}
         <div className="conduit-card p-5 flex flex-col gap-4">
           <div className="flex items-start justify-between gap-3">
@@ -3812,7 +3812,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                   <select
                     value={selectedChannel}
                     onChange={(e) => setSelectedChannel(e.target.value)}
-                    className="flex-1 cx-type-xs rounded-lg px-2 py-2 bg-[var(--cx-surface)] border border-[var(--cx-border)] text-[var(--cx-text)] outline-none"
+                    className="flex-1 cx-select-sm"
                   >
                     <option value="">Pick a channel…</option>
                     {slackChannels.map((c) => (
@@ -3945,10 +3945,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             </PraxisButton>
           )}
         </div>
-      </div>
 
         {/* Google Drive */}
-        <div className="conduit-card p-5 flex flex-col gap-4">
+        <div className="conduit-card p-5 flex flex-col gap-4 md:col-span-2">
           <div className="flex items-start justify-between gap-3">
             <div
               className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
@@ -4245,6 +4244,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             Not configured
           </PraxisButton>
         )}
+      </div>
       </div>
 
       {/* Coming soon — Notion */}
