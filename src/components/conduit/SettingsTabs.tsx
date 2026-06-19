@@ -3711,17 +3711,14 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               Connect Google Calendar
             </a>
           ) : (
-            <button
-              disabled
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-2"
-              style={{
-                background: "var(--cx-surface)",
-                border: "1px solid var(--cx-border)",
-                color: "var(--cx-text-muted)",
-              }}
+            <PraxisButton
+              isDisabled
+              variant="secondary"
+              size="sm"
+              className="mt-auto w-full justify-center"
             >
               Not configured
-            </button>
+            </PraxisButton>
           )}
         </div>
 
@@ -3834,17 +3831,14 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               Connect Slack
             </a>
           ) : (
-            <button
-              disabled
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-2"
-              style={{
-                background: "var(--cx-surface)",
-                border: "1px solid var(--cx-border)",
-                color: "var(--cx-text-muted)",
-              }}
+            <PraxisButton
+              isDisabled
+              variant="secondary"
+              size="sm"
+              className="mt-auto w-full justify-center"
             >
               Not configured
-            </button>
+            </PraxisButton>
           )}
         </div>
 
@@ -3917,17 +3911,14 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               Connect HubSpot
             </a>
           ) : (
-            <button
-              disabled
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-2"
-              style={{
-                background: "var(--cx-surface)",
-                border: "1px solid var(--cx-border)",
-                color: "var(--cx-text-muted)",
-              }}
+            <PraxisButton
+              isDisabled
+              variant="secondary"
+              size="sm"
+              className="mt-auto w-full justify-center"
             >
               Not configured
-            </button>
+            </PraxisButton>
           )}
         </div>
       </div>
@@ -4143,17 +4134,14 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               Connect Google Drive
             </a>
           ) : (
-            <button
-              disabled
-              className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-2"
-              style={{
-                background: "var(--cx-surface)",
-                border: "1px solid var(--cx-border)",
-                color: "var(--cx-text-muted)",
-              }}
+            <PraxisButton
+              isDisabled
+              variant="secondary"
+              size="sm"
+              className="mt-auto w-full justify-center"
             >
               Not configured
-            </button>
+            </PraxisButton>
           )}
         </div>
 
@@ -4239,17 +4227,14 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             Connect GitHub
           </a>
         ) : (
-          <button
-            disabled
-            className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40 flex items-center justify-center gap-2"
-            style={{
-              background: "var(--cx-surface)",
-              border: "1px solid var(--cx-border)",
-              color: "var(--cx-text-muted)",
-            }}
+          <PraxisButton
+            isDisabled
+            variant="secondary"
+            size="sm"
+            className="mt-auto w-full justify-center"
           >
             Not configured
-          </button>
+          </PraxisButton>
         )}
       </div>
 
@@ -4295,17 +4280,14 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                   {description}
                 </p>
               </div>
-              <button
-                disabled
-                className="mt-auto w-full py-2 rounded-lg cx-type-xs font-medium cursor-not-allowed opacity-40"
-                style={{
-                  background: "var(--cx-surface)",
-                  border: "1px solid var(--cx-border)",
-                  color: "var(--cx-text-muted)",
-                }}
+              <PraxisButton
+                isDisabled
+                variant="secondary"
+                size="sm"
+                className="mt-auto w-full justify-center"
               >
                 Connect {name}
-              </button>
+              </PraxisButton>
             </div>
           ))}
         </div>
