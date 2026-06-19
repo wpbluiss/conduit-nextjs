@@ -120,9 +120,9 @@
   color: var(--color-text);
   isolation: isolate;
   transition:
-    box-shadow 280ms var(--praxis-ease-out-quart),
-    border-color 280ms var(--praxis-ease-out-quart),
-    transform 280ms var(--praxis-ease-out-quart);
+    box-shadow 180ms var(--cx-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color 180ms var(--cx-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform 180ms var(--cx-ease, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 /* Top-edge gradient indicator (FR-023) — replaces the 3px left stripe
@@ -199,9 +199,9 @@
 /* Locked / ghosted variant — FR-027 */
 .praxis-root .praxis-card[data-locked="true"] {
   filter: saturate(0.40) brightness(0.70);
-  transition: filter 220ms var(--praxis-ease-out-quart),
-              border-color 280ms var(--praxis-ease-out-quart),
-              box-shadow 280ms var(--praxis-ease-out-quart);
+  transition: filter 200ms var(--cx-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+              border-color 180ms var(--cx-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+              box-shadow 180ms var(--cx-ease, cubic-bezier(0.22, 1, 0.36, 1));
 }
 .praxis-root .praxis-card[data-locked="true"]:hover {
   filter: saturate(0.55) brightness(0.78);
@@ -456,8 +456,8 @@
   border: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08));
   box-shadow: var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
   border-radius: var(--radius-pill);
-  transition: border-color 200ms var(--praxis-ease-out-quart),
-              box-shadow 200ms var(--praxis-ease-out-quart);
+  transition: border-color 180ms var(--cx-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+              box-shadow 180ms var(--cx-ease, cubic-bezier(0.22, 1, 0.36, 1));
 }
 .praxis-root .praxis-composer-pill[data-state="focus"],
 .praxis-root .praxis-composer-pill:focus-within {
