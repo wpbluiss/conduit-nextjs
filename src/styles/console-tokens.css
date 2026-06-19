@@ -81,6 +81,8 @@
 
   /* ---- Semantic signal colors ---- */
   --cx-reward:          #34D399;
+  --cx-warn:            #FBBF24;
+  --cx-warn-tint:       rgba(234, 179, 8, 0.10);
   --cx-danger:          #F4607D;
 
   /* ---- Type scale (px, applied as font-size) ----
@@ -187,6 +189,8 @@
 
   /* -- Existing --color-green / --color-danger -- */
   --color-green:  var(--cx-reward);
+  --color-amber:  var(--cx-warn);
+  --color-yellow: var(--cx-warn);
   --color-pink:   var(--cx-danger);
 
   /* -- Destructive / semantic signal bridges -- */
@@ -496,6 +500,7 @@
 .praxis-root .cx-text-faint      { color: var(--cx-text-faint); }
 .praxis-root .cx-text-accent     { color: var(--cx-accent); }
 .praxis-root .cx-text-reward     { color: var(--cx-reward); }
+.praxis-root .cx-text-warn       { color: var(--cx-warn); }
 .praxis-root .cx-text-danger     { color: var(--cx-danger); }
 
 /* ---- Type scale utilities ---- */
