@@ -203,7 +203,7 @@ export function WelcomeChecklist({
                       background: done ? "var(--color-accent)" : "transparent",
                     }}
                   >
-                    {done && <Check size={11} color="#fff" strokeWidth={3} />}
+                    {done && <Check size={11} color="#fff" style={{ strokeWidth: 3 }} />}
                   </span>
                   <span className={done ? "line-through text-[var(--color-text-muted)]" : ""}>
                     {item.label}

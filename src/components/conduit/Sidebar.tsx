@@ -1108,7 +1108,7 @@ export function Sidebar({
                         style={{ background: DEPT_COLOR[emp] }}
                         aria-label="Pinned"
                       >
-                        <Pin size={7} style={{ color: "var(--cx-canvas)" }} strokeWidth={2.5} />
+                        <Pin size={7} style={{ color: "var(--cx-canvas)", strokeWidth: 2.5 }} />
                       </span>
                     )}
                   </motion.span>

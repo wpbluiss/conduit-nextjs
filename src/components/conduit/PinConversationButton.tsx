@@ -66,9 +66,9 @@ export function PinConversationButton({ conversationId, pinned, atLimit }: Props
       >
         <Star
           size={14}
-          strokeWidth={2}
           className={optimistic ? "fill-current" : ""}
           style={{
+            strokeWidth: 2,
             color: optimistic
               ? "var(--color-amber)"
               : "var(--color-text-muted)",

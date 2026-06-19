@@ -798,6 +798,26 @@
 .praxis-root .cx-radius-full { border-radius: var(--cx-radius-full); }
 
 /* ------------------------------------------------------------
+ * Iconography system — uniform 1.75px stroke for all Lucide icons
+ *
+ * CONSOLE_REDESIGN.md §Iconography: "uniform stroke (1.75–2px),
+ * 20/24 optical sizes." Lucide outputs stroke-width="2" as an SVG
+ * presentation attribute by default. CSS rules have higher cascade
+ * priority than SVG presentation attributes, so this one rule
+ * enforces the 1.75 default system-wide without per-icon props.
+ *
+ * Exceptions: use inline style={{ strokeWidth: X }} on specific
+ * elements where optical correction is needed (tiny indicators at
+ * ≤8px, checkmarks inside filled circles, loading spinners).
+ * Custom SVGs (SpinnerIcon, SpecialistEmptyArt backdrops) are raw
+ * <svg> elements without the .lucide class — they are not affected.
+ * ------------------------------------------------------------ */
+
+.praxis-root svg.lucide {
+  stroke-width: 1.75;
+}
+
+/* ------------------------------------------------------------
  * .cx-icon-btn — square icon-only button
  *
  * Pairs with any PraxisButton variant or standalone.

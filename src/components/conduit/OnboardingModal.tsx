@@ -260,7 +260,7 @@ export function OnboardingModal({
                             : "border-[var(--color-border)]"
                         }`}
                       >
-                        {selected && <Check size={12} strokeWidth={3} className="text-white" />}
+                        {selected && <Check size={12} className="text-white" style={{ strokeWidth: 3 }} />}
                       </span>
                       {goal}
                     </button>

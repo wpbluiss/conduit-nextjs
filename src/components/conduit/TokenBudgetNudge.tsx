@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Warning, X } from "@phosphor-icons/react";
+import { AlertTriangle, X } from "lucide-react";
 import { track } from "@/lib/analytics/track";
 import { PraxisButton } from "@/components/conduit/ui/Button";
 
@@ -59,9 +59,8 @@ export function TokenBudgetNudge({
         borderBottomColor: "color-mix(in srgb, var(--cx-accent) 20%, transparent)",
       }}
     >
-      <Warning
+      <AlertTriangle
         size={14}
-        weight="fill"
         style={{ color: "var(--cx-accent)", flexShrink: 0 }}
       />
       <span style={{ color: "var(--color-text)" }}>
