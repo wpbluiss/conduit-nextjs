@@ -194,7 +194,7 @@ export function PaywallModal({
             <X size={18} />
           </Button>
 
-          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-[var(--cx-reward)] mb-2">
+          <div className="flex items-center gap-2 cx-type-xs uppercase tracking-[0.18em] text-[var(--cx-reward)] mb-2">
             <Sparkles size={13} />
             {reasonLabel}
           </div>
@@ -202,7 +202,7 @@ export function PaywallModal({
           <h2 id="paywall-title" className="cx-type-xl md:cx-type-2xl font-semibold leading-tight">
             {payload.message}
           </h2>
-          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+          <p className="mt-1 cx-type-base text-[var(--color-text-muted)]">
             Upgrade to Pro to continue.
           </p>
 
@@ -210,7 +210,7 @@ export function PaywallModal({
           <div className="mt-4 inline-flex items-center gap-1 rounded-full p-1" style={{ background: "var(--cx-surface-raised)", border: "1px solid var(--color-border)" }}>
             <button
               onClick={() => setBilling("monthly")}
-              className="px-3 py-1 text-xs rounded-full transition-colors"
+              className="px-3 py-1 cx-type-xs rounded-full transition-colors"
               style={
                 billing === "monthly"
                   ? { background: "var(--color-border)", color: "var(--color-text)" }
@@ -221,7 +221,7 @@ export function PaywallModal({
             </button>
             <button
               onClick={() => setBilling("annual")}
-              className="px-3 py-1 text-xs rounded-full transition-colors flex items-center gap-1.5"
+              className="px-3 py-1 cx-type-xs rounded-full transition-colors flex items-center gap-1.5"
               style={
                 billing === "annual"
                   ? { background: "var(--color-border)", color: "var(--color-text)" }
@@ -240,7 +240,7 @@ export function PaywallModal({
         <div className="px-6 pb-2">
           <div className="rounded-xl overflow-hidden" style={{ border: "1px solid var(--color-border)" }}>
             {/* Column headers */}
-            <div className="grid grid-cols-3 text-xs">
+            <div className="grid grid-cols-3 cx-type-xs">
               <div className="px-4 py-3 text-[var(--color-text-muted)] font-medium uppercase tracking-[0.12em]">
                 Feature
               </div>
@@ -263,7 +263,7 @@ export function PaywallModal({
             {FEATURES.map((f, i) => (
               <div
                 key={f.label}
-                className="grid grid-cols-3 text-sm"
+                className="grid grid-cols-3 cx-type-base"
                 style={{
                   borderTop: "1px solid var(--color-border)",
                   background: i % 2 === 0 ? "transparent" : "color-mix(in srgb, var(--color-border) 20%, transparent)",
@@ -294,15 +294,15 @@ export function PaywallModal({
               <span className="cx-mono cx-type-2xl font-semibold" style={{ color: "var(--color-text)" }}>
                 ${displayPrice.toFixed(2)}
               </span>
-              <span className="text-sm text-[var(--color-text-muted)] ml-1">/mo</span>
+              <span className="cx-type-base text-[var(--color-text-muted)] ml-1">/mo</span>
               {billing === "annual" && (
-                <span className="ml-2 text-xs text-[var(--color-text-muted)] line-through">
+                <span className="ml-2 cx-type-xs text-[var(--color-text-muted)] line-through">
                   ${monthlyPrice}/mo
                 </span>
               )}
             </div>
             {billing === "annual" && (
-              <span className="text-xs text-[var(--cx-reward)]">
+              <span className="cx-type-xs text-[var(--cx-reward)]">
                 Billed ${(monthlyPrice * 12 * 0.8).toFixed(2)}/yr
               </span>
             )}
@@ -320,10 +320,10 @@ export function PaywallModal({
           </Button>
 
           {error && (
-            <p className="mt-3 text-xs text-[var(--color-pink,#f87171)]">{error}</p>
+            <p className="mt-3 cx-type-xs text-[var(--color-pink,#f87171)]">{error}</p>
           )}
 
-          <p className="mt-3 text-center text-xs text-[var(--color-text-muted)]">
+          <p className="mt-3 text-center cx-type-xs text-[var(--color-text-muted)]">
             Cancel anytime · Seats billed per workspace
           </p>
         </div>

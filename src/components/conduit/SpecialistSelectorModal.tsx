@@ -111,7 +111,7 @@ export function SpecialistSelectorModal({
           Who leads this?
         </h2>
         <p
-          className="text-sm mb-6"
+          className="cx-type-base mb-6"
           style={{ color: "var(--color-text-muted)" }}
         >
           Pick a specialist, or let Atlas route it automatically.

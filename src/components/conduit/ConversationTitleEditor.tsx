@@ -85,14 +85,14 @@ export function ConversationTitleEditor({ conversationId, initialTitle }: Props)
         onBlur={() => void save()}
         maxLength={160}
         aria-label="Rename conversation"
-        className="flex-1 bg-transparent text-sm outline-none border-b border-[var(--color-accent)] text-[var(--color-text)] min-w-0 py-0.5"
+        className="flex-1 bg-transparent cx-type-base outline-none border-b border-[var(--color-accent)] text-[var(--color-text)] min-w-0 py-0.5"
       />
     );
   }
 
   return (
     <span className="flex items-center gap-1.5 flex-1 min-w-0 group/title">
-      <span className="truncate text-sm">{title}</span>
+      <span className="truncate cx-type-base">{title}</span>
       <PraxisButton
         type="button"
         variant="ghost"

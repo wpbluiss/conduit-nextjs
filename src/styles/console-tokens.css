@@ -136,6 +136,20 @@
   --cx-text-32: var(--cx-type-2xl);
   --cx-text-44: var(--cx-type-3xl);
 
+  /* ---- Semantic size aliases (CONSOLE_REDESIGN.md issue #1022 names) ----
+   * Named aliases for the type scale matching the spec naming convention.
+   * Alias to --cx-type-* so there is a single source of truth.
+   * Prefer --cx-type-* in component code; these names are for
+   * the spec-exact issue API and for Tailwind arbitrary-value consumers. */
+  --cx-text-2xs: var(--cx-type-xs);    /* 12px — caption, tooltip, micro-copy */
+  --cx-text-xs:  var(--cx-type-sm);    /* 13px — compact labels, secondary info */
+  --cx-text-sm:  var(--cx-type-base);  /* 14px — body reading text */
+  --cx-text-base: var(--cx-type-md);   /* 16px — prominent body / action labels */
+  --cx-text-md:  var(--cx-type-lg);    /* 20px — subheadings, section titles */
+  --cx-text-lg:  var(--cx-type-xl);    /* 24px — heading 3 */
+  --cx-text-xl:  var(--cx-type-2xl);   /* 32px — heading 2 / display */
+  --cx-text-2xl: var(--cx-type-3xl);   /* 44px — hero display */
+
   /* ---- Issue-spec semantic aliases (CONSOLE_REDESIGN issue #986 names) ---- */
   --cx-type-body:    var(--cx-type-base);   /* 14px — comfortable reading */
   --cx-type-display: var(--cx-type-3xl);   /* 44px — hero/display */
@@ -554,6 +568,18 @@
 .praxis-root .cx-text-24 { font-size: var(--cx-text-24); }
 .praxis-root .cx-text-32 { font-size: var(--cx-text-32); }
 .praxis-root .cx-text-44 { font-size: var(--cx-text-44); }
+
+/* ---- Semantic size utilities (issue #1022 names) ----
+ * Alias to cx-type-* so both naming conventions work.
+ * cx-text-2xs (12px) through cx-text-2xl (44px). */
+.praxis-root .cx-text-2xs  { font-size: var(--cx-text-2xs); }
+.praxis-root .cx-text-xs   { font-size: var(--cx-text-xs); }
+.praxis-root .cx-text-sm   { font-size: var(--cx-text-sm); }
+.praxis-root .cx-text-base { font-size: var(--cx-text-base); }
+.praxis-root .cx-text-md   { font-size: var(--cx-text-md); }
+.praxis-root .cx-text-lg   { font-size: var(--cx-text-lg); }
+.praxis-root .cx-text-xl   { font-size: var(--cx-text-xl); }
+.praxis-root .cx-text-2xl  { font-size: var(--cx-text-2xl); }
 
 /* ---- Body text compound utility ----
  * Applies spec body size (14px) + comfortable line-height (1.60).

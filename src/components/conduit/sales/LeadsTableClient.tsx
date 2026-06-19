@@ -156,14 +156,14 @@ export default function LeadsTableClient({
             </div>
             <h2 className="cx-type-lg font-semibold mt-0.5">
               {filtered.length}{" "}
-              <span className="text-[var(--color-text-muted)] text-sm font-normal">
+              <span className="text-[var(--color-text-muted)] cx-type-base font-normal">
                 {filtered.length === 1 ? "prospect" : "prospects"}
               </span>
             </h2>
           </div>
           <Button
             onClick={() => setShowModal(true)}
-            className="!text-sm inline-flex items-center gap-2"
+            className="cx-type-base inline-flex items-center gap-2"
             style={{ background: deptColor, color: "var(--cx-canvas)" }}
           >
             <Search size={14} />
@@ -172,7 +172,7 @@ export default function LeadsTableClient({
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap items-center gap-2 text-sm">
+        <div className="flex flex-wrap items-center gap-2 cx-type-base">
           <FilterSelect
             label="Vertical"
             value={filterVertical}
@@ -218,7 +218,7 @@ export default function LeadsTableClient({
             ]}
           />
           {refetching && (
-            <span className="text-xs text-[var(--color-text-muted)] inline-flex items-center gap-1">
+            <span className="cx-type-xs text-[var(--color-text-muted)] inline-flex items-center gap-1">
               <Loader2 size={12} className="animate-spin" />
               refreshing
             </span>
@@ -289,14 +289,14 @@ function FilterSelect({
   options: Array<{ value: string; label: string }>;
 }) {
   return (
-    <label className="inline-flex items-center gap-1.5 text-xs">
+    <label className="inline-flex items-center gap-1.5 cx-type-xs">
       <span className="text-[var(--color-text-muted)] uppercase tracking-[0.12em]">
         {label}
       </span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="bg-[var(--color-bg-elevated,rgba(255,255,255,0.03))] border border-[var(--color-border)] rounded-md px-2 py-1 text-[var(--color-text)] text-sm"
+        className="bg-[var(--color-bg-elevated,rgba(255,255,255,0.03))] border border-[var(--color-border)] rounded-md px-2 py-1 text-[var(--color-text)] cx-type-base"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -361,14 +361,14 @@ function LeadCard({
                 </span>
               )}
             </div>
-            <div className="mt-1 text-xs text-[var(--color-text-muted)] truncate">
+            <div className="mt-1 cx-type-xs text-[var(--color-text-muted)] truncate">
               {lead.address || "—"}
               {lead.phone && ` · ${lead.phone}`}
               {lead.rating != null && ` · ★ ${lead.rating}`}
               {lead.review_count != null && ` (${lead.review_count})`}
             </div>
             {lead.intent_signal_text && (
-              <div className="mt-1.5 text-xs italic text-[var(--color-text-muted)] line-clamp-2">
+              <div className="mt-1.5 cx-type-xs italic text-[var(--color-text-muted)] line-clamp-2">
                 “{lead.intent_signal_text}”
               </div>
             )}
@@ -493,9 +493,9 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
           </Button>
         </div>
 
-        <div className="space-y-3 text-sm">
+        <div className="space-y-3 cx-type-base">
           <label className="block">
-            <span className="block text-xs text-[var(--color-text-muted)] uppercase tracking-[0.12em] mb-1">
+            <span className="block cx-type-xs text-[var(--color-text-muted)] uppercase tracking-[0.12em] mb-1">
               Vertical
             </span>
             <select
@@ -513,7 +513,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
           </label>
 
           <label className="block">
-            <span className="block text-xs text-[var(--color-text-muted)] uppercase tracking-[0.12em] mb-1">
+            <span className="block cx-type-xs text-[var(--color-text-muted)] uppercase tracking-[0.12em] mb-1">
               City
             </span>
             <select
@@ -530,7 +530,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
           </label>
 
           <fieldset className="space-y-1.5">
-            <legend className="text-xs text-[var(--color-text-muted)] uppercase tracking-[0.12em] mb-1">
+            <legend className="cx-type-xs text-[var(--color-text-muted)] uppercase tracking-[0.12em] mb-1">
               Sources
             </legend>
             <SourceToggle
@@ -556,7 +556,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
 
         {running && (
           <div
-            className="rounded-md p-3 text-sm flex items-center gap-2"
+            className="rounded-md p-3 cx-type-base flex items-center gap-2"
             style={{
               background: `color-mix(in srgb, ${deptColor} 10%, transparent)`,
               color: deptColor,
@@ -568,13 +568,13 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
         )}
 
         {result && !result.error && (
-          <div className="rounded-md p-3 text-sm space-y-1 border border-[var(--color-border)]">
+          <div className="rounded-md p-3 cx-type-base space-y-1 border border-[var(--color-border)]">
             <div className="font-medium text-[var(--color-text)]">
               {result.added ?? 0} new · {result.updated ?? 0} boosted ·{" "}
               {result.enriched ?? 0} enriched
             </div>
             {result.signals_found != null && (
-              <div className="text-xs text-[var(--color-text-muted)]">
+              <div className="cx-type-xs text-[var(--color-text-muted)]">
                 {result.signals_found} intent signal
                 {result.signals_found === 1 ? "" : "s"} captured.
               </div>
@@ -583,7 +583,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
               Object.entries(result.errors_per_source).some(
                 ([, v]) => v != null,
               ) && (
-                <div className="text-xs text-[var(--color-text-muted)]">
+                <div className="cx-type-xs text-[var(--color-text-muted)]">
                   {Object.entries(result.errors_per_source)
                     .filter(([, v]) => v)
                     .map(([k, v]) => `${k}: ${v}`)
@@ -594,7 +594,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
         )}
 
         {result?.error && (
-          <div className="rounded-md p-3 text-sm border border-red-500/30 text-red-400">
+          <div className="rounded-md p-3 cx-type-base border border-red-500/30 text-red-400">
             {result.error}
           </div>
         )}
@@ -603,7 +603,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
           {result ? (
             <Button
               onClick={onComplete}
-              className="!text-sm"
+              className="cx-type-base"
               style={{ background: deptColor, color: "var(--cx-canvas)" }}
             >
               Done
@@ -622,7 +622,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
               <Button
                 onClick={start}
                 disabled={running || (!useOverpass && !useReddit && !useMaps)}
-                className="!text-sm disabled:opacity-50"
+                className="cx-type-base disabled:opacity-50"
                 style={{ background: deptColor, color: "var(--cx-canvas)" }}
               >
                 {running ? "Running…" : "Start"}
@@ -647,7 +647,7 @@ function SourceToggle({
   disabled?: boolean;
 }) {
   return (
-    <label className="flex items-center gap-2 text-sm cursor-pointer">
+    <label className="flex items-center gap-2 cx-type-base cursor-pointer">
       <input
         type="checkbox"
         checked={checked}

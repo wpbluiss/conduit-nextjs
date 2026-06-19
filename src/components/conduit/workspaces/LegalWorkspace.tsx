@@ -61,14 +61,14 @@ export default function LegalWorkspace() {
           style={{ color: "var(--color-amber)" }}
         />
         <div className="flex-1 min-w-0">
-          <div className="text-sm text-[var(--color-text)]">
+          <div className="cx-type-base text-[var(--color-text)]">
             {EXPIRING.length} documents expire in the next 30 days
           </div>
           <ul className="mt-2 space-y-1">
             {EXPIRING.map((e) => (
               <li
                 key={e.title}
-                className="flex items-center justify-between text-xs"
+                className="flex items-center justify-between cx-type-xs"
               >
                 <span className="text-[var(--color-text)]">
                   {e.title}{" "}
@@ -92,7 +92,7 @@ export default function LegalWorkspace() {
           </ul>
           <Link
             href={`/app?pin=legal&prompt=${encodeURIComponent("Review the contracts expiring this month")}`}
-            className="mt-3 inline-flex items-center gap-1 text-xs"
+            className="mt-3 inline-flex items-center gap-1 cx-type-xs"
             style={{ color: "var(--color-amber)" }}
           >
             Review expiring docs <ArrowRight size={11} />
@@ -123,7 +123,7 @@ export default function LegalWorkspace() {
                 style={{ borderLeftColor: statusColor(c.status) }}
               >
                 <div className="min-w-0">
-                  <div className="text-sm text-[var(--color-text)]">
+                  <div className="cx-type-base text-[var(--color-text)]">
                     {c.title}
                   </div>
                   <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-0.5">
@@ -145,7 +145,7 @@ export default function LegalWorkspace() {
           ))}
         </ul>
         <div
-          className="conduit-card p-3 mt-3 text-xs text-[var(--color-text-muted)]"
+          className="conduit-card p-3 mt-3 cx-type-xs text-[var(--color-text-muted)]"
           style={{ background: deptSoft }}
         >
           Scaffold — Legal will track real contracts and expirations once you

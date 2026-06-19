@@ -56,7 +56,7 @@ export function BillingReturnBanner({ type }: { type: BannerType }) {
 
   return (
     <div
-      className="flex items-center gap-3 px-4 py-3 rounded-lg mb-6 text-sm"
+      className="flex items-center gap-3 px-4 py-3 rounded-lg mb-6 cx-type-base"
       style={{
         background: `color-mix(in srgb, ${color} 12%, transparent)`,
         border: `1px solid color-mix(in srgb, ${color} 30%, transparent)`,

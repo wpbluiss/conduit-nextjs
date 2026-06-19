@@ -82,7 +82,7 @@ export function ThemeToggle({
 
   return (
     <div>
-      <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2">
+      <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2">
         Appearance
       </div>
       <div
@@ -98,7 +98,7 @@ export function ThemeToggle({
               role="radio"
               aria-checked={active}
               onClick={() => choose(o.key)}
-              className={`inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs transition-colors ${
+              className={`inline-flex items-center gap-2 px-3 py-2 rounded-full cx-type-xs transition-colors ${
                 active
                   ? "bg-[var(--color-accent)] text-white"
                   : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"

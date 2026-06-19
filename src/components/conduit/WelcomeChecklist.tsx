@@ -167,7 +167,7 @@ export function WelcomeChecklist({
             <div className="flex items-center gap-3">
               <ProgressRing done={done} total={ITEMS.length} />
               <div>
-                <div className="text-sm font-medium">Get started with Praxis</div>
+                <div className="cx-type-base font-medium">Get started with Praxis</div>
                 <div className="cx-type-xs text-[var(--color-text-muted)] mt-0.5">
                   {done} of {ITEMS.length} complete
                 </div>
@@ -190,7 +190,7 @@ export function WelcomeChecklist({
               const done = Boolean(checklist[item.key]);
               const inner = (
                 <div
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg cx-type-base transition-colors ${
                     done
                       ? "opacity-50"
                       : "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
@@ -265,7 +265,7 @@ export function ChecklistProgressPip({
   if (done >= total) return null;
   return (
     <div
-      className="mx-3 mt-2 flex items-center gap-2 px-3 py-2 rounded-lg text-xs cursor-default"
+      className="mx-3 mt-2 flex items-center gap-2 px-3 py-2 rounded-lg cx-type-xs cursor-default"
       style={{
         background: "color-mix(in srgb, var(--color-accent) 8%, transparent)",
         border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)",

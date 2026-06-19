@@ -58,7 +58,7 @@ export default async function ArtifactsPage() {
             cta={
               <Link
                 href="/app"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg cx-type-base font-medium bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity"
               >
                 Chat with a specialist →
               </Link>
@@ -104,7 +104,7 @@ export default async function ArtifactsPage() {
                     <div className="cx-heading-lg group-hover:text-[var(--color-accent)] transition-colors">
                       {a.title}
                     </div>
-                    <p className="text-xs text-[var(--color-text-muted)] line-clamp-2">
+                    <p className="cx-type-xs text-[var(--color-text-muted)] line-clamp-2">
                       {preview}…
                     </p>
                     <div className="cx-meta mt-auto pt-2">

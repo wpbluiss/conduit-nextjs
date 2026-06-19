@@ -779,7 +779,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
     return (
       <div className="space-y-4">
         <div className="conduit-card p-6 text-center relative">
-          <div className="flex items-center justify-center gap-2 text-xs uppercase tracking-[0.18em] text-[var(--cx-accent-bright)] mb-2">
+          <div className="flex items-center justify-center gap-2 cx-type-xs uppercase tracking-[0.18em] text-[var(--cx-accent-bright)] mb-2">
             <Lock size={12} /> Pro feature
           </div>
           <p className="cx-heading-xl">Voice mode is a Pro perk</p>
@@ -2389,7 +2389,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
           Connector context fetches (all time)
         </div>
         {connectorStats.length === 0 ? (
-          <div className="conduit-card p-5 text-[var(--cx-text-muted)] text-xs">
+          <div className="conduit-card p-5 text-[var(--cx-text-muted)] cx-type-xs">
             No connectors connected.{" "}
             <a href="/app/settings?tab=integrations" className="underline hover:text-[var(--cx-accent)]">
               Connect one in Integrations →
@@ -2945,7 +2945,7 @@ function BillingTab({
                             href={inv.pdf_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-[var(--cx-accent)] hover:underline"
+                            className="inline-flex items-center gap-1 cx-type-xs text-[var(--cx-accent)] hover:underline"
                           >
                             Download PDF
                             <ExternalLink size={11} />
@@ -4569,7 +4569,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
               "linear-gradient(135deg, color-mix(in srgb, var(--cx-accent) 6%, var(--cx-surface)), var(--cx-surface))",
           }}
         >
-          <div className="flex items-center justify-center gap-2 text-xs uppercase tracking-[0.18em] text-[var(--cx-accent-bright)] mb-2">
+          <div className="flex items-center justify-center gap-2 cx-type-xs uppercase tracking-[0.18em] text-[var(--cx-accent-bright)] mb-2">
             <Lock size={12} /> Pro feature
           </div>
           <p className="cx-heading-xl">Programmatic access</p>

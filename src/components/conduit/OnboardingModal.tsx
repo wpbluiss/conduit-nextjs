@@ -120,7 +120,7 @@ export function OnboardingModal({
           <div className="flex items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2">
               <PraxisLogo size={24} />
-              <span className="text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
+              <span className="cx-type-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
                 Praxis · Step {displayStep} of {TOTAL_STEPS}
               </span>
             </div>
@@ -192,7 +192,7 @@ export function OnboardingModal({
                     key={t}
                     type="button"
                     onClick={() => setBusinessType(t)}
-                    className={`px-4 py-2 text-sm rounded-full border transition-colors ${
+                    className={`px-4 py-2 cx-type-base rounded-full border transition-colors ${
                       businessType === t
                         ? "border-[var(--color-accent)] text-[var(--color-accent-hi)] bg-[color-mix(in_srgb,var(--color-accent)_10%,transparent)]"
                         : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-text)] hover:text-[var(--color-text)]"
@@ -209,7 +209,7 @@ export function OnboardingModal({
                   onChange={(e) => setCustomType(e.target.value)}
                   autoFocus
                   placeholder="What kind?"
-                  className="mt-6 w-full bg-transparent border-b border-[var(--color-border)] focus:border-[var(--color-accent)] outline-none px-1 py-2 text-xl"
+                  className="mt-6 w-full bg-transparent border-b border-[var(--color-border)] focus:border-[var(--color-accent)] outline-none px-1 py-2 cx-type-lg"
                 />
               )}
               <div className="mt-10 flex justify-between">
@@ -245,7 +245,7 @@ export function OnboardingModal({
                       type="button"
                       onClick={() => toggleGoal(goal)}
                       disabled={atMax}
-                      className={`flex items-center gap-3 px-4 py-3 text-sm rounded-xl border text-left transition-colors ${
+                      className={`flex items-center gap-3 px-4 py-3 cx-type-base rounded-xl border text-left transition-colors ${
                         selected
                           ? "border-[var(--color-accent)] text-[var(--color-accent-hi)] bg-[color-mix(in_srgb,var(--color-accent)_10%,transparent)]"
                           : atMax
@@ -267,7 +267,7 @@ export function OnboardingModal({
                   );
                 })}
               </div>
-              <p className="mt-4 text-xs text-[var(--color-text-muted)]">
+              <p className="mt-4 cx-type-xs text-[var(--color-text-muted)]">
                 {goals.length}/{MAX_GOALS} selected
               </p>
               <div className="mt-10 flex justify-between">
@@ -295,10 +295,10 @@ export function OnboardingModal({
                 autoFocus
                 rows={5}
                 placeholder="I'm trying to land my first 10 cleaning contracts in Houston…"
-                className="mt-8 w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-2xl focus:border-[var(--color-accent)] outline-none p-4 text-base resize-none leading-relaxed"
+                className="mt-8 w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-2xl focus:border-[var(--color-accent)] outline-none p-4 cx-type-md resize-none leading-relaxed"
               />
               {error && (
-                <p className="mt-3 text-sm text-[var(--color-pink)]">
+                <p className="mt-3 cx-type-base text-[var(--color-pink)]">
                   {error}
                 </p>
               )}
@@ -348,7 +348,7 @@ export function OnboardingModal({
               <h2 className="serif text-cx-2xl leading-tight">
                 Setting up your team…
               </h2>
-              <p className="mt-3 text-sm text-[var(--color-text-muted)]">
+              <p className="mt-3 cx-type-base text-[var(--color-text-muted)]">
                 Briefing Atlas. Bringing Marketing, Sales, and Engineering
                 online.
               </p>

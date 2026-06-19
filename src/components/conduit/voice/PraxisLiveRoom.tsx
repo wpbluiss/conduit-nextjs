@@ -212,7 +212,7 @@ export default function PraxisLiveRoom({
           <p className="cx-meta mb-1 text-left">{EMPLOYEES[activeSpeaker]?.name ?? "Team"}</p>
           <Waveform analyserRef={agentAnalyserRef} color="var(--cx-accent-bright)" />
         </div>
-        <div className="min-h-10 text-sm leading-relaxed">
+        <div className="min-h-10 cx-type-base leading-relaxed">
           {!connected && !error && <span style={{ color: "var(--cx-text-muted)" }}>Connecting…</span>}
           {connected && !agentPresent && <span style={{ color: "var(--cx-text-muted)" }}>The room is joining…</span>}
           {error && <span className="inline-flex items-center gap-1.5" style={{ color: "var(--cx-danger)" }}><AlertCircle className="size-3.5" /> {error}</span>}

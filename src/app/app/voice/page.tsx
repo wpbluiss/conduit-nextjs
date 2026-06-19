@@ -128,7 +128,7 @@ export default async function VoiceRoomLanding() {
           <div className="conduit-card p-5 mb-6 inline-flex items-center gap-3 max-w-xl">
             <Lock size={14} className="text-[var(--color-accent-hi)]" />
             <div>
-              <div className="text-sm">Voice mode is a Pro perk</div>
+              <div className="cx-type-base">Voice mode is a Pro perk</div>
               <p className="cx-type-xs text-[var(--color-text-muted)] mt-0.5">
                 Free accounts can still use voice <em>input</em> in chat.{" "}
                 <Link
@@ -191,12 +191,12 @@ export default async function VoiceRoomLanding() {
             <div className="cx-label">
               Voice settings
             </div>
-            <p className="text-xs mt-2 text-[var(--color-text-muted)]">
+            <p className="cx-type-xs mt-2 text-[var(--color-text-muted)]">
               Per-employee voices, auto-play, streaming.
             </p>
             <Link
               href="/app/settings/voice"
-              className="mt-3 inline-flex items-center gap-1 text-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+              className="mt-3 inline-flex items-center gap-1 cx-type-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
             >
               Manage →
             </Link>
@@ -237,7 +237,7 @@ export default async function VoiceRoomLanding() {
                 <EmployeeAvatar employee={emp} size={32} />
                 <div className="min-w-0 flex-1">
                   <div
-                    className="text-sm font-medium truncate"
+                    className="cx-type-base font-medium truncate"
                     style={{ color: meta.color }}
                   >
                     {meta.name}
@@ -267,7 +267,7 @@ export default async function VoiceRoomLanding() {
           </Link>
         </div>
         {recent.length === 0 ? (
-          <p className="text-xs text-[var(--color-text-muted)] mt-2">
+          <p className="cx-type-xs text-[var(--color-text-muted)] mt-2">
             No voice sessions yet. Pick an employee above to start your first
             room.
           </p>
@@ -288,7 +288,7 @@ export default async function VoiceRoomLanding() {
                 >
                   <EmployeeAvatar employee={empKey} size={24} />
                   <div className="min-w-0 flex-1">
-                    <div className="text-sm" style={{ color: meta.color }}>
+                    <div className="cx-type-base" style={{ color: meta.color }}>
                       {meta.name}
                     </div>
                     <div className="cx-mono cx-type-xs tabular-nums text-[var(--color-text-muted)]">

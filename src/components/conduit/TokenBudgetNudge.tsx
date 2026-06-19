@@ -53,7 +53,7 @@ export function TokenBudgetNudge({
   return (
     <div
       role="alert"
-      className="hairline border-l-0 border-r-0 border-t-0 px-4 py-2 flex items-center gap-3 text-xs"
+      className="hairline border-l-0 border-r-0 border-t-0 px-4 py-2 flex items-center gap-3 cx-type-xs"
       style={{
         background: "var(--cx-accent-tint)",
         borderBottomColor: "color-mix(in srgb, var(--cx-accent) 20%, transparent)",

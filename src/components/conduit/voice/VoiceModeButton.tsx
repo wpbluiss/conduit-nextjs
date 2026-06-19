@@ -112,7 +112,7 @@ export default function VoiceModeButton({
       {error && (
         <div
           role="alert"
-          className="fixed top-4 right-4 z-[70] max-w-sm text-sm bg-red-950/90 border border-red-500/40 rounded-md px-3 py-2 text-red-100 inline-flex items-start gap-2 shadow-lg"
+          className="fixed top-4 right-4 z-[70] max-w-sm cx-type-base bg-red-950/90 border border-red-500/40 rounded-md px-3 py-2 text-red-100 inline-flex items-start gap-2 shadow-lg"
         >
           <AlertCircle size={14} className="mt-0.5 shrink-0" />
           <div>
@@ -130,7 +130,7 @@ export default function VoiceModeButton({
       )}
 
       {savedToast && (
-        <div className="fixed top-4 right-4 z-[70] text-sm bg-black/80 border border-[var(--color-border)] rounded-md px-3 py-2 inline-flex items-center gap-2">
+        <div className="fixed top-4 right-4 z-[70] cx-type-base bg-black/80 border border-[var(--color-border)] rounded-md px-3 py-2 inline-flex items-center gap-2">
           Conversation saved.{" "}
           <a
             href="/app/settings/voice-history"

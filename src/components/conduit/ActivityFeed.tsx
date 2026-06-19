@@ -142,7 +142,7 @@ export function ActivityFeed({ initial, initialHasMore, initialNextBefore }: Pro
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center px-6">
         <p
-          className="text-sm"
+          className="cx-type-base"
           style={{ color: "var(--color-text-muted)" }}
         >
           No activity yet. Start a conversation with your Praxis specialists.

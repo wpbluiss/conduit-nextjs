@@ -203,7 +203,7 @@ function UsageBanner({
 
   return (
     <div
-      className="conduit-card p-3 mb-4 flex items-center justify-between text-xs"
+      className="conduit-card p-3 mb-4 flex items-center justify-between cx-type-xs"
       style={{
         borderColor: exhausted
           ? "color-mix(in srgb, var(--color-pink) 35%, transparent)"
@@ -281,7 +281,7 @@ function Tab({
     <button
       type="button"
       onClick={onClick}
-      className="relative px-3 py-2 text-sm transition-colors"
+      className="relative px-3 py-2 cx-type-base transition-colors"
       style={{
         color: active ? "var(--color-text)" : "var(--color-text-muted)",
         borderBottom: `2px solid ${active ? "var(--color-accent)" : "transparent"}`,
@@ -339,15 +339,15 @@ function TemplatesTab({ builds }: { builds: R7Build[] }) {
               href={b.live_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hi)] inline-flex items-center gap-1 truncate"
+              className="cx-type-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hi)] inline-flex items-center gap-1 truncate"
             >
               {b.live_url}
               <ExternalLink size={11} />
             </a>
           ) : b.error_message ? (
-            <p className="text-xs text-[var(--color-pink)]">{b.error_message}</p>
+            <p className="cx-type-xs text-[var(--color-pink)]">{b.error_message}</p>
           ) : (
-            <p className="text-xs text-[var(--color-text-muted)]">Building…</p>
+            <p className="cx-type-xs text-[var(--color-text-muted)]">Building…</p>
           )}
           <div className="flex items-center justify-between cx-type-xs text-[var(--color-text-muted)] mt-auto pt-2">
             <span className="cx-mono tabular-nums">{new Date(b.created_at).toLocaleString()}</span>
@@ -415,16 +415,16 @@ function EngineeringTab({
               {s.prompt}
             </div>
             {s.deploy_url ? (
-              <span className="text-xs text-[var(--color-accent)] inline-flex items-center gap-1 truncate">
+              <span className="cx-type-xs text-[var(--color-accent)] inline-flex items-center gap-1 truncate">
                 {s.deploy_url.replace(/^https?:\/\//, "")}
                 <ExternalLink size={11} />
               </span>
             ) : s.error_message ? (
-              <p className="text-xs text-[var(--color-pink)] line-clamp-2">
+              <p className="cx-type-xs text-[var(--color-pink)] line-clamp-2">
                 {s.error_message}
               </p>
             ) : (
-              <p className="text-xs text-[var(--color-text-muted)]">
+              <p className="cx-type-xs text-[var(--color-text-muted)]">
                 {labelForLiveStatus(s.status)}
               </p>
             )}
@@ -537,7 +537,7 @@ function ContinueModal({
             <X size={16} />
           </PraxisButton>
         </div>
-        <p className="text-xs text-[var(--color-text-muted)] mb-3">
+        <p className="cx-type-xs text-[var(--color-text-muted)] mb-3">
           Engineering will start a new build with this prompt and the
           previous build&apos;s files already in place.
         </p>
@@ -547,11 +547,11 @@ function ContinueModal({
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="What should change?"
           rows={4}
-          className="w-full rounded-md bg-[var(--color-card)] border border-[var(--color-border)] p-3 text-sm focus:outline-none focus:border-[var(--color-accent)]"
+          className="w-full rounded-md bg-[var(--color-card)] border border-[var(--color-border)] p-3 cx-type-base focus:outline-none focus:border-[var(--color-accent)]"
           disabled={submitting}
         />
         {error && (
-          <p className="text-xs text-[var(--color-pink)] mt-2">{error}</p>
+          <p className="cx-type-xs text-[var(--color-pink)] mt-2">{error}</p>
         )}
         <div className="flex items-center justify-end gap-2 mt-4">
           <PraxisButton

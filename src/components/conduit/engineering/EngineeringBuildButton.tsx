@@ -92,7 +92,7 @@ export default function EngineeringBuildButton({
     <>
       <Button
         onClick={() => setOpen(true)}
-        className="!text-sm inline-flex items-center gap-1.5"
+        className="!cx-type-base inline-flex items-center gap-1.5"
         style={{ background: deptColor, color: "var(--cx-canvas)" }}
       >
         <Hammer size={13} /> Start a build
@@ -155,7 +155,7 @@ export default function EngineeringBuildButton({
                         : "transparent",
                   }}
                 >
-                  <div className="text-sm">{t.label}</div>
+                  <div className="cx-type-base">{t.label}</div>
                   <div className="cx-type-xs text-[var(--color-text-muted)] mt-0.5">
                     {t.hint}
                   </div>
@@ -171,7 +171,7 @@ export default function EngineeringBuildButton({
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Build me a one-page landing for a fictional barbershop in West Palm Beach with a contact form."
               rows={5}
-              className="w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-md focus:border-[var(--color-accent)] outline-none p-3 text-sm resize-none leading-relaxed"
+              className="w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-md focus:border-[var(--color-accent)] outline-none p-3 cx-type-base resize-none leading-relaxed"
               maxLength={4000}
             />
             <div className="cx-type-xs text-[var(--color-text-muted)] mt-1">
@@ -179,7 +179,7 @@ export default function EngineeringBuildButton({
             </div>
 
             {error && (
-              <p className="mt-3 text-xs text-[var(--color-pink)]">{error}</p>
+              <p className="mt-3 cx-type-xs text-[var(--color-pink)]">{error}</p>
             )}
 
             <div className="mt-5 flex justify-end gap-2">
@@ -194,7 +194,7 @@ export default function EngineeringBuildButton({
               <Button
                 onClick={submit}
                 disabled={submitting || prompt.trim().length < 8}
-                className="!text-sm inline-flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="!cx-type-base inline-flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ background: deptColor, color: "var(--cx-canvas)" }}
               >
                 {submitting && <Loader2 size={12} className="animate-spin" />}

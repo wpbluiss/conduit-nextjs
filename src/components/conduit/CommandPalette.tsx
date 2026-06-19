@@ -246,7 +246,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
                   placeholder="Search conversations, specialists, settings…"
                   autoComplete="off"
                   spellCheck={false}
-                  className="flex-1 bg-transparent outline-none text-sm placeholder:text-[var(--color-text-muted)]"
+                  className="flex-1 bg-transparent outline-none cx-type-base placeholder:text-[var(--color-text-muted)]"
                   aria-label="Search palette"
                   aria-controls="palette-list"
                   aria-activedescendant={
@@ -276,7 +276,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
                 aria-label="Results"
               >
                 {filteredItems.length === 0 ? (
-                  <div className="px-4 py-8 text-center text-sm text-[var(--color-text-muted)]">
+                  <div className="px-4 py-8 text-center cx-type-base text-[var(--color-text-muted)]">
                     No results for &ldquo;{query}&rdquo;
                   </div>
                 ) : (
@@ -317,7 +317,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
                               {item.icon}
                             </span>
                             <span className="min-w-0 flex-1">
-                              <span className="block text-sm font-medium truncate">
+                              <span className="block cx-type-base font-medium truncate">
                                 {item.label}
                               </span>
                               {item.sublabel && (

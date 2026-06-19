@@ -51,14 +51,14 @@ export function PostOnboardingNudge() {
       <p className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
         You&apos;re all set
       </p>
-      <p className="text-sm font-medium mb-3 pr-4">
+      <p className="cx-type-base font-medium mb-3 pr-4">
         Your team is ready — start exploring or upgrade for more tokens.
       </p>
 
       <div className="flex flex-col gap-2">
         <Button
           onClick={() => setVisible(false)}
-          className="w-full justify-center text-xs"
+          className="w-full justify-center cx-type-xs"
         >
           Explore your team
         </Button>

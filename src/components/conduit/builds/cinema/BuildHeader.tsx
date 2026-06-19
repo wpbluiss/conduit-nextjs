@@ -108,7 +108,7 @@ export function BuildHeader({ session, subscription, heartbeat, onRefresh }: Pro
           onRefresh={onRefresh}
         />
         {abortError && (
-          <span className="text-xs text-[var(--color-pink)]">{abortError}</span>
+          <span className="cx-type-xs text-[var(--color-pink)]">{abortError}</span>
         )}
         {isAbortable && (
           <PraxisButton
