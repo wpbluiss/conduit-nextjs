@@ -67,23 +67,23 @@ export default async function VoiceHistoryPage() {
         <div>
           <Link
             href="/app/settings"
-            className="text-xs text-[var(--color-text-muted)] inline-flex items-center gap-1 hover:text-[var(--color-text)]"
+            className="cx-type-xs text-[var(--cx-text-muted)] inline-flex items-center gap-1 hover:text-[var(--cx-text)] transition-colors duration-150"
           >
             <ArrowLeft size={12} /> Settings
           </Link>
           <h1 className="cx-heading-2xl mt-2">Voice History</h1>
-          <p className="cx-body text-[var(--color-text-muted)] mt-1">
+          <p className="cx-type-sm text-[var(--cx-text-muted)] mt-1">
             Your past voice conversations. Transcripts stay private to your
             account.
           </p>
         </div>
 
         {sessions.length === 0 ? (
-          <div className="conduit-card p-8 text-center text-[var(--color-text-muted)]">
-            <Mic size={20} className="mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No voice conversations yet.</p>
-            <p className="text-xs mt-1">
-              Click "Voice Mode" on any employee workspace to start one.
+          <div className="conduit-card p-8 text-center text-[var(--cx-text-muted)]">
+            <Mic size={20} className="mx-auto mb-3 opacity-40" style={{ color: "var(--cx-accent)" }} />
+            <p className="cx-type-sm font-medium text-[var(--cx-text)]">No voice conversations yet</p>
+            <p className="cx-type-xs mt-1 text-[var(--cx-text-muted)]">
+              Click &ldquo;Voice Mode&rdquo; on any employee workspace to start one.
             </p>
           </div>
         ) : (
@@ -97,37 +97,37 @@ export default async function VoiceHistoryPage() {
                   style={{ borderLeftColor: employee.color }}
                 >
                   <div className="flex flex-wrap items-baseline gap-2">
-                    <span className="font-medium">{employee.name}</span>
-                    <span className="cx-mono cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] tabular-nums">
+                    <span className="cx-type-sm font-medium text-[var(--cx-text)]">{employee.name}</span>
+                    <span className="cx-mono cx-type-xs uppercase tracking-[0.15em] text-[var(--cx-text-muted)] tabular-nums">
                       {fmtRelative(s.started_at)} · {fmtDuration(s.duration_seconds)}
                     </span>
                     {s.end_reason && s.end_reason !== "user_left" && (
-                      <span className="cx-type-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
+                      <span className="cx-type-xs uppercase tracking-[0.12em] text-[var(--cx-text-muted)]">
                         ended: {s.end_reason}
                       </span>
                     )}
                   </div>
                   {s.transcript_summary && (
-                    <p className="cx-body text-[var(--color-text)] mt-1.5">
+                    <p className="cx-type-sm text-[var(--cx-text-muted)] mt-1.5 leading-relaxed">
                       {s.transcript_summary}
                     </p>
                   )}
                   {s.raw_transcript && s.raw_transcript.length > 0 && (
                     <details className="mt-2">
-                      <summary className="text-xs text-[var(--color-text-muted)] cursor-pointer hover:text-[var(--color-text)]">
+                      <summary className="cx-type-xs text-[var(--cx-text-muted)] cursor-pointer hover:text-[var(--cx-text)] transition-colors duration-150">
                         Show full transcript ({s.raw_transcript.length} turns)
                       </summary>
-                      <div className="mt-2 space-y-1 text-xs max-h-64 overflow-y-auto pl-2 border-l border-[var(--color-border)]">
+                      <div className="mt-2 space-y-1 cx-type-xs max-h-64 overflow-y-auto pl-2 border-l border-[var(--cx-border)]">
                         {s.raw_transcript.map((entry, i) => (
                           <div
                             key={i}
                             className={
                               entry.role === "user"
-                                ? "text-[var(--color-text-muted)]"
-                                : "text-[var(--color-text)]"
+                                ? "text-[var(--cx-text-muted)]"
+                                : "text-[var(--cx-text)]"
                             }
                           >
-                            <span className="cx-type-xs uppercase tracking-[0.12em] mr-2 text-[var(--color-text-muted)]">
+                            <span className="cx-type-xs uppercase tracking-[0.12em] mr-2 text-[var(--cx-text-muted)]">
                               {entry.role === "user" ? "You" : employee.name}
                             </span>
                             {entry.text}

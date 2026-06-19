@@ -337,6 +337,10 @@
   -webkit-backdrop-filter: var(--cx-glass-blur);
   border-color: var(--cx-glass-border);
   box-shadow: var(--cx-glass-highlight);
+  /* Console uses faster spec timing; suppress marketing 400ms + lift transform */
+  transition:
+    border-color var(--cx-dur-default) var(--cx-ease),
+    box-shadow var(--cx-dur-default) var(--cx-ease);
 }
 
 /* Opaque card fallback */
@@ -355,7 +359,9 @@
   }
 }
 
-/* Card hover — electric violet edge + glow (replaces old purple) */
+/* Card hover — electric violet edge + glow (replaces old purple).
+ * transform: none explicitly suppresses the translateY(-4px) lift that the
+ * marketing card rule in globals.css applies — panels in the console don't lift. */
 .praxis-root .conduit-card:hover {
   border-color: rgba(124, 108, 255, 0.30);
   box-shadow:
@@ -363,6 +369,7 @@
     0 0 0 1px rgba(124, 108, 255, 0.08),
     0 0 24px rgba(124, 108, 255, 0.10),
     0 12px 40px rgba(0, 0, 0, 0.50);
+  transform: none;
 }
 
 /* Praxis brand-mark glow — electric violet */
