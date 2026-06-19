@@ -6,7 +6,7 @@ import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Link, Pin, Se
 import { UpgradeCTABanner } from "./UpgradeCTABanner";
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, useTransform } from "framer-motion";
 import { MESSAGE_SENT } from "@/lib/ui/motion";
-import { CX_REWARD } from "@/lib/design-system/cx-tokens";
+import { CX_ACCENT_BRIGHT, CX_REWARD } from "@/lib/design-system/cx-tokens";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
   DEPT_COLOR,
@@ -2858,6 +2858,38 @@ function CountTick({ target, active }: { target: number; active: boolean }) {
   );
 }
 
+// 3 spark particles fanning toward bottom-right — fires on significant completions only.
+const TAIL_SPARKS = [
+  { angle: 25,  color: CX_REWARD,        dist: 18 },
+  { angle: 65,  color: CX_ACCENT_BRIGHT, dist: 22 },
+  { angle: 105, color: CX_REWARD,        dist: 15 },
+] as const;
+
+function MessageTailSpark({ active }: { active: boolean }) {
+  return (
+    <AnimatePresence>
+      {active &&
+        TAIL_SPARKS.map(({ angle, color, dist }, i) => {
+          const rad = (angle * Math.PI) / 180;
+          const tx = Math.round(Math.cos(rad) * dist);
+          const ty = Math.round(Math.sin(rad) * dist);
+          return (
+            <motion.span
+              key={`tail-spark-${i}`}
+              aria-hidden
+              className="absolute pointer-events-none rounded-full"
+              initial={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+              animate={{ opacity: 0, x: tx, y: ty, scale: 0 }}
+              exit={{}}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1], delay: i * 0.04 }}
+              style={{ width: 3, height: 3, right: 10, bottom: 10, background: color }}
+            />
+          );
+        })}
+    </AnimatePresence>
+  );
+}
+
 function MessageTimestamp({
   createdAt,
   touchVisible,
@@ -3329,6 +3361,10 @@ const MessageBubble = memo(function MessageBubble({
               caretColor={message.pending ? "var(--cx-accent)" : undefined}
             />
           </div>
+          {/* Tail spark — 3 particles at bottom-right corner on significant completions */}
+          {!prefersReducedMotion && (
+            <MessageTailSpark active={rewarded && rewardSignificant} />
+          )}
         </div>
         {!!(message.metadata as Record<string, unknown>)?.incomplete && (
           <div
