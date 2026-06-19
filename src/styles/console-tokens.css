@@ -563,6 +563,15 @@
 .praxis-root h3 { letter-spacing: var(--cx-ls-tight); }
 .praxis-root h4 { letter-spacing: var(--cx-ls-tight); }
 
+/* Body text baseline — comfortable reading line-height for paragraphs and lists.
+ * Tailwind's default (leading-normal = 1.5) is subtly tighter than the spec
+ * body line-height (1.60). This rule applies only inside .praxis-root so
+ * marketing pages are unaffected. */
+.praxis-root p,
+.praxis-root li {
+  line-height: var(--cx-lh-body);
+}
+
 /* ---- Heading compound utilities ----
  * Use cx-heading-* on any element (div, h1, etc.) to get size +
  * letter-spacing + line-height + font-family in one class. */
@@ -609,6 +618,18 @@
   color: var(--cx-text-faint);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
+}
+
+/* Section label — the most common console pattern:
+ * ALL CAPS mono eyebrow above a form group, table column, or setting block.
+ * Replaces the repeated: cx-type-xs cx-mono uppercase tracking-[0.14em] text-muted */
+.praxis-root .cx-label {
+  font-family: var(--font-mono, monospace);
+  font-size: var(--cx-type-xs);
+  color: var(--cx-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Stat number display — mono + 32px for metric cards */

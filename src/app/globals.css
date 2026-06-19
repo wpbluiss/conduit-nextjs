@@ -85,6 +85,29 @@
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
   /* ============================================================
+   * Console type scale — CONSOLE_REDESIGN.md spec sizes
+   * 12 / 13 / 14 / 16 / 20 / 24 / 32 / 44
+   *
+   * These @theme entries make Tailwind JIT generate:
+   *   text-cx-xs (12px)  text-cx-sm (13px)  text-cx-base (14px)
+   *   text-cx-md (16px)  text-cx-lg (20px)  text-cx-xl (24px)
+   *   text-cx-2xl (32px) text-cx-3xl (44px)
+   *
+   * Use these in console components instead of bare text-sm / text-xs
+   * so font-size always matches the spec exactly.
+   * See console-tokens.css for .cx-type-* CSS utilities and compound
+   * classes (.cx-body, .cx-meta, .cx-stat, .cx-heading-*).
+   * ============================================================ */
+  --font-size-cx-xs:   12px;
+  --font-size-cx-sm:   13px;
+  --font-size-cx-base: 14px;
+  --font-size-cx-md:   16px;
+  --font-size-cx-lg:   20px;
+  --font-size-cx-xl:   24px;
+  --font-size-cx-2xl:  32px;
+  --font-size-cx-3xl:  44px;
+
+  /* ============================================================
    * Conduit Marketing — Visual overhaul v3 (2026-05-08)
    * Light-first institutional palette. Indigo primary, ember celebration-only.
    * ============================================================ */
