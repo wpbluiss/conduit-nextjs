@@ -92,9 +92,9 @@ export function PraxisButton({
           style={{
             display: "inline-flex",
             alignItems: "center",
-            gap: "8px",
+            gap: "var(--cx-space-2, 8px)",
             opacity: isLoading ? 0 : 1,
-            transition: "opacity 0.15s ease-out",
+            transition: "opacity var(--cx-dur-fast, 120ms) ease-out",
           }}
         >
           {children}
@@ -108,7 +108,7 @@ export function PraxisButton({
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: "6px",
+              gap: "var(--cx-space-1, 4px)",
             }}
           >
             <SpinnerIcon />

@@ -335,7 +335,8 @@ body {
     color-mix(in srgb, var(--cx-accent, #7C6CFF) 88%, #fff 12%) 0%,
     var(--cx-accent, #7C6CFF) 100%
   );
-  color: #FFFFFF;
+  color: white;
+  border: none;
   padding: var(--cx-space-3, 12px) var(--cx-space-6, 24px);
   font-size: var(--cx-type-base, 14px);
   font-weight: 500;
@@ -344,7 +345,7 @@ body {
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.18),
     0 1px 3px rgba(0,0,0,0.3),
-    0 0 0 1px rgba(124,108,255,0.20);
+    0 0 0 1px color-mix(in srgb, var(--cx-accent, #7C6CFF) 20%, transparent);
   transition:
     background var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
     box-shadow var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
@@ -461,7 +462,8 @@ body {
 
 .btn-danger {
   background: var(--cx-danger, #F4607D);
-  color: #FFFFFF;
+  color: white;
+  border: none;
   padding: var(--cx-space-3, 12px) var(--cx-space-6, 24px);
   font-size: var(--cx-type-base, 14px);
   font-weight: 500;
@@ -490,7 +492,7 @@ body {
 }
 .btn-danger:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(244, 96, 125, 0.30), inset 0 1px 0 rgba(255,255,255,0.12);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cx-danger, #F4607D) 30%, transparent), inset 0 1px 0 rgba(255,255,255,0.12);
 }
 
 /* Opaque fallback for .btn-secondary when backdrop-filter is unsupported */
