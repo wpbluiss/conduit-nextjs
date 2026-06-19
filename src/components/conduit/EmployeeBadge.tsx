@@ -95,7 +95,12 @@ export function EmployeeBadge({
   );
 }
 
-/** Dept-tinted pill showing the specialist name — used in chat message headers. */
+/**
+ * Dept-tinted pill showing the specialist name — used in chat message headers
+ * and the thinking indicator. Uses glass-style background (dept tint over the
+ * glass base) with a standard cx-glass top highlight. No backdrop-filter since
+ * chips are typically rendered inside glass surfaces.
+ */
 export function SpecialistChip({
   employee,
   label,
@@ -109,10 +114,12 @@ export function SpecialistChip({
     <span
       className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full cx-mono cx-type-xs font-semibold leading-none tracking-tight select-none"
       style={{
-        background: m.colorSoft,
+        // Dept tint layered over the glass base — frosted feel without a stacked backdrop-filter.
+        background: `color-mix(in srgb, ${m.color} 12%, var(--cx-glass-bg, rgba(255,255,255,0.04)))`,
         color: m.color,
-        border: `1px solid color-mix(in srgb, ${m.color} 30%, transparent)`,
-        boxShadow: `inset 0 1px 0 color-mix(in srgb, ${m.color} 12%, transparent)`,
+        border: `1px solid color-mix(in srgb, ${m.color} 28%, transparent)`,
+        // Standard glass top-edge highlight (pane-of-glass feel).
+        boxShadow: `var(--cx-glass-highlight, inset 0 1px 0 rgba(255,255,255,0.10))`,
       }}
     >
       <Icon size={12} strokeWidth={SPECIALIST_ICON_STROKE} aria-hidden />

@@ -143,7 +143,8 @@ export function SpecialistSelectorModal({
                 }}
                 aria-pressed={isSelected}
               >
-                <SpecialistAvatar employee={id as EmployeeKey} size={28} active={isSelected} />
+                {/* Card styling already shows selection; dept-color icon stays for identity. */}
+                <SpecialistAvatar employee={id as EmployeeKey} size={28} />
                 <div>
                   <div
                     className="cx-type-sm font-medium leading-tight"
