@@ -445,16 +445,19 @@
 /* ------------------------------------------------------------
  * .praxis-composer-pill — chat composer (P-010 / FR-009 / FR-052)
  *
- * Demoted resting border so the room outranks the input.
- * Dept-colored focus ring only on focus.
+ * Glass recipe comes from .cx-glass (Tier 1 raised — sidebar, cards,
+ * composer). Only composer-specific overrides live here:
+ *   - pill border-radius
+ *   - hairline glass border (separate from cx-glass box-shadow)
+ *   - dept-colored focus ring on :focus-within
+ *
+ * Opaque fallback backgrounds override cx-glass's cx-surface default
+ * with cx-surface-raised so the composer reads above the canvas when
+ * backdrop-filter is unsupported or transparency is reduced.
  * ------------------------------------------------------------ */
 
 .praxis-root .praxis-composer-pill {
-  background: var(--cx-glass-bg, rgba(255, 255, 255, 0.04));
-  backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
-  -webkit-backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
   border: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08));
-  box-shadow: var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
   border-radius: var(--radius-pill);
   transition: border-color 180ms var(--cx-ease, cubic-bezier(0.22, 1, 0.36, 1)),
               box-shadow 180ms var(--cx-ease, cubic-bezier(0.22, 1, 0.36, 1));
@@ -470,15 +473,11 @@
 @supports not (backdrop-filter: blur(1px)) {
   .praxis-root .praxis-composer-pill {
     background: var(--cx-surface-raised, var(--color-surface-elevated));
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
   }
 }
 
 @media (prefers-reduced-transparency: reduce) {
   .praxis-root .praxis-composer-pill {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
     background: var(--cx-surface-raised, var(--color-surface-elevated));
   }
 }
