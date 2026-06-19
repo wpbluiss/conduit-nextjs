@@ -3469,7 +3469,15 @@ function ArtifactDrawer({
       <div onClick={onClose} className="flex-1 bg-black/60" />
       <div className="cx-glass w-full max-w-2xl border-l overflow-y-auto p-6 md:p-8" style={{ borderLeftColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>
         {!data ? (
-          <p className="cx-body text-[var(--cx-text-muted)]">Loading…</p>
+          <div className="space-y-4 pt-2" aria-busy aria-label="Loading artifact">
+            <div className="cx-skeleton" style={{ height: 10, width: 120, borderRadius: 9999, opacity: 0.4 }} />
+            <div className="cx-skeleton" style={{ height: 32, width: "75%", borderRadius: 6, opacity: 0.5 }} />
+            <div className="space-y-2 mt-6">
+              {[100, 90, 95, 70, 85].map((w, i) => (
+                <div key={i} className="cx-skeleton" style={{ height: 11, width: `${w}%`, borderRadius: 9999, opacity: 0.3 - i * 0.02 }} />
+              ))}
+            </div>
+          </div>
         ) : (
           <>
             <div className="flex items-start justify-between gap-3 mb-6">

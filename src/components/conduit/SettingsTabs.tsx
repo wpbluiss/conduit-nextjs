@@ -623,7 +623,7 @@ function SpecialistMetrics() {
           ))}
         </div>
         {loading && (
-          <span className="cx-type-xs text-[var(--cx-text-muted)] animate-pulse">Loading…</span>
+          <div className="cx-skeleton" style={{ height: 10, width: 64, borderRadius: 9999, opacity: 0.45 }} />
         )}
       </div>
 
@@ -2201,7 +2201,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
           ))}
         </div>
         {monthLoading && (
-          <span className="cx-type-xs text-[var(--cx-text-muted)] animate-pulse">Loading…</span>
+          <div className="cx-skeleton" style={{ height: 10, width: 64, borderRadius: 9999, opacity: 0.45 }} />
         )}
       </div>
 
@@ -4641,7 +4641,17 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
 
       {/* Active keys */}
       {loading ? (
-        <div className="cx-type-sm text-[var(--cx-text-muted)]">Loading…</div>
+        <div className="space-y-2" aria-busy aria-label="Loading API keys">
+          {[70, 85, 60].map((w, i) => (
+            <div key={i} className="conduit-card flex items-center gap-4 px-4 py-3 rounded-xl" style={{ opacity: 0.38 - i * 0.04 }}>
+              <div className="flex-1 space-y-1.5">
+                <div className="cx-skeleton" style={{ height: 12, width: `${w}%`, borderRadius: 9999 }} />
+                <div className="cx-skeleton" style={{ height: 10, width: "45%", borderRadius: 9999, opacity: 0.55 }} />
+              </div>
+              <div className="cx-skeleton shrink-0" style={{ height: 28, width: 60, borderRadius: 6, opacity: 0.4 }} />
+            </div>
+          ))}
+        </div>
       ) : activeKeys.length === 0 ? (
         <p className="cx-type-sm text-[var(--cx-text-muted)]">No active API keys.</p>
       ) : (
@@ -4758,7 +4768,18 @@ function ReferralsTab() {
   };
 
   if (loading) {
-    return <p className="cx-type-sm text-[var(--cx-text-muted)]">Loading…</p>;
+    return (
+      <div className="space-y-8" aria-busy aria-label="Loading referral data">
+        <div className="space-y-2">
+          <div className="cx-skeleton" style={{ height: 26, width: 140, borderRadius: 6, opacity: 0.5 }} />
+          <div className="cx-skeleton" style={{ height: 11, width: 280, borderRadius: 9999, opacity: 0.3 }} />
+        </div>
+        <div className="conduit-card p-5 space-y-3">
+          <div className="cx-skeleton" style={{ height: 9, width: 100, borderRadius: 9999, opacity: 0.45 }} />
+          <div className="cx-skeleton" style={{ height: 36, borderRadius: 8, opacity: 0.28 }} />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -4956,7 +4977,14 @@ function LabelsTab() {
       </div>
 
       {loading ? (
-        <div className="cx-type-sm text-[var(--cx-text-muted)]">Loading labels…</div>
+        <div className="space-y-2" aria-busy aria-label="Loading labels">
+          {[75, 60, 82].map((w, i) => (
+            <div key={i} className="conduit-card flex items-center gap-3 px-4 py-3 rounded-xl" style={{ opacity: 0.38 - i * 0.04 }}>
+              <div className="cx-skeleton shrink-0" style={{ width: 14, height: 14, borderRadius: 9999 }} />
+              <div className="cx-skeleton flex-1" style={{ height: 12, width: `${w}%`, borderRadius: 9999 }} />
+            </div>
+          ))}
+        </div>
       ) : (
         <div className="space-y-2">
           {labels.length === 0 && !showCreate && (
