@@ -257,8 +257,8 @@
   flex-direction: column;
   gap: var(--pdl-space-md);
   background: var(--pdl-surface-glass);
-  backdrop-filter: var(--cx-glass-blur-float, blur(28px) saturate(140%));
-  -webkit-backdrop-filter: var(--cx-glass-blur-float, blur(28px) saturate(140%));
+  backdrop-filter: var(--cx-glass-blur-float, blur(24px) saturate(150%));
+  -webkit-backdrop-filter: var(--cx-glass-blur-float, blur(24px) saturate(150%));
   border: 1px solid var(--pdl-border-default);
   box-shadow: var(--pdl-elev-3);
   color: var(--pdl-text);

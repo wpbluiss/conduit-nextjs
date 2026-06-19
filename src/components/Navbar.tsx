@@ -467,8 +467,8 @@ export default function Navbar() {
               className="absolute inset-0"
               style={{
                 background: "rgba(250, 250, 247, 0.92)",
-                backdropFilter: "blur(20px) saturate(160%)",
-                WebkitBackdropFilter: "blur(20px) saturate(160%)",
+                backdropFilter: "var(--cx-glass-blur-overlay, blur(20px) saturate(160%))",
+                WebkitBackdropFilter: "var(--cx-glass-blur-overlay, blur(20px) saturate(160%))",
               }}
             />
             <motion.div

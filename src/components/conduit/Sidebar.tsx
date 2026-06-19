@@ -628,8 +628,6 @@ export function Sidebar({
         style={{
           borderColor: "var(--cx-glass-border)",
           transition: shouldReduceMotion ? "none" : "transform 180ms cubic-bezier(0.22,1,0.36,1)",
-          backdropFilter: "var(--cx-glass-blur)",
-          WebkitBackdropFilter: "var(--cx-glass-blur)",
         }}
       >
         {/* Header — workspace logo / Praxis wordmark + collapse toggle */}
