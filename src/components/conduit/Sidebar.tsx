@@ -1221,7 +1221,7 @@ export function Sidebar({
                       specialistFilter === null
                         ? {
                             background: "var(--cx-accent)",
-                            color: "#fff",
+                            color: "var(--cx-canvas)",
                           }
                         : {
                             background: "var(--cx-surface-raised)",
