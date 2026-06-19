@@ -350,10 +350,31 @@
   --border-subtle: var(--cx-border);
   --border-strong: var(--cx-border-strong);
 
-  /* -- Text scale -- */
+  /* -- Text color scale -- */
   --text-primary: var(--cx-text);
   --text-muted:   var(--cx-text-muted);
   --text-faint:   var(--cx-text-faint);
+
+  /* -- Type size scale (spec-exact names — alias to --cx-type-*) --
+   * 12 / 13 / 14 (body) / 16 / 20 / 24 / 32 / 44 px
+   * These are the canonical names from CONSOLE_REDESIGN.md §Typography.
+   * New code may use either --text-{step} or --cx-type-{name}. */
+  --text-xs:   var(--cx-type-xs);    /* 12px — caption, tooltip, micro-copy */
+  --text-sm:   var(--cx-type-sm);    /* 13px — compact labels, secondary info */
+  --text-base: var(--cx-type-base);  /* 14px — body reading text */
+  --text-md:   var(--cx-type-md);    /* 16px — prominent body / action labels */
+  --text-lg:   var(--cx-type-lg);    /* 20px — subheadings, section titles */
+  --text-xl:   var(--cx-type-xl);    /* 24px — heading 3 */
+  --text-2xl:  var(--cx-type-2xl);   /* 32px — heading 2 / display */
+  --text-3xl:  var(--cx-type-3xl);   /* 44px — hero display */
+
+  /* -- Line-height scale (spec-exact names) -- */
+  --lh-heading: var(--cx-lh-heading); /* 1.10 — tight headings (1.05–1.15 range) */
+  --lh-body:    var(--cx-lh-body);    /* 1.60 — comfortable body (1.55–1.65 range) */
+
+  /* -- Letter-spacing scale (spec-exact names) -- */
+  --ls-tight:   var(--cx-ls-tight);   /* -0.01em — h3/h4, 20px+ */
+  --ls-tighter: var(--cx-ls-tighter); /* -0.02em — h1/h2, 32px+ */
 
   /* -- Accent (electric violet — the ONE accent) -- */
   --accent-base:   var(--cx-accent);
@@ -687,6 +708,21 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
   font-weight: 600;
+}
+
+/* Inline code — first-class mono treatment for `code` spans inside prose.
+ * Relative font-size (0.85em) scales with surrounding text so it reads
+ * naturally at any paragraph size. Background/border match the ink surface. */
+.praxis-root .cx-code-inline {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--cx-surface-raised);
+  border: 1px solid var(--cx-border);
+  color: var(--cx-accent-bright);
 }
 
 /* ---- Form control utilities ----

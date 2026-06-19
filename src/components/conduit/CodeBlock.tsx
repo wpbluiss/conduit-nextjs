@@ -144,8 +144,8 @@ export function CodeBlock({
 
       {/* Code body */}
       <pre
-        className="cx-code-scroll code-block-root relative overflow-x-auto cx-type-sm leading-[1.7] font-mono px-0 py-0"
-        style={{ fontFamily: "var(--font-mono, 'JetBrains Mono', 'Monaco', 'Courier New', monospace)", margin: 0 }}
+        className="cx-code-scroll code-block-root relative overflow-x-auto cx-type-sm leading-[1.7] cx-mono px-0 py-0"
+        style={{ margin: 0 }}
       >
         <code className="block px-4 py-3">
           {lines.map((_, i) => {
