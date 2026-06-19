@@ -188,14 +188,7 @@ function UserMenuPopover({
                     {displayName}
                   </div>
                 )}
-                <div
-                  className="truncate"
-                  style={{
-                    fontFamily: "var(--cx-font-mono, monospace)",
-                    fontSize: "var(--cx-type-xs, 12px)",
-                    color: "var(--cx-text-faint, #6B6B7B)",
-                  }}
-                >
+                <div className="truncate cx-meta">
                   {userEmail}
                 </div>
               </div>
@@ -423,14 +416,7 @@ export function ConsoleTopBar({
                 style={{ color: "var(--cx-text-faint)" }}
                 aria-hidden="true"
               />
-              <span
-                className="truncate"
-                style={{
-                  fontFamily: "var(--cx-font-mono)",
-                  fontSize: "var(--cx-type-xs)",
-                  color: "var(--cx-text-faint)",
-                }}
-              >
+              <span className="truncate cx-meta">
                 {breadcrumb.conversationTitle}
               </span>
             </motion.div>

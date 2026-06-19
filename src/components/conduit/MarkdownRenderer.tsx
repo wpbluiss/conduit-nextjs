@@ -353,16 +353,7 @@ function renderSegments(segments: Segment[], key: string) {
     }
     if (seg.type === "code") {
       return (
-        <code
-          key={k}
-          className="px-1.5 py-0.5 rounded-md text-[0.85em]"
-          style={{
-            background: "var(--cx-surface-raised)",
-            border: "1px solid var(--cx-border)",
-            fontFamily: "var(--font-mono, monospace)",
-            color: "var(--cx-accent-bright)",
-          }}
-        >
+        <code key={k} className="cx-code-inline">
           {seg.content}
         </code>
       );
