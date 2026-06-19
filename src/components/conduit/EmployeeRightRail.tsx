@@ -145,7 +145,7 @@ export default async function EmployeeRightRail({
           Recent context
         </div>
         {memory.length === 0 && engSessions.length === 0 ? (
-          <p className="cx-type-xs text-[var(--color-text-muted)]">
+          <p className="cx-type-xs" style={{ color: "var(--cx-text-muted)" }}>
             No memory notes yet. Tell Atlas about {meta.name.toLowerCase()}{" "}
             and he&apos;ll save what matters.
           </p>

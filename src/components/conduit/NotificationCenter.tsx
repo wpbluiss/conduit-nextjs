@@ -209,12 +209,12 @@ export function NotificationCenter() {
                   <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-6">
                     <Bell
                       size={28}
-                      className="text-[var(--color-text-muted)] opacity-40"
+                      style={{ color: "var(--cx-text-muted)", opacity: 0.4 }}
                     />
-                    <p className="cx-type-base text-[var(--color-text-muted)]">
+                    <p className="cx-type-base" style={{ color: "var(--cx-text-muted)" }}>
                       No notifications yet
                     </p>
-                    <p className="cx-type-xs text-[var(--color-text-muted)] opacity-70">
+                    <p className="cx-type-xs" style={{ color: "var(--cx-text-faint)" }}>
                       Build completions, artifact events, and billing updates will appear here.
                     </p>
                   </div>

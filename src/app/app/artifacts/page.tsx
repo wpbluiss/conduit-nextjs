@@ -55,10 +55,10 @@ export default async function ArtifactsPage() {
             icon={<ArtifactsEmptySVG />}
             headline="Your AI team's output lands here"
             body="Praxis saves every doc, plan, and report your specialists generate — ask any specialist to draft something and it will appear here."
-            cta={
+            action={
               <Link
                 href="/app"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg cx-type-base font-medium bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity"
+                className="btn-primary btn-sz-sm"
               >
                 Chat with a specialist →
               </Link>

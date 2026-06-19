@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Bookmark, Copy, Download, Trash2, ArrowLeft, Check } from "lucide-react";
+import { Copy, Download, Trash2, ArrowLeft, Check } from "lucide-react";
 import Link from "next/link";
 import { EMPLOYEES, type EmployeeId } from "@/lib/conduit/employees";
 import { Button } from "@/components/conduit/ui/Button";
+import { EmptyState, OutputsEmptySVG } from "@/components/conduit/EmptyState";
 
 interface Output {
   id: string;
@@ -114,21 +115,12 @@ export default function OutputsPage() {
             ))}
           </div>
         ) : outputs.length === 0 ? (
-          <div
-            className="conduit-card p-12 text-center"
-            style={{
-              background: "var(--cx-glass-bg, rgba(255,255,255,0.04))",
-              border: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))",
-            }}
-          >
-            <Bookmark
-              size={32}
-              className="mx-auto mb-3"
-              style={{ color: "var(--cx-text-muted, #A0A0B0)", opacity: 0.6 }}
+          <div className="max-w-md mx-auto">
+            <EmptyState
+              icon={<OutputsEmptySVG />}
+              title="No saved outputs yet"
+              body="Hover over any specialist response in chat and click Save to keep it here for later reference."
             />
-            <p className="cx-body" style={{ color: "var(--cx-text-muted, #A0A0B0)" }}>
-              No outputs saved yet. Hover over any specialist response in chat and click <strong>Save</strong> to add it here.
-            </p>
           </div>
         ) : (
           <div className="space-y-3">
