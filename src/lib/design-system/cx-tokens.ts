@@ -43,17 +43,25 @@ export const CX_DANGER = "#F4607D";
 // ─── Glass recipe (JS mirror for SVG fills, Framer Motion, Canvas 2D) ────────
 // These are dark-mode defaults — when using CSS, prefer var(--cx-glass-*) so
 // theme overrides (light mode, prefers-reduced-transparency) apply automatically.
+//
+// Three depth tiers mirror the CONSOLE_REDESIGN.md glassmorphism hierarchy:
+//   raised  → sidebar, cards, composer
+//   float   → menus, popovers, toasts
+//   overlay → modals, drawers (heaviest)
 
 export const CX_GLASS_BG           = "rgba(255, 255, 255, 0.04)";  // raised tier
-export const CX_GLASS_BG_FLOAT     = "rgba(255, 255, 255, 0.06)";  // floating tier
+export const CX_GLASS_BG_FLOAT     = "rgba(255, 255, 255, 0.06)";  // float tier
+export const CX_GLASS_BG_OVERLAY   = "rgba(255, 255, 255, 0.06)";  // overlay tier
 export const CX_GLASS_BG_ACCENT    = "rgba(124, 108, 255, 0.08)";  // accent-tinted
 export const CX_GLASS_BORDER       = "rgba(255, 255, 255, 0.08)";  // hairline edge
 export const CX_GLASS_HIGHLIGHT    = "inset 0 1px 0 rgba(255, 255, 255, 0.10)";
-export const CX_GLASS_BLUR         = "blur(20px) saturate(140%)";  // raised tier
-export const CX_GLASS_BLUR_FLOAT   = "blur(28px) saturate(140%)";  // floating tier
-export const CX_GLASS_SHADOW       = "0 1px 3px rgba(0, 0, 0, 0.40), 0 4px 16px rgba(0, 0, 0, 0.30)";
-export const CX_GLASS_SHADOW_FLOAT = "0 4px 24px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40)";
+export const CX_GLASS_BLUR           = "blur(20px) saturate(140%)";  // raised
+export const CX_GLASS_BLUR_FLOAT     = "blur(24px) saturate(150%)";  // float
+export const CX_GLASS_BLUR_OVERLAY   = "blur(28px) saturate(160%)";  // overlay
+export const CX_GLASS_SHADOW           = "0 1px 3px rgba(0, 0, 0, 0.40), 0 4px 16px rgba(0, 0, 0, 0.30)";
+export const CX_GLASS_SHADOW_FLOAT     = "0 4px 24px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40)";
+export const CX_GLASS_SHADOW_OVERLAY   = "0 8px 40px rgba(0, 0, 0, 0.70), 0 4px 12px rgba(0, 0, 0, 0.50)";
 
-// Scrim / overlay blur — subtle background blur for modal backdrops and tour overlays.
+// Scrim / overlay backdrop blur — subtle background blur for modal backdrops and tour overlays.
 // Intentionally lighter than glass blur; not a frosted-glass surface.
 export const CX_SCRIM_BLUR = "blur(2px)";

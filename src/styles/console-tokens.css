@@ -47,24 +47,33 @@
   /* Spec-exact alias */
   --cx-text-primary:    var(--cx-text);
 
-  /* ---- Glass recipe tokens (depth tiers for frosted glass surfaces) ---- */
-  /* Tier 1 — raised (sidebar, cards, composer): subtle bg + moderate blur */
-  --cx-glass-bg:          rgba(255, 255, 255, 0.04);
-  /* Tier 2 — floating (menus, modals, toasts): slightly more opaque + heavier blur */
-  --cx-glass-bg-float:    rgba(255, 255, 255, 0.06);
+  /* ---- Glass recipe tokens — three depth tiers (CONSOLE_REDESIGN.md §Glassmorphism) ----
+   * Tier 1 — raised   (sidebar, cards, composer): subtle bg + moderate blur
+   * Tier 2 — float    (menus, popovers, toasts):  slightly more opaque + mid blur
+   * Tier 3 — overlay  (modals, drawers):           same bg as float + heaviest blur + deepest shadow
+   * Depth hierarchy: canvas (opaque) → raised → float → overlay
+   * Rule: never nest a glass tier inside another glass tier (max 2 stacked blur layers:
+   *   scrim + the panel on top; sidebar counts as one layer). */
+
+  /* Background fills */
+  --cx-glass-bg:          rgba(255, 255, 255, 0.04);   /* raised */
+  --cx-glass-bg-float:    rgba(255, 255, 255, 0.06);   /* float */
+  --cx-glass-bg-overlay:  rgba(255, 255, 255, 0.06);   /* overlay — same fill, distinct blur/shadow */
   /* Accent-tinted glass — active/primary panels */
   --cx-glass-bg-accent:   rgba(124, 108, 255, 0.08);
   /* Shared hairline border — "pane of glass" edge */
   --cx-glass-border:      rgba(255, 255, 255, 0.08);
   /* Inset top highlight — simulates glass catching light */
   --cx-glass-highlight:   inset 0 1px 0 rgba(255, 255, 255, 0.10);
-  /* Blur amounts */
-  --cx-glass-blur:        blur(20px) saturate(140%);
-  --cx-glass-blur-float:  blur(28px) saturate(140%);
-  /* Drop shadows — deeper for floating tier */
-  --cx-glass-shadow:      0 1px 3px rgba(0, 0, 0, 0.40), 0 4px 16px rgba(0, 0, 0, 0.30);
-  --cx-glass-shadow-float: 0 4px 24px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40);
-  /* Scrim / modal overlay blur — intentionally lighter than glass; not a glass surface */
+  /* Blur amounts per tier */
+  --cx-glass-blur:         blur(20px) saturate(140%);   /* raised  */
+  --cx-glass-blur-float:   blur(24px) saturate(150%);   /* float   */
+  --cx-glass-blur-overlay: blur(28px) saturate(160%);   /* overlay */
+  /* Drop shadows per tier — deeper with each level */
+  --cx-glass-shadow:         0 1px 3px rgba(0, 0, 0, 0.40), 0 4px 16px rgba(0, 0, 0, 0.30);
+  --cx-glass-shadow-float:   0 4px 24px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40);
+  --cx-glass-shadow-overlay: 0 8px 40px rgba(0, 0, 0, 0.70), 0 4px 12px rgba(0, 0, 0, 0.50);
+  /* Scrim / modal overlay backdrop blur — intentionally lighter; not a frosted-glass surface */
   --cx-scrim-blur:        blur(2px);
 
   /* ---- Electric violet accent (the ONE accent) ---- */
@@ -895,13 +904,23 @@ html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-thumb {
     var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
 }
 
-/* ---- Tier 2: floating glass (heavier blur + stronger shadow) ---- */
+/* ---- Tier 2: floating glass (menus, popovers, toasts) ---- */
 .cx-glass-float {
   background: var(--cx-glass-bg-float, rgba(255, 255, 255, 0.06));
-  backdrop-filter: var(--cx-glass-blur-float, blur(28px) saturate(140%));
-  -webkit-backdrop-filter: var(--cx-glass-blur-float, blur(28px) saturate(140%));
+  backdrop-filter: var(--cx-glass-blur-float, blur(24px) saturate(150%));
+  -webkit-backdrop-filter: var(--cx-glass-blur-float, blur(24px) saturate(150%));
   box-shadow:
     var(--cx-glass-shadow-float, 0 4px 24px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40)),
+    var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
+}
+
+/* ---- Tier 3: overlay glass (modals, drawers) — heaviest blur + deepest shadow ---- */
+.cx-glass-overlay {
+  background: var(--cx-glass-bg-overlay, rgba(255, 255, 255, 0.06));
+  backdrop-filter: var(--cx-glass-blur-overlay, blur(28px) saturate(160%));
+  -webkit-backdrop-filter: var(--cx-glass-blur-overlay, blur(28px) saturate(160%));
+  box-shadow:
+    var(--cx-glass-shadow-overlay, 0 8px 40px rgba(0, 0, 0, 0.70), 0 4px 12px rgba(0, 0, 0, 0.50)),
     var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
 }
 
@@ -927,6 +946,11 @@ html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-thumb {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
+  .cx-glass-overlay {
+    background: var(--cx-surface-overlay, #23232E);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
   .cx-glass-accent {
     background: var(--cx-surface-raised, #1C1C26);
     backdrop-filter: none;
@@ -942,6 +966,11 @@ html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-thumb {
     background: var(--cx-surface, #131319);
   }
   .cx-glass-float {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--cx-surface-overlay, #23232E);
+  }
+  .cx-glass-overlay {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     background: var(--cx-surface-overlay, #23232E);
@@ -965,10 +994,12 @@ html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-thumb {
  * ----------------------------------------------------------------- */
 @media (max-width: 480px) {
   .praxis-root {
-    --cx-glass-blur:       blur(12px) saturate(130%);
-    --cx-glass-blur-float: blur(16px) saturate(130%);
-    --cx-glass-bg:         rgba(255, 255, 255, 0.06);
-    --cx-glass-bg-float:   rgba(255, 255, 255, 0.08);
+    --cx-glass-blur:         blur(12px) saturate(130%);
+    --cx-glass-blur-float:   blur(14px) saturate(130%);
+    --cx-glass-blur-overlay: blur(16px) saturate(130%);
+    --cx-glass-bg:           rgba(255, 255, 255, 0.06);
+    --cx-glass-bg-float:     rgba(255, 255, 255, 0.08);
+    --cx-glass-bg-overlay:   rgba(255, 255, 255, 0.08);
   }
 }
 
@@ -978,13 +1009,15 @@ html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-thumb {
  * they render outside .praxis-root but are still descendants of <html>.
  * ----------------------------------------------------------------- */
 html[data-praxis-theme="light"] {
-  --cx-glass-bg:           rgba(255, 255, 255, 0.65);
-  --cx-glass-bg-float:     rgba(255, 255, 255, 0.82);
-  --cx-glass-bg-accent:    rgba(96, 84, 232, 0.08);
-  --cx-glass-border:       rgba(0, 0, 0, 0.07);
-  --cx-glass-highlight:    inset 0 1px 0 rgba(255, 255, 255, 0.80);
-  --cx-glass-shadow:       0 1px 3px rgba(15, 15, 20, 0.08), 0 4px 16px rgba(15, 15, 20, 0.06);
-  --cx-glass-shadow-float: 0 4px 24px rgba(15, 15, 20, 0.14), 0 2px 8px rgba(15, 15, 20, 0.08);
+  --cx-glass-bg:             rgba(255, 255, 255, 0.65);
+  --cx-glass-bg-float:       rgba(255, 255, 255, 0.82);
+  --cx-glass-bg-overlay:     rgba(255, 255, 255, 0.90);
+  --cx-glass-bg-accent:      rgba(96, 84, 232, 0.08);
+  --cx-glass-border:         rgba(0, 0, 0, 0.07);
+  --cx-glass-highlight:      inset 0 1px 0 rgba(255, 255, 255, 0.80);
+  --cx-glass-shadow:         0 1px 3px rgba(15, 15, 20, 0.08), 0 4px 16px rgba(15, 15, 20, 0.06);
+  --cx-glass-shadow-float:   0 4px 24px rgba(15, 15, 20, 0.14), 0 2px 8px rgba(15, 15, 20, 0.08);
+  --cx-glass-shadow-overlay: 0 8px 40px rgba(15, 15, 20, 0.20), 0 4px 12px rgba(15, 15, 20, 0.12);
 }
 
 /* ---- Glass border utility — add hairline to glass panels ---- */

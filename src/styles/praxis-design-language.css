@@ -161,8 +161,8 @@ html[data-praxis-theme="light"] .praxis-root {
 
 .praxis-root .pdl-glass {
   background: var(--cx-glass-bg-float, var(--pdl-surface-glass));
-  backdrop-filter: var(--cx-glass-blur-float, blur(28px) saturate(140%));
-  -webkit-backdrop-filter: var(--cx-glass-blur-float, blur(28px) saturate(140%));
+  backdrop-filter: var(--cx-glass-blur-float, blur(24px) saturate(150%));
+  -webkit-backdrop-filter: var(--cx-glass-blur-float, blur(24px) saturate(150%));
   border: 1px solid var(--cx-glass-border, var(--pdl-border-hairline));
   box-shadow:
     var(--cx-glass-shadow-float, var(--pdl-elev-3)),
