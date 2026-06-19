@@ -96,6 +96,7 @@
   --cx-warn-tint:       rgba(234, 179, 8, 0.10);
   --cx-reward-tint:     rgba(52, 211, 153, 0.10);   /* reward bg — pair with --cx-reward text */
   --cx-danger:          #F4607D;
+  --cx-danger-tint:     rgba(244, 96, 125, 0.10);   /* danger bg — pair with --cx-danger text */
 
   /* ---- Accent: additional opacity steps ---- */
   --cx-accent-border:   rgba(124, 108, 255, 0.30);  /* mid-strength accent edge (blockquotes, hover borders) */
@@ -566,6 +567,12 @@
 .praxis-root .cx-text-warn       { color: var(--cx-warn); }
 .praxis-root .cx-text-danger     { color: var(--cx-danger); }
 
+/* ---- Semantic tint backgrounds ---- */
+.praxis-root .cx-bg-danger-tint  { background-color: var(--cx-danger-tint); }
+.praxis-root .cx-bg-reward-tint  { background-color: var(--cx-reward-tint); }
+.praxis-root .cx-bg-warn-tint    { background-color: var(--cx-warn-tint); }
+.praxis-root .cx-bg-accent-tint  { background-color: var(--cx-accent-tint); }
+
 /* ---- Type scale utilities ---- */
 .praxis-root .cx-type-xs      { font-size: var(--cx-type-xs); }
 .praxis-root .cx-type-sm      { font-size: var(--cx-type-sm); }
@@ -986,11 +993,12 @@ html[data-praxis-theme="light"] .praxis-root {
   --cx-text-faint: #8F8FA0;
 
   /* Electric violet deepens slightly for legibility on light canvas */
-  --cx-accent:        #6054E8;
-  --cx-accent-bright: #7C6CFF;
-  --cx-accent-tint:   rgba(96, 84, 232, 0.10);
-  --cx-accent-glow:   0 0 0 3px rgba(96, 84, 232, 0.20);
+  --cx-accent:          #6054E8;
+  --cx-accent-bright:   #7C6CFF;
+  --cx-accent-tint:     rgba(96, 84, 232, 0.10);
+  --cx-accent-glow:     0 0 0 3px rgba(96, 84, 232, 0.20);
   --cx-accent-glow-raw: rgba(96, 84, 232, 0.20);
+  --cx-focus-ring:      0 0 0 2px #6054E8, 0 0 0 4px rgba(96, 84, 232, 0.20);
 
   /* Glass overrides — light canvas: translucent white surface instead of dark ink overlay */
   --cx-glass-bg:          rgba(255, 255, 255, 0.65);

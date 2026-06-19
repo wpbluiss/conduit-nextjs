@@ -320,7 +320,7 @@ export function PaywallModal({
           </Button>
 
           {error && (
-            <p className="mt-3 cx-type-xs text-[var(--color-pink,#f87171)]">{error}</p>
+            <p className="mt-3 cx-type-xs text-[var(--cx-danger)]">{error}</p>
           )}
 
           <p className="mt-3 text-center cx-type-xs text-[var(--color-text-muted)]">
