@@ -216,7 +216,7 @@ export default async function ConversationsPage({
               <MessageSquare size={24} style={{ color: "var(--color-accent)" }} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-[var(--color-text)] mb-1">
+              <p className="cx-type-base font-semibold text-[var(--color-text)] mb-1">
                 {activeLabelId ? "No conversations with this label" : "No conversations yet"}
               </p>
               <p className="cx-type-sm text-[var(--color-text-muted)] leading-relaxed">

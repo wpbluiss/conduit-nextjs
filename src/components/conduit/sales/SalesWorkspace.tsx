@@ -69,7 +69,7 @@ export default async function SalesWorkspace({ supabase, account }: Props) {
             >
               {employee.name}
             </h1>
-            <p className="mt-1 text-sm text-[var(--color-text-muted)] max-w-xl">
+            <p className="mt-1 cx-type-base text-[var(--color-text-muted)] max-w-xl">
               {employee.tagline}
             </p>
           </div>
@@ -133,7 +133,7 @@ function Stat({
 }) {
   return (
     <div className="conduit-card px-4 py-3">
-      <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+      <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
         {label}
       </div>
       <div className="cx-mono cx-type-xl font-semibold mt-1">{value}</div>

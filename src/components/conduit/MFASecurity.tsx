@@ -35,7 +35,7 @@ function CodeInput({
       onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, 6))}
       disabled={disabled}
       placeholder="000000"
-      className="w-full rounded-lg px-4 py-3 text-center text-2xl tracking-[0.4em] outline-none transition-all duration-200 font-mono disabled:opacity-50"
+      className="w-full rounded-lg px-4 py-3 text-center cx-type-xl tracking-[0.4em] outline-none transition-all duration-200 font-mono disabled:opacity-50"
       style={{
         background: "var(--color-surface-elevated)",
         border: "1px solid var(--color-border)",
@@ -87,7 +87,7 @@ function BackupCodesGrid({ codes }: { codes: string[] }) {
         {formatted.map((c) => (
           <div
             key={c}
-            className="rounded-lg px-3 py-2 text-center font-mono text-sm tracking-widest select-all"
+            className="rounded-lg px-3 py-2 text-center font-mono cx-type-base tracking-widest select-all"
             style={{
               background: "var(--color-surface)",
               border: "1px solid var(--color-border)",
@@ -238,7 +238,7 @@ export function MFASecurity() {
 
   if (state.phase === "loading") {
     return (
-      <div className="flex items-center gap-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
+      <div className="flex items-center gap-2 cx-type-base" style={{ color: "var(--color-text-muted)" }}>
         <SpinnerIcon size={14} />
         Loading security settings…
       </div>
@@ -248,17 +248,17 @@ export function MFASecurity() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-base font-semibold" style={{ color: "var(--color-text)" }}>
+        <h2 className="cx-type-md font-semibold" style={{ color: "var(--color-text)" }}>
           Two-factor authentication
         </h2>
-        <p className="mt-1 text-sm" style={{ color: "var(--color-text-muted)" }}>
+        <p className="mt-1 cx-type-base" style={{ color: "var(--color-text-muted)" }}>
           Add a second layer of security using an authenticator app (Google Authenticator, 1Password, Authy, etc.).
         </p>
       </div>
 
       {success && (
         <div
-          className="rounded-lg px-4 py-3 text-sm"
+          className="rounded-lg px-4 py-3 cx-type-base"
           style={{ background: "color-mix(in srgb, var(--cx-reward) 12%, transparent)", color: "var(--cx-reward)", border: "1px solid color-mix(in srgb, var(--cx-reward) 30%, transparent)" }}
         >
           {success}
@@ -280,7 +280,7 @@ export function MFASecurity() {
                     Enabled
                   </span>
                 </div>
-                <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
+                <p className="mt-2 cx-type-base" style={{ color: "var(--color-text-muted)" }}>
                   Authenticator app — your account is protected with TOTP.
                 </p>
               </div>
@@ -299,10 +299,10 @@ export function MFASecurity() {
           <SectionCard>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>
+                <p className="cx-type-base font-medium" style={{ color: "var(--color-text)" }}>
                   Backup codes
                 </p>
-                <p className="mt-1 text-sm" style={{ color: "var(--color-text-muted)" }}>
+                <p className="mt-1 cx-type-base" style={{ color: "var(--color-text-muted)" }}>
                   Use a one-time backup code if you lose access to your authenticator app.
                   Each code works once.
                 </p>
@@ -319,7 +319,7 @@ export function MFASecurity() {
                 Regenerate
               </Button>
             </div>
-            {error && <p className="mt-2 text-xs" style={{ color: "var(--cx-danger)" }}>{error}</p>}
+            {error && <p className="mt-2 cx-type-xs" style={{ color: "var(--cx-danger)" }}>{error}</p>}
           </SectionCard>
         </>
       )}
@@ -327,10 +327,10 @@ export function MFASecurity() {
       {/* ── Backup codes reveal ── */}
       {state.phase === "backup-codes" && (
         <SectionCard>
-          <h3 className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
+          <h3 className="cx-type-base font-semibold" style={{ color: "var(--color-text)" }}>
             Save your backup codes
           </h3>
-          <p className="mt-1.5 text-sm" style={{ color: "var(--color-text-muted)" }}>
+          <p className="mt-1.5 cx-type-base" style={{ color: "var(--color-text-muted)" }}>
             Each code can only be used once. Store them somewhere safe — they won't be shown again.
           </p>
           <BackupCodesGrid codes={state.codes} />
@@ -339,7 +339,7 @@ export function MFASecurity() {
               setSuccess("Two-factor authentication is now enabled.");
               await loadFactors();
             }}
-            className="mt-4 w-full rounded-lg px-4 py-3 text-sm font-medium"
+            className="mt-4 w-full rounded-lg px-4 py-3 cx-type-base font-medium"
           >
             I've saved my codes — done
           </Button>
@@ -349,10 +349,10 @@ export function MFASecurity() {
       {/* ── Disable confirm ── */}
       {state.phase === "disabling" && (
         <SectionCard>
-          <h3 className="text-sm font-semibold" style={{ color: "var(--cx-danger)" }}>
+          <h3 className="cx-type-base font-semibold" style={{ color: "var(--cx-danger)" }}>
             Disable two-factor authentication
           </h3>
-          <p className="mt-1.5 text-sm" style={{ color: "var(--color-text-muted)" }}>
+          <p className="mt-1.5 cx-type-base" style={{ color: "var(--color-text-muted)" }}>
             This removes the additional security layer from your account. Type <strong>DISABLE</strong> to confirm.
           </p>
           <label className="mt-4 block">
@@ -363,11 +363,11 @@ export function MFASecurity() {
               value={disableConfirm}
               onChange={(e) => setDisableConfirm(e.target.value)}
               placeholder="DISABLE"
-              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+              className="w-full rounded-lg px-3 py-2 cx-type-base outline-none"
               style={{ background: "var(--color-surface-elevated)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
             />
           </label>
-          {error && <p className="mt-2 text-xs" style={{ color: "var(--cx-danger)" }}>{error}</p>}
+          {error && <p className="mt-2 cx-type-xs" style={{ color: "var(--cx-danger)" }}>{error}</p>}
           <div className="mt-4 flex gap-2">
             <Button variant="ghost" size="sm" onClick={cancelDisable}>
               Cancel
@@ -391,17 +391,17 @@ export function MFASecurity() {
         <SectionCard>
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>
+              <p className="cx-type-base font-medium" style={{ color: "var(--color-text)" }}>
                 Not configured
               </p>
-              <p className="mt-1 text-sm" style={{ color: "var(--color-text-muted)" }}>
+              <p className="mt-1 cx-type-base" style={{ color: "var(--color-text-muted)" }}>
                 Enable 2FA to protect your account with a time-based one-time password.
               </p>
             </div>
             <Button
               onClick={startEnrollment}
               disabled={isPending}
-              className="shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition-opacity disabled:opacity-50"
+              className="shrink-0 rounded-lg px-3 py-2 cx-type-base font-medium transition-opacity disabled:opacity-50"
             >
               {isPending ? <SpinnerIcon size={14} /> : "Enable 2FA"}
             </Button>
@@ -412,7 +412,7 @@ export function MFASecurity() {
       {/* ── Enrollment: scan QR ── */}
       {state.phase === "enrolling" && (
         <SectionCard>
-          <h3 className="text-sm font-semibold mb-4" style={{ color: "var(--color-text)" }}>
+          <h3 className="cx-type-base font-semibold mb-4" style={{ color: "var(--color-text)" }}>
             Step 1 — Scan with your authenticator app
           </h3>
           <div className="flex flex-col items-center gap-4">
@@ -429,24 +429,24 @@ export function MFASecurity() {
               />
             </div>
             <div className="w-full">
-              <p className="text-xs text-center mb-2" style={{ color: "var(--color-text-muted)" }}>
+              <p className="cx-type-xs text-center mb-2" style={{ color: "var(--color-text-muted)" }}>
                 Can't scan? Enter this key manually:
               </p>
               <p
-                className="text-center text-sm font-mono tracking-widest select-all rounded-lg px-3 py-2"
+                className="text-center cx-type-base font-mono tracking-widest select-all rounded-lg px-3 py-2"
                 style={{ background: "var(--color-surface-elevated)", border: "1px solid var(--color-border)", color: "var(--color-text)", wordBreak: "break-all" }}
               >
                 {state.secret}
               </p>
             </div>
           </div>
-          <p className="mt-5 text-sm font-medium" style={{ color: "var(--color-text)" }}>
+          <p className="mt-5 cx-type-base font-medium" style={{ color: "var(--color-text)" }}>
             Step 2 — Enter the 6-digit code from your app
           </p>
           <div className="mt-3">
             <CodeInput value={code} onChange={setCode} disabled={isPending} />
           </div>
-          {error && <p className="mt-2 text-xs" style={{ color: "var(--cx-danger)" }}>{error}</p>}
+          {error && <p className="mt-2 cx-type-xs" style={{ color: "var(--cx-danger)" }}>{error}</p>}
           <div className="mt-4 flex gap-2">
             <Button
               variant="ghost"
@@ -458,7 +458,7 @@ export function MFASecurity() {
             <Button
               disabled={isPending || code.length !== 6}
               onClick={verifyEnrollment}
-              className="rounded-lg px-4 py-2 text-sm font-medium transition-opacity disabled:opacity-40"
+              className="rounded-lg px-4 py-2 cx-type-base font-medium transition-opacity disabled:opacity-40"
             >
               {isPending ? (
                 <span className="flex items-center gap-2"><SpinnerIcon size={14} />Verifying…</span>

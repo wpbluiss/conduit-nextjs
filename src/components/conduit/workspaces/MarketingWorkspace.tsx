@@ -113,13 +113,13 @@ export default function MarketingWorkspace({
               background: `linear-gradient(180deg, ${deptSoft}, transparent 70%)`,
             }}
           >
-            <p className="text-sm text-[var(--color-text)] mb-3">
+            <p className="cx-type-base text-[var(--color-text)] mb-3">
               No posts shipped yet. Marketing can draft your first blog post,
               a launch email, or a 30-day calendar — all from a single brief.
             </p>
             <Link
               href={`/app?pin=marketing&prompt=${encodeURIComponent("Draft a launch announcement")}`}
-              className="inline-flex items-center gap-1 text-sm"
+              className="inline-flex items-center gap-1 cx-type-base"
               style={{ color: dept }}
             >
               <Sparkles size={13} /> Draft a launch post
@@ -138,7 +138,7 @@ export default function MarketingWorkspace({
                     <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                       {s.status} · {relativeDay(s.created_at)}
                     </div>
-                    <div className="text-sm text-[var(--color-text)] line-clamp-1">
+                    <div className="cx-type-base text-[var(--color-text)] line-clamp-1">
                       {s.prompt}
                     </div>
                   </div>

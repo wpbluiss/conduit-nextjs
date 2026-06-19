@@ -104,13 +104,13 @@ export default async function TeamPage() {
             >
               <div className="flex-1">
                 <p
-                  className="text-sm font-medium"
+                  className="cx-type-base font-medium"
                   style={{ color: "var(--color-text)" }}
                 >
                   Your team is ready — start a task
                 </p>
                 <p
-                  className="text-sm mt-1"
+                  className="cx-type-base mt-1"
                   style={{ color: "var(--color-text-muted)" }}
                 >
                   Ask Atlas to route your first request, or pick a specialist
@@ -119,7 +119,7 @@ export default async function TeamPage() {
               </div>
               <Link
                 href="/app"
-                className="inline-flex items-center gap-1.5 text-sm font-medium shrink-0"
+                className="inline-flex items-center gap-1.5 cx-type-base font-medium shrink-0"
                 style={{ color: "var(--color-accent)" }}
               >
                 Open the console <ArrowRight size={14} />

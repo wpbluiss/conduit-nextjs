@@ -131,7 +131,7 @@ export function ChangelogPopover() {
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)]">
-              <span className="text-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+              <span className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                 What&apos;s new
               </span>
               <PraxisButton
@@ -165,7 +165,7 @@ export function ChangelogPopover() {
                     <p className="cx-type-sm font-medium leading-snug text-[var(--color-text)]">
                       {e.title}
                     </p>
-                    <p className="text-xs text-[var(--color-text-muted)] leading-relaxed line-clamp-2">
+                    <p className="cx-type-xs text-[var(--color-text-muted)] leading-relaxed line-clamp-2">
                       {e.body}
                     </p>
                   </li>

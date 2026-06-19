@@ -52,7 +52,7 @@ export default function OpsWorkspace() {
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="text-sm text-[var(--color-text)] truncate">
+                  <div className="cx-type-base text-[var(--color-text)] truncate">
                     {sop.title}
                   </div>
                   <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-0.5">
@@ -99,7 +99,7 @@ export default function OpsWorkspace() {
                 }}
               >
                 <div className="min-w-0">
-                  <div className="text-sm text-[var(--color-text)]">
+                  <div className="cx-type-base text-[var(--color-text)]">
                     {v.name}
                   </div>
                   <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-0.5">
@@ -127,7 +127,7 @@ export default function OpsWorkspace() {
           })}
         </ul>
         <div
-          className="conduit-card p-3 mt-3 text-xs text-[var(--color-text-muted)]"
+          className="conduit-card p-3 mt-3 cx-type-xs text-[var(--color-text-muted)]"
           style={{ background: deptSoft }}
         >
           Scaffold — Ops will track real renewals once you point it at your
@@ -145,7 +145,7 @@ export default function OpsWorkspace() {
             <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
               Weekly cadence
             </div>
-            <div className="text-sm text-[var(--color-text)] mt-0.5">
+            <div className="cx-type-base text-[var(--color-text)] mt-0.5">
               Run the weekly business review
             </div>
           </div>

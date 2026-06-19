@@ -223,7 +223,7 @@ export function KeyboardShortcutsOverlay() {
               <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
                 <div className="flex items-center gap-2">
                   <Keyboard size={15} className="text-[var(--color-text-muted)]" />
-                  <span className="text-sm font-medium">Keyboard shortcuts</span>
+                  <span className="cx-type-base font-medium">Keyboard shortcuts</span>
                 </div>
                 <PraxisButton
                   type="button"
@@ -249,7 +249,7 @@ export function KeyboardShortcutsOverlay() {
                           key={s.label}
                           className="flex items-center justify-between gap-4"
                         >
-                          <span className="text-sm text-[var(--color-text)]">
+                          <span className="cx-type-base text-[var(--color-text)]">
                             {s.label}
                           </span>
                           <div className="flex items-center gap-1 shrink-0">

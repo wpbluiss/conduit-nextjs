@@ -36,7 +36,7 @@ export function UpgradeNudge({
 
   return (
     <div
-      className="hairline border-l-0 border-r-0 border-t-0 px-4 py-2 flex items-center gap-3 text-xs"
+      className="hairline border-l-0 border-r-0 border-t-0 px-4 py-2 flex items-center gap-3 cx-type-xs"
       style={{
         background:
           "color-mix(in srgb, var(--color-accent) 6%, transparent)",

@@ -124,7 +124,7 @@ export function NotificationCenter() {
         variant="ghost"
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
         onClick={() => setOpen((v: boolean) => !v)}
-        className="relative flex items-center gap-2 px-3 py-2 text-xs w-full"
+        className="relative flex items-center gap-2 px-3 py-2 cx-type-xs w-full"
       >
         <Inbox size={14} className="shrink-0" />
         <span>Notifications</span>
@@ -171,7 +171,7 @@ export function NotificationCenter() {
               <div className="flex items-center justify-between px-4 py-4 border-b border-[var(--color-border)]">
                 <div className="flex items-center gap-2">
                   <Bell size={14} className="text-[var(--color-text-muted)]" />
-                  <span className="text-sm font-medium">Notifications</span>
+                  <span className="cx-type-base font-medium">Notifications</span>
                   {unreadCount > 0 && (
                     <span className="cx-type-xs font-semibold px-1.5 py-0.5 rounded-full bg-red-500 text-white leading-none">
                       {unreadCount}
@@ -211,7 +211,7 @@ export function NotificationCenter() {
                       size={28}
                       className="text-[var(--color-text-muted)] opacity-40"
                     />
-                    <p className="text-sm text-[var(--color-text-muted)]">
+                    <p className="cx-type-base text-[var(--color-text-muted)]">
                       No notifications yet
                     </p>
                     <p className="cx-type-xs text-[var(--color-text-muted)] opacity-70">
@@ -247,7 +247,7 @@ export function NotificationCenter() {
                             <NotifIcon type={n.type} />
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className="block text-sm text-[var(--color-text)] leading-snug">
+                            <span className="block cx-type-base text-[var(--color-text)] leading-snug">
                               {n.title}
                             </span>
                             {n.body && (

@@ -375,7 +375,7 @@ export default function VoiceRoom({
           </div>
         </div>
 
-        <div className="min-h-[20px] text-sm">
+        <div className="min-h-[20px] cx-type-base">
           {!connected && !error && (
             <span className="text-white/60">Connecting…</span>
           )}
@@ -391,7 +391,7 @@ export default function VoiceRoom({
         </div>
       </div>
 
-      <div className="px-4 max-h-32 md:max-h-40 overflow-y-auto space-y-1 text-sm">
+      <div className="px-4 max-h-32 md:max-h-40 overflow-y-auto space-y-1 cx-type-base">
         {transcript.slice(-6).map((t) => {
           const speaker =
             t.role === "user"

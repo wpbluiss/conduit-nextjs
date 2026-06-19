@@ -93,7 +93,7 @@ export default function OutputsPage() {
         <div className="flex items-center gap-3 mb-2">
           <Link
             href="/app"
-            className="flex items-center gap-1 text-[var(--color-text-muted)] hover:text-[var(--color-text)] text-sm transition-colors"
+            className="flex items-center gap-1 text-[var(--color-text-muted)] hover:text-[var(--color-text)] cx-type-base transition-colors"
           >
             <ArrowLeft size={14} />
           </Link>
@@ -144,7 +144,7 @@ export default function OutputsPage() {
                   <div className="px-5 pt-4 pb-3">
                     <div className="flex items-start justify-between gap-3 mb-1">
                       <div className="min-w-0">
-                        <h2 className="text-sm font-medium text-[var(--color-text)] truncate">
+                        <h2 className="cx-type-base font-medium text-[var(--color-text)] truncate">
                           {output.title}
                         </h2>
                         <div className="flex items-center gap-2 mt-0.5">

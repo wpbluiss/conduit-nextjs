@@ -114,7 +114,7 @@ export default async function EmployeeRightRail({
         <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
           About {meta.name}
         </div>
-        <p className="text-sm text-[var(--color-text)] leading-relaxed">
+        <p className="cx-type-base text-[var(--color-text)] leading-relaxed">
           {meta.tagline}
         </p>
         <div className="mt-3 flex flex-wrap gap-1.5">
@@ -145,7 +145,7 @@ export default async function EmployeeRightRail({
           Recent context
         </div>
         {memory.length === 0 && engSessions.length === 0 ? (
-          <p className="text-xs text-[var(--color-text-muted)]">
+          <p className="cx-type-xs text-[var(--color-text-muted)]">
             No memory notes yet. Tell Atlas about {meta.name.toLowerCase()}{" "}
             and he&apos;ll save what matters.
           </p>
@@ -157,7 +157,7 @@ export default async function EmployeeRightRail({
               <li key={`s-${s.id}`}>
                 <Link
                   href={`/app/builds?session=${s.id}`}
-                  className="conduit-card px-3 py-2 text-xs leading-snug block hover:border-[var(--color-accent)] transition-colors"
+                  className="conduit-card px-3 py-2 cx-type-xs leading-snug block hover:border-[var(--color-accent)] transition-colors"
                 >
                   <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1 inline-flex items-center gap-1.5">
                     <Hammer size={10} /> build · {s.status} · {relativeTime(s.created_at)}
@@ -171,7 +171,7 @@ export default async function EmployeeRightRail({
             {memory.map((m) => (
               <li
                 key={m.id}
-                className="conduit-card px-3 py-2 text-xs leading-snug"
+                className="conduit-card px-3 py-2 cx-type-xs leading-snug"
               >
                 <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1">
                   {m.kind}
@@ -206,7 +206,7 @@ export default async function EmployeeRightRail({
                   ["--dept" as string]: meta.color,
                   ["--dept-soft" as string]: meta.colorSoft,
                 }}
-                className="conduit-suggestion px-3 py-2.5 text-xs block leading-snug border-[var(--color-accent)]"
+                className="conduit-suggestion px-3 py-2.5 cx-type-xs block leading-snug border-[var(--color-accent)]"
               >
                 <span className="inline-flex items-center gap-1.5">
                   <Hammer size={11} /> Resume last build · {activeSession.status}
@@ -221,7 +221,7 @@ export default async function EmployeeRightRail({
                   ["--dept" as string]: meta.color,
                   ["--dept-soft" as string]: meta.colorSoft,
                 }}
-                className="conduit-suggestion px-3 py-2.5 text-xs block leading-snug"
+                className="conduit-suggestion px-3 py-2.5 cx-type-xs block leading-snug"
               >
                 {a}
               </Link>

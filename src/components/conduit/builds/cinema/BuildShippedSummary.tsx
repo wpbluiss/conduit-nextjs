@@ -186,7 +186,7 @@ export function BuildShippedSummary({ session, logs, internalAccount }: Props) {
           </Link>
         )}
         {recovery && recovery.kind === "contact-support" && (
-          <span className="text-sm text-[var(--color-text-muted)]">
+          <span className="cx-type-base text-[var(--color-text-muted)]">
             {recovery.label}
           </span>
         )}

@@ -80,7 +80,7 @@ export function EmployeeBadge({
       <EmployeeAvatar employee={employee} size={26} />
       <span className="leading-tight">
         <span
-          className="block text-xs font-medium tracking-tight"
+          className="block cx-type-xs font-medium tracking-tight"
           style={{ color: m.color }}
         >
           {m.name}

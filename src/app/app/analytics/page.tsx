@@ -97,7 +97,7 @@ export default async function AnalyticsPage() {
           <h2 className="cx-heading-xl mb-3">
             More analytics coming soon
           </h2>
-          <p className="text-sm text-[var(--color-text-muted)] leading-relaxed max-w-2xl">
+          <p className="cx-type-base text-[var(--color-text-muted)] leading-relaxed max-w-2xl">
             Per-employee work output, build success rate, lead conversion,
             cost-per-conversation, time-to-first-response, and a weekly
             digest you can export. The numbers above are real — the rest is

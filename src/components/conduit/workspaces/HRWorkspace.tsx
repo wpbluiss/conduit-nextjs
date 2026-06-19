@@ -123,7 +123,7 @@ export default function HRWorkspace() {
                 }}
               >
                 <div className="min-w-0">
-                  <div className="text-sm text-[var(--color-text)]">
+                  <div className="cx-type-base text-[var(--color-text)]">
                     {r.title}
                   </div>
                   <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-0.5">

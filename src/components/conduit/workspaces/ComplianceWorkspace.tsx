@@ -87,7 +87,7 @@ export default function ComplianceWorkspace() {
               <div className="flex items-baseline justify-between gap-2">
                 <div>
                   <div className="cx-type-xl font-semibold">{f.name}</div>
-                  <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                  <p className="cx-type-xs text-[var(--color-text-muted)] mt-1">
                     {f.blurb}
                   </p>
                 </div>
@@ -109,7 +109,7 @@ export default function ComplianceWorkspace() {
                 {pct}% scaffolded
               </div>
 
-              <ul className="space-y-1.5 text-xs">
+              <ul className="space-y-1.5 cx-type-xs">
                 {f.highlights.map((h) => (
                   <li
                     key={h.label}
@@ -150,7 +150,7 @@ export default function ComplianceWorkspace() {
       </div>
 
       <div
-        className="conduit-card p-3 text-xs text-[var(--color-text-muted)]"
+        className="conduit-card p-3 cx-type-xs text-[var(--color-text-muted)]"
         style={{ background: deptSoft }}
       >
         Scaffolds — Compliance keeps track of evidence and policy state once you

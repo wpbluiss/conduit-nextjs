@@ -215,7 +215,7 @@ export function ConversationLabelManager({
                       key={label.id}
                       type="button"
                       onClick={() => void toggle(label)}
-                      className="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-sm hover:bg-[var(--color-surface)] transition-colors"
+                      className="w-full flex items-center gap-2 px-2 py-2 rounded-lg cx-type-base hover:bg-[var(--color-surface)] transition-colors"
                     >
                       <span
                         className="w-3 h-3 rounded-full shrink-0"
@@ -233,7 +233,7 @@ export function ConversationLabelManager({
               </div>
             )}
             {all.length === 0 && (
-              <p className="px-3 py-3 text-xs text-[var(--color-text-muted)]">
+              <p className="px-3 py-3 cx-type-xs text-[var(--color-text-muted)]">
                 No labels yet. Create some in{" "}
                 <a href="/app/settings?tab=labels" className="underline">Settings → Labels</a>.
               </p>
@@ -279,7 +279,7 @@ export function ConversationLabelManager({
                       key={label.id}
                       type="button"
                       onClick={() => void toggle(label)}
-                      className="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-sm hover:bg-[var(--color-surface)] transition-colors"
+                      className="w-full flex items-center gap-2 px-2 py-2 rounded-lg cx-type-base hover:bg-[var(--color-surface)] transition-colors"
                     >
                       <span
                         className="w-3 h-3 rounded-full shrink-0"
@@ -324,7 +324,7 @@ export function ConversationLabelManager({
                   onChange={(e) => setNewName(e.target.value.slice(0, 32))}
                   onKeyDown={(e) => { if (e.key === "Enter") void createLabel(); if (e.key === "Escape") setCreating(false); }}
                   maxLength={32}
-                  className="w-full px-2 py-1 text-xs rounded-lg border outline-none"
+                  className="w-full px-2 py-1 cx-type-xs rounded-lg border outline-none"
                   style={{
                     background: "var(--color-surface)",
                     borderColor: "var(--color-border)",

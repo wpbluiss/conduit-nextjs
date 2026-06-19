@@ -217,7 +217,7 @@ export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
               </PraxisButton>
             </div>
 
-            <h3 className="text-sm font-semibold text-[var(--color-cream)] leading-snug mb-2">
+            <h3 className="cx-type-base font-semibold text-[var(--color-cream)] leading-snug mb-2">
               {current.title}
             </h3>
             <p className="cx-type-sm text-[var(--color-cream-soft)] leading-[1.6] mb-5">

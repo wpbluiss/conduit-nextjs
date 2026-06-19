@@ -108,7 +108,7 @@ export default function EnterTheRoomCard({
             Pro perk
           </div>
           <h2 className="cx-type-xl font-semibold mb-1">Enter the room</h2>
-          <p className="text-sm text-[var(--color-text-muted)]">
+          <p className="cx-type-base text-[var(--color-text-muted)]">
             Get the whole team on the line. Atlas moderates; say{" "}
             <span className="text-[var(--color-text)]">team</span> for a
             round-robin or address an employee directly. Available on Pro and up.
@@ -139,7 +139,7 @@ export default function EnterTheRoomCard({
             <span className="live-dot" aria-hidden /> {tierLabel}
           </div>
           <h2 className="cx-type-xl md:cx-type-2xl font-semibold mb-1">Enter the room</h2>
-          <p className="text-sm text-[var(--color-text-muted)]">
+          <p className="cx-type-base text-[var(--color-text-muted)]">
             Talk to your whole team at once. Address anyone, or say{" "}
             <span className="text-[var(--color-text)]">team</span> for a
             round-robin. Atlas closes.
@@ -161,7 +161,7 @@ export default function EnterTheRoomCard({
       {error && (
         <div
           role="alert"
-          className="fixed top-4 right-4 z-[70] max-w-sm text-sm bg-red-950/90 border border-red-500/40 rounded-md px-3 py-2 text-red-100 inline-flex items-start gap-2 shadow-lg"
+          className="fixed top-4 right-4 z-[70] max-w-sm cx-type-base bg-red-950/90 border border-red-500/40 rounded-md px-3 py-2 text-red-100 inline-flex items-start gap-2 shadow-lg"
         >
           <AlertCircle size={14} className="mt-0.5 shrink-0" />
           <div>
@@ -203,7 +203,7 @@ function AvatarStack({ displays }: { displays: ParticipantDisplay[] }) {
       {visible.map((d) => (
         <div
           key={d.id}
-          className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-base font-semibold border-2 border-[var(--color-bg)]"
+          className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center cx-type-base md:cx-type-md font-semibold border-2 border-[var(--color-bg)]"
           style={{ background: d.color, color: "var(--cx-canvas)" }}
           title={d.name}
         >
@@ -212,7 +212,7 @@ function AvatarStack({ displays }: { displays: ParticipantDisplay[] }) {
       ))}
       {overflow > 0 && (
         <div
-          className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-xs font-semibold border-2 border-[var(--color-bg)] bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)]"
+          className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center cx-type-xs font-semibold border-2 border-[var(--color-bg)] bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)]"
           title={`+${overflow} more`}
         >
           +{overflow}

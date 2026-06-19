@@ -340,7 +340,7 @@ export default async function WorkspacePage({ params }: PageProps) {
                       ["--dept" as string]: dept,
                       ["--dept-soft" as string]: employee.colorSoft,
                     }}
-                    className="conduit-suggestion px-4 py-3 text-sm block"
+                    className="conduit-suggestion px-4 py-3 cx-type-base block"
                   >
                     {p}
                   </Link>
@@ -387,7 +387,7 @@ export default async function WorkspacePage({ params }: PageProps) {
               </p>
               <Link
                 href={`/app?pin=${employeeId}`}
-                className="mt-3 inline-flex items-center gap-1 text-sm"
+                className="mt-3 inline-flex items-center gap-1 cx-type-base"
                 style={{ color: dept }}
               >
                 {emptyState.cta}
@@ -422,7 +422,7 @@ export default async function WorkspacePage({ params }: PageProps) {
                           {a.type.replace("_", " ")} ·{" "}
                           <span className="tabular-nums">{relativeTime(a.created_at)}</span>
                         </span>
-                        <span className="block text-sm text-[var(--color-text)] truncate">
+                        <span className="block cx-type-base text-[var(--color-text)] truncate">
                           {a.title}
                         </span>
                       </span>
@@ -445,11 +445,11 @@ export default async function WorkspacePage({ params }: PageProps) {
                         <span className="block cx-label">
                           conversation · <span className="tabular-nums">{relativeTime(a.created_at)}</span>
                         </span>
-                        <span className="block text-sm text-[var(--color-text)] truncate">
+                        <span className="block cx-type-base text-[var(--color-text)] truncate">
                           {a.title}
                         </span>
                         {a.snippet && (
-                          <span className="block text-xs text-[var(--color-text-muted)] truncate mt-0.5">
+                          <span className="block cx-type-xs text-[var(--color-text-muted)] truncate mt-0.5">
                             {a.snippet}
                           </span>
                         )}

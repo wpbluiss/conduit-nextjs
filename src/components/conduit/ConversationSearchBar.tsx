@@ -217,7 +217,7 @@ export function ConversationSearchBar() {
           placeholder="Search conversations…"
           aria-label="Search conversations"
           autoComplete="off"
-          className="flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--color-text-muted)]"
+          className="flex-1 bg-transparent cx-type-base outline-none placeholder:text-[var(--color-text-muted)]"
           style={{ color: "var(--color-text)" }}
         />
         {query && (
@@ -250,7 +250,7 @@ export function ConversationSearchBar() {
         >
           {!loading && searched && results.length === 0 && (
             <div className="px-4 py-4">
-              <p className="text-sm text-[var(--color-text-muted)] mb-3">
+              <p className="cx-type-base text-[var(--color-text-muted)] mb-3">
                 No conversations match &ldquo;{query}&rdquo;
               </p>
               <Link
@@ -312,7 +312,7 @@ export function ConversationSearchBar() {
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-sm font-medium text-[var(--color-text)] truncate">
+                    <span className="cx-type-base font-medium text-[var(--color-text)] truncate">
                       {r.title || "Untitled chat"}
                     </span>
                     {r.updated_at && (
@@ -321,7 +321,7 @@ export function ConversationSearchBar() {
                       </span>
                     )}
                   </div>
-                  <div className="mt-0.5 text-xs text-[var(--color-text-muted)] leading-snug line-clamp-2">
+                  <div className="mt-0.5 cx-type-xs text-[var(--color-text-muted)] leading-snug line-clamp-2">
                     <HighlightSnippet text={r.snippet} query={query} />
                   </div>
                 </div>

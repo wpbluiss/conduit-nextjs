@@ -99,7 +99,7 @@ export function SaveOutputButton({ messageId, content, specialist, conversationI
             }}
             placeholder="Name this output…"
             maxLength={200}
-            className="w-full rounded-lg px-2.5 py-1.5 text-sm outline-none mb-2"
+            className="w-full rounded-lg px-2.5 py-1.5 cx-type-base outline-none mb-2"
             style={{
               background: "var(--color-surface)",
               border: "1px solid var(--color-border)",

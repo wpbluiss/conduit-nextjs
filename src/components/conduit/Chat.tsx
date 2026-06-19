@@ -1722,7 +1722,7 @@ export function Chat({
 
           {companyBrief && messages.length === 0 && (
             <div
-              className="flex items-start gap-2 px-3 py-2 rounded-lg text-xs"
+              className="flex items-start gap-2 px-3 py-2 rounded-lg cx-type-xs"
               style={{
                 background: "color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-elevated))",
                 border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)",
@@ -1883,7 +1883,7 @@ export function Chat({
                     whileHover={{ y: -1 }}
                     whileTap={{ scale: 0.96 }}
                     transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
-                    className="px-3 py-2 text-xs rounded-full border transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+                    className="px-3 py-2 cx-type-xs rounded-full border transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
                     style={{
                       borderColor: "var(--color-border)",
                       background: "var(--color-surface-elevated)",
@@ -2176,7 +2176,7 @@ export function Chat({
                   >
                     Hand off to…
                   </p>
-                  <h2 className="text-base font-semibold" style={{ color: "var(--color-text)" }}>
+                  <h2 className="cx-type-md font-semibold" style={{ color: "var(--color-text)" }}>
                     Choose a specialist
                   </h2>
                 </div>
@@ -2222,7 +2222,7 @@ export function Chat({
                       }}
                     >
                       <span
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center cx-type-base font-bold"
                         style={{
                           background: emp.colorSoft,
                           color: emp.color,
@@ -2267,7 +2267,7 @@ export function Chat({
         return (
           <button
             onClick={stopAudio}
-            className="fixed bottom-24 right-6 md:bottom-6 z-30 conduit-card px-4 py-3 text-xs flex items-center gap-2 transition-colors"
+            className="fixed bottom-24 right-6 md:bottom-6 z-30 conduit-card px-4 py-3 cx-type-xs flex items-center gap-2 transition-colors"
             style={{
               borderColor: deptColor,
               color: deptColor,
@@ -2777,7 +2777,7 @@ function MessageHandoffButton({
             <button
               key={emp}
               onClick={() => handoff(emp)}
-              className="w-full text-left px-3 py-2 text-xs flex items-center gap-2 transition-colors"
+              className="w-full text-left px-3 py-2 cx-type-xs flex items-center gap-2 transition-colors"
               style={{ color: "var(--color-text)" }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.background = "color-mix(in srgb, var(--color-accent) 8%, transparent)";
@@ -2844,7 +2844,7 @@ function CountTick({ target, active }: { target: number; active: boolean }) {
           key="count-tick"
           aria-hidden
           className="cx-mono tabular-nums select-none inline-flex items-center gap-0.5"
-          style={{ color: CX_REWARD, fontSize: 11 }}
+          style={{ color: CX_REWARD, fontSize: "var(--cx-type-xs)" }}
           initial={{ opacity: 0, x: -3 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, transition: { duration: 0.2, ease: "easeOut" } }}
@@ -2899,7 +2899,7 @@ function MessageTimestamp({
       side={side}
       delay={300}
     >
-      <span className="text-xs whitespace-nowrap">{full}</span>
+      <span className="cx-type-xs whitespace-nowrap">{full}</span>
     </Tooltip>
   );
 }
@@ -3487,7 +3487,7 @@ function ArtifactDrawer({
                   onClick={() =>
                     navigator.clipboard?.writeText(data.content)
                   }
-                  className="!px-3 !py-2 !text-xs"
+                  className="!px-3 !py-2 cx-type-xs"
                 >
                   Copy
                 </Button>
@@ -3506,7 +3506,7 @@ function ArtifactDrawer({
                     a.click();
                     URL.revokeObjectURL(url);
                   }}
-                  className="!px-3 !py-2 !text-xs"
+                  className="!px-3 !py-2 cx-type-xs"
                 >
                   Download
                 </Button>
