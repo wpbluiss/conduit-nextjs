@@ -45,7 +45,7 @@ const SETTINGS_ITEMS: PaletteItem[] = [
     id: "settings-profile",
     label: "Profile",
     sublabel: "Account name, display name, avatar",
-    icon: <User size={ICON_SIZE} />,
+    icon: <User size={ICON_SIZE} strokeWidth={1.75} />,
     href: "/app/settings?tab=profile",
     group: "Settings",
   },
@@ -53,7 +53,7 @@ const SETTINGS_ITEMS: PaletteItem[] = [
     id: "settings-billing",
     label: "Billing",
     sublabel: "Manage your subscription",
-    icon: <CreditCard size={ICON_SIZE} />,
+    icon: <CreditCard size={ICON_SIZE} strokeWidth={1.75} />,
     href: "/app/settings?tab=billing",
     group: "Settings",
   },
@@ -61,7 +61,7 @@ const SETTINGS_ITEMS: PaletteItem[] = [
     id: "settings-connectors",
     label: "Connectors",
     sublabel: "Integrations and connected services",
-    icon: <Puzzle size={ICON_SIZE} />,
+    icon: <Puzzle size={ICON_SIZE} strokeWidth={1.75} />,
     href: "/app/settings?tab=integrations",
     group: "Settings",
   },
@@ -69,7 +69,7 @@ const SETTINGS_ITEMS: PaletteItem[] = [
     id: "settings-security",
     label: "Security",
     sublabel: "Sessions, passwords, and account security",
-    icon: <Lock size={ICON_SIZE} />,
+    icon: <Lock size={ICON_SIZE} strokeWidth={1.75} />,
     href: "/app/settings?tab=security",
     group: "Settings",
   },
@@ -234,6 +234,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
               <div className="flex items-center gap-3 px-4 py-4 border-b border-[var(--color-border)]">
                 <Search
                   size={15}
+                  strokeWidth={1.75}
                   className="shrink-0"
                   style={{ color: "var(--color-text-muted)" }}
                 />
@@ -375,7 +376,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
                     }}
                     aria-label="Open keyboard shortcuts"
                   >
-                    <Keyboard size={12} />
+                    <Keyboard size={12} strokeWidth={1.75} />
                     Shortcuts
                   </PraxisButton>
                 </span>

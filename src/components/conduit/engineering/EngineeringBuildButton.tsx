@@ -54,7 +54,7 @@ export default function EngineeringBuildButton({
         isDisabled
         title="Engineering builds are in early access."
       >
-        <Lock size={12} /> Start a build
+        <Lock size={12} strokeWidth={1.75} /> Start a build
       </Button>
     );
   }
@@ -95,7 +95,7 @@ export default function EngineeringBuildButton({
         className="!cx-type-base inline-flex items-center gap-1.5"
         style={{ background: deptColor, color: "var(--cx-canvas)" }}
       >
-        <Hammer size={13} /> Start a build
+        <Hammer size={13} strokeWidth={1.75} /> Start a build
       </Button>
 
       <AnimatePresence>

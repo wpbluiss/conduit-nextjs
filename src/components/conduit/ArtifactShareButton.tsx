@@ -86,11 +86,11 @@ export function ArtifactShareButton({ artifactId, initialShareToken }: Props) {
         aria-label={shareToken ? "Copy share link" : "Share artifact"}
       >
         {copied ? (
-          <Check size={13} />
+          <Check size={13} strokeWidth={1.75} />
         ) : shareToken ? (
-          <Link2 size={13} />
+          <Link2 size={13} strokeWidth={1.75} />
         ) : (
-          <Share2 size={13} />
+          <Share2 size={13} strokeWidth={1.75} />
         )}
       </PraxisButton>
       {shareToken && (
@@ -103,7 +103,7 @@ export function ArtifactShareButton({ artifactId, initialShareToken }: Props) {
           title="Revoke share link"
           aria-label="Revoke share link"
         >
-          <X size={13} />
+          <X size={13} strokeWidth={1.75} />
         </PraxisButton>
       )}
     </div>

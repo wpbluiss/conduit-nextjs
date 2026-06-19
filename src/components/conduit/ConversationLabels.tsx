@@ -190,7 +190,7 @@ export function ConversationLabelManager({
             (e.currentTarget as HTMLElement).style.borderColor = open ? "var(--color-border)" : "transparent";
           }}
         >
-          <Tag size={12} />
+          <Tag size={12} strokeWidth={1.75} />
           <span className="hidden sm:inline">Labels</span>
           {assigned.length > 0 && (
             <span
@@ -260,7 +260,7 @@ export function ConversationLabelManager({
             border: "1px dashed var(--color-border)",
           }}
         >
-          <Tag size={10} />
+          <Tag size={10} strokeWidth={1.75} />
           {assigned.length === 0 ? "Add label" : ""}
         </button>
 
@@ -311,7 +311,7 @@ export function ConversationLabelManager({
                 className="w-full flex items-center gap-2 px-3 py-2 border-t disabled:opacity-40"
                 style={{ borderColor: "var(--color-border)" }}
               >
-                <Plus size={12} />
+                <Plus size={12} strokeWidth={1.75} />
                 {all.length >= 10 ? "Label limit reached (10)" : "Create new label"}
               </PraxisButton>
             ) : (

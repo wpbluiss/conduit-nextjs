@@ -118,7 +118,7 @@ export function BuildHeader({ session, subscription, heartbeat, onRefresh }: Pro
             disabled={aborting}
             title="Kill the worker subprocess for this build"
           >
-            <StopCircle size={13} />
+            <StopCircle size={13} strokeWidth={1.75} />
             {aborting ? "Stopping…" : "Stop build"}
           </PraxisButton>
         )}

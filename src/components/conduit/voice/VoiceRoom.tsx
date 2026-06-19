@@ -384,7 +384,7 @@ export default function VoiceRoom({
           )}
           {error && (
             <span className="text-red-400 inline-flex items-center gap-1.5">
-              <AlertCircle size={14} />
+              <AlertCircle size={14} strokeWidth={1.75} />
               {error}
             </span>
           )}
@@ -444,7 +444,7 @@ export default function VoiceRoom({
           onClick={end}
           aria-label="End call"
         >
-          <PhoneOff size={20} />
+          <PhoneOff size={20} strokeWidth={1.75} />
         </PraxisButton>
       </div>
     </div>

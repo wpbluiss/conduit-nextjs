@@ -172,7 +172,7 @@ export function OnboardingModal({
                   disabled={!name.trim()}
                   className="disabled:opacity-40"
                 >
-                  Continue <ArrowRight size={16} />
+                  Continue <ArrowRight size={16} strokeWidth={1.75} />
                 </Button>
               </div>
             </div>
@@ -221,7 +221,7 @@ export function OnboardingModal({
                   disabled={!finalType.trim()}
                   className="disabled:opacity-40"
                 >
-                  Continue <ArrowRight size={16} />
+                  Continue <ArrowRight size={16} strokeWidth={1.75} />
                 </Button>
               </div>
             </div>
@@ -275,7 +275,7 @@ export function OnboardingModal({
                   Back
                 </Button>
                 <Button onClick={() => setStep(4)}>
-                  Continue <ArrowRight size={16} />
+                  Continue <ArrowRight size={16} strokeWidth={1.75} />
                 </Button>
               </div>
             </div>
@@ -311,7 +311,7 @@ export function OnboardingModal({
                   disabled={!description.trim() || submitting}
                   className="disabled:opacity-40"
                 >
-                  Meet Atlas <ArrowRight size={16} />
+                  Meet Atlas <ArrowRight size={16} strokeWidth={1.75} />
                 </Button>
               </div>
             </div>

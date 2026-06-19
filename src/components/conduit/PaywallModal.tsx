@@ -48,8 +48,8 @@ const FEATURES: {
 ];
 
 function FeatureValue({ value }: { value: string | boolean }) {
-  if (value === true) return <Check size={15} className="mx-auto text-[var(--cx-reward)]" aria-label="Included" />;
-  if (value === false) return <Minus size={15} className="mx-auto text-[var(--color-text-muted)] opacity-40" aria-label="Not included" />;
+  if (value === true) return <Check size={15} strokeWidth={1.75} className="mx-auto text-[var(--cx-reward)]" aria-label="Included" />;
+  if (value === false) return <Minus size={15} strokeWidth={1.75} className="mx-auto text-[var(--color-text-muted)] opacity-40" aria-label="Not included" />;
   return <span>{value}</span>;
 }
 
@@ -191,11 +191,11 @@ export function PaywallModal({
             aria-label="Close"
             className="absolute top-4 right-4"
           >
-            <X size={18} />
+            <X size={18} strokeWidth={1.75} />
           </Button>
 
           <div className="flex items-center gap-2 cx-type-xs uppercase tracking-[0.18em] text-[var(--cx-reward)] mb-2">
-            <Sparkles size={13} />
+            <Sparkles size={13} strokeWidth={1.75} />
             {reasonLabel}
           </div>
 

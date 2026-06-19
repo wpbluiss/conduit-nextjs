@@ -42,7 +42,7 @@ export function UpgradeNudge({
           "color-mix(in srgb, var(--color-accent) 6%, transparent)",
       }}
     >
-      <Sparkles size={14} className="text-[var(--color-accent)]" />
+      <Sparkles size={14} strokeWidth={1.75} className="text-[var(--color-accent)]" />
       <span className="text-[var(--color-text)]">
         You&apos;re on Praxis Free. Want premium routing?
       </span>
@@ -54,7 +54,7 @@ export function UpgradeNudge({
         Upgrade →
       </Link>
       <PraxisButton type="button" variant="ghost" size="icon-sm" onClick={close} aria-label="Dismiss">
-        <X size={14} />
+        <X size={14} strokeWidth={1.75} />
       </PraxisButton>
     </div>
   );

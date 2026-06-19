@@ -166,7 +166,7 @@ export default function LeadsTableClient({
             className="cx-type-base inline-flex items-center gap-2"
             style={{ background: deptColor, color: "var(--cx-canvas)" }}
           >
-            <Search size={14} />
+            <Search size={14} strokeWidth={1.75} />
             Run Discovery
           </Button>
         </div>
@@ -219,7 +219,7 @@ export default function LeadsTableClient({
           />
           {refetching && (
             <span className="cx-type-xs text-[var(--color-text-muted)] inline-flex items-center gap-1">
-              <Loader2 size={12} className="animate-spin" />
+              <Loader2 size={12} className="animate-spin" strokeWidth={1.75} />
               refreshing
             </span>
           )}
@@ -382,7 +382,7 @@ function LeadCard({
                 onClick={onDraft}
                 title="Draft cold outreach"
               >
-                <Send size={12} />
+                <Send size={12} strokeWidth={1.75} />
                 <span className="hidden sm:inline">Draft</span>
               </Button>
               <Button
@@ -394,9 +394,9 @@ function LeadCard({
                 title="Mark contacted"
               >
                 {lead.status === "contacted" ? (
-                  <Check size={12} />
+                  <Check size={12} strokeWidth={1.75} />
                 ) : (
-                  <PhoneCall size={12} />
+                  <PhoneCall size={12} strokeWidth={1.75} />
                 )}
                 <span className="hidden sm:inline">
                   {lead.status === "contacted" ? "Contacted" : "Mark contacted"}
@@ -409,7 +409,7 @@ function LeadCard({
                 onClick={onDiscard}
                 title="Discard"
               >
-                <Trash2 size={12} />
+                <Trash2 size={12} strokeWidth={1.75} />
               </Button>
             </div>
           )}
@@ -489,7 +489,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
             disabled={running}
             aria-label="Close"
           >
-            <X size={18} />
+            <X size={18} strokeWidth={1.75} />
           </Button>
         </div>
 
@@ -562,7 +562,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
               color: deptColor,
             }}
           >
-            <Loader2 size={14} className="animate-spin" />
+            <Loader2 size={14} className="animate-spin" strokeWidth={1.75} />
             <span>{phase || "Working…"}</span>
           </div>
         )}

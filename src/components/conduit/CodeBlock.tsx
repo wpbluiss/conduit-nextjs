@@ -187,9 +187,9 @@ export function CodeBlock({
                       }}
                     >
                       {isFolded ? (
-                        <ChevronRight size={12} aria-hidden />
+                        <ChevronRight size={12} strokeWidth={1.75} aria-hidden />
                       ) : (
-                        <ChevronDown size={12} aria-hidden />
+                        <ChevronDown size={12} strokeWidth={1.75} aria-hidden />
                       )}
                     </button>
                   ) : (

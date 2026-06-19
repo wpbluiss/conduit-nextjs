@@ -180,7 +180,7 @@ export function BillingDashboard({
             className="shrink-0"
           >
             Manage in Stripe
-            <ExternalLink size={12} />
+            <ExternalLink size={12} strokeWidth={1.75} />
           </PraxisButton>
         )}
       </div>
@@ -267,7 +267,7 @@ export function BillingDashboard({
                     className="mt-4 w-full justify-center"
                   >
                     {`Upgrade to ${t.name}`}
-                    <ArrowRight size={12} />
+                    <ArrowRight size={12} strokeWidth={1.75} />
                   </PraxisButton>
                 )}
               </div>
@@ -298,7 +298,7 @@ export function BillingDashboard({
               </div>
               <span className="mt-3 inline-flex items-center gap-1 cx-type-xs text-[var(--cx-accent)]">
                 {busy === t.id ? "Opening Stripe…" : "Buy"}
-                <ArrowRight size={11} />
+                <ArrowRight size={11} strokeWidth={1.75} />
               </span>
             </PraxisButton>
           ))}

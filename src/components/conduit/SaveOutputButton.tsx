@@ -65,7 +65,7 @@ export function SaveOutputButton({ messageId, content, specialist, conversationI
         className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100"
         style={{ color: saved ? "var(--color-accent)" : undefined }}
       >
-        {saved ? <BookmarkCheck size={13} /> : <Bookmark size={13} />}
+        {saved ? <BookmarkCheck size={13} strokeWidth={1.75} /> : <Bookmark size={13} strokeWidth={1.75} />}
         <span className="hidden md:inline cx-type-xs">{saved ? "Saved" : "Save"}</span>
       </PraxisButton>
 
@@ -85,7 +85,7 @@ export function SaveOutputButton({ messageId, content, specialist, conversationI
               aria-label="Close"
               className="p-0.5"
             >
-              <X size={12} />
+              <X size={12} strokeWidth={1.75} />
             </PraxisButton>
           </div>
           <input

@@ -68,9 +68,9 @@ export function PinnedMessagesBanner({ pins, onUnpin, onJumpTo }: Props) {
           </span>
         </div>
         {expanded ? (
-          <ChevronUp size={13} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} />
+          <ChevronUp size={13} strokeWidth={1.75} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} />
         ) : (
-          <ChevronDown size={13} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} />
+          <ChevronDown size={13} strokeWidth={1.75} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} />
         )}
       </PraxisButton>
 
@@ -116,7 +116,7 @@ export function PinnedMessagesBanner({ pins, onUnpin, onJumpTo }: Props) {
                   aria-label="Unpin message"
                   title="Unpin"
                 >
-                  <X size={11} />
+                  <X size={11} strokeWidth={1.75} />
                 </PraxisButton>
               </div>
             </div>

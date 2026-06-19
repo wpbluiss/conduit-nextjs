@@ -160,7 +160,7 @@ export default async function EmployeeRightRail({
                   className="conduit-card px-3 py-2 cx-type-xs leading-snug block hover:border-[var(--color-accent)] transition-colors"
                 >
                   <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-1 inline-flex items-center gap-1.5">
-                    <Hammer size={10} /> build · {s.status} · {relativeTime(s.created_at)}
+                    <Hammer size={10} strokeWidth={1.75} /> build · {s.status} · {relativeTime(s.created_at)}
                   </div>
                   <p className="text-[var(--color-text)] line-clamp-2">
                     {s.prompt}
@@ -187,7 +187,7 @@ export default async function EmployeeRightRail({
           href="/app/settings/memory"
           className="mt-2 inline-flex items-center gap-1 cx-type-xs uppercase tracking-[0.15em] text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
         >
-          See all memory <ArrowRight size={10} />
+          See all memory <ArrowRight size={10} strokeWidth={1.75} />
         </Link>
       </section>
 
@@ -209,7 +209,7 @@ export default async function EmployeeRightRail({
                 className="conduit-suggestion px-3 py-2.5 cx-type-xs block leading-snug border-[var(--color-accent)]"
               >
                 <span className="inline-flex items-center gap-1.5">
-                  <Hammer size={11} /> Resume last build · {activeSession.status}
+                  <Hammer size={11} strokeWidth={1.75} /> Resume last build · {activeSession.status}
                 </span>
               </Link>
             )}

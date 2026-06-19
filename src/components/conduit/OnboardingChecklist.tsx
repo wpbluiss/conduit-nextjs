@@ -117,7 +117,7 @@ export function OnboardingChecklist({
             className="transition-colors p-0.5 rounded hover:opacity-70"
             style={{ color: "var(--color-text-muted)" }}
           >
-            <X size={12} />
+            <X size={12} strokeWidth={1.75} />
           </button>
         </div>
 

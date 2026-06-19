@@ -23,6 +23,7 @@ export function UpgradeCTABanner({
     >
       <Sparkles
         size={12}
+        strokeWidth={1.75}
         aria-hidden
         className="shrink-0"
         style={{ color: "var(--color-accent)" }}

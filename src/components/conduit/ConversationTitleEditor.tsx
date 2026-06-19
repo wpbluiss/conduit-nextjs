@@ -101,7 +101,7 @@ export function ConversationTitleEditor({ conversationId, initialTitle }: Props)
         aria-label="Rename conversation"
         className="shrink-0 opacity-0 group-hover/title:opacity-100 focus:opacity-100"
       >
-        <Pencil size={11} />
+        <Pencil size={11} strokeWidth={1.75} />
       </PraxisButton>
     </span>
   );

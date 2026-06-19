@@ -273,7 +273,7 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
               border: "1px solid var(--pdl-border-hairline, var(--color-border))",
             }}
           >
-            <Search size={13} style={{ color: "var(--pdl-text-muted, var(--color-text-muted))", flexShrink: 0 }} />
+            <Search size={13} strokeWidth={1.75} style={{ color: "var(--pdl-text-muted, var(--color-text-muted))", flexShrink: 0 }} />
             <input
               type="text"
               value={query}
@@ -314,7 +314,7 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
               aria-label="Export memories as JSON"
               className="ml-auto shrink-0"
             >
-              <Download size={12} />
+              <Download size={12} strokeWidth={1.75} />
               <span className="hidden sm:inline">Export</span>
             </PraxisButton>
           )}

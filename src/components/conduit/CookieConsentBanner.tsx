@@ -74,7 +74,7 @@ export function CookieConsentBanner() {
             size="icon-sm"
             aria-label="Dismiss"
           >
-            <X size={14} />
+            <X size={14} strokeWidth={1.75} />
           </PraxisButton>
         </div>
       </div>

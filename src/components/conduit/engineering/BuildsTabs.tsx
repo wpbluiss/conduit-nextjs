@@ -256,7 +256,7 @@ function FailedToggle({
           : "Show failed and aborted builds"
       }
     >
-      <EyeOff size={11} />
+      <EyeOff size={11} strokeWidth={1.75} />
       {showFailed
         ? "Hide failed"
         : `Show failed${hiddenCount > 0 ? ` (${hiddenCount})` : ""}`}
@@ -342,7 +342,7 @@ function TemplatesTab({ builds }: { builds: R7Build[] }) {
               className="cx-type-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hi)] inline-flex items-center gap-1 truncate"
             >
               {b.live_url}
-              <ExternalLink size={11} />
+              <ExternalLink size={11} strokeWidth={1.75} />
             </a>
           ) : b.error_message ? (
             <p className="cx-type-xs text-[var(--color-pink)]">{b.error_message}</p>
@@ -417,7 +417,7 @@ function EngineeringTab({
             {s.deploy_url ? (
               <span className="cx-type-xs text-[var(--color-accent)] inline-flex items-center gap-1 truncate">
                 {s.deploy_url.replace(/^https?:\/\//, "")}
-                <ExternalLink size={11} />
+                <ExternalLink size={11} strokeWidth={1.75} />
               </span>
             ) : s.error_message ? (
               <p className="cx-type-xs text-[var(--color-pink)] line-clamp-2">

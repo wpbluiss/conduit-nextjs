@@ -102,7 +102,7 @@ export default function VoiceModeButton({
         disabled={requesting}
         title="Live voice conversation"
       >
-        <Mic size={14} style={{ color: deptColor }} />
+        <Mic size={14} strokeWidth={1.75} style={{ color: deptColor }} />
         {requesting ? "Connecting…" : (label ?? "Voice Mode")}
       </PraxisButton>
 

@@ -37,11 +37,11 @@ function relativeTime(iso: string): string {
 
 function NotifIcon({ type }: { type: string }) {
   const size = 14;
-  if (type === "build_complete") return <Hammer size={size} />;
-  if (type === "artifact_ready") return <FileText size={size} />;
-  if (type === "memory_saved") return <MemoryStick size={size} />;
-  if (type === "billing") return <CreditCard size={size} />;
-  return <Bell size={size} />;
+  if (type === "build_complete") return <Hammer size={size} strokeWidth={1.75} />;
+  if (type === "artifact_ready") return <FileText size={size} strokeWidth={1.75} />;
+  if (type === "memory_saved") return <MemoryStick size={size} strokeWidth={1.75} />;
+  if (type === "billing") return <CreditCard size={size} strokeWidth={1.75} />;
+  return <Bell size={size} strokeWidth={1.75} />;
 }
 
 export function NotificationCenter() {
@@ -126,7 +126,7 @@ export function NotificationCenter() {
         onClick={() => setOpen((v: boolean) => !v)}
         className="relative flex items-center gap-2 px-3 py-2 cx-type-xs w-full"
       >
-        <Inbox size={14} className="shrink-0" />
+        <Inbox size={14} strokeWidth={1.75} className="shrink-0" />
         <span>Notifications</span>
         {unreadCount > 0 && (
           <span
@@ -170,7 +170,7 @@ export function NotificationCenter() {
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-4 border-b border-[var(--color-border)]">
                 <div className="flex items-center gap-2">
-                  <Bell size={14} className="text-[var(--color-text-muted)]" />
+                  <Bell size={14} strokeWidth={1.75} className="text-[var(--color-text-muted)]" />
                   <span className="cx-type-base font-medium">Notifications</span>
                   {unreadCount > 0 && (
                     <span className="cx-type-xs font-semibold px-1.5 py-0.5 rounded-full bg-red-500 text-white leading-none">
@@ -188,7 +188,7 @@ export function NotificationCenter() {
                       title="Mark all as read"
                       aria-label="Mark all as read"
                     >
-                      <CheckCheck size={12} />
+                      <CheckCheck size={12} strokeWidth={1.75} />
                       Mark all read
                     </PraxisButton>
                   )}
@@ -198,7 +198,7 @@ export function NotificationCenter() {
                     onClick={() => setOpen(false)}
                     aria-label="Close notifications"
                   >
-                    <X size={14} />
+                    <X size={14} strokeWidth={1.75} />
                   </PraxisButton>
                 </div>
               </div>
@@ -209,6 +209,7 @@ export function NotificationCenter() {
                   <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-6">
                     <Bell
                       size={28}
+                      strokeWidth={1.75}
                       style={{ color: "var(--cx-text-muted)", opacity: 0.4 }}
                     />
                     <p className="cx-type-base" style={{ color: "var(--cx-text-muted)" }}>

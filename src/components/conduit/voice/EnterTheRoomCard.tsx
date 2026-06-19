@@ -101,7 +101,7 @@ export default function EnterTheRoomCard({
     return (
       <div className="conduit-card p-6 md:p-7 mb-10 border border-[var(--color-border)] flex flex-col md:flex-row items-start md:items-center gap-5">
         <div className="shrink-0 inline-flex items-center justify-center w-14 h-14 rounded-full bg-[var(--color-surface-elevated)]">
-          <Lock size={20} className="text-[var(--color-accent-hi)]" />
+          <Lock size={20} strokeWidth={1.75} className="text-[var(--color-accent-hi)]" />
         </div>
         <div className="flex-1">
           <div className="cx-type-xs uppercase tracking-[0.2em] text-[var(--color-accent-hi)] mb-1">
@@ -153,7 +153,7 @@ export default function EnterTheRoomCard({
           loadingText="Connecting…"
           className="shrink-0"
         >
-          <Mic size={14} />
+          <Mic size={14} strokeWidth={1.75} />
           Enter the room
         </Button>
       </div>

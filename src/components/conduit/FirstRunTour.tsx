@@ -213,7 +213,7 @@ export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
                 onClick={dismiss}
                 aria-label="Skip tour"
               >
-                <X size={16} />
+                <X size={16} strokeWidth={1.75} />
               </PraxisButton>
             </div>
 
@@ -239,7 +239,7 @@ export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
                 autoFocus
               >
                 {isLast ? "Get started" : "Next →"}
-                <ArrowRight size={13} />
+                <ArrowRight size={13} strokeWidth={1.75} />
               </Button>
             </div>
           </div>

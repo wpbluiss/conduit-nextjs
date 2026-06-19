@@ -507,7 +507,7 @@ export function PraxisComposerPill({
             cursor: "pointer",
           }}
         >
-          <Mic size={16} />
+          <Mic size={16} strokeWidth={1.75} />
         </motion.button>
       ) : !whisperSupported ? (
         <button
@@ -530,7 +530,7 @@ export function PraxisComposerPill({
             opacity: 0.4,
           }}
         >
-          <MicOff size={16} />
+          <MicOff size={16} strokeWidth={1.75} />
         </button>
       ) : null}
 
@@ -589,7 +589,7 @@ export function PraxisComposerPill({
                 flexShrink: 0,
               }}
             >
-              <Square size={14} fill="currentColor" />
+              <Square size={14} fill="currentColor" strokeWidth={1.75} />
             </motion.button>
             <motion.button
               type="button"
@@ -656,7 +656,7 @@ export function PraxisComposerPill({
               opacity: voiceRecordingState === "uploading" || loading ? 0.5 : 1,
             }}
           >
-            <Mic2 size={16} />
+            <Mic2 size={16} strokeWidth={1.75} />
           </motion.button>
         )
       )}
@@ -712,7 +712,7 @@ export function PraxisComposerPill({
                 flexShrink: 0,
               }}
             >
-              <Square size={12} fill="currentColor" />
+              <Square size={12} fill="currentColor" strokeWidth={1.75} />
             </motion.button>
             <motion.button
               type="button"
@@ -787,7 +787,7 @@ export function PraxisComposerPill({
                 }}
               />
             ) : (
-              <Mic size={16} />
+              <Mic size={16} strokeWidth={1.75} />
             )}
           </motion.button>
         )
@@ -820,7 +820,7 @@ export function PraxisComposerPill({
           isLoading={loading}
           aria-label="Send"
         >
-          <Send size={16} />
+          <Send size={16} strokeWidth={1.75} />
         </Button>
       </span>
     </form>

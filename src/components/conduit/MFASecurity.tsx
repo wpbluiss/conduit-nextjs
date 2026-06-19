@@ -100,10 +100,10 @@ function BackupCodesGrid({ codes }: { codes: string[] }) {
       </div>
       <div className="flex gap-2">
         <Button variant="secondary" size="sm" onClick={copyAll} className="flex-1 justify-center">
-          <Copy size={13} /> Copy all
+          <Copy size={13} strokeWidth={1.75} /> Copy all
         </Button>
         <Button variant="secondary" size="sm" onClick={download} className="flex-1 justify-center">
-          <Download size={13} /> Download
+          <Download size={13} strokeWidth={1.75} /> Download
         </Button>
       </div>
     </div>

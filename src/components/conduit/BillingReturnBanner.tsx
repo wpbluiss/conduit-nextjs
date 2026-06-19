@@ -63,10 +63,10 @@ export function BillingReturnBanner({ type }: { type: BannerType }) {
         color: "var(--cx-text)",
       }}
     >
-      <Icon size={16} style={{ color, flexShrink: 0 }} />
+      <Icon size={16} strokeWidth={1.75} style={{ color, flexShrink: 0 }} />
       <span className="flex-1">{text}</span>
       <PraxisButton type="button" variant="ghost" size="icon-sm" aria-label="Dismiss" onClick={() => setVisible(false)}>
-        <X size={14} />
+        <X size={14} strokeWidth={1.75} />
       </PraxisButton>
     </div>
   );

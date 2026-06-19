@@ -31,7 +31,7 @@ export default function OpsWorkspace() {
       <div>
         <div className="flex items-baseline justify-between mb-3">
           <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
-            <ClipboardList size={11} /> Standard procedures
+            <ClipboardList size={11} strokeWidth={1.75} /> Standard procedures
           </div>
           <Link
             href={`/app?pin=ops&prompt=${encodeURIComponent("Build an SOP for client onboarding")}`}
@@ -79,7 +79,7 @@ export default function OpsWorkspace() {
       <div>
         <div className="flex items-baseline justify-between mb-3">
           <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] inline-flex items-center gap-1.5">
-            <Building2 size={11} /> Vendor renewals
+            <Building2 size={11} strokeWidth={1.75} /> Vendor renewals
           </div>
           <span className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
             {VENDORS.length} tracked
@@ -119,7 +119,7 @@ export default function OpsWorkspace() {
                     </span>
                   </div>
                   <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-0.5 inline-flex items-center gap-1">
-                    <Clock size={9} /> until renew
+                    <Clock size={9} strokeWidth={1.75} /> until renew
                   </div>
                 </div>
               </li>
@@ -149,7 +149,7 @@ export default function OpsWorkspace() {
               Run the weekly business review
             </div>
           </div>
-          <ArrowRight size={14} style={{ color: dept }} />
+          <ArrowRight size={14} strokeWidth={1.75} style={{ color: dept }} />
         </Link>
       </div>
     </section>
