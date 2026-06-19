@@ -1215,133 +1215,137 @@ function WorkspaceTab({
   };
 
   return (
-    <div className="space-y-8">
-      {/* ── Workspace logo ── */}
-      <div>
-        <div className="cx-label mb-1">
-          Workspace logo
-        </div>
-        <p className="cx-type-xs text-[var(--cx-text-muted)] mb-3">
-          Shown in the sidebar header. JPEG or PNG, max 2 MB.
-        </p>
-        <div className="flex items-center gap-5">
-          <button
-            type="button"
-            onClick={() => logoInputRef.current?.click()}
-            disabled={logoUploading}
-            className="relative group shrink-0"
-            aria-label="Upload workspace logo"
-          >
-            <div
-              className="w-16 h-16 rounded-xl flex items-center justify-center overflow-hidden border-2 border-[var(--cx-border)] group-hover:border-[var(--cx-accent)] transition-colors"
-              style={{ background: "var(--cx-surface)" }}
-            >
-              {logoPreview ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={logoPreview}
-                  alt="Workspace logo"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="cx-type-2xl font-bold" style={{ color: "var(--cx-accent-bright)" }}>
-                  {(wsName || workspaceName || "P")[0]?.toUpperCase() ?? "P"}
-                </span>
-              )}
-            </div>
-            {logoUploading && (
-              <div className="absolute inset-0 rounded-xl flex items-center justify-center" style={{ background: "var(--cx-canvas-dim, rgba(11,11,15,0.60))" }}>
-                <SpinnerIcon size={18} />
-              </div>
-            )}
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[var(--cx-accent)] flex items-center justify-center shadow">
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="white">
-                <path d="M5 2v6M2 5h6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </div>
-          </button>
-          <div className="space-y-2">
-            <PraxisButton
+    <div className="space-y-6">
+      <section className="conduit-card p-6 space-y-6">
+        <h2 className="cx-type-md font-semibold">Workspace</h2>
+
+        {/* ── Workspace logo ── */}
+        <div>
+          <div className="cx-label mb-1">
+            Workspace logo
+          </div>
+          <p className="cx-type-xs text-[var(--cx-text-muted)] mb-3">
+            Shown in the sidebar header. JPEG or PNG, max 2 MB.
+          </p>
+          <div className="flex items-center gap-5">
+            <button
               type="button"
               onClick={() => logoInputRef.current?.click()}
-              isDisabled={logoUploading}
-              variant="ghost"
-              size="sm"
-              className=""
+              disabled={logoUploading}
+              className="relative group shrink-0"
+              aria-label="Upload workspace logo"
             >
-              {logoUploading ? "Uploading…" : "Choose logo"}
-            </PraxisButton>
-            {logoPreview && (
+              <div
+                className="w-16 h-16 rounded-xl flex items-center justify-center overflow-hidden border-2 border-[var(--cx-border)] group-hover:border-[var(--cx-accent)] transition-colors"
+                style={{ background: "var(--cx-surface)" }}
+              >
+                {logoPreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={logoPreview}
+                    alt="Workspace logo"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="cx-type-2xl font-bold" style={{ color: "var(--cx-accent-bright)" }}>
+                    {(wsName || workspaceName || "P")[0]?.toUpperCase() ?? "P"}
+                  </span>
+                )}
+              </div>
+              {logoUploading && (
+                <div className="absolute inset-0 rounded-xl flex items-center justify-center" style={{ background: "var(--cx-canvas-dim, rgba(11,11,15,0.60))" }}>
+                  <SpinnerIcon size={18} />
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[var(--cx-accent)] flex items-center justify-center shadow">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="white">
+                  <path d="M5 2v6M2 5h6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </div>
+            </button>
+            <div className="space-y-2">
               <PraxisButton
                 type="button"
-                onClick={removeLogo}
-                isDisabled={logoRemoving}
+                onClick={() => logoInputRef.current?.click()}
+                isDisabled={logoUploading}
                 variant="ghost"
                 size="sm"
                 className=""
               >
-                {logoRemoving ? "Removing…" : "Remove logo"}
+                {logoUploading ? "Uploading…" : "Choose logo"}
               </PraxisButton>
-            )}
-            {logoError && (
-              <p className="cx-type-xs text-[var(--cx-danger)]">{logoError}</p>
-            )}
+              {logoPreview && (
+                <PraxisButton
+                  type="button"
+                  onClick={removeLogo}
+                  isDisabled={logoRemoving}
+                  variant="ghost"
+                  size="sm"
+                  className=""
+                >
+                  {logoRemoving ? "Removing…" : "Remove logo"}
+                </PraxisButton>
+              )}
+              {logoError && (
+                <p className="cx-type-xs text-[var(--cx-danger)]">{logoError}</p>
+              )}
+            </div>
+            <input
+              ref={logoInputRef}
+              type="file"
+              accept="image/jpeg,image/png"
+              className="hidden"
+              onChange={handleLogoChange}
+              aria-hidden
+            />
           </div>
-          <input
-            ref={logoInputRef}
-            type="file"
-            accept="image/jpeg,image/png"
-            className="hidden"
-            onChange={handleLogoChange}
-            aria-hidden
-          />
         </div>
-      </div>
 
-      {/* ── Workspace name ── */}
-      <form onSubmit={saveWsName} className="space-y-2 max-w-sm">
-        <label className="cx-label block">
-          Workspace name
-        </label>
-        <p className="cx-type-xs text-[var(--cx-text-muted)] -mt-1">
-          Shown in the sidebar. Leave blank to use your account name.
-        </p>
-        <div className="relative">
-          <input
-            value={wsName}
-            onChange={(e) => {
-              setWsName(e.target.value.slice(0, WS_NAME_MAX));
-              setWsNameSaved(false);
-              setWsNameError("");
-            }}
-            maxLength={WS_NAME_MAX}
-            placeholder="e.g. Acme AI Team"
-            className="w-full cx-input"
-            style={{ paddingRight: "3rem" }}
-          />
-          <span
-            className="absolute right-3 top-1/2 -translate-y-1/2 cx-type-xs tabular-nums"
-            style={{
-              color:
-                wsName.length >= WS_NAME_MAX
-                  ? "var(--cx-danger)"
-                  : "var(--cx-text-muted)",
-            }}
+        {/* ── Workspace name ── */}
+        <form onSubmit={saveWsName} className="space-y-2 max-w-sm">
+          <label className="cx-label block">
+            Workspace name
+          </label>
+          <p className="cx-type-xs text-[var(--cx-text-muted)] -mt-1">
+            Shown in the sidebar. Leave blank to use your account name.
+          </p>
+          <div className="relative">
+            <input
+              value={wsName}
+              onChange={(e) => {
+                setWsName(e.target.value.slice(0, WS_NAME_MAX));
+                setWsNameSaved(false);
+                setWsNameError("");
+              }}
+              maxLength={WS_NAME_MAX}
+              placeholder="e.g. Acme AI Team"
+              className="w-full cx-input"
+              style={{ paddingRight: "3rem" }}
+            />
+            <span
+              className="absolute right-3 top-1/2 -translate-y-1/2 cx-type-xs tabular-nums"
+              style={{
+                color:
+                  wsName.length >= WS_NAME_MAX
+                    ? "var(--cx-danger)"
+                    : "var(--cx-text-muted)",
+              }}
+            >
+              {wsName.length}/{WS_NAME_MAX}
+            </span>
+          </div>
+          {wsNameError && <p className="cx-type-xs text-[var(--cx-danger)]">{wsNameError}</p>}
+          <PraxisButton
+            type="submit"
+            isLoading={wsNameSaving}
+            isDisabled={wsNameSaving}
+            variant="secondary"
+            className=""
           >
-            {wsName.length}/{WS_NAME_MAX}
-          </span>
-        </div>
-        {wsNameError && <p className="cx-type-xs text-[var(--cx-danger)]">{wsNameError}</p>}
-        <PraxisButton
-          type="submit"
-          isLoading={wsNameSaving}
-          isDisabled={wsNameSaving}
-          variant="secondary"
-          className=""
-        >
-          {wsNameSaved ? <><Check size={12} /> Saved</> : "Save name"}
-        </PraxisButton>
-      </form>
+            {wsNameSaved ? <><Check size={12} /> Saved</> : "Save name"}
+          </PraxisButton>
+        </form>
+      </section>
     </div>
   );
 }
@@ -2816,7 +2820,7 @@ function BillingTab({
           onClick={(e) => e.target === e.currentTarget && setShowCancelModal(false)}
         >
           <div
-            className="cx-glass-float cx-glass-border p-6 max-w-sm w-full space-y-4"
+            className="cx-glass-modal p-6 max-w-sm w-full space-y-4"
           >
             <div>
               <div className="cx-heading-lg mb-1">Cancel subscription?</div>
