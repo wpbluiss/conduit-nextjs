@@ -85,7 +85,7 @@ export default async function ActivityPage() {
           Activity
         </h1>
         <p
-          className="mt-0.5 text-sm"
+          className="mt-0.5 cx-body"
           style={{ color: "var(--color-text-muted)" }}
         >
           Recent specialist activity across all conversations and builds

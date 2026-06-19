@@ -99,7 +99,7 @@ export default function OutputsPage() {
           </Link>
           <h1 className="cx-heading-2xl">Outputs</h1>
         </div>
-        <p className="text-sm text-[var(--color-text-muted)] mb-8">
+        <p className="cx-body text-[var(--color-text-muted)] mb-8">
           Specialist responses you&apos;ve saved for reference.
         </p>
 
@@ -116,7 +116,7 @@ export default function OutputsPage() {
         ) : outputs.length === 0 ? (
           <div className="conduit-card p-12 text-center">
             <Bookmark size={32} className="mx-auto mb-3" style={{ color: "var(--color-text-muted)" }} />
-            <p className="text-sm text-[var(--color-text-muted)]">
+            <p className="cx-body text-[var(--color-text-muted)]">
               No outputs saved yet. Hover over any specialist response in chat and click <strong>Save</strong> to add it here.
             </p>
           </div>
@@ -165,7 +165,7 @@ export default function OutputsPage() {
                       </PraxisButton>
                     </div>
 
-                    <p className="text-sm text-[var(--color-text-muted)] mt-2 line-clamp-3 whitespace-pre-wrap">
+                    <p className="cx-body text-[var(--color-text-muted)] mt-2 line-clamp-3 whitespace-pre-wrap">
                       {output.content}
                     </p>
                   </div>

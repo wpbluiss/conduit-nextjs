@@ -89,6 +89,20 @@
   --cx-type-2xl:   32px;
   --cx-type-3xl:   44px;
 
+  /* ---- Spec-exact numbered aliases (--cx-text-{size}px) ----
+   * Canonical names matching the CONSOLE_REDESIGN.md spec.
+   * Alias to --cx-type-* to keep a single source of truth.
+   * New code should prefer --cx-type-* or cx-type-* classes;
+   * these aliases exist for spec-exact naming convention. */
+  --cx-text-12: var(--cx-type-xs);
+  --cx-text-13: var(--cx-type-sm);
+  --cx-text-14: var(--cx-type-base);
+  --cx-text-16: var(--cx-type-md);
+  --cx-text-20: var(--cx-type-lg);
+  --cx-text-24: var(--cx-type-xl);
+  --cx-text-32: var(--cx-type-2xl);
+  --cx-text-44: var(--cx-type-3xl);
+
   --cx-lh-heading: 1.10;
   --cx-lh-body:    1.60;
   --cx-ls-tight:   -0.01em;
@@ -479,6 +493,29 @@
 .praxis-root .cx-type-xl   { font-size: var(--cx-type-xl); }
 .praxis-root .cx-type-2xl  { font-size: var(--cx-type-2xl); }
 .praxis-root .cx-type-3xl  { font-size: var(--cx-type-3xl); }
+
+/* ---- Spec-exact numbered font-size utilities ----
+ * Parallel to cx-type-* but use the --cx-text-{size} alias names.
+ * Both sets are canonical; cx-type-* is the preferred shorthand. */
+.praxis-root .cx-text-12 { font-size: var(--cx-text-12); }
+.praxis-root .cx-text-13 { font-size: var(--cx-text-13); }
+.praxis-root .cx-text-14 { font-size: var(--cx-text-14); }
+.praxis-root .cx-text-16 { font-size: var(--cx-text-16); }
+.praxis-root .cx-text-20 { font-size: var(--cx-text-20); }
+.praxis-root .cx-text-24 { font-size: var(--cx-text-24); }
+.praxis-root .cx-text-32 { font-size: var(--cx-text-32); }
+.praxis-root .cx-text-44 { font-size: var(--cx-text-44); }
+
+/* ---- Body text compound utility ----
+ * Applies spec body size (14px) + comfortable line-height (1.60).
+ * Use on <p> and descriptive spans to get the spec body treatment.
+ * Prefer cx-body over text-sm on multi-line paragraph copy so the
+ * line-height (1.60) is always explicit — Tailwind's text-sm default
+ * (line-height: 1.25rem) is too tight for reading-length text. */
+.praxis-root .cx-body {
+  font-size: var(--cx-type-base);
+  line-height: var(--cx-lh-body);
+}
 
 /* ---- Heading auto-treatment ----
  * Scoped to .praxis-root so marketing pages are never affected.

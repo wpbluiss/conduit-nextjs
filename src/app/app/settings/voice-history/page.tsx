@@ -72,7 +72,7 @@ export default async function VoiceHistoryPage() {
             <ArrowLeft size={12} /> Settings
           </Link>
           <h1 className="cx-heading-2xl mt-2">Voice History</h1>
-          <p className="text-sm text-[var(--color-text-muted)] mt-1">
+          <p className="cx-body text-[var(--color-text-muted)] mt-1">
             Your past voice conversations. Transcripts stay private to your
             account.
           </p>
@@ -108,7 +108,7 @@ export default async function VoiceHistoryPage() {
                     )}
                   </div>
                   {s.transcript_summary && (
-                    <p className="text-sm text-[var(--color-text)] mt-1.5">
+                    <p className="cx-body text-[var(--color-text)] mt-1.5">
                       {s.transcript_summary}
                     </p>
                   )}
