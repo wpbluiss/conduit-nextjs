@@ -149,7 +149,7 @@ export function OnboardingModal({
         <div className="w-full max-w-2xl">
           {step === 1 && (
             <div className="onboarding-step">
-              <h2 className="serif text-3xl md:text-5xl leading-[1.05]">
+              <h2 className="serif text-cx-2xl md:text-cx-3xl leading-[1.05]">
                 What&apos;s your business called?
               </h2>
               <p className="mt-3 text-sm md:text-base text-[var(--color-text-muted)]">
@@ -164,7 +164,7 @@ export function OnboardingModal({
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && name.trim()) setStep(2);
                 }}
-                className="mt-8 w-full bg-transparent border-b border-[var(--color-border)] focus:border-[var(--color-accent)] outline-none px-1 py-3 text-2xl md:text-3xl serif placeholder:text-[var(--color-text-muted)]"
+                className="mt-8 w-full bg-transparent border-b border-[var(--color-border)] focus:border-[var(--color-accent)] outline-none px-1 py-3 text-cx-xl md:text-cx-2xl serif placeholder:text-[var(--color-text-muted)]"
               />
               <div className="mt-10 flex justify-end">
                 <Button
@@ -180,7 +180,7 @@ export function OnboardingModal({
 
           {step === 2 && (
             <div className="onboarding-step">
-              <h2 className="serif text-3xl md:text-5xl leading-[1.05]">
+              <h2 className="serif text-cx-2xl md:text-cx-3xl leading-[1.05]">
                 What kind of business is it?
               </h2>
               <p className="mt-3 text-sm md:text-base text-[var(--color-text-muted)]">
@@ -229,7 +229,7 @@ export function OnboardingModal({
 
           {step === 3 && (
             <div className="onboarding-step">
-              <h2 className="serif text-3xl md:text-5xl leading-[1.05]">
+              <h2 className="serif text-cx-2xl md:text-cx-3xl leading-[1.05]">
                 What are you working toward?
               </h2>
               <p className="mt-3 text-sm md:text-base text-[var(--color-text-muted)]">
@@ -283,7 +283,7 @@ export function OnboardingModal({
 
           {step === 4 && (
             <div className="onboarding-step">
-              <h2 className="serif text-3xl md:text-5xl leading-[1.05]">
+              <h2 className="serif text-cx-2xl md:text-cx-3xl leading-[1.05]">
                 Tell Atlas what you&apos;re working on.
               </h2>
               <p className="mt-3 text-sm md:text-base text-[var(--color-text-muted)]">
@@ -345,7 +345,7 @@ export function OnboardingModal({
                   }}
                 />
               </div>
-              <h2 className="serif text-3xl md:text-4xl leading-tight">
+              <h2 className="serif text-cx-2xl leading-tight">
                 Setting up your team…
               </h2>
               <p className="mt-3 text-sm text-[var(--color-text-muted)]">
