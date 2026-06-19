@@ -135,9 +135,9 @@ function SidebarUpgradeBanner({
         border: "1px solid color-mix(in srgb, var(--cx-accent) 20%, var(--cx-border))",
       }}
     >
-      <div className="px-3 pt-2.5 pb-2.5">
+      <div className="px-3 pt-3 pb-3">
         <div className="flex items-start justify-between gap-1 mb-2">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <Sparkles size={11} style={{ color: "var(--cx-accent)", flexShrink: 0 }} />
             <span className="cx-type-xs font-semibold" style={{ color: "var(--cx-text)" }}>
               Unlock all 9 specialists
@@ -620,13 +620,12 @@ export function Sidebar({
         role="dialog"
         aria-modal={open ? "true" : undefined}
         aria-label="Navigation"
-        animate={{ width: collapsed ? 56 : 256, minWidth: collapsed ? 56 : 256 }}
+        animate={{ width: collapsed ? 52 : 256, minWidth: collapsed ? 52 : 256 }}
         transition={skipTransition || shouldReduceMotion ? { duration: 0 } : { ...CX_SPRING_SOFT }}
-        className={`cx-glass fixed md:static z-40 inset-y-0 left-0 border-r flex flex-col overflow-hidden ${
+        className={`cx-glass fixed md:static z-40 inset-y-0 left-0 flex flex-col overflow-hidden ${
           open ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
         style={{
-          borderColor: "var(--cx-glass-border)",
           transition: shouldReduceMotion ? "none" : "transform 180ms cubic-bezier(0.22,1,0.36,1)",
         }}
       >
@@ -782,10 +781,10 @@ export function Sidebar({
           {!collapsed && pinned.length > 0 && (
             <div className="mt-3">
               <div
-                className="mx-3 mt-0 mb-1.5 pb-1 flex items-center gap-1.5"
+                className="mx-3 mt-0 mb-2 pb-1 flex items-center gap-2"
                 style={{ borderBottom: "1px solid var(--cx-glass-border)" }}
               >
-                <Pin size={9} aria-hidden style={{ color: "var(--cx-text-faint)" }} />
+                <Pin size={10} aria-hidden style={{ color: "var(--cx-text-faint)" }} />
                 <span
                   className="cx-mono cx-type-xs font-semibold uppercase tracking-[0.15em]"
                   style={{ color: "var(--cx-text-faint)" }}
@@ -793,7 +792,7 @@ export function Sidebar({
                   Pinned
                 </span>
               </div>
-              <ul className="space-y-0.5 mt-0.5">
+              <ul className="space-y-1 mt-1">
                 {pinned.map((emp) => {
                   const isStreaming = streamingEmployee === emp;
                   const allowed = allowedEmployees.includes(emp);
@@ -803,7 +802,7 @@ export function Sidebar({
                       whileHover={shouldReduceMotion ? undefined : { scale: 1.01 }}
                       whileTap={shouldReduceMotion ? undefined : { scale: 0.99 }}
                       transition={{ duration: 0.15, ease: [...CX_EASE] }}
-                      className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-[120ms] ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)]" : ""}`}
+                      className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]" : ""}`}
                       style={{
                         background: active ? "var(--cx-accent-tint)" : undefined,
                       }}
@@ -822,7 +821,7 @@ export function Sidebar({
                       <SpecialistAvatar employee={emp} size={24} active={active} streaming={isStreaming} />
                       <span
                         className="truncate flex-1 cx-type-sm"
-                        style={{ color: active ? "var(--cx-text)" : "var(--cx-text-muted)", fontWeight: active ? 500 : 400 }}
+                        style={{ color: "var(--cx-text)", fontWeight: active ? 600 : 400 }}
                       >
                         {labelFor(emp)}
                       </span>
@@ -865,18 +864,18 @@ export function Sidebar({
               <button
                 type="button"
                 onClick={() => setTeamExpanded((v) => !v)}
-                className="w-full mx-0 flex items-center justify-between px-3 pt-1 pb-2 cx-type-xs font-semibold uppercase tracking-[0.15em] transition-colors duration-100"
+                className="w-full mx-0 flex items-center justify-between px-3 pt-1 pb-2 cx-type-xs font-semibold uppercase tracking-[0.15em] transition-colors duration-150"
                 style={{ color: "var(--cx-text-faint)", borderBottom: "1px solid var(--cx-glass-border)", marginBottom: "4px" }}
               >
-                <span className="cx-mono inline-flex items-center gap-1.5">
-                  <Users2 size={9} strokeWidth={2} aria-hidden /> Specialists
+                <span className="cx-mono inline-flex items-center gap-2">
+                  <Users2 size={10} strokeWidth={2} aria-hidden /> Specialists
                 </span>
                 <span aria-hidden style={{ fontSize: "var(--cx-type-xs)" }}>
                   {teamExpanded ? "−" : "+"}
                 </span>
               </button>
               {teamExpanded && (
-                <ul className="space-y-0.5 mt-1">
+                <ul className="space-y-1 mt-1">
                   {TEAM.map((emp) => {
                     const isStreaming = streamingEmployee === emp;
                     const allowed = allowedEmployees.includes(emp);
@@ -886,7 +885,7 @@ export function Sidebar({
                         whileHover={shouldReduceMotion ? undefined : { scale: 1.01 }}
                         whileTap={shouldReduceMotion ? undefined : { scale: 0.99 }}
                         transition={{ duration: 0.15, ease: [...CX_EASE] }}
-                        className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-[120ms] ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)]" : ""}`}
+                        className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]" : ""}`}
                         style={{
                           background: active ? "var(--cx-accent-tint)" : undefined,
                         }}
@@ -905,7 +904,7 @@ export function Sidebar({
                         <SpecialistAvatar employee={emp} size={24} active={active} streaming={isStreaming} />
                         <span
                           className="truncate flex-1 cx-type-sm"
-                          style={{ color: active ? "var(--cx-text)" : "var(--cx-text-muted)", fontWeight: active ? 500 : 400 }}
+                          style={{ color: "var(--cx-text)", fontWeight: active ? 600 : 400 }}
                         >
                           {labelFor(emp)}
                         </span>
@@ -1083,11 +1082,11 @@ export function Sidebar({
                   onClick={close}
                   aria-label={collapsed ? "Builds" : undefined}
                   className={[
-                    "relative flex items-center rounded-lg transition-colors duration-100",
+                    "relative flex items-center rounded-lg transition-colors duration-150",
                     collapsed ? "justify-center mx-auto w-8 h-8" : "gap-2 px-3 py-2",
                     isActive("/app/builds")
                       ? "text-[var(--cx-text)]"
-                      : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)]",
+                      : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]",
                   ].join(" ")}
                   style={{
                     background: isActive("/app/builds") ? "var(--cx-accent-tint)" : undefined,
@@ -1166,7 +1165,7 @@ export function Sidebar({
               <Link
                 href="/app"
                 onClick={close}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg cx-type-xs font-medium hover:opacity-90 transition-opacity mt-1"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg cx-type-xs font-medium hover:opacity-90 transition-opacity mt-1"
                 style={{ background: "var(--cx-accent)", color: "var(--cx-canvas)" }}
               >
                 <Plus size={12} strokeWidth={2} />
@@ -1179,7 +1178,7 @@ export function Sidebar({
           {!collapsed && conversations.length > 0 && (
             <div className="mt-3">
               <div
-                className="mx-3 mt-3 mb-1.5 pb-1.5 flex items-center gap-2"
+                className="mx-3 mt-3 mb-2 pb-2 flex items-center gap-2"
                 style={{ borderBottom: "1px solid var(--cx-glass-border)" }}
               >
                 <span
@@ -1205,7 +1204,7 @@ export function Sidebar({
                     whileHover={shouldReduceMotion ? undefined : { scale: 1.04 }}
                     whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
                     transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
-                    className="shrink-0 flex items-center px-2 py-0.5 rounded-full cx-type-xs font-medium whitespace-nowrap"
+                    className="shrink-0 flex items-center px-2 py-1 rounded-full cx-type-xs font-medium whitespace-nowrap"
                     style={
                       specialistFilter === null
                         ? {
@@ -1237,7 +1236,7 @@ export function Sidebar({
                         whileHover={shouldReduceMotion ? undefined : { scale: 1.04 }}
                         whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
                         transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
-                        className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full cx-type-xs font-medium whitespace-nowrap"
+                        className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-full cx-type-xs font-medium whitespace-nowrap"
                         style={
                           active
                             ? {
@@ -1278,7 +1277,7 @@ export function Sidebar({
                 </PraxisButton>
                 {/* Full input: always on desktop; on mobile only when expanded */}
                 <div
-                  className={`${searchExpanded ? "flex" : "hidden md:flex"} items-center gap-1.5 px-2 py-1.5 rounded-lg`}
+                  className={`${searchExpanded ? "flex" : "hidden md:flex"} items-center gap-2 px-2 py-2 rounded-lg`}
                   style={{
                     background: "var(--cx-surface-raised)",
                     border: "1px solid var(--cx-border)",
@@ -1351,7 +1350,7 @@ export function Sidebar({
                           <Link
                             href={`/app?c=${c.id}`}
                             onClick={close}
-                            className={`relative flex items-start gap-2 pl-3 pr-2 py-2 rounded-lg transition-colors duration-[120ms] group ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)]" : ""}`}
+                            className={`relative flex items-start gap-2 pl-3 pr-2 py-2 rounded-lg transition-colors duration-150 group ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]" : ""}`}
                             style={{
                               background: active ? "var(--cx-accent-tint)" : undefined,
                             }}
@@ -1368,7 +1367,7 @@ export function Sidebar({
                               />
                             )}
                             {/* Avatar aligned to first text line */}
-                            <span className="shrink-0 mt-0.5">
+                            <span className="shrink-0 mt-1">
                               {isTeam ? (
                                 <span
                                   aria-hidden
@@ -1388,29 +1387,29 @@ export function Sidebar({
                                 <span
                                   className="truncate flex-1 cx-type-sm leading-snug"
                                   style={{
-                                    color: active ? "var(--cx-text)" : "var(--cx-text-muted)",
-                                    fontWeight: 500,
+                                    color: "var(--cx-text)",
+                                    fontWeight: active ? 500 : 400,
                                   }}
                                 >
                                   {titleOverrides[c.id] ?? c.title ?? "Untitled chat"}
                                 </span>
                                 <span
-                                  className="shrink-0 cx-mono cx-type-xs opacity-40 group-hover:opacity-70 transition-opacity duration-[120ms]"
-                                  style={{ color: "var(--cx-text-faint)" }}
+                                  className="shrink-0 cx-mono cx-type-xs"
+                                  style={{ color: "var(--cx-text-muted)" }}
                                 >
                                   {relativeDate(c.updated_at)}
                                 </span>
                               </div>
                               {preview && (
                                 <p
-                                  className="truncate cx-type-xs mt-0.5"
+                                  className="truncate cx-type-xs mt-1"
                                   style={{ color: "var(--cx-text-faint)" }}
                                 >
                                   {preview}
                                 </p>
                               )}
                               {c.labels && c.labels.length > 0 && (
-                                <span className="flex items-center gap-0.5 mt-0.5">
+                                <span className="flex items-center gap-1 mt-1">
                                   {c.labels.slice(0, 3).map((l) => (
                                     <span
                                       key={l.id}
@@ -1439,7 +1438,7 @@ export function Sidebar({
                       <Link
                         href="/app/conversations"
                         onClick={close}
-                        className="mt-1 flex items-center px-3 py-1.5 cx-type-xs uppercase tracking-[0.15em] text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] transition-colors"
+                        className="mt-1 flex items-center px-3 py-2 cx-type-xs uppercase tracking-[0.15em] text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] transition-colors"
                       >
                         See all <span className="cx-mono">({conversations.length})</span>
                       </Link>
@@ -1503,7 +1502,7 @@ export function Sidebar({
               </PraxisButton>
               <SidebarThemeButton collapsed />
               <Link href="/app/settings" title="Settings" aria-label="Settings" onClick={close} data-tour-target="settings"
-                className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-[120ms]"
+                className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-150"
                 style={{
                   background: isActive("/app/settings") ? "var(--cx-accent-tint)" : undefined,
                   color: isActive("/app/settings") ? "var(--cx-accent)" : "var(--cx-text-muted)",
@@ -1511,7 +1510,7 @@ export function Sidebar({
                 <Settings size={16} />
               </Link>
               <Link href="/app/settings/billing" title="Billing" aria-label="Billing" onClick={close}
-                className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-[120ms]"
+                className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-150"
                 style={{
                   background: isActive("/app/settings/billing") ? "var(--cx-accent-tint)" : undefined,
                   color: isActive("/app/settings/billing") ? "var(--cx-accent)" : "var(--cx-text-muted)",
@@ -1520,7 +1519,7 @@ export function Sidebar({
               </Link>
               <form action="/auth/sign-out" method="post">
                 <button type="submit" title="Sign out" aria-label="Sign out"
-                  className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-[120ms]"
+                  className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-150"
                   style={{ color: "var(--cx-text-muted)" }}>
                   <LogOut size={16} />
                 </button>
@@ -1582,7 +1581,7 @@ export function Sidebar({
               <form action="/auth/sign-out" method="post">
                 <button
                   type="submit"
-                  className="w-full flex items-center gap-2 px-3 py-1.5 cx-type-sm rounded-lg transition-colors duration-100 text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)]"
+                  className="w-full flex items-center gap-2 px-3 py-2 cx-type-sm rounded-lg transition-colors duration-150 text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]"
                 >
                   <LogOut size={16} strokeWidth={2} /> Sign out
                 </button>
@@ -1692,7 +1691,7 @@ export function Sidebar({
               zIndex: 50,
             }}
           >
-            <div className="flex items-center gap-1.5 mb-1">
+            <div className="flex items-center gap-2 mb-1">
               {isTeam ? (
                 <span
                   aria-hidden
@@ -1758,12 +1757,12 @@ function NavLink({
         onClick={onClick}
         aria-label={collapsed ? label : undefined}
         className={[
-          "relative flex items-center rounded-lg transition-colors duration-100",
+          "relative flex items-center rounded-lg transition-colors duration-150",
           collapsed
             ? "justify-center mx-auto w-8 h-8"
-            : `gap-2 px-3 ${small ? "py-1.5" : "py-2"}`,
+            : `gap-2 px-3 ${small ? "py-1" : "py-2"}`,
           !active
-            ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)] hover:text-[var(--cx-text)]"
+            ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)] hover:text-[var(--cx-text)]"
             : "",
         ].join(" ")}
         style={{
