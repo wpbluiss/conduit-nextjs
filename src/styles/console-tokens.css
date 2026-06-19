@@ -1275,3 +1275,23 @@ html[data-praxis-theme="light"] {
   .cx-modal-animate,
   .cx-overlay-animate { animation: none !important; }
 }
+
+/* ============================================================
+ * Toast reward pulse — subtle glow beat on reward variant.
+ * Applied as .toast-reward-pulse on the toast card element.
+ * Uses the reward-green as the pulse color.
+ * ============================================================ */
+
+@keyframes cx-reward-pulse {
+  0%   { box-shadow: var(--cx-glass-shadow-float, 0 4px 24px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40)), var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10)); }
+  40%  { box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.20), 0 4px 24px rgba(52, 211, 153, 0.15), var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10)); }
+  100% { box-shadow: var(--cx-glass-shadow-float, 0 4px 24px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40)), var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10)); }
+}
+
+.toast-reward-pulse {
+  animation: cx-reward-pulse 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.1s 1 forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-reward-pulse { animation: none !important; }
+}
