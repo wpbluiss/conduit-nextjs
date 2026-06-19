@@ -4187,7 +4187,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                   <p>Repos: {githubConnectedMeta.repos.join(", ")}</p>
                 )}
                 {githubConnectedMeta.last_fetched_at && (
-                  <p>Last synced: {new Date(githubConnectedMeta.last_fetched_at).toLocaleString()}</p>
+                  <p>Last synced: <time className="cx-mono tabular-nums" dateTime={githubConnectedMeta.last_fetched_at}>{new Date(githubConnectedMeta.last_fetched_at).toLocaleString()}</time></p>
                 )}
               </div>
             )}
@@ -4636,7 +4636,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
             >
               <div className="flex-1 min-w-0">
                 <p className="cx-type-sm font-medium text-[var(--cx-text)] truncate">{k.name}</p>
-                <p className="cx-type-xs text-[var(--cx-text-muted)] mt-0.5">
+                <p className="cx-type-xs text-[var(--cx-text-muted)] mt-0.5 cx-mono tabular-nums">
                   <code className="font-mono">{k.key_preview}</code>
                   {" · Created "}
                   {new Date(k.created_at).toLocaleDateString()}
@@ -4678,7 +4678,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
                 <p className="cx-type-sm font-medium text-[var(--cx-text)] truncate line-through">
                   {k.name}
                 </p>
-                <p className="cx-type-xs text-[var(--cx-text-muted)] mt-0.5">
+                <p className="cx-type-xs text-[var(--cx-text-muted)] mt-0.5 cx-mono tabular-nums">
                   <code className="font-mono">{k.key_preview}</code>
                   {" · Revoked "}
                   {k.revoked_at ? new Date(k.revoked_at).toLocaleDateString() : ""}

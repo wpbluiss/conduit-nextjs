@@ -62,7 +62,7 @@ export default async function AnalyticsPage() {
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-10">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8">
-          <p className="cx-type-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
+          <p className="cx-label">
             Praxis Console · Analytics
           </p>
           <h1 className="cx-heading-3xl mt-2">Analytics</h1>
@@ -91,7 +91,7 @@ export default async function AnalyticsPage() {
         </div>
 
         <div className="conduit-card p-6 md:p-8">
-          <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-2">
+          <div className="cx-label text-[var(--color-accent-hi)] mb-2">
             Coming soon
           </div>
           <h2 className="cx-heading-xl mb-3">
@@ -122,7 +122,7 @@ function Card({
 }) {
   return (
     <div className="conduit-card p-5">
-      <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+      <div className="cx-label">
         {label}
       </div>
       <div className="mt-2">

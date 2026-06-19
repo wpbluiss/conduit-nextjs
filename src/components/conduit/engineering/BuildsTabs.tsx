@@ -347,7 +347,7 @@ function TemplatesTab({ builds }: { builds: R7Build[] }) {
             <p className="text-xs text-[var(--color-text-muted)]">Building…</p>
           )}
           <div className="flex items-center justify-between cx-type-xs text-[var(--color-text-muted)] mt-auto pt-2">
-            <span>{new Date(b.created_at).toLocaleString()}</span>
+            <span className="cx-mono tabular-nums">{new Date(b.created_at).toLocaleString()}</span>
             {b.conversation_id && (
               <Link
                 href={`/app?c=${b.conversation_id}`}
@@ -427,9 +427,9 @@ function EngineeringTab({
             )}
           </Link>
           <div className="flex items-center justify-between cx-type-xs text-[var(--color-text-muted)] pt-2 border-t border-[var(--color-border)]">
-            <span>{new Date(s.created_at).toLocaleString()}</span>
+            <span className="cx-mono tabular-nums">{new Date(s.created_at).toLocaleString()}</span>
             <span className="flex items-center gap-3">
-              <span>
+              <span className="cx-mono tabular-nums">
                 {(s.total_input_tokens ?? 0) + (s.total_output_tokens ?? 0)}t
               </span>
               {s.status === "complete" && (

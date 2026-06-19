@@ -102,7 +102,7 @@ export default async function VoiceHistoryPage() {
                       {fmtRelative(s.started_at)} · {fmtDuration(s.duration_seconds)}
                     </span>
                     {s.end_reason && s.end_reason !== "user_left" && (
-                      <span className="cx-type-xs uppercase tracking-[0.12em] text-[var(--cx-text-muted)]">
+                      <span className="cx-label">
                         ended: {s.end_reason}
                       </span>
                     )}
@@ -127,7 +127,7 @@ export default async function VoiceHistoryPage() {
                                 : "text-[var(--cx-text)]"
                             }
                           >
-                            <span className="cx-type-xs uppercase tracking-[0.12em] mr-2 text-[var(--cx-text-muted)]">
+                            <span className="cx-label mr-2">
                               {entry.role === "user" ? "You" : employee.name}
                             </span>
                             {entry.text}

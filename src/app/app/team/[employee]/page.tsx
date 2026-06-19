@@ -328,7 +328,7 @@ export default async function WorkspacePage({ params }: PageProps) {
           <>
             {/* Quick start */}
             <section>
-              <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-3">
+              <div className="cx-label mb-3">
                 Quick start
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -350,7 +350,7 @@ export default async function WorkspacePage({ params }: PageProps) {
 
             {/* Stats */}
             <section>
-              <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-3">
+              <div className="cx-label mb-3">
                 This cycle
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -371,7 +371,7 @@ export default async function WorkspacePage({ params }: PageProps) {
 
             {/* Recent activity / empty */}
             <section>
-          <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-3">
+          <div className="cx-label mb-3">
             Recent activity
           </div>
           {empty ? (
@@ -418,9 +418,9 @@ export default async function WorkspacePage({ params }: PageProps) {
                         )}
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                        <span className="block cx-label">
                           {a.type.replace("_", " ")} ·{" "}
-                          {relativeTime(a.created_at)}
+                          <span className="tabular-nums">{relativeTime(a.created_at)}</span>
                         </span>
                         <span className="block text-sm text-[var(--color-text)] truncate">
                           {a.title}
@@ -442,8 +442,8 @@ export default async function WorkspacePage({ params }: PageProps) {
                         <MessageSquare size={14} style={{ color: dept }} />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-                          conversation · {relativeTime(a.created_at)}
+                        <span className="block cx-label">
+                          conversation · <span className="tabular-nums">{relativeTime(a.created_at)}</span>
                         </span>
                         <span className="block text-sm text-[var(--color-text)] truncate">
                           {a.title}
@@ -487,7 +487,7 @@ function Stat({
 }) {
   return (
     <div className="conduit-card px-4 py-3">
-      <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+      <div className="cx-label">
         {label}
       </div>
       <div className="cx-stat mt-1">{value}</div>

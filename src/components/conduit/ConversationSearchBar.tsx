@@ -316,7 +316,7 @@ export function ConversationSearchBar() {
                       {r.title || "Untitled chat"}
                     </span>
                     {r.updated_at && (
-                      <span className="shrink-0 cx-type-xs text-[var(--color-text-muted)]">
+                      <span className="shrink-0 cx-mono cx-type-xs tabular-nums text-[var(--color-text-muted)]">
                         {relativeDate(r.updated_at)}
                       </span>
                     )}

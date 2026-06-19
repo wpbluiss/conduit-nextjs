@@ -111,7 +111,7 @@ export default async function VoiceRoomLanding() {
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-10">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8">
-          <p className="cx-type-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
+          <p className="cx-label">
             Praxis Console · Voice Room
           </p>
           <h1 className="cx-heading-3xl mt-2 inline-flex items-center gap-3">
@@ -145,7 +145,7 @@ export default async function VoiceRoomLanding() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-10">
           <div className="conduit-card p-5">
-            <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+            <div className="cx-label">
               Today
             </div>
             <div className="mt-2 flex items-baseline gap-1.5">
@@ -173,7 +173,7 @@ export default async function VoiceRoomLanding() {
             </div>
           </div>
           <div className="conduit-card p-5">
-            <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+            <div className="cx-label">
               Per-session cap
             </div>
             <div className="mt-2">
@@ -188,7 +188,7 @@ export default async function VoiceRoomLanding() {
             </div>
           </div>
           <div className="conduit-card p-5">
-            <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+            <div className="cx-label">
               Voice settings
             </div>
             <p className="text-xs mt-2 text-[var(--color-text-muted)]">
@@ -212,7 +212,7 @@ export default async function VoiceRoomLanding() {
 
         {/* Pick an employee for a 1:1. */}
         <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="text-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+          <h2 className="cx-label">
             Talk solo
           </h2>
           <span className="cx-type-xs text-[var(--color-text-muted)]">
@@ -242,7 +242,7 @@ export default async function VoiceRoomLanding() {
                   >
                     {meta.name}
                   </div>
-                  <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] truncate">
+                  <div className="cx-mono cx-type-xs text-[var(--color-text-muted)] truncate">
                     {meta.role}
                   </div>
                 </div>
@@ -256,7 +256,7 @@ export default async function VoiceRoomLanding() {
 
         {/* Recent sessions */}
         <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="text-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+          <h2 className="cx-label">
             Recent sessions
           </h2>
           <Link
@@ -291,7 +291,7 @@ export default async function VoiceRoomLanding() {
                     <div className="text-sm" style={{ color: meta.color }}>
                       {meta.name}
                     </div>
-                    <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+                    <div className="cx-mono cx-type-xs tabular-nums text-[var(--color-text-muted)]">
                       {fmtDuration(s.duration_seconds ?? 0)} ·{" "}
                       {relativeTime(s.started_at)}
                     </div>

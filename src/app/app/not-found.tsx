@@ -5,8 +5,7 @@ export default function AppNotFound() {
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-6 py-20 text-center">
       <p
-        className="cx-type-xs uppercase tracking-[0.2em] mb-3"
-        style={{ color: "var(--color-text-muted)" }}
+        className="cx-label mb-3"
       >
         404
       </p>
