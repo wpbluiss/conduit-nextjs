@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Hammer, Lock, Loader2, X } from "lucide-react";
 import { Button } from "@/components/conduit/ui/Button";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
 
 interface Props {
   internalAccount: boolean;
@@ -47,12 +46,14 @@ export default function EngineeringBuildButton({
 
   if (!internalAccount) {
     return (
-      <span
-        className="btn-primary !text-sm opacity-50 cursor-not-allowed inline-flex items-center gap-1.5"
+      <Button
+        variant="primary"
+        size="sm"
+        isDisabled
         title="Engineering builds are in early access."
       >
         <Lock size={12} /> Start a build
-      </span>
+      </Button>
     );
   }
 
@@ -109,7 +110,7 @@ export default function EngineeringBuildButton({
                 </div>
                 <h2 className="serif text-xl mt-1">Start a build</h2>
               </div>
-              <PraxisButton
+              <Button
                 type="button"
                 variant="ghost"
                 size="icon-sm"
@@ -117,7 +118,7 @@ export default function EngineeringBuildButton({
                 aria-label="Close"
               >
                 <X size={16} />
-              </PraxisButton>
+              </Button>
             </div>
 
             <label className="block cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-1.5">
@@ -167,14 +168,14 @@ export default function EngineeringBuildButton({
             )}
 
             <div className="mt-5 flex justify-end gap-2">
-              <PraxisButton
+              <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 onClick={() => setOpen(false)}
               >
                 Cancel
-              </PraxisButton>
+              </Button>
               <Button
                 onClick={submit}
                 disabled={submitting || prompt.trim().length < 8}
