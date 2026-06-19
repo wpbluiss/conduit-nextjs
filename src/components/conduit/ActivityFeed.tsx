@@ -154,7 +154,7 @@ function EventRow({ event }: { event: ActivityEvent }) {
         }}
         aria-hidden
       >
-        <Icon size={13} style={{ strokeWidth: 2 }} />
+        <Icon size={13} strokeWidth={1.75} />
         {/* Reward beat — fires once on mount for build-shipped events */}
         {isBuild && <BuildShippedPulse />}
       </span>

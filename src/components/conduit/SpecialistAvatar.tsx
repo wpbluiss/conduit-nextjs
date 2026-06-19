@@ -66,7 +66,7 @@ export function SpecialistAvatar({
     : (color ?? "var(--cx-accent)");
   const deptColorSoft = isBuiltin
     ? DEPT_COLOR_SOFT[employee!]
-    : (color ? `color-mix(in srgb, ${color} 12%, transparent)` : "var(--cx-accent-tint)");
+    : (color ? `color-mix(in srgb, ${color} 12%, transparent)` : "var(--cx-surface-raised)");
 
   // Active state: electric violet accent (spec: "active state picks up the accent").
   // Rest state: dept identity color.
@@ -103,7 +103,7 @@ export function SpecialistAvatar({
         <Icon size={glyphSize} strokeWidth={SPECIALIST_ICON_STROKE} />
       ) : (
         <span
-          className="font-semibold leading-none"
+          className="cx-mono font-semibold leading-none"
           style={{ fontSize, letterSpacing: "-0.01em" }}
         >
           {initials(name ?? "?")}

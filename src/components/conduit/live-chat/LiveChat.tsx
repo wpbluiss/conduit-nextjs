@@ -14,21 +14,20 @@ import { useRouter } from "next/navigation";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import {
-  Sparkles, Code2, TrendingUp, Megaphone, DollarSign, Wrench, ShieldCheck,
-  Users, Scale, SquarePen, Menu, ArrowUp, Paperclip, Search, Settings,
-  MoreHorizontal, Command, Slash, AtSign, Copy, RefreshCw, Hammer, FileText, Download, Printer, X, AudioLines,
+  Sparkles, Scale, SquarePen, Menu, ArrowUp, Paperclip, Search, Settings,
+  MoreHorizontal, Command, Slash, AtSign, Copy, RefreshCw, Hammer, FileText, Download, Printer, X, AudioLines, DollarSign,
 } from "lucide-react";
 import { Button } from "@/components/conduit/ui/Button";
 import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
+import { SPECIALIST_ICON } from "@/lib/ui/specialist-icons";
 import PraxisLiveRoom from "@/components/conduit/voice/PraxisLiveRoom";
 import type { VoiceTokenResponse } from "@/components/conduit/voice/VoiceRoom";
 import { PaywallModal, type PaywallPayload } from "@/components/conduit/PaywallModal";
 
 type Icon = React.ComponentType<{ className?: string }>;
-const ICON: Record<EmployeeId, Icon> = {
-  jarvis: Sparkles, engineering: Code2, sales: TrendingUp, marketing: Megaphone,
-  finance: DollarSign, ops: Wrench, compliance: ShieldCheck, hr: Users, legal: Scale,
-};
+// Use canonical SPECIALIST_ICON registry — ensures all dept icons are consistent
+// across the full console (Compass for jarvis, Workflow for ops, HeartHandshake for hr, etc.)
+const ICON: Record<EmployeeId, Icon> = SPECIALIST_ICON as unknown as Record<EmployeeId, Icon>;
 
 const SLASH: { cmd: string; desc: string; emp: EmployeeId; template: string; icon: Icon }[] = [
   { cmd: "/build", desc: "Build with Engineering", emp: "engineering", template: "Build me ", icon: Hammer },

@@ -452,7 +452,7 @@ function SpecialistsTab({
                     boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 32%, transparent)`,
                   }}
                 >
-                  <Icon size={14} style={{ color }} strokeWidth={2} />
+                  <Icon size={16} style={{ color }} strokeWidth={1.75} />
                 </span>
                 <div className="flex-1 min-w-0">
                   <label
@@ -515,7 +515,7 @@ function SpecialistsTab({
                     boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 32%, transparent)`,
                   }}
                 >
-                  <Icon size={14} style={{ color }} strokeWidth={2} />
+                  <Icon size={16} style={{ color }} strokeWidth={1.75} />
                 </span>
                 <div className="flex-1 min-w-0">
                   <span className="block cx-type-xs cx-mono uppercase tracking-[0.12em] text-[var(--cx-text-muted)] mb-2">
@@ -671,7 +671,7 @@ function SpecialistMetrics() {
                         boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 32%, transparent)`,
                       }}
                     >
-                      <Icon size={13} style={{ color }} strokeWidth={2} />
+                      <Icon size={14} style={{ color }} strokeWidth={1.75} />
                     </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-baseline justify-between gap-2 flex-wrap">

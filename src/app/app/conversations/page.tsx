@@ -81,7 +81,7 @@ function ConversationRow({
                 boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 60%, transparent)`,
               }}
             >
-              <RecentIcon size={11} strokeWidth={2.5} />
+              <RecentIcon size={11} strokeWidth={1.75} />
             </span>
           )}
         </Link>
