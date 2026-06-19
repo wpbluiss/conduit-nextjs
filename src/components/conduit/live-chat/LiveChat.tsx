@@ -49,6 +49,21 @@ function escapeHtml(s: string) { return s.replace(/&/g, "&amp;").replace(/</g, "
 const CX_REWARD_RING = "rgba(52,211,153,0.4)";
 const CX_REWARD_RING_FADE = "rgba(52,211,153,0)";
 
+// Dept-accent RGB values for pulsing avatar glow while specialist is pending.
+// Parallel to the CSS variable dept palette — keeps glow computation in JS where
+// framer-motion can interpolate the rgba() strings.
+const DEPT_GLOW_RGB: Record<EmployeeId, string> = {
+  jarvis:      "200,197,189",
+  marketing:   "255,138,61",
+  sales:       "52,211,153",
+  engineering: "96,165,250",
+  finance:     "234,179,8",
+  compliance:  "168,85,247",
+  hr:          "236,72,153",
+  ops:         "20,184,166",
+  legal:       "59,130,246",
+};
+
 // Mono micro-copy shown while the specialist is thinking/processing.
 // Phrased to feel purposeful — not generic "loading…" — per CONSOLE_REDESIGN.md
 const THINKING_COPY: Record<EmployeeId, string> = {
@@ -63,14 +78,17 @@ const THINKING_COPY: Record<EmployeeId, string> = {
   legal:       "reviewing legal considerations…",
 };
 
-function SpecialistChip({ icon: I, complete, reducedMotion }: {
+function SpecialistChip({ icon: I, complete, pending, employee, reducedMotion }: {
   icon: React.ComponentType<{ className?: string }>;
   complete: boolean;
+  pending: boolean;
+  employee: EmployeeId;
   reducedMotion: boolean;
 }) {
   const controls = useAnimation();
   // Pre-initialize to true for messages already complete on mount (loaded from history)
   const firedRef = React.useRef(complete);
+  const rgb = DEPT_GLOW_RGB[employee] ?? "124,108,255";
 
   React.useEffect(() => {
     if (complete && !firedRef.current && !reducedMotion) {
@@ -89,16 +107,35 @@ function SpecialistChip({ icon: I, complete, reducedMotion }: {
   return (
     <motion.span
       animate={controls}
-      className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-secondary text-primary"
+      className="relative mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-secondary text-primary"
       style={{ willChange: "transform, box-shadow" }}
     >
       <I className="size-4" />
+      {/* Dept-accent pulsing ring while specialist is thinking — fades out on completion */}
+      <AnimatePresence>
+        {pending && !reducedMotion && (
+          <motion.span
+            key="pending-ring"
+            className="pointer-events-none absolute inset-0 rounded-lg"
+            animate={{
+              boxShadow: [
+                `0 0 0 0px rgba(${rgb},0)`,
+                `0 0 0 3px rgba(${rgb},0.45)`,
+                `0 0 0 0px rgba(${rgb},0)`,
+              ],
+            }}
+            exit={{ boxShadow: `0 0 0 0px rgba(${rgb},0)`, transition: { duration: 0.2 } }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+          />
+        )}
+      </AnimatePresence>
     </motion.span>
   );
 }
 
-// Premium thinking indicator — three accent-violet dots with shimmer wave + mono micro-copy.
-// Replaces the generic gray dots per CONSOLE_REDESIGN.md §"AI is thinking / processing".
+// Premium thinking indicator — accent shimmer bar + pulsing dots + specialist micro-copy.
+// Per CONSOLE_REDESIGN.md §"AI is thinking / processing": GPU-cheap (transform/opacity only),
+// staggered for personality, instant acknowledge then meaningful wait feedback.
 function ThinkingIndicator({ employee, reducedMotion }: {
   employee: EmployeeId;
   reducedMotion: boolean;
@@ -110,18 +147,37 @@ function ThinkingIndicator({ employee, reducedMotion }: {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -4, transition: { duration: 0.12, ease: [0.22, 1, 0.36, 1] } }}
       transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-      className="space-y-2 py-1"
+      className="space-y-2.5 py-1"
       aria-live="polite"
     >
-      <div className="flex items-center gap-1.5" aria-label={`${EMPLOYEES[employee]?.name ?? "Specialist"} is thinking`} role="status">
+      {/* Thin accent progress shimmer — slides left-to-right, GPU-only (translateX) */}
+      <div
+        className="relative h-0.5 w-40 overflow-hidden rounded-full"
+        style={{ background: "rgba(124,108,255,0.10)" }}
+        role="status"
+        aria-label={`${EMPLOYEES[employee]?.name ?? "Specialist"} is thinking`}
+      >
+        {reducedMotion ? (
+          <div className="absolute inset-y-0 left-0 w-1/2 rounded-full" style={{ background: "rgba(124,108,255,0.4)" }} />
+        ) : (
+          <motion.div
+            className="absolute inset-y-0 left-0 w-2/5 rounded-full"
+            style={{ background: "linear-gradient(90deg, transparent, rgba(124,108,255,0.75), rgba(124,108,255,0.95), rgba(124,108,255,0.75), transparent)" }}
+            animate={{ x: ["-100%", "350%"] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.1 }}
+          />
+        )}
+      </div>
+      {/* Three staggered pulsing dots — wave pattern gives personality */}
+      <div className="flex items-center gap-1.5">
         {[0, 1, 2].map((j) => (
           <motion.span
             key={j}
-            className="size-2 rounded-full"
+            className="size-1.5 rounded-full"
             style={{ backgroundColor: "var(--cx-accent, #7C6CFF)" }}
             animate={reducedMotion ? { opacity: 0.5 } : {
-              opacity: [0.2, 1, 0.2],
-              scale:   [0.8, 1.2, 0.8],
+              opacity: [0.25, 1, 0.25],
+              scale:   [0.75, 1.15, 0.75],
             }}
             transition={{
               duration: 1.4,
@@ -132,12 +188,13 @@ function ThinkingIndicator({ employee, reducedMotion }: {
           />
         ))}
       </div>
+      {/* Specialist-specific mono micro-copy — fades in after a beat */}
       <motion.p
         className="cx-mono cx-type-xs"
         style={{ color: "var(--cx-text-faint, #6B6B7B)" }}
         initial={{ opacity: 0 }}
         animate={{ opacity: reducedMotion ? 0 : 1 }}
-        transition={{ duration: 0.3, delay: 0.15 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
       >
         {label}
       </motion.p>
@@ -600,7 +657,7 @@ export function LiveChat({
               const e = (m.employee as EmployeeId) ?? "jarvis"; const I = ICON[e] ?? Sparkles; const k = m.id ?? String(i);
               return (
                 <motion.div key={m.id ?? i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 28 }} className="group flex gap-3">
-                  <SpecialistChip icon={I} complete={!m.pending} reducedMotion={reducedMotion} />
+                  <SpecialistChip icon={I} complete={!m.pending} pending={!!m.pending} employee={e} reducedMotion={reducedMotion} />
                   <div className="min-w-0 flex-1">
                     <p className="mb-1 text-sm font-semibold">{EMPLOYEES[e]?.name ?? "Atlas"}</p>
                     <AnimatePresence mode="sync" initial={false}>
