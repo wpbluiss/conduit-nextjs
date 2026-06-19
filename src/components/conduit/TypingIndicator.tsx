@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { DEPT_COLOR, employeeLabel, SpecialistChip } from "./EmployeeBadge";
 import { SpecialistAvatar } from "./SpecialistAvatar";
@@ -52,6 +53,11 @@ export const ROUTING_TO_STATUS: Partial<Record<EmployeeKey, string>> = {
  * The chip + animated thinking bubble without any outer flex wrapper or avatar.
  * Used by Chat.tsx's MessageBubble so the avatar lives in the stable outer
  * shell and only the content area crossfades when streaming begins.
+ *
+ * Staged indicator (spec §"AI is thinking"):
+ *   1. Glass bubble surface appears immediately with the message slot entry.
+ *   2. After 120ms the animated dots + mono micro-copy fade in (acknowledge → thinking).
+ *   3. When first token arrives, Chat.tsx's AnimatePresence exits this and enters content.
  */
 export function ThinkingBubble({
   employee,
@@ -66,6 +72,16 @@ export function ThinkingBubble({
 }) {
   const reduced = useReducedMotion();
   const name = employeeLabel(employee);
+
+  // Stage 2 gate: glass surface mounts immediately; animated content follows after
+  // a brief settle so the message slot "acknowledges" before the thinking animation
+  // starts. If the first streaming token arrives before this fires, the component
+  // unmounts — user never sees a spurious flash of dots.
+  const [showDots, setShowDots] = useState(false);
+  useEffect(() => {
+    const id = setTimeout(() => setShowDots(true), 120);
+    return () => clearTimeout(id);
+  }, []);
 
   const statusText = !isActive
     ? "waiting…"
@@ -86,42 +102,55 @@ export function ThinkingBubble({
         aria-live="polite"
         aria-label={isActive ? `${name} is responding` : `${name} is waiting`}
         className="thinking-bubble inline-flex flex-col gap-2 px-4 py-3"
+        style={{ minHeight: 44 }}
       >
         {reduced ? (
-          <span className="thinking-status">{statusText}</span>
+          /* Reduced motion: skip staged delay, render text immediately */
+          showDots && <span className="thinking-status">{statusText}</span>
         ) : (
-          <>
-            {/* Three pulsing dots — framer-motion stagger */}
-            <div className="flex items-center gap-1.5" aria-hidden="true">
-              {[0, 1, 2].map((i) => (
+          <AnimatePresence>
+            {showDots && (
+              <motion.div
+                key="thinking-content"
+                className="flex flex-col gap-2"
+                initial={{ opacity: 0, y: 3 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+              >
+                {/* Three pulsing dots — framer-motion stagger */}
+                <div className="flex items-center gap-1.5" aria-hidden="true">
+                  {[0, 1, 2].map((i) => (
+                    <motion.span
+                      key={i}
+                      custom={i}
+                      variants={dotVariants}
+                      animate="pulse"
+                      style={{
+                        display: "inline-block",
+                        width: 6,
+                        height: 6,
+                        borderRadius: 9999,
+                        background: "var(--cx-accent)",
+                        flexShrink: 0,
+                      }}
+                    />
+                  ))}
+                </div>
+                {/* Mono micro-copy — re-animates when routing target is revealed */}
                 <motion.span
-                  key={i}
-                  custom={i}
-                  variants={dotVariants}
-                  animate="pulse"
-                  style={{
-                    display: "inline-block",
-                    width: 6,
-                    height: 6,
-                    borderRadius: 9999,
-                    background: "var(--cx-accent)",
-                    flexShrink: 0,
-                  }}
-                />
-              ))}
-            </div>
-            {/* Micro-copy: animates when routing target is revealed */}
-            <motion.span
-              key={statusText}
-              className="thinking-status"
-              aria-hidden="true"
-              initial={{ opacity: 0, y: 3 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {statusText}
-            </motion.span>
-          </>
+                  key={statusText}
+                  className="thinking-status"
+                  aria-hidden="true"
+                  initial={{ opacity: 0, y: 3 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {statusText}
+                </motion.span>
+              </motion.div>
+            )}
+          </AnimatePresence>
         )}
       </div>
     </div>

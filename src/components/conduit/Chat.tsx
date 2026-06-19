@@ -2077,37 +2077,62 @@ export function Chat({
             role="status"
             aria-live="polite"
             aria-atomic="true"
-            className="mt-2 min-h-4 flex items-center justify-center cx-type-xs"
+            className="mt-2 min-h-4 flex items-center justify-center cx-type-xs overflow-hidden"
           >
-            {streamingEmployee ? (
-              <span className="presence-line flex items-center gap-1.5 min-w-0">
-                <span
-                  aria-hidden="true"
-                  className="presence-dot inline-block w-1.5 h-1.5 rounded-full shrink-0"
-                  style={{ background: "var(--cx-accent, #7C6CFF)" }}
-                />
-                <span
-                  className="shrink-0 font-medium"
-                  style={{ color: DEPT_COLOR[streamingEmployee] }}
+            <AnimatePresence mode="wait">
+              {streamingEmployee ? (
+                <motion.span
+                  key={streamingEmployee}
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                  className="presence-line flex items-center gap-1.5 min-w-0"
                 >
-                  {labelFor(streamingEmployee)}
-                </span>
-                <span className="cx-mono cx-text-muted truncate">
-                  {routingTarget && streamingEmployee === "jarvis"
-                    ? `is ${ROUTING_TO_STATUS[routingTarget] ?? `routing to ${labelFor(routingTarget)}…`}`
-                    : `is ${THINKING_STATUS[streamingEmployee] ?? "thinking…"}`}
-                </span>
-              </span>
-            ) : (
-              <>
-                <span className="hidden sm:inline cx-text-faint">
-                  Shift+Enter for newline
-                </span>
-                <span className="sm:hidden cx-text-faint">
-                  Tap send to submit
-                </span>
-              </>
-            )}
+                  <span
+                    aria-hidden="true"
+                    className="presence-dot inline-block w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{ background: "var(--cx-accent, #7C6CFF)" }}
+                  />
+                  <span
+                    className="shrink-0 font-medium"
+                    style={{ color: DEPT_COLOR[streamingEmployee] }}
+                  >
+                    {labelFor(streamingEmployee)}
+                  </span>
+                  {/* Status text re-animates when routing resolves */}
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={routingTarget && streamingEmployee === "jarvis" ? `routing-${routingTarget}` : `thinking-${streamingEmployee}`}
+                      className="cx-mono cx-text-muted truncate"
+                      initial={{ opacity: 0, y: 3 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.14, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      {routingTarget && streamingEmployee === "jarvis"
+                        ? `is ${ROUTING_TO_STATUS[routingTarget] ?? `routing to ${labelFor(routingTarget)}…`}`
+                        : `is ${THINKING_STATUS[streamingEmployee] ?? "thinking…"}`}
+                    </motion.span>
+                  </AnimatePresence>
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="hint"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.12 }}
+                >
+                  <span className="hidden sm:inline cx-text-faint">
+                    Shift+Enter for newline
+                  </span>
+                  <span className="sm:hidden cx-text-faint">
+                    Tap send to submit
+                  </span>
+                </motion.span>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
@@ -3137,7 +3162,10 @@ const MessageBubble = memo(function MessageBubble({
           {empty ? (
             <motion.div
               key="thinking"
-              exit={{ opacity: 0, transition: { duration: 0.14, ease: [0.4, 0, 0.2, 1] } }}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -2, transition: { duration: 0.14, ease: [0.22, 1, 0.36, 1] } }}
+              transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
             >
               <ThinkingBubble
                 employee={employee}
