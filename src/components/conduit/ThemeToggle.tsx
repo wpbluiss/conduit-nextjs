@@ -98,7 +98,7 @@ export function ThemeToggle({
               role="radio"
               aria-checked={active}
               onClick={() => choose(o.key)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-colors ${
+              className={`inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs transition-colors ${
                 active
                   ? "bg-[var(--color-accent)] text-white"
                   : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"

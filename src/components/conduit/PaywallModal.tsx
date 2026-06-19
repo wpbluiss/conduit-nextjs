@@ -269,12 +269,12 @@ export function PaywallModal({
                   background: i % 2 === 0 ? "transparent" : "color-mix(in srgb, var(--color-border) 20%, transparent)",
                 }}
               >
-                <div className="px-4 py-2.5 text-[var(--color-text-muted)]">{f.label}</div>
-                <div className="px-4 py-2.5 text-center text-[var(--color-text-muted)]" style={{ borderLeft: "1px solid var(--color-border)" }}>
+                <div className="px-4 py-3 text-[var(--color-text-muted)]">{f.label}</div>
+                <div className="px-4 py-3 text-center text-[var(--color-text-muted)]" style={{ borderLeft: "1px solid var(--color-border)" }}>
                   <FeatureValue value={f.free} />
                 </div>
                 <div
-                  className="px-4 py-2.5 text-center text-[var(--color-text)]"
+                  className="px-4 py-3 text-center text-[var(--color-text)]"
                   style={{
                     borderLeft: "1px solid color-mix(in srgb, var(--cx-reward) 30%, transparent)",
                     background: "color-mix(in srgb, var(--cx-reward) 5%, transparent)",

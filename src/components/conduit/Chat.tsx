@@ -1883,7 +1883,7 @@ export function Chat({
                     whileHover={{ y: -1 }}
                     whileTap={{ scale: 0.96 }}
                     transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
-                    className="px-3 py-1.5 text-xs rounded-full border transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+                    className="px-3 py-2 text-xs rounded-full border transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
                     style={{
                       borderColor: "var(--color-border)",
                       background: "var(--color-surface-elevated)",
@@ -2267,7 +2267,7 @@ export function Chat({
         return (
           <button
             onClick={stopAudio}
-            className="fixed bottom-24 right-6 md:bottom-6 z-30 conduit-card px-4 py-2.5 text-xs flex items-center gap-2 transition-colors"
+            className="fixed bottom-24 right-6 md:bottom-6 z-30 conduit-card px-4 py-3 text-xs flex items-center gap-2 transition-colors"
             style={{
               borderColor: deptColor,
               color: deptColor,
@@ -2478,7 +2478,7 @@ function EmptyState({
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.97 }}
                 transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
-                className="px-4 py-2.5 rounded-xl cx-body text-left transition-all"
+                className="px-4 py-3 rounded-xl cx-body text-left transition-all"
                 style={{
                   border: `1px solid color-mix(in srgb, ${EMPLOYEES[pin as EmployeeId].color} 30%, var(--color-border))`,
                   background: `color-mix(in srgb, ${EMPLOYEES[pin as EmployeeId].color} 6%, var(--color-surface-elevated))`,
@@ -2770,14 +2770,14 @@ function MessageHandoffButton({
         <div
           className="cx-glass-float cx-glass-border absolute left-0 top-full mt-1 z-20 rounded-xl py-1 min-w-[170px]"
         >
-          <p className="px-3 py-1.5 cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+          <p className="px-3 py-2 cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
             Hand off to…
           </p>
           {targets.map((emp) => (
             <button
               key={emp}
               onClick={() => handoff(emp)}
-              className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 transition-colors"
+              className="w-full text-left px-3 py-2 text-xs flex items-center gap-2 transition-colors"
               style={{ color: "var(--color-text)" }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.background = "color-mix(in srgb, var(--color-accent) 8%, transparent)";

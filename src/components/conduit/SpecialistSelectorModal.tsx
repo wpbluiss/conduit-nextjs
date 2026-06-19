@@ -128,7 +128,7 @@ export function SpecialistSelectorModal({
                 type="button"
                 disabled={!isAllowed}
                 onClick={() => setSelected(isSelected ? null : id)}
-                className="flex flex-col items-start gap-1.5 rounded-xl border p-3 text-left transition-all"
+                className="flex flex-col items-start gap-2 rounded-xl border p-3 text-left transition-all"
                 style={{
                   background: isSelected
                     ? DEPT_COLOR_SOFT[id as EmployeeKey]

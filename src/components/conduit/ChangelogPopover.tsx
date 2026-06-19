@@ -174,7 +174,7 @@ export function ChangelogPopover() {
             </ul>
 
             {/* Footer */}
-            <div className="px-4 py-2.5 border-t border-[var(--color-border)] flex items-center justify-between">
+            <div className="px-4 py-3 border-t border-[var(--color-border)] flex items-center justify-between">
               <a
                 href="/changelog"
                 target="_blank"
