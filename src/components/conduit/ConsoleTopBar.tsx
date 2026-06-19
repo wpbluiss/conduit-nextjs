@@ -130,13 +130,12 @@ function UserMenuPopover({
           initial={prefersReduced ? { opacity: 0 } : "hidden"}
           animate={prefersReduced ? { opacity: 1 } : "visible"}
           exit={prefersReduced ? { opacity: 0 } : "exit"}
-          className="cx-glass-float cx-glass-border"
+          className="cx-glass-popover"
           style={{
             position: "absolute",
             top: "calc(100% + 8px)",
             right: 0,
             minWidth: 220,
-            borderRadius: "var(--cx-radius-md, 12px)",
             overflow: "hidden",
             zIndex: 100,
           }}

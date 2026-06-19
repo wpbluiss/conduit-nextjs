@@ -149,7 +149,7 @@ export function Tooltip({
           <div
             id={id}
             role="tooltip"
-            className={`praxis-root pdl-tooltip pdl-glass${className ? ` ${className}` : ""}`}
+            className={`praxis-root pdl-tooltip cx-glass-popover${className ? ` ${className}` : ""}`}
             data-interactive={interactive || undefined}
             style={style}
             onMouseEnter={interactive ? cancelClose : undefined}
