@@ -2,7 +2,7 @@
 
 import type { SubscriptionStatus } from "@/hooks/useBuildSubscription";
 import type { HeartbeatState } from "@/hooks/useBuildHeartbeat";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 interface Props {
   subscription: SubscriptionStatus;

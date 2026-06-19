@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { PraxisLogo } from "@/components/conduit/PraxisLogo";
-import { SpinnerIcon } from "@/components/conduit/PraxisButton";
+import { SpinnerIcon } from "@/components/conduit/ui/Button";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 const CONTAINER = {

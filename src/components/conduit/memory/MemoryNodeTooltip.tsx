@@ -13,7 +13,7 @@
 
 import { useState } from "react";
 import { Pin, PinOff, Lock, LockOpen, Edit3, Archive } from "lucide-react";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 import type { MemoryRecord, MemoryKind } from "@/lib/ai/memory";
 import { EMPLOYEES, type EmployeeId } from "@/lib/conduit/employees";
 import { DeptIcon } from "@/components/conduit/pdl/DeptIcon";

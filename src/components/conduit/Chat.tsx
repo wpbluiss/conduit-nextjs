@@ -44,8 +44,7 @@ import { track } from "@/lib/analytics/track";
 import { ConversationLabelManager, type ConversationLabel } from "./ConversationLabels";
 import { Tooltip } from "./pdl/Tooltip";
 import { SpecialistEmptyArt } from "./SpecialistEmptyArt";
-import { Button } from "@/components/conduit/ui/Button";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { Button, PraxisButton } from "@/components/conduit/ui/Button";
 
 export interface VoicePrefs {
   enabled: boolean;

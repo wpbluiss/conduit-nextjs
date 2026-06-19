@@ -55,5 +55,5 @@
  * Always import from `@/components/conduit/ui/Button` — not from PraxisButton
  * directly. The `PraxisButton` name is the internal implementation detail.
  */
-export { PraxisButton as Button, SpinnerIcon } from "@/components/conduit/PraxisButton";
-export type { PraxisButtonVariant as ButtonVariant, PraxisButtonSize as ButtonSize } from "@/components/conduit/PraxisButton";
+export { PraxisButton, PraxisButton as Button, SpinnerIcon } from "@/components/conduit/PraxisButton";
+export type { PraxisButtonVariant, PraxisButtonVariant as ButtonVariant, PraxisButtonSize, PraxisButtonSize as ButtonSize } from "@/components/conduit/PraxisButton";

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Share2, Link2, X, Check } from "lucide-react";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 interface Props {
   artifactId: string;

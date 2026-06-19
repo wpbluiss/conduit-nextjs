@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Loader2, StopCircle, X, CheckCircle2, AlertTriangle } from "lucide-react";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 import type { SessionRow } from "@/hooks/useBuildSession";
 import { ReconnectingPip } from "./ReconnectingPip";
 import type { SubscriptionStatus } from "@/hooks/useBuildSubscription";

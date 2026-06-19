@@ -2,8 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Bookmark, BookmarkCheck, X } from "lucide-react";
-import { Button } from "@/components/conduit/ui/Button";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { Button, PraxisButton } from "@/components/conduit/ui/Button";
 
 interface Props {
   messageId: string;

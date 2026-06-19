@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Warning, X } from "@phosphor-icons/react";
 import { track } from "@/lib/analytics/track";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 const STORAGE_KEY = "conduit_budget_nudge_dismissed_v1";
 const WARN_THRESHOLD = 0.8;

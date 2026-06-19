@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { DownloadSimple, X, Share } from "@phosphor-icons/react";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 type BIPEvent = Event & {
   prompt: () => Promise<void>;

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Check, X } from "lucide-react";
 import Link from "next/link";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 type GsKey = "gs_msg" | "gs_connector" | "gs_template" | "gs_invite";
 type GsState = Partial<Record<GsKey | "gs_dismissed", boolean>>;

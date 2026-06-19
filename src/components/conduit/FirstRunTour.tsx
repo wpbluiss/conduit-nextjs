@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight } from "@phosphor-icons/react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { Button } from "@/components/conduit/ui/Button";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { Button, PraxisButton } from "@/components/conduit/ui/Button";
 
 const STORAGE_KEY = "praxis_tour_v1_done";
 

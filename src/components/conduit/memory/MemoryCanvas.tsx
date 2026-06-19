@@ -16,7 +16,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Download, Search, X } from "lucide-react";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 import type { MemoryRecord, MemoryKind } from "@/lib/ai/memory";
 import { Canvas } from "@/components/conduit/pdl/Canvas";
 import { Edge } from "@/components/conduit/pdl/Edge";

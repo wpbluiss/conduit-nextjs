@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Bookmark, Copy, Download, Trash2, ArrowLeft, Check } from "lucide-react";
 import Link from "next/link";
 import { EMPLOYEES, type EmployeeId } from "@/lib/conduit/employees";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 interface Output {
   id: string;

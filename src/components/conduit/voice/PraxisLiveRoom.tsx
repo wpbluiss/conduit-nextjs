@@ -19,7 +19,7 @@ import {
   Mic, MicOff, PhoneOff, AlertCircle,
   Sparkles, Code2, TrendingUp, Megaphone, DollarSign, Wrench, ShieldCheck, Users, Scale,
 } from "lucide-react";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 import Waveform from "./Waveform";
 import { EMPLOYEES, type EmployeeId } from "@/lib/conduit/employees";
 import type { VoiceTokenResponse } from "./VoiceRoom";
