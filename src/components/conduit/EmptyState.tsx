@@ -1,4 +1,8 @@
+"use client";
+
+import { motion } from "framer-motion";
 import type { ReactNode } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface EmptyStateProps {
   icon: ReactNode;
@@ -9,15 +13,45 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ icon, headline, body, cta, className = "" }: EmptyStateProps) {
+  const reduced = useReducedMotion();
+
   return (
-    <div
-      className={`flex flex-col items-center text-center px-6 py-10 rounded-2xl border border-dashed border-[var(--color-border)] ${className}`}
+    <motion.div
+      className={`flex flex-col items-center text-center px-6 py-10 rounded-2xl ${className}`}
+      style={{
+        background: "var(--cx-glass-bg, rgba(255,255,255,0.04))",
+        border: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))",
+        backdropFilter: "var(--cx-glass-blur, blur(20px) saturate(140%))",
+        WebkitBackdropFilter: "var(--cx-glass-blur, blur(20px) saturate(140%))",
+        boxShadow: "var(--cx-glass-highlight, inset 0 1px 0 rgba(255,255,255,0.10))",
+      }}
+      initial={reduced ? undefined : { opacity: 0, y: 8 }}
+      animate={reduced ? undefined : { opacity: 1, y: 0 }}
+      transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="mb-4 text-[var(--color-text-muted)] opacity-60">{icon}</div>
-      <p className="text-sm font-medium text-[var(--color-text)] mb-1">{headline}</p>
-      <p className="text-xs text-[var(--color-text-muted)] max-w-[22rem]">{body}</p>
+      <div
+        className="mb-4"
+        style={{ color: "var(--cx-text-muted, #A0A0B0)", opacity: 0.7 }}
+      >
+        {icon}
+      </div>
+      <p
+        className="cx-type-sm font-medium mb-1.5"
+        style={{ color: "var(--cx-text, #F4F4F7)" }}
+      >
+        {headline}
+      </p>
+      <p
+        className="cx-type-xs max-w-[22rem]"
+        style={{
+          color: "var(--cx-text-muted, #A0A0B0)",
+          lineHeight: "var(--cx-lh-body, 1.60)",
+        }}
+      >
+        {body}
+      </p>
       {cta && <div className="mt-5">{cta}</div>}
-    </div>
+    </motion.div>
   );
 }
 

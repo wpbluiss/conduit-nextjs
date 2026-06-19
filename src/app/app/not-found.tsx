@@ -12,7 +12,7 @@ export default function AppNotFound() {
       <h1 className="cx-heading-2xl mb-3">
         Page not found
       </h1>
-      <p className="text-sm mb-8 max-w-xs" style={{ color: "var(--color-text-muted)", lineHeight: 1.6 }}>
+      <p className="cx-type-sm mb-8 max-w-xs" style={{ color: "var(--cx-text-muted, #A0A0B0)", lineHeight: "var(--cx-lh-body, 1.6)" }}>
         This page doesn&rsquo;t exist. You may have followed a broken link.
       </p>
       <div className="flex flex-col sm:flex-row items-center gap-3">
@@ -25,8 +25,8 @@ export default function AppNotFound() {
         </Link>
         <Link
           href="/app"
-          className="inline-flex items-center gap-1.5 text-sm"
-          style={{ color: "var(--color-text-muted)" }}
+          className="inline-flex items-center gap-1.5 cx-type-sm"
+          style={{ color: "var(--cx-text-muted, #A0A0B0)" }}
         >
           <ArrowLeft size={13} />
           New chat

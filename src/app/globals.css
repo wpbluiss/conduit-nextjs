@@ -923,6 +923,39 @@ body {
   .presence-dot { animation: none; opacity: 0.8; }
 }
 
+/* Skeleton shimmer — GPU-cheap sweeping highlight for loading placeholders.
+   Use class="cx-skeleton" on each skeleton bar element. The sweep is
+   transform-only (no layout thrashing); reduced-motion just fades to static. */
+@keyframes skeletonSweep {
+  0%   { transform: translateX(-150%); }
+  100% { transform: translateX(350%); }
+}
+.cx-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--cx-border, #262630);
+  border-radius: inherit;
+}
+.cx-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.045) 40%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.045) 60%,
+    transparent 100%
+  );
+  animation: skeletonSweep 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cx-skeleton::after { animation: none; }
+  .cx-skeleton { opacity: 0.6; }
+}
+
 @keyframes handoffSlide {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
