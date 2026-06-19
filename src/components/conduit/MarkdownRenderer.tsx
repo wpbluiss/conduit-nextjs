@@ -188,7 +188,7 @@ function HighlightedCodeBlock({
       style={{
         background: "var(--cx-surface-raised)",
         border: "1px solid var(--cx-glass-border)",
-        borderTopColor: "rgba(124, 108, 255, 0.30)",
+        borderTopColor: "var(--cx-accent-border, rgba(124,108,255,0.30))",
         boxShadow: [
           "var(--cx-glass-shadow, 0 1px 3px rgba(0,0,0,.40), 0 4px 16px rgba(0,0,0,.30))",
           "var(--cx-glass-highlight, inset 0 1px 0 rgba(255,255,255,.10))",
