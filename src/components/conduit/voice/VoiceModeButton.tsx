@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Mic, AlertCircle } from "lucide-react";
+import { Mic } from "lucide-react";
 import { PraxisButton } from "@/components/conduit/ui/Button";
+import { useToast } from "@/context/ToastContext";
 import VoiceRoom, {
   type ParticipantDisplay,
   type VoiceTokenResponse,
@@ -35,13 +36,11 @@ export default function VoiceModeButton({
   participantDisplays,
   label,
 }: Props) {
+  const toast = useToast();
   const [requesting, setRequesting] = useState(false);
   const [token, setToken] = useState<VoiceTokenResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [savedToast, setSavedToast] = useState(false);
 
   async function start() {
-    setError(null);
     setRequesting(true);
     try {
       // Request mic permission up front so the user-gesture window is open
@@ -65,15 +64,13 @@ export default function VoiceModeButton({
           message?: string;
         };
         if (res.status === 503) {
-          setError(
-            err.message ?? "Voice mode is being set up. Try again shortly.",
-          );
+          toast.error(err.message ?? "Voice mode is being set up. Try again shortly.");
         } else if (res.status === 429) {
-          setError(err.message ?? "Daily voice cap reached.");
+          toast.error(err.message ?? "Daily voice cap reached.");
         } else if (res.status === 403) {
-          setError("Voice Mode requires a paid tier.");
+          toast.error("Voice Mode requires a paid tier.");
         } else {
-          setError(err.error ?? "Couldn't start voice mode.");
+          toast.error(err.error ?? "Couldn't start voice mode.");
         }
         return;
       }
@@ -86,9 +83,9 @@ export default function VoiceModeButton({
         e.name === "PermissionDeniedError" ||
         e.name === "SecurityError"
       ) {
-        setError("Mic permission denied — enable in browser settings.");
+        toast.error("Mic permission denied — enable in browser settings.");
       } else {
-        setError(e.message ?? "Couldn't start voice mode.");
+        toast.error(e.message ?? "Couldn't start voice mode.");
       }
     } finally {
       setRequesting(false);
@@ -109,39 +106,6 @@ export default function VoiceModeButton({
         {requesting ? "Connecting…" : (label ?? "Voice Mode")}
       </PraxisButton>
 
-      {error && (
-        <div
-          role="alert"
-          className="fixed top-4 right-4 z-[70] max-w-sm cx-type-base bg-red-950/90 border border-red-500/40 rounded-md px-3 py-2 text-red-100 inline-flex items-start gap-2 shadow-lg"
-        >
-          <AlertCircle size={14} className="mt-0.5 shrink-0" />
-          <div>
-            <div>{error}</div>
-            <PraxisButton
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setError(null)}
-            >
-              dismiss
-            </PraxisButton>
-          </div>
-        </div>
-      )}
-
-      {savedToast && (
-        <div className="fixed top-4 right-4 z-[70] cx-type-base bg-black/80 border border-[var(--color-border)] rounded-md px-3 py-2 inline-flex items-center gap-2">
-          Conversation saved.{" "}
-          <a
-            href="/app/settings/voice-history"
-            className="underline"
-            style={{ color: deptColor }}
-          >
-            View transcript
-          </a>
-        </div>
-      )}
-
       {token && (
         <VoiceRoom
           tokenResponse={token}
@@ -152,8 +116,13 @@ export default function VoiceModeButton({
           onClose={({ saved }) => {
             setToken(null);
             if (saved) {
-              setSavedToast(true);
-              window.setTimeout(() => setSavedToast(false), 5000);
+              toast.success({
+                title: "Conversation saved.",
+                action: {
+                  label: "View transcript",
+                  onClick: () => window.location.assign("/app/conversations"),
+                },
+              });
             }
           }}
         />
