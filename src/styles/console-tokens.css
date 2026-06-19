@@ -1010,3 +1010,37 @@ html[data-praxis-theme="light"] {
     -webkit-backdrop-filter: none;
   }
 }
+
+/* ============================================================
+ * Data-viz: chart animate-in keyframes
+ *
+ * cx-bar-anim  — bar chart bars grow up from 0 (scaleY)
+ * cx-chart-anim — whole chart fades in with a subtle scale
+ *
+ * Stagger delay per bar is set via inline animationDelay.
+ * Both classes respect prefers-reduced-motion.
+ * ============================================================ */
+
+@keyframes cx-bar-grow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+@keyframes cx-chart-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.cx-bar-anim {
+  animation: cx-bar-grow 280ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  transform-origin: bottom;
+}
+
+.cx-chart-anim {
+  animation: cx-chart-in 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cx-bar-anim  { animation: none !important; }
+  .cx-chart-anim { animation: none !important; }
+}

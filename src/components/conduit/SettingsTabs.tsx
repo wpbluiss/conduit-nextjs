@@ -983,7 +983,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
       {saving && (
         <p className="cx-type-xs text-[var(--cx-text-muted)]">Saving…</p>
       )}
-      {error && <p className="text-sm text-[var(--cx-danger)]">{error}</p>}
+      {error && <p className="cx-type-sm text-[var(--cx-danger)]">{error}</p>}
     </div>
   );
 }
@@ -1217,7 +1217,7 @@ function WorkspaceTab({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-2xl font-bold" style={{ color: "var(--cx-accent-bright)" }}>
+                <span className="cx-type-2xl font-bold" style={{ color: "var(--cx-accent-bright)" }}>
                   {(wsName || workspaceName || "P")[0]?.toUpperCase() ?? "P"}
                 </span>
               )}
@@ -2234,25 +2234,48 @@ function UsageTab({ usage }: { usage: UsageData }) {
           Tokens · daily
         </div>
         {monthLoading ? (
-          <p className="text-[var(--cx-text-muted)]">Loading…</p>
-        ) : fillByDay.length === 0 ? (
-          <p className="text-[var(--cx-text-muted)]">No usage yet.</p>
-        ) : (
           <div className="conduit-card p-4">
             <div className="flex items-end gap-px h-32">
-              {fillByDay.map(({ d, v }) => {
+              {Array.from({ length: 20 }, (_, i) => (
+                <div
+                  key={i}
+                  className="flex-1 rounded-t animate-pulse bg-[var(--cx-border)]"
+                  style={{ height: `${18 + Math.abs(Math.sin(i * 0.9)) * 45 + (i % 4) * 8}%` }}
+                />
+              ))}
+            </div>
+            <div className="mt-2 flex justify-between cx-type-xs text-[var(--cx-text-muted)]">
+              <div className="h-2.5 w-16 rounded animate-pulse bg-[var(--cx-border)]" />
+              <div className="h-2.5 w-16 rounded animate-pulse bg-[var(--cx-border)]" />
+            </div>
+          </div>
+        ) : fillByDay.length === 0 ? (
+          <div className="conduit-card p-6 text-center">
+            <p className="cx-type-sm text-[var(--cx-text-muted)]">No usage yet.</p>
+            <p className="cx-type-xs text-[var(--cx-text-faint)] mt-1">
+              Token usage will appear here once you start chatting.
+            </p>
+          </div>
+        ) : (
+          <div className="conduit-card p-4" key={selectedMonth}>
+            <div className="flex items-end gap-px h-32">
+              {fillByDay.map(({ d, v }, i) => {
                 const h = Math.round((v / max) * 100);
                 return (
                   <div
                     key={d}
                     title={`${d}: ${v.toLocaleString()} tokens`}
-                    className="flex-1 rounded-t bg-[var(--cx-accent)] opacity-70 hover:opacity-100 transition-opacity"
-                    style={{ height: `${Math.max(2, h)}%` }}
+                    className="flex-1 rounded-t bg-[var(--cx-accent)] hover:opacity-100 transition-opacity cx-bar-anim"
+                    style={{
+                      height: `${Math.max(2, h)}%`,
+                      opacity: 0.65,
+                      animationDelay: `${i * 12}ms`,
+                    }}
                   />
                 );
               })}
             </div>
-            <div className="mt-2 flex justify-between cx-type-xs text-[var(--cx-text-muted)]">
+            <div className="mt-2 flex justify-between cx-type-xs cx-mono text-[var(--cx-text-muted)]">
               <span>{fillByDay[0]?.d}</span>
               <span>{fillByDay[fillByDay.length - 1]?.d}</span>
             </div>
@@ -2266,45 +2289,69 @@ function UsageTab({ usage }: { usage: UsageData }) {
           <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
             Share by employee
           </div>
-          {monthLoading || empTotal === 1 ? (
-            <p className="text-[var(--cx-text-muted)]">
-              {monthLoading ? "Loading…" : "No usage yet."}
-            </p>
+          {monthLoading ? (
+            <div className="flex items-center gap-5">
+              <div className="w-[120px] h-[120px] rounded-full animate-pulse bg-[var(--cx-border)] shrink-0" />
+              <div className="space-y-2 flex-1">
+                {Array.from({ length: 4 }, (_, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full animate-pulse bg-[var(--cx-border)]" />
+                    <div className="h-2.5 rounded animate-pulse bg-[var(--cx-border)]" style={{ width: `${55 + i * 12}%` }} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : empTotal === 1 ? (
+            <p className="cx-type-xs text-[var(--cx-text-muted)]">No usage yet.</p>
           ) : (
-            <Donut data={empValues} total={empTotal} />
+            <Donut key={selectedMonth} data={empValues} total={empTotal} />
           )}
         </div>
         <div className="conduit-card p-5">
           <div className="cx-type-xs uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
             By employee
           </div>
-          <div className="space-y-2">
-            {empNames.map((emp) => {
-              const v = displayData.byEmployee[emp];
-              if (!v) return null;
-              return (
-                <div key={emp} className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <span
-                      aria-hidden
-                      className="inline-block w-2 h-2 rounded-full"
-                      style={{ background: DEPT_COLOR[emp] }}
-                    />
-                    {employeeLabel(emp)}
-                  </span>
-                  <span className="cx-type-xs cx-mono text-[var(--cx-text-muted)]">
-                    {(v.input + v.output).toLocaleString()} · $
-                    {(v.cost / 100).toFixed(2)}
-                  </span>
+          {monthLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 5 }, (_, i) => (
+                <div key={i} className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full animate-pulse bg-[var(--cx-border)]" />
+                    <div className="h-2.5 w-20 rounded animate-pulse bg-[var(--cx-border)]" />
+                  </div>
+                  <div className="h-2.5 w-24 rounded animate-pulse bg-[var(--cx-border)]" />
                 </div>
-              );
-            })}
-            {empNames.every((e) => !displayData.byEmployee[e]) && (
-              <p className="cx-type-xs text-[var(--cx-text-muted)]">
-                No usage yet.
-              </p>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {empNames.map((emp) => {
+                const v = displayData.byEmployee[emp];
+                if (!v) return null;
+                return (
+                  <div key={emp} className="flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <span
+                        aria-hidden
+                        className="inline-block w-2 h-2 rounded-full"
+                        style={{ background: DEPT_COLOR[emp] }}
+                      />
+                      {employeeLabel(emp)}
+                    </span>
+                    <span className="cx-type-xs cx-mono text-[var(--cx-text-muted)]">
+                      {(v.input + v.output).toLocaleString()} · $
+                      {(v.cost / 100).toFixed(2)}
+                    </span>
+                  </div>
+                );
+              })}
+              {empNames.every((e) => !displayData.byEmployee[e]) && (
+                <p className="cx-type-xs text-[var(--cx-text-muted)]">
+                  No usage yet.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -2398,7 +2445,7 @@ function Donut({
     });
   return (
     <div className="flex items-center gap-5">
-      <svg width="120" height="120" viewBox="0 0 120 120" aria-hidden>
+      <svg width="120" height="120" viewBox="0 0 120 120" aria-hidden className="cx-chart-anim">
         <circle
           cx="60"
           cy="60"
@@ -2887,7 +2934,7 @@ function BillingTab({
       )}
 
       {error && (
-        <p className="text-sm text-[var(--cx-danger)]">{error}</p>
+        <p className="cx-type-sm text-[var(--cx-danger)]">{error}</p>
       )}
 
       {/* Tier comparison */}
@@ -2916,7 +2963,7 @@ function BillingTab({
                 </div>
                 <div className="cx-heading-xl mt-1">{t.name}</div>
                 <div className="mt-1">
-                  <span className="text-2xl font-medium">
+                  <span className="cx-type-xl font-semibold">
                     ${t.monthlyPriceCents / 100}
                   </span>
                   <span className="cx-type-xs text-[var(--cx-text-muted)]">
@@ -3126,6 +3173,12 @@ function UsageSummary({
   const total = cap + bonus;
   const remaining = Math.max(0, total - used);
   const pct = Math.min(100, Math.round((used / Math.max(1, total)) * 100));
+  const [displayPct, setDisplayPct] = useState(0);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDisplayPct(pct), 60);
+    return () => clearTimeout(t);
+  }, [pct]);
 
   const barColor =
     pct >= 100
@@ -3151,17 +3204,21 @@ function UsageSummary({
       <div>
         <div className="h-2 rounded-full bg-[var(--cx-border)] overflow-hidden">
           <div
-            className="h-2 rounded-full transition-all duration-500"
-            style={{ width: `${pct}%`, background: barColor }}
+            className="h-2 rounded-full motion-safe:transition-[width] motion-safe:duration-700"
+            style={{
+              width: `${displayPct}%`,
+              background: barColor,
+              transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+            }}
           />
         </div>
-        <div className="mt-1.5 flex items-baseline justify-between cx-type-xs text-[var(--cx-text-muted)] tabular-nums">
+        <div className="mt-1.5 flex items-baseline justify-between cx-type-xs cx-mono text-[var(--cx-text-muted)]">
           <span>{used.toLocaleString()} used</span>
           <span>{total.toLocaleString()} total</span>
         </div>
       </div>
 
-      <div className="flex items-center justify-between text-xs">
+      <div className="flex items-center justify-between cx-type-xs">
         <span
           className="font-medium"
           style={{ color: remaining === 0 ? "var(--cx-danger)" : "var(--cx-text)" }}
@@ -3306,7 +3363,7 @@ function NotificationsTab() {
       {saving && (
         <p className="cx-type-xs text-[var(--cx-text-muted)]">Saving…</p>
       )}
-      {error && <p className="text-sm text-[var(--cx-danger)]">{error}</p>}
+      {error && <p className="cx-type-sm text-[var(--cx-danger)]">{error}</p>}
     </div>
   );
 }
@@ -3927,9 +3984,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                     Synced files ({driveSelectedFiles.length}/5):
                   </p>
                   {driveSelectedFiles.map((f) => (
-                    <div key={f.id} className="flex items-center justify-between gap-2 text-xs">
+                    <div key={f.id} className="flex items-center justify-between gap-2 cx-type-xs">
                       <span className="truncate text-[var(--cx-text)]">{f.name}</span>
-                      <span className="shrink-0 cx-type-xs text-[var(--cx-text-muted)]">
+                      <span className="shrink-0 text-[var(--cx-text-muted)]">
                         {f.mimeType === "application/vnd.google-apps.spreadsheet" ? "Sheet" : "Doc"}
                       </span>
                     </div>
@@ -4642,7 +4699,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
       {/* Revoked keys */}
       {revokedKeys.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.12em] text-[var(--cx-text-muted)] font-semibold">
+          <p className="cx-type-xs uppercase tracking-[0.12em] text-[var(--cx-text-muted)] font-semibold">
             Revoked keys
           </p>
           {revokedKeys.map((k) => (
@@ -4651,7 +4708,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
               className="conduit-card flex items-center gap-4 px-4 py-3 rounded-xl opacity-50"
             >
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[var(--cx-text)] truncate line-through">
+                <p className="cx-type-sm font-medium text-[var(--cx-text)] truncate line-through">
                   {k.name}
                 </p>
                 <p className="cx-type-xs text-[var(--cx-text-muted)] mt-0.5">
