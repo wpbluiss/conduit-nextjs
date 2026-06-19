@@ -1,6 +1,6 @@
 "use client";
 
-import { Compass } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, DEPT_COLOR_SOFT, EMPLOYEE_ICON } from "./EmployeeBadge";
 import { SPECIALIST_ICON_STROKE } from "@/lib/ui/specialist-icons";
@@ -68,19 +68,23 @@ export function SpecialistAvatar({
     ? DEPT_COLOR_SOFT[employee!]
     : (color ? `color-mix(in srgb, ${color} 12%, transparent)` : "var(--cx-accent-tint)");
 
-  const bg = deptColorSoft;
+  // Active state: electric violet accent (spec: "active state picks up the accent").
+  // Rest state: dept identity color.
+  const bg = active ? "var(--cx-accent-tint)" : deptColorSoft;
   const iconColor = active
-    ? deptColor
+    ? "var(--cx-accent)"
     : `color-mix(in srgb, ${deptColor} 80%, transparent)`;
   const shadow = active
-    ? `inset 0 0 0 1.5px ${deptColor}, 0 0 0 3px color-mix(in srgb, ${deptColor} 22%, transparent)`
+    ? `inset 0 0 0 1.5px var(--cx-accent), 0 0 0 3px var(--cx-accent-glow-raw, rgba(124,108,255,0.25))`
     : `inset 0 0 0 1.5px color-mix(in srgb, ${deptColor} 45%, transparent)`;
 
   const radius = Math.round(size * 0.25); // 8px at size=32, scales proportionally
   const glyphSize = Math.max(10, Math.round(size * 0.44)); // 14px at size=32
   const fontSize = Math.max(9, Math.round(size * 0.37));    // 12px at size=32
 
-  const Icon = isBuiltin ? (EMPLOYEE_ICON[employee!] ?? Compass) : null;
+  // Sparkles is the fallback for unknown/custom-keyed specialists (not Compass — that is
+  // Atlas's identity icon). Custom specialists (name prop) always render initials.
+  const Icon = isBuiltin ? (EMPLOYEE_ICON[employee!] ?? Sparkles) : null;
 
   return (
     <span
