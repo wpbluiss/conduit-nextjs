@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DownloadSimple, X, Share } from "@phosphor-icons/react";
+import { Download, X, Share2 } from "lucide-react";
 import { PraxisButton } from "@/components/conduit/ui/Button";
 
 type BIPEvent = Event & {
@@ -82,9 +82,8 @@ export function PwaInstaller() {
           className="rounded-lg p-2 shrink-0"
           style={{ background: "var(--cx-accent-tint)" }}
         >
-          <DownloadSimple
+          <Download
             size={18}
-            weight="fill"
             style={{ color: "var(--cx-accent)" }}
           />
         </div>
@@ -94,7 +93,7 @@ export function PwaInstaller() {
           </div>
           {iosHint ? (
             <p className="cx-type-xs text-[var(--color-cream-mute)] mt-1 flex items-center gap-1 flex-wrap">
-              Tap <Share size={13} className="inline" /> Share →{" "}
+              Tap <Share2 size={13} className="inline" /> Share →{" "}
               <span className="text-[var(--color-cream)]">
                 Add to Home Screen
               </span>

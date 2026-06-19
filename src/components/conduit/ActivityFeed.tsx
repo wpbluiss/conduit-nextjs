@@ -53,7 +53,7 @@ function EventRow({ event }: { event: ActivityEvent }) {
         }}
         aria-hidden
       >
-        <Icon size={13} strokeWidth={2} />
+        <Icon size={13} style={{ strokeWidth: 2 }} />
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex items-baseline gap-2 flex-wrap">

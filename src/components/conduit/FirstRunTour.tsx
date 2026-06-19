@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ArrowRight } from "@phosphor-icons/react";
+import { X, ArrowRight } from "lucide-react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { Button, PraxisButton } from "@/components/conduit/ui/Button";
 
@@ -239,7 +239,7 @@ export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
                 autoFocus
               >
                 {isLast ? "Get started" : "Next →"}
-                <ArrowRight size={13} weight="bold" />
+                <ArrowRight size={13} />
               </Button>
             </div>
           </div>
