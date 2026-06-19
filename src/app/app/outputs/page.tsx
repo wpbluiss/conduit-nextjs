@@ -99,24 +99,34 @@ export default function OutputsPage() {
           </Link>
           <h1 className="cx-heading-2xl">Outputs</h1>
         </div>
-        <p className="cx-body text-[var(--color-text-muted)] mb-8">
+        <p className="cx-body mb-8" style={{ color: "var(--cx-text-muted, #A0A0B0)" }}>
           Specialist responses you&apos;ve saved for reference.
         </p>
 
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="conduit-card p-5 space-y-2 animate-pulse">
-                <div className="h-4 w-48 rounded bg-[var(--color-border)]" />
-                <div className="h-3 w-full rounded bg-[var(--color-border)] opacity-60" />
-                <div className="h-3 w-3/4 rounded bg-[var(--color-border)] opacity-40" />
+              <div key={i} className="conduit-card p-5 space-y-2">
+                <div className="cx-skeleton h-4 w-48 rounded" style={{ opacity: 0.55 }} />
+                <div className="cx-skeleton h-3 w-full rounded" style={{ opacity: 0.38 }} />
+                <div className="cx-skeleton h-3 w-3/4 rounded" style={{ opacity: 0.28 }} />
               </div>
             ))}
           </div>
         ) : outputs.length === 0 ? (
-          <div className="conduit-card p-12 text-center">
-            <Bookmark size={32} className="mx-auto mb-3" style={{ color: "var(--color-text-muted)" }} />
-            <p className="cx-body text-[var(--color-text-muted)]">
+          <div
+            className="conduit-card p-12 text-center"
+            style={{
+              background: "var(--cx-glass-bg, rgba(255,255,255,0.04))",
+              border: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))",
+            }}
+          >
+            <Bookmark
+              size={32}
+              className="mx-auto mb-3"
+              style={{ color: "var(--cx-text-muted, #A0A0B0)", opacity: 0.6 }}
+            />
+            <p className="cx-body" style={{ color: "var(--cx-text-muted, #A0A0B0)" }}>
               No outputs saved yet. Hover over any specialist response in chat and click <strong>Save</strong> to add it here.
             </p>
           </div>

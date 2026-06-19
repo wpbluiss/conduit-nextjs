@@ -31,8 +31,9 @@ export default function AppError({ error, reset, unstable_retry }: Props) {
       <span
         className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-6"
         style={{
-          background: "color-mix(in srgb, var(--color-pink) 12%, var(--color-surface-elevated))",
-          color: "var(--color-pink)",
+          background: "color-mix(in srgb, var(--cx-danger, #F4607D) 12%, var(--cx-surface-raised, #1C1C26))",
+          color: "var(--cx-danger, #F4607D)",
+          border: "1px solid color-mix(in srgb, var(--cx-danger, #F4607D) 24%, transparent)",
         }}
       >
         <AlertTriangle size={22} />
@@ -40,7 +41,7 @@ export default function AppError({ error, reset, unstable_retry }: Props) {
       <h1 className="cx-heading-xl mb-3">
         Something went wrong
       </h1>
-      <p className="text-sm mb-8 max-w-xs" style={{ color: "var(--color-text-muted)", lineHeight: 1.6 }}>
+      <p className="cx-type-sm mb-8 max-w-xs" style={{ color: "var(--cx-text-muted, #A0A0B0)", lineHeight: "var(--cx-lh-body, 1.6)" }}>
         An error occurred while loading this page. Your data is safe — try reloading.
       </p>
       <div className="flex flex-col sm:flex-row items-center gap-3">

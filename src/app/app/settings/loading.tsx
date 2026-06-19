@@ -1,7 +1,7 @@
 export default function SettingsLoading() {
   return (
     <div
-      className="flex-1 overflow-y-auto px-4 md:px-8 py-8 animate-pulse"
+      className="flex-1 overflow-y-auto px-4 md:px-8 py-8"
       aria-busy
       aria-live="polite"
     >
@@ -9,22 +9,22 @@ export default function SettingsLoading() {
         {/* Page title + subtitle */}
         <div className="mb-8">
           <div
+            className="cx-skeleton"
             style={{
               height: 32,
               width: 120,
               marginBottom: 8,
               borderRadius: 6,
-              background: "var(--cx-border)",
-              opacity: 0.6,
+              opacity: 0.55,
             }}
           />
           <div
+            className="cx-skeleton"
             style={{
               height: 14,
               width: 240,
               borderRadius: 9999,
-              background: "var(--cx-border)",
-              opacity: 0.35,
+              opacity: 0.3,
             }}
           />
         </div>
@@ -36,12 +36,12 @@ export default function SettingsLoading() {
             {[56, 72, 52, 64, 60].map((w, i) => (
               <div
                 key={i}
+                className="cx-skeleton"
                 style={{
                   height: 32,
                   width: w,
                   borderRadius: 6,
-                  background: "var(--cx-border)",
-                  opacity: i === 0 ? 0.55 : 0.3,
+                  opacity: i === 0 ? 0.5 : 0.28,
                 }}
               />
             ))}
@@ -52,21 +52,21 @@ export default function SettingsLoading() {
             {[160, 200, 180].map((w, i) => (
               <div key={i}>
                 <div
+                  className="cx-skeleton"
                   style={{
                     height: 8,
                     width: w,
                     borderRadius: 9999,
-                    background: "var(--cx-border)",
-                    opacity: 0.5,
+                    opacity: 0.45,
                     marginBottom: 8,
                   }}
                 />
                 <div
+                  className="cx-skeleton"
                   style={{
                     height: 44,
                     borderRadius: 8,
-                    background: "var(--cx-border)",
-                    opacity: 0.25,
+                    opacity: 0.22,
                   }}
                 />
               </div>

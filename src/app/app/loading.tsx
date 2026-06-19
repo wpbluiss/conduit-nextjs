@@ -13,7 +13,7 @@ export default function ChatLoading() {
       aria-live="polite"
     >
       {/* Message thread skeleton */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-6 space-y-5 animate-pulse">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-6 space-y-5">
         <SkeletonBubble align="left" lines={2} wide />
         <SkeletonBubble align="right" lines={1} />
         <SkeletonBubble align="left" lines={3} wide />
@@ -23,15 +23,12 @@ export default function ChatLoading() {
 
       {/* Input bar skeleton */}
       <div
-        className="px-4 md:px-6 py-4 border-t animate-pulse"
-        style={{ borderColor: "var(--color-border)" }}
+        className="px-4 md:px-6 py-4 border-t"
+        style={{ borderColor: "var(--cx-border, #262630)" }}
       >
         <div
-          className="rounded-xl h-12 w-full"
-          style={{
-            background: "var(--color-surface-elevated)",
-            border: "1px solid var(--color-border)",
-          }}
+          className="cx-skeleton rounded-xl h-12 w-full"
+          style={{ opacity: 0.5 }}
         />
       </div>
 
@@ -56,8 +53,8 @@ function SkeletonBubble({
     >
       {isLeft && (
         <div
-          className="h-8 w-8 rounded-full shrink-0 mt-0.5"
-          style={{ background: "var(--color-border)", opacity: 0.6 }}
+          className="cx-skeleton h-8 w-8 rounded-[8px] shrink-0 mt-0.5"
+          style={{ opacity: 0.5 }}
         />
       )}
       <div
@@ -66,26 +63,25 @@ function SkeletonBubble({
       >
         {isLeft && (
           <div
-            className="h-2 w-16 rounded-full mb-1"
-            style={{ background: "var(--color-border)", opacity: 0.5 }}
+            className="cx-skeleton h-2 w-16 rounded-full mb-1"
+            style={{ opacity: 0.4 }}
           />
         )}
         <div
           className="rounded-2xl px-4 py-3 space-y-2"
           style={{
             background: isLeft
-              ? "var(--color-surface-elevated)"
-              : "color-mix(in srgb, var(--color-accent) 15%, var(--color-surface-elevated))",
-            border: "1px solid var(--color-border)",
+              ? "var(--cx-surface-raised, #1C1C26)"
+              : "color-mix(in srgb, var(--cx-accent, #7C6CFF) 10%, var(--cx-surface-raised, #1C1C26))",
+            border: "1px solid var(--cx-border, #262630)",
           }}
         >
           {Array.from({ length: lines }).map((_, i) => (
             <div
               key={i}
-              className="h-2.5 rounded-full"
+              className="cx-skeleton h-2.5 rounded-full"
               style={{
-                background: "var(--color-border)",
-                opacity: 0.6,
+                opacity: 0.5,
                 width: i === lines - 1 ? "65%" : "100%",
               }}
             />
