@@ -1164,6 +1164,109 @@ html[data-praxis-theme="light"] {
   border: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08));
 }
 
+/* ================================================================
+ * Semantic modal / popover all-in-one utilities
+ *
+ * Convenience classes that combine the glass recipe + spec radius
+ * so component call-sites don't hand-roll per surface.
+ *
+ * .cx-glass-modal   — Tier 3 overlay (dialogs, drawers):
+ *                     28px blur + deepest shadow + 16px radius
+ * .cx-glass-popover — Tier 2 float (menus, popovers, context menus):
+ *                     24px blur + float shadow + 12px radius
+ *
+ * Both include border, highlight, opaque and transparency fallbacks.
+ * Defined globally (not scoped to .praxis-root) so they work inside
+ * Radix / React portals that render outside the praxis-root tree.
+ * ================================================================ */
+
+.cx-glass-modal {
+  background: var(--cx-glass-bg-overlay, rgba(255, 255, 255, 0.06));
+  backdrop-filter: var(--cx-glass-blur-overlay, blur(28px) saturate(160%));
+  -webkit-backdrop-filter: var(--cx-glass-blur-overlay, blur(28px) saturate(160%));
+  border: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08));
+  box-shadow:
+    var(--cx-glass-shadow-overlay, 0 8px 40px rgba(0, 0, 0, 0.70), 0 4px 12px rgba(0, 0, 0, 0.50)),
+    var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
+  border-radius: var(--cx-radius-lg, 16px);
+  color: var(--cx-text, #F4F4F7);
+}
+
+.cx-glass-popover {
+  background: var(--cx-glass-bg-float, rgba(255, 255, 255, 0.06));
+  backdrop-filter: var(--cx-glass-blur-float, blur(24px) saturate(150%));
+  -webkit-backdrop-filter: var(--cx-glass-blur-float, blur(24px) saturate(150%));
+  border: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08));
+  box-shadow:
+    var(--cx-glass-shadow-float, 0 4px 24px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40)),
+    var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
+  border-radius: var(--cx-radius-md, 12px);
+  color: var(--cx-text, #F4F4F7);
+}
+
+/* Opaque fallback when backdrop-filter is unsupported */
+@supports not (backdrop-filter: blur(1px)) {
+  .cx-glass-modal {
+    background: var(--cx-surface-overlay, #23232E);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .cx-glass-popover {
+    background: var(--cx-surface-overlay, #23232E);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* Opaque fallback when user prefers reduced transparency */
+@media (prefers-reduced-transparency: reduce) {
+  .cx-glass-modal {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--cx-surface-overlay, #23232E);
+  }
+  .cx-glass-popover {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--cx-surface-overlay, #23232E);
+  }
+}
+
+/* Light theme overrides — placed on html[data-praxis-theme="light"] so portal
+ * elements outside .praxis-root also pick up the correct light-mode values. */
+html[data-praxis-theme="light"] .cx-glass-modal {
+  background: var(--cx-glass-bg-overlay, rgba(255, 255, 255, 0.90));
+  border-color: var(--cx-glass-border, rgba(0, 0, 0, 0.07));
+  box-shadow:
+    var(--cx-glass-shadow-overlay, 0 8px 40px rgba(15, 15, 20, 0.20), 0 4px 12px rgba(15, 15, 20, 0.12)),
+    var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.80));
+  color: var(--cx-text, #0F0F14);
+}
+
+html[data-praxis-theme="light"] .cx-glass-popover {
+  background: var(--cx-glass-bg-float, rgba(255, 255, 255, 0.82));
+  border-color: var(--cx-glass-border, rgba(0, 0, 0, 0.07));
+  box-shadow:
+    var(--cx-glass-shadow-float, 0 4px 24px rgba(15, 15, 20, 0.14), 0 2px 8px rgba(15, 15, 20, 0.08)),
+    var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.80));
+  color: var(--cx-text, #0F0F14);
+}
+
+/* Mobile blur reduction for .cx-glass-modal / .cx-glass-popover — mirrors the
+ * mobile overrides for .cx-glass-overlay / .cx-glass-float above. */
+@media (max-width: 480px) {
+  .cx-glass-modal {
+    backdrop-filter: blur(16px) saturate(130%);
+    -webkit-backdrop-filter: blur(16px) saturate(130%);
+    background: var(--cx-glass-bg-overlay, rgba(255, 255, 255, 0.08));
+  }
+  .cx-glass-popover {
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    background: var(--cx-glass-bg-float, rgba(255, 255, 255, 0.08));
+  }
+}
+
 /* ---- Scrim utility — modal/dialog overlay backdrop ----
  * NOT a glass surface: intentionally lighter blur (2px) so the
  * floating panel reads clearly against it. Background opacity set

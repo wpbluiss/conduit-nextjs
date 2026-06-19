@@ -1907,7 +1907,7 @@ export function Sidebar({
         return createPortal(
           <div
             role="tooltip"
-            className="praxis-root pdl-tooltip pdl-glass"
+            className="praxis-root pdl-tooltip cx-glass-popover"
             style={{
               position: "fixed",
               top: tooltipTop,

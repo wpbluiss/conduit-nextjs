@@ -53,14 +53,16 @@ export function Drawer({
 
   return createPortal(
     <div className="praxis-root">
+      {/* Scrim — matches DialogOverlay pattern: cx-scrim for blur, bg for tint */}
       <div
-        className="pdl-scrim"
+        className="fixed inset-0 z-50 cx-scrim"
+        style={{ background: "var(--cx-modal-scrim, rgba(11, 11, 15, 0.65))" }}
         onClick={() => onOpenChange(false)}
         aria-hidden
       />
       <div
         ref={dialogRef}
-        className={`pdl-drawer pdl-glass${className ? ` ${className}` : ""}`}
+        className={`pdl-drawer cx-glass-overlay cx-glass-border${className ? ` ${className}` : ""}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
