@@ -6,8 +6,9 @@
 // "go around" round-robin trigger phrases handled by the worker per R12.5.
 
 import { useState } from "react";
-import { Mic, Lock, AlertCircle } from "lucide-react";
-import { Button, PraxisButton } from "@/components/conduit/ui/Button";
+import { Mic, Lock } from "lucide-react";
+import { Button } from "@/components/conduit/ui/Button";
+import { useToast } from "@/context/ToastContext";
 import VoiceRoom, {
   type ParticipantDisplay,
   type VoiceTokenResponse,
@@ -29,8 +30,8 @@ export default function EnterTheRoomCard({
   tierLabel,
   conversationId,
 }: Props) {
+  const toast = useToast();
   const [requesting, setRequesting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<VoiceTokenResponse | null>(null);
 
   const displays: ParticipantDisplay[] = participants.map((p) => ({
@@ -47,7 +48,6 @@ export default function EnterTheRoomCard({
 
   async function start() {
     if (!available || requesting) return;
-    setError(null);
     setRequesting(true);
     try {
       const probe = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -69,13 +69,13 @@ export default function EnterTheRoomCard({
           message?: string;
         };
         if (r.status === 503) {
-          setError(j.message ?? "Voice mode is being set up.");
+          toast.error(j.message ?? "Voice mode is being set up. Try again shortly.");
         } else if (r.status === 429) {
-          setError(j.message ?? "Daily voice cap reached.");
+          toast.error(j.message ?? "Daily voice cap reached.");
         } else if (r.status === 403) {
-          setError(j.message ?? "Voice Mode requires a paid tier.");
+          toast.error(j.message ?? "Voice Mode requires a paid tier.");
         } else {
-          setError(j.error ?? "Couldn't start voice mode.");
+          toast.error(j.error ?? "Couldn't start voice mode.");
         }
         return;
       }
@@ -88,9 +88,9 @@ export default function EnterTheRoomCard({
         e.name === "PermissionDeniedError" ||
         e.name === "SecurityError"
       ) {
-        setError("Mic permission denied — enable in browser settings.");
+        toast.error("Mic permission denied — enable in browser settings.");
       } else {
-        setError(e.message ?? "Couldn't start voice mode.");
+        toast.error(e.message ?? "Couldn't start voice mode.");
       }
     } finally {
       setRequesting(false);
@@ -157,26 +157,6 @@ export default function EnterTheRoomCard({
           Enter the room
         </Button>
       </div>
-
-      {error && (
-        <div
-          role="alert"
-          className="fixed top-4 right-4 z-[70] max-w-sm cx-type-base bg-red-950/90 border border-red-500/40 rounded-md px-3 py-2 text-red-100 inline-flex items-start gap-2 shadow-lg"
-        >
-          <AlertCircle size={14} className="mt-0.5 shrink-0" />
-          <div>
-            <div>{error}</div>
-            <PraxisButton
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setError(null)}
-            >
-              dismiss
-            </PraxisButton>
-          </div>
-        </div>
-      )}
 
       {token && (
         <VoiceRoom
