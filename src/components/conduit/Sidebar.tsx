@@ -5,7 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { CX_EASE, CX_DUR_FAST, TX_BASE } from "@/lib/ui/motion";
+import { CX_EASE, CX_DUR_FAST, CX_DUR_BASE, TX_BASE } from "@/lib/ui/motion";
 import {
   Activity,
   BarChart3,
@@ -953,8 +953,16 @@ export function Sidebar({
                   {teamExpanded ? "−" : "+"}
                 </span>
               </button>
+              <AnimatePresence initial={false}>
               {teamExpanded && (
-                <ul className="space-y-1 mt-1">
+                <motion.ul
+                  key="specialists-list"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={shouldReduceMotion ? { duration: 0 } : { duration: CX_DUR_BASE, ease: [...CX_EASE] }}
+                  className="space-y-1 mt-1 overflow-hidden"
+                >
                   {TEAM.map((emp) => {
                     const isStreaming = streamingEmployee === emp;
                     const allowed = allowedEmployees.includes(emp);
@@ -1046,8 +1054,9 @@ export function Sidebar({
                       </li>
                     );
                   })}
-                </ul>
+                </motion.ul>
               )}
+              </AnimatePresence>
             </div>
           )}
 
@@ -1463,8 +1472,8 @@ export function Sidebar({
                           <motion.div
                             key={c.id}
                             className="group relative"
-                            whileHover={shouldReduceMotion ? undefined : { x: 2 }}
-                            whileTap={shouldReduceMotion ? undefined : { x: 0 }}
+                            whileHover={shouldReduceMotion ? undefined : { y: -1 }}
+                            whileTap={shouldReduceMotion ? undefined : { y: 0, scale: 0.99 }}
                             transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
                           >
                             {deletingId === c.id ? (
@@ -1559,8 +1568,8 @@ export function Sidebar({
                                 <Link
                                   href={`/app?c=${c.id}`}
                                   onClick={close}
-                                  className={`relative flex items-start gap-2 pl-3 pr-9 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]" : ""}`}
-                                  style={{ background: active ? "var(--cx-accent-tint)" : undefined }}
+                                  className={`relative flex items-start gap-2 pl-3 pr-9 py-2 rounded-lg transition-[background,box-shadow] duration-[120ms] ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.22)]" : ""}`}
+                                  style={{ background: active ? "var(--cx-accent-tint)" : undefined, boxShadow: active ? "var(--cx-glass-highlight)" : undefined }}
                                   onMouseEnter={(e) => openPeek(c.id, e.currentTarget)}
                                   onMouseLeave={closePeek}
                                   onFocus={(e) => openPeek(c.id, e.currentTarget, true)}
@@ -1585,7 +1594,7 @@ export function Sidebar({
                                       </span>
                                       <span
                                         className="shrink-0 cx-mono cx-type-xs"
-                                        style={{ color: "var(--cx-text-muted)" }}
+                                        style={{ color: "var(--cx-text-faint)" }}
                                       >
                                         {relativeDate(c.updated_at)}
                                       </span>
