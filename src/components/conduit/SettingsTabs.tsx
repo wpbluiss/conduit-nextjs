@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type ComponentType, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { AnimatePresence, motion, MotionConfig } from "framer-motion";
 import {
   ArrowRight,
   Calendar,
@@ -166,6 +167,7 @@ export function SettingsTabs({
   const [tab, setTab] = useState<SettingsTabKey>(defaultTab);
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="flex flex-col md:flex-row gap-8">
 
       {/* ── Mobile: horizontal pill strip ──────────────────────────── */}
@@ -229,69 +231,80 @@ export function SettingsTabs({
       </nav>
 
       {/* ── Content ────────────────────────────────────────────────── */}
-      <div className="flex-1 min-w-0">
-        {tab === "profile" && (
-          <ProfileTab
-            email={email}
-            fullName={fullName}
-            creatorMode={Boolean(account.creator_mode)}
-            creatorModeVersion={account.creator_mode_version ?? 1}
-            timezone={account.timezone ?? "America/New_York"}
-            themePref={account.theme_preference ?? "system"}
-            displayName={account.display_name ?? null}
-            avatarUrl={account.avatar_url ?? null}
-            workspaceName={account.workspace_name ?? null}
-          />
-        )}
-        {tab === "workspace" && (
-          <WorkspaceTab
-            workspaceName={account.workspace_name ?? null}
-            avatarUrl={account.avatar_url ?? null}
-          />
-        )}
-        {tab === "business" && <BusinessTab account={account} />}
-        {tab === "specialists" && (
-          <SpecialistsTab
-            initialNicknames={account.specialist_nicknames ?? {}}
-            initialPrefs={account.specialist_prefs ?? {}}
-          />
-        )}
-        {tab === "voice" && (
-          <VoiceTab
-            ttsAllowed={Boolean(
-              account.internal_account || (account.tier_id ?? "free") !== "free",
+      <div className="flex-1 min-w-0 overflow-hidden">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={tab}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {tab === "profile" && (
+              <ProfileTab
+                email={email}
+                fullName={fullName}
+                creatorMode={Boolean(account.creator_mode)}
+                creatorModeVersion={account.creator_mode_version ?? 1}
+                timezone={account.timezone ?? "America/New_York"}
+                themePref={account.theme_preference ?? "system"}
+                displayName={account.display_name ?? null}
+                avatarUrl={account.avatar_url ?? null}
+                workspaceName={account.workspace_name ?? null}
+              />
             )}
-          />
-        )}
-        {tab === "team" && <TeamTab />}
-        {tab === "usage" && <UsageTab usage={usage} />}
-        {tab === "billing" && <BillingTab account={account} usage={usage} />}
-        {tab === "security" && <MFASecurity />}
-        {tab === "notifications" && <NotificationsTab />}
-        {tab === "integrations" && (
-          <IntegrationsTab
-            isFreeUser={
-              !account.internal_account && (account.tier_id ?? "free") === "free"
-            }
-          />
-        )}
-        {tab === "appearance" && (
-          <AppearanceTab
-            themePref={account.theme_preference ?? "system"}
-            accentPref={account.accent_preference ?? "violet"}
-          />
-        )}
-        {tab === "api" && (
-          <ApiKeysTab
-            isPro={Boolean(
-              account.internal_account || (account.tier_id ?? "free") !== "free",
+            {tab === "workspace" && (
+              <WorkspaceTab
+                workspaceName={account.workspace_name ?? null}
+                avatarUrl={account.avatar_url ?? null}
+              />
             )}
-          />
-        )}
-        {tab === "referrals" && <ReferralsTab />}
-        {tab === "labels" && <LabelsTab />}
+            {tab === "business" && <BusinessTab account={account} />}
+            {tab === "specialists" && (
+              <SpecialistsTab
+                initialNicknames={account.specialist_nicknames ?? {}}
+                initialPrefs={account.specialist_prefs ?? {}}
+              />
+            )}
+            {tab === "voice" && (
+              <VoiceTab
+                ttsAllowed={Boolean(
+                  account.internal_account || (account.tier_id ?? "free") !== "free",
+                )}
+              />
+            )}
+            {tab === "team" && <TeamTab />}
+            {tab === "usage" && <UsageTab usage={usage} />}
+            {tab === "billing" && <BillingTab account={account} usage={usage} />}
+            {tab === "security" && <MFASecurity />}
+            {tab === "notifications" && <NotificationsTab />}
+            {tab === "integrations" && (
+              <IntegrationsTab
+                isFreeUser={
+                  !account.internal_account && (account.tier_id ?? "free") === "free"
+                }
+              />
+            )}
+            {tab === "appearance" && (
+              <AppearanceTab
+                themePref={account.theme_preference ?? "system"}
+                accentPref={account.accent_preference ?? "violet"}
+              />
+            )}
+            {tab === "api" && (
+              <ApiKeysTab
+                isPro={Boolean(
+                  account.internal_account || (account.tier_id ?? "free") !== "free",
+                )}
+              />
+            )}
+            {tab === "referrals" && <ReferralsTab />}
+            {tab === "labels" && <LabelsTab />}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
+    </MotionConfig>
   );
 }
 
