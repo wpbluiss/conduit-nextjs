@@ -1519,7 +1519,7 @@ export function Sidebar({
               </PraxisButton>
               <SidebarThemeButton collapsed />
               <Link href="/app/settings" title="Settings" aria-label="Settings" onClick={close} data-tour-target="settings"
-                className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-150"
+                className="cx-icon-btn cx-icon-btn-lg"
                 style={{
                   background: isActive("/app/settings") ? "var(--cx-accent-tint)" : undefined,
                   color: isActive("/app/settings") ? "var(--cx-accent)" : "var(--cx-text-muted)",
@@ -1527,7 +1527,7 @@ export function Sidebar({
                 <Settings size={16} />
               </Link>
               <Link href="/app/settings/billing" title="Billing" aria-label="Billing" onClick={close}
-                className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-150"
+                className="cx-icon-btn cx-icon-btn-lg"
                 style={{
                   background: isActive("/app/settings/billing") ? "var(--cx-accent-tint)" : undefined,
                   color: isActive("/app/settings/billing") ? "var(--cx-accent)" : "var(--cx-text-muted)",
@@ -1535,11 +1535,15 @@ export function Sidebar({
                 <CreditCard size={16} />
               </Link>
               <form action="/auth/sign-out" method="post">
-                <button type="submit" title="Sign out" aria-label="Sign out"
-                  className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-150"
-                  style={{ color: "var(--cx-text-muted)" }}>
+                <PraxisButton
+                  type="submit"
+                  variant="ghost"
+                  size="icon-sm"
+                  title="Sign out"
+                  aria-label="Sign out"
+                >
                   <LogOut size={16} />
-                </button>
+                </PraxisButton>
               </form>
               <div
                 className="w-6 h-6 rounded-full flex items-center justify-center cx-type-xs font-semibold shrink-0 overflow-hidden mt-1"
@@ -1596,12 +1600,14 @@ export function Sidebar({
                 small
               />
               <form action="/auth/sign-out" method="post">
-                <button
+                <PraxisButton
                   type="submit"
-                  className="w-full flex items-center gap-2 px-3 py-2 cx-type-sm rounded-lg transition-colors duration-150 text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]"
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start"
                 >
                   <LogOut size={16} strokeWidth={2} /> Sign out
-                </button>
+                </PraxisButton>
               </form>
               <div className="px-3 pt-2 flex items-center gap-2">
                 <div
@@ -1767,6 +1773,7 @@ function NavLink({
   const inner = (
     <motion.div
       whileHover={!shouldReduceMotion ? { y: -1 } : undefined}
+      whileTap={!shouldReduceMotion ? { scale: 0.97 } : undefined}
       transition={{ duration: 0.15, ease: [...CX_EASE] }}
     >
       <Link
