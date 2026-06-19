@@ -1,6 +1,7 @@
 import type { EmployeeId } from "@/lib/conduit/employees";
 import { EMPLOYEES } from "@/lib/conduit/employees";
 import { EMPLOYEE_ICON } from "@/components/conduit/EmployeeBadge";
+import { SPECIALIST_ICON_STROKE } from "@/lib/ui/specialist-icons";
 
 export type PraxisAvatarSize = "sm" | "md" | "lg" | "xl" | "2xl";
 export type PraxisAvatarPulse = "ambient" | "streaming" | "celebration";
@@ -65,7 +66,7 @@ export function PraxisAvatar({
       aria-label={ariaLabel ?? `${meta.name}, ${meta.role}`}
       style={style}
     >
-      <Icon size={glyphSize} strokeWidth={2.25} aria-hidden />
+      <Icon size={glyphSize} strokeWidth={SPECIALIST_ICON_STROKE} aria-hidden />
     </span>
   );
 }

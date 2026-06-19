@@ -308,7 +308,7 @@ export function ConversationSearchBar() {
                       boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 60%, transparent)`,
                     }}
                   >
-                    <RecentIcon size={9} style={{ strokeWidth: 2.5 }} />
+                    <RecentIcon size={9} strokeWidth={1.75} />
                   </span>
                 )}
                 <div className="min-w-0 flex-1">

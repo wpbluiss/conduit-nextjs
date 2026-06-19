@@ -130,7 +130,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
       id: `convo-${c.id}`,
       label: c.title || "Untitled chat",
       sublabel: emp ? `with ${employeeLabel(emp)}` : "Conversation",
-      icon: <Icon size={ICON_SIZE} style={emp ? { color: DEPT_COLOR[emp] } : undefined} />,
+      icon: <Icon size={ICON_SIZE} strokeWidth={1.75} style={emp ? { color: DEPT_COLOR[emp] } : undefined} />,
       href: `/app?c=${c.id}`,
       group: "Conversations",
     };
@@ -143,7 +143,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
       id: `specialist-${emp}`,
       label: employeeLabel(emp),
       sublabel: "Open a new chat",
-      icon: <Icon size={ICON_SIZE} style={{ color: DEPT_COLOR[emp] }} />,
+      icon: <Icon size={ICON_SIZE} strokeWidth={1.75} style={{ color: DEPT_COLOR[emp] }} />,
       href: `/app?pin=${emp}`,
       group: "Specialists",
     };
