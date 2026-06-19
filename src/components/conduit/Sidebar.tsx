@@ -34,7 +34,7 @@ import {
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
 import { SpecialistAvatar } from "./SpecialistAvatar";
-import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
+import { EMPLOYEE_ORDER, EMPLOYEES } from "@/lib/conduit/employees";
 import { useNicknames } from "@/context/NicknameContext";
 import { PraxisLogo } from "./PraxisLogo";
 import { SidebarBuildPip } from "./builds/in-flight/SidebarBuildPip";
@@ -128,7 +128,7 @@ function SidebarUpgradeBanner({
 
   return (
     <div
-      className="mx-3 mb-2 rounded-xl"
+      className="mx-3 mb-2 rounded-[var(--cx-radius-md)]"
       style={{
         background: "color-mix(in srgb, var(--cx-accent) 6%, var(--cx-surface))",
         border: "1px solid color-mix(in srgb, var(--cx-accent) 20%, var(--cx-border))",
@@ -621,7 +621,7 @@ export function Sidebar({
         aria-label="Navigation"
         animate={{ width: collapsed ? 52 : 256, minWidth: collapsed ? 52 : 256 }}
         transition={skipTransition || shouldReduceMotion ? { duration: 0 } : { ...CX_SPRING_SOFT }}
-        className={`cx-glass fixed md:static z-40 inset-y-0 left-0 flex flex-col overflow-hidden ${
+        className={`cx-glass border-r border-[var(--cx-glass-border)] fixed md:static z-40 inset-y-0 left-0 flex flex-col overflow-hidden ${
           open ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
         style={{
@@ -682,15 +682,16 @@ export function Sidebar({
           {!collapsed && (
             <>
               <div className="hidden md:flex items-center gap-1">
-                <button
+                <PraxisButton
                   type="button"
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={toggleCollapsed}
                   aria-label="Collapse sidebar"
                   title="Collapse sidebar"
-                  className="cx-icon-btn cx-focus-ring"
                 >
                   <PanelLeftClose size={16} strokeWidth={2} />
-                </button>
+                </PraxisButton>
               </div>
               <PraxisButton
                 type="button"
@@ -709,15 +710,16 @@ export function Sidebar({
         {/* Expand button when collapsed — desktop only */}
         {collapsed && (
           <div className="hidden md:flex justify-center py-2 border-b border-[var(--cx-glass-border)]">
-            <button
+            <PraxisButton
               type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={toggleCollapsed}
               aria-label="Expand sidebar"
               title="Expand sidebar"
-              className="cx-icon-btn cx-focus-ring"
             >
               <PanelLeftOpen size={16} strokeWidth={2} />
-            </button>
+            </PraxisButton>
           </div>
         )}
 
@@ -784,10 +786,7 @@ export function Sidebar({
                 style={{ borderBottom: "1px solid var(--cx-glass-border)" }}
               >
                 <Pin size={10} aria-hidden style={{ color: "var(--cx-text-faint)" }} />
-                <span
-                  className="cx-mono cx-type-xs font-semibold uppercase tracking-[0.15em]"
-                  style={{ color: "var(--cx-text-faint)" }}
-                >
+                <span className="cx-label" style={{ color: "var(--cx-text-faint)", letterSpacing: "0.15em" }}>
                   Pinned
                 </span>
               </div>
@@ -796,12 +795,13 @@ export function Sidebar({
                   const isStreaming = streamingEmployee === emp;
                   const allowed = allowedEmployees.includes(emp);
                   const active = pathname === `/app/team/${emp}`;
+                  const empRole = EMPLOYEES[emp]?.role ?? "";
                   const rowInner = (
                     <motion.span
                       whileHover={shouldReduceMotion ? undefined : { scale: 1.01 }}
                       whileTap={shouldReduceMotion ? undefined : { scale: 0.99 }}
-                      transition={{ duration: 0.15, ease: [...CX_EASE] }}
-                      className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]" : ""}`}
+                      transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
+                      className={`relative flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]" : ""}`}
                       style={{
                         background: active ? "var(--cx-accent-tint)" : undefined,
                       }}
@@ -818,12 +818,22 @@ export function Sidebar({
                         />
                       )}
                       <SpecialistAvatar employee={emp} size={24} active={active} streaming={isStreaming} />
-                      <span
-                        className="truncate flex-1 cx-type-sm"
-                        style={{ color: "var(--cx-text)", fontWeight: active ? 600 : 400 }}
-                      >
-                        {labelFor(emp)}
-                      </span>
+                      <div className="min-w-0 flex-1">
+                        <span
+                          className="block truncate cx-type-sm"
+                          style={{ color: "var(--cx-text)", fontWeight: active ? 600 : 400 }}
+                        >
+                          {labelFor(emp)}
+                        </span>
+                        {empRole && (
+                          <span
+                            className="block truncate cx-mono cx-type-xs"
+                            style={{ color: "var(--cx-text-faint)" }}
+                          >
+                            {empRole}
+                          </span>
+                        )}
+                      </div>
                       {!allowed ? (
                         <Lock
                           size={10}
@@ -863,10 +873,10 @@ export function Sidebar({
               <button
                 type="button"
                 onClick={() => setTeamExpanded((v) => !v)}
-                className="w-full mx-0 flex items-center justify-between px-3 pt-1 pb-2 cx-type-xs font-semibold uppercase tracking-[0.15em] transition-colors duration-150"
-                style={{ color: "var(--cx-text-faint)", borderBottom: "1px solid var(--cx-glass-border)", marginBottom: "4px" }}
+                className="w-full mx-0 flex items-center justify-between px-3 pt-1 pb-2 transition-colors duration-150 hover:opacity-80"
+                style={{ borderBottom: "1px solid var(--cx-glass-border)", marginBottom: "4px" }}
               >
-                <span className="cx-mono inline-flex items-center gap-2">
+                <span className="cx-label inline-flex items-center gap-2" style={{ color: "var(--cx-text-faint)", letterSpacing: "0.15em" }}>
                   <Users2 size={10} strokeWidth={2} aria-hidden /> Specialists
                 </span>
                 <span aria-hidden style={{ fontSize: "var(--cx-type-xs)" }}>
@@ -879,12 +889,13 @@ export function Sidebar({
                     const isStreaming = streamingEmployee === emp;
                     const allowed = allowedEmployees.includes(emp);
                     const active = pathname === `/app/team/${emp}`;
+                    const empRole = EMPLOYEES[emp]?.role ?? "";
                     const rowInner = (
                       <motion.span
                         whileHover={shouldReduceMotion ? undefined : { scale: 1.01 }}
                         whileTap={shouldReduceMotion ? undefined : { scale: 0.99 }}
-                        transition={{ duration: 0.15, ease: [...CX_EASE] }}
-                        className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]" : ""}`}
+                        transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
+                        className={`relative flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]" : ""}`}
                         style={{
                           background: active ? "var(--cx-accent-tint)" : undefined,
                         }}
@@ -901,12 +912,22 @@ export function Sidebar({
                           />
                         )}
                         <SpecialistAvatar employee={emp} size={24} active={active} streaming={isStreaming} />
-                        <span
-                          className="truncate flex-1 cx-type-sm"
-                          style={{ color: "var(--cx-text)", fontWeight: active ? 600 : 400 }}
-                        >
-                          {labelFor(emp)}
-                        </span>
+                        <div className="min-w-0 flex-1">
+                          <span
+                            className="block truncate cx-type-sm"
+                            style={{ color: "var(--cx-text)", fontWeight: active ? 600 : 400 }}
+                          >
+                            {labelFor(emp)}
+                          </span>
+                          {empRole && (
+                            <span
+                              className="block truncate cx-mono cx-type-xs"
+                              style={{ color: "var(--cx-text-faint)" }}
+                            >
+                              {empRole}
+                            </span>
+                          )}
+                        </div>
                         {!allowed ? (
                           <Lock
                             size={10}
@@ -1029,7 +1050,7 @@ export function Sidebar({
             </div>
           )}
 
-          <div className="mt-3 space-y-0.5">
+          <div className="mt-3 space-y-1">
             <NavLink
               href="/app/voice"
               icon={<Mic size={20} strokeWidth={2} />}
@@ -1180,10 +1201,7 @@ export function Sidebar({
                 className="mx-3 mt-3 mb-2 pb-2 flex items-center gap-2"
                 style={{ borderBottom: "1px solid var(--cx-glass-border)" }}
               >
-                <span
-                  className="cx-mono cx-type-xs font-semibold uppercase tracking-[0.15em]"
-                  style={{ color: "var(--cx-text-faint)" }}
-                >
+                <span className="cx-label" style={{ color: "var(--cx-text-faint)", letterSpacing: "0.15em" }}>
                   Conversations
                 </span>
               </div>
@@ -1478,7 +1496,7 @@ export function Sidebar({
 
         {/* Bottom — settings, billing, sign out, email, tier */}
         <div
-          className="pt-2 pb-3 space-y-0.5"
+          className="pt-2 pb-3 space-y-1"
           style={{
             borderTop: "1px solid var(--cx-glass-border)",
             paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0.75rem))",
@@ -1542,7 +1560,7 @@ export function Sidebar({
               </div>
             </div>
           ) : (
-            <div className="px-2 space-y-0.5">
+            <div className="px-2 space-y-1">
               <ChangelogPopover />
               <div className="px-1"><NotificationCenter /></div>
               <PraxisButton
