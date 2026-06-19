@@ -4,7 +4,7 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Link, Pin, Search, Share2, Tag, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { UpgradeCTABanner } from "./UpgradeCTABanner";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, useTransform } from "framer-motion";
 import { MESSAGE_SENT } from "@/lib/ui/motion";
 import { CX_REWARD } from "@/lib/design-system/cx-tokens";
 import type { EmployeeKey } from "@/lib/ai/provider";
@@ -2786,6 +2786,53 @@ function formatMessageTimestamp(iso: string): string {
   });
 }
 
+/**
+ * CountTick — animated word-count readout shown when a specialist completes a turn.
+ * Counts from 0 → word count over 380ms (easing [0.22,1,0.36,1]).
+ * prefers-reduced-motion: renders the final value without animation.
+ */
+function CountTick({ target, active }: { target: number; active: boolean }) {
+  const prefersReducedMotion = useReducedMotion();
+  const count = useMotionValue(0);
+  const displayCount = useTransform(count, (v) => String(Math.round(v)));
+
+  useEffect(() => {
+    if (!active) {
+      count.set(0);
+      return;
+    }
+    if (prefersReducedMotion) {
+      count.set(target);
+      return;
+    }
+    const controls = animate(count, target, {
+      duration: 0.38,
+      ease: [0.22, 1, 0.36, 1],
+    });
+    return () => controls.stop();
+  }, [active, target, count, prefersReducedMotion]);
+
+  return (
+    <AnimatePresence>
+      {active && (
+        <motion.span
+          key="count-tick"
+          aria-hidden
+          className="cx-mono tabular-nums select-none inline-flex items-center gap-0.5"
+          style={{ color: CX_REWARD, fontSize: 11 }}
+          initial={{ opacity: 0, x: -3 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, transition: { duration: 0.2, ease: "easeOut" } }}
+          transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <motion.span>{displayCount}</motion.span>
+          <span>{"w"}</span>
+        </motion.span>
+      )}
+    </AnimatePresence>
+  );
+}
+
 function MessageTimestamp({
   createdAt,
   touchVisible,
@@ -3161,6 +3208,11 @@ const MessageBubble = memo(function MessageBubble({
                 )}
               </AnimatePresence>
             </span>
+            {/* Word-count tick — counts up when specialist finishes */}
+            <CountTick
+              target={message.content.split(/\s+/).filter(Boolean).length}
+              active={rewarded}
+            />
             {message.created_at && !message.pending && (
               <MessageTimestamp
                 createdAt={message.created_at}
