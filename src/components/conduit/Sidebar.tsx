@@ -628,6 +628,8 @@ export function Sidebar({
         style={{
           borderColor: "var(--cx-glass-border)",
           transition: shouldReduceMotion ? "none" : "transform 180ms cubic-bezier(0.22,1,0.36,1)",
+          backdropFilter: "blur(24px) saturate(140%)",
+          WebkitBackdropFilter: "blur(24px) saturate(140%)",
         }}
       >
         {/* Header — workspace logo / Praxis wordmark + collapse toggle */}
@@ -691,7 +693,7 @@ export function Sidebar({
                   title="Collapse sidebar"
                   className="cx-icon-btn cx-focus-ring"
                 >
-                  <PanelLeftClose size={16} strokeWidth={1.75} />
+                  <PanelLeftClose size={16} strokeWidth={2} />
                 </button>
               </div>
               <PraxisButton
@@ -718,61 +720,50 @@ export function Sidebar({
               title="Expand sidebar"
               className="cx-icon-btn cx-focus-ring"
             >
-              <PanelLeftOpen size={16} strokeWidth={1.75} />
+              <PanelLeftOpen size={16} strokeWidth={2} />
             </button>
           </div>
         )}
 
         {/* New chat — quick action */}
         {collapsed ? (
-          <motion.button
-            type="button"
-            onClick={() => {
-              close();
-              router.push("/app");
-              router.refresh();
-            }}
-            title="New chat"
-            aria-label="New chat"
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.94 }}
-            transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
-            className="mx-auto my-2 flex items-center justify-center w-8 h-8 rounded-lg"
-            style={{
-              background: "var(--cx-accent-tint)",
-              border: "1px solid color-mix(in srgb, var(--cx-accent) 30%, var(--cx-border))",
-              color: "var(--cx-accent)",
-            }}
-          >
-            <Plus size={14} />
-          </motion.button>
+          <div className="flex justify-center my-2">
+            <Button
+              variant="primary"
+              size="icon-sm"
+              onClick={() => {
+                close();
+                router.push("/app");
+                router.refresh();
+              }}
+              aria-label="New chat"
+              title="New chat"
+            >
+              <Plus size={14} strokeWidth={2} />
+            </Button>
+          </div>
         ) : (
-          <motion.button
-            type="button"
-            onClick={() => {
-              close();
-              router.push("/app");
-              router.refresh();
-            }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
-            className="mx-3 my-2 flex items-center gap-2 px-3 py-2 rounded-lg cx-type-sm font-medium"
-            style={{
-              background: "var(--cx-accent-tint)",
-              border: "1px solid color-mix(in srgb, var(--cx-accent) 28%, var(--cx-border))",
-              color: "var(--cx-accent-bright)",
-            }}
-          >
-            <Plus size={14} /> New chat
-          </motion.button>
+          <div className="mx-3 my-2">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                close();
+                router.push("/app");
+                router.refresh();
+              }}
+              className="w-full justify-start"
+            >
+              <Plus size={14} strokeWidth={2} /> New chat
+            </Button>
+          </div>
         )}
 
         {/* Primary nav sections */}
         <nav className="flex-1 overflow-y-auto pb-3" aria-label="Main navigation">
           <NavLink
             href="/app/workspace"
-            icon={<LayoutGrid size={20} strokeWidth={1.75} />}
+            icon={<LayoutGrid size={20} strokeWidth={2} />}
             label="Workspace"
             active={isActive("/app/workspace")}
             onClick={close}
@@ -781,7 +772,7 @@ export function Sidebar({
           <div data-tour-target="specialists">
           <NavLink
             href="/app/team"
-            icon={<Users2 size={20} strokeWidth={1.75} />}
+            icon={<Users2 size={20} strokeWidth={2} />}
             label="Team"
             active={pathname === "/app/team"}
             onClick={close}
@@ -798,7 +789,7 @@ export function Sidebar({
               >
                 <Pin size={9} aria-hidden style={{ color: "var(--cx-text-faint)" }} />
                 <span
-                  className="cx-type-xs font-semibold uppercase tracking-[0.15em]"
+                  className="cx-mono cx-type-xs font-semibold uppercase tracking-[0.15em]"
                   style={{ color: "var(--cx-text-faint)" }}
                 >
                   Pinned
@@ -826,7 +817,7 @@ export function Sidebar({
                       {active && (
                         <span
                           aria-hidden
-                          className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full"
+                          className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full"
                           style={{ background: "var(--cx-accent)" }}
                         />
                       )}
@@ -879,7 +870,7 @@ export function Sidebar({
                 className="w-full mx-0 flex items-center justify-between px-3 pt-1 pb-2 cx-type-xs font-semibold uppercase tracking-[0.15em] transition-colors duration-100"
                 style={{ color: "var(--cx-text-faint)", borderBottom: "1px solid var(--cx-glass-border)", marginBottom: "4px" }}
               >
-                <span className="inline-flex items-center gap-1.5">
+                <span className="cx-mono inline-flex items-center gap-1.5">
                   <Users2 size={9} strokeWidth={2} aria-hidden /> Specialists
                 </span>
                 <span aria-hidden style={{ fontSize: "var(--cx-type-xs)" }}>
@@ -909,7 +900,7 @@ export function Sidebar({
                         {active && (
                           <span
                             aria-hidden
-                            className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full"
+                            className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full"
                             style={{ background: "var(--cx-accent)" }}
                           />
                         )}
@@ -1045,7 +1036,7 @@ export function Sidebar({
           <div className="mt-3 space-y-0.5">
             <NavLink
               href="/app/voice"
-              icon={<Mic size={20} strokeWidth={1.75} />}
+              icon={<Mic size={20} strokeWidth={2} />}
               label="Voice Room"
               active={isActive("/app/voice")}
               onClick={close}
@@ -1054,7 +1045,7 @@ export function Sidebar({
             {allowedEmployees.includes("sales") && (
               <NavLink
                 href="/app/team/sales"
-                icon={<Sparkles size={20} strokeWidth={1.75} />}
+                icon={<Sparkles size={20} strokeWidth={2} />}
                 label="Leads"
                 active={pathname === "/app/team/sales"}
                 onClick={close}
@@ -1064,7 +1055,7 @@ export function Sidebar({
             <div data-tour-target="memory">
             <NavLink
               href="/app/activity"
-              icon={<Activity size={20} strokeWidth={1.75} />}
+              icon={<Activity size={20} strokeWidth={2} />}
               label="Activity"
               active={isActive("/app/activity")}
               onClick={close}
@@ -1072,7 +1063,7 @@ export function Sidebar({
             />
             <NavLink
               href="/app/memory"
-              icon={<Brain size={20} strokeWidth={1.75} />}
+              icon={<Brain size={20} strokeWidth={2} />}
               label="Memory"
               active={isActive("/app/memory")}
               onClick={close}
@@ -1081,7 +1072,7 @@ export function Sidebar({
             </div>
             <NavLink
               href="/app/outputs"
-              icon={<Bookmark size={20} strokeWidth={1.75} />}
+              icon={<Bookmark size={20} strokeWidth={2} />}
               label="Outputs"
               active={isActive("/app/outputs")}
               onClick={close}
@@ -1109,7 +1100,7 @@ export function Sidebar({
                     <span
                       aria-hidden
                       className={`absolute left-0 rounded-full ${
-                        collapsed ? "top-1.5 bottom-1.5 w-0.5" : "top-2 bottom-2 w-[3px]"
+                        collapsed ? "top-1.5 bottom-1.5 w-0.5" : "top-2 bottom-2 w-[2px]"
                       }`}
                       style={{ background: "var(--cx-accent)" }}
                     />
@@ -1118,7 +1109,7 @@ export function Sidebar({
                     className="relative inline-flex shrink-0"
                     style={{ color: isActive("/app/builds") ? "var(--cx-accent)" : undefined }}
                   >
-                    <Hammer size={collapsed ? 20 : 16} strokeWidth={1.75} />
+                    <Hammer size={collapsed ? 20 : 16} strokeWidth={2} />
                     <SidebarBuildPip
                       initial={inFlightBuildsInitial}
                       accountId={accountId}
@@ -1148,7 +1139,7 @@ export function Sidebar({
             })()}
             <NavLink
               href="/app/analytics"
-              icon={<BarChart3 size={20} strokeWidth={1.75} />}
+              icon={<BarChart3 size={20} strokeWidth={2} />}
               label="Analytics"
               active={isActive("/app/analytics")}
               onClick={close}
@@ -1194,7 +1185,7 @@ export function Sidebar({
                 style={{ borderBottom: "1px solid var(--cx-glass-border)" }}
               >
                 <span
-                  className="cx-type-xs font-semibold uppercase tracking-[0.15em]"
+                  className="cx-mono cx-type-xs font-semibold uppercase tracking-[0.15em]"
                   style={{ color: "var(--cx-text-faint)" }}
                 >
                   Conversations
@@ -1374,7 +1365,7 @@ export function Sidebar({
                             {active && (
                               <span
                                 aria-hidden
-                                className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full"
+                                className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full"
                                 style={{ background: "var(--cx-accent)" }}
                               />
                             )}
@@ -1571,7 +1562,7 @@ export function Sidebar({
               <div data-tour-target="settings">
               <NavLink
                 href="/app/settings"
-                icon={<Settings size={16} strokeWidth={1.75} />}
+                icon={<Settings size={16} strokeWidth={2} />}
                 label="Settings"
                 active={
                   pathname === "/app/settings" ||
@@ -1584,7 +1575,7 @@ export function Sidebar({
               </div>
               <NavLink
                 href="/app/settings/billing"
-                icon={<CreditCard size={16} strokeWidth={1.75} />}
+                icon={<CreditCard size={16} strokeWidth={2} />}
                 label="Billing"
                 active={isActive("/app/settings/billing")}
                 onClick={close}
@@ -1595,7 +1586,7 @@ export function Sidebar({
                   type="submit"
                   className="w-full flex items-center gap-2 px-3 py-1.5 cx-type-sm rounded-lg transition-colors duration-100 text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)]"
                 >
-                  <LogOut size={16} strokeWidth={1.75} /> Sign out
+                  <LogOut size={16} strokeWidth={2} /> Sign out
                 </button>
               </form>
               <div className="px-3 pt-2 flex items-center gap-2">
@@ -1788,7 +1779,7 @@ function NavLink({
           <span
             aria-hidden
             className={`absolute left-0 rounded-full ${
-              collapsed ? "top-1.5 bottom-1.5 w-0.5" : "top-2 bottom-2 w-[3px]"
+              collapsed ? "top-1.5 bottom-1.5 w-0.5" : "top-2 bottom-2 w-[2px]"
             }`}
             style={{ background: "var(--cx-accent)" }}
           />
