@@ -4,8 +4,9 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Link, Pin, Search, Share2, Tag, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { UpgradeCTABanner } from "./UpgradeCTABanner";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { MESSAGE_SENT } from "@/lib/ui/motion";
+import { CX_REWARD } from "@/lib/design-system/cx-tokens";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
   DEPT_COLOR,
@@ -2901,6 +2902,8 @@ const MessageBubble = memo(function MessageBubble({
     }
   }, [isEditing]);
 
+  const prefersReducedMotion = useReducedMotion();
+
   if (message.role === "user") {
     const meta = (message.metadata ?? {}) as Record<string, unknown>;
     const isVoice = meta.type === "voice";
@@ -3105,10 +3108,59 @@ const MessageBubble = memo(function MessageBubble({
               transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
             >
         {/* Glass bubble — chip header + content in one pane */}
-        <div className="conduit-bubble-assistant max-w-[68ch]">
+        <div className="conduit-bubble-assistant max-w-[68ch] relative">
+          {/* Reward shimmer — green glow ring that fades when specialist completes */}
+          <AnimatePresence>
+            {rewarded && !prefersReducedMotion && (
+              <motion.span
+                key="bubble-reward-shimmer"
+                aria-hidden
+                className="pointer-events-none absolute inset-0"
+                style={{ borderRadius: "var(--cx-radius-md, 12px)", zIndex: 1 }}
+                initial={{ opacity: 0.85 }}
+                animate={{ opacity: 0 }}
+                exit={{}}
+                transition={{ duration: 0.52, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <span
+                  aria-hidden
+                  className="absolute inset-0"
+                  style={{
+                    borderRadius: "var(--cx-radius-md, 12px)",
+                    boxShadow: `0 0 0 1px ${CX_REWARD}38, 0 0 18px 5px ${CX_REWARD}16`,
+                    pointerEvents: "none",
+                  }}
+                />
+              </motion.span>
+            )}
+          </AnimatePresence>
           {/* Bubble header: specialist chip + timestamp + meta */}
           <div className="px-4 pt-3 pb-2 flex items-center gap-2 flex-wrap">
-            <SpecialistChip employee={employee} label={nickLabelFor(employee)} />
+            {/* Chip with reward pulse ring — accent→green burst on specialist completion */}
+            <span className="relative inline-flex">
+              <SpecialistChip employee={employee} label={nickLabelFor(employee)} />
+              <AnimatePresence>
+                {rewarded && !prefersReducedMotion && (
+                  <motion.span
+                    key="chip-reward-ring"
+                    aria-hidden
+                    className="pointer-events-none absolute"
+                    style={{
+                      top: -4,
+                      right: -4,
+                      bottom: -4,
+                      left: -4,
+                      borderRadius: 9999,
+                      boxShadow: `0 0 0 2px ${DEPT_COLOR[employee]}77, 0 0 10px 3px ${CX_REWARD}40`,
+                    }}
+                    initial={{ opacity: 0.9, scale: 0.88 }}
+                    animate={{ opacity: 0, scale: 1.3 }}
+                    exit={{}}
+                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                )}
+              </AnimatePresence>
+            </span>
             {message.created_at && !message.pending && (
               <MessageTimestamp
                 createdAt={message.created_at}
