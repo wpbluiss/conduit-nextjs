@@ -11,22 +11,26 @@ import {
   BarChart3,
   Bookmark,
   Brain,
+  Check,
   CircleHelp,
   CreditCard,
   Hammer,
   LayoutGrid,
   Lock,
   LogOut,
+  MessageSquare,
   Mic,
   Moon,
   PanelLeftClose,
   PanelLeftOpen,
+  Pencil,
   Pin,
   Plus,
   Search,
   Settings,
   Sparkles,
   Sun,
+  Trash2,
   Users2,
   Monitor,
   X,
@@ -374,6 +378,12 @@ export function Sidebar({
   // Specialist filter chip — null = "All"
   const [specialistFilter, setSpecialistFilter] = useState<EmployeeKey | null>(null);
 
+  // Inline rename / delete for conversation rows
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
   const shouldReduceMotion = useReducedMotion() ?? false;
   const { pinned, pin, unpin } = usePinnedSpecialists();
 
@@ -560,7 +570,63 @@ export function Sidebar({
     return () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
   }, []);
 
-  const openPeek = (id: string, el: HTMLAnchorElement, fromFocus = false) => {
+  const startRename = (id: string, currentTitle: string) => {
+    setDeletingId(null);
+    setRenamingId(id);
+    setRenameValue(currentTitle);
+  };
+
+  const commitRename = async () => {
+    if (!renamingId) return;
+    const idToRename = renamingId;
+    const trimmed = renameValue.trim();
+    if (!trimmed) { setRenamingId(null); return; }
+    const prev = titleOverrides[idToRename] ?? conversations.find((c) => c.id === idToRename)?.title ?? "Untitled chat";
+    setRenamingId(null);
+    if (trimmed === prev) return;
+    setTitleOverrides((p) => ({ ...p, [idToRename]: trimmed }));
+    window.dispatchEvent(new CustomEvent("praxis:title_updated", { detail: { conversation_id: idToRename, title: trimmed } }));
+    try {
+      const res = await fetch(`/api/conduit/conversations/${idToRename}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ title: trimmed }),
+      });
+      if (!res.ok) {
+        setTitleOverrides((p) => ({ ...p, [idToRename]: prev }));
+        window.dispatchEvent(new CustomEvent("praxis:title_updated", { detail: { conversation_id: idToRename, title: prev } }));
+      }
+    } catch {
+      setTitleOverrides((p) => ({ ...p, [idToRename]: prev }));
+      window.dispatchEvent(new CustomEvent("praxis:title_updated", { detail: { conversation_id: idToRename, title: prev } }));
+    }
+  };
+
+  const cancelRename = () => { setRenamingId(null); setRenameValue(""); };
+
+  const handleRenameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") { e.preventDefault(); void commitRename(); }
+    if (e.key === "Escape") { e.preventDefault(); cancelRename(); }
+  };
+
+  const confirmDelete = async (id: string) => {
+    setDeleteLoading(true);
+    try {
+      const res = await fetch(`/api/conduit/conversations/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setDeletingId(null);
+        setDeleteLoading(false);
+        if (activeId === id) router.push("/app");
+        router.refresh();
+      } else {
+        setDeleteLoading(false);
+      }
+    } catch {
+      setDeleteLoading(false);
+    }
+  };
+
+  const openPeek = (id: string, el: HTMLElement, fromFocus = false) => {
     // Suppress hover tooltip on touch/coarse-pointer devices; always allow keyboard focus.
     if (!fromFocus && isCoarsePointer) return;
     if (peekOpenTimer.current) clearTimeout(peekOpenTimer.current);
@@ -1177,21 +1243,30 @@ export function Sidebar({
           {/* Empty state — no conversations yet, not in icon-only mode */}
           {!collapsed && conversations.length === 0 && (
             <div className="mt-8 px-4 flex flex-col items-center text-center gap-3">
-              <PraxisLogo size={28} withWordmark glow />
-              <p className="cx-type-base font-semibold mt-1" style={{ color: "var(--cx-text)" }}>
-                Your specialists are ready
-              </p>
-              <p className="cx-type-xs max-w-[13rem]" style={{ color: "var(--cx-text-muted)", lineHeight: "var(--cx-lh-body)" }}>
-                Nine specialists. Zero payroll. Start a conversation to put your team to work.
-              </p>
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{
+                  background: "var(--cx-accent-tint)",
+                  border: "1px solid color-mix(in srgb, var(--cx-accent) 20%, transparent)",
+                }}
+              >
+                <MessageSquare size={18} strokeWidth={1.75} style={{ color: "var(--cx-accent)" }} />
+              </div>
+              <div>
+                <p className="cx-type-sm font-semibold" style={{ color: "var(--cx-text)" }}>
+                  No conversations yet
+                </p>
+                <p className="cx-type-xs mt-1 max-w-[11rem] mx-auto" style={{ color: "var(--cx-text-muted)", lineHeight: "var(--cx-lh-body)" }}>
+                  Pick a specialist and start a conversation
+                </p>
+              </div>
               <Link
                 href="/app"
                 onClick={close}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg cx-type-xs font-medium hover:opacity-90 transition-opacity mt-1"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg cx-type-xs font-medium hover:opacity-90 transition-opacity"
                 style={{ background: "var(--cx-accent)", color: "var(--cx-canvas)" }}
               >
-                <Plus size={12} strokeWidth={1.75} />
-                Start a conversation
+                Start your first conversation →
               </Link>
             </div>
           )}
@@ -1360,89 +1435,200 @@ export function Sidebar({
                         const preview = c.last_message
                           ? c.last_message.replace(/\n+/g, " ").trim().slice(0, 100)
                           : null;
+                        const displayTitle = titleOverrides[c.id] ?? c.title ?? "Untitled chat";
+
+                        const avatarEl = (
+                          <span className="shrink-0 mt-1">
+                            {isTeam ? (
+                              <span
+                                aria-hidden
+                                className="inline-block w-3.5 h-3.5 rounded-full"
+                                style={{
+                                  background: "conic-gradient(from 90deg, var(--color-dept-marketing), var(--color-dept-sales), var(--color-dept-engineering), var(--color-dept-jarvis), var(--color-dept-marketing))",
+                                }}
+                              />
+                            ) : (
+                              <SpecialistAvatar employee={empKey} size={16} active={active} />
+                            )}
+                          </span>
+                        );
+
                         return (
                           <motion.div
                             key={c.id}
+                            className="group relative"
                             whileHover={shouldReduceMotion ? undefined : { x: 2 }}
                             whileTap={shouldReduceMotion ? undefined : { x: 0 }}
                             transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
                           >
-                          <Link
-                            href={`/app?c=${c.id}`}
-                            onClick={close}
-                            className={`relative flex items-start gap-2 pl-3 pr-2 py-2 rounded-lg transition-colors duration-150 group ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]" : ""}`}
-                            style={{
-                              background: active ? "var(--cx-accent-tint)" : undefined,
-                            }}
-                            onMouseEnter={(e) => openPeek(c.id, e.currentTarget)}
-                            onMouseLeave={closePeek}
-                            onFocus={(e) => openPeek(c.id, e.currentTarget, true)}
-                            onBlur={closePeek}
-                          >
-                            {active && (
-                              <span
-                                aria-hidden
-                                className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full"
-                                style={{ background: "var(--cx-accent)" }}
-                              />
-                            )}
-                            {/* Avatar aligned to first text line */}
-                            <span className="shrink-0 mt-1">
-                              {isTeam ? (
-                                <span
-                                  aria-hidden
-                                  className="inline-block w-3.5 h-3.5 rounded-full"
-                                  style={{
-                                    background:
-                                      "conic-gradient(from 90deg, var(--color-dept-marketing), var(--color-dept-sales), var(--color-dept-engineering), var(--color-dept-jarvis), var(--color-dept-marketing))",
-                                  }}
-                                />
-                              ) : (
-                                <SpecialistAvatar employee={empKey} size={16} active={active} />
-                              )}
-                            </span>
-                            {/* Content: title + date on one line, preview below */}
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-baseline gap-1">
-                                <span
-                                  className="truncate flex-1 cx-type-sm leading-snug"
-                                  style={{
-                                    color: "var(--cx-text)",
-                                    fontWeight: active ? 600 : 400,
-                                  }}
-                                >
-                                  {titleOverrides[c.id] ?? c.title ?? "Untitled chat"}
+                            {deletingId === c.id ? (
+                              /* Delete confirmation inline strip */
+                              <div
+                                className="flex items-center gap-2 px-3 py-2 rounded-lg"
+                                style={{
+                                  background: "color-mix(in srgb, var(--cx-danger) 8%, var(--cx-surface))",
+                                  border: "1px solid color-mix(in srgb, var(--cx-danger) 20%, var(--cx-border))",
+                                }}
+                              >
+                                <Trash2 size={12} strokeWidth={1.75} style={{ color: "var(--cx-danger)", flexShrink: 0 }} />
+                                <span className="cx-type-xs flex-1 truncate" style={{ color: "var(--cx-text)" }}>
+                                  Delete this conversation?
                                 </span>
-                                <span
-                                  className="shrink-0 cx-mono cx-type-xs"
-                                  style={{ color: "var(--cx-text-muted)" }}
-                                >
-                                  {relativeDate(c.updated_at)}
-                                </span>
+                                <div className="flex items-center gap-1 shrink-0">
+                                  <PraxisButton
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    onClick={() => setDeletingId(null)}
+                                    aria-label="Cancel delete"
+                                    disabled={deleteLoading}
+                                  >
+                                    <X size={11} strokeWidth={1.75} />
+                                  </PraxisButton>
+                                  <PraxisButton
+                                    type="button"
+                                    variant="danger"
+                                    size="sm"
+                                    onClick={() => confirmDelete(c.id)}
+                                    disabled={deleteLoading}
+                                    aria-label="Confirm delete"
+                                  >
+                                    Delete
+                                  </PraxisButton>
+                                </div>
                               </div>
-                              {preview && (
-                                <p
-                                  className="truncate cx-type-xs mt-1"
-                                  style={{ color: "var(--cx-text-faint)" }}
+                            ) : renamingId === c.id ? (
+                              /* Rename inline mode */
+                              <div
+                                className="relative flex items-start gap-2 pl-3 pr-2 py-2 rounded-lg"
+                                style={{ background: active ? "var(--cx-accent-tint)" : "var(--cx-glass-bg)" }}
+                              >
+                                {active && (
+                                  <span
+                                    aria-hidden
+                                    className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full"
+                                    style={{ background: "var(--cx-accent)" }}
+                                  />
+                                )}
+                                {avatarEl}
+                                <div className="flex-1 min-w-0 flex items-center gap-1">
+                                  <input
+                                    type="text"
+                                    value={renameValue}
+                                    onChange={(e) => setRenameValue(e.target.value)}
+                                    onKeyDown={handleRenameKeyDown}
+                                    onBlur={() => void commitRename()}
+                                    autoFocus
+                                    maxLength={160}
+                                    aria-label="Rename conversation"
+                                    className="flex-1 min-w-0 bg-transparent cx-type-sm outline-none pb-px"
+                                    style={{
+                                      color: "var(--cx-text)",
+                                      borderBottom: "1px solid var(--cx-accent)",
+                                    }}
+                                  />
+                                  <PraxisButton
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    onMouseDown={(e) => { e.preventDefault(); void commitRename(); }}
+                                    aria-label="Save rename"
+                                  >
+                                    <Check size={11} strokeWidth={2} style={{ color: "var(--cx-accent)" }} />
+                                  </PraxisButton>
+                                  <PraxisButton
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    onMouseDown={(e) => { e.preventDefault(); cancelRename(); }}
+                                    aria-label="Cancel rename"
+                                  >
+                                    <X size={11} strokeWidth={1.75} />
+                                  </PraxisButton>
+                                </div>
+                              </div>
+                            ) : (
+                              /* Normal state — link + hover action buttons */
+                              <>
+                                <Link
+                                  href={`/app?c=${c.id}`}
+                                  onClick={close}
+                                  className={`relative flex items-start gap-2 pl-3 pr-9 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]" : ""}`}
+                                  style={{ background: active ? "var(--cx-accent-tint)" : undefined }}
+                                  onMouseEnter={(e) => openPeek(c.id, e.currentTarget)}
+                                  onMouseLeave={closePeek}
+                                  onFocus={(e) => openPeek(c.id, e.currentTarget, true)}
+                                  onBlur={closePeek}
                                 >
-                                  {preview}
-                                </p>
-                              )}
-                              {c.labels && c.labels.length > 0 && (
-                                <span className="flex items-center gap-1 mt-1">
-                                  {c.labels.slice(0, 3).map((l) => (
+                                  {active && (
                                     <span
-                                      key={l.id}
-                                      aria-label={l.name}
-                                      title={l.name}
-                                      className="inline-block w-2 h-2 rounded-full"
-                                      style={{ background: l.color }}
+                                      aria-hidden
+                                      className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full"
+                                      style={{ background: "var(--cx-accent)" }}
                                     />
-                                  ))}
-                                </span>
-                              )}
-                            </div>
-                          </Link>
+                                  )}
+                                  {avatarEl}
+                                  {/* Content: title + date on one line, preview below */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-baseline gap-1">
+                                      <span
+                                        className="truncate flex-1 cx-type-sm leading-snug"
+                                        style={{ color: "var(--cx-text)", fontWeight: active ? 600 : 400 }}
+                                      >
+                                        {displayTitle}
+                                      </span>
+                                      <span
+                                        className="shrink-0 cx-mono cx-type-xs"
+                                        style={{ color: "var(--cx-text-muted)" }}
+                                      >
+                                        {relativeDate(c.updated_at)}
+                                      </span>
+                                    </div>
+                                    {preview && (
+                                      <p className="truncate cx-type-xs mt-1" style={{ color: "var(--cx-text-faint)" }}>
+                                        {preview}
+                                      </p>
+                                    )}
+                                    {c.labels && c.labels.length > 0 && (
+                                      <span className="flex items-center gap-1 mt-1">
+                                        {c.labels.slice(0, 3).map((l) => (
+                                          <span
+                                            key={l.id}
+                                            aria-label={l.name}
+                                            title={l.name}
+                                            className="inline-block w-2 h-2 rounded-full"
+                                            style={{ background: l.color }}
+                                          />
+                                        ))}
+                                      </span>
+                                    )}
+                                  </div>
+                                </Link>
+                                {/* Hover action affordances — hidden at rest, revealed on group hover */}
+                                <div className="absolute right-1 top-1.5 flex items-center gap-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-100 z-10">
+                                  <PraxisButton
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); startRename(c.id, displayTitle); }}
+                                    aria-label="Rename conversation"
+                                    title="Rename"
+                                  >
+                                    <Pencil size={11} strokeWidth={1.75} />
+                                  </PraxisButton>
+                                  <PraxisButton
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); setDeletingId(c.id); }}
+                                    aria-label="Delete conversation"
+                                    title="Delete"
+                                  >
+                                    <Trash2 size={11} strokeWidth={1.75} style={{ color: "var(--cx-danger)" }} />
+                                  </PraxisButton>
+                                </div>
+                              </>
+                            )}
                           </motion.div>
                         );
                       })}
