@@ -30,15 +30,22 @@
   --cx-surface:         #131319;
   --cx-surface-raised:  #1C1C26;
   --cx-surface-overlay: #23232E;
+  /* Spec-exact short aliases (CONSOLE_REDESIGN.md names) */
+  --cx-raised:          var(--cx-surface-raised);
+  --cx-overlay:         var(--cx-surface-overlay);
 
   /* ---- Ink: borders / hairlines ---- */
   --cx-border:          #262630;
   --cx-border-strong:   #33333F;
+  /* Spec-exact alias */
+  --cx-border-subtle:   var(--cx-border);
 
   /* ---- Text scale ---- */
   --cx-text:            #F4F4F7;
   --cx-text-muted:      #A0A0B0;
   --cx-text-faint:      #6B6B7B;
+  /* Spec-exact alias */
+  --cx-text-primary:    var(--cx-text);
 
   /* ---- Glass recipe tokens (depth tiers for frosted glass surfaces) ---- */
   /* Tier 1 — raised (sidebar, cards, composer): subtle bg + moderate blur */
