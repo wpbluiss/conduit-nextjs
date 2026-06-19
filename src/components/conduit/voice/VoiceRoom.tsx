@@ -13,7 +13,7 @@ import {
   type RemoteAudioTrack,
 } from "livekit-client";
 import { Mic, MicOff, X, AlertCircle, PhoneOff } from "lucide-react";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 import Waveform from "./Waveform";
 
 export interface VoiceTokenResponse {

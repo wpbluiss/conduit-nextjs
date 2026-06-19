@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Sparkles, X } from "lucide-react";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 const STORAGE_KEY = "conduit_upgrade_nudge_dismissed";
 

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pencil } from "lucide-react";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 interface Props {
   conversationId: string;

@@ -15,8 +15,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ExternalLink, ArrowRight, EyeOff, X } from "lucide-react";
-import { Button } from "@/components/conduit/ui/Button";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { Button, PraxisButton } from "@/components/conduit/ui/Button";
 import type { DailyUsage } from "@/lib/engineering/limits";
 
 const FAILED_STATUSES = new Set(["failed", "timeout", "aborted"]);

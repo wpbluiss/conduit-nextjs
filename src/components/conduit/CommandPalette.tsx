@@ -23,7 +23,7 @@ import {
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, EMPLOYEE_ICON, employeeLabel } from "./EmployeeBadge";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 interface PaletteItem {
   id: string;

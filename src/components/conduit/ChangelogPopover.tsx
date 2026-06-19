@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Bell, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CHANGELOG_ENTRIES } from "@/lib/conduit/changelog-entries";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 const STORAGE_KEY = "praxis_changelog_last_seen";
 const RECENT_ENTRIES = CHANGELOG_ENTRIES.slice(0, 5);

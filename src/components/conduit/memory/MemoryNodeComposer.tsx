@@ -14,7 +14,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 import type { MemoryKind, MemoryRecord } from "@/lib/ai/memory";
 import type { EmployeeId } from "@/lib/conduit/employees";
 import { MemoryKindPicker } from "./MemoryKindPicker";

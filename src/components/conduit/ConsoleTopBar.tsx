@@ -19,7 +19,7 @@ import {
   Sparkles,
   Users2,
 } from "lucide-react";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 import { useTopBar } from "@/context/TopBarContext";
 import type { LucideIcon } from "lucide-react";
 

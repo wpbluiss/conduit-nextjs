@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CheckCircle, X, Info, Sparkles } from "lucide-react";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 type BannerType =
   | "checkout_success"

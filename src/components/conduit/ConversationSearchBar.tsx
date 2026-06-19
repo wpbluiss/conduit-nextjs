@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MessageSquarePlus, Search, X } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 import { DEPT_COLOR, EMPLOYEE_ICON } from "./EmployeeBadge";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 

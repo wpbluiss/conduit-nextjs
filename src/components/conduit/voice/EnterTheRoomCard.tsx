@@ -7,8 +7,7 @@
 
 import { useState } from "react";
 import { Mic, Lock, AlertCircle } from "lucide-react";
-import { Button } from "@/components/conduit/ui/Button";
-import { PraxisButton } from "@/components/conduit/PraxisButton";
+import { Button, PraxisButton } from "@/components/conduit/ui/Button";
 import VoiceRoom, {
   type ParticipantDisplay,
   type VoiceTokenResponse,
