@@ -2985,7 +2985,7 @@ const MessageBubble = memo(function MessageBubble({
                 style={{ maxWidth: "260px", outline: "none" }}
               />
             ) : (
-              <span className="whitespace-pre-wrap">{message.content}</span>
+              <MarkdownRenderer content={message.content} />
             )}
           </div>
           <div className="flex items-center gap-2">
