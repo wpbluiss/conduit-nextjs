@@ -876,8 +876,8 @@ export function Sidebar({
               <button
                 type="button"
                 onClick={() => setTeamExpanded((v) => !v)}
-                className="w-full mx-0 flex items-center justify-between px-3 py-1 cx-type-xs font-semibold uppercase tracking-[0.15em] transition-colors duration-100"
-                style={{ color: "var(--cx-text-faint)", borderBottom: "1px solid var(--cx-glass-border)", paddingBottom: "6px", marginBottom: "4px" }}
+                className="w-full mx-0 flex items-center justify-between px-3 pt-1 pb-2 cx-type-xs font-semibold uppercase tracking-[0.15em] transition-colors duration-100"
+                style={{ color: "var(--cx-text-faint)", borderBottom: "1px solid var(--cx-glass-border)", marginBottom: "4px" }}
               >
                 <span className="inline-flex items-center gap-1.5">
                   <Users2 size={9} strokeWidth={2} aria-hidden /> Specialists
@@ -1095,12 +1095,15 @@ export function Sidebar({
                   aria-label={collapsed ? "Builds" : undefined}
                   className={[
                     "relative flex items-center rounded-lg transition-colors duration-100",
-                    collapsed ? "justify-center mx-auto w-8 h-8" : "gap-2 px-3 py-2 text-sm",
+                    collapsed ? "justify-center mx-auto w-8 h-8" : "gap-2 px-3 py-2",
                     isActive("/app/builds")
                       ? "text-[var(--cx-text)]"
                       : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)]",
                   ].join(" ")}
-                  style={{ background: isActive("/app/builds") ? "var(--cx-accent-tint)" : undefined }}
+                  style={{
+                    background: isActive("/app/builds") ? "var(--cx-accent-tint)" : undefined,
+                    fontSize: collapsed ? undefined : "var(--cx-type-sm)",
+                  }}
                 >
                   {isActive("/app/builds") && (
                     <span
@@ -1346,6 +1349,9 @@ export function Sidebar({
                         const empKey = (
                           dom && (TEAM as string[]).includes(dom) ? dom : "jarvis"
                         ) as EmployeeKey;
+                        const preview = c.last_message
+                          ? c.last_message.replace(/\n+/g, " ").trim().slice(0, 100)
+                          : null;
                         return (
                           <motion.div
                             key={c.id}
@@ -1356,7 +1362,7 @@ export function Sidebar({
                           <Link
                             href={`/app?c=${c.id}`}
                             onClick={close}
-                            className={`relative flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-lg transition-colors duration-[120ms] group ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)]" : ""}`}
+                            className={`relative flex items-start gap-2 pl-3 pr-2 py-2 rounded-lg transition-colors duration-[120ms] group ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)]" : ""}`}
                             style={{
                               background: active ? "var(--cx-accent-tint)" : undefined,
                             }}
@@ -1372,46 +1378,62 @@ export function Sidebar({
                                 style={{ background: "var(--cx-accent)" }}
                               />
                             )}
-                            {isTeam ? (
-                              <span
-                                aria-hidden
-                                className="inline-block w-3.5 h-3.5 rounded-full shrink-0"
-                                style={{
-                                  background:
-                                    "conic-gradient(from 90deg, var(--color-dept-marketing), var(--color-dept-sales), var(--color-dept-engineering), var(--color-dept-jarvis), var(--color-dept-marketing))",
-                                }}
-                              />
-                            ) : (
-                              <SpecialistAvatar employee={empKey} size={16} active={active} />
-                            )}
-                            <span
-                              className="truncate flex-1 cx-type-base leading-snug"
-                              style={{
-                                color: active ? "var(--cx-text)" : "var(--cx-text-muted)",
-                                fontWeight: 500,
-                              }}
-                            >
-                              {titleOverrides[c.id] ?? c.title ?? "Untitled chat"}
+                            {/* Avatar aligned to first text line */}
+                            <span className="shrink-0 mt-0.5">
+                              {isTeam ? (
+                                <span
+                                  aria-hidden
+                                  className="inline-block w-3.5 h-3.5 rounded-full"
+                                  style={{
+                                    background:
+                                      "conic-gradient(from 90deg, var(--color-dept-marketing), var(--color-dept-sales), var(--color-dept-engineering), var(--color-dept-jarvis), var(--color-dept-marketing))",
+                                  }}
+                                />
+                              ) : (
+                                <SpecialistAvatar employee={empKey} size={16} active={active} />
+                              )}
                             </span>
-                            <span
-                              className="shrink-0 cx-mono cx-type-xs opacity-40 group-hover:opacity-80 transition-opacity duration-[120ms]"
-                              style={{ color: "var(--cx-text-faint)" }}
-                            >
-                              {relativeDate(c.updated_at)}
-                            </span>
-                            {c.labels && c.labels.length > 0 && (
-                              <span className="flex items-center gap-0.5 shrink-0">
-                                {c.labels.slice(0, 3).map((l) => (
-                                  <span
-                                    key={l.id}
-                                    aria-label={l.name}
-                                    title={l.name}
-                                    className="inline-block w-2 h-2 rounded-full"
-                                    style={{ background: l.color }}
-                                  />
-                                ))}
-                              </span>
-                            )}
+                            {/* Content: title + date on one line, preview below */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-baseline gap-1">
+                                <span
+                                  className="truncate flex-1 cx-type-sm leading-snug"
+                                  style={{
+                                    color: active ? "var(--cx-text)" : "var(--cx-text-muted)",
+                                    fontWeight: 500,
+                                  }}
+                                >
+                                  {titleOverrides[c.id] ?? c.title ?? "Untitled chat"}
+                                </span>
+                                <span
+                                  className="shrink-0 cx-mono cx-type-xs opacity-40 group-hover:opacity-70 transition-opacity duration-[120ms]"
+                                  style={{ color: "var(--cx-text-faint)" }}
+                                >
+                                  {relativeDate(c.updated_at)}
+                                </span>
+                              </div>
+                              {preview && (
+                                <p
+                                  className="truncate cx-type-xs mt-0.5"
+                                  style={{ color: "var(--cx-text-faint)" }}
+                                >
+                                  {preview}
+                                </p>
+                              )}
+                              {c.labels && c.labels.length > 0 && (
+                                <span className="flex items-center gap-0.5 mt-0.5">
+                                  {c.labels.slice(0, 3).map((l) => (
+                                    <span
+                                      key={l.id}
+                                      aria-label={l.name}
+                                      title={l.name}
+                                      className="inline-block w-2 h-2 rounded-full"
+                                      style={{ background: l.color }}
+                                    />
+                                  ))}
+                                </span>
+                              )}
+                            </div>
                           </Link>
                           </motion.div>
                         );
@@ -1430,7 +1452,7 @@ export function Sidebar({
                         onClick={close}
                         className="mt-1 flex items-center px-3 py-1.5 cx-type-xs uppercase tracking-[0.15em] text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] transition-colors"
                       >
-                        See all ({conversations.length})
+                        See all <span className="cx-mono">({conversations.length})</span>
                       </Link>
                     )}
                     {filtered.length > 8 && (
@@ -1632,7 +1654,7 @@ export function Sidebar({
             left: ctxMenu.x,
             zIndex: 100,
             minWidth: 140,
-            borderRadius: 10,
+            borderRadius: "var(--cx-radius-md)",
             padding: "4px",
           }}
         >
