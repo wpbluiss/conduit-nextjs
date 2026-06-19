@@ -146,12 +146,11 @@ export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: reduced ? 0 : 0.3 }}
+          className="cx-scrim"
           style={{
             position: "absolute",
             inset: 0,
             background: "rgba(10,9,8,0.55)",
-            backdropFilter: "var(--cx-scrim-blur, blur(2px))",
-            WebkitBackdropFilter: "var(--cx-scrim-blur, blur(2px))",
             pointerEvents: "auto",
           }}
           onClick={dismiss}
