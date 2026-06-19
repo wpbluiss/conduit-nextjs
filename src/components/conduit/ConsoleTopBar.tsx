@@ -312,10 +312,13 @@ export function ConsoleTopBar({
   };
 
   return (
-    <header
-      className="shrink-0 flex items-center h-14 px-3 gap-2 cx-glass-float cx-glass-border sticky top-0 z-20"
+    <motion.header
+      className="shrink-0 flex items-center h-14 px-3 gap-2 cx-glass-float sticky top-0 z-20"
       style={{ borderBottom: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))" }}
       aria-label="Console navigation"
+      initial={{ opacity: 0, y: prefersReduced ? 0 : -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
     >
       {/* Mobile hamburger — triggers Sidebar via CustomEvent */}
       <PraxisButton
@@ -530,6 +533,6 @@ export function ConsoleTopBar({
           />
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 }
