@@ -879,7 +879,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
   return (
     <div className="space-y-6">
       {!voiceConfigured && (
-        <div className="conduit-card p-4 cx-type-xs text-[var(--color-amber)] border-[var(--color-amber)]/40">
+        <div className="conduit-card p-4 cx-type-xs text-[var(--cx-warn)] border-[var(--cx-warn)]/40">
           Voice provider not connected yet. Settings save, previews are
           disabled until upstream keys land.
         </div>
@@ -1077,7 +1077,7 @@ function checkPasswordStrength(pw: string): PwStrength {
 const STRENGTH_COLORS = [
   "",
   "var(--cx-danger)",
-  "var(--color-amber)",
+  "var(--cx-warn)",
   "var(--cx-reward)",
   "var(--cx-reward)",
 ] as const;
@@ -2244,7 +2244,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
                 capPct >= 100
                   ? "var(--cx-danger)"
                   : capPct >= 80
-                    ? "var(--color-amber)"
+                    ? "var(--cx-warn)"
                     : "var(--cx-accent)",
             }}
           />
@@ -2743,12 +2743,12 @@ function BillingTab({
           {trialDaysLeft !== null && trialDaysLeft > 0 && (
             <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full cx-type-xs font-medium"
               style={{
-                background: "color-mix(in srgb, var(--color-amber) 12%, transparent)",
-                color: "var(--color-amber)",
-                border: "1px solid color-mix(in srgb, var(--color-amber) 30%, transparent)",
+                background: "color-mix(in srgb, var(--cx-warn) 12%, transparent)",
+                color: "var(--cx-warn)",
+                border: "1px solid color-mix(in srgb, var(--cx-warn) 30%, transparent)",
               }}
             >
-              <span aria-hidden className="inline-block w-2 h-2 rounded-full shrink-0" style={{ background: "var(--color-amber)" }} />
+              <span aria-hidden className="inline-block w-2 h-2 rounded-full shrink-0" style={{ background: "var(--cx-warn)" }} />
               {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} of free period left
             </div>
           )}
@@ -3212,7 +3212,7 @@ function UsageSummary({
     pct >= 100
       ? "var(--cx-danger)"
       : pct >= 80
-        ? "var(--color-amber)"
+        ? "var(--cx-warn)"
         : "var(--cx-accent)";
 
   return (
@@ -4271,9 +4271,9 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                 <span
                   className="cx-type-xs uppercase tracking-[0.1em] font-medium px-2 py-0.5 rounded-full shrink-0"
                   style={{
-                    background: "color-mix(in srgb, var(--color-amber) 12%, transparent)",
-                    color: "var(--color-amber)",
-                    border: "1px solid color-mix(in srgb, var(--color-amber) 28%, transparent)",
+                    background: "color-mix(in srgb, var(--cx-warn) 12%, transparent)",
+                    color: "var(--cx-warn)",
+                    border: "1px solid color-mix(in srgb, var(--cx-warn) 28%, transparent)",
                   }}
                 >
                   Coming soon
@@ -4983,19 +4983,14 @@ function LabelsTab() {
                       if (e.key === "Escape") setEditingId(null);
                     }}
                     maxLength={32}
-                    className="flex-1 px-2 py-1 cx-type-sm rounded-lg border outline-none"
-                    style={{
-                      background: "var(--cx-surface-raised)",
-                      borderColor: "var(--cx-border)",
-                      color: "var(--cx-text)",
-                    }}
+                    className="flex-1 cx-input-sm"
                   />
                   <button
                     type="button"
                     onClick={() => void handleSave(label.id)}
                     disabled={!editName.trim() || saving}
-                    className="px-3 py-1 rounded-lg cx-type-xs font-medium text-white disabled:opacity-50 hover:opacity-80 transition-opacity duration-150"
-                    style={{ background: editColor }}
+                    className="px-3 py-1.5 rounded-lg cx-type-xs font-medium text-white disabled:opacity-50 transition-[opacity,transform] duration-[120ms] hover:opacity-90 active:scale-[0.96] motion-reduce:active:scale-100"
+                    style={{ background: editColor, minHeight: 32 }}
                   >
                     {saving ? "Saving…" : "Save"}
                   </button>
@@ -5080,18 +5075,13 @@ function LabelsTab() {
                   value={newName}
                   onChange={(e) => setNewName(e.target.value.slice(0, 32))}
                   maxLength={32}
-                  className="flex-1 px-2 py-1 cx-type-sm rounded-lg border outline-none"
-                  style={{
-                    background: "var(--cx-surface-raised)",
-                    borderColor: "var(--cx-border)",
-                    color: "var(--cx-text)",
-                  }}
+                  className="flex-1 cx-input-sm"
                 />
                 <button
                   type="submit"
                   disabled={!newName.trim() || creating}
-                  className="px-3 py-1 rounded-lg cx-type-xs font-medium text-white disabled:opacity-50 hover:opacity-80 transition-opacity duration-150"
-                  style={{ background: newColor }}
+                  className="px-3 py-1.5 rounded-lg cx-type-xs font-medium text-white disabled:opacity-50 transition-[opacity,transform] duration-[120ms] hover:opacity-90 active:scale-[0.96] motion-reduce:active:scale-100"
+                  style={{ background: newColor, minHeight: 32 }}
                 >
                   {creating ? "Creating…" : "Create"}
                 </button>

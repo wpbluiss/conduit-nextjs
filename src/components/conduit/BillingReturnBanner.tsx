@@ -15,27 +15,27 @@ const MESSAGES: Record<BannerType, { icon: typeof CheckCircle; text: string; col
   checkout_success: {
     icon: CheckCircle,
     text: "You're upgraded! Your new plan is active.",
-    color: "var(--color-green)",
+    color: "var(--cx-reward)",
   },
   topup_success: {
     icon: CheckCircle,
     text: "Tokens added to your account.",
-    color: "var(--color-green)",
+    color: "var(--cx-reward)",
   },
   checkout_canceled: {
     icon: Info,
     text: "Checkout canceled — no charge was made.",
-    color: "var(--color-text-muted)",
+    color: "var(--cx-text-muted)",
   },
   upgrade_intent_pro: {
     icon: Sparkles,
     text: "You're one step from Pro — upgrade below to unlock 1M tokens/month, adaptive routing, and 4 employees.",
-    color: "var(--color-accent)",
+    color: "var(--cx-accent)",
   },
   upgrade_intent_enterprise: {
     icon: Sparkles,
     text: "You're one step from Enterprise — upgrade below to unlock your full AI workforce.",
-    color: "var(--color-accent)",
+    color: "var(--cx-accent)",
   },
 };
 
@@ -60,7 +60,7 @@ export function BillingReturnBanner({ type }: { type: BannerType }) {
       style={{
         background: `color-mix(in srgb, ${color} 12%, transparent)`,
         border: `1px solid color-mix(in srgb, ${color} 30%, transparent)`,
-        color: "var(--color-text)",
+        color: "var(--cx-text)",
       }}
     >
       <Icon size={16} style={{ color, flexShrink: 0 }} />
