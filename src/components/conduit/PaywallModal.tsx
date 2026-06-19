@@ -2,9 +2,22 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Check, Minus, Sparkles, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { TIERS, type TierId } from "@/lib/billing/tiers";
 import { track } from "@/lib/analytics/track";
 import { Button } from "@/components/conduit/ui/Button";
+
+const SCRIM_VARIANTS = {
+  hidden:  { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.14 } },
+  exit:    { opacity: 0, transition: { duration: 0.12 } },
+} as const;
+
+const PANEL_VARIANTS = {
+  hidden:  { opacity: 0, scale: 0.96 },
+  visible: { opacity: 1, scale: 1,    transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] as const } },
+  exit:    { opacity: 0, scale: 0.96, transition: { duration: 0.12, ease: [0.22, 1, 0.36, 1] as const } },
+} as const;
 
 export type PaywallReason =
   | "cap_reached"
@@ -50,8 +63,11 @@ export function PaywallModal({
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(true);
   const dialogRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<Element | null>(null);
+
+  const handleClose = () => setMounted(false);
 
   useEffect(() => {
     track("paywall_viewed", { reason: payload.reason });
@@ -66,7 +82,7 @@ export function PaywallModal({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { onClose(); return; }
+      if (e.key === "Escape") { handleClose(); return; }
       if (e.key !== "Tab") return;
       const dialog = dialogRef.current;
       if (!dialog) return;
@@ -140,15 +156,30 @@ export function PaywallModal({
         : "Premium feature";
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center px-4 cx-scrim bg-black/65"
-      aria-modal="true"
-      role="dialog"
-      aria-labelledby="paywall-title"
-    >
-      <div
+    <AnimatePresence onExitComplete={onClose}>
+      {mounted && (
+        <>
+          <motion.div
+            className="fixed inset-0 z-50 cx-scrim bg-black/65"
+            variants={SCRIM_VARIANTS}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            aria-hidden
+          />
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center px-4"
+            aria-modal="true"
+            role="dialog"
+            aria-labelledby="paywall-title"
+          >
+      <motion.div
         ref={dialogRef}
-        className="cx-glass-float cx-glass-border w-full max-w-2xl relative rounded-[16px] overflow-hidden"
+        className="cx-glass-overlay cx-glass-border w-full max-w-2xl relative rounded-[16px] overflow-hidden"
+        variants={PANEL_VARIANTS}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
       >
         {/* Header */}
         <div className="px-6 pt-6 pb-4">
@@ -156,7 +187,7 @@ export function PaywallModal({
             type="button"
             variant="ghost"
             size="icon-sm"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close"
             className="absolute top-4 right-4"
           >
@@ -296,7 +327,10 @@ export function PaywallModal({
             Cancel anytime · Seats billed per workspace
           </p>
         </div>
-      </div>
-    </div>
+      </motion.div>
+          </div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }
