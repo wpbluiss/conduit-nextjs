@@ -1701,7 +1701,7 @@ export function Chat({
                 }}
                 placeholder="Search messages…"
                 aria-label="Search messages in this conversation"
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--color-text-muted)]"
+                className="flex-1 bg-transparent cx-body outline-none placeholder:text-[var(--cx-text-muted)]"
               />
               {searchQuery && (
                 <span className="cx-type-xs shrink-0" style={{ color: "var(--color-text-muted)" }}>
@@ -1843,7 +1843,7 @@ export function Chat({
           {/* Handoff banner — shown when this conversation was handed off */}
           {handoffInfo && (
             <div
-              className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-sm mt-2"
+              className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl cx-body mt-2"
               style={{
                 background: "color-mix(in srgb, var(--color-accent) 7%, var(--color-surface-elevated))",
                 border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)",
@@ -1860,7 +1860,7 @@ export function Chat({
               </div>
               <a
                 href={`/app?c=${handoffInfo.conversationId}`}
-                className="flex items-center gap-1 text-xs font-medium shrink-0 transition-opacity hover:opacity-80"
+                className="flex items-center gap-1 cx-type-xs font-medium shrink-0 transition-opacity hover:opacity-80"
                 style={{ color: "var(--color-accent-hi)" }}
               >
                 Open <ArrowRight size={11} />
@@ -1918,8 +1918,8 @@ export function Chat({
                 style={{ color: sendError.capacity ? "var(--color-yellow)" : "var(--cx-danger)" }}
               />
               <p
-                className="flex-1 text-sm leading-relaxed"
-                style={{ color: "var(--color-text)" }}
+                className="flex-1 cx-body"
+                style={{ color: "var(--cx-text)" }}
               >
                 {sendError.text}
               </p>
@@ -1955,7 +1955,7 @@ export function Chat({
                 className="shrink-0"
                 style={{ color: "var(--color-amber)" }}
               />
-              <p className="flex-1 text-sm" style={{ color: "var(--color-text)" }}>
+              <p className="flex-1 cx-body" style={{ color: "var(--cx-text)" }}>
                 Ready again in{" "}
                 <span className="cx-mono font-medium">{rateLimitSecondsLeft} s</span>
               </p>
@@ -1968,7 +1968,7 @@ export function Chat({
         <div
           role="status"
           aria-live="polite"
-          className="flex items-center justify-between gap-3 px-4 md:px-8 py-2 text-xs"
+          className="flex items-center justify-between gap-3 px-4 md:px-8 py-2 cx-type-xs"
           style={{
             background: connStatus === 'reconnected'
               ? 'color-mix(in srgb, var(--cx-reward) 8%, transparent)'
@@ -2453,7 +2453,7 @@ function EmptyState({
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.97 }}
                 transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
-                className="px-4 py-2.5 rounded-xl text-sm text-left transition-all"
+                className="px-4 py-2.5 rounded-xl cx-body text-left transition-all"
                 style={{
                   border: `1px solid color-mix(in srgb, ${EMPLOYEES[pin as EmployeeId].color} 30%, var(--color-border))`,
                   background: `color-mix(in srgb, ${EMPLOYEES[pin as EmployeeId].color} 6%, var(--color-surface-elevated))`,
@@ -2930,7 +2930,7 @@ const MessageBubble = memo(function MessageBubble({
                 if (e.key === "Escape") onEditCancel?.();
               }}
               rows={Math.max(2, editDraft.split("\n").length)}
-              className="w-full px-4 py-3 rounded-xl text-sm leading-relaxed resize-none outline-none"
+              className="w-full px-4 py-3 rounded-xl cx-body resize-none outline-none"
               style={{
                 background: "var(--color-surface-elevated)",
                 border: "1px solid var(--color-accent)",
@@ -3301,7 +3301,7 @@ const MessageBubble = memo(function MessageBubble({
               <span className="block cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                 {a.type.replace("_", " ")} · by {nickLabelFor(employee)}
               </span>
-              <span className="block text-sm text-[var(--color-text)] mt-0.5 truncate">
+              <span className="block cx-body text-[var(--cx-text)] mt-0.5 truncate">
                 {a.title}
               </span>
               <span className="block cx-type-xs text-[var(--color-text-muted)] mt-1 inline-flex items-center gap-1 group-hover:text-[var(--color-text)]">
@@ -3389,7 +3389,7 @@ function ArtifactDrawer({
       <div onClick={onClose} className="flex-1 bg-black/60" />
       <div className="cx-glass w-full max-w-2xl border-l overflow-y-auto p-6 md:p-8" style={{ borderLeftColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>
         {!data ? (
-          <p className="text-sm text-[var(--color-text-muted)]">Loading…</p>
+          <p className="cx-body text-[var(--cx-text-muted)]">Loading…</p>
         ) : (
           <>
             <div className="flex items-start justify-between gap-3 mb-6">
@@ -3397,7 +3397,7 @@ function ArtifactDrawer({
                 <div className="cx-type-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
                   {data.type.replace("_", " ")} · by {data.produced_by}
                 </div>
-                <h2 className="serif text-2xl md:text-3xl mt-1 leading-tight">
+                <h2 className="cx-heading-xl md:cx-heading-2xl mt-1">
                   {data.title}
                 </h2>
               </div>
@@ -3441,7 +3441,7 @@ function ArtifactDrawer({
                 </PraxisButton>
               </div>
             </div>
-            <pre className="whitespace-pre-wrap font-sans text-[var(--color-text)] leading-relaxed text-sm">
+            <pre className="whitespace-pre-wrap font-sans text-[var(--cx-text)] cx-body">
               {data.content}
             </pre>
           </>

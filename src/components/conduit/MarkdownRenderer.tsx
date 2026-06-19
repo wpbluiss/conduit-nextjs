@@ -611,7 +611,7 @@ function renderBlock(block: Block, bi: number, caretColor?: string): React.React
           return (
             <p
               key={li}
-              className="text-sm leading-relaxed"
+              className="cx-body"
               style={{ color: "var(--cx-text-muted)" }}
             >
               {renderSegments(parseInline(line), `bq${bi}-${li}`)}
@@ -660,7 +660,7 @@ function renderBlock(block: Block, bi: number, caretColor?: string): React.React
     return (
       <div key={bi} className="overflow-x-auto my-3">
         <table
-          className="w-full text-sm border-collapse"
+          className="w-full cx-type-base border-collapse"
           style={{ borderColor: "var(--cx-border)" }}
         >
           <thead>
