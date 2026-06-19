@@ -29,6 +29,7 @@ import { ReferralClaimer } from "@/components/conduit/ReferralClaimer";
 import { NicknameProvider } from "@/context/NicknameContext";
 import { PostHogIdentify } from "@/components/PostHogIdentify";
 import { ConsoleMotionProvider } from "@/components/conduit/ConsoleMotionProvider";
+import { ConsolePageTransition } from "@/components/conduit/ConsolePageTransition";
 import { TopBarProvider } from "@/context/TopBarContext";
 
 export const dynamic = "force-dynamic";
@@ -234,7 +235,7 @@ export default async function AppLayout({
             tierId={account.tier_id ?? "free"}
             internalAccount={Boolean(account.internal_account)}
           />
-          {children}
+          <ConsolePageTransition>{children}</ConsolePageTransition>
         </main>
         {!onboarded && <OnboardingModal defaultName={userName} />}
         <PostOnboardingNudge />
