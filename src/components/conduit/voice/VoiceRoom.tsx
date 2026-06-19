@@ -312,7 +312,7 @@ export default function VoiceRoom({
               return (
                 <div key={d.id} className="relative">
                   <div
-                    className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center text-lg md:text-xl font-medium serif transition-all ${
+                    className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center cx-type-md md:cx-type-lg font-semibold transition-all ${
                       isActive ? "" : "opacity-40"
                     }`}
                     style={{ background: d.color, color: "var(--cx-canvas)" }}
@@ -342,7 +342,7 @@ export default function VoiceRoom({
         ) : (
           <div className="relative">
             <div
-              className="w-24 h-24 md:w-32 md:h-32 rounded-full flex items-center justify-center text-3xl md:text-4xl font-medium serif"
+              className="w-24 h-24 md:w-32 md:h-32 rounded-full flex items-center justify-center cx-type-2xl md:cx-type-3xl font-semibold"
               style={{ background: deptColor, color: "var(--cx-canvas)" }}
             >
               {employeeInitial}

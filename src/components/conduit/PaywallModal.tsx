@@ -199,7 +199,7 @@ export function PaywallModal({
             {reasonLabel}
           </div>
 
-          <h2 id="paywall-title" className="serif text-2xl md:text-3xl leading-tight">
+          <h2 id="paywall-title" className="cx-type-xl md:cx-type-2xl font-semibold leading-tight">
             {payload.message}
           </h2>
           <p className="mt-1 text-sm text-[var(--color-text-muted)]">
@@ -291,7 +291,7 @@ export function PaywallModal({
         <div className="px-6 pt-4 pb-6">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <span className="text-3xl font-semibold" style={{ color: "var(--color-text)" }}>
+              <span className="cx-mono cx-type-2xl font-semibold" style={{ color: "var(--color-text)" }}>
                 ${displayPrice.toFixed(2)}
               </span>
               <span className="text-sm text-[var(--color-text-muted)] ml-1">/mo</span>

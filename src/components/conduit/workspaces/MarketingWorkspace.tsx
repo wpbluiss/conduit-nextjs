@@ -84,7 +84,7 @@ export default function MarketingWorkspace({
               <span className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
                 {d.dow}
               </span>
-              <span className="serif text-lg leading-none mt-1">{d.dom}</span>
+              <span className="cx-mono cx-type-lg leading-none mt-1">{d.dom}</span>
               <span
                 className="mt-2 inline-flex items-center justify-center w-6 h-6 rounded-md cx-type-xs font-medium"
                 style={{ background: deptSoft, color: dept }}

@@ -108,7 +108,7 @@ export default function EngineeringBuildButton({
                 <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                   Engineering · early access
                 </div>
-                <h2 className="serif text-xl mt-1">Start a build</h2>
+                <h2 className="cx-type-lg font-semibold mt-1">Start a build</h2>
               </div>
               <Button
                 type="button"

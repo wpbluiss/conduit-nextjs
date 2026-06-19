@@ -112,7 +112,7 @@ export default function OpsWorkspace() {
                     color: urgent ? "var(--color-amber)" : "var(--color-text)",
                   }}
                 >
-                  <div className="serif text-2xl leading-none flex items-baseline gap-1 justify-end">
+                  <div className="cx-mono cx-type-xl font-semibold leading-none flex items-baseline gap-1 justify-end">
                     {v.renewsInDays}
                     <span className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
                       d

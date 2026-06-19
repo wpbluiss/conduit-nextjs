@@ -330,7 +330,7 @@ function TemplatesTab({ builds }: { builds: R7Build[] }) {
             </span>
             <StatusPill status={b.status} />
           </div>
-          <div className="serif text-lg leading-snug">{b.build_name}</div>
+          <div className="cx-type-md font-medium leading-snug">{b.build_name}</div>
           {b.live_url ? (
             <a
               href={b.live_url}
@@ -408,7 +408,7 @@ function EngineeringTab({
               </span>
               <StatusPill status={s.status} />
             </div>
-            <div className="serif text-base leading-snug line-clamp-2">
+            <div className="cx-type-base leading-snug line-clamp-2">
               {s.prompt}
             </div>
             {s.deploy_url ? (
@@ -506,7 +506,7 @@ function ContinueModal({
             <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-1">
               Continue build
             </div>
-            <p className="serif text-lg line-clamp-2">{parent.prompt}</p>
+            <p className="cx-type-base line-clamp-2">{parent.prompt}</p>
           </div>
           <PraxisButton
             type="button"

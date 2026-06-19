@@ -121,6 +121,10 @@
   --cx-text-32: var(--cx-type-2xl);
   --cx-text-44: var(--cx-type-3xl);
 
+  /* ---- Issue-spec semantic aliases (CONSOLE_REDESIGN issue #986 names) ---- */
+  --cx-type-body:    var(--cx-type-base);   /* 14px — comfortable reading */
+  --cx-type-display: var(--cx-type-3xl);   /* 44px — hero/display */
+
   --cx-lh-heading: 1.10;
   --cx-lh-body:    1.60;
   --cx-ls-tight:   -0.01em;
@@ -513,14 +517,16 @@
 .praxis-root .cx-text-danger     { color: var(--cx-danger); }
 
 /* ---- Type scale utilities ---- */
-.praxis-root .cx-type-xs   { font-size: var(--cx-type-xs); }
-.praxis-root .cx-type-sm   { font-size: var(--cx-type-sm); }
-.praxis-root .cx-type-base { font-size: var(--cx-type-base); }
-.praxis-root .cx-type-md   { font-size: var(--cx-type-md); }
-.praxis-root .cx-type-lg   { font-size: var(--cx-type-lg); }
-.praxis-root .cx-type-xl   { font-size: var(--cx-type-xl); }
-.praxis-root .cx-type-2xl  { font-size: var(--cx-type-2xl); }
-.praxis-root .cx-type-3xl  { font-size: var(--cx-type-3xl); }
+.praxis-root .cx-type-xs      { font-size: var(--cx-type-xs); }
+.praxis-root .cx-type-sm      { font-size: var(--cx-type-sm); }
+.praxis-root .cx-type-base    { font-size: var(--cx-type-base); }
+.praxis-root .cx-type-body    { font-size: var(--cx-type-body); }
+.praxis-root .cx-type-md      { font-size: var(--cx-type-md); }
+.praxis-root .cx-type-lg      { font-size: var(--cx-type-lg); }
+.praxis-root .cx-type-xl      { font-size: var(--cx-type-xl); }
+.praxis-root .cx-type-2xl     { font-size: var(--cx-type-2xl); }
+.praxis-root .cx-type-3xl     { font-size: var(--cx-type-3xl); }
+.praxis-root .cx-type-display { font-size: var(--cx-type-display); }
 
 /* ---- Spec-exact numbered font-size utilities ----
  * Parallel to cx-type-* but use the --cx-text-{size} alias names.
