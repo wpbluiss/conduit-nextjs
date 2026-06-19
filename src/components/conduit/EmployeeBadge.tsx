@@ -107,14 +107,15 @@ export function SpecialistChip({
   const Icon = SPECIALIST_ICON[employee] ?? Compass;
   return (
     <span
-      className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full cx-type-xs font-semibold leading-none tracking-tight select-none"
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full cx-mono cx-type-xs font-semibold leading-none tracking-tight select-none"
       style={{
         background: m.colorSoft,
         color: m.color,
-        border: `1px solid color-mix(in srgb, ${m.color} 28%, transparent)`,
+        border: `1px solid color-mix(in srgb, ${m.color} 30%, transparent)`,
+        boxShadow: `inset 0 1px 0 color-mix(in srgb, ${m.color} 12%, transparent)`,
       }}
     >
-      <Icon size={11} strokeWidth={SPECIALIST_ICON_STROKE} aria-hidden />
+      <Icon size={12} strokeWidth={SPECIALIST_ICON_STROKE} aria-hidden />
       {label ?? m.name}
     </span>
   );
