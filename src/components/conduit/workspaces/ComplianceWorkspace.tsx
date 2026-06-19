@@ -86,7 +86,7 @@ export default function ComplianceWorkspace() {
             >
               <div className="flex items-baseline justify-between gap-2">
                 <div>
-                  <div className="serif text-2xl">{f.name}</div>
+                  <div className="cx-type-xl font-semibold">{f.name}</div>
                   <p className="text-xs text-[var(--color-text-muted)] mt-1">
                     {f.blurb}
                   </p>

@@ -64,7 +64,7 @@ export default async function SalesWorkspace({ supabase, account }: Props) {
               {employee.role}
             </div>
             <h1
-              className="serif text-3xl md:text-4xl mt-1"
+              className="cx-type-2xl md:cx-type-3xl font-semibold mt-1"
               style={{ color: employee.color }}
             >
               {employee.name}
@@ -136,7 +136,7 @@ function Stat({
       <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
         {label}
       </div>
-      <div className="serif text-2xl mt-1">{value}</div>
+      <div className="cx-mono cx-type-xl font-semibold mt-1">{value}</div>
       {sub && (
         <div className="cx-type-xs text-[var(--color-text-muted)] mt-0.5">
           {sub}

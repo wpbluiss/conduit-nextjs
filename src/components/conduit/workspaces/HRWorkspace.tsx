@@ -79,7 +79,7 @@ export default function HRWorkspace() {
                 <span className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
                   {p.stage}
                 </span>
-                <span className="serif text-3xl leading-none mt-2">
+                <span className="cx-stat leading-none mt-2">
                   {p.count}
                 </span>
                 <div className="mt-3 w-full h-1 rounded-full bg-[var(--color-border)] overflow-hidden">
@@ -131,7 +131,7 @@ export default function HRWorkspace() {
                   </div>
                 </div>
                 <div className="shrink-0 text-right">
-                  <div className="serif text-xl leading-none">
+                  <div className="cx-mono cx-type-lg font-semibold leading-none">
                     {r.applicants}
                   </div>
                   <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mt-0.5">

@@ -107,7 +107,7 @@ export default function EnterTheRoomCard({
           <div className="cx-type-xs uppercase tracking-[0.2em] text-[var(--color-accent-hi)] mb-1">
             Pro perk
           </div>
-          <h2 className="serif text-2xl mb-1">Enter the room</h2>
+          <h2 className="cx-type-xl font-semibold mb-1">Enter the room</h2>
           <p className="text-sm text-[var(--color-text-muted)]">
             Get the whole team on the line. Atlas moderates; say{" "}
             <span className="text-[var(--color-text)]">team</span> for a
@@ -138,7 +138,7 @@ export default function EnterTheRoomCard({
           <div className="cx-type-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)] mb-1 inline-flex items-center gap-2">
             <span className="live-dot" aria-hidden /> {tierLabel}
           </div>
-          <h2 className="serif text-2xl md:text-3xl mb-1">Enter the room</h2>
+          <h2 className="cx-type-xl md:cx-type-2xl font-semibold mb-1">Enter the room</h2>
           <p className="text-sm text-[var(--color-text-muted)]">
             Talk to your whole team at once. Address anyone, or say{" "}
             <span className="text-[var(--color-text)]">team</span> for a
@@ -203,7 +203,7 @@ function AvatarStack({ displays }: { displays: ParticipantDisplay[] }) {
       {visible.map((d) => (
         <div
           key={d.id}
-          className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-base serif border-2 border-[var(--color-bg)]"
+          className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-base font-semibold border-2 border-[var(--color-bg)]"
           style={{ background: d.color, color: "var(--cx-canvas)" }}
           title={d.name}
         >
@@ -212,7 +212,7 @@ function AvatarStack({ displays }: { displays: ParticipantDisplay[] }) {
       ))}
       {overflow > 0 && (
         <div
-          className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-xs serif border-2 border-[var(--color-bg)] bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)]"
+          className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-xs font-semibold border-2 border-[var(--color-bg)] bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)]"
           title={`+${overflow} more`}
         >
           +{overflow}

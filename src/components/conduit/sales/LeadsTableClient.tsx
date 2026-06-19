@@ -154,7 +154,7 @@ export default function LeadsTableClient({
             >
               Fresh Leads
             </div>
-            <h2 className="serif text-xl mt-0.5">
+            <h2 className="cx-type-lg font-semibold mt-0.5">
               {filtered.length}{" "}
               <span className="text-[var(--color-text-muted)] text-sm font-normal">
                 {filtered.length === 1 ? "prospect" : "prospects"}
@@ -480,7 +480,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
     >
       <div className="conduit-card max-w-md w-full p-5 space-y-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between">
-          <h3 className="serif text-xl">Run Discovery</h3>
+          <h3 className="cx-type-lg font-semibold">Run Discovery</h3>
           <Button
             type="button"
             variant="ghost"
