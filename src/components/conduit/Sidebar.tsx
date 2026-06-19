@@ -5,7 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { CX_EASE, CX_DUR_FAST, CX_DUR_BASE, CX_SPRING_SOFT } from "@/lib/ui/motion";
+import { CX_EASE, CX_DUR_FAST, TX_BASE } from "@/lib/ui/motion";
 import {
   Activity,
   BarChart3,
@@ -620,7 +620,7 @@ export function Sidebar({
         aria-modal={open ? "true" : undefined}
         aria-label="Navigation"
         animate={{ width: collapsed ? 52 : 256, minWidth: collapsed ? 52 : 256 }}
-        transition={skipTransition || shouldReduceMotion ? { duration: 0 } : { ...CX_SPRING_SOFT }}
+        transition={skipTransition || shouldReduceMotion ? { duration: 0 } : { ...TX_BASE }}
         className={`cx-glass border-r border-[var(--cx-glass-border)] fixed md:static z-40 inset-y-0 left-0 flex flex-col overflow-hidden ${
           open ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
