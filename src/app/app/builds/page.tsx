@@ -67,7 +67,7 @@ export default async function BuildsPage({ searchParams }: Ctx) {
         <h1 className="cx-heading-2xl mb-2 flex items-center gap-2">
           <Hammer size={22} /> Builds
         </h1>
-        <p className="text-sm text-[var(--color-text-muted)] mb-6">
+        <p className="cx-body text-[var(--color-text-muted)] mb-6">
           Every site Engineering has shipped for you.
         </p>
 

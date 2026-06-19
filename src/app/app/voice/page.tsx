@@ -118,7 +118,7 @@ export default async function VoiceRoomLanding() {
             <Mic className="text-[var(--color-accent)]" size={32} />
             Voice Room
           </h1>
-          <p className="mt-3 text-sm text-[var(--color-text-muted)] max-w-xl">
+          <p className="mt-3 cx-body text-[var(--color-text-muted)] max-w-xl">
             Talk to your team like a Zoom call. Pick an employee to start a
             session.
           </p>
@@ -150,7 +150,7 @@ export default async function VoiceRoomLanding() {
             </div>
             <div className="mt-2 flex items-baseline gap-1.5">
               <AnimatedStat value={usedTodayMin} format={(n) => String(n)} />
-              <span className="text-base text-[var(--color-text-muted)]">
+              <span className="cx-mono cx-type-md text-[var(--color-text-muted)]">
                 / {ceilings.dailyMinutes} min
               </span>
             </div>

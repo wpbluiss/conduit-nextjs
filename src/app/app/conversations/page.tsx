@@ -189,7 +189,7 @@ export default async function ConversationsPage({
         <h1 className="cx-heading-2xl mb-2 flex items-center gap-2">
           <MessageSquare size={22} /> Conversations
         </h1>
-        <p className="text-sm text-[var(--color-text-muted)] mb-6">
+        <p className="cx-body text-[var(--color-text-muted)] mb-6">
           Your full chat history — click any conversation to continue it. Hover
           to star up to {MAX_PINNED}.
         </p>

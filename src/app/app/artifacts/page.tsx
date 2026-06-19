@@ -47,7 +47,7 @@ export default async function ArtifactsPage() {
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8">
       <div className="mx-auto max-w-4xl">
         <h1 className="cx-heading-2xl mb-2">Artifacts</h1>
-        <p className="text-sm text-[var(--color-text-muted)] mb-8">
+        <p className="cx-body text-[var(--color-text-muted)] mb-8">
           Everything your team has produced.
         </p>
         {empty ? (

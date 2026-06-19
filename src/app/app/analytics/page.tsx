@@ -66,7 +66,7 @@ export default async function AnalyticsPage() {
             Praxis Console · Analytics
           </p>
           <h1 className="cx-heading-3xl mt-2">Analytics</h1>
-          <p className="mt-3 text-sm text-[var(--color-text-muted)] max-w-xl">
+          <p className="mt-3 cx-body text-[var(--color-text-muted)] max-w-xl">
             What your team has been up to. Last 7 days unless noted.
           </p>
         </div>
