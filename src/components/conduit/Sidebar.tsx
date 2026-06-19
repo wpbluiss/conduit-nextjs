@@ -137,7 +137,7 @@ function SidebarUpgradeBanner({
       <div className="px-3 pt-3 pb-3">
         <div className="flex items-start justify-between gap-1 mb-2">
           <div className="flex items-center gap-2">
-            <Sparkles size={11} style={{ color: "var(--cx-accent)", flexShrink: 0 }} />
+            <Sparkles size={11} strokeWidth={1.75} style={{ color: "var(--cx-accent)", flexShrink: 0 }} />
             <span className="cx-type-xs font-semibold" style={{ color: "var(--cx-text)" }}>
               Unlock all 9 specialists
             </span>
@@ -149,7 +149,7 @@ function SidebarUpgradeBanner({
             onClick={dismiss}
             aria-label="Dismiss upgrade prompt"
           >
-            <X size={12} />
+            <X size={12} strokeWidth={1.75} />
           </PraxisButton>
         </div>
 
@@ -269,9 +269,9 @@ function SidebarThemeButton({ collapsed = false }: { collapsed?: boolean }) {
   }
 
   const icons: Record<ThemePref, React.ReactNode> = {
-    light: <Sun size={16} />,
-    dark: <Moon size={16} />,
-    system: <Monitor size={16} />,
+    light: <Sun size={16} strokeWidth={1.75} />,
+    dark: <Moon size={16} strokeWidth={1.75} />,
+    system: <Monitor size={16} strokeWidth={1.75} />,
   };
   const labels: Record<ThemePref, string> = {
     light: "Light",
@@ -690,7 +690,7 @@ export function Sidebar({
                   aria-label="Collapse sidebar"
                   title="Collapse sidebar"
                 >
-                  <PanelLeftClose size={16} strokeWidth={2} />
+                  <PanelLeftClose size={16} strokeWidth={1.75} />
                 </PraxisButton>
               </div>
               <PraxisButton
@@ -701,7 +701,7 @@ export function Sidebar({
                 aria-label="Close menu"
                 className="md:hidden"
               >
-                <X size={18} />
+                <X size={18} strokeWidth={1.75} />
               </PraxisButton>
             </>
           )}
@@ -718,7 +718,7 @@ export function Sidebar({
               aria-label="Expand sidebar"
               title="Expand sidebar"
             >
-              <PanelLeftOpen size={16} strokeWidth={2} />
+              <PanelLeftOpen size={16} strokeWidth={1.75} />
             </PraxisButton>
           </div>
         )}
@@ -737,7 +737,7 @@ export function Sidebar({
               aria-label="New chat"
               title="New chat"
             >
-              <Plus size={14} strokeWidth={2} />
+              <Plus size={14} strokeWidth={1.75} />
             </Button>
           </div>
         ) : (
@@ -752,7 +752,7 @@ export function Sidebar({
               }}
               className="w-full justify-start"
             >
-              <Plus size={14} strokeWidth={2} /> New chat
+              <Plus size={14} strokeWidth={1.75} /> New chat
             </Button>
           </div>
         )}
@@ -761,7 +761,7 @@ export function Sidebar({
         <nav className="flex-1 overflow-y-auto pb-3" aria-label="Main navigation">
           <NavLink
             href="/app/workspace"
-            icon={<LayoutGrid size={20} strokeWidth={2} />}
+            icon={<LayoutGrid size={20} strokeWidth={1.75} />}
             label="Workspace"
             active={isActive("/app/workspace")}
             onClick={close}
@@ -770,7 +770,7 @@ export function Sidebar({
           <div data-tour-target="specialists">
           <NavLink
             href="/app/team"
-            icon={<Users2 size={20} strokeWidth={2} />}
+            icon={<Users2 size={20} strokeWidth={1.75} />}
             label="Team"
             active={pathname === "/app/team"}
             onClick={close}
@@ -785,8 +785,8 @@ export function Sidebar({
                 className="mx-3 mt-0 mb-2 pb-1 flex items-center gap-2"
                 style={{ borderBottom: "1px solid var(--cx-glass-border)" }}
               >
-                <Pin size={10} aria-hidden style={{ color: "var(--cx-text-faint)" }} />
-                <span className="cx-label" style={{ color: "var(--cx-text-faint)", letterSpacing: "0.15em" }}>
+                <Pin size={10} strokeWidth={1.75} aria-hidden style={{ color: "var(--cx-text-faint)" }} />
+                <span className="cx-label" style={{ color: "var(--cx-text-faint)" }}>
                   Pinned
                 </span>
               </div>
@@ -837,6 +837,7 @@ export function Sidebar({
                       {!allowed ? (
                         <Lock
                           size={10}
+                          strokeWidth={1.75}
                           aria-label="Locked — upgrade to unlock"
                           style={{ color: "var(--cx-text-muted)" }}
                         />
@@ -873,11 +874,11 @@ export function Sidebar({
               <button
                 type="button"
                 onClick={() => setTeamExpanded((v) => !v)}
-                className="w-full mx-0 flex items-center justify-between px-3 pt-1 pb-2 transition-colors duration-150 hover:opacity-80"
+                className="w-full mx-0 flex items-center justify-between px-3 pt-1 pb-2 rounded-lg transition-colors duration-150 hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]"
                 style={{ borderBottom: "1px solid var(--cx-glass-border)", marginBottom: "4px" }}
               >
-                <span className="cx-label inline-flex items-center gap-2" style={{ color: "var(--cx-text-faint)", letterSpacing: "0.15em" }}>
-                  <Users2 size={10} strokeWidth={2} aria-hidden /> Specialists
+                <span className="cx-label inline-flex items-center gap-2" style={{ color: "var(--cx-text-faint)" }}>
+                  <Users2 size={10} strokeWidth={1.75} aria-hidden /> Specialists
                 </span>
                 <span aria-hidden style={{ fontSize: "var(--cx-type-xs)" }}>
                   {teamExpanded ? "−" : "+"}
@@ -931,6 +932,7 @@ export function Sidebar({
                         {!allowed ? (
                           <Lock
                             size={10}
+                            strokeWidth={1.75}
                             aria-label="Locked — upgrade to unlock"
                             style={{ color: "var(--cx-text-muted)" }}
                           />
@@ -1006,7 +1008,7 @@ export function Sidebar({
                     <SpecialistAvatar employee={emp} size={28} active={active} streaming={isStreaming} />
                     {!allowed && (
                       <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 flex items-center justify-center z-10">
-                        <Lock size={8} style={{ color: "var(--cx-text-muted)" }} />
+                        <Lock size={8} strokeWidth={1.75} style={{ color: "var(--cx-text-muted)" }} />
                       </span>
                     )}
                     {allowed && !isPinned && (
@@ -1053,7 +1055,7 @@ export function Sidebar({
           <div className="mt-3 space-y-1">
             <NavLink
               href="/app/voice"
-              icon={<Mic size={20} strokeWidth={2} />}
+              icon={<Mic size={20} strokeWidth={1.75} />}
               label="Voice Room"
               active={isActive("/app/voice")}
               onClick={close}
@@ -1062,7 +1064,7 @@ export function Sidebar({
             {allowedEmployees.includes("sales") && (
               <NavLink
                 href="/app/team/sales"
-                icon={<Sparkles size={20} strokeWidth={2} />}
+                icon={<Sparkles size={20} strokeWidth={1.75} />}
                 label="Leads"
                 active={pathname === "/app/team/sales"}
                 onClick={close}
@@ -1072,7 +1074,7 @@ export function Sidebar({
             <div data-tour-target="memory">
             <NavLink
               href="/app/activity"
-              icon={<Activity size={20} strokeWidth={2} />}
+              icon={<Activity size={20} strokeWidth={1.75} />}
               label="Activity"
               active={isActive("/app/activity")}
               onClick={close}
@@ -1080,7 +1082,7 @@ export function Sidebar({
             />
             <NavLink
               href="/app/memory"
-              icon={<Brain size={20} strokeWidth={2} />}
+              icon={<Brain size={20} strokeWidth={1.75} />}
               label="Memory"
               active={isActive("/app/memory")}
               onClick={close}
@@ -1089,7 +1091,7 @@ export function Sidebar({
             </div>
             <NavLink
               href="/app/outputs"
-              icon={<Bookmark size={20} strokeWidth={2} />}
+              icon={<Bookmark size={20} strokeWidth={1.75} />}
               label="Outputs"
               active={isActive("/app/outputs")}
               onClick={close}
@@ -1126,7 +1128,7 @@ export function Sidebar({
                     className="relative inline-flex shrink-0"
                     style={{ color: isActive("/app/builds") ? "var(--cx-accent)" : undefined }}
                   >
-                    <Hammer size={collapsed ? 20 : 16} strokeWidth={2} />
+                    <Hammer size={collapsed ? 20 : 16} strokeWidth={1.75} />
                     <SidebarBuildPip
                       initial={inFlightBuildsInitial}
                       accountId={accountId}
@@ -1156,7 +1158,7 @@ export function Sidebar({
             })()}
             <NavLink
               href="/app/analytics"
-              icon={<BarChart3 size={20} strokeWidth={2} />}
+              icon={<BarChart3 size={20} strokeWidth={1.75} />}
               label="Analytics"
               active={isActive("/app/analytics")}
               onClick={close}
@@ -1188,7 +1190,7 @@ export function Sidebar({
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg cx-type-xs font-medium hover:opacity-90 transition-opacity mt-1"
                 style={{ background: "var(--cx-accent)", color: "var(--cx-canvas)" }}
               >
-                <Plus size={12} strokeWidth={2} />
+                <Plus size={12} strokeWidth={1.75} />
                 Start a conversation
               </Link>
             </div>
@@ -1201,7 +1203,7 @@ export function Sidebar({
                 className="mx-3 mt-3 mb-2 pb-2 flex items-center gap-2"
                 style={{ borderBottom: "1px solid var(--cx-glass-border)" }}
               >
-                <span className="cx-label" style={{ color: "var(--cx-text-faint)", letterSpacing: "0.15em" }}>
+                <span className="cx-label" style={{ color: "var(--cx-text-faint)" }}>
                   Conversations
                 </span>
               </div>
@@ -1290,18 +1292,19 @@ export function Sidebar({
                   aria-label="Search conversations"
                   className={`${searchExpanded ? "hidden" : "md:hidden"}`}
                 >
-                  <Search size={13} />
+                  <Search size={13} strokeWidth={1.75} />
                 </PraxisButton>
                 {/* Full input: always on desktop; on mobile only when expanded */}
                 <div
-                  className={`${searchExpanded ? "flex" : "hidden md:flex"} items-center gap-2 px-2 py-2 rounded-lg`}
+                  className={`${searchExpanded ? "flex" : "hidden md:flex"} items-center gap-2 px-2 py-1.5 rounded-lg transition-shadow duration-150 focus-within:[box-shadow:var(--cx-accent-glow)]`}
                   style={{
-                    background: "var(--cx-surface-raised)",
-                    border: "1px solid var(--cx-border)",
+                    background: "var(--cx-glass-bg)",
+                    border: "1px solid var(--cx-glass-border)",
                   }}
                 >
                   <Search
                     size={11}
+                    strokeWidth={1.75}
                     className="shrink-0"
                     style={{ color: "var(--cx-text-muted)" }}
                   />
@@ -1325,7 +1328,7 @@ export function Sidebar({
                       aria-label="Clear search"
                       className="shrink-0"
                     >
-                      <X size={11} />
+                      <X size={11} strokeWidth={1.75} />
                     </PraxisButton>
                   )}
                 </div>
@@ -1405,7 +1408,7 @@ export function Sidebar({
                                   className="truncate flex-1 cx-type-sm leading-snug"
                                   style={{
                                     color: "var(--cx-text)",
-                                    fontWeight: active ? 500 : 400,
+                                    fontWeight: active ? 600 : 400,
                                   }}
                                 >
                                   {titleOverrides[c.id] ?? c.title ?? "Untitled chat"}
@@ -1515,7 +1518,7 @@ export function Sidebar({
                 title="Keyboard shortcuts"
                 aria-label="Keyboard shortcuts"
               >
-                <CircleHelp size={16} />
+                <CircleHelp size={16} strokeWidth={1.75} />
               </PraxisButton>
               <SidebarThemeButton collapsed />
               <Link href="/app/settings" title="Settings" aria-label="Settings" onClick={close} data-tour-target="settings"
@@ -1524,7 +1527,7 @@ export function Sidebar({
                   background: isActive("/app/settings") ? "var(--cx-accent-tint)" : undefined,
                   color: isActive("/app/settings") ? "var(--cx-accent)" : "var(--cx-text-muted)",
                 }}>
-                <Settings size={16} />
+                <Settings size={16} strokeWidth={1.75} />
               </Link>
               <Link href="/app/settings/billing" title="Billing" aria-label="Billing" onClick={close}
                 className="cx-icon-btn cx-icon-btn-lg"
@@ -1532,7 +1535,7 @@ export function Sidebar({
                   background: isActive("/app/settings/billing") ? "var(--cx-accent-tint)" : undefined,
                   color: isActive("/app/settings/billing") ? "var(--cx-accent)" : "var(--cx-text-muted)",
                 }}>
-                <CreditCard size={16} />
+                <CreditCard size={16} strokeWidth={1.75} />
               </Link>
               <form action="/auth/sign-out" method="post">
                 <PraxisButton
@@ -1542,7 +1545,7 @@ export function Sidebar({
                   title="Sign out"
                   aria-label="Sign out"
                 >
-                  <LogOut size={16} />
+                  <LogOut size={16} strokeWidth={1.75} />
                 </PraxisButton>
               </form>
               <div
@@ -1574,13 +1577,13 @@ export function Sidebar({
                 onClick={() => window.dispatchEvent(new CustomEvent("praxis:shortcuts:open"))}
                 className="w-full justify-start"
               >
-                <CircleHelp size={16} /> Shortcuts
+                <CircleHelp size={16} strokeWidth={1.75} /> Shortcuts
               </PraxisButton>
               <SidebarThemeButton />
               <div data-tour-target="settings">
               <NavLink
                 href="/app/settings"
-                icon={<Settings size={16} strokeWidth={2} />}
+                icon={<Settings size={16} strokeWidth={1.75} />}
                 label="Settings"
                 active={
                   pathname === "/app/settings" ||
@@ -1593,7 +1596,7 @@ export function Sidebar({
               </div>
               <NavLink
                 href="/app/settings/billing"
-                icon={<CreditCard size={16} strokeWidth={2} />}
+                icon={<CreditCard size={16} strokeWidth={1.75} />}
                 label="Billing"
                 active={isActive("/app/settings/billing")}
                 onClick={close}
@@ -1606,7 +1609,7 @@ export function Sidebar({
                   size="sm"
                   className="w-full justify-start"
                 >
-                  <LogOut size={16} strokeWidth={2} /> Sign out
+                  <LogOut size={16} strokeWidth={1.75} /> Sign out
                 </PraxisButton>
               </form>
               <div className="px-3 pt-2 flex items-center gap-2">
@@ -1680,7 +1683,7 @@ export function Sidebar({
             }}
             className="w-full justify-start"
           >
-            <Pin size={12} style={{ color: "var(--cx-text-muted)" }} />
+            <Pin size={12} strokeWidth={1.75} style={{ color: "var(--cx-text-muted)" }} />
             {pinned.includes(ctxMenu.emp) ? "Unpin specialist" : "Pin specialist"}
           </PraxisButton>
         </div>,
