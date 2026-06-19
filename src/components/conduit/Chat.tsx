@@ -27,7 +27,7 @@ import {
 } from "./praxis/PraxisComposerPill";
 import { composeChatEmptyCopy, timeOfDayBucket } from "@/lib/conduit/welcome-copy";
 import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
-import { ThinkingBubble } from "./TypingIndicator";
+import { ThinkingBubble, THINKING_STATUS, ROUTING_TO_STATUS } from "./TypingIndicator";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import {
   SpecialistSelectorModal,
@@ -139,18 +139,6 @@ function suggestionsForTier(allowed: Set<EmployeeKey>): Suggestion[] {
   return [...base, ...extras].slice(0, 4);
 }
 
-// Mono micro-copy shown in the composer presence line while a specialist is active.
-const SPECIALIST_THINKING_HINT: Partial<Record<EmployeeKey, string>> = {
-  jarvis:      "is routing to your team…",
-  marketing:   "is reviewing your brief…",
-  engineering: "is analyzing the problem…",
-  sales:       "is building the play…",
-  finance:     "is reviewing the numbers…",
-  compliance:  "is checking requirements…",
-  hr:          "is reviewing your request…",
-  ops:         "is mapping the process…",
-  legal:       "is reviewing the brief…",
-};
 
 const SPECIALIST_PROMPTS: Record<EmployeeId, string> = {
   jarvis: "Help me prioritize what to work on this week across my business",
@@ -2083,37 +2071,39 @@ export function Chat({
             onWhisperStop={() => whisperRecorder.stop()}
             onWhisperCancel={() => whisperRecorder.cancel()}
           />
+          {/* Presence line — aria-live region so screen readers announce
+              specialist activity without interrupting the conversation flow. */}
           <div
-            className="mt-2 h-4 flex items-center justify-center"
-            style={{ fontSize: "var(--cx-type-xs)" }}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className="mt-2 min-h-4 flex items-center justify-center cx-type-xs"
           >
             {streamingEmployee ? (
-              <span className="presence-line flex items-center gap-1.5">
+              <span className="presence-line flex items-center gap-1.5 min-w-0">
                 <span
                   aria-hidden="true"
                   className="presence-dot inline-block w-1.5 h-1.5 rounded-full shrink-0"
                   style={{ background: "var(--cx-accent, #7C6CFF)" }}
                 />
-                <span style={{ color: DEPT_COLOR[streamingEmployee], fontWeight: 500 }}>
+                <span
+                  className="shrink-0 font-medium"
+                  style={{ color: DEPT_COLOR[streamingEmployee] }}
+                >
                   {labelFor(streamingEmployee)}
                 </span>
-                <span
-                  style={{
-                    color: "var(--color-text-muted)",
-                    fontFamily: "var(--font-mono, monospace)",
-                  }}
-                >
+                <span className="cx-mono cx-text-muted truncate">
                   {routingTarget && streamingEmployee === "jarvis"
-                    ? `is routing to ${labelFor(routingTarget)}…`
-                    : (SPECIALIST_THINKING_HINT[streamingEmployee] ?? "is thinking…")}
+                    ? `is ${ROUTING_TO_STATUS[routingTarget] ?? `routing to ${labelFor(routingTarget)}…`}`
+                    : `is ${THINKING_STATUS[streamingEmployee] ?? "thinking…"}`}
                 </span>
               </span>
             ) : (
               <>
-                <span className="hidden sm:inline" style={{ color: "var(--color-text-muted)" }}>
+                <span className="hidden sm:inline cx-text-faint">
                   Shift+Enter for newline
                 </span>
-                <span className="sm:hidden" style={{ color: "var(--color-text-muted)" }}>
+                <span className="sm:hidden cx-text-faint">
                   Tap send to submit
                 </span>
               </>

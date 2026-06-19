@@ -7,7 +7,8 @@ import { SpecialistAvatar } from "./SpecialistAvatar";
 import type { EmployeeKey } from "@/lib/ai/provider";
 
 // Contextual mono micro-copy per specialist — shown while waiting for first token.
-const THINKING_STATUS: Record<EmployeeKey, string> = {
+// Exported so Chat.tsx and other consumers can share the same copy without duplication.
+export const THINKING_STATUS: Record<EmployeeKey, string> = {
   jarvis:      "routing to your team…",
   marketing:   "reviewing your brief…",
   engineering: "analyzing the problem…",
@@ -35,7 +36,8 @@ const dotVariants = {
 };
 
 // Routing micro-copy shown when Atlas has determined which specialist to route to.
-const ROUTING_TO_STATUS: Partial<Record<EmployeeKey, string>> = {
+// Exported for use in Chat.tsx presence line.
+export const ROUTING_TO_STATUS: Partial<Record<EmployeeKey, string>> = {
   marketing:   "routing to Marketing…",
   engineering: "routing to Engineering…",
   sales:       "routing to Sales…",
