@@ -2659,7 +2659,7 @@ function MessageFeedbackButtons({
         disabled={busy}
         className="min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center p-1 rounded transition-colors disabled:pointer-events-none"
         style={{
-          color: rating === -1 ? "#f87171" : "var(--color-text-muted)",
+          color: rating === -1 ? "var(--cx-danger)" : "var(--color-text-muted)",
         }}
         onMouseEnter={(e) => { if (rating !== -1) (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
         onMouseLeave={(e) => { if (rating !== -1) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
