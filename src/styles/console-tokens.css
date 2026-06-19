@@ -648,6 +648,54 @@
   font-weight: 600;
 }
 
+/* ---- Form control utilities ----
+ * Opaque surface inputs — do NOT use conduit-card/glass here; inputs live
+ * inside glass cards and a second backdrop-filter layer exceeds the two-layer cap.
+ * Focus ring + accent border-color are handled globally by the :focus-visible
+ * rules above. Use cx-input on <input>, cx-select on <select>, cx-textarea on
+ * <textarea>. Width must be set by the call-site (w-full, flex-1, max-w-*).
+ * cx-input-sm: compact 8/12 variant for dense lists (e.g. per-specialist selectors). */
+
+.praxis-root .cx-input,
+.praxis-root .cx-select,
+.praxis-root .cx-textarea {
+  background: var(--cx-surface-raised);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-sm);
+  padding: 12px 16px;
+  font-size: var(--cx-type-sm);
+  line-height: var(--cx-lh-body);
+  color: var(--cx-text);
+  outline: none;
+  transition: border-color var(--cx-dur-fast) var(--cx-ease);
+}
+
+.praxis-root .cx-input::placeholder,
+.praxis-root .cx-textarea::placeholder {
+  color: var(--cx-text-faint);
+}
+
+.praxis-root .cx-textarea {
+  resize: vertical;
+}
+
+/* Compact variant for dense list contexts */
+.praxis-root .cx-input-sm,
+.praxis-root .cx-select-sm {
+  background: var(--cx-surface-raised);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-sm);
+  padding: 8px 12px;
+  font-size: var(--cx-type-sm);
+  color: var(--cx-text);
+  outline: none;
+  transition: border-color var(--cx-dur-fast) var(--cx-ease);
+}
+
+.praxis-root .cx-input-sm::placeholder {
+  color: var(--cx-text-faint);
+}
+
 /* ------------------------------------------------------------
  * .cx-accent-* utilities
  * ------------------------------------------------------------ */

@@ -189,11 +189,18 @@ export function SettingsTabs({
       </div>
 
       {/* ── Desktop: vertical sidebar nav ──────────────────────────── */}
-      <nav className="hidden md:block w-44 shrink-0" aria-label="Settings navigation">
+      <nav
+        className="hidden md:flex flex-col w-44 shrink-0 sticky top-8 self-start border-r pr-4"
+        style={{ borderColor: "var(--cx-border)" }}
+        aria-label="Settings navigation"
+      >
         {SETTINGS_NAV.map((section, si) => (
           <div key={si} className={si > 0 ? "mt-6" : ""}>
             {section.title && (
-              <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-faint)] px-3 mb-2">
+              <div
+                className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-faint)] px-3 mb-2"
+                style={{ letterSpacing: "0.14em" }}
+              >
                 {section.title}
               </div>
             )}
@@ -203,12 +210,24 @@ export function SettingsTabs({
                   key={key}
                   type="button"
                   onClick={() => setTab(key)}
-                  className={`w-full text-left px-3 py-2 rounded-md cx-type-sm transition-all duration-150 focus-visible:outline-none ${
+                  className={`w-full text-left px-3 py-2 rounded-md cx-type-sm transition-all focus-visible:outline-none ${
                     tab === key
-                      ? "bg-[var(--cx-accent-tint)] text-[var(--cx-accent-bright)] font-medium"
+                      ? "text-[var(--cx-accent-bright)] font-medium"
                       : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[var(--cx-surface-raised)]"
                   }`}
-                  style={tab === key ? { boxShadow: "inset 2px 0 0 var(--cx-accent)" } : undefined}
+                  style={
+                    tab === key
+                      ? {
+                          background: "var(--cx-accent-tint)",
+                          boxShadow: "inset 2px 0 0 var(--cx-accent)",
+                          transitionDuration: "var(--cx-dur-fast)",
+                          transitionTimingFunction: "var(--cx-ease)",
+                        }
+                      : {
+                          transitionDuration: "var(--cx-dur-fast)",
+                          transitionTimingFunction: "var(--cx-ease)",
+                        }
+                  }
                 >
                   {label}
                 </button>
@@ -461,7 +480,7 @@ function SpecialistsTab({
                     onChange={(e: ChangeEvent<HTMLInputElement>) => handleNicknameChange(emp, e.target.value)}
                     placeholder={canonical}
                     maxLength={32}
-                    className="w-full rounded-lg border border-[var(--cx-border)] bg-[var(--cx-surface-raised)] px-3 py-2 cx-type-sm text-[var(--cx-text)] placeholder:text-[var(--cx-text-muted)] outline-none"
+                    className="w-full cx-input-sm"
                   />
                 </div>
                 {nicknames[emp] && (
@@ -594,7 +613,7 @@ function SpecialistMetrics() {
     <div className="space-y-5">
       {/* Date range picker */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">Period</span>
+        <span className="cx-label">Period</span>
         <div className="flex flex-wrap gap-2">
           {RANGE_OPTIONS.map(({ value, label }) => (
             <button
@@ -943,7 +962,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
                 <select
                   value={current}
                   onChange={(e) => setEmployeeVoice(emp, e.target.value)}
-                  className="w-full bg-[var(--cx-surface-raised)] border border-[var(--cx-border)] rounded-lg px-3 py-2 cx-type-sm text-[var(--cx-text)] outline-none"
+                  className="w-full cx-select-sm"
                 >
                   {/* Always offer the default first */}
                   <option value={DEFAULT_EMPLOYEE_VOICES[emp]}>
@@ -1191,7 +1210,7 @@ function WorkspaceTab({
     <div className="space-y-8">
       {/* ── Workspace logo ── */}
       <div>
-        <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
+        <div className="cx-label mb-1">
           Workspace logo
         </div>
         <p className="cx-type-xs text-[var(--cx-text-muted)] mb-3">
@@ -1273,7 +1292,7 @@ function WorkspaceTab({
 
       {/* ── Workspace name ── */}
       <form onSubmit={saveWsName} className="space-y-2 max-w-sm">
-        <label className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block">
+        <label className="cx-label block">
           Workspace name
         </label>
         <p className="cx-type-xs text-[var(--cx-text-muted)] -mt-1">
@@ -1289,7 +1308,8 @@ function WorkspaceTab({
             }}
             maxLength={WS_NAME_MAX}
             placeholder="e.g. Acme AI Team"
-            className="w-full conduit-card cx-radius-sm px-4 py-3 outline-none cx-type-sm pr-12"
+            className="w-full cx-input"
+            style={{ paddingRight: "3rem" }}
           />
           <span
             className="absolute right-3 top-1/2 -translate-y-1/2 cx-type-xs tabular-nums"
@@ -1633,7 +1653,7 @@ function ProfileTab({
 
         {/* Display name */}
         <form onSubmit={saveName} className="space-y-2 max-w-sm">
-          <label className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block">
+          <label className="cx-label block">
             Display name
           </label>
           <div className="flex gap-2">
@@ -1642,7 +1662,7 @@ function ProfileTab({
               onChange={(e) => { setNameValue(e.target.value); setNameSaved(false); setNameError(""); }}
               maxLength={100}
               placeholder={fullName || "Your name"}
-              className="flex-1 conduit-card cx-radius-sm px-4 py-3 outline-none cx-type-sm"
+              className="flex-1 cx-input"
             />
             <PraxisButton
               type="submit"
@@ -1659,7 +1679,7 @@ function ProfileTab({
 
         {/* Workspace name */}
         <form onSubmit={saveWsName} className="space-y-2 max-w-sm">
-          <label className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block">
+          <label className="cx-label block">
             Workspace name
           </label>
           <p className="cx-type-xs text-[var(--cx-text-muted)] -mt-1">
@@ -1671,7 +1691,7 @@ function ProfileTab({
               onChange={(e) => { setWsName(e.target.value); setWsNameSaved(false); setWsNameError(""); }}
               maxLength={80}
               placeholder="e.g. Acme AI Team"
-              className="flex-1 conduit-card cx-radius-sm px-4 py-3 outline-none cx-type-sm"
+              className="flex-1 cx-input"
             />
             <PraxisButton
               type="submit"
@@ -1692,20 +1712,20 @@ function ProfileTab({
         <h2 className="cx-type-md font-medium tracking-[-0.01em]">Account</h2>
         <div className="space-y-5">
           <div>
-            <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
+            <div className="cx-label mb-1">
               Email
             </div>
             <div className="cx-type-sm">{email}</div>
           </div>
           <ThemeToggle initialPref={themePref} />
           <div>
-            <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-2">
+            <div className="cx-label mb-2">
               Timezone
             </div>
             <select
               value={tz}
               onChange={(e) => saveTz(e.target.value)}
-              className="w-full max-w-sm bg-[var(--cx-surface-raised)] border border-[var(--cx-border)] px-3 py-2 outline-none rounded-lg cx-type-sm text-[var(--cx-text)]"
+              className="w-full max-w-sm cx-select-sm"
             >
               {[...new Set([tz, ...COMMON_TIMEZONES])].map((z) => (
                 <option key={z} value={z}>
@@ -1719,7 +1739,7 @@ function ProfileTab({
           </div>
           {creatorMode && (
             <div>
-              <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
+              <div className="cx-label mb-1">
                 Mode
               </div>
               <span
@@ -1749,7 +1769,7 @@ function ProfileTab({
 
         {/* Update email */}
         <div>
-          <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+          <div className="cx-label mb-3">
             Update email
           </div>
           {emailSent ? (
@@ -1765,7 +1785,7 @@ function ProfileTab({
                 onChange={(e) => { setNewEmail(e.target.value); setEmailError(""); }}
                 autoComplete="email"
                 required
-                className="w-full conduit-card cx-radius-sm px-4 py-3 outline-none cx-type-sm"
+                className="w-full cx-input"
               />
               {emailError && (
                 <p className="cx-type-xs text-[var(--cx-danger)]">{emailError}</p>
@@ -1784,7 +1804,7 @@ function ProfileTab({
 
         {/* Change password */}
         <div className="pt-4 border-t border-[var(--cx-border)]">
-          <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+          <div className="cx-label mb-3">
             Change password
           </div>
           <form onSubmit={submitPasswordChange} className="space-y-3 max-w-sm">
@@ -1796,7 +1816,7 @@ function ProfileTab({
                 onChange={(e) => { setCurrentPw(e.target.value); setPwError(""); }}
                 autoComplete="current-password"
                 required
-                className="w-full conduit-card cx-radius-sm px-4 py-3 outline-none cx-type-sm"
+                className="w-full cx-input"
               />
             </div>
             <div>
@@ -1807,7 +1827,7 @@ function ProfileTab({
                 onChange={(e) => { setNewPw(e.target.value); setPwError(""); }}
                 autoComplete="new-password"
                 required
-                className="w-full conduit-card cx-radius-sm px-4 py-3 outline-none cx-type-sm"
+                className="w-full cx-input"
               />
               <PwMeter pw={newPw} />
             </div>
@@ -1819,7 +1839,7 @@ function ProfileTab({
                 onChange={(e) => { setConfirmPw(e.target.value); setPwError(""); }}
                 autoComplete="new-password"
                 required
-                className="w-full conduit-card cx-radius-sm px-4 py-3 outline-none cx-type-sm"
+                className="w-full cx-input"
               />
             </div>
             {pwError && (
@@ -1843,7 +1863,7 @@ function ProfileTab({
 
         {/* Guided Tour */}
         <div>
-          <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-2">
+          <div className="cx-label mb-2">
             Guided tour
           </div>
           <p className="cx-type-xs text-[var(--cx-text-muted)] mb-3 max-w-sm">
@@ -1854,7 +1874,7 @@ function ProfileTab({
 
         {/* Data & Privacy */}
         <div className="pt-4 border-t border-[var(--cx-border)]">
-          <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-2">
+          <div className="cx-label mb-2">
             Data &amp; privacy
           </div>
           <p className="cx-type-xs text-[var(--cx-text-muted)] mb-3 max-w-sm">
@@ -1976,34 +1996,34 @@ function BusinessTab({ account }: { account: AccountData }) {
       <section className="conduit-card p-6 space-y-5">
         <h2 className="cx-type-md font-medium tracking-[-0.01em]">Business info</h2>
         <div>
-          <label className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block mb-2">
+          <label className="cx-label block mb-2">
             Business name
           </label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full conduit-card cx-radius-sm px-4 py-3 outline-none cx-type-sm"
+            className="w-full cx-input"
           />
         </div>
         <div>
-          <label className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block mb-2">
+          <label className="cx-label block mb-2">
             Business type
           </label>
           <input
             value={businessType}
             onChange={(e) => setBusinessType(e.target.value)}
-            className="w-full conduit-card cx-radius-sm px-4 py-3 outline-none cx-type-sm"
+            className="w-full cx-input"
           />
         </div>
         <div>
-          <label className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] block mb-2">
+          <label className="cx-label block mb-2">
             What you&apos;re working on
           </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
-            className="w-full conduit-card cx-radius-sm px-4 py-3 outline-none resize-none cx-type-sm"
+            className="w-full cx-textarea"
           />
         </div>
         {error && <p className="cx-type-xs text-[var(--cx-danger)]">{error}</p>}
@@ -2036,7 +2056,7 @@ function BusinessTab({ account }: { account: AccountData }) {
               rows={4}
               maxLength={COMPANY_BRIEF_MAX}
               placeholder="e.g. Acme builds B2B SaaS for HR teams in the US mid-market. We're pre-revenue, 2 founders, focused on getting our first 10 design partners this quarter."
-              className="w-full conduit-card cx-radius-sm px-4 py-3 outline-none resize-none cx-type-sm"
+              className="w-full cx-textarea"
             />
             <span
               className="absolute bottom-3 right-3 cx-type-xs tabular-nums"
@@ -2150,7 +2170,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
     <div className="space-y-8">
       {/* Month selector */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">Period</span>
+        <span className="cx-label">Period</span>
         <div className="flex flex-wrap gap-2">
           {monthOptions.map((opt) => (
             <button
@@ -2199,7 +2219,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
       {/* Billing cycle cap — always shows current cycle data */}
       <div className="conduit-card px-5 py-4">
         <div className="flex items-baseline justify-between gap-3 mb-2">
-          <span className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
+          <span className="cx-label">
             Token cap (current cycle)
           </span>
           <span className="cx-type-sm cx-mono">
@@ -2230,7 +2250,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
 
       {/* Daily token bar chart */}
       <div>
-        <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+        <div className="cx-label mb-3">
           Tokens · daily
         </div>
         {monthLoading ? (
@@ -2286,7 +2306,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
       {/* Per-employee breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="conduit-card p-5">
-          <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+          <div className="cx-label mb-3">
             Share by employee
           </div>
           {monthLoading ? (
@@ -2308,7 +2328,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
           )}
         </div>
         <div className="conduit-card p-5">
-          <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+          <div className="cx-label mb-3">
             By employee
           </div>
           {monthLoading ? (
@@ -2357,7 +2377,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
 
       {/* Connector call totals */}
       <div>
-        <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+        <div className="cx-label mb-3">
           Connector context fetches (all time)
         </div>
         {connectorStats.length === 0 ? (
@@ -2838,7 +2858,7 @@ function BillingTab({
       {/* Invoice history — only shown on paid accounts with a Stripe customer */}
       {account.has_stripe_customer && (
         <div>
-          <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+          <div className="cx-label mb-3">
             Invoice history
           </div>
           {invoices === null ? (
@@ -2864,7 +2884,7 @@ function BillingTab({
                     {["Date", "Amount", "Status", ""].map((h) => (
                       <th
                         key={h}
-                        className="px-4 py-3 text-left cx-type-xs cx-mono uppercase tracking-[0.15em] text-[var(--cx-text-muted)] font-normal"
+                        className="px-4 py-3 text-left cx-label font-normal"
                       >
                         {h}
                       </th>
@@ -2939,7 +2959,7 @@ function BillingTab({
 
       {/* Tier comparison */}
       <div>
-        <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+        <div className="cx-label mb-3">
           Plans
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -3027,7 +3047,7 @@ function BillingTab({
 
       {/* Top-ups */}
       <div>
-        <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-3">
+        <div className="cx-label mb-3">
           Buy more tokens
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -3107,7 +3127,7 @@ function ReferralSection() {
   return (
     <div className="conduit-card p-5 space-y-4">
       <div>
-        <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
+        <div className="cx-label mb-1">
           Refer & Earn
         </div>
         <p className="cx-type-sm text-[var(--cx-text-muted)]">
@@ -3190,7 +3210,7 @@ function UsageSummary({
   return (
     <div className="conduit-card p-5 space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
+        <span className="cx-label">
           Usage this cycle
         </span>
         <span
@@ -3244,7 +3264,7 @@ function Stat({
 }) {
   return (
     <div className="conduit-card px-4 py-3">
-      <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
+      <div className="cx-label">
         {label}
       </div>
       <div className="cx-heading-xl mt-1">{value}</div>
@@ -4353,7 +4373,7 @@ function AppearanceTab({
       </div>
 
       <div className="conduit-card p-5 space-y-4">
-        <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
+        <div className="cx-label">
           Accent colour
         </div>
         <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Accent colour">
@@ -4587,7 +4607,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
           placeholder="Key name (e.g. CI/CD Pipeline)"
           maxLength={80}
           required
-          className="flex-1 rounded-xl border border-[var(--cx-border)] bg-[var(--cx-surface-raised)] px-4 py-3 cx-type-sm text-[var(--cx-text)] outline-none placeholder:text-[var(--cx-text-muted)] transition-colors"
+          className="flex-1 cx-input"
         />
         <PraxisButton
           type="submit"
@@ -4733,7 +4753,7 @@ function ReferralsTab() {
 
       {/* Referral link */}
       <div className="conduit-card p-5 space-y-3">
-        <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
+        <div className="cx-label">
           Your referral link
         </div>
         {referralUrl ? (
@@ -4742,7 +4762,7 @@ function ReferralsTab() {
               readOnly
               value={referralUrl}
               aria-label="Your referral link"
-              className="flex-1 rounded-lg border border-[var(--cx-border)] bg-[var(--cx-surface-raised)] px-3 py-2 cx-type-sm text-[var(--cx-text)] outline-none select-all cursor-text"
+              className="flex-1 cx-input-sm select-all cursor-text"
               onFocus={(e) => e.currentTarget.select()}
             />
             <PraxisButton
@@ -4768,7 +4788,7 @@ function ReferralsTab() {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
         <div className="conduit-card p-5">
-          <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
+          <div className="cx-label mb-1">
             Successful referrals
           </div>
           <AnimatedStat
@@ -4777,7 +4797,7 @@ function ReferralsTab() {
           />
         </div>
         <div className="conduit-card p-5">
-          <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)] mb-1">
+          <div className="cx-label mb-1">
             Bonus tokens earned
           </div>
           <AnimatedStat
@@ -4789,7 +4809,7 @@ function ReferralsTab() {
 
       {/* How it works */}
       <div className="conduit-card p-5 space-y-3">
-        <div className="cx-type-xs cx-mono uppercase tracking-[0.14em] text-[var(--cx-text-muted)]">
+        <div className="cx-label">
           How it works
         </div>
         <ol className="space-y-2 text-[var(--cx-text-muted)]">

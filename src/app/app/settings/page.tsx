@@ -26,9 +26,9 @@ export default async function SettingsPage({
   return (
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8">
       <div className="mx-auto max-w-5xl">
-        <div className="mb-8">
+        <div className="mb-8 pb-6" style={{ borderBottom: "1px solid var(--cx-border)" }}>
           <h1 className="cx-heading-2xl">Settings</h1>
-          <p className="cx-type-sm mt-1" style={{ color: "var(--cx-text-muted)" }}>
+          <p className="cx-type-sm mt-1 cx-text-muted">
             Manage your account, workspace, and billing preferences.
           </p>
         </div>
