@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Bookmark, Copy, Download, Trash2, ArrowLeft, Check } from "lucide-react";
 import Link from "next/link";
 import { EMPLOYEES, type EmployeeId } from "@/lib/conduit/employees";
-import { PraxisButton } from "@/components/conduit/ui/Button";
+import { Button } from "@/components/conduit/ui/Button";
 
 interface Output {
   id: string;
@@ -23,7 +23,7 @@ function CopyAction({ content }: { content: string }) {
     setTimeout(() => setCopied(false), 1500);
   };
   return (
-    <PraxisButton
+    <Button
       type="button"
       variant="ghost"
       size="sm"
@@ -32,7 +32,7 @@ function CopyAction({ content }: { content: string }) {
     >
       {copied ? <Check size={11} /> : <Copy size={11} />}
       {copied ? "Copied" : "Copy"}
-    </PraxisButton>
+    </Button>
   );
 }
 
@@ -50,7 +50,7 @@ function DownloadAction({ content, title }: { content: string; title: string }) 
     URL.revokeObjectURL(url);
   };
   return (
-    <PraxisButton
+    <Button
       type="button"
       variant="ghost"
       size="sm"
@@ -59,7 +59,7 @@ function DownloadAction({ content, title }: { content: string; title: string }) 
     >
       <Download size={11} />
       <span className="hidden sm:inline">Download</span>
-    </PraxisButton>
+    </Button>
   );
 }
 
@@ -153,7 +153,7 @@ export default function OutputsPage() {
                           </span>
                         </div>
                       </div>
-                      <PraxisButton
+                      <Button
                         type="button"
                         variant="ghost"
                         size="icon-sm"
@@ -162,7 +162,7 @@ export default function OutputsPage() {
                         aria-label="Delete output"
                       >
                         <Trash2 size={13} />
-                      </PraxisButton>
+                      </Button>
                     </div>
 
                     <p className="cx-body text-[var(--color-text-muted)] mt-2 line-clamp-3 whitespace-pre-wrap">
