@@ -8,10 +8,7 @@ import { DEPT_COLOR, EMPLOYEE_ICON, employeeLabel } from "./EmployeeBadge";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import type { ActivityEvent } from "@/app/api/conduit/activity/route";
 import { EmptyState, ActivityEmptySVG } from "./EmptyState";
-
-const CX_REWARD = "#34D399";
-const CX_ACCENT = "#7C6CFF";
-const CX_ACCENT_BRIGHT = "#9B8CFF";
+import { CX_ACCENT, CX_ACCENT_BRIGHT, CX_REWARD } from "@/lib/design-system/cx-tokens";
 
 // 3 evenly-spaced spark angles for the build-shipped beat.
 const SPARK_ANGLES = [0, 120, 240];

@@ -40,6 +40,14 @@ export const CX_ACCENT_DEEP   = "#5548CC";
 export const CX_REWARD = "#34D399";
 export const CX_DANGER = "#F4607D";
 
+// Alpha variants — for framer-motion box-shadow keyframes that interpolate
+// between transparent and the full reward glow.
+export const CX_REWARD_RING      = "rgba(52, 211, 153, 0.40)"; // 40% — ring at peak
+export const CX_REWARD_RING_FADE = "rgba(52, 211, 153, 0)";    // 0%  — ring at rest
+
+// Accent tint — for framer-motion / SVG fill consumers.
+export const CX_ACCENT_TINT = "rgba(124, 108, 255, 0.12)";
+
 // ─── Glass recipe (JS mirror for SVG fills, Framer Motion, Canvas 2D) ────────
 // These are dark-mode defaults — when using CSS, prefer var(--cx-glass-*) so
 // theme overrides (light mode, prefers-reduced-transparency) apply automatically.

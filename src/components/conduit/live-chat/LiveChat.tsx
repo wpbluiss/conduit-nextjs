@@ -23,6 +23,7 @@ import { SPECIALIST_ICON } from "@/lib/ui/specialist-icons";
 import PraxisLiveRoom from "@/components/conduit/voice/PraxisLiveRoom";
 import type { VoiceTokenResponse } from "@/components/conduit/voice/VoiceRoom";
 import { PaywallModal, type PaywallPayload } from "@/components/conduit/PaywallModal";
+import { CX_REWARD_RING, CX_REWARD_RING_FADE } from "@/lib/design-system/cx-tokens";
 
 type Icon = React.ComponentType<{ className?: string }>;
 // Use canonical SPECIALIST_ICON registry — ensures all dept icons are consistent
@@ -43,10 +44,6 @@ const DOC_TYPES = new Set(["post", "doc", "brief", "proposal", "report", "letter
 function extFor(type: string) { return type === "migration" || type === "sql" ? "sql" : type === "code" || type === "build" ? "ts" : "md"; }
 function slugify(s: string) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "artifact"; }
 function escapeHtml(s: string) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
-
-// cx-reward token value (#34D399) used only for ephemeral animation keyframes
-const CX_REWARD_RING = "rgba(52,211,153,0.4)";
-const CX_REWARD_RING_FADE = "rgba(52,211,153,0)";
 
 // Dept-accent RGB values for pulsing avatar glow while specialist is pending.
 // Parallel to the CSS variable dept palette — keeps glow computation in JS where
