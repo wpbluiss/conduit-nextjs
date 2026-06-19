@@ -821,7 +821,7 @@ export function Sidebar({
                           style={{ background: "var(--cx-accent)" }}
                         />
                       )}
-                      <SpecialistAvatar employee={emp} size={28} active={active} streaming={isStreaming} />
+                      <SpecialistAvatar employee={emp} size={24} active={active} streaming={isStreaming} />
                       <span
                         className="truncate flex-1 cx-type-sm"
                         style={{ color: active ? "var(--cx-text)" : "var(--cx-text-muted)", fontWeight: active ? 500 : 400 }}
@@ -838,9 +838,9 @@ export function Sidebar({
                         <span
                           className="w-1.5 h-1.5 rounded-full shrink-0"
                           style={{
-                            background: isStreaming ? "var(--cx-accent)" : DEPT_COLOR[emp],
-                            opacity: isStreaming ? 1 : 0.5,
-                            boxShadow: isStreaming ? "0 0 6px var(--cx-accent)" : "none",
+                            background: DEPT_COLOR[emp],
+                            opacity: isStreaming ? 1 : 0.45,
+                            boxShadow: isStreaming ? `0 0 5px ${DEPT_COLOR[emp]}` : "none",
                           }}
                           aria-label={isStreaming ? "Active" : "Online"}
                         />
@@ -904,7 +904,7 @@ export function Sidebar({
                             style={{ background: "var(--cx-accent)" }}
                           />
                         )}
-                        <SpecialistAvatar employee={emp} size={28} active={active} streaming={isStreaming} />
+                        <SpecialistAvatar employee={emp} size={24} active={active} streaming={isStreaming} />
                         <span
                           className="truncate flex-1 cx-type-sm"
                           style={{ color: active ? "var(--cx-text)" : "var(--cx-text-muted)", fontWeight: active ? 500 : 400 }}
@@ -921,9 +921,9 @@ export function Sidebar({
                           <span
                             className="w-1.5 h-1.5 rounded-full shrink-0"
                             style={{
-                              background: isStreaming ? "var(--cx-accent)" : DEPT_COLOR[emp],
-                              opacity: isStreaming ? 1 : 0.5,
-                              boxShadow: isStreaming ? "0 0 6px var(--cx-accent)" : "none",
+                              background: DEPT_COLOR[emp],
+                              opacity: isStreaming ? 1 : 0.45,
+                              boxShadow: isStreaming ? `0 0 5px ${DEPT_COLOR[emp]}` : "none",
                             }}
                             aria-label={isStreaming ? "Active" : "Online"}
                           />
@@ -986,7 +986,7 @@ export function Sidebar({
                         style={{ background: "var(--cx-accent)" }}
                       />
                     )}
-                    <SpecialistAvatar employee={emp} size={32} active={active} streaming={isStreaming} />
+                    <SpecialistAvatar employee={emp} size={28} active={active} streaming={isStreaming} />
                     {!allowed && (
                       <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 flex items-center justify-center z-10">
                         <Lock size={8} style={{ color: "var(--cx-text-muted)" }} />
@@ -997,7 +997,7 @@ export function Sidebar({
                         className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full border border-[var(--cx-canvas)] z-10"
                         style={{
                           background: DEPT_COLOR[emp],
-                          opacity: isStreaming ? 1 : 0.55,
+                          opacity: isStreaming ? 1 : 0.5,
                           boxShadow: isStreaming ? `0 0 4px ${DEPT_COLOR[emp]}` : "none",
                         }}
                       />

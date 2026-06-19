@@ -68,15 +68,13 @@ export function SpecialistAvatar({
     ? DEPT_COLOR_SOFT[employee!]
     : (color ? `color-mix(in srgb, ${color} 12%, transparent)` : "var(--cx-accent-tint)");
 
-  const bg = active
-    ? "var(--cx-accent-tint)"
-    : deptColorSoft;
+  const bg = deptColorSoft;
   const iconColor = active
-    ? "var(--cx-accent-bright)"
-    : deptColor;
+    ? deptColor
+    : `color-mix(in srgb, ${deptColor} 80%, transparent)`;
   const shadow = active
-    ? "inset 0 0 0 1.5px var(--cx-accent)"
-    : `inset 0 0 0 1.5px color-mix(in srgb, ${deptColor} 55%, transparent)`;
+    ? `inset 0 0 0 1.5px ${deptColor}, 0 0 0 3px color-mix(in srgb, ${deptColor} 22%, transparent)`
+    : `inset 0 0 0 1.5px color-mix(in srgb, ${deptColor} 45%, transparent)`;
 
   const radius = Math.round(size * 0.25); // 8px at size=32, scales proportionally
   const glyphSize = Math.max(10, Math.round(size * 0.44)); // 14px at size=32
