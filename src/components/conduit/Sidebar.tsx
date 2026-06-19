@@ -867,7 +867,7 @@ export function Sidebar({
                       whileHover={shouldReduceMotion ? undefined : { y: -1 }}
                       whileTap={shouldReduceMotion ? undefined : { scale: 0.98, y: 0 }}
                       transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
-                      className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]" : ""}`}
+                      className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[var(--cx-surface-raised)]" : ""}`}
                       style={{
                         background: active ? "var(--cx-accent-tint)" : undefined,
                       }}
@@ -943,7 +943,7 @@ export function Sidebar({
               <button
                 type="button"
                 onClick={() => setTeamExpanded((v) => !v)}
-                className="w-full mx-0 flex items-center justify-between px-3 pt-1 pb-2 rounded-lg transition-colors duration-150 hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]"
+                className="w-full mx-0 flex items-center justify-between px-3 pt-1 pb-2 rounded-lg transition-colors duration-150 hover:bg-[var(--cx-surface-raised)]"
                 style={{ borderBottom: "1px solid var(--cx-glass-border)", marginBottom: "4px" }}
               >
                 <span className="cx-label inline-flex items-center gap-2" style={{ color: "var(--cx-text-faint)" }}>
@@ -973,7 +973,7 @@ export function Sidebar({
                         whileHover={shouldReduceMotion ? undefined : { y: -1 }}
                         whileTap={shouldReduceMotion ? undefined : { scale: 0.98, y: 0 }}
                         transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
-                        className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]" : ""}`}
+                        className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[var(--cx-surface-raised)]" : ""}`}
                         style={{
                           background: active ? "var(--cx-accent-tint)" : undefined,
                         }}
@@ -1189,7 +1189,7 @@ export function Sidebar({
                     collapsed ? "justify-center mx-auto w-8 h-8" : "gap-2 px-3 py-2",
                     isActive("/app/builds")
                       ? "text-[var(--cx-text)]"
-                      : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)]",
+                      : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[var(--cx-surface-raised)]",
                   ].join(" ")}
                   style={{
                     background: isActive("/app/builds") ? "var(--cx-accent-tint)" : undefined,
@@ -1439,7 +1439,7 @@ export function Sidebar({
                   : bySearch.slice(0, 8);
                 return (
                   <>
-                    <div className="space-y-0.5">
+                    <div className="space-y-1">
                       {filtered.slice(0, 8).map((c) => {
                         const active = isChat && activeId === c.id;
                         const dom = c.dominant_employee;
@@ -1568,7 +1568,7 @@ export function Sidebar({
                                 <Link
                                   href={`/app?c=${c.id}`}
                                   onClick={close}
-                                  className={`relative flex items-start gap-2 pl-3 pr-9 py-2 rounded-lg transition-[background,box-shadow] duration-[120ms] ${!active ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.22)]" : ""}`}
+                                  className={`relative flex items-start gap-2 pl-3 pr-9 py-2 rounded-lg transition-[background,box-shadow] duration-150 ${!active ? "hover:bg-[var(--cx-surface-raised)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.22)]" : ""}`}
                                   style={{ background: active ? "var(--cx-accent-tint)" : undefined, boxShadow: active ? "var(--cx-glass-highlight)" : undefined }}
                                   onMouseEnter={(e) => openPeek(c.id, e.currentTarget)}
                                   onMouseLeave={closePeek}
@@ -1594,7 +1594,7 @@ export function Sidebar({
                                       </span>
                                       <span
                                         className="shrink-0 cx-mono cx-type-xs"
-                                        style={{ color: "var(--cx-text-faint)" }}
+                                        style={{ color: "var(--cx-text-muted)" }}
                                       >
                                         {relativeDate(c.updated_at)}
                                       </span>
@@ -1990,7 +1990,7 @@ function NavLink({
             ? "justify-center mx-auto w-8 h-8"
             : `gap-2 px-3 ${small ? "py-1" : "py-2"}`,
           !active
-            ? "hover:bg-[color-mix(in_srgb,var(--cx-accent)_6%,transparent)] hover:text-[var(--cx-text)]"
+            ? "hover:bg-[var(--cx-surface-raised)] hover:text-[var(--cx-text)]"
             : "",
         ].join(" ")}
         style={{
