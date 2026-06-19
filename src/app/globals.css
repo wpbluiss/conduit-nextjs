@@ -741,7 +741,7 @@ body {
   background: var(--color-surface-elevated);
   border: 1px solid var(--color-border);
   border-radius: 14px;
-  transition: background 180ms ease, border-color 180ms ease, transform 220ms ease;
+  transition: background 180ms var(--cx-ease, cubic-bezier(0.22,1,0.36,1)), border-color 180ms var(--cx-ease, cubic-bezier(0.22,1,0.36,1)), transform 180ms var(--cx-ease, cubic-bezier(0.22,1,0.36,1));
 }
 .conduit-suggestion:hover {
   border-color: var(--dept, var(--color-accent));
