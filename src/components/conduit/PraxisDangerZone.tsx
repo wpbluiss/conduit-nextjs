@@ -41,38 +41,30 @@ export function PraxisDangerZone() {
     <div
       className="mt-10 rounded-xl p-5"
       style={{
-        border: "1px solid color-mix(in srgb, var(--cx-danger) 35%, var(--color-border))",
+        border: "1px solid color-mix(in srgb, var(--cx-danger) 35%, var(--cx-border))",
         background: "color-mix(in srgb, var(--cx-danger) 5%, transparent)",
       }}
     >
-      <h2 className="text-sm font-semibold" style={{ color: "var(--cx-danger)" }}>
+      <h2 className="cx-type-sm font-semibold" style={{ color: "var(--cx-danger)" }}>
         Danger zone
       </h2>
-      <p className="mt-1.5 text-sm" style={{ color: "var(--color-text-muted)" }}>
+      <p className="mt-1.5 cx-type-sm" style={{ color: "var(--cx-text-muted)" }}>
         Permanently delete your account and all of your data — conversations, memory,
         artifacts, builds, and voice history. This <strong>cannot be undone.</strong>
       </p>
       <label className="mt-4 block">
-        <span
-          className="mb-1.5 block cx-type-xs uppercase tracking-[0.16em]"
-          style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-mono)" }}
-        >
+        <span className="mb-1.5 block cx-label text-[var(--cx-text-muted)]">
           Type DELETE to confirm
         </span>
         <input
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
           placeholder="DELETE"
-          className="w-full rounded-lg px-3 py-2 text-sm outline-none"
-          style={{
-            background: "var(--color-surface-elevated)",
-            border: "1px solid var(--color-border)",
-            color: "var(--color-text)",
-          }}
+          className="w-full cx-input"
         />
       </label>
       {error && (
-        <p className="mt-2 text-xs" style={{ color: "var(--cx-danger)" }}>
+        <p className="mt-2 cx-type-xs" style={{ color: "var(--cx-danger)" }}>
           {error}
         </p>
       )}
