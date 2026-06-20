@@ -31,7 +31,7 @@ function CopyAction({ content }: { content: string }) {
       onClick={() => void handleCopy()}
       aria-label="Copy to clipboard"
     >
-      {copied ? <Check size={11} /> : <Copy size={11} />}
+      {copied ? <Check size={11} strokeWidth={1.75} /> : <Copy size={11} strokeWidth={1.75} />}
       {copied ? "Copied" : "Copy"}
     </Button>
   );
@@ -58,7 +58,7 @@ function DownloadAction({ content, title }: { content: string; title: string }) 
       onClick={handleDownload}
       aria-label="Download as Markdown"
     >
-      <Download size={11} />
+      <Download size={11} strokeWidth={1.75} />
       <span className="hidden sm:inline">Download</span>
     </Button>
   );
@@ -96,7 +96,7 @@ export default function OutputsPage() {
             href="/app"
             className="flex items-center gap-1 text-[var(--color-text-muted)] hover:text-[var(--color-text)] cx-type-base transition-colors"
           >
-            <ArrowLeft size={14} />
+            <ArrowLeft size={14} strokeWidth={1.75} />
           </Link>
           <h1 className="cx-heading-2xl">Outputs</h1>
         </div>
@@ -163,7 +163,7 @@ export default function OutputsPage() {
                         disabled={deletingId === output.id}
                         aria-label="Delete output"
                       >
-                        <Trash2 size={13} />
+                        <Trash2 size={13} strokeWidth={1.75} />
                       </Button>
                     </div>
 

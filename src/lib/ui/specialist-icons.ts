@@ -35,5 +35,12 @@ export const SPECIALIST_ICON: Record<EmployeeKey, LucideIcon> = {
   legal: Scale,           // Contracts + Counsel
 };
 
-/** Uniform stroke width for all specialist icons. */
-export const SPECIALIST_ICON_STROKE = 1.75 as const;
+/**
+ * Canonical stroke width for all lucide icons across the console.
+ * Spec: CONSOLE_REDESIGN.md §Iconography — "uniform stroke (1.75–2px)".
+ * Use strokeWidth={2} for sub-12px icons where 1.75px hairlines hurt legibility.
+ */
+export const ICON_STROKE = 1.75 as const;
+
+/** Uniform stroke width for specialist icons — canonical value for icon system. */
+export const SPECIALIST_ICON_STROKE = ICON_STROKE;

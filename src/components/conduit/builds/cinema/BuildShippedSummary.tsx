@@ -358,7 +358,7 @@ function BuildShippedSummaryInner({
             rel="noopener noreferrer"
             className="btn-primary btn-sz-sm inline-flex items-center gap-1.5"
           >
-            Open live site <ExternalLink size={13} />
+            Open live site <ExternalLink size={13} strokeWidth={1.75} />
           </a>
         )}
         {isSuccess && session.github_repo && (
@@ -377,7 +377,7 @@ function BuildShippedSummaryInner({
             className="btn-secondary btn-sz-sm inline-flex items-center gap-1.5"
             title="Iterate on this build by talking to Engineering"
           >
-            Continue with Engineering <ArrowRight size={13} />
+            Continue with Engineering <ArrowRight size={13} strokeWidth={1.75} />
           </Link>
         )}
         {recovery && recovery.kind === "retry" && (
@@ -388,7 +388,7 @@ function BuildShippedSummaryInner({
               recovery.promptSeed ? `Will reuse: ${recovery.promptSeed}` : undefined
             }
           >
-            {recovery.label} <ArrowRight size={13} />
+            {recovery.label} <ArrowRight size={13} strokeWidth={1.75} />
           </Link>
         )}
         {recovery && recovery.kind === "continue-from" && (
@@ -396,7 +396,7 @@ function BuildShippedSummaryInner({
             href={`/app/builds?continue=${recovery.parentSessionId}`}
             className="btn-primary btn-sz-sm inline-flex items-center gap-1.5"
           >
-            {recovery.label} <ArrowRight size={13} />
+            {recovery.label} <ArrowRight size={13} strokeWidth={1.75} />
           </Link>
         )}
         {recovery && recovery.kind === "contact-support" && (
@@ -411,7 +411,7 @@ function BuildShippedSummaryInner({
             rel="noopener noreferrer"
             className="btn-primary btn-sz-sm inline-flex items-center gap-1.5"
           >
-            {recovery.label} <ExternalLink size={13} />
+            {recovery.label} <ExternalLink size={13} strokeWidth={1.75} />
           </a>
         )}
       </div>

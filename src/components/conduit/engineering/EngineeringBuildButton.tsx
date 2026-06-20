@@ -132,7 +132,7 @@ export default function EngineeringBuildButton({
                 onClick={() => setOpen(false)}
                 aria-label="Close"
               >
-                <X size={16} />
+                <X size={16} strokeWidth={1.75} />
               </Button>
             </div>
 
@@ -197,7 +197,7 @@ export default function EngineeringBuildButton({
                 className="!cx-type-base inline-flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ background: deptColor, color: "var(--cx-canvas)" }}
               >
-                {submitting && <Loader2 size={12} className="animate-spin" />}
+                {submitting && <Loader2 size={12} strokeWidth={1.75} className="animate-spin" />}
                 Ship it
               </Button>
             </div>

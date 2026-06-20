@@ -144,7 +144,7 @@ export function MemoryNodeTooltip({
           title={memory.pinned ? "Unpin" : "Pin (always include in prompts)"}
           aria-label={memory.pinned ? "Unpin memory" : "Pin memory"}
         >
-          {memory.pinned ? <PinOff size={13} /> : <Pin size={13} />}
+          {memory.pinned ? <PinOff size={13} strokeWidth={1.75} /> : <Pin size={13} strokeWidth={1.75} />}
         </PraxisButton>
         <PraxisButton
           variant="ghost"
@@ -156,7 +156,7 @@ export function MemoryNodeTooltip({
           title={memory.locked ? "Unlock (Atlas can supersede)" : "Lock (Atlas can't overwrite)"}
           aria-label={memory.locked ? "Unlock memory" : "Lock memory"}
         >
-          {memory.locked ? <LockOpen size={13} /> : <Lock size={13} />}
+          {memory.locked ? <LockOpen size={13} strokeWidth={1.75} /> : <Lock size={13} strokeWidth={1.75} />}
         </PraxisButton>
         <PraxisButton
           variant="ghost"

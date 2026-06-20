@@ -20,7 +20,7 @@ export default function AppNotFound() {
           href="/app/workspace"
           className="btn-primary btn-sz-md inline-flex items-center gap-2"
         >
-          <Home size={14} />
+          <Home size={14} strokeWidth={1.75} />
           Workspace
         </Link>
         <Link
@@ -28,7 +28,7 @@ export default function AppNotFound() {
           className="inline-flex items-center gap-1.5 cx-type-sm"
           style={{ color: "var(--cx-text-muted, #A0A0B0)" }}
         >
-          <ArrowLeft size={13} />
+          <ArrowLeft size={13} strokeWidth={1.75} />
           New chat
         </Link>
       </div>

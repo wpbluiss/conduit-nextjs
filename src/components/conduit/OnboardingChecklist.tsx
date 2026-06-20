@@ -161,7 +161,7 @@ export function OnboardingChecklist({
                     transition: "background 0.2s, border-color 0.2s",
                   }}
                 >
-                  {checked && <Check size={8} color="#fff" strokeWidth={3} />}
+                  {checked && <Check size={8} color="#fff" strokeWidth={2} />}
                 </span>
                 <span
                   className={checked ? "line-through" : ""}

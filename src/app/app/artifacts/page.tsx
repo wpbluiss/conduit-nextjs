@@ -84,7 +84,7 @@ export default async function ArtifactsPage() {
                       className="inline-flex items-center justify-center w-7 h-7 rounded-lg"
                       style={{ background: DEPT_COLOR_SOFT[emp] }}
                     >
-                      <FileText size={13} style={{ color: DEPT_COLOR[emp] }} />
+                      <FileText size={13} strokeWidth={1.75} style={{ color: DEPT_COLOR[emp] }} />
                     </span>
                     <span className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] flex-1 min-w-0">
                       {(a.type as string).replace("_", " ")} ·{" "}

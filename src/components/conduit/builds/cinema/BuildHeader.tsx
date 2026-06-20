@@ -129,7 +129,7 @@ export function BuildHeader({ session, subscription, heartbeat, onRefresh }: Pro
           aria-label="Back to all builds"
           title="Back to all builds"
         >
-          <X size={16} />
+          <X size={16} strokeWidth={1.75} />
         </PraxisButton>
       </div>
     </header>

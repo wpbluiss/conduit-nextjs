@@ -229,7 +229,7 @@ export function ConversationSearchBar() {
             aria-label="Clear search"
             className="shrink-0"
           >
-            <X size={13} />
+            <X size={13} strokeWidth={1.75} />
           </PraxisButton>
         )}
         {loading && (

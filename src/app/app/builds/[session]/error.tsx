@@ -66,7 +66,7 @@ export default function CinemaError({ error, unstable_retry, reset }: Props) {
         </div>
         <div className="eng-cinema-summary-actions">
           <Button onClick={onReopen}>
-            Reopen the live view <ArrowRight size={13} />
+            Reopen the live view <ArrowRight size={13} strokeWidth={1.75} />
           </Button>
           {deployUrl && (
             <a
@@ -75,7 +75,7 @@ export default function CinemaError({ error, unstable_retry, reset }: Props) {
               rel="noopener noreferrer"
               className="btn-secondary btn-sz-sm inline-flex items-center gap-1.5"
             >
-              Open last-known preview <ExternalLink size={13} />
+              Open last-known preview <ExternalLink size={13} strokeWidth={1.75} />
             </a>
           )}
           <Button

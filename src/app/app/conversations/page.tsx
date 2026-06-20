@@ -188,7 +188,7 @@ export default async function ConversationsPage({
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8">
       <div className="mx-auto max-w-3xl">
         <h1 className="cx-heading-2xl mb-2 flex items-center gap-2">
-          <MessageSquare size={22} /> Conversations
+          <MessageSquare size={22} strokeWidth={1.75} /> Conversations
         </h1>
         <p className="cx-body text-[var(--color-text-muted)] mb-6">
           Your full chat history — click any conversation to continue it. Hover
