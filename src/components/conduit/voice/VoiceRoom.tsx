@@ -300,7 +300,7 @@ export default function VoiceRoom({
           onClick={end}
           aria-label="End call"
         >
-          <X size={20} />
+          <X size={20} strokeWidth={1.75} />
         </PraxisButton>
       </div>
 
@@ -428,7 +428,7 @@ export default function VoiceRoom({
           aria-label={muted ? "Unmute" : "Mute"}
           title={muted ? "Unmute" : "Mute"}
         >
-          {muted ? <MicOff size={20} /> : <Mic size={20} />}
+          {muted ? <MicOff size={20} strokeWidth={1.75} /> : <Mic size={20} strokeWidth={1.75} />}
         </button>
         <div
           className={`px-3 py-1 rounded-full cx-type-sm font-mono tabular-nums transition-colors ${

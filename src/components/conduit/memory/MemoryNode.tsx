@@ -107,7 +107,7 @@ export function MemoryNode({
 
       {memory.locked && (
         <span className="mem-node-lock" aria-hidden>
-          <Lock size={8} strokeWidth={2.25} />
+          <Lock size={8} strokeWidth={2} />
         </span>
       )}
 

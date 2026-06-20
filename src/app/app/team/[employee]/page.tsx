@@ -299,7 +299,7 @@ export default async function WorkspacePage({ params }: PageProps) {
               className="btn-primary btn-sz-sm"
               style={{ background: dept, color: "var(--color-surface)" }}
             >
-              Talk to {employee.name} <ArrowRight size={14} />
+              Talk to {employee.name} <ArrowRight size={14} strokeWidth={1.75} />
             </Link>
           </div>
         </div>
@@ -412,9 +412,9 @@ export default async function WorkspacePage({ params }: PageProps) {
                         style={{ background: employee.colorSoft }}
                       >
                         {a.type === "build" ? (
-                          <Hammer size={14} style={{ color: dept }} />
+                          <Hammer size={14} strokeWidth={1.75} style={{ color: dept }} />
                         ) : (
-                          <FileText size={14} style={{ color: dept }} />
+                          <FileText size={14} strokeWidth={1.75} style={{ color: dept }} />
                         )}
                       </span>
                       <span className="min-w-0 flex-1">
@@ -439,7 +439,7 @@ export default async function WorkspacePage({ params }: PageProps) {
                         className="inline-flex items-center justify-center w-8 h-8 rounded-lg shrink-0"
                         style={{ background: employee.colorSoft }}
                       >
-                        <MessageSquare size={14} style={{ color: dept }} />
+                        <MessageSquare size={14} strokeWidth={1.75} style={{ color: dept }} />
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block cx-label">

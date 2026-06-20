@@ -291,7 +291,7 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
                 aria-label="Clear search"
                 className="shrink-0"
               >
-                <X size={12} />
+                <X size={12} strokeWidth={1.75} />
               </PraxisButton>
             )}
           </div>

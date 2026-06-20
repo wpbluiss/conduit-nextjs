@@ -180,7 +180,7 @@ export function WelcomeChecklist({
               onClick={dismiss}
               aria-label="Dismiss checklist"
             >
-              <X size={16} />
+              <X size={16} strokeWidth={1.75} />
             </PraxisButton>
           </div>
 
@@ -203,7 +203,7 @@ export function WelcomeChecklist({
                       background: done ? "var(--color-accent)" : "transparent",
                     }}
                   >
-                    {done && <Check size={11} color="#fff" style={{ strokeWidth: 3 }} />}
+                    {done && <Check size={11} color="#fff" strokeWidth={2} />}
                   </span>
                   <span className={done ? "line-through text-[var(--color-text-muted)]" : ""}>
                     {item.label}

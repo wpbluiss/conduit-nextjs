@@ -33,7 +33,7 @@ function BuildIcon({ build }: { build: InFlightBuild }) {
     return (
       <Upload
         size={11}
-        strokeWidth={2.25}
+        strokeWidth={2}
         style={{ color: DEPT_COLOR_ENG, flexShrink: 0 }}
         aria-hidden
       />
@@ -43,7 +43,7 @@ function BuildIcon({ build }: { build: InFlightBuild }) {
     return (
       <Clock
         size={11}
-        strokeWidth={2.25}
+        strokeWidth={2}
         className="text-[var(--cx-text-muted)]"
         style={{ flexShrink: 0 }}
         aria-hidden
@@ -54,7 +54,7 @@ function BuildIcon({ build }: { build: InFlightBuild }) {
   return (
     <Loader2
       size={11}
-      strokeWidth={2.25}
+      strokeWidth={2}
       className="animate-spin"
       style={{ color: DEPT_COLOR_ENG, flexShrink: 0 }}
       aria-hidden
@@ -87,7 +87,7 @@ function CelebrationRow({ build }: { build: CelebratingBuild }) {
       >
         <CheckCircle2
           size={11}
-          strokeWidth={2.25}
+          strokeWidth={2}
           style={{ flexShrink: 0, color: isSuccess ? "var(--cx-reward)" : "var(--cx-danger)" }}
           aria-hidden
         />
@@ -135,7 +135,7 @@ export function SidebarBuildsSection({ initial, accountId }: Props) {
       <div className="flex items-center gap-1.5 px-3 pb-1">
         <Hammer
           size={10}
-          strokeWidth={2.5}
+          strokeWidth={2}
           style={{ color: DEPT_COLOR_ENG }}
           aria-hidden
         />

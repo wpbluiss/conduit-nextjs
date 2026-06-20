@@ -115,7 +115,7 @@ export default async function VoiceRoomLanding() {
             Praxis Console · Voice Room
           </p>
           <h1 className="cx-heading-3xl mt-2 inline-flex items-center gap-3">
-            <Mic className="text-[var(--color-accent)]" size={32} />
+            <Mic className="text-[var(--color-accent)]" size={32} strokeWidth={1.75} />
             Voice Room
           </h1>
           <p className="mt-3 cx-body text-[var(--color-text-muted)] max-w-xl">
@@ -126,7 +126,7 @@ export default async function VoiceRoomLanding() {
 
         {!ttsAllowed && (
           <div className="conduit-card p-5 mb-6 inline-flex items-center gap-3 max-w-xl">
-            <Lock size={14} className="text-[var(--color-accent-hi)]" />
+            <Lock size={14} strokeWidth={1.75} className="text-[var(--color-accent-hi)]" />
             <div>
               <div className="cx-type-base">Voice mode is a Pro perk</div>
               <p className="cx-type-xs text-[var(--color-text-muted)] mt-0.5">
@@ -247,7 +247,7 @@ export default async function VoiceRoomLanding() {
                   </div>
                 </div>
                 {!isAllowed && (
-                  <Lock size={12} className="text-[var(--color-text-muted)]" />
+                  <Lock size={12} strokeWidth={1.75} className="text-[var(--color-text-muted)]" />
                 )}
               </Link>
             );

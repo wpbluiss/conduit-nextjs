@@ -50,7 +50,7 @@ function LabelChip({
           aria-label={`Remove label ${label.name}`}
           className="ml-0.5"
         >
-          <X size={9} style={{ strokeWidth: 2.5 }} />
+          <X size={9} strokeWidth={2} />
         </PraxisButton>
       )}
     </span>

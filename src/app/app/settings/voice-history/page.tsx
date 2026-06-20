@@ -69,7 +69,7 @@ export default async function VoiceHistoryPage() {
             href="/app/settings"
             className="cx-type-xs text-[var(--cx-text-muted)] inline-flex items-center gap-1 hover:text-[var(--cx-text)] transition-colors duration-150"
           >
-            <ArrowLeft size={12} /> Settings
+            <ArrowLeft size={12} strokeWidth={1.75} /> Settings
           </Link>
           <h1 className="cx-heading-2xl mt-2">Voice History</h1>
           <p className="cx-type-sm text-[var(--cx-text-muted)] mt-1">
@@ -80,7 +80,7 @@ export default async function VoiceHistoryPage() {
 
         {sessions.length === 0 ? (
           <div className="conduit-card p-8 text-center text-[var(--cx-text-muted)]">
-            <Mic size={20} className="mx-auto mb-3 opacity-40" style={{ color: "var(--cx-accent)" }} />
+            <Mic size={20} strokeWidth={1.75} className="mx-auto mb-3 opacity-40" style={{ color: "var(--cx-accent)" }} />
             <p className="cx-type-sm font-medium text-[var(--cx-text)]">No voice conversations yet</p>
             <p className="cx-type-xs mt-1 text-[var(--cx-text-muted)]">
               Click &ldquo;Voice Mode&rdquo; on any employee workspace to start one.

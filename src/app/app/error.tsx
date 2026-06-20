@@ -36,7 +36,7 @@ export default function AppError({ error, reset, unstable_retry }: Props) {
           border: "1px solid color-mix(in srgb, var(--cx-danger, #F4607D) 24%, transparent)",
         }}
       >
-        <AlertTriangle size={22} />
+        <AlertTriangle size={22} strokeWidth={1.75} />
       </span>
       <h1 className="cx-heading-xl mb-3">
         Something went wrong
@@ -46,7 +46,7 @@ export default function AppError({ error, reset, unstable_retry }: Props) {
       </p>
       <div className="flex flex-col sm:flex-row items-center gap-3">
         <Button onClick={onRetry} variant="primary" size="md">
-          <RotateCcw size={14} />
+          <RotateCcw size={14} strokeWidth={1.75} />
           Try again
         </Button>
         <Button
@@ -54,7 +54,7 @@ export default function AppError({ error, reset, unstable_retry }: Props) {
           variant="ghost"
           size="md"
         >
-          <Home size={13} />
+          <Home size={13} strokeWidth={1.75} />
           Workspace
         </Button>
       </div>

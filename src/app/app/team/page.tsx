@@ -69,7 +69,7 @@ export default async function TeamPage() {
               style={{ background: "var(--color-surface-elevated)" }}
               aria-hidden
             >
-              <Users2 size={16} style={{ color: "var(--color-text-muted)" }} />
+              <Users2 size={16} strokeWidth={1.75} style={{ color: "var(--color-text-muted)" }} />
             </span>
             <h1 className="praxis-display-1">Your team</h1>
           </div>
@@ -122,7 +122,7 @@ export default async function TeamPage() {
                 className="inline-flex items-center gap-1.5 cx-type-base font-medium shrink-0"
                 style={{ color: "var(--color-accent)" }}
               >
-                Open the console <ArrowRight size={14} />
+                Open the console <ArrowRight size={14} strokeWidth={1.75} />
               </Link>
             </div>
           </>
