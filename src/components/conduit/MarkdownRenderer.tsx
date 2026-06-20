@@ -94,7 +94,7 @@ const TOKEN_COLOR: Record<TokenKind, string> = {
   keyword:  "var(--cx-accent-bright)",
   string:   "var(--cx-reward)",
   comment:  "var(--cx-text-faint)",
-  number:   "var(--color-amber)",
+  number:   "var(--cx-warn)",
   operator: "var(--cx-text-muted)",
   plain:    "var(--cx-text)",
 };
