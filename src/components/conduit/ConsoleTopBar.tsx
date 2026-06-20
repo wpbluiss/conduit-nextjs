@@ -255,32 +255,16 @@ function UserMenuPopover({
             }}
           >
             <form action="/auth/sign-out" method="post">
-              <button
+              <PraxisButton
                 type="submit"
                 role="menuitem"
-                className="flex items-center gap-2.5 w-full rounded-lg"
-                style={{
-                  padding: "8px 12px",
-                  fontSize: "var(--cx-type-sm, 13px)",
-                  color: "var(--cx-text-muted, #A0A0B0)",
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  transition: `background var(--cx-dur-fast, 120ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)), color var(--cx-dur-fast, 120ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1))`,
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "color-mix(in srgb, var(--cx-danger, #F4607D) 10%, transparent)";
-                  (e.currentTarget as HTMLElement).style.color = "var(--cx-danger, #F4607D)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "transparent";
-                  (e.currentTarget as HTMLElement).style.color = "var(--cx-text-muted, #A0A0B0)";
-                }}
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start hover:bg-[color-mix(in_srgb,var(--cx-danger,#F4607D)_10%,transparent)] hover:text-[var(--cx-danger,#F4607D)]"
               >
                 <LogOut size={14} strokeWidth={1.75} aria-hidden="true" />
-                <span>Sign out</span>
-              </button>
+                Sign out
+              </PraxisButton>
             </form>
           </div>
         </motion.div>

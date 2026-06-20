@@ -5130,14 +5130,17 @@ function LabelsTab() {
                   maxLength={32}
                   className="flex-1 cx-input-sm"
                 />
-                <button
+                <PraxisButton
                   type="submit"
-                  disabled={!newName.trim() || creating}
-                  className="px-3 py-1.5 rounded-lg cx-type-xs font-medium text-white disabled:opacity-50 transition-[opacity,transform] duration-[120ms] hover:opacity-90 active:scale-[0.96] motion-reduce:active:scale-100"
-                  style={{ background: newColor, minHeight: 32 }}
+                  isDisabled={!newName.trim() || creating}
+                  isLoading={creating}
+                  loadingText="Creating…"
+                  variant="primary"
+                  size="sm"
+                  style={{ background: newColor }}
                 >
-                  {creating ? "Creating…" : "Create"}
-                </button>
+                  Create
+                </PraxisButton>
                 <PraxisButton
                   type="button"
                   onClick={() => { setShowCreate(false); setNewName(""); }}
