@@ -18,6 +18,7 @@ import {
   MoreHorizontal, Command, Slash, AtSign, Copy, RefreshCw, Hammer, FileText, Download, Printer, X, AudioLines, DollarSign,
 } from "lucide-react";
 import { Button } from "@/components/conduit/ui/Button";
+import { MarkdownRenderer } from "@/components/conduit/MarkdownRenderer";
 import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
 import { SPECIALIST_ICON } from "@/lib/ui/specialist-icons";
 import PraxisLiveRoom from "@/components/conduit/voice/PraxisLiveRoom";
@@ -195,25 +196,6 @@ function ThinkingIndicator({ employee, reducedMotion }: {
         {label}
       </motion.p>
     </motion.div>
-  );
-}
-
-// Streaming caret — soft accent-violet blink while tokens are arriving.
-// Uses framer-motion so it inherits the app's easing system and responds
-// to prefers-reduced-motion without separate CSS keyframes.
-function StreamingCaret({ reducedMotion }: { reducedMotion: boolean }) {
-  return (
-    <motion.span
-      className="ml-0.5 inline-block h-4 w-[3px] translate-y-0.5 rounded-full align-middle"
-      style={{ backgroundColor: "var(--cx-accent, #7C6CFF)" }}
-      animate={reducedMotion ? { opacity: 0.8 } : { opacity: [1, 0] }}
-      transition={reducedMotion ? {} : {
-        duration: 0.7,
-        repeat: Infinity,
-        repeatType: "reverse",
-        ease: "easeInOut",
-      }}
-    />
   );
 }
 
@@ -681,10 +663,12 @@ export function LiveChat({
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                          className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90"
                         >
-                          {m.content}
-                          {m.pending && <StreamingCaret reducedMotion={reducedMotion} />}
+                          <MarkdownRenderer
+                            content={m.content}
+                            streaming={m.pending}
+                            caretColor={m.pending ? "var(--cx-accent)" : undefined}
+                          />
                         </motion.div>
                       )}
                     </AnimatePresence>
