@@ -1317,16 +1317,18 @@ html[data-praxis-theme="light"] .cx-glass-popover {
 }
 
 /* Mobile blur reduction for .cx-glass-modal / .cx-glass-popover — mirrors the
- * mobile overrides for .cx-glass-overlay / .cx-glass-float above. */
+ * mobile overrides for .cx-glass-overlay / .cx-glass-float above.
+ * Use token vars (already overridden at html level above) so there is a
+ * single source of truth for mobile blur values. */
 @media (max-width: 480px) {
   .cx-glass-modal {
-    backdrop-filter: blur(16px) saturate(130%);
-    -webkit-backdrop-filter: blur(16px) saturate(130%);
+    backdrop-filter: var(--cx-glass-blur-overlay, blur(16px) saturate(130%));
+    -webkit-backdrop-filter: var(--cx-glass-blur-overlay, blur(16px) saturate(130%));
     background: var(--cx-glass-bg-overlay, rgba(255, 255, 255, 0.08));
   }
   .cx-glass-popover {
-    backdrop-filter: blur(14px) saturate(130%);
-    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    backdrop-filter: var(--cx-glass-blur-float, blur(14px) saturate(130%));
+    -webkit-backdrop-filter: var(--cx-glass-blur-float, blur(14px) saturate(130%));
     background: var(--cx-glass-bg-float, rgba(255, 255, 255, 0.08));
   }
 }
