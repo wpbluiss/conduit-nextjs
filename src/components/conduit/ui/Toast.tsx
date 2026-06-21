@@ -16,8 +16,8 @@
  *   action   — optional inline CTA button
  *
  * Animated enter/exit:
- *   Enter: slide up + fade in, 180ms [0.22,1,0.36,1]
- *   Exit:  fade + scale down, 150ms
+ *   Enter: slide up + fade in, 160ms [0.22,1,0.36,1]
+ *   Exit:  slide right + fade + scale, 150ms
  *   Reduced-motion: instant opacity toggle only
  *
  * Stack behaviour (managed by ToastProvider, not this component):
@@ -67,6 +67,7 @@ const VARIANT_CONFIG: Record<
   {
     Icon: LucideIcon;
     color: string;          // CSS variable reference (inline style)
+    bgTint?: string;        // optional semantic tint overlaid on glass base
     autoDismiss: boolean;
     pulseClass?: string;
   }
@@ -74,16 +75,19 @@ const VARIANT_CONFIG: Record<
   success: {
     Icon: CheckCircle2,
     color: "var(--cx-reward)",
+    bgTint: "var(--cx-reward-tint)",
     autoDismiss: true,
   },
   error: {
     Icon: AlertCircle,
     color: "var(--cx-danger)",
+    bgTint: "var(--cx-danger-tint)",
     autoDismiss: false,
   },
   warning: {
     Icon: AlertTriangle,
     color: "var(--cx-warn)",
+    bgTint: "var(--cx-warn-tint)",
     autoDismiss: true,
   },
   info: {
@@ -94,6 +98,7 @@ const VARIANT_CONFIG: Record<
   reward: {
     Icon: Sparkles,
     color: "var(--cx-reward)",
+    bgTint: "var(--cx-reward-tint)",
     autoDismiss: true,
     pulseClass: "toast-reward-pulse",
   },
@@ -111,14 +116,15 @@ const ENTER_VARIANTS = {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { duration: 0.16, ease: [0.22, 1, 0.36, 1] as const },
   },
 };
 
 const EXIT_VARIANTS = {
   exit: {
     opacity: 0,
-    scale: 0.92,
+    x: 20,
+    scale: 0.96,
     transition: { duration: 0.15, ease: [0.4, 0, 0.2, 1] as const },
   },
 };
@@ -142,7 +148,7 @@ function ToastCard({
 }) {
   const prefersReduced = useReducedMotion();
   const cfg = VARIANT_CONFIG[item.variant];
-  const { Icon, color, autoDismiss, pulseClass } = cfg;
+  const { Icon, color, bgTint, autoDismiss, pulseClass } = cfg;
 
   // Progress bar state — only for auto-dismiss variants
   const [progress, setProgress] = useState(100);
@@ -180,13 +186,22 @@ function ToastCard({
       aria-atomic="true"
       className={`cx-glass-float cx-glass-border relative overflow-hidden flex items-start gap-3 px-4 py-3 rounded-[12px] pointer-events-auto${pulseClass ? ` ${pulseClass}` : ""}`}
       style={{
-        maxWidth: 360,
-        minWidth: 260,
+        maxWidth: "min(360px, calc(100vw - 32px))",
+        minWidth: "min(260px, calc(100vw - 32px))",
         color: "var(--cx-text)",
         borderLeftWidth: "3px",
         borderLeftColor: color,
       }}
     >
+      {/* Variant tint overlay — layered above the glass base, below content */}
+      {bgTint && (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none rounded-[12px]"
+          style={{ background: bgTint }}
+        />
+      )}
+
       {/* Icon */}
       <Icon
         size={18}
@@ -259,7 +274,7 @@ export function ToastContainer({
   return (
     <div
       aria-label="Notifications"
-      className="fixed bottom-6 right-6 z-[200] flex flex-col gap-2 pointer-events-none"
+      className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[200] flex flex-col gap-2 pointer-events-none"
     >
       <AnimatePresence initial={false} mode="popLayout">
         {visible.map((item) => (
