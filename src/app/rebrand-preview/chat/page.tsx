@@ -17,7 +17,7 @@ import {
   MoreHorizontal, Copy, RefreshCw, Command, AtSign, Slash, CornerDownLeft,
   Hammer, FileText, Zap, X, Download, Printer, Check, AudioLines, PhoneOff, MicOff, Keyboard,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ShadcnButton as Button } from "@/components/ui/button";
 
 type Icon = React.ComponentType<{ className?: string }>;
 type EmpId = "atlas" | "engineering" | "sales" | "marketing" | "finance" | "ops" | "compliance" | "hr" | "legal";

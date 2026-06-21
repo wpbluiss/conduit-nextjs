@@ -4,10 +4,29 @@ import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
-// Console-canonical Button for /app surfaces — import from @/components/conduit/ui/Button
-export { PraxisButton, SpinnerIcon } from "@/components/conduit/PraxisButton";
-export type { PraxisButtonVariant, PraxisButtonSize } from "@/components/conduit/PraxisButton";
+/**
+ * Console-canonical Button for /app surfaces.
+ * `Button` = PraxisButton (framer-motion, Apple-grade, electric violet dark system).
+ * Import from here OR from @/components/conduit/ui/Button — same component.
+ *
+ * For rebrand-preview/shadcn prototype surfaces, use ShadcnButton.
+ */
+export {
+  PraxisButton,
+  PraxisButton as Button,
+  SpinnerIcon,
+} from "@/components/conduit/PraxisButton";
+export type {
+  PraxisButtonVariant,
+  PraxisButtonVariant as ButtonVariant,
+  PraxisButtonSize,
+  PraxisButtonSize as ButtonSize,
+} from "@/components/conduit/PraxisButton";
 
+/**
+ * shadcn/CVA button — kept for rebrand-preview prototype pages only.
+ * DO NOT use in /app, /chat, or Settings surfaces.
+ */
 const buttonVariants = cva(
   "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
@@ -42,7 +61,7 @@ const buttonVariants = cva(
   }
 )
 
-function Button({
+function ShadcnButton({
   className,
   variant = "default",
   size = "default",
@@ -65,4 +84,4 @@ function Button({
   )
 }
 
-export { Button, buttonVariants }
+export { ShadcnButton, buttonVariants }
