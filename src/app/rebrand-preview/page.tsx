@@ -16,7 +16,7 @@ import {
   Code2, Wrench, ShieldCheck, Users, Scale,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { ShadcnButton as Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
