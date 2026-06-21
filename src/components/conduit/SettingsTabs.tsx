@@ -317,10 +317,10 @@ function TeamTab() {
         prompt overrides) in a future update.
       </p>
       <div
-        className="conduit-card p-5"
+        className="cx-glass cx-glass-border rounded-xl p-5"
         style={{
           background:
-            "linear-gradient(135deg, color-mix(in srgb, var(--cx-accent) 6%, var(--cx-surface)), var(--cx-surface))",
+            "linear-gradient(135deg, color-mix(in srgb, var(--cx-accent) 8%, rgba(255,255,255,0.04)), rgba(255,255,255,0.04))",
         }}
       >
         <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--cx-accent-bright)] mb-2">
@@ -641,7 +641,7 @@ function SpecialistMetrics() {
       )}
 
       {!loading && !error && metrics !== null && metrics.length === 0 && (
-        <div className="conduit-card p-8 text-center">
+        <div className="cx-glass cx-glass-border rounded-xl p-8 text-center">
           <p className="cx-type-sm text-[var(--cx-text-muted)]">No specialist activity in this period.</p>
           <p className="cx-type-xs text-[var(--cx-text-muted)] mt-1">
             Start a conversation with any specialist to see usage here.
@@ -785,7 +785,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
   if (!ttsAllowed) {
     return (
       <div className="space-y-4">
-        <div className="conduit-card p-6 text-center relative">
+        <div className="cx-glass cx-glass-border rounded-xl p-6 text-center relative">
           <div className="flex items-center justify-center gap-2 cx-type-xs uppercase tracking-[0.18em] text-[var(--cx-accent-bright)] mb-2">
             <Lock size={12} strokeWidth={1.75} /> Pro feature
           </div>
@@ -802,7 +802,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
   if (!prefs) {
     return (
       <div className="space-y-6" aria-busy aria-label="Loading voice settings">
-        <div className="conduit-card p-5 space-y-4">
+        <div className="cx-glass cx-glass-border rounded-xl p-5 space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center justify-between gap-4">
               <div className="space-y-1.5">
@@ -892,7 +892,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
         </div>
       )}
 
-      <div className="conduit-card p-5 space-y-4">
+      <div className="cx-glass cx-glass-border rounded-xl p-5 space-y-4">
         <ToggleRow
           label="Enable voice mode"
           desc="Show the mic button and play audio replies."
@@ -1221,7 +1221,7 @@ function WorkspaceTab({
 
   return (
     <div className="space-y-6">
-      <section className="conduit-card p-6 space-y-5">
+      <section className="cx-glass cx-glass-border rounded-xl p-6 space-y-5">
         <div className="pb-4 border-b border-[var(--cx-border)]">
           <h2 className="cx-heading-lg">Workspace</h2>
         </div>
@@ -1605,7 +1605,7 @@ function ProfileTab({
   return (
     <div className="space-y-6">
       {/* ── Identity card ── */}
-      <section className="conduit-card p-6 space-y-5">
+      <section className="cx-glass cx-glass-border rounded-xl p-6 space-y-5">
         <div className="pb-4 border-b border-[var(--cx-border)]">
           <h2 className="cx-heading-lg">Profile</h2>
         </div>
@@ -1729,7 +1729,7 @@ function ProfileTab({
       </section>
 
       {/* ── Account card ── */}
-      <section className="conduit-card p-6 space-y-5">
+      <section className="cx-glass cx-glass-border rounded-xl p-6 space-y-5">
         <div className="pb-4 border-b border-[var(--cx-border)]">
           <h2 className="cx-heading-lg">Account</h2>
         </div>
@@ -1787,7 +1787,7 @@ function ProfileTab({
       </section>
 
       {/* ── Security card ── */}
-      <section className="conduit-card p-6 space-y-5">
+      <section className="cx-glass cx-glass-border rounded-xl p-6 space-y-5">
         <div className="pb-4 border-b border-[var(--cx-border)]">
           <h2 className="cx-heading-lg">Security</h2>
         </div>
@@ -1883,7 +1883,7 @@ function ProfileTab({
       </section>
 
       {/* ── Actions card ── */}
-      <section className="conduit-card p-6 space-y-5">
+      <section className="cx-glass cx-glass-border rounded-xl p-6 space-y-5">
         <div className="pb-4 border-b border-[var(--cx-border)]">
           <h2 className="cx-heading-lg">Account actions</h2>
         </div>
@@ -2020,7 +2020,7 @@ function BusinessTab({ account }: { account: AccountData }) {
   return (
     <div className="space-y-6">
       {/* Business info card */}
-      <section className="conduit-card p-6 space-y-5">
+      <section className="cx-glass cx-glass-border rounded-xl p-6 space-y-5">
         <div className="pb-4 border-b border-[var(--cx-border)]">
           <h2 className="cx-heading-lg">Business info</h2>
         </div>
@@ -2066,7 +2066,7 @@ function BusinessTab({ account }: { account: AccountData }) {
       </section>
 
       {/* Company brief card */}
-      <section className="conduit-card p-6 space-y-4">
+      <section className="cx-glass cx-glass-border rounded-xl p-6 space-y-4">
         <div className="pb-4 border-b border-[var(--cx-border)]">
           <h2 className="cx-heading-lg mb-1">Company brief</h2>
           <p className="cx-type-xs text-[var(--cx-text-muted)]">
@@ -2246,7 +2246,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
       </div>
 
       {/* Billing cycle cap — always shows current cycle data */}
-      <div className="conduit-card px-5 py-4">
+      <div className="cx-glass cx-glass-border rounded-xl px-5 py-4">
         <div className="flex items-baseline justify-between gap-3 mb-2">
           <span className="cx-label">
             Token cap (current cycle)
@@ -2283,7 +2283,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
           Tokens · daily
         </div>
         {monthLoading ? (
-          <div className="conduit-card p-4">
+          <div className="cx-glass cx-glass-border rounded-xl p-4">
             <div className="flex items-end gap-px h-32">
               {Array.from({ length: 20 }, (_, i) => (
                 <div
@@ -2299,14 +2299,14 @@ function UsageTab({ usage }: { usage: UsageData }) {
             </div>
           </div>
         ) : fillByDay.length === 0 ? (
-          <div className="conduit-card p-6 text-center">
+          <div className="cx-glass cx-glass-border rounded-xl p-6 text-center">
             <p className="cx-type-sm text-[var(--cx-text-muted)]">No usage yet.</p>
             <p className="cx-type-xs text-[var(--cx-text-faint)] mt-1">
               Token usage will appear here once you start chatting.
             </p>
           </div>
         ) : (
-          <div className="conduit-card p-4" key={selectedMonth}>
+          <div className="cx-glass cx-glass-border rounded-xl p-4" key={selectedMonth}>
             <div className="flex items-end gap-px h-32">
               {fillByDay.map(({ d, v }, i) => {
                 const h = Math.round((v / max) * 100);
@@ -2334,7 +2334,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
 
       {/* Per-employee breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="conduit-card p-5">
+        <div className="cx-glass cx-glass-border rounded-xl p-5">
           <div className="cx-label mb-3">
             Share by employee
           </div>
@@ -2356,7 +2356,7 @@ function UsageTab({ usage }: { usage: UsageData }) {
             <Donut key={selectedMonth} data={empValues} total={empTotal} />
           )}
         </div>
-        <div className="conduit-card p-5">
+        <div className="cx-glass cx-glass-border rounded-xl p-5">
           <div className="cx-label mb-3">
             By employee
           </div>
@@ -2410,14 +2410,14 @@ function UsageTab({ usage }: { usage: UsageData }) {
           Connector context fetches (all time)
         </div>
         {connectorStats.length === 0 ? (
-          <div className="conduit-card p-5 text-[var(--cx-text-muted)] cx-type-xs">
+          <div className="cx-glass cx-glass-border rounded-xl p-5 text-[var(--cx-text-muted)] cx-type-xs">
             No connectors connected.{" "}
             <a href="/app/settings?tab=integrations" className="underline hover:text-[var(--cx-accent)]">
               Connect one in Integrations →
             </a>
           </div>
         ) : (
-          <div className="conduit-card divide-y divide-[var(--cx-border)]">
+          <div className="cx-glass cx-glass-border rounded-xl divide-y divide-[var(--cx-border)]">
             {connectorStats.map((stat) => {
               const label =
                 stat.provider === "google_calendar"
@@ -2577,7 +2577,7 @@ function BillingTab({
   if (internal) {
     return (
       <div className="space-y-6">
-        <div className="conduit-card p-6">
+        <div className="cx-glass cx-glass-border rounded-xl p-6">
           <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--cx-accent-bright)] mb-1">
             Internal Account · Conduit AI Team
           </div>
@@ -2738,7 +2738,7 @@ function BillingTab({
   return (
     <div className="space-y-6">
       {/* Current plan */}
-      <div className="conduit-card p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="cx-glass cx-glass-border rounded-xl p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--cx-text-muted)]">
             Current plan ·{" "}
@@ -2891,7 +2891,7 @@ function BillingTab({
             Invoice history
           </div>
           {invoices === null ? (
-            <div className="conduit-card p-4 space-y-2">
+            <div className="cx-glass cx-glass-border rounded-xl p-4 space-y-2">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex items-center justify-between gap-4">
                   <div className="h-3 rounded w-24 animate-pulse bg-[var(--cx-border)]" />
@@ -2902,11 +2902,11 @@ function BillingTab({
               ))}
             </div>
           ) : invoices.length === 0 ? (
-            <div className="conduit-card p-5 text-center cx-type-sm text-[var(--cx-text-muted)]">
+            <div className="cx-glass cx-glass-border rounded-xl p-5 text-center cx-type-sm text-[var(--cx-text-muted)]">
               No invoices yet
             </div>
           ) : (
-            <div className="conduit-card overflow-hidden">
+            <div className="cx-glass cx-glass-border rounded-xl overflow-hidden">
               <table className="w-full cx-type-sm">
                 <thead>
                   <tr className="border-b border-[var(--cx-border)]">
@@ -3001,7 +3001,7 @@ function BillingTab({
             return (
               <div
                 key={t.id}
-                className={`conduit-card p-5 ${
+                className={`cx-glass cx-glass-border rounded-xl p-5 ${
                   isCurrent
                     ? "border-[var(--cx-accent)]"
                     : ""
@@ -3089,7 +3089,7 @@ function BillingTab({
               key={t.id}
               onClick={() => buyTopup(t.id)}
               disabled={busy !== null}
-              className="conduit-card p-4 text-left hover:border-[var(--cx-accent)] transition-colors disabled:opacity-50"
+              className="cx-glass cx-glass-border rounded-xl p-4 text-left hover:border-[var(--cx-accent)] transition-colors disabled:opacity-50"
             >
               <div className="cx-heading-lg">${t.amountCents / 100}</div>
               <div className="mt-1 cx-type-sm text-[var(--cx-text-muted)]">
@@ -3158,7 +3158,7 @@ function ReferralSection() {
   }
 
   return (
-    <div className="conduit-card p-5 space-y-4">
+    <div className="cx-glass cx-glass-border rounded-xl p-5 space-y-4">
       <div>
         <div className="cx-label mb-1">
           Refer & Earn
@@ -3241,7 +3241,7 @@ function UsageSummary({
         : "var(--cx-accent)";
 
   return (
-    <div className="conduit-card p-5 space-y-3">
+    <div className="cx-glass cx-glass-border rounded-xl p-5 space-y-3">
       <div className="flex items-center justify-between gap-3">
         <span className="cx-label">
           Usage this cycle
@@ -3296,7 +3296,7 @@ function Stat({
   sub?: string;
 }) {
   return (
-    <div className="conduit-card px-4 py-3">
+    <div className="cx-glass cx-glass-border rounded-xl px-4 py-3">
       <div className="cx-label">
         {label}
       </div>
@@ -3367,7 +3367,7 @@ function NotificationsTab() {
 
   if (!prefs) {
     return (
-      <div className="conduit-card p-5 space-y-4" aria-busy aria-label="Loading notification settings">
+      <div className="cx-glass cx-glass-border rounded-xl p-5 space-y-4" aria-busy aria-label="Loading notification settings">
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="flex items-center justify-between gap-4">
             <div className="space-y-1.5">
@@ -3388,7 +3388,7 @@ function NotificationsTab() {
         security alerts are always sent regardless of these settings.
       </p>
 
-      <div className="conduit-card p-5 space-y-4">
+      <div className="cx-glass cx-glass-border rounded-xl p-5 space-y-4">
         <ToggleRow
           label="Product updates & new features"
           desc="Hear about new Praxis capabilities, releases, and tips."
@@ -3708,7 +3708,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
       {/* Live connectors */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:grid-flow-dense">
         {/* Google Calendar */}
-        <div className="conduit-card p-5 flex flex-col gap-4">
+        <div className="cx-glass cx-glass-border rounded-xl p-5 flex flex-col gap-4">
           <div className="flex items-start justify-between gap-3">
             <div
               className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
@@ -3783,7 +3783,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
         </div>
 
         {/* Slack */}
-        <div className="conduit-card p-5 flex flex-col gap-4">
+        <div className="cx-glass cx-glass-border rounded-xl p-5 flex flex-col gap-4">
           <div className="flex items-start justify-between gap-3">
             <div
               className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
@@ -3893,7 +3893,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
         </div>
 
         {/* HubSpot */}
-        <div className="conduit-card p-5 flex flex-col gap-4">
+        <div className="cx-glass cx-glass-border rounded-xl p-5 flex flex-col gap-4">
           <div className="flex items-start justify-between gap-3">
             <div
               className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
@@ -3968,7 +3968,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
         </div>
 
         {/* Google Drive */}
-        <div className="conduit-card p-5 flex flex-col gap-4 md:col-span-2">
+        <div className="cx-glass cx-glass-border rounded-xl p-5 flex flex-col gap-4 md:col-span-2">
           <div className="flex items-start justify-between gap-3">
             <div
               className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
@@ -4180,7 +4180,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
         </div>
 
       {/* GitHub connector */}
-      <div className="conduit-card p-5 flex flex-col gap-4">
+      <div className="cx-glass cx-glass-border rounded-xl p-5 flex flex-col gap-4">
         <div className="flex items-start justify-between gap-3">
           <div
             className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
@@ -4282,7 +4282,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               Icon: BrandMarkNotion,
             },
           ].map(({ name, description, Icon }) => (
-            <div key={name} className="conduit-card p-5 flex flex-col gap-4 opacity-60">
+            <div key={name} className="cx-glass cx-glass-border rounded-xl p-5 flex flex-col gap-4 opacity-60">
               <div className="flex items-start justify-between gap-3">
                 <div
                   className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
@@ -4324,10 +4324,10 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
       </div>
 
       <div
-        className="conduit-card p-5"
+        className="cx-glass cx-glass-border rounded-xl p-5"
         style={{
           background:
-            "linear-gradient(135deg, color-mix(in srgb, var(--cx-accent) 6%, var(--cx-surface)), var(--cx-surface))",
+            "linear-gradient(135deg, color-mix(in srgb, var(--cx-accent) 8%, rgba(255,255,255,0.04)), rgba(255,255,255,0.04))",
         }}
       >
         <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--cx-accent-bright)] mb-2">
@@ -4413,11 +4413,11 @@ function AppearanceTab({
         Choose how Praxis looks on this device. Changes apply immediately.
       </p>
 
-      <div className="conduit-card p-5">
+      <div className="cx-glass cx-glass-border rounded-xl p-5">
         <ThemeToggle initialPref={themePref} />
       </div>
 
-      <div className="conduit-card p-5 space-y-4">
+      <div className="cx-glass cx-glass-border rounded-xl p-5 space-y-4">
         <div className="cx-label">
           Accent colour
         </div>
@@ -4588,10 +4588,10 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
           </p>
         </div>
         <div
-          className="conduit-card p-6 text-center"
+          className="cx-glass cx-glass-border rounded-xl p-6 text-center"
           style={{
             background:
-              "linear-gradient(135deg, color-mix(in srgb, var(--cx-accent) 6%, var(--cx-surface)), var(--cx-surface))",
+              "linear-gradient(135deg, color-mix(in srgb, var(--cx-accent) 8%, rgba(255,255,255,0.04)), rgba(255,255,255,0.04))",
           }}
         >
           <div className="flex items-center justify-center gap-2 cx-type-xs uppercase tracking-[0.18em] text-[var(--cx-accent-bright)] mb-2">
@@ -4618,7 +4618,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
 
       {/* New key banner (shown once after creation) */}
       {revealedKey && (
-        <div className="conduit-card p-4 border border-[var(--cx-accent)] rounded-xl">
+        <div className="cx-glass cx-glass-border rounded-xl p-4 border border-[var(--cx-accent)]">
           <p className="cx-type-xs uppercase tracking-[0.12em] text-[var(--cx-accent)] mb-2 font-semibold">
             New API key — copy it now
           </p>
@@ -4744,7 +4744,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
         </div>
       )}
 
-      <div className="conduit-card p-4 rounded-xl cx-type-sm text-[var(--cx-text-muted)] space-y-1">
+      <div className="cx-glass cx-glass-border rounded-xl p-4 cx-type-sm text-[var(--cx-text-muted)] space-y-1">
         <p className="font-medium text-[var(--cx-text)]">Using API keys</p>
         <p>Include your key in the <code className="font-mono cx-type-xs">Authorization</code> header:</p>
         <code className="block cx-type-xs font-mono bg-[var(--cx-canvas)] rounded-lg px-3 py-2 mt-1">
@@ -4799,7 +4799,7 @@ function ReferralsTab() {
           <div className="cx-skeleton" style={{ height: 26, width: 140, borderRadius: 6, opacity: 0.5 }} />
           <div className="cx-skeleton" style={{ height: 11, width: 280, borderRadius: 9999, opacity: 0.3 }} />
         </div>
-        <div className="conduit-card p-5 space-y-3">
+        <div className="cx-glass cx-glass-border rounded-xl p-5 space-y-3">
           <div className="cx-skeleton" style={{ height: 9, width: 100, borderRadius: 9999, opacity: 0.45 }} />
           <div className="cx-skeleton" style={{ height: 36, borderRadius: 8, opacity: 0.28 }} />
         </div>
@@ -4818,7 +4818,7 @@ function ReferralsTab() {
       </div>
 
       {/* Referral link */}
-      <div className="conduit-card p-5 space-y-3">
+      <div className="cx-glass cx-glass-border rounded-xl p-5 space-y-3">
         <div className="cx-label">
           Your referral link
         </div>
@@ -4853,7 +4853,7 @@ function ReferralsTab() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="conduit-card p-5">
+        <div className="cx-glass cx-glass-border rounded-xl p-5">
           <div className="cx-label mb-1">
             Successful referrals
           </div>
@@ -4862,7 +4862,7 @@ function ReferralsTab() {
             style={{ color: "var(--cx-accent)" }}
           />
         </div>
-        <div className="conduit-card p-5">
+        <div className="cx-glass cx-glass-border rounded-xl p-5">
           <div className="cx-label mb-1">
             Bonus tokens earned
           </div>
@@ -4874,7 +4874,7 @@ function ReferralsTab() {
       </div>
 
       {/* How it works */}
-      <div className="conduit-card p-5 space-y-3">
+      <div className="cx-glass cx-glass-border rounded-xl p-5 space-y-3">
         <div className="cx-label">
           How it works
         </div>
@@ -5013,7 +5013,7 @@ function LabelsTab() {
       ) : (
         <div className="space-y-2">
           {labels.length === 0 && !showCreate && (
-            <div className="conduit-card p-6 flex flex-col items-center gap-3 text-center">
+            <div className="cx-glass cx-glass-border rounded-xl p-6 flex flex-col items-center gap-3 text-center">
               <Tag size={20} strokeWidth={1.75} style={{ color: "var(--cx-text-muted)" }} />
               <p className="cx-type-sm text-[var(--cx-text-muted)]">No labels yet. Create one to start organizing conversations.</p>
             </div>
