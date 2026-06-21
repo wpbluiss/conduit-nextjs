@@ -36,7 +36,7 @@ import {
   X,
 } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
-import { DEPT_COLOR, DEPT_COLOR_SOFT, employeeLabel } from "./EmployeeBadge";
+import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
 import { SpecialistAvatar } from "./SpecialistAvatar";
 import { EMPLOYEE_ORDER, EMPLOYEES } from "@/lib/conduit/employees";
 import { useNicknames } from "@/context/NicknameContext";
@@ -863,7 +863,6 @@ export function Sidebar({
                   const active = pathname === `/app/team/${emp}`;
                   const empRole = EMPLOYEES[emp]?.role ?? "";
                   const deptColor = DEPT_COLOR[emp];
-                  const deptColorSoft = DEPT_COLOR_SOFT[emp];
                   const rowInner = (
                     <motion.span
                       whileHover={shouldReduceMotion ? undefined : { y: -1 }}
@@ -871,7 +870,7 @@ export function Sidebar({
                       transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
                       className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[var(--cx-surface-raised)]" : ""}`}
                       style={{
-                        background: active ? deptColorSoft : undefined,
+                        background: active ? "var(--cx-accent-tint)" : undefined,
                       }}
                       onContextMenu={(e) => handleSpecialistContextMenu(e, emp)}
                       onTouchStart={(e) => handleSpecialistTouchStart(e, emp)}
@@ -882,7 +881,7 @@ export function Sidebar({
                         <span
                           aria-hidden
                           className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full"
-                          style={{ background: deptColor }}
+                          style={{ background: "var(--cx-accent)" }}
                         />
                       )}
                       <SpecialistAvatar employee={emp} size={20} active={active} streaming={isStreaming} />
@@ -890,7 +889,7 @@ export function Sidebar({
                         <span
                           className="block truncate cx-type-sm"
                           style={{
-                            color: active ? deptColor : "var(--cx-text-muted)",
+                            color: active ? "var(--cx-accent)" : "var(--cx-text-muted)",
                             fontWeight: active ? 600 : 400,
                           }}
                         >
@@ -971,7 +970,6 @@ export function Sidebar({
                     const active = pathname === `/app/team/${emp}`;
                     const empRole = EMPLOYEES[emp]?.role ?? "";
                     const deptColor = DEPT_COLOR[emp];
-                    const deptColorSoft = DEPT_COLOR_SOFT[emp];
                     const rowInner = (
                       <motion.span
                         whileHover={shouldReduceMotion ? undefined : { y: -1 }}
@@ -979,7 +977,7 @@ export function Sidebar({
                         transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
                         className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[var(--cx-surface-raised)]" : ""}`}
                         style={{
-                          background: active ? deptColorSoft : undefined,
+                          background: active ? "var(--cx-accent-tint)" : undefined,
                         }}
                         onContextMenu={(e) => handleSpecialistContextMenu(e, emp)}
                         onTouchStart={(e) => handleSpecialistTouchStart(e, emp)}
@@ -990,7 +988,7 @@ export function Sidebar({
                           <span
                             aria-hidden
                             className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full"
-                            style={{ background: deptColor }}
+                            style={{ background: "var(--cx-accent)" }}
                           />
                         )}
                         <SpecialistAvatar employee={emp} size={20} active={active} streaming={isStreaming} />
@@ -998,7 +996,7 @@ export function Sidebar({
                           <span
                             className="block truncate cx-type-sm"
                             style={{
-                              color: active ? deptColor : "var(--cx-text-muted)",
+                              color: active ? "var(--cx-accent)" : "var(--cx-text-muted)",
                               fontWeight: active ? 600 : 400,
                             }}
                           >
@@ -1073,14 +1071,13 @@ export function Sidebar({
                 const active = pathname === `/app/team/${emp}`;
                 const isPinned = pinned.includes(emp);
                 const deptColor = DEPT_COLOR[emp];
-                const deptColorSoft = DEPT_COLOR_SOFT[emp];
                 const btn = (
                   <motion.span
                     whileHover={shouldReduceMotion ? undefined : { scale: 1.06 }}
                     whileTap={shouldReduceMotion ? undefined : { scale: 0.94 }}
                     transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
                     className="relative flex items-center justify-center w-9 h-9 rounded-lg"
-                    style={{ background: active ? deptColorSoft : undefined }}
+                    style={{ background: active ? "var(--cx-accent-tint)" : undefined }}
                     onContextMenu={(e) => handleSpecialistContextMenu(e, emp)}
                     onTouchStart={(e) => handleSpecialistTouchStart(e, emp)}
                     onTouchEnd={handleSpecialistTouchEnd}
@@ -1090,7 +1087,7 @@ export function Sidebar({
                       <span
                         aria-hidden
                         className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full z-10"
-                        style={{ background: deptColor }}
+                        style={{ background: "var(--cx-accent)" }}
                       />
                     )}
                     <SpecialistAvatar employee={emp} size={28} active={active} streaming={isStreaming} />
@@ -1446,7 +1443,7 @@ export function Sidebar({
                   : bySearch.slice(0, 8);
                 return (
                   <>
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       {filtered.slice(0, 8).map((c) => {
                         const active = isChat && activeId === c.id;
                         const dom = c.dominant_employee;
@@ -1607,7 +1604,7 @@ export function Sidebar({
                                       </span>
                                     </div>
                                     {preview && (
-                                      <p className="truncate cx-type-xs mt-1" style={{ color: "var(--cx-text-faint)" }}>
+                                      <p className="truncate cx-type-xs mt-1" style={{ color: "var(--cx-text-muted)" }}>
                                         {preview}
                                       </p>
                                     )}
