@@ -25,14 +25,7 @@ export function EmptyState({ icon, title, headline, body, action, cta, className
 
   return (
     <motion.div
-      className={`flex flex-col items-center text-center px-6 py-10 rounded-2xl ${className}`}
-      style={{
-        background: "var(--cx-glass-bg, rgba(255,255,255,0.04))",
-        border: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))",
-        backdropFilter: "var(--cx-glass-blur, blur(20px) saturate(140%))",
-        WebkitBackdropFilter: "var(--cx-glass-blur, blur(20px) saturate(140%))",
-        boxShadow: "var(--cx-glass-highlight, inset 0 1px 0 rgba(255,255,255,0.10))",
-      }}
+      className={`flex flex-col items-center text-center px-6 py-10 rounded-2xl cx-glass cx-glass-border ${className}`}
       initial={reduced ? undefined : { opacity: 0, y: 8 }}
       animate={reduced ? undefined : { opacity: 1, y: 0 }}
       transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
