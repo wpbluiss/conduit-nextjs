@@ -152,7 +152,7 @@ export function OnboardingModal({
               <h2 className="serif text-cx-2xl md:text-cx-3xl leading-[1.05]">
                 What&apos;s your business called?
               </h2>
-              <p className="mt-3 text-sm md:text-base text-[var(--color-text-muted)]">
+              <p className="mt-3 cx-body text-[var(--color-text-muted)]">
                 This is the name Atlas and your team will use.
               </p>
               <input
@@ -183,7 +183,7 @@ export function OnboardingModal({
               <h2 className="serif text-cx-2xl md:text-cx-3xl leading-[1.05]">
                 What kind of business is it?
               </h2>
-              <p className="mt-3 text-sm md:text-base text-[var(--color-text-muted)]">
+              <p className="mt-3 cx-body text-[var(--color-text-muted)]">
                 Pick one or describe your own.
               </p>
               <div className="mt-8 flex flex-wrap gap-2">
@@ -232,7 +232,7 @@ export function OnboardingModal({
               <h2 className="serif text-cx-2xl md:text-cx-3xl leading-[1.05]">
                 What are you working toward?
               </h2>
-              <p className="mt-3 text-sm md:text-base text-[var(--color-text-muted)]">
+              <p className="mt-3 cx-body text-[var(--color-text-muted)]">
                 Pick up to {MAX_GOALS}. Your team will keep these front of mind.
               </p>
               <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -286,7 +286,7 @@ export function OnboardingModal({
               <h2 className="serif text-cx-2xl md:text-cx-3xl leading-[1.05]">
                 Tell Atlas what you&apos;re working on.
               </h2>
-              <p className="mt-3 text-sm md:text-base text-[var(--color-text-muted)]">
+              <p className="mt-3 cx-body text-[var(--color-text-muted)]">
                 A sentence or two. Context, constraints, what success looks like.
               </p>
               <textarea

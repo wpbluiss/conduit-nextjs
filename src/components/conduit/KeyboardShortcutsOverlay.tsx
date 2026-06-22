@@ -260,14 +260,7 @@ export function KeyboardShortcutsOverlay() {
                                     then
                                   </span>
                                 )}
-                                <kbd
-                                  className="inline-flex items-center justify-center min-w-[1.5rem] px-1.5 py-0.5 cx-type-xs font-mono rounded border"
-                                  style={{
-                                    background: "var(--color-surface)",
-                                    borderColor: "var(--color-border)",
-                                    color: "var(--color-text-muted)",
-                                  }}
-                                >
+                                <kbd className="cx-kbd">
                                   {k}
                                 </kbd>
                               </span>

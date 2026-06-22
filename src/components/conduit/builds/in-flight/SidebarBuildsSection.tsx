@@ -76,7 +76,7 @@ function CelebrationRow({ build }: { build: CelebratingBuild }) {
     >
       <Link
         href={`/app/builds/${build.id}`}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-colors duration-100"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg cx-type-xs transition-colors duration-100"
         style={{
           color: isSuccess ? "var(--cx-reward)" : "var(--cx-danger)",
           background: isSuccess
@@ -160,7 +160,7 @@ export function SidebarBuildsSection({ initial, accountId }: Props) {
           <li key={build.id}>
             <Link
               href={`/app/builds/${build.id}`}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)] transition-colors duration-100"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg cx-type-xs text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[color-mix(in_srgb,var(--cx-accent)_8%,transparent)] transition-colors duration-100"
               aria-label={`Build in progress: ${build.prompt}`}
             >
               <BuildIcon build={build} />

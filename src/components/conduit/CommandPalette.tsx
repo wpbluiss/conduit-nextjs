@@ -354,17 +354,17 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
                 style={{ color: "var(--color-text-muted)" }}
               >
                 <span>
-                  <kbd className="font-mono">↑↓</kbd> navigate
+                  <kbd className="cx-kbd">↑↓</kbd> navigate
                 </span>
                 <span>
-                  <kbd className="font-mono">↵</kbd> open
+                  <kbd className="cx-kbd">↵</kbd> open
                 </span>
                 <span>
-                  <kbd className="font-mono">Esc</kbd> close
+                  <kbd className="cx-kbd">Esc</kbd> close
                 </span>
                 <span className="ml-auto flex items-center gap-3">
                   <span className="hidden sm:inline">
-                    <kbd className="font-mono">⌘K</kbd> to reopen
+                    <kbd className="cx-kbd">⌘K</kbd> to reopen
                   </span>
                   <PraxisButton
                     variant="ghost"
