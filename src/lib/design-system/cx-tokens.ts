@@ -45,6 +45,10 @@ export const CX_DANGER = "#F4607D";
 export const CX_REWARD_RING      = "rgba(52, 211, 153, 0.40)"; // 40% — ring at peak
 export const CX_REWARD_RING_FADE = "rgba(52, 211, 153, 0)";    // 0%  — ring at rest
 
+// Accent ring — mirrors CX_REWARD_RING pattern for accent→reward-green pulse sequences.
+export const CX_ACCENT_RING      = "rgba(124, 108, 255, 0.40)"; // 40% — ring at peak
+export const CX_ACCENT_RING_FADE = "rgba(124, 108, 255, 0)";    // 0%  — ring at rest
+
 // Accent tint — for framer-motion / SVG fill consumers.
 export const CX_ACCENT_TINT = "rgba(124, 108, 255, 0.12)";
 

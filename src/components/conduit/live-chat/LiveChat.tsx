@@ -24,7 +24,8 @@ import { SPECIALIST_ICON } from "@/lib/ui/specialist-icons";
 import PraxisLiveRoom from "@/components/conduit/voice/PraxisLiveRoom";
 import type { VoiceTokenResponse } from "@/components/conduit/voice/VoiceRoom";
 import { PaywallModal, type PaywallPayload } from "@/components/conduit/PaywallModal";
-import { CX_REWARD_RING, CX_REWARD_RING_FADE } from "@/lib/design-system/cx-tokens";
+import { CX_ACCENT_RING, CX_ACCENT_RING_FADE, CX_REWARD_RING, CX_REWARD_RING_FADE } from "@/lib/design-system/cx-tokens";
+import { useRewardMoment } from "@/context/RewardMomentContext";
 
 type Icon = React.ComponentType<{ className?: string }>;
 // Use canonical SPECIALIST_ICON registry — ensures all dept icons are consistent
@@ -75,34 +76,45 @@ const THINKING_COPY: Record<EmployeeId, string> = {
   legal:       "reviewing legal considerations…",
 };
 
-function SpecialistChip({ icon: I, complete, pending, employee, reducedMotion }: {
+function SpecialistChip({ icon: I, complete, pending, employee, reducedMotion, onComplete }: {
   icon: React.ComponentType<{ className?: string }>;
   complete: boolean;
   pending: boolean;
   employee: EmployeeId;
   reducedMotion: boolean;
+  onComplete?: (rect: DOMRect) => void;
 }) {
   const controls = useAnimation();
   // Pre-initialize to true for messages already complete on mount (loaded from history)
   const firedRef = React.useRef(complete);
+  const chipRef = React.useRef<HTMLSpanElement>(null);
   const rgb = DEPT_GLOW_RGB[employee] ?? "124,108,255";
 
   React.useEffect(() => {
-    if (complete && !firedRef.current && !reducedMotion) {
+    if (complete && !firedRef.current) {
       firedRef.current = true;
-      controls.start({
-        scale: [1, 1.18, 0.95, 1],
-        boxShadow: [
-          `0 0 0 0px ${CX_REWARD_RING_FADE}`,
-          `0 0 0 5px ${CX_REWARD_RING}`,
-          `0 0 0 0px ${CX_REWARD_RING_FADE}`,
-        ],
-      }, { duration: 0.38, ease: [0.22, 1, 0.36, 1] });
+      // Notify caller with chip position so confetti can originate there
+      if (chipRef.current) {
+        onComplete?.(chipRef.current.getBoundingClientRect());
+      }
+      if (!reducedMotion) {
+        // Accent (electric-violet) → reward-green pulse per CONSOLE_REDESIGN.md §Motion
+        controls.start({
+          scale: [1, 1.18, 0.95, 1],
+          boxShadow: [
+            `0 0 0 0px ${CX_ACCENT_RING_FADE}`,
+            `0 0 0 5px ${CX_ACCENT_RING}`,
+            `0 0 0 5px ${CX_REWARD_RING}`,
+            `0 0 0 0px ${CX_REWARD_RING_FADE}`,
+          ],
+        }, { duration: 0.44, ease: [0.22, 1, 0.36, 1] });
+      }
     }
-  }, [complete, reducedMotion, controls]);
+  }, [complete, reducedMotion, controls, onComplete]);
 
   return (
     <motion.span
+      ref={chipRef}
       animate={controls}
       className="relative mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-secondary text-primary"
       style={{ willChange: "transform, box-shadow" }}
@@ -226,6 +238,7 @@ export function LiveChat({
   const router = useRouter();
   const ctxUser = useUser();
   const reducedMotion = useReducedMotion();
+  const { triggerReward } = useRewardMoment();
   const allowedSet = new Set<EmployeeId>(allowedEmployees);
   const roster = EMPLOYEE_ORDER.filter((id) => id === "jarvis" || allowedSet.has(id));
 
@@ -635,7 +648,14 @@ export function LiveChat({
               const e = (m.employee as EmployeeId) ?? "jarvis"; const I = ICON[e] ?? Sparkles; const k = m.id ?? String(i);
               return (
                 <motion.div key={m.id ?? i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 28 }} className="group flex gap-3">
-                  <SpecialistChip icon={I} complete={!m.pending} pending={!!m.pending} employee={e} reducedMotion={reducedMotion} />
+                  <SpecialistChip
+                    icon={I}
+                    complete={!m.pending}
+                    pending={!!m.pending}
+                    employee={e}
+                    reducedMotion={reducedMotion}
+                    onComplete={(rect) => triggerReward({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })}
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="mb-1 text-sm font-semibold">{EMPLOYEES[e]?.name ?? "Atlas"}</p>
                     <AnimatePresence mode="sync" initial={false}>

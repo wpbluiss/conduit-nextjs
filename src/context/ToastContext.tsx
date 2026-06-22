@@ -30,6 +30,7 @@ import {
 } from "react";
 import { ToastContainer } from "@/components/conduit/ui/Toast";
 import type { ToastVariant, ToastInput, ToastItem } from "@/components/conduit/ui/Toast";
+import { useRewardMoment } from "@/context/RewardMomentContext";
 
 export type { ToastVariant };
 
@@ -80,6 +81,7 @@ function toItem(variant: ToastVariant, input: ToastArg): Omit<ToastItem, "id"> {
 }
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const { triggerReward } = useRewardMoment();
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const timers = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
@@ -103,13 +105,22 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         return next.length > MAX_VISIBLE ? next.slice(next.length - MAX_VISIBLE) : next;
       });
 
+      // Fire confetti near the toast stack (bottom-right) for reward-positive variants
+      if (variant === "success" || variant === "reward") {
+        triggerReward(
+          typeof window !== "undefined"
+            ? { x: window.innerWidth - 180, y: window.innerHeight - 120 }
+            : undefined,
+        );
+      }
+
       // Error variant: never auto-dismiss
       if (variant !== "error") {
         const t = setTimeout(() => dismiss(id), AUTO_DISMISS_MS);
         timers.current.set(id, t);
       }
     },
-    [dismiss],
+    [dismiss, triggerReward],
   );
 
   const api: ToastAPI = {
