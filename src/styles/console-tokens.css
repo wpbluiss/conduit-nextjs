@@ -678,6 +678,44 @@
   letter-spacing: var(--cx-ls-tight);
   font-weight: 600;
 }
+.praxis-root .cx-heading-md {
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: var(--cx-type-md);
+  line-height: var(--cx-lh-heading);
+  letter-spacing: var(--cx-ls-tight);
+  font-weight: 600;
+}
+.praxis-root .cx-heading-sm {
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: var(--cx-type-base);
+  line-height: var(--cx-lh-heading);
+  letter-spacing: 0;
+  font-weight: 600;
+}
+
+/* ---- Semantic mono utilities — "engineered data" feel ----
+ * cx-timestamp: for relative/absolute time values
+ * cx-count:     for integer counts, usage numbers, stats
+ * cx-model:     for AI model names (mono + accent-faint tint) */
+.praxis-root .cx-timestamp {
+  font-family: var(--cx-font-mono);
+  font-size: var(--cx-type-xs);
+  color: var(--cx-text-faint);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.praxis-root .cx-count {
+  font-family: var(--cx-font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.praxis-root .cx-model {
+  font-family: var(--cx-font-mono);
+  font-size: var(--cx-type-xs);
+  color: var(--cx-text-muted);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
 
 /* Mono label utility — "engineered" numbers/metadata */
 .praxis-root .cx-mono {
@@ -730,6 +768,38 @@
   background: var(--cx-surface-raised);
   border: 1px solid var(--cx-border);
   color: var(--cx-accent-bright);
+}
+
+/* ---- Global code/kbd auto-treatment ----
+ * Any <code> or <kbd> inside .praxis-root automatically gets Geist Mono.
+ * This mirrors how h1–h4 get sans-serif + heading metrics automatically.
+ * Individual cx-code-inline / cx-kbd classes layer on top for full styling. */
+.praxis-root code,
+.praxis-root kbd {
+  font-family: var(--cx-font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+/* Keyboard shortcut chip — engineered look for key combos.
+ * Use on <kbd> elements for keybinding displays.
+ * Visual: mono text, hairline border, raised surface, tight padding. */
+.praxis-root .cx-kbd {
+  font-family: var(--cx-font-mono);
+  font-size: var(--cx-type-xs);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--cx-surface-raised);
+  border: 1px solid var(--cx-border-strong);
+  color: var(--cx-text-muted);
+  line-height: 1.4;
+  box-shadow: inset 0 -1px 0 var(--cx-border-strong);
 }
 
 /* ---- Form control utilities ----

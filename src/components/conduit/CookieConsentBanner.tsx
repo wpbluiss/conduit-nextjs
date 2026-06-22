@@ -51,7 +51,7 @@ export function CookieConsentBanner() {
       <div
         className="mx-auto max-w-3xl cx-glass-float cx-glass-border flex flex-row items-center gap-2 p-3 md:flex-row md:items-center md:gap-6 md:p-4"
       >
-        <p className="flex-1 text-xs md:text-sm text-[var(--color-text-muted)] leading-relaxed">
+        <p className="flex-1 cx-body text-[var(--color-text-muted)]">
           We use analytics to improve Praxis.{" "}
           <a
             href="/legal/privacy"

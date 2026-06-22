@@ -227,8 +227,8 @@ function HighlightedCodeBlock({
 
       {/* Code body */}
       <pre
-        className="cx-code-scroll overflow-x-auto px-4 py-3 cx-type-xs leading-[1.7]"
-        style={{ fontFamily: "var(--font-mono, monospace)", margin: 0 }}
+        className="cx-code-scroll cx-mono overflow-x-auto px-4 py-3 cx-type-xs leading-[1.7]"
+        style={{ margin: 0 }}
       >
         <code>
           {lines.map((line, i) => {

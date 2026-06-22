@@ -4692,7 +4692,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
               <div className="flex-1 min-w-0">
                 <p className="cx-type-sm font-medium text-[var(--cx-text)] truncate">{k.name}</p>
                 <p className="cx-type-xs text-[var(--cx-text-muted)] mt-0.5 cx-mono tabular-nums">
-                  <code className="font-mono">{k.key_preview}</code>
+                  <code>{k.key_preview}</code>
                   {" · Created "}
                   {new Date(k.created_at).toLocaleDateString()}
                   {k.last_used_at && (
@@ -4734,7 +4734,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
                   {k.name}
                 </p>
                 <p className="cx-type-xs text-[var(--cx-text-muted)] mt-0.5 cx-mono tabular-nums">
-                  <code className="font-mono">{k.key_preview}</code>
+                  <code>{k.key_preview}</code>
                   {" · Revoked "}
                   {k.revoked_at ? new Date(k.revoked_at).toLocaleDateString() : ""}
                 </p>
@@ -4746,8 +4746,8 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
 
       <div className="cx-glass cx-glass-border rounded-xl p-4 cx-type-sm text-[var(--cx-text-muted)] space-y-1">
         <p className="font-medium text-[var(--cx-text)]">Using API keys</p>
-        <p>Include your key in the <code className="font-mono cx-type-xs">Authorization</code> header:</p>
-        <code className="block cx-type-xs font-mono bg-[var(--cx-canvas)] rounded-lg px-3 py-2 mt-1">
+        <p>Include your key in the <code className="cx-code-inline">Authorization</code> header:</p>
+        <code className="block cx-type-xs cx-mono bg-[var(--cx-canvas)] rounded-lg px-3 py-2 mt-1">
           Authorization: Bearer prx_…
         </code>
         <p className="cx-type-xs mt-2">Maximum 20 active keys per account.</p>
