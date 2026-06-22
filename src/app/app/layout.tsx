@@ -14,6 +14,7 @@ import { RouteProgress } from "@/components/conduit/RouteProgress";
 import { ConsoleTopBar } from "@/components/conduit/ConsoleTopBar";
 import { PraxisCanvasTintProvider } from "@/components/conduit/praxis/PraxisCanvasTintProvider";
 import { ToastProvider } from "@/context/ToastContext";
+import { RewardMomentProvider } from "@/context/RewardMomentContext";
 import { UserProvider } from "@/context/UserContext";
 import { tierById } from "@/lib/billing/tiers";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
@@ -193,6 +194,7 @@ export default async function AppLayout({
       <TopBarProvider>
       <UserProvider initialUser={initialUser}>
       <NicknameProvider initialNicknames={specialistNicknames}>
+      <RewardMomentProvider>
       <ToastProvider>
       <PraxisCanvasTintProvider>
         <RouteProgress />
@@ -255,6 +257,7 @@ export default async function AppLayout({
         </Suspense>
       </PraxisCanvasTintProvider>
       </ToastProvider>
+      </RewardMomentProvider>
       </NicknameProvider>
       </UserProvider>
       </TopBarProvider>
