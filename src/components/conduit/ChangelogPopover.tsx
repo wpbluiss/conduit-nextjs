@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Bell, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CHANGELOG_ENTRIES } from "@/lib/conduit/changelog-entries";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 const STORAGE_KEY = "praxis_changelog_last_seen";
 const RECENT_ENTRIES = CHANGELOG_ENTRIES.slice(0, 5);
@@ -14,12 +15,12 @@ const TAG_COLOR: Record<string, { bg: string; color: string }> = {
     color: "var(--color-accent-hi, var(--color-accent))",
   },
   fix: {
-    bg: "rgba(22, 163, 74, 0.10)",
-    color: "var(--color-green, #4ade80)",
+    bg: "var(--cx-reward-tint, rgba(52,211,153,0.10))",
+    color: "var(--color-green)",
   },
   infra: {
-    bg: "rgba(202, 138, 4, 0.10)",
-    color: "var(--color-amber, #ca8a04)",
+    bg: "var(--cx-warn-tint, rgba(234,179,8,0.10))",
+    color: "var(--color-amber)",
   },
 };
 
@@ -91,18 +92,20 @@ export function ChangelogPopover() {
 
   return (
     <div className="relative">
-      <button
+      <PraxisButton
         type="button"
+        variant="ghost"
+        size="sm"
         onClick={handleOpen}
         aria-label={`What's new${unseen > 0 ? ` — ${unseen} unread` : ""}`}
-        className="relative flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] rounded-lg transition-colors duration-100 w-full"
+        className="relative w-full justify-start"
       >
-        <Bell size={14} />
+        <Bell size={14} strokeWidth={1.75} />
         <span>What&apos;s new</span>
         {unseen > 0 && (
           <span
             aria-hidden
-            className="absolute top-1 left-5 flex items-center justify-center w-3.5 h-3.5 rounded-full text-[9px] font-bold leading-none"
+            className="absolute top-1 left-5 flex items-center justify-center w-3.5 h-3.5 rounded-full cx-type-xs font-bold leading-none"
             style={{
               background: "var(--color-accent)",
               color: "#fff",
@@ -111,7 +114,7 @@ export function ChangelogPopover() {
             {unseen > 9 ? "9+" : unseen}
           </span>
         )}
-      </button>
+      </PraxisButton>
 
       <AnimatePresence>
         {open && (
@@ -122,24 +125,24 @@ export function ChangelogPopover() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -8 }}
             transition={{ duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
-            className="absolute bottom-full left-0 mb-2 w-64 rounded-xl border border-[var(--color-border)] shadow-xl z-50 overflow-hidden"
-            style={{ background: "var(--color-surface-elevated)" }}
+            className="cx-glass-popover absolute bottom-full left-0 mb-2 w-64 z-50 overflow-hidden"
             role="dialog"
             aria-label="What's new"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)]">
-              <span className="text-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+              <span className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                 What&apos;s new
               </span>
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="icon-sm"
                 onClick={() => setOpen(false)}
                 aria-label="Close"
-                className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
               >
-                <X size={14} />
-              </button>
+                <X size={14} strokeWidth={1.75} />
+              </PraxisButton>
             </div>
 
             {/* Entries */}
@@ -150,19 +153,19 @@ export function ChangelogPopover() {
                   <li key={`${e.date}-${e.title}`} className="px-4 py-3 space-y-1.5">
                     <div className="flex items-center gap-2">
                       <span
-                        className="inline-block text-[9px] uppercase tracking-[0.12em] font-semibold rounded-full px-1.5 py-0.5"
+                        className="inline-block cx-type-xs uppercase tracking-[0.12em] font-semibold rounded-full px-1.5 py-0.5"
                         style={{ background: tag.bg, color: tag.color }}
                       >
                         {e.tag}
                       </span>
-                      <span className="text-[10px] text-[var(--color-text-muted)] font-mono">
+                      <span className="cx-meta tabular-nums">
                         {e.date}
                       </span>
                     </div>
-                    <p className="text-[13px] font-medium leading-snug text-[var(--color-text)]">
+                    <p className="cx-type-sm font-medium leading-snug text-[var(--color-text)]">
                       {e.title}
                     </p>
-                    <p className="text-[12px] text-[var(--color-text-muted)] leading-relaxed line-clamp-2">
+                    <p className="cx-type-xs text-[var(--color-text-muted)] leading-relaxed line-clamp-2">
                       {e.body}
                     </p>
                   </li>
@@ -171,12 +174,12 @@ export function ChangelogPopover() {
             </ul>
 
             {/* Footer */}
-            <div className="px-4 py-2.5 border-t border-[var(--color-border)] flex items-center justify-between">
+            <div className="px-4 py-3 border-t border-[var(--color-border)] flex items-center justify-between">
               <a
                 href="/changelog"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[11px] text-[var(--color-accent)] hover:underline"
+                className="cx-type-xs text-[var(--color-accent)] hover:underline"
                 onClick={() => setOpen(false)}
               >
                 Full changelog →

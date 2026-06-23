@@ -139,6 +139,6 @@ export function modelExceedsCeiling(
 
 export function ceilingDowngrade(ceiling: ModelCeiling): string {
   if (ceiling === "haiku") return "claude-haiku-4-5-20251001";
-  if (ceiling === "sonnet") return "claude-sonnet-4-20250514";
+  if (ceiling === "sonnet") return "claude-sonnet-4-6";
   return "claude-opus-4-7";
 }

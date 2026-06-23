@@ -15,7 +15,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ExternalLink, ArrowRight, EyeOff, X } from "lucide-react";
-import { Button } from "@/components/conduit/ui/Button";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Button, PraxisButton } from "@/components/conduit/ui/Button";
 import type { DailyUsage } from "@/lib/engineering/limits";
 
 const FAILED_STATUSES = new Set(["failed", "timeout", "aborted"]);
@@ -155,17 +156,19 @@ export default function BuildsTabs({
         />
       )}
 
-      {continueParent && (
-        <ContinueModal
-          parent={continueParent}
-          onClose={() => setContinueParent(null)}
-          onCreated={(newId) => {
-            setContinueParent(null);
-            // Hand off to the durable cinema URL — same affordance as fresh builds.
-            router.push(`/app/builds/${newId}`);
-          }}
-        />
-      )}
+      <AnimatePresence>
+        {continueParent && (
+          <ContinueModal
+            key="continue-modal"
+            parent={continueParent}
+            onClose={() => setContinueParent(null)}
+            onCreated={(newId) => {
+              setContinueParent(null);
+              router.push(`/app/builds/${newId}`);
+            }}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }
@@ -181,7 +184,7 @@ function UsageBanner({
 }) {
   if (internal || usage.unlimited) {
     return (
-      <div className="flex items-center gap-3 mb-4 text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+      <div className="flex items-center gap-3 mb-4 cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
         <span className="text-[var(--color-green)]">●</span> Unlimited
         engineering builds (internal account)
       </div>
@@ -200,7 +203,7 @@ function UsageBanner({
 
   return (
     <div
-      className="conduit-card p-3 mb-4 flex items-center justify-between text-xs"
+      className="conduit-card p-3 mb-4 flex items-center justify-between cx-type-xs"
       style={{
         borderColor: exhausted
           ? "color-mix(in srgb, var(--color-pink) 35%, transparent)"
@@ -208,7 +211,7 @@ function UsageBanner({
       }}
     >
       <div className="flex items-center gap-4">
-        <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+        <span className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
           Today &middot; {tierName}
         </span>
         <span className={buildsExhausted ? "text-[var(--color-pink)]" : ""}>
@@ -242,21 +245,22 @@ function FailedToggle({
   // Nothing to surface if no failures exist and the toggle is already off.
   if (!showFailed && hiddenCount === 0) return null;
   return (
-    <button
+    <PraxisButton
       type="button"
+      variant="ghost"
+      size="sm"
       onClick={() => onToggle(!showFailed)}
-      className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] pb-2"
       title={
         showFailed
           ? "Hide failed and aborted builds"
           : "Show failed and aborted builds"
       }
     >
-      <EyeOff size={11} />
+      <EyeOff size={11} strokeWidth={1.75} />
       {showFailed
         ? "Hide failed"
         : `Show failed${hiddenCount > 0 ? ` (${hiddenCount})` : ""}`}
-    </button>
+    </PraxisButton>
   );
 }
 
@@ -277,7 +281,7 @@ function Tab({
     <button
       type="button"
       onClick={onClick}
-      className="relative px-3 py-2 text-sm transition-colors"
+      className="relative px-3 py-2 cx-type-base transition-colors"
       style={{
         color: active ? "var(--color-text)" : "var(--color-text-muted)",
         borderBottom: `2px solid ${active ? "var(--color-accent)" : "transparent"}`,
@@ -285,12 +289,12 @@ function Tab({
     >
       {label}
       {count !== null && (
-        <span className="ml-1.5 text-[10px] text-[var(--color-text-muted)]">
+        <span className="ml-1.5 cx-type-xs text-[var(--color-text-muted)]">
           {count}
         </span>
       )}
       {badge && (
-        <span className="ml-2 text-[9px] uppercase tracking-[0.15em] text-[var(--color-accent-hi)]">
+        <span className="ml-2 cx-type-xs uppercase tracking-[0.15em] text-[var(--color-accent-hi)]">
           {badge}
         </span>
       )}
@@ -302,14 +306,14 @@ function TemplatesTab({ builds }: { builds: R7Build[] }) {
   if (builds.length === 0) {
     return (
       <div className="conduit-card p-8 max-w-md">
-        <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
+        <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
           Nothing shipped yet
         </div>
         <p className="text-[var(--color-text)] mb-4">
           Ask Engineering for a landing page, CRM, blog, lead-capture page, or
           contact form.
         </p>
-        <Link href="/app" className="btn-primary">
+        <Link href="/app" className="btn-primary btn-sz-md">
           Go to chat →
         </Link>
       </div>
@@ -324,29 +328,29 @@ function TemplatesTab({ builds }: { builds: R7Build[] }) {
           style={{ borderLeftColor: "var(--color-dept-engineering)" }}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+            <span className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
               {b.template_id}
             </span>
             <StatusPill status={b.status} />
           </div>
-          <div className="serif text-lg leading-snug">{b.build_name}</div>
+          <div className="cx-type-md font-medium leading-snug">{b.build_name}</div>
           {b.live_url ? (
             <a
               href={b.live_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hi)] inline-flex items-center gap-1 truncate"
+              className="cx-type-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hi)] inline-flex items-center gap-1 truncate"
             >
               {b.live_url}
-              <ExternalLink size={11} />
+              <ExternalLink size={11} strokeWidth={1.75} />
             </a>
           ) : b.error_message ? (
-            <p className="text-xs text-[var(--color-pink)]">{b.error_message}</p>
+            <p className="cx-type-xs text-[var(--color-pink)]">{b.error_message}</p>
           ) : (
-            <p className="text-xs text-[var(--color-text-muted)]">Building…</p>
+            <p className="cx-type-xs text-[var(--color-text-muted)]">Building…</p>
           )}
-          <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted)] mt-auto pt-2">
-            <span>{new Date(b.created_at).toLocaleString()}</span>
+          <div className="flex items-center justify-between cx-type-xs text-[var(--color-text-muted)] mt-auto pt-2">
+            <span className="cx-mono tabular-nums">{new Date(b.created_at).toLocaleString()}</span>
             {b.conversation_id && (
               <Link
                 href={`/app?c=${b.conversation_id}`}
@@ -372,13 +376,13 @@ function EngineeringTab({
   if (sessions.length === 0) {
     return (
       <div className="conduit-card p-8 max-w-md">
-        <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
+        <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
           Nothing built yet
         </div>
         <p className="text-[var(--color-text)] mb-4">
           Open Engineering and click <span className="font-medium">Start a build</span>.
         </p>
-        <Link href="/app/team/engineering" className="btn-primary">
+        <Link href="/app/team/engineering" className="btn-primary btn-sz-md">
           Open Engineering →
         </Link>
       </div>
@@ -397,7 +401,7 @@ function EngineeringTab({
             className="flex flex-col gap-3 text-left hover:opacity-95 transition-opacity"
           >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+              <span className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                 {s.build_type ?? "custom"}
                 {s.parent_session_id && (
                   <span className="ml-2 text-[var(--color-accent)]">
@@ -407,39 +411,40 @@ function EngineeringTab({
               </span>
               <StatusPill status={s.status} />
             </div>
-            <div className="serif text-base leading-snug line-clamp-2">
+            <div className="cx-type-base leading-snug line-clamp-2">
               {s.prompt}
             </div>
             {s.deploy_url ? (
-              <span className="text-xs text-[var(--color-accent)] inline-flex items-center gap-1 truncate">
+              <span className="cx-type-xs text-[var(--color-accent)] inline-flex items-center gap-1 truncate">
                 {s.deploy_url.replace(/^https?:\/\//, "")}
-                <ExternalLink size={11} />
+                <ExternalLink size={11} strokeWidth={1.75} />
               </span>
             ) : s.error_message ? (
-              <p className="text-xs text-[var(--color-pink)] line-clamp-2">
+              <p className="cx-type-xs text-[var(--color-pink)] line-clamp-2">
                 {s.error_message}
               </p>
             ) : (
-              <p className="text-xs text-[var(--color-text-muted)]">
+              <p className="cx-type-xs text-[var(--color-text-muted)]">
                 {labelForLiveStatus(s.status)}
               </p>
             )}
           </Link>
-          <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted)] pt-2 border-t border-[var(--color-border)]">
-            <span>{new Date(s.created_at).toLocaleString()}</span>
+          <div className="flex items-center justify-between cx-type-xs text-[var(--color-text-muted)] pt-2 border-t border-[var(--color-border)]">
+            <span className="cx-mono tabular-nums">{new Date(s.created_at).toLocaleString()}</span>
             <span className="flex items-center gap-3">
-              <span>
+              <span className="cx-mono tabular-nums">
                 {(s.total_input_tokens ?? 0) + (s.total_output_tokens ?? 0)}t
               </span>
               {s.status === "complete" && (
-                <button
+                <PraxisButton
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => onContinue(s)}
-                  className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.15em] text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
                   title="Continue from this build (clones the workspace files)"
                 >
                   Continue <ArrowRight size={10} />
-                </button>
+                </PraxisButton>
               )}
             </span>
           </div>
@@ -458,6 +463,7 @@ function ContinueModal({
   onClose: () => void;
   onCreated: (newSessionId: string) => void;
 }) {
+  const reduced = useReducedMotion();
   const [prompt, setPrompt] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -497,25 +503,41 @@ function ContinueModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg conduit-card p-6">
+    <motion.div
+      className="fixed inset-0 z-[110] cx-scrim flex items-center justify-center p-4"
+      style={{ background: "var(--cx-modal-scrim, rgba(11,11,15,0.65))" }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.14 }}
+    >
+      <motion.div
+        className="w-full max-w-lg cx-glass-overlay cx-glass-border rounded-[16px] p-6"
+        role="dialog"
+        aria-modal="true"
+        initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
+        animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+        exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
+        transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+      >
         <div className="flex items-start justify-between mb-3">
           <div>
-            <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-1">
+            <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-1">
               Continue build
             </div>
-            <p className="serif text-lg line-clamp-2">{parent.prompt}</p>
+            <p className="cx-type-base line-clamp-2">{parent.prompt}</p>
           </div>
-          <button
+          <PraxisButton
             type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={onClose}
-            className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
             aria-label="Close"
           >
             <X size={16} />
-          </button>
+          </PraxisButton>
         </div>
-        <p className="text-xs text-[var(--color-text-muted)] mb-3">
+        <p className="cx-type-xs text-[var(--color-text-muted)] mb-3">
           Engineering will start a new build with this prompt and the
           previous build&apos;s files already in place.
         </p>
@@ -525,21 +547,22 @@ function ContinueModal({
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="What should change?"
           rows={4}
-          className="w-full rounded-md bg-[var(--color-card)] border border-[var(--color-border)] p-3 text-sm focus:outline-none focus:border-[var(--color-accent)]"
+          className="w-full rounded-md bg-[var(--color-card)] border border-[var(--color-border)] p-3 cx-type-base focus:outline-none focus:border-[var(--color-accent)]"
           disabled={submitting}
         />
         {error && (
-          <p className="text-xs text-[var(--color-pink)] mt-2">{error}</p>
+          <p className="cx-type-xs text-[var(--color-pink)] mt-2">{error}</p>
         )}
         <div className="flex items-center justify-end gap-2 mt-4">
-          <button
+          <PraxisButton
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={onClose}
-            className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] px-3 py-1.5"
             disabled={submitting}
           >
             Cancel
-          </button>
+          </PraxisButton>
           <Button
             onClick={submit}
             disabled={submitting}
@@ -547,8 +570,8 @@ function ContinueModal({
             {submitting ? "Starting…" : "Start continuation →"}
           </Button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -584,7 +607,7 @@ function StatusPill({ status }: { status: string }) {
   const m = map[status] ?? map.pending;
   return (
     <span
-      className="text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full"
+      className="cx-type-xs uppercase tracking-[0.15em] px-2 py-0.5 rounded-full"
       style={{
         color: m.color,
         background: `color-mix(in srgb, ${m.color} 14%, transparent)`,

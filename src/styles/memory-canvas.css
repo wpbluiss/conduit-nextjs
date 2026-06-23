@@ -52,8 +52,8 @@
   padding: 4px 10px;
   border-radius: var(--pdl-radius-round);
   background: var(--pdl-surface-glass);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  -webkit-backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
   border: 1px solid var(--pdl-border-hairline);
 }
 
@@ -133,11 +133,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--pdl-space-md);
-  /* Glass recipe inlined here so we don't depend on .pdl-glass-the-class
-   * styling that may compete with size constraints. Same recipe values. */
+  /* Glass recipe via tokens — never hand-roll the blur recipe at consumer sites. */
   background: var(--pdl-surface-glass);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  -webkit-backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
   border: 1px solid var(--pdl-border-default);
   box-shadow: var(--pdl-elev-3);
   color: var(--pdl-text);
@@ -258,8 +257,8 @@
   flex-direction: column;
   gap: var(--pdl-space-md);
   background: var(--pdl-surface-glass);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: var(--cx-glass-blur-float, blur(24px) saturate(150%));
+  -webkit-backdrop-filter: var(--cx-glass-blur-float, blur(24px) saturate(150%));
   border: 1px solid var(--pdl-border-default);
   box-shadow: var(--pdl-elev-3);
   color: var(--pdl-text);

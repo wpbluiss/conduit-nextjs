@@ -23,6 +23,7 @@ import {
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, EMPLOYEE_ICON, employeeLabel } from "./EmployeeBadge";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 interface PaletteItem {
   id: string;
@@ -44,7 +45,7 @@ const SETTINGS_ITEMS: PaletteItem[] = [
     id: "settings-profile",
     label: "Profile",
     sublabel: "Account name, display name, avatar",
-    icon: <User size={ICON_SIZE} />,
+    icon: <User size={ICON_SIZE} strokeWidth={1.75} />,
     href: "/app/settings?tab=profile",
     group: "Settings",
   },
@@ -52,7 +53,7 @@ const SETTINGS_ITEMS: PaletteItem[] = [
     id: "settings-billing",
     label: "Billing",
     sublabel: "Manage your subscription",
-    icon: <CreditCard size={ICON_SIZE} />,
+    icon: <CreditCard size={ICON_SIZE} strokeWidth={1.75} />,
     href: "/app/settings?tab=billing",
     group: "Settings",
   },
@@ -60,7 +61,7 @@ const SETTINGS_ITEMS: PaletteItem[] = [
     id: "settings-connectors",
     label: "Connectors",
     sublabel: "Integrations and connected services",
-    icon: <Puzzle size={ICON_SIZE} />,
+    icon: <Puzzle size={ICON_SIZE} strokeWidth={1.75} />,
     href: "/app/settings?tab=integrations",
     group: "Settings",
   },
@@ -68,7 +69,7 @@ const SETTINGS_ITEMS: PaletteItem[] = [
     id: "settings-security",
     label: "Security",
     sublabel: "Sessions, passwords, and account security",
-    icon: <Lock size={ICON_SIZE} />,
+    icon: <Lock size={ICON_SIZE} strokeWidth={1.75} />,
     href: "/app/settings?tab=security",
     group: "Settings",
   },
@@ -129,7 +130,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
       id: `convo-${c.id}`,
       label: c.title || "Untitled chat",
       sublabel: emp ? `with ${employeeLabel(emp)}` : "Conversation",
-      icon: <Icon size={ICON_SIZE} style={emp ? { color: DEPT_COLOR[emp] } : undefined} />,
+      icon: <Icon size={ICON_SIZE} strokeWidth={1.75} style={emp ? { color: DEPT_COLOR[emp] } : undefined} />,
       href: `/app?c=${c.id}`,
       group: "Conversations",
     };
@@ -142,7 +143,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
       id: `specialist-${emp}`,
       label: employeeLabel(emp),
       sublabel: "Open a new chat",
-      icon: <Icon size={ICON_SIZE} style={{ color: DEPT_COLOR[emp] }} />,
+      icon: <Icon size={ICON_SIZE} strokeWidth={1.75} style={{ color: DEPT_COLOR[emp] }} />,
       href: `/app?pin=${emp}`,
       group: "Specialists",
     };
@@ -208,7 +209,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
+            transition={{ duration: 0.14 }}
             className="fixed inset-0 z-[200] bg-black/50"
             aria-hidden
             onClick={close}
@@ -217,10 +218,9 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
           {/* Panel */}
           <motion.div
             key="cmd-palette-panel"
-            initial={{ opacity: 0, scale: 0.97, y: -8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.97, y: -8 }}
-            transition={{ duration: 0.15, ease: [0.25, 1, 0.5, 1] }}
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1, transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] } }}
+            exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.12, ease: [0.22, 1, 0.36, 1] } }}
             className="fixed inset-0 z-[201] flex items-start justify-center pt-[12vh] px-4 pointer-events-none"
             aria-live="off"
           >
@@ -228,13 +228,13 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
               role="dialog"
               aria-label="Command palette"
               aria-modal="true"
-              className="pointer-events-auto w-full max-w-lg rounded-2xl border border-[var(--color-border)] shadow-2xl overflow-hidden"
-              style={{ background: "var(--color-surface-elevated)" }}
+              className="cx-glass-overlay cx-glass-border pointer-events-auto w-full max-w-lg rounded-2xl overflow-hidden"
             >
               {/* Search input */}
-              <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[var(--color-border)]">
+              <div className="flex items-center gap-3 px-4 py-4 border-b border-[var(--color-border)]">
                 <Search
                   size={15}
+                  strokeWidth={1.75}
                   className="shrink-0"
                   style={{ color: "var(--color-text-muted)" }}
                 />
@@ -247,7 +247,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
                   placeholder="Search conversations, specialists, settings…"
                   autoComplete="off"
                   spellCheck={false}
-                  className="flex-1 bg-transparent outline-none text-sm placeholder:text-[var(--color-text-muted)]"
+                  className="flex-1 bg-transparent outline-none cx-type-base placeholder:text-[var(--color-text-muted)]"
                   aria-label="Search palette"
                   aria-controls="palette-list"
                   aria-activedescendant={
@@ -257,7 +257,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
                   }
                 />
                 <kbd
-                  className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono rounded border shrink-0"
+                  className="hidden sm:inline-flex items-center px-1.5 py-0.5 cx-type-xs font-mono rounded border shrink-0"
                   style={{
                     background: "var(--color-surface)",
                     borderColor: "var(--color-border)",
@@ -277,13 +277,13 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
                 aria-label="Results"
               >
                 {filteredItems.length === 0 ? (
-                  <div className="px-4 py-8 text-center text-sm text-[var(--color-text-muted)]">
+                  <div className="px-4 py-8 text-center cx-type-base text-[var(--color-text-muted)]">
                     No results for &ldquo;{query}&rdquo;
                   </div>
                 ) : (
                   groups.map((group) => (
                     <div key={group.name}>
-                      <div className="px-4 pt-3 pb-1 text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                      <div className="px-4 pt-3 pb-1 cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                         {group.name}
                       </div>
                       {group.items.map((item) => {
@@ -299,7 +299,7 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
                             type="button"
                             onClick={() => activate(item)}
                             onMouseEnter={() => setActiveIdx(flatIdx)}
-                            className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors"
+                            className="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors"
                             style={{
                               background: isActive
                                 ? "color-mix(in srgb, var(--color-accent) 10%, transparent)"
@@ -318,18 +318,18 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
                               {item.icon}
                             </span>
                             <span className="min-w-0 flex-1">
-                              <span className="block text-sm font-medium truncate">
+                              <span className="block cx-type-base font-medium truncate">
                                 {item.label}
                               </span>
                               {item.sublabel && (
-                                <span className="block text-[11px] text-[var(--color-text-muted)] truncate">
+                                <span className="block cx-type-xs text-[var(--color-text-muted)] truncate">
                                   {item.sublabel}
                                 </span>
                               )}
                             </span>
                             {isActive && (
                               <kbd
-                                className="hidden sm:inline-flex shrink-0 items-center px-1.5 py-0.5 text-[10px] font-mono rounded border"
+                                className="hidden sm:inline-flex shrink-0 items-center px-1.5 py-0.5 cx-type-xs font-mono rounded border"
                                 style={{
                                   background: "var(--color-surface)",
                                   borderColor: "var(--color-border)",
@@ -350,34 +350,35 @@ export function CommandPalette({ recentConvos = [] }: CommandPaletteProps) {
 
               {/* Footer */}
               <div
-                className="px-4 py-2.5 border-t border-[var(--color-border)] flex items-center gap-4 text-[10px]"
+                className="px-4 py-3 border-t border-[var(--color-border)] flex items-center gap-4 cx-type-xs"
                 style={{ color: "var(--color-text-muted)" }}
               >
                 <span>
-                  <kbd className="font-mono">↑↓</kbd> navigate
+                  <kbd className="cx-kbd">↑↓</kbd> navigate
                 </span>
                 <span>
-                  <kbd className="font-mono">↵</kbd> open
+                  <kbd className="cx-kbd">↵</kbd> open
                 </span>
                 <span>
-                  <kbd className="font-mono">Esc</kbd> close
+                  <kbd className="cx-kbd">Esc</kbd> close
                 </span>
                 <span className="ml-auto flex items-center gap-3">
                   <span className="hidden sm:inline">
-                    <kbd className="font-mono">⌘K</kbd> to reopen
+                    <kbd className="cx-kbd">⌘K</kbd> to reopen
                   </span>
-                  <button
-                    type="button"
-                    className="sm:hidden flex items-center gap-1.5 transition-colors hover:text-[var(--color-text)]"
+                  <PraxisButton
+                    variant="ghost"
+                    size="sm"
+                    className="sm:hidden"
                     onClick={() => {
                       close();
                       window.dispatchEvent(new CustomEvent("praxis:shortcuts:open"));
                     }}
                     aria-label="Open keyboard shortcuts"
                   >
-                    <Keyboard size={12} />
+                    <Keyboard size={12} strokeWidth={1.75} />
                     Shortcuts
-                  </button>
+                  </PraxisButton>
                 </span>
               </div>
             </div>

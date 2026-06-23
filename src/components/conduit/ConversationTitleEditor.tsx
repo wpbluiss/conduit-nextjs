@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pencil } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 interface Props {
   conversationId: string;
@@ -84,25 +85,24 @@ export function ConversationTitleEditor({ conversationId, initialTitle }: Props)
         onBlur={() => void save()}
         maxLength={160}
         aria-label="Rename conversation"
-        className="flex-1 bg-transparent text-sm outline-none border-b border-[var(--color-accent)] text-[var(--color-text)] min-w-0 py-0.5"
+        className="flex-1 bg-transparent cx-type-base outline-none border-b border-[var(--color-accent)] text-[var(--color-text)] min-w-0 py-0.5"
       />
     );
   }
 
   return (
     <span className="flex items-center gap-1.5 flex-1 min-w-0 group/title">
-      <span className="truncate text-sm">{title}</span>
-      <button
+      <span className="truncate cx-type-base">{title}</span>
+      <PraxisButton
         type="button"
+        variant="ghost"
+        size="icon-sm"
         onClick={(e) => { e.preventDefault(); startEdit(); }}
         aria-label="Rename conversation"
-        className="shrink-0 opacity-0 group-hover/title:opacity-100 focus:opacity-100 transition-opacity p-0.5 rounded"
-        style={{ color: "var(--color-text-muted)" }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
+        className="shrink-0 opacity-0 group-hover/title:opacity-100 focus:opacity-100"
       >
-        <Pencil size={11} />
-      </button>
+        <Pencil size={11} strokeWidth={1.75} />
+      </PraxisButton>
     </span>
   );
 }

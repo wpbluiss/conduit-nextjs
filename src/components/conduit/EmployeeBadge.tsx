@@ -1,17 +1,7 @@
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { EMPLOYEES } from "@/lib/conduit/employees";
-import {
-  Code2,
-  Compass,
-  DollarSign,
-  HeartHandshake,
-  Megaphone,
-  Scale,
-  ShieldCheck,
-  TrendingUp,
-  Workflow,
-  type LucideIcon,
-} from "lucide-react";
+import { Compass, type LucideIcon } from "lucide-react";
+import { SPECIALIST_ICON, SPECIALIST_ICON_STROKE } from "@/lib/ui/specialist-icons";
 
 // Re-exported as Records for compatibility with existing call sites that
 // indexed by EmployeeKey directly.
@@ -23,19 +13,8 @@ export const DEPT_COLOR_SOFT: Record<EmployeeKey, string> = Object.fromEntries(
   Object.entries(EMPLOYEES).map(([id, c]) => [id, c.colorSoft]),
 ) as Record<EmployeeKey, string>;
 
-// R14 role-icon avatars — replaces the letter-initial mark in the rail
-// and any dense surface where the icon reads faster than a letter.
-export const EMPLOYEE_ICON: Record<EmployeeKey, LucideIcon> = {
-  jarvis: Compass,        // Atlas — routes work, holds bigger picture
-  marketing: Megaphone,
-  sales: TrendingUp,
-  engineering: Code2,
-  finance: DollarSign,
-  compliance: ShieldCheck,
-  hr: HeartHandshake,
-  ops: Workflow,
-  legal: Scale,
-};
+// Re-export from canonical source for existing call sites.
+export const EMPLOYEE_ICON: Record<EmployeeKey, LucideIcon> = SPECIALIST_ICON;
 
 // Fallback for any employee id that isn't one of the current specialists
 // (e.g. an old conversation/message tagged with a since-removed id). Prevents
@@ -44,8 +23,8 @@ const FALLBACK_EMPLOYEE = {
   name: "Specialist",
   role: "",
   initial: "?",
-  color: "var(--color-text-muted, #8a8a8a)",
-  colorSoft: "rgba(138,138,138,0.12)",
+  color: "var(--cx-text-muted)",
+  colorSoft: "var(--cx-text-muted-tint, rgba(160,160,176,0.12))",
 };
 
 export function EmployeeAvatar({
@@ -75,14 +54,14 @@ export function EmployeeAvatar({
         ["--dept" as string]: m.color,
         boxShadow: `inset 0 0 0 1.5px ${m.color}`,
       }}
-      className={`relative inline-flex items-center justify-center rounded-full text-[11px] font-medium ${
+      className={`relative inline-flex items-center justify-center rounded-full cx-type-xs font-medium ${
         active ? "employee-pulse" : ""
       }`}
     >
       {variant === "letter" ? (
         <span style={{ color: "var(--color-text)" }}>{m.initial}</span>
       ) : (
-        <Icon size={glyphSize} strokeWidth={2.25} />
+        <Icon size={glyphSize} strokeWidth={SPECIALIST_ICON_STROKE} />
       )}
     </span>
   );
@@ -101,13 +80,13 @@ export function EmployeeBadge({
       <EmployeeAvatar employee={employee} size={26} />
       <span className="leading-tight">
         <span
-          className="block text-[12px] font-medium tracking-tight"
+          className="block cx-type-xs font-medium tracking-tight"
           style={{ color: m.color }}
         >
           {m.name}
         </span>
         {withRole && (
-          <span className="block text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+          <span className="block cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
             {m.role}
           </span>
         )}
@@ -116,7 +95,12 @@ export function EmployeeBadge({
   );
 }
 
-/** Dept-tinted pill showing the specialist name — used in chat message headers. */
+/**
+ * Dept-tinted pill showing the specialist name — used in chat message headers
+ * and the thinking indicator. Uses glass-style background (dept tint over the
+ * glass base) with a standard cx-glass top highlight. No backdrop-filter since
+ * chips are typically rendered inside glass surfaces.
+ */
 export function SpecialistChip({
   employee,
   label,
@@ -125,15 +109,20 @@ export function SpecialistChip({
   label?: string;
 }) {
   const m = EMPLOYEES[employee] ?? FALLBACK_EMPLOYEE;
+  const Icon = SPECIALIST_ICON[employee] ?? Compass;
   return (
     <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold leading-none tracking-tight select-none"
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full cx-mono cx-type-xs font-semibold leading-none tracking-tight select-none"
       style={{
-        background: m.colorSoft,
+        // Dept tint layered over the glass base — frosted feel without a stacked backdrop-filter.
+        background: `color-mix(in srgb, ${m.color} 12%, var(--cx-glass-bg, rgba(255,255,255,0.04)))`,
         color: m.color,
         border: `1px solid color-mix(in srgb, ${m.color} 28%, transparent)`,
+        // Standard glass top-edge highlight (pane-of-glass feel).
+        boxShadow: `var(--cx-glass-highlight, inset 0 1px 0 rgba(255,255,255,0.10))`,
       }}
     >
+      <Icon size={12} strokeWidth={SPECIALIST_ICON_STROKE} aria-hidden />
       {label ?? m.name}
     </span>
   );

@@ -1,75 +1,83 @@
-/**
- * Loading skeleton for /app/settings. Mirrors the settings page structure:
- * header + tab bar + form rows. Renders inside the persistent /app layout.
- */
 export default function SettingsLoading() {
   return (
     <div
-      className="flex-1 overflow-y-auto px-4 md:px-8 py-8 animate-pulse"
+      className="flex-1 overflow-y-auto px-4 md:px-8 py-8"
       aria-busy
       aria-live="polite"
     >
-      <div className="mx-auto max-w-3xl">
-        {/* Page title */}
-        <div
-          style={{
-            height: 32,
-            width: 120,
-            marginBottom: "var(--space-8)",
-            borderRadius: 6,
-            background: "var(--color-border)",
-            opacity: 0.6,
-          }}
-        />
-
-        {/* Tab bar */}
-        <div
-          style={{
-            display: "flex",
-            gap: "var(--space-2)",
-            marginBottom: "var(--space-8)",
-            borderBottom: "1px solid var(--color-border)",
-            paddingBottom: "var(--space-3)",
-          }}
-        >
-          {[80, 64, 96].map((w, i) => (
-            <div
-              key={i}
-              style={{
-                height: 28,
-                width: w,
-                borderRadius: 6,
-                background: "var(--color-border)",
-                opacity: i === 0 ? 0.6 : 0.35,
-              }}
-            />
-          ))}
+      <div className="mx-auto max-w-5xl">
+        {/* Page title + subtitle */}
+        <div className="mb-8">
+          <div
+            className="cx-skeleton"
+            style={{
+              height: 32,
+              width: 120,
+              marginBottom: 8,
+              borderRadius: 6,
+              opacity: 0.55,
+            }}
+          />
+          <div
+            className="cx-skeleton"
+            style={{
+              height: 14,
+              width: 240,
+              borderRadius: 9999,
+              opacity: 0.3,
+            }}
+          />
         </div>
 
-        {/* Form rows */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-6)" }}>
-          {[160, 200, 180].map((w, i) => (
-            <div key={i}>
+        {/* Two-column layout skeleton */}
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* Sidebar nav skeleton (desktop only) — matches cx-glass glass panel */}
+          <div
+            className="hidden md:flex flex-col gap-2 w-48 shrink-0 p-3 rounded-xl"
+            style={{
+              background: "var(--cx-glass-bg)",
+              border: "1px solid var(--cx-glass-border)",
+            }}
+          >
+            {[56, 72, 52, 64, 60].map((w, i) => (
               <div
+                key={i}
+                className="cx-skeleton"
                 style={{
-                  height: 8,
+                  height: 28,
                   width: w,
-                  borderRadius: 9999,
-                  background: "var(--color-border)",
-                  opacity: 0.5,
-                  marginBottom: "var(--space-2)",
-                }}
-              />
-              <div
-                style={{
-                  height: 44,
                   borderRadius: 6,
-                  background: "var(--color-border)",
-                  opacity: 0.3,
+                  opacity: i === 0 ? 0.5 : 0.28,
                 }}
               />
-            </div>
-          ))}
+            ))}
+          </div>
+
+          {/* Content skeleton */}
+          <div className="flex-1 min-w-0 flex flex-col gap-6">
+            {[160, 200, 180].map((w, i) => (
+              <div key={i}>
+                <div
+                  className="cx-skeleton"
+                  style={{
+                    height: 8,
+                    width: w,
+                    borderRadius: 9999,
+                    opacity: 0.45,
+                    marginBottom: 8,
+                  }}
+                />
+                <div
+                  className="cx-skeleton"
+                  style={{
+                    height: 44,
+                    borderRadius: 8,
+                    opacity: 0.22,
+                  }}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
       <span className="sr-only">Loading settings…</span>

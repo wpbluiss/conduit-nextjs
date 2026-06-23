@@ -9,6 +9,7 @@
 
 import { useEffect, useId, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface Props {
   open: boolean;
@@ -31,6 +32,7 @@ export function Drawer({
 }: Props) {
   const titleId = useId();
   const descId = useId();
+  const dialogRef = useFocusTrap<HTMLDivElement>(open);
 
   useEffect(() => {
     if (!open) return;
@@ -51,13 +53,16 @@ export function Drawer({
 
   return createPortal(
     <div className="praxis-root">
+      {/* Scrim — matches DialogOverlay pattern: cx-scrim for blur, bg for tint */}
       <div
-        className="pdl-scrim"
+        className="fixed inset-0 z-50 cx-scrim"
+        style={{ background: "var(--cx-modal-scrim, rgba(11, 11, 15, 0.65))" }}
         onClick={() => onOpenChange(false)}
         aria-hidden
       />
       <div
-        className={`pdl-drawer pdl-glass${className ? ` ${className}` : ""}`}
+        ref={dialogRef}
+        className={`pdl-drawer cx-glass-overlay cx-glass-border${className ? ` ${className}` : ""}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
@@ -74,9 +79,10 @@ export function Drawer({
               <h2
                 id={titleId}
                 style={{
-                  fontFamily: "var(--font-serif, serif)",
-                  fontSize: 20,
-                  lineHeight: 1.2,
+                  fontFamily: "var(--font-sans, system-ui, sans-serif)",
+                  fontSize: "var(--cx-type-lg)",
+                  lineHeight: "var(--cx-lh-heading)",
+                  letterSpacing: "var(--cx-ls-tight)",
                   color: "var(--pdl-text)",
                   margin: 0,
                 }}
@@ -89,9 +95,9 @@ export function Drawer({
                 id={descId}
                 style={{
                   marginTop: 4,
-                  fontSize: 13,
+                  fontSize: "var(--cx-type-sm)",
                   color: "var(--pdl-text-muted)",
-                  lineHeight: 1.45,
+                  lineHeight: "var(--cx-lh-body)",
                 }}
               >
                 {description}

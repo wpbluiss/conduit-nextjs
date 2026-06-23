@@ -181,7 +181,7 @@ export function SpecialistEmptyArt({ employeeId, size = 220 }: Props) {
         >
           <Icon
             size={Math.round(size * 0.1)}
-            strokeWidth={2}
+            strokeWidth={1.75}
             style={{ color: emp.color }}
           />
         </span>

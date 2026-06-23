@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ArrowRight } from "@phosphor-icons/react";
+import { X, ArrowRight } from "lucide-react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { Button } from "@/components/conduit/ui/Button";
+import { Button, PraxisButton } from "@/components/conduit/ui/Button";
 
 const STORAGE_KEY = "praxis_tour_v1_done";
 
@@ -146,11 +146,11 @@ export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: reduced ? 0 : 0.3 }}
+          className="cx-scrim"
           style={{
             position: "absolute",
             inset: 0,
-            background: "rgba(10,9,8,0.55)",
-            backdropFilter: "blur(2px)",
+            background: "var(--cx-canvas-scrim, rgba(11,11,15,0.55))",
             pointerEvents: "auto",
           }}
           onClick={dismiss}
@@ -174,12 +174,11 @@ export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
           }}
         >
           <div
-            className="conduit-card p-6"
+            className="cx-glass-float cx-glass-border p-6"
             style={{
-              background: "var(--color-ink-surface-elevated)",
-              border: "1px solid rgba(124,108,255,0.30)",
+              border: "1px solid color-mix(in srgb, var(--cx-accent) 30%, transparent)",
               boxShadow:
-                "0 0 0 1px rgba(124,108,255,0.12), 0 16px 48px rgba(0,0,0,0.40)",
+                "0 0 0 1px var(--cx-accent-tint), var(--cx-glass-shadow-float, 0 4px 24px rgba(0,0,0,0.60))",
             }}
           >
             {/* Header */}
@@ -204,43 +203,43 @@ export function FirstRunTour({ isFirstRun }: { isFirstRun: boolean }) {
                     />
                   ))}
                 </div>
-                <span className="text-[11px] uppercase tracking-wider text-[var(--color-cream-mute)]">
+                <span className="cx-type-xs uppercase tracking-wider text-[var(--color-cream-mute)]">
                   {step + 1} / {STEPS.length}
                 </span>
               </div>
-              <button
-                type="button"
+              <PraxisButton
+                variant="ghost"
+                size="icon-sm"
                 onClick={dismiss}
-                className="text-[var(--color-cream-mute)] hover:text-[var(--color-cream)] transition-colors p-0.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-indigo-500)]"
                 aria-label="Skip tour"
               >
-                <X size={16} />
-              </button>
+                <X size={16} strokeWidth={1.75} />
+              </PraxisButton>
             </div>
 
-            <h3 className="text-[15px] font-semibold text-[var(--color-cream)] leading-snug mb-2">
+            <h3 className="cx-type-base font-semibold text-[var(--color-cream)] leading-snug mb-2">
               {current.title}
             </h3>
-            <p className="text-[13px] text-[var(--color-cream-soft)] leading-[1.6] mb-5">
+            <p className="cx-type-sm text-[var(--color-cream-soft)] leading-[1.6] mb-5">
               {current.body}
             </p>
 
             {/* Actions */}
             <div className="flex items-center justify-between gap-3">
-              <button
-                type="button"
+              <PraxisButton
+                variant="ghost"
+                size="sm"
                 onClick={dismiss}
-                className="text-[12px] text-[var(--color-cream-mute)] hover:text-[var(--color-cream)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-indigo-500)] rounded"
               >
                 Skip tour
-              </button>
+              </PraxisButton>
               <Button
                 onClick={next}
                 size="sm"
                 autoFocus
               >
                 {isLast ? "Get started" : "Next →"}
-                <ArrowRight size={13} weight="bold" />
+                <ArrowRight size={13} strokeWidth={1.75} />
               </Button>
             </div>
           </div>

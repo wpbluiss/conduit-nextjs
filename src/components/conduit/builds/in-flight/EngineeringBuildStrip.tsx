@@ -111,7 +111,7 @@ export function EngineeringBuildStrip({
             gap: "var(--space-1)",
           }}
         >
-          Open live view <ArrowRight size={11} />
+          Open live view <ArrowRight size={11} strokeWidth={1.75} />
         </span>
       </div>
     </Link>
@@ -162,7 +162,7 @@ function CelebrationStrip({
               gap: "var(--space-1)",
             }}
           >
-            Open summary <ArrowRight size={11} />
+            Open summary <ArrowRight size={11} strokeWidth={1.75} />
           </span>
         </div>
       </Link>
@@ -213,7 +213,7 @@ function CelebrationStrip({
             gap: "var(--space-1)",
           }}
         >
-          See what happened <ArrowRight size={11} />
+          See what happened <ArrowRight size={11} strokeWidth={1.75} />
         </span>
       </div>
     </Link>

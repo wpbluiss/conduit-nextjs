@@ -42,38 +42,29 @@ export function PostOnboardingNudge() {
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-6 right-6 z-40 w-72 conduit-card p-5 shadow-xl animate-in slide-in-from-bottom-4 fade-in duration-300"
+      className="fixed bottom-6 right-6 z-40 w-72 cx-glass-float cx-glass-border p-5 animate-in slide-in-from-bottom-4 fade-in duration-300"
     >
-      <button
-        type="button"
-        onClick={() => setVisible(false)}
-        aria-label="Dismiss"
-        className="absolute top-3 right-3 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-      >
-        <X size={14} />
-      </button>
+      <Button type="button" variant="ghost" size="icon-sm" onClick={() => setVisible(false)} aria-label="Dismiss" className="absolute top-3 right-3">
+        <X size={14} strokeWidth={1.75} />
+      </Button>
 
-      <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
+      <p className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
         You&apos;re all set
       </p>
-      <p className="text-sm font-medium mb-3 pr-4">
+      <p className="cx-type-base font-medium mb-3 pr-4">
         Your team is ready — start exploring or upgrade for more tokens.
       </p>
 
       <div className="flex flex-col gap-2">
         <Button
           onClick={() => setVisible(false)}
-          className="w-full justify-center text-xs"
+          className="w-full justify-center cx-type-xs"
         >
           Explore your team
         </Button>
-        <button
-          type="button"
-          onClick={handleSeePlans}
-          className="inline-flex items-center justify-center gap-1 text-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hi)] transition-colors"
-        >
-          See plans <ArrowRight size={12} />
-        </button>
+        <Button type="button" variant="ghost" size="sm" onClick={handleSeePlans} className="text-[var(--cx-accent)] hover:text-[var(--cx-accent-bright)]">
+          See plans <ArrowRight size={12} strokeWidth={1.75} />
+        </Button>
       </div>
     </div>
   );

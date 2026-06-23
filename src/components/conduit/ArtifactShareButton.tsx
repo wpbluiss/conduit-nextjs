@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Share2, Link2, X, Check } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 interface Props {
   artifactId: string;
@@ -75,37 +76,35 @@ export function ArtifactShareButton({ artifactId, initialShareToken }: Props) {
       className="flex items-center gap-1"
       onClick={(e) => e.preventDefault()}
     >
-      <button
+      <PraxisButton
         type="button"
+        variant={shareToken ? "primary" : "ghost"}
+        size="icon-sm"
         onClick={handleShare}
         disabled={loading}
         title={shareToken ? "Copy share link" : "Share this artifact"}
         aria-label={shareToken ? "Copy share link" : "Share artifact"}
-        className={`inline-flex items-center justify-center w-7 h-7 rounded-lg transition-colors disabled:opacity-50 ${
-          shareToken
-            ? "bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hi)]"
-            : "bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-raised)]"
-        }`}
       >
         {copied ? (
-          <Check size={13} />
+          <Check size={13} strokeWidth={1.75} />
         ) : shareToken ? (
-          <Link2 size={13} />
+          <Link2 size={13} strokeWidth={1.75} />
         ) : (
-          <Share2 size={13} />
+          <Share2 size={13} strokeWidth={1.75} />
         )}
-      </button>
+      </PraxisButton>
       {shareToken && (
-        <button
+        <PraxisButton
           type="button"
+          variant="ghost"
+          size="icon-sm"
           onClick={handleRevoke}
           disabled={loading}
           title="Revoke share link"
           aria-label="Revoke share link"
-          className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:text-red-400 hover:bg-[var(--color-surface-raised)] transition-colors disabled:opacity-50"
         >
-          <X size={13} />
-        </button>
+          <X size={13} strokeWidth={1.75} />
+        </PraxisButton>
       )}
     </div>
   );

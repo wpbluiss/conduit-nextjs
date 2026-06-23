@@ -11,8 +11,10 @@ import { OnboardingModal } from "@/components/conduit/OnboardingModal";
 import { UpgradeNudge } from "@/components/conduit/UpgradeNudge";
 import { TokenBudgetNudge } from "@/components/conduit/TokenBudgetNudge";
 import { RouteProgress } from "@/components/conduit/RouteProgress";
+import { ConsoleTopBar } from "@/components/conduit/ConsoleTopBar";
 import { PraxisCanvasTintProvider } from "@/components/conduit/praxis/PraxisCanvasTintProvider";
 import { ToastProvider } from "@/context/ToastContext";
+import { RewardMomentProvider } from "@/context/RewardMomentContext";
 import { UserProvider } from "@/context/UserContext";
 import { tierById } from "@/lib/billing/tiers";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
@@ -27,6 +29,9 @@ import { Suspense } from "react";
 import { ReferralClaimer } from "@/components/conduit/ReferralClaimer";
 import { NicknameProvider } from "@/context/NicknameContext";
 import { PostHogIdentify } from "@/components/PostHogIdentify";
+import { ConsoleMotionProvider } from "@/components/conduit/ConsoleMotionProvider";
+import { ConsolePageTransition } from "@/components/conduit/ConsolePageTransition";
+import { TopBarProvider } from "@/context/TopBarContext";
 
 export const dynamic = "force-dynamic";
 
@@ -185,8 +190,11 @@ export default async function AppLayout({
   return (
     <div className="praxis-root h-screen flex bg-[var(--cx-canvas)] text-[var(--cx-text)]">
       <a href="#app-main" className="conduit-skip-link">Skip to main content</a>
+      <ConsoleMotionProvider>
+      <TopBarProvider>
       <UserProvider initialUser={initialUser}>
       <NicknameProvider initialNicknames={specialistNicknames}>
+      <RewardMomentProvider>
       <ToastProvider>
       <PraxisCanvasTintProvider>
         <RouteProgress />
@@ -213,7 +221,12 @@ export default async function AppLayout({
           showGettingStarted={onboarded && isNewAccount && !gsDismissed}
           hasContext={onboarded}
         />
-        <main id="app-main" className="conduit-canvas praxis-canvas-tint flex-1 flex flex-col min-w-0 pt-12 md:pt-0">
+        <main id="app-main" className="conduit-canvas praxis-canvas-tint flex-1 flex flex-col min-w-0">
+          <ConsoleTopBar
+            avatarUrl={account.avatar_url ?? null}
+            displayName={account.display_name ?? null}
+            userEmail={user.email ?? ""}
+          />
           <UpgradeNudge
             tierId={account.tier_id ?? "free"}
             internalAccount={Boolean(account.internal_account)}
@@ -224,7 +237,7 @@ export default async function AppLayout({
             tierId={account.tier_id ?? "free"}
             internalAccount={Boolean(account.internal_account)}
           />
-          {children}
+          <ConsolePageTransition>{children}</ConsolePageTransition>
         </main>
         {!onboarded && <OnboardingModal defaultName={userName} />}
         <PostOnboardingNudge />
@@ -244,8 +257,11 @@ export default async function AppLayout({
         </Suspense>
       </PraxisCanvasTintProvider>
       </ToastProvider>
+      </RewardMomentProvider>
       </NicknameProvider>
       </UserProvider>
+      </TopBarProvider>
+      </ConsoleMotionProvider>
     </div>
   );
 }

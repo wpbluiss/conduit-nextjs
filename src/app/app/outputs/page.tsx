@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Bookmark, Copy, Download, Trash2, ArrowLeft, Check } from "lucide-react";
+import { Copy, Download, Trash2, ArrowLeft, Check } from "lucide-react";
 import Link from "next/link";
 import { EMPLOYEES, type EmployeeId } from "@/lib/conduit/employees";
+import { Button } from "@/components/conduit/ui/Button";
+import { EmptyState, OutputsEmptySVG } from "@/components/conduit/EmptyState";
 
 interface Output {
   id: string;
@@ -22,19 +24,16 @@ function CopyAction({ content }: { content: string }) {
     setTimeout(() => setCopied(false), 1500);
   };
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="sm"
       onClick={() => void handleCopy()}
-      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
-      style={{
-        color: copied ? "var(--color-accent)" : "var(--color-text-muted)",
-        border: "1px solid var(--color-border)",
-      }}
       aria-label="Copy to clipboard"
     >
-      {copied ? <Check size={11} /> : <Copy size={11} />}
+      {copied ? <Check size={11} strokeWidth={1.75} /> : <Copy size={11} strokeWidth={1.75} />}
       {copied ? "Copied" : "Copy"}
-    </button>
+    </Button>
   );
 }
 
@@ -52,16 +51,16 @@ function DownloadAction({ content, title }: { content: string; title: string }) 
     URL.revokeObjectURL(url);
   };
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="sm"
       onClick={handleDownload}
-      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
-      style={{ color: "var(--color-text-muted)", border: "1px solid var(--color-border)" }}
       aria-label="Download as Markdown"
     >
-      <Download size={11} />
+      <Download size={11} strokeWidth={1.75} />
       <span className="hidden sm:inline">Download</span>
-    </button>
+    </Button>
   );
 }
 
@@ -95,32 +94,33 @@ export default function OutputsPage() {
         <div className="flex items-center gap-3 mb-2">
           <Link
             href="/app"
-            className="flex items-center gap-1 text-[var(--color-text-muted)] hover:text-[var(--color-text)] text-sm transition-colors"
+            className="flex items-center gap-1 text-[var(--color-text-muted)] hover:text-[var(--color-text)] cx-type-base transition-colors"
           >
-            <ArrowLeft size={14} />
+            <ArrowLeft size={14} strokeWidth={1.75} />
           </Link>
           <h1 className="cx-heading-2xl">Outputs</h1>
         </div>
-        <p className="text-sm text-[var(--color-text-muted)] mb-8">
+        <p className="cx-body mb-8" style={{ color: "var(--cx-text-muted, #A0A0B0)" }}>
           Specialist responses you&apos;ve saved for reference.
         </p>
 
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="conduit-card p-5 space-y-2 animate-pulse">
-                <div className="h-4 w-48 rounded bg-[var(--color-border)]" />
-                <div className="h-3 w-full rounded bg-[var(--color-border)] opacity-60" />
-                <div className="h-3 w-3/4 rounded bg-[var(--color-border)] opacity-40" />
+              <div key={i} className="conduit-card p-5 space-y-2">
+                <div className="cx-skeleton h-4 w-48 rounded" style={{ opacity: 0.55 }} />
+                <div className="cx-skeleton h-3 w-full rounded" style={{ opacity: 0.38 }} />
+                <div className="cx-skeleton h-3 w-3/4 rounded" style={{ opacity: 0.28 }} />
               </div>
             ))}
           </div>
         ) : outputs.length === 0 ? (
-          <div className="conduit-card p-12 text-center">
-            <Bookmark size={32} className="mx-auto mb-3" style={{ color: "var(--color-text-muted)" }} />
-            <p className="text-sm text-[var(--color-text-muted)]">
-              No outputs saved yet. Hover over any specialist response in chat and click <strong>Save</strong> to add it here.
-            </p>
+          <div className="max-w-md mx-auto">
+            <EmptyState
+              icon={<OutputsEmptySVG />}
+              title="No saved outputs yet"
+              body="Hover over any specialist response in chat and click Save to keep it here for later reference."
+            />
           </div>
         ) : (
           <div className="space-y-3">
@@ -136,12 +136,12 @@ export default function OutputsPage() {
                   <div className="px-5 pt-4 pb-3">
                     <div className="flex items-start justify-between gap-3 mb-1">
                       <div className="min-w-0">
-                        <h2 className="text-sm font-medium text-[var(--color-text)] truncate">
+                        <h2 className="cx-type-base font-medium text-[var(--color-text)] truncate">
                           {output.title}
                         </h2>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span
-                            className="text-[10px] uppercase tracking-[0.15em] font-medium"
+                            className="cx-type-xs uppercase tracking-[0.15em] font-medium"
                             style={{ color: deptColor }}
                           >
                             {emp?.name ?? output.specialist}
@@ -155,18 +155,19 @@ export default function OutputsPage() {
                           </span>
                         </div>
                       </div>
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="icon-sm"
                         onClick={() => void handleDelete(output.id)}
                         disabled={deletingId === output.id}
-                        className="shrink-0 p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-destructive,#ef4444)] transition-colors disabled:opacity-40"
                         aria-label="Delete output"
                       >
-                        <Trash2 size={13} />
-                      </button>
+                        <Trash2 size={13} strokeWidth={1.75} />
+                      </Button>
                     </div>
 
-                    <p className="text-sm text-[var(--color-text-muted)] mt-2 line-clamp-3 whitespace-pre-wrap">
+                    <p className="cx-body text-[var(--color-text-muted)] mt-2 line-clamp-3 whitespace-pre-wrap">
                       {output.content}
                     </p>
                   </div>
@@ -180,7 +181,7 @@ export default function OutputsPage() {
                     {output.source_conversation_id && (
                       <Link
                         href={`/app?c=${output.source_conversation_id}`}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors ml-auto"
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg cx-type-xs transition-colors ml-auto"
                         style={{ color: "var(--color-text-muted)", border: "1px solid var(--color-border)" }}
                       >
                         View in chat

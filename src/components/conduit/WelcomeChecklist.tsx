@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, X } from "lucide-react";
 import Link from "next/link";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 export type ChecklistKey =
   | "meet_team"
@@ -159,30 +160,28 @@ export function WelcomeChecklist({
         className="fixed bottom-6 right-4 md:right-6 z-30 w-[calc(100vw-2rem)] max-w-sm"
       >
         <div
-          className="conduit-card p-5"
-          style={{
-            background: "var(--color-surface-elevated)",
-            boxShadow: "0 8px 32px rgba(10,9,8,0.4)",
-          }}
+          className="cx-glass-float cx-glass-border p-5"
         >
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <ProgressRing done={done} total={ITEMS.length} />
               <div>
-                <div className="text-sm font-medium">Get started with Praxis</div>
-                <div className="text-[11px] text-[var(--color-text-muted)] mt-0.5">
+                <div className="cx-type-base font-medium">Get started with Praxis</div>
+                <div className="cx-type-xs text-[var(--color-text-muted)] mt-0.5">
                   {done} of {ITEMS.length} complete
                 </div>
               </div>
             </div>
-            <button
+            <PraxisButton
+              type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={dismiss}
               aria-label="Dismiss checklist"
-              className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors p-0.5"
             >
-              <X size={16} />
-            </button>
+              <X size={16} strokeWidth={1.75} />
+            </PraxisButton>
           </div>
 
           {/* Items */}
@@ -191,7 +190,7 @@ export function WelcomeChecklist({
               const done = Boolean(checklist[item.key]);
               const inner = (
                 <div
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg cx-type-base transition-colors ${
                     done
                       ? "opacity-50"
                       : "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
@@ -204,7 +203,7 @@ export function WelcomeChecklist({
                       background: done ? "var(--color-accent)" : "transparent",
                     }}
                   >
-                    {done && <Check size={11} color="#fff" strokeWidth={3} />}
+                    {done && <Check size={11} color="#fff" strokeWidth={2} />}
                   </span>
                   <span className={done ? "line-through text-[var(--color-text-muted)]" : ""}>
                     {item.label}
@@ -215,14 +214,16 @@ export function WelcomeChecklist({
               return (
                 <li key={item.key}>
                   {item.action === "cmd-k" ? (
-                    <button
+                    <PraxisButton
                       type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={triggerCmdK}
                       className="w-full text-left"
-                      disabled={done}
+                      isDisabled={done}
                     >
                       {inner}
-                    </button>
+                    </PraxisButton>
                   ) : item.href ? (
                     <Link
                       href={item.href}
@@ -232,14 +233,16 @@ export function WelcomeChecklist({
                       {inner}
                     </Link>
                   ) : (
-                    <button
+                    <PraxisButton
                       type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => !done && check(item.key)}
                       className="w-full text-left"
-                      disabled={done}
+                      isDisabled={done}
                     >
                       {inner}
-                    </button>
+                    </PraxisButton>
                   )}
                 </li>
               );
@@ -262,7 +265,7 @@ export function ChecklistProgressPip({
   if (done >= total) return null;
   return (
     <div
-      className="mx-3 mt-2 flex items-center gap-2 px-3 py-2 rounded-lg text-xs cursor-default"
+      className="mx-3 mt-2 flex items-center gap-2 px-3 py-2 rounded-lg cx-type-xs cursor-default"
       style={{
         background: "color-mix(in srgb, var(--color-accent) 8%, transparent)",
         border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)",
@@ -270,7 +273,7 @@ export function ChecklistProgressPip({
       title={`Onboarding: ${done}/${total} steps done`}
     >
       <ProgressRing done={done} total={total} />
-      <span className="text-[var(--color-text-muted)] text-[11px] leading-tight">
+      <span className="text-[var(--color-text-muted)] cx-type-xs leading-tight">
         Setup <br />
         <span style={{ color: "var(--color-accent)" }}>
           {done}/{total} done

@@ -15,6 +15,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 type Side = "top" | "right" | "bottom" | "left";
 type Align = "start" | "center" | "end";
@@ -36,6 +37,7 @@ export function Popover({
   align = "center",
   className,
 }: Props) {
+  const reduced = useReducedMotion();
   const id = useId();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -142,21 +144,26 @@ export function Popover({
       <span ref={triggerRef} onClick={toggle} aria-expanded={open} aria-controls={open ? id : undefined}>
         {trigger}
       </span>
-      {open &&
-        mounted &&
-        anchor &&
-        createPortal(
-          <div
-            ref={popRef}
-            id={id}
-            role="dialog"
-            className={`praxis-root pdl-popover pdl-glass${className ? ` ${className}` : ""}`}
-            style={style}
-          >
-            {typeof children === "function" ? children(close) : children}
-          </div>,
-          document.body,
-        )}
+      {mounted && createPortal(
+        <AnimatePresence>
+          {open && anchor && (
+            <motion.div
+              ref={popRef}
+              id={id}
+              role="dialog"
+              className={`praxis-root cx-glass-float cx-glass-border${className ? ` ${className}` : ""}`}
+              style={{ ...style, borderRadius: "var(--cx-radius-lg, 16px)", color: "var(--cx-text)" }}
+              initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: side === "top" ? 4 : -4 }}
+              animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+              exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: side === "top" ? 4 : -4 }}
+              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {typeof children === "function" ? children(close) : children}
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
     </>
   );
 }

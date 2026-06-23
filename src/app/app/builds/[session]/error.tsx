@@ -65,29 +65,26 @@ export default function CinemaError({ error, unstable_retry, reset }: Props) {
           </p>
         </div>
         <div className="eng-cinema-summary-actions">
-          <Button
-            onClick={onReopen}
-            className="inline-flex items-center gap-1.5"
-          >
-            Reopen the live view <ArrowRight size={13} />
+          <Button onClick={onReopen}>
+            Reopen the live view <ArrowRight size={13} strokeWidth={1.75} />
           </Button>
           {deployUrl && (
             <a
               href={deployUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md border border-[var(--color-border)] hover:border-[var(--color-accent)] text-sm text-[var(--color-text)] transition-colors"
+              className="btn-secondary btn-sz-sm inline-flex items-center gap-1.5"
             >
-              Open last-known preview <ExternalLink size={13} />
+              Open last-known preview <ExternalLink size={13} strokeWidth={1.75} />
             </a>
           )}
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => router.push("/app/builds")}
-            className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] underline-offset-2 hover:underline px-3"
           >
             Back to all builds
-          </button>
+          </Button>
         </div>
       </section>
     </div>

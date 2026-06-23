@@ -37,14 +37,20 @@
   --color-surface: #0B0B0F;
   --color-surface-elevated: #131319;
   --color-surface-raised: #1C1C26;
+  --color-surface-overlay: #23232E;
   --color-border: #262630;
   --color-border-soft: #33333F;
   --color-border-default: #262630;
   --color-text: #F4F4F7;
   --color-text-muted: #A0A0B0;
+  --color-text-faint: #6B6B7B;
   --color-accent: #7C6CFF;
   --color-accent-hi: #9B8CFF;
   --color-accent-deep: #5548CC;
+  --color-accent-soft: rgba(124, 108, 255, 0.12);
+  --color-reward: #34D399;
+  --color-danger: #F4607D;
+  --color-yellow: #EAB308;
   --color-cyan: #22D3EE;
   --color-purple: #A855F7;
   --color-green: #34D399;
@@ -77,6 +83,29 @@
   --font-serif: "Fraunces", ui-serif, Georgia, Cambria, "Times New Roman", serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  /* ============================================================
+   * Console type scale — CONSOLE_REDESIGN.md spec sizes
+   * 12 / 13 / 14 / 16 / 20 / 24 / 32 / 44
+   *
+   * These @theme entries make Tailwind JIT generate:
+   *   text-cx-xs (12px)  text-cx-sm (13px)  text-cx-base (14px)
+   *   text-cx-md (16px)  text-cx-lg (20px)  text-cx-xl (24px)
+   *   text-cx-2xl (32px) text-cx-3xl (44px)
+   *
+   * Use these in console components instead of bare text-sm / text-xs
+   * so font-size always matches the spec exactly.
+   * See console-tokens.css for .cx-type-* CSS utilities and compound
+   * classes (.cx-body, .cx-meta, .cx-stat, .cx-heading-*).
+   * ============================================================ */
+  --font-size-cx-xs:   12px;
+  --font-size-cx-sm:   13px;
+  --font-size-cx-base: 14px;
+  --font-size-cx-md:   16px;
+  --font-size-cx-lg:   20px;
+  --font-size-cx-xl:   24px;
+  --font-size-cx-2xl:  32px;
+  --font-size-cx-3xl:  44px;
 
   /* ============================================================
    * Conduit Marketing — Visual overhaul v3 (2026-05-08)
@@ -197,6 +226,42 @@
   --animate-accordion-up: accordion-up 0.25s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
+/* ============================================================
+ * Ember retirement — remap wm-rebrand tokens to the console
+ * electric violet palette.
+ *
+ * This rule cascades AFTER the watermelon.css import (same
+ * specificity, later position = wins). LiveChat.tsx uses
+ * .wm-rebrand as its root; overriding the --wm-* vars here
+ * retires the warm/ember palette from all console surfaces
+ * without touching the component itself.
+ * ============================================================ */
+.wm-rebrand {
+  background: #0B0B0F;              /* = cx-canvas */
+  --wm-background:           #0B0B0F;
+  --wm-foreground:           #F4F4F7;
+  --wm-card:                 #131319;
+  --wm-card-foreground:      #F4F4F7;
+  --wm-popover:              #1C1C26;
+  --wm-popover-foreground:   #F4F4F7;
+  --wm-primary:              #7C6CFF;   /* was: #ff8a3d (ember) */
+  --wm-primary-foreground:   #FFFFFF;
+  --wm-secondary:            #1C1C26;
+  --wm-secondary-foreground: #F4F4F7;
+  --wm-muted:                #131319;
+  --wm-muted-foreground:     #A0A0B0;
+  --wm-accent-foreground:    #9B8CFF;
+  --wm-destructive:          #F4607D;   /* = cx-danger */
+  --wm-destructive-foreground: #FFFFFF;
+  --wm-input:                #1C1C26;
+  --wm-ring:                 #7C6CFF;   /* was: ember */
+  --wm-ember:                #7C6CFF;   /* retired → cx-accent */
+  --wm-ember-hi:             #9B8CFF;   /* retired → cx-accent-bright */
+  --wm-ember-deep:           #5548CC;   /* retired → cx-accent-deep */
+  --wm-ok:                   #34D399;   /* = cx-reward */
+  --wm-idle:                 #6B6B7B;   /* = cx-text-faint */
+}
+
 html {
   scroll-behavior: smooth;
   /* Account for the sticky marketing nav when jumping to anchors. */
@@ -287,17 +352,23 @@ body {
  * Apple-grade recipe: layered depth, hairline inner top highlight, ≥44px touch target,
  * springy press via framer-motion whileTap scale(0.97), snappy 120–180ms ease. */
 .btn-primary {
-  background: var(--cx-accent, #7C6CFF);
-  color: #FFFFFF;
+  /* Subtle top-light gradient — simulates a light source from above (spec: "top-light gradient") */
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--cx-accent, #7C6CFF) 88%, #fff 12%) 0%,
+    var(--cx-accent, #7C6CFF) 100%
+  );
+  color: white;
+  border: none;
   padding: var(--cx-space-3, 12px) var(--cx-space-6, 24px);
   font-size: var(--cx-type-base, 14px);
   font-weight: 500;
   letter-spacing: -0.005em;
   /* hairline inner top highlight + soft resting depth */
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.18),
     0 1px 3px rgba(0,0,0,0.3),
-    0 0 0 1px rgba(124,108,255,0.15);
+    0 0 0 1px color-mix(in srgb, var(--cx-accent, #7C6CFF) 20%, transparent);
   transition:
     background var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
     box-shadow var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
@@ -311,7 +382,11 @@ body {
   cursor: pointer;
 }
 .btn-primary:hover {
-  background: var(--cx-accent-bright, #9B8CFF);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--cx-accent-bright, #9B8CFF) 88%, #fff 12%) 0%,
+    var(--cx-accent-bright, #9B8CFF) 100%
+  );
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.15),
     0 6px 24px color-mix(in srgb, var(--cx-accent, #7C6CFF) 40%, transparent),
@@ -326,20 +401,22 @@ body {
 }
 .btn-primary:focus-visible {
   outline: none;
-  box-shadow: var(--cx-accent-glow, 0 0 0 3px rgba(124,108,255,0.25)), inset 0 1px 0 rgba(255,255,255,0.12);
+  box-shadow: var(--cx-focus-ring, 0 0 0 2px #7C6CFF, 0 0 0 4px rgba(124,108,255,0.20)), inset 0 1px 0 rgba(255,255,255,0.12);
 }
 
 /* secondary = glass surface (frosted, translucent) */
 .btn-secondary {
-  background: rgba(255,255,255,0.05);
+  background: var(--cx-glass-bg, rgba(255,255,255,0.04));
+  backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  -webkit-backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
   color: var(--cx-text, #F4F4F7);
   padding: var(--cx-space-3, 12px) var(--cx-space-6, 24px);
   font-size: var(--cx-type-base, 14px);
   font-weight: 500;
   letter-spacing: -0.005em;
-  border: 1px solid rgba(255,255,255,0.09);
+  border: 1px solid var(--cx-glass-border, rgba(255,255,255,0.08));
   /* glass edge highlight */
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 1px 2px rgba(0,0,0,0.2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 1px 2px rgba(0,0,0,0.2);
   transition:
     background var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
     border-color var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
@@ -367,7 +444,7 @@ body {
 }
 .btn-secondary:focus-visible {
   outline: none;
-  box-shadow: var(--cx-accent-glow, 0 0 0 3px rgba(124,108,255,0.25)), inset 0 1px 0 rgba(255,255,255,0.07);
+  box-shadow: var(--cx-focus-ring, 0 0 0 2px #7C6CFF, 0 0 0 4px rgba(124,108,255,0.20)), inset 0 1px 0 rgba(255,255,255,0.07);
 }
 
 .btn-ghost {
@@ -397,15 +474,19 @@ body {
   border-color: var(--cx-border, #262630);
   transform: translateY(-1px);
 }
-.btn-ghost:active { transform: translateY(0); }
+.btn-ghost:active {
+  transform: translateY(0);
+  background: color-mix(in srgb, var(--cx-surface-raised, #1C1C26) 80%, var(--cx-border, #262630));
+}
 .btn-ghost:focus-visible {
   outline: none;
-  box-shadow: var(--cx-accent-glow, 0 0 0 3px rgba(124,108,255,0.25));
+  box-shadow: var(--cx-focus-ring, 0 0 0 2px #7C6CFF, 0 0 0 4px rgba(124,108,255,0.20));
 }
 
 .btn-danger {
   background: var(--cx-danger, #F4607D);
-  color: #FFFFFF;
+  color: white;
+  border: none;
   padding: var(--cx-space-3, 12px) var(--cx-space-6, 24px);
   font-size: var(--cx-type-base, 14px);
   font-weight: 500;
@@ -434,7 +515,23 @@ body {
 }
 .btn-danger:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(244, 96, 125, 0.30), inset 0 1px 0 rgba(255,255,255,0.12);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cx-danger, #F4607D) 30%, transparent), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+/* Opaque fallback for .btn-secondary when backdrop-filter is unsupported */
+@supports not (backdrop-filter: blur(1px)) {
+  .btn-secondary {
+    background: var(--cx-surface-raised, #1C1C26);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .btn-secondary {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--cx-surface-raised, #1C1C26);
+  }
 }
 
 /* Reduced-motion: keep colour/shadow transitions, remove all transforms */
@@ -474,7 +571,7 @@ body {
   min-height: 48px;
   height: 48px;
   padding: 0 var(--cx-space-6, 24px);
-  font-size: 15px;
+  font-size: var(--cx-type-md, 16px);
   gap: var(--cx-space-2, 8px);
 }
 .btn-sz-icon {
@@ -568,9 +665,10 @@ body {
 }
 .scroll-hint { animation: scrollHint 2s ease-in-out infinite; }
 
-/* Terminal caret */
-@keyframes caret { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
-.caret { animation: caret 900ms step-end infinite; }
+/* Terminal caret — soft blink, ease-in-out per design spec */
+@keyframes caret-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+.caret { animation: caret-blink 1.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .caret { animation: none; opacity: 1; } }
 
 /* Hairline divider */
 .divider { height: 1px; background: var(--color-border-default); width: 100%; }
@@ -597,27 +695,53 @@ body {
 }
 
 .conduit-bubble-user {
-  background: color-mix(in srgb, var(--color-accent) 11%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
-  border-radius: 22px 22px 22px 6px;
-  box-shadow: 0 2px 12px color-mix(in srgb, var(--color-accent) 12%, transparent);
-  font-size: 14px;
-  line-height: 1.7;
+  /* Solid accent-tinted surface — clearly "yours", right-aligned */
+  background: color-mix(in srgb, var(--cx-accent, var(--color-accent)) 18%, transparent);
+  /* Stronger border for clear visual distinction from specialist glass */
+  border: 1px solid color-mix(in srgb, var(--cx-accent, var(--color-accent)) 50%, transparent);
+  border-radius: var(--cx-radius-md, 12px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 1px 6px rgba(0, 0, 0, 0.28);
+  font-size: var(--cx-type-base, 14px);
+  line-height: var(--cx-lh-body, 1.60);
 }
 .conduit-bubble-assistant {
-  background: color-mix(in srgb, var(--dept, var(--color-accent)) 4%, var(--color-surface-elevated));
-  border-left: 2px solid var(--dept, var(--color-border));
-  border-radius: 22px 22px 6px 22px;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18);
-  font-size: 14px;
-  line-height: 1.75;
+  /* Glass surface — frosted pane over the dark canvas */
+  background: var(--cx-glass-bg, rgba(255, 255, 255, 0.04));
+  backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  -webkit-backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  /* Hairline glass edge on all sides + dept-accent left rail */
+  border: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08));
+  border-left: 3px solid var(--dept, var(--cx-accent, var(--color-accent)));
+  border-radius: var(--cx-radius-md, 12px);
+  box-shadow:
+    var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10)),
+    var(--cx-glass-shadow, 0 1px 3px rgba(0, 0, 0, 0.40), 0 4px 16px rgba(0, 0, 0, 0.30));
+  font-size: var(--cx-type-base, 14px);
+  line-height: var(--cx-lh-body, 1.60);
+}
+/* Opaque fallback when backdrop-filter is unsupported */
+@supports not (backdrop-filter: blur(1px)) {
+  .conduit-bubble-assistant {
+    background: var(--cx-surface-raised, #1C1C26);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .conduit-bubble-assistant {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--cx-surface-raised, #1C1C26);
+  }
 }
 
 .conduit-suggestion {
   background: var(--color-surface-elevated);
   border: 1px solid var(--color-border);
   border-radius: 14px;
-  transition: background 180ms ease, border-color 180ms ease, transform 220ms ease;
+  transition: background 180ms var(--cx-ease, cubic-bezier(0.22,1,0.36,1)), border-color 180ms var(--cx-ease, cubic-bezier(0.22,1,0.36,1)), transform 180ms var(--cx-ease, cubic-bezier(0.22,1,0.36,1));
 }
 .conduit-suggestion:hover {
   border-color: var(--dept, var(--color-accent));
@@ -662,13 +786,15 @@ body {
 @keyframes whisperWave3 { 0%,100% { height:6px; } 50% { height:14px; } }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-@keyframes presenceFade {
-  0% { opacity: 0; transform: translateY(2px); }
-  20%, 80% { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(0); }
+/* Presence line — fades in once when the specialist starts responding,
+   stays visible until React removes it from the DOM. No looping fade-out
+   so the mono micro-copy reads cleanly throughout the thinking window. */
+@keyframes presenceEnter {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 .presence-line {
-  animation: presenceFade 2.4s ease-in-out infinite;
+  animation: presenceEnter 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes typingDot {
@@ -688,65 +814,146 @@ body {
   .typing-dot { animation: none; opacity: 0.7; }
 }
 
-/* Premium thinking indicator — issue #802 */
-@keyframes thinkingPulse {
-  0%, 100% {
-    opacity: 0.25;
-    transform: scale(0.85);
-    box-shadow: 0 0 0 0 transparent;
-  }
-  40% {
-    opacity: 1;
-    transform: scale(1);
-    box-shadow: 0 0 6px 2px color-mix(in srgb, var(--dept, var(--color-accent)) 40%, transparent);
+/* Thinking indicator bubble + status — animated dots handled by framer-motion in TypingIndicator.tsx */
+
+/* Shimmer: a slim bar that sweeps linearly across the bubble bottom — GPU-cheap (transform only) */
+@keyframes thinkingShimmer {
+  0%   { transform: translateX(-250%); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateX(350%); opacity: 0; }
+}
+
+/* Subtle ambient glow breathe on the thinking bubble — uses accent (#7C6CFF) per spec */
+@keyframes thinkingBreath {
+  0%, 100% { box-shadow: 0 1px 6px rgba(0, 0, 0, 0.18), var(--cx-glass-highlight, inset 0 1px 0 rgba(255,255,255,0.10)); }
+  50% {
+    box-shadow:
+      0 2px 16px rgba(0, 0, 0, 0.24),
+      0 0 0 1px color-mix(in srgb, var(--cx-accent, #7C6CFF) 22%, transparent),
+      0 0 20px color-mix(in srgb, var(--cx-accent, #7C6CFF) 6%, transparent),
+      var(--cx-glass-highlight, inset 0 1px 0 rgba(255,255,255,0.10));
   }
 }
-.thinking-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 9999px;
-  background: var(--dept, var(--color-accent));
-  animation: thinkingPulse 1.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-}
-.thinking-dot:nth-child(2) { animation-delay: 200ms; }
-.thinking-dot:nth-child(3) { animation-delay: 400ms; }
 
 .thinking-bubble {
-  background: color-mix(in srgb, var(--dept, var(--color-accent)) 5%, var(--color-surface-elevated));
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-left: 2px solid var(--dept, var(--color-border));
+  position: relative;
+  overflow: hidden;
+  /* Dept-tinted bg identifies which specialist is thinking; accent drives the animation */
+  background: color-mix(in srgb, var(--dept, var(--cx-accent, var(--color-accent))) 5%, var(--cx-surface-raised, var(--color-surface-elevated)));
+  border: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08));
+  border-left: 2px solid var(--dept, var(--cx-accent, var(--color-border)));
   border-radius: 22px 22px 6px 22px;
   box-shadow:
     0 1px 6px rgba(0, 0, 0, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(20px) saturate(140%);
+    var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
+  backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  -webkit-backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  animation: thinkingBreath 2.4s ease-in-out infinite;
+}
+/* Bottom sweep — accent shimmer per spec: "thin accent progress shimmer (#7C6CFF)" */
+.thinking-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  height: 2px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--cx-accent, #7C6CFF) 90%, transparent) 50%,
+    transparent 100%
+  );
+  animation: thinkingShimmer 1.8s linear infinite;
+}
+/* Top hairline — static accent gradient, gives "pane of glass" depth */
+.thinking-bubble::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--cx-accent, #7C6CFF) 45%, transparent) 50%,
+    transparent 100%
+  );
+  border-radius: 9999px;
+  pointer-events: none;
 }
 
 .thinking-status {
   font-family: var(--font-mono, monospace);
-  font-size: 11px;
-  color: var(--color-text-muted);
+  font-size: var(--cx-type-xs, 11px);
+  color: var(--cx-text-muted, var(--color-text-muted));
   letter-spacing: 0.01em;
+  line-height: 1.4;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .thinking-dot {
+  .thinking-bubble {
     animation: none;
-    opacity: 0.6;
-    box-shadow: none;
+  }
+  .thinking-bubble::before {
+    animation: none;
+    opacity: 0;
+  }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .thinking-bubble {
+    background: var(--cx-surface-raised, var(--color-surface-elevated));
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }
 
-/* Presence line dot — pulses in dept color while specialist is active */
+/* Presence line dot — pulses in accent color while specialist is thinking (per spec) */
 @keyframes presenceDot {
-  0%, 100% { opacity: 0.6; transform: scale(0.9); }
-  50% { opacity: 1; transform: scale(1.2); }
+  0%, 100% { opacity: 0.5; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.25); box-shadow: 0 0 6px color-mix(in srgb, var(--cx-accent, #7C6CFF) 60%, transparent); }
 }
 .presence-dot {
-  animation: presenceDot 1.2s ease-in-out infinite;
+  animation: presenceDot 1.1s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .presence-dot { animation: none; opacity: 0.8; }
+}
+
+/* Skeleton shimmer — GPU-cheap sweeping highlight for loading placeholders.
+   Use class="cx-skeleton" on each skeleton bar element. The sweep is
+   transform-only (no layout thrashing); reduced-motion just fades to static. */
+@keyframes skeletonSweep {
+  0%   { transform: translateX(-150%); }
+  100% { transform: translateX(350%); }
+}
+.cx-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--cx-border, #262630);
+  border-radius: inherit;
+}
+.cx-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.045) 40%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.045) 60%,
+    transparent 100%
+  );
+  animation: skeletonSweep 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cx-skeleton::after { animation: none; }
+  .cx-skeleton { opacity: 0.6; }
 }
 
 @keyframes handoffSlide {
@@ -1634,16 +1841,16 @@ body {
 /* Glass nav — light glass on scroll, transparent over hero */
 .conduit-nav-glass {
   background: rgba(250, 250, 247, 0.85);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: var(--cx-glass-blur-overlay, blur(20px) saturate(160%));
+  -webkit-backdrop-filter: var(--cx-glass-blur-overlay, blur(20px) saturate(160%));
   border-bottom: 1px solid var(--color-border-subtle);
   /* Subtle indigo-glow edge on the bottom border */
   box-shadow: 0 1px 0 0 rgba(91, 99, 232, 0.08);
 }
 .conduit-nav-glass-inverse {
   background: rgba(10, 9, 8, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
+  -webkit-backdrop-filter: var(--cx-glass-blur, blur(20px) saturate(140%));
   border-bottom: 1px solid var(--color-border-on-inverse);
 }
 
@@ -1667,15 +1874,26 @@ body {
   outline-offset: 2px;
 }
 
-/* App shell — catch-all focus ring for elements without explicit focus styles.
-   More specific rules (btn-primary:focus-visible etc.) take precedence via
-   CSS cascade. Uses the same indigo accent so focus is visible throughout. */
+/* App shell — explicit override for anchor, button, and option elements
+   to guarantee --cx-focus-ring wins over Tailwind's reset specificity.
+   console-tokens.css defines the global :focus-visible rule at (0,1,0);
+   this rule at (0,1,1) ensures a, button, and [role="option"] never fall
+   back to browser-default outlines even if specificity battles arise. */
 .praxis-root a:focus-visible,
 .praxis-root button:focus-visible,
 .praxis-root [role="option"]:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-  border-radius: 4px;
+  outline: none;
+  box-shadow: var(--cx-focus-ring, 0 0 0 2px #7C6CFF, 0 0 0 4px rgba(124, 108, 255, 0.20));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .praxis-root a:focus-visible,
+  .praxis-root button:focus-visible,
+  .praxis-root [role="option"]:focus-visible {
+    outline: 2px solid var(--cx-accent, #7C6CFF);
+    outline-offset: 2px;
+    box-shadow: none;
+  }
 }
 
 /* Mobile-tighter section padding override */

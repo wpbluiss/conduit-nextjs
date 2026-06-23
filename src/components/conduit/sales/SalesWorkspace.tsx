@@ -58,18 +58,18 @@ export default async function SalesWorkspace({ supabase, account }: Props) {
           <EmployeeAvatar employee="sales" size={56} />
           <div className="min-w-0 flex-1">
             <div
-              className="text-[10px] uppercase tracking-[0.2em]"
+              className="cx-type-xs uppercase tracking-[0.2em]"
               style={{ color: employee.color }}
             >
               {employee.role}
             </div>
             <h1
-              className="serif text-3xl md:text-4xl mt-1"
+              className="cx-type-2xl md:cx-type-3xl font-semibold mt-1"
               style={{ color: employee.color }}
             >
               {employee.name}
             </h1>
-            <p className="mt-1 text-sm text-[var(--color-text-muted)] max-w-xl">
+            <p className="mt-1 cx-type-base text-[var(--color-text-muted)] max-w-xl">
               {employee.tagline}
             </p>
           </div>
@@ -82,8 +82,8 @@ export default async function SalesWorkspace({ supabase, account }: Props) {
             />
             <Link
               href="/app?pin=sales"
-              className="btn-primary !text-sm"
-              style={{ background: employee.color, color: "var(--cx-canvas, #0B0B0F)" }}
+              className="btn-primary btn-sz-sm"
+              style={{ background: employee.color, color: "var(--cx-canvas)" }}
             >
               Talk to Sales <ArrowRight size={14} />
             </Link>
@@ -133,12 +133,12 @@ function Stat({
 }) {
   return (
     <div className="conduit-card px-4 py-3">
-      <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+      <div className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
         {label}
       </div>
-      <div className="serif text-2xl mt-1">{value}</div>
+      <div className="cx-mono cx-type-xl font-semibold mt-1">{value}</div>
       {sub && (
-        <div className="text-[10px] text-[var(--color-text-muted)] mt-0.5">
+        <div className="cx-type-xs text-[var(--color-text-muted)] mt-0.5">
           {sub}
         </div>
       )}

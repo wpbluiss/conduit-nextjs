@@ -296,10 +296,10 @@ export default async function WorkspacePage({ params }: PageProps) {
             )}
             <Link
               href={`/app?pin=${employeeId}`}
-              className="btn-primary !text-sm"
+              className="btn-primary btn-sz-sm"
               style={{ background: dept, color: "var(--color-surface)" }}
             >
-              Talk to {employee.name} <ArrowRight size={14} />
+              Talk to {employee.name} <ArrowRight size={14} strokeWidth={1.75} />
             </Link>
           </div>
         </div>
@@ -328,7 +328,7 @@ export default async function WorkspacePage({ params }: PageProps) {
           <>
             {/* Quick start */}
             <section>
-              <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-3">
+              <div className="cx-label mb-3">
                 Quick start
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -340,7 +340,7 @@ export default async function WorkspacePage({ params }: PageProps) {
                       ["--dept" as string]: dept,
                       ["--dept-soft" as string]: employee.colorSoft,
                     }}
-                    className="conduit-suggestion px-4 py-3 text-sm block"
+                    className="conduit-suggestion px-4 py-3 cx-type-base block"
                   >
                     {p}
                   </Link>
@@ -350,7 +350,7 @@ export default async function WorkspacePage({ params }: PageProps) {
 
             {/* Stats */}
             <section>
-              <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-3">
+              <div className="cx-label mb-3">
                 This cycle
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -371,7 +371,7 @@ export default async function WorkspacePage({ params }: PageProps) {
 
             {/* Recent activity / empty */}
             <section>
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-3">
+          <div className="cx-label mb-3">
             Recent activity
           </div>
           {empty ? (
@@ -387,7 +387,7 @@ export default async function WorkspacePage({ params }: PageProps) {
               </p>
               <Link
                 href={`/app?pin=${employeeId}`}
-                className="mt-3 inline-flex items-center gap-1 text-sm"
+                className="mt-3 inline-flex items-center gap-1 cx-type-base"
                 style={{ color: dept }}
               >
                 {emptyState.cta}
@@ -412,17 +412,17 @@ export default async function WorkspacePage({ params }: PageProps) {
                         style={{ background: employee.colorSoft }}
                       >
                         {a.type === "build" ? (
-                          <Hammer size={14} style={{ color: dept }} />
+                          <Hammer size={14} strokeWidth={1.75} style={{ color: dept }} />
                         ) : (
-                          <FileText size={14} style={{ color: dept }} />
+                          <FileText size={14} strokeWidth={1.75} style={{ color: dept }} />
                         )}
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                        <span className="block cx-label">
                           {a.type.replace("_", " ")} ·{" "}
-                          {relativeTime(a.created_at)}
+                          <span className="tabular-nums">{relativeTime(a.created_at)}</span>
                         </span>
-                        <span className="block text-sm text-[var(--color-text)] truncate">
+                        <span className="block cx-type-base text-[var(--color-text)] truncate">
                           {a.title}
                         </span>
                       </span>
@@ -439,17 +439,17 @@ export default async function WorkspacePage({ params }: PageProps) {
                         className="inline-flex items-center justify-center w-8 h-8 rounded-lg shrink-0"
                         style={{ background: employee.colorSoft }}
                       >
-                        <MessageSquare size={14} style={{ color: dept }} />
+                        <MessageSquare size={14} strokeWidth={1.75} style={{ color: dept }} />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-                          conversation · {relativeTime(a.created_at)}
+                        <span className="block cx-label">
+                          conversation · <span className="tabular-nums">{relativeTime(a.created_at)}</span>
                         </span>
-                        <span className="block text-sm text-[var(--color-text)] truncate">
+                        <span className="block cx-type-base text-[var(--color-text)] truncate">
                           {a.title}
                         </span>
                         {a.snippet && (
-                          <span className="block text-xs text-[var(--color-text-muted)] truncate mt-0.5">
+                          <span className="block cx-type-xs text-[var(--color-text-muted)] truncate mt-0.5">
                             {a.snippet}
                           </span>
                         )}
@@ -487,12 +487,12 @@ function Stat({
 }) {
   return (
     <div className="conduit-card px-4 py-3">
-      <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+      <div className="cx-label">
         {label}
       </div>
       <div className="cx-stat mt-1">{value}</div>
       {sub && (
-        <div className="text-[10px] text-[var(--color-text-muted)] mt-0.5">
+        <div className="cx-type-xs text-[var(--color-text-muted)] mt-0.5">
           {sub}
         </div>
       )}

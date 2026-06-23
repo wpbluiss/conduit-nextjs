@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Warning, X } from "@phosphor-icons/react";
+import { AlertTriangle, X } from "lucide-react";
 import { track } from "@/lib/analytics/track";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 const STORAGE_KEY = "conduit_budget_nudge_dismissed_v1";
 const WARN_THRESHOLD = 0.8;
@@ -52,15 +53,15 @@ export function TokenBudgetNudge({
   return (
     <div
       role="alert"
-      className="hairline border-l-0 border-r-0 border-t-0 px-4 py-2 flex items-center gap-3 text-xs"
+      className="hairline border-l-0 border-r-0 border-t-0 px-4 py-2 flex items-center gap-3 cx-type-xs"
       style={{
         background: "var(--cx-accent-tint)",
-        borderBottomColor: "rgba(124,108,255,0.20)",
+        borderBottomColor: "color-mix(in srgb, var(--cx-accent) 20%, transparent)",
       }}
     >
-      <Warning
+      <AlertTriangle
         size={14}
-        weight="fill"
+        strokeWidth={1.75}
         style={{ color: "var(--cx-accent)", flexShrink: 0 }}
       />
       <span style={{ color: "var(--color-text)" }}>
@@ -80,14 +81,9 @@ export function TokenBudgetNudge({
       >
         Upgrade →
       </Link>
-      <button
-        onClick={close}
-        aria-label="Dismiss"
-        className="shrink-0 hover:opacity-70 transition-opacity"
-        style={{ color: "var(--color-text-muted)" }}
-      >
-        <X size={14} />
-      </button>
+      <PraxisButton type="button" variant="ghost" size="icon-sm" onClick={close} aria-label="Dismiss">
+        <X size={14} strokeWidth={1.75} />
+      </PraxisButton>
     </div>
   );
 }

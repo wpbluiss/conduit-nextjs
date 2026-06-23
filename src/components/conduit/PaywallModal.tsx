@@ -2,8 +2,22 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Check, Minus, Sparkles, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { TIERS, type TierId } from "@/lib/billing/tiers";
 import { track } from "@/lib/analytics/track";
+import { Button } from "@/components/conduit/ui/Button";
+
+const SCRIM_VARIANTS = {
+  hidden:  { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.14 } },
+  exit:    { opacity: 0, transition: { duration: 0.12 } },
+} as const;
+
+const PANEL_VARIANTS = {
+  hidden:  { opacity: 0, scale: 0.96 },
+  visible: { opacity: 1, scale: 1,    transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] as const } },
+  exit:    { opacity: 0, scale: 0.96, transition: { duration: 0.12, ease: [0.22, 1, 0.36, 1] as const } },
+} as const;
 
 export type PaywallReason =
   | "cap_reached"
@@ -34,8 +48,8 @@ const FEATURES: {
 ];
 
 function FeatureValue({ value }: { value: string | boolean }) {
-  if (value === true) return <Check size={15} className="mx-auto text-[var(--cx-reward)]" aria-label="Included" />;
-  if (value === false) return <Minus size={15} className="mx-auto text-[var(--color-text-muted)] opacity-40" aria-label="Not included" />;
+  if (value === true) return <Check size={15} strokeWidth={1.75} className="mx-auto text-[var(--cx-reward)]" aria-label="Included" />;
+  if (value === false) return <Minus size={15} strokeWidth={1.75} className="mx-auto text-[var(--color-text-muted)] opacity-40" aria-label="Not included" />;
   return <span>{value}</span>;
 }
 
@@ -49,8 +63,11 @@ export function PaywallModal({
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(true);
   const dialogRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<Element | null>(null);
+
+  const handleClose = () => setMounted(false);
 
   useEffect(() => {
     track("paywall_viewed", { reason: payload.reason });
@@ -65,7 +82,7 @@ export function PaywallModal({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { onClose(); return; }
+      if (e.key === "Escape") { handleClose(); return; }
       if (e.key !== "Tab") return;
       const dialog = dialogRef.current;
       if (!dialog) return;
@@ -139,43 +156,61 @@ export function PaywallModal({
         : "Premium feature";
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-sm bg-black/65"
-      aria-modal="true"
-      role="dialog"
-      aria-labelledby="paywall-title"
-    >
-      <div
+    <AnimatePresence onExitComplete={onClose}>
+      {mounted && (
+        <>
+          <motion.div
+            className="fixed inset-0 z-50 cx-scrim bg-black/65"
+            variants={SCRIM_VARIANTS}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            aria-hidden
+          />
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center px-4"
+            aria-modal="true"
+            role="dialog"
+            aria-labelledby="paywall-title"
+          >
+      <motion.div
         ref={dialogRef}
-        className="cx-glass-float cx-glass-border w-full max-w-2xl relative rounded-[16px] overflow-hidden"
+        className="cx-glass-overlay cx-glass-border w-full max-w-2xl relative rounded-[16px] overflow-hidden"
+        variants={PANEL_VARIANTS}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
       >
         {/* Header */}
         <div className="px-6 pt-6 pb-4">
-          <button
-            onClick={onClose}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={handleClose}
             aria-label="Close"
-            className="absolute top-4 right-4 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+            className="absolute top-4 right-4"
           >
-            <X size={18} />
-          </button>
+            <X size={18} strokeWidth={1.75} />
+          </Button>
 
-          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-[var(--cx-reward)] mb-2">
-            <Sparkles size={13} />
+          <div className="flex items-center gap-2 cx-type-xs uppercase tracking-[0.18em] text-[var(--cx-reward)] mb-2">
+            <Sparkles size={13} strokeWidth={1.75} />
             {reasonLabel}
           </div>
 
-          <h2 id="paywall-title" className="serif text-2xl md:text-3xl leading-tight">
+          <h2 id="paywall-title" className="cx-type-xl md:cx-type-2xl font-semibold leading-tight">
             {payload.message}
           </h2>
-          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+          <p className="mt-1 cx-type-base text-[var(--color-text-muted)]">
             Upgrade to Pro to continue.
           </p>
 
           {/* Billing toggle */}
-          <div className="mt-4 inline-flex items-center gap-1 rounded-full p-1" style={{ background: "var(--color-surface-raised, #1a1a1a)", border: "1px solid var(--color-border)" }}>
+          <div className="mt-4 inline-flex items-center gap-1 rounded-full p-1" style={{ background: "var(--cx-surface-raised)", border: "1px solid var(--color-border)" }}>
             <button
               onClick={() => setBilling("monthly")}
-              className="px-3 py-1 text-xs rounded-full transition-colors"
+              className="px-3 py-1 cx-type-xs rounded-full transition-colors"
               style={
                 billing === "monthly"
                   ? { background: "var(--color-border)", color: "var(--color-text)" }
@@ -186,7 +221,7 @@ export function PaywallModal({
             </button>
             <button
               onClick={() => setBilling("annual")}
-              className="px-3 py-1 text-xs rounded-full transition-colors flex items-center gap-1.5"
+              className="px-3 py-1 cx-type-xs rounded-full transition-colors flex items-center gap-1.5"
               style={
                 billing === "annual"
                   ? { background: "var(--color-border)", color: "var(--color-text)" }
@@ -194,7 +229,7 @@ export function PaywallModal({
               }
             >
               Annual
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: "color-mix(in srgb, var(--cx-reward) 15%, transparent)", color: "var(--cx-reward)" }}>
+              <span className="cx-type-xs px-1.5 py-0.5 rounded-full font-medium" style={{ background: "color-mix(in srgb, var(--cx-reward) 15%, transparent)", color: "var(--cx-reward)" }}>
                 −20%
               </span>
             </button>
@@ -205,7 +240,7 @@ export function PaywallModal({
         <div className="px-6 pb-2">
           <div className="rounded-xl overflow-hidden" style={{ border: "1px solid var(--color-border)" }}>
             {/* Column headers */}
-            <div className="grid grid-cols-3 text-xs">
+            <div className="grid grid-cols-3 cx-type-xs">
               <div className="px-4 py-3 text-[var(--color-text-muted)] font-medium uppercase tracking-[0.12em]">
                 Feature
               </div>
@@ -215,7 +250,7 @@ export function PaywallModal({
               <div
                 className="px-4 py-3 text-center font-medium uppercase tracking-[0.12em]"
                 style={{
-                  borderLeft: "1px solid rgba(52,211,153,0.30)",
+                  borderLeft: "1px solid color-mix(in srgb, var(--cx-reward) 30%, transparent)",
                   background: "color-mix(in srgb, var(--cx-reward) 8%, transparent)",
                   color: "var(--cx-reward)",
                 }}
@@ -228,20 +263,20 @@ export function PaywallModal({
             {FEATURES.map((f, i) => (
               <div
                 key={f.label}
-                className="grid grid-cols-3 text-sm"
+                className="grid grid-cols-3 cx-type-base"
                 style={{
                   borderTop: "1px solid var(--color-border)",
                   background: i % 2 === 0 ? "transparent" : "color-mix(in srgb, var(--color-border) 20%, transparent)",
                 }}
               >
-                <div className="px-4 py-2.5 text-[var(--color-text-muted)]">{f.label}</div>
-                <div className="px-4 py-2.5 text-center text-[var(--color-text-muted)]" style={{ borderLeft: "1px solid var(--color-border)" }}>
+                <div className="px-4 py-3 text-[var(--color-text-muted)]">{f.label}</div>
+                <div className="px-4 py-3 text-center text-[var(--color-text-muted)]" style={{ borderLeft: "1px solid var(--color-border)" }}>
                   <FeatureValue value={f.free} />
                 </div>
                 <div
-                  className="px-4 py-2.5 text-center text-[var(--color-text)]"
+                  className="px-4 py-3 text-center text-[var(--color-text)]"
                   style={{
-                    borderLeft: "1px solid rgba(52,211,153,0.30)",
+                    borderLeft: "1px solid color-mix(in srgb, var(--cx-reward) 30%, transparent)",
                     background: "color-mix(in srgb, var(--cx-reward) 5%, transparent)",
                   }}
                 >
@@ -256,45 +291,46 @@ export function PaywallModal({
         <div className="px-6 pt-4 pb-6">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <span className="text-3xl font-semibold" style={{ color: "var(--color-text)" }}>
+              <span className="cx-mono cx-type-2xl font-semibold" style={{ color: "var(--color-text)" }}>
                 ${displayPrice.toFixed(2)}
               </span>
-              <span className="text-sm text-[var(--color-text-muted)] ml-1">/mo</span>
+              <span className="cx-type-base text-[var(--color-text-muted)] ml-1">/mo</span>
               {billing === "annual" && (
-                <span className="ml-2 text-xs text-[var(--color-text-muted)] line-through">
+                <span className="ml-2 cx-type-xs text-[var(--color-text-muted)] line-through">
                   ${monthlyPrice}/mo
                 </span>
               )}
             </div>
             {billing === "annual" && (
-              <span className="text-xs text-[var(--cx-reward)]">
+              <span className="cx-type-xs text-[var(--cx-reward)]">
                 Billed ${(monthlyPrice * 12 * 0.8).toFixed(2)}/yr
               </span>
             )}
           </div>
 
-          <button
+          <Button
             onClick={upgrade}
-            disabled={busy}
-            className="w-full py-3 rounded-xl text-sm font-medium transition-all disabled:opacity-60"
-            style={{
-              background: busy ? "var(--color-border)" : "var(--cx-reward)",
-              color: busy ? "var(--color-text-muted)" : "#fff",
-              boxShadow: busy ? "none" : "0 4px 16px rgba(52,211,153,0.35)",
-            }}
+            isLoading={busy}
+            loadingText="Opening checkout…"
+            variant="primary"
+            size="lg"
+            className="w-full rounded-xl"
           >
-            {busy ? "Opening checkout…" : "Upgrade to Pro"}
-          </button>
+            Upgrade to Pro
+          </Button>
 
           {error && (
-            <p className="mt-3 text-xs text-[var(--color-pink,#f87171)]">{error}</p>
+            <p className="mt-3 cx-type-xs text-[var(--cx-danger)]">{error}</p>
           )}
 
-          <p className="mt-3 text-center text-xs text-[var(--color-text-muted)]">
+          <p className="mt-3 text-center cx-type-xs text-[var(--color-text-muted)]">
             Cancel anytime · Seats billed per workspace
           </p>
         </div>
-      </div>
-    </div>
+      </motion.div>
+          </div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

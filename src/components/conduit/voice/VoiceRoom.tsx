@@ -13,6 +13,7 @@ import {
   type RemoteAudioTrack,
 } from "livekit-client";
 import { Mic, MicOff, X, AlertCircle, PhoneOff } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 import Waveform from "./Waveform";
 
 export interface VoiceTokenResponse {
@@ -277,19 +278,30 @@ export default function VoiceRoom({
   const remainingSec = Math.max(0, tokenResponse.max_seconds - elapsedSec);
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/85 backdrop-blur-md flex flex-col text-white">
-      <div className="px-4 md:px-6 py-3 flex items-center justify-between border-b border-white/10">
-        <div className="text-[10px] uppercase tracking-[0.22em] text-white/60">
+    <div
+      className="fixed inset-0 z-[60] flex flex-col"
+      style={{
+        background: "color-mix(in srgb, var(--cx-canvas) 90%, transparent)",
+        backdropFilter: "var(--cx-glass-blur-overlay, blur(28px) saturate(160%))",
+        WebkitBackdropFilter: "var(--cx-glass-blur-overlay, blur(28px) saturate(160%))",
+        color: "var(--cx-text)",
+      }}
+    >
+      <div
+        className="px-4 md:px-6 py-3 flex items-center justify-between border-b"
+        style={{ borderColor: "var(--cx-glass-border)" }}
+      >
+        <div className="cx-type-xs uppercase tracking-[0.22em] text-white/60">
           Praxis Voice · {isRoundTable ? "Round-table" : employeeName}
         </div>
-        <button
-          type="button"
+        <PraxisButton
+          variant="ghost"
+          size="icon-sm"
           onClick={end}
-          className="text-white/60 hover:text-white"
           aria-label="End call"
         >
-          <X size={20} />
-        </button>
+          <X size={20} strokeWidth={1.75} />
+        </PraxisButton>
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center gap-6 md:gap-8 px-4">
@@ -300,10 +312,10 @@ export default function VoiceRoom({
               return (
                 <div key={d.id} className="relative">
                   <div
-                    className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center text-lg md:text-xl font-medium serif transition-all ${
+                    className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center cx-type-md md:cx-type-lg font-semibold transition-all ${
                       isActive ? "" : "opacity-40"
                     }`}
-                    style={{ background: d.color, color: "var(--cx-canvas, #0B0B0F)" }}
+                    style={{ background: d.color, color: "var(--cx-canvas)" }}
                     title={d.name}
                   >
                     {d.initial}
@@ -317,7 +329,7 @@ export default function VoiceRoom({
                     />
                   )}
                   <div
-                    className={`mt-1 text-[10px] uppercase tracking-[0.15em] text-center transition-colors ${
+                    className={`mt-1 cx-type-xs uppercase tracking-[0.15em] text-center transition-colors ${
                       isActive ? "text-white/80" : "text-white/30"
                     }`}
                   >
@@ -330,8 +342,8 @@ export default function VoiceRoom({
         ) : (
           <div className="relative">
             <div
-              className="w-24 h-24 md:w-32 md:h-32 rounded-full flex items-center justify-center text-3xl md:text-4xl font-medium serif"
-              style={{ background: deptColor, color: "var(--cx-canvas, #0B0B0F)" }}
+              className="w-24 h-24 md:w-32 md:h-32 rounded-full flex items-center justify-center cx-type-2xl md:cx-type-3xl font-semibold"
+              style={{ background: deptColor, color: "var(--cx-canvas)" }}
             >
               {employeeInitial}
             </div>
@@ -348,13 +360,13 @@ export default function VoiceRoom({
 
         <div className="w-full max-w-md space-y-4">
           <div>
-            <div className="text-[10px] uppercase tracking-[0.18em] text-white/40 mb-1">
+            <div className="cx-type-xs uppercase tracking-[0.18em] text-white/40 mb-1">
               You {muted && "· muted"}
             </div>
             <Waveform analyserRef={userAnalyserRef} color={headerColor} />
           </div>
           <div>
-            <div className="text-[10px] uppercase tracking-[0.18em] text-white/40 mb-1">
+            <div className="cx-type-xs uppercase tracking-[0.18em] text-white/40 mb-1">
               {isRoundTable
                 ? activeDisplay?.name ?? "Team"
                 : employeeName}
@@ -363,7 +375,7 @@ export default function VoiceRoom({
           </div>
         </div>
 
-        <div className="min-h-[20px] text-sm">
+        <div className="min-h-[20px] cx-type-base">
           {!connected && !error && (
             <span className="text-white/60">Connecting…</span>
           )}
@@ -372,14 +384,14 @@ export default function VoiceRoom({
           )}
           {error && (
             <span className="text-red-400 inline-flex items-center gap-1.5">
-              <AlertCircle size={14} />
+              <AlertCircle size={14} strokeWidth={1.75} />
               {error}
             </span>
           )}
         </div>
       </div>
 
-      <div className="px-4 max-h-32 md:max-h-40 overflow-y-auto space-y-1 text-sm">
+      <div className="px-4 max-h-32 md:max-h-40 overflow-y-auto space-y-1 cx-type-base">
         {transcript.slice(-6).map((t) => {
           const speaker =
             t.role === "user"
@@ -395,7 +407,7 @@ export default function VoiceRoom({
               key={t.id}
               className={t.role === "user" ? "text-white/60" : "text-white/90"}
             >
-              <span className="text-[10px] uppercase tracking-[0.15em] text-white/40 mr-2">
+              <span className="cx-type-xs uppercase tracking-[0.15em] text-white/40 mr-2">
                 {speaker}
               </span>
               {t.text}
@@ -404,7 +416,10 @@ export default function VoiceRoom({
         })}
       </div>
 
-      <div className="px-4 py-4 md:py-5 flex items-center justify-center gap-4 border-t border-white/10">
+      <div
+        className="px-4 py-4 md:py-5 flex items-center justify-center gap-4 border-t"
+        style={{ borderColor: "var(--cx-glass-border)" }}
+      >
         <button
           type="button"
           onClick={toggleMute}
@@ -413,24 +428,24 @@ export default function VoiceRoom({
           aria-label={muted ? "Unmute" : "Mute"}
           title={muted ? "Unmute" : "Mute"}
         >
-          {muted ? <MicOff size={20} /> : <Mic size={20} />}
+          {muted ? <MicOff size={20} strokeWidth={1.75} /> : <Mic size={20} strokeWidth={1.75} />}
         </button>
         <div
-          className={`px-3 py-1 rounded-full text-sm tabular-nums transition-colors ${
+          className={`px-3 py-1 rounded-full cx-type-sm font-mono tabular-nums transition-colors ${
             inWarn ? "text-amber-300 bg-amber-300/10" : "text-white/70 bg-white/5"
           }`}
           title={`${remainingSec}s remaining`}
         >
           {fmtTime(elapsedSec)} / {fmtTime(tokenResponse.max_seconds)}
         </div>
-        <button
-          type="button"
+        <PraxisButton
+          variant="danger"
+          size="icon"
           onClick={end}
-          className="w-12 h-12 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center transition-colors"
           aria-label="End call"
         >
-          <PhoneOff size={20} />
-        </button>
+          <PhoneOff size={20} strokeWidth={1.75} />
+        </PraxisButton>
       </div>
     </div>
   );

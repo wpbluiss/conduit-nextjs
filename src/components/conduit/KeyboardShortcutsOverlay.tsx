@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Keyboard, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 interface ShortcutGroup {
   title: string;
@@ -56,7 +57,6 @@ export function KeyboardShortcutsOverlay() {
   const [isMac, setIsMac] = useState(false);
   const router = useRouter();
   const panelRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     setIsMac(navigator.platform.toUpperCase().startsWith("MAC"));
@@ -72,7 +72,7 @@ export function KeyboardShortcutsOverlay() {
   // Focus management + trap
   useEffect(() => {
     if (!open) return;
-    closeButtonRef.current?.focus();
+    panelRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
     const panel = panelRef.current;
     if (!panel) return;
     const onTab = (e: KeyboardEvent) => {
@@ -198,7 +198,7 @@ export function KeyboardShortcutsOverlay() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
+            transition={{ duration: 0.14 }}
             className="fixed inset-0 z-[100] bg-black/50"
             aria-hidden="true"
             onClick={() => setOpen(false)}
@@ -211,38 +211,36 @@ export function KeyboardShortcutsOverlay() {
             aria-label="Keyboard shortcuts"
             aria-modal="true"
             initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.96 }}
-            transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
+            animate={{ opacity: 1, scale: 1, transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] } }}
+            exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.12, ease: [0.22, 1, 0.36, 1] } }}
             className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none"
           >
             <div
               ref={panelRef}
-              className="pointer-events-auto w-full max-w-sm rounded-2xl border border-[var(--color-border)] shadow-2xl overflow-hidden"
-              style={{ background: "var(--color-surface-elevated)" }}
+              className="cx-glass-overlay cx-glass-border pointer-events-auto w-full max-w-sm rounded-2xl overflow-hidden"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)]">
                 <div className="flex items-center gap-2">
-                  <Keyboard size={15} className="text-[var(--color-text-muted)]" />
-                  <span className="text-sm font-medium">Keyboard shortcuts</span>
+                  <Keyboard size={15} strokeWidth={1.75} className="text-[var(--color-text-muted)]" />
+                  <span className="cx-type-base font-medium">Keyboard shortcuts</span>
                 </div>
-                <button
-                  ref={closeButtonRef}
+                <PraxisButton
                   type="button"
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => setOpen(false)}
                   aria-label="Close"
-                  className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
                 >
-                  <X size={15} />
-                </button>
+                  <X size={15} strokeWidth={1.75} />
+                </PraxisButton>
               </div>
 
               {/* Groups */}
               <div className="px-5 py-4 space-y-5 max-h-[60vh] overflow-y-auto">
                 {groups.map((group) => (
                   <div key={group.title}>
-                    <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
+                    <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-2">
                       {group.title}
                     </div>
                     <div className="space-y-1.5">
@@ -251,25 +249,18 @@ export function KeyboardShortcutsOverlay() {
                           key={s.label}
                           className="flex items-center justify-between gap-4"
                         >
-                          <span className="text-sm text-[var(--color-text)]">
+                          <span className="cx-type-base text-[var(--color-text)]">
                             {s.label}
                           </span>
                           <div className="flex items-center gap-1 shrink-0">
                             {s.keys.map((k, i) => (
                               <span key={k}>
                                 {i > 0 && (
-                                  <span className="text-[10px] text-[var(--color-text-muted)] mx-0.5">
+                                  <span className="cx-type-xs text-[var(--color-text-muted)] mx-0.5">
                                     then
                                   </span>
                                 )}
-                                <kbd
-                                  className="inline-flex items-center justify-center min-w-[1.5rem] px-1.5 py-0.5 text-[11px] font-mono rounded border"
-                                  style={{
-                                    background: "var(--color-surface)",
-                                    borderColor: "var(--color-border)",
-                                    color: "var(--color-text-muted)",
-                                  }}
-                                >
+                                <kbd className="cx-kbd">
                                   {k}
                                 </kbd>
                               </span>
@@ -283,7 +274,7 @@ export function KeyboardShortcutsOverlay() {
               </div>
 
               <div className="px-5 py-3 border-t border-[var(--color-border)]">
-                <p className="text-[11px] text-[var(--color-text-muted)]">
+                <p className="cx-type-xs text-[var(--color-text-muted)]">
                   Shortcuts are disabled when typing in text fields.
                 </p>
               </div>

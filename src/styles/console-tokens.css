@@ -30,33 +30,54 @@
   --cx-surface:         #131319;
   --cx-surface-raised:  #1C1C26;
   --cx-surface-overlay: #23232E;
+  /* Spec-exact short aliases (CONSOLE_REDESIGN.md names) */
+  --cx-raised:          var(--cx-surface-raised);
+  --cx-overlay:         var(--cx-surface-overlay);
 
   /* ---- Ink: borders / hairlines ---- */
   --cx-border:          #262630;
   --cx-border-strong:   #33333F;
+  /* Spec-exact alias */
+  --cx-border-subtle:   var(--cx-border);
 
   /* ---- Text scale ---- */
   --cx-text:            #F4F4F7;
   --cx-text-muted:      #A0A0B0;
   --cx-text-faint:      #6B6B7B;
+  /* Spec-exact alias */
+  --cx-text-primary:    var(--cx-text);
 
-  /* ---- Glass recipe tokens (depth tiers for frosted glass surfaces) ---- */
-  /* Tier 1 — raised (sidebar, cards, composer): subtle bg + moderate blur */
-  --cx-glass-bg:          rgba(255, 255, 255, 0.04);
-  /* Tier 2 — floating (menus, modals, toasts): slightly more opaque + heavier blur */
-  --cx-glass-bg-float:    rgba(255, 255, 255, 0.06);
+  /* ---- Glass recipe tokens — three depth tiers (CONSOLE_REDESIGN.md §Glassmorphism) ----
+   * Tier 1 — raised   (sidebar, cards, composer): subtle bg + moderate blur
+   * Tier 2 — float    (menus, popovers, toasts):  slightly more opaque + mid blur
+   * Tier 3 — overlay  (modals, drawers):           same bg as float + heaviest blur + deepest shadow
+   * Depth hierarchy: canvas (opaque) → raised → float → overlay
+   * Rule: never nest a glass tier inside another glass tier (max 2 stacked blur layers:
+   *   scrim + the panel on top; sidebar counts as one layer). */
+
+  /* Background fills */
+  --cx-glass-bg:          rgba(255, 255, 255, 0.04);   /* raised */
+  --cx-glass-bg-float:    rgba(255, 255, 255, 0.06);   /* float */
+  --cx-glass-bg-overlay:  rgba(255, 255, 255, 0.06);   /* overlay — same fill, distinct blur/shadow */
   /* Accent-tinted glass — active/primary panels */
   --cx-glass-bg-accent:   rgba(124, 108, 255, 0.08);
+  /* Spec-exact aliases — all resolve to the same value */
+  --cx-glass-accent-bg:   var(--cx-glass-bg-accent);
+  --glass-accent-tint:    var(--cx-glass-bg-accent);
   /* Shared hairline border — "pane of glass" edge */
   --cx-glass-border:      rgba(255, 255, 255, 0.08);
   /* Inset top highlight — simulates glass catching light */
   --cx-glass-highlight:   inset 0 1px 0 rgba(255, 255, 255, 0.10);
-  /* Blur amounts */
-  --cx-glass-blur:        blur(20px) saturate(140%);
-  --cx-glass-blur-float:  blur(28px) saturate(140%);
-  /* Drop shadows — deeper for floating tier */
-  --cx-glass-shadow:      0 1px 3px rgba(0, 0, 0, 0.40), 0 4px 16px rgba(0, 0, 0, 0.30);
-  --cx-glass-shadow-float: 0 4px 24px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40);
+  /* Blur amounts per tier */
+  --cx-glass-blur:         blur(20px) saturate(140%);   /* raised  */
+  --cx-glass-blur-float:   blur(24px) saturate(150%);   /* float   */
+  --cx-glass-blur-overlay: blur(28px) saturate(160%);   /* overlay */
+  /* Drop shadows per tier — deeper with each level */
+  --cx-glass-shadow:         0 1px 3px rgba(0, 0, 0, 0.40), 0 4px 16px rgba(0, 0, 0, 0.30);
+  --cx-glass-shadow-float:   0 4px 24px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40);
+  --cx-glass-shadow-overlay: 0 8px 40px rgba(0, 0, 0, 0.70), 0 4px 12px rgba(0, 0, 0, 0.50);
+  /* Scrim / modal overlay backdrop blur — intentionally lighter; not a frosted-glass surface */
+  --cx-scrim-blur:        blur(2px);
 
   /* ---- Electric violet accent (the ONE accent) ---- */
   --cx-accent:          #7C6CFF;
@@ -66,10 +87,29 @@
   --cx-accent-glow:     0 0 0 3px rgba(124, 108, 255, 0.25);
   /* Raw alpha for color-mix() and box-shadow consumers */
   --cx-accent-glow-raw: rgba(124, 108, 255, 0.25);
+  /* Spec-precise focus ring: 2px solid accent ring + 4px soft halo.
+   * Use this — not --cx-accent-glow — for keyboard focus indicators. */
+  --cx-focus-ring:      0 0 0 2px var(--cx-accent), 0 0 0 4px rgba(124, 108, 255, 0.20);
 
   /* ---- Semantic signal colors ---- */
   --cx-reward:          #34D399;
+  --cx-warn:            #FBBF24;
+  --cx-warn-tint:       rgba(234, 179, 8, 0.10);
+  --cx-reward-tint:     rgba(52, 211, 153, 0.10);   /* reward bg — pair with --cx-reward text */
   --cx-danger:          #F4607D;
+  --cx-danger-tint:     rgba(244, 96, 125, 0.10);   /* danger bg — pair with --cx-danger text */
+
+  /* ---- Accent: additional opacity steps ---- */
+  --cx-accent-border:   rgba(124, 108, 255, 0.30);  /* mid-strength accent edge (blockquotes, hover borders) */
+
+  /* ---- Overlay / scrim tints (opaque-canvas alpha) ---- */
+  --cx-canvas-scrim:    rgba(11, 11, 15, 0.55);     /* tour overlay, lightweight dismissible layer */
+  --cx-canvas-dim:      rgba(11, 11, 15, 0.60);     /* in-progress upload overlay on image/avatar */
+  --cx-modal-scrim:     rgba(11, 11, 15, 0.65);     /* modal backdrop (use with .cx-scrim blur) */
+
+  /* ---- UI control tokens ---- */
+  --cx-toggle-thumb:    rgba(255, 255, 255, 0.95);  /* toggle/switch thumb on accent-colored track */
+  --cx-text-muted-tint: rgba(160, 160, 176, 0.12);  /* neutral badge bg for fallback/unknown entities */
 
   /* ---- Type scale (px, applied as font-size) ----
    * 12 / 13 / 14 (body) / 16 / 20 / 24 / 32 / 44
@@ -83,6 +123,38 @@
   --cx-type-xl:    24px;
   --cx-type-2xl:   32px;
   --cx-type-3xl:   44px;
+
+  /* ---- Spec-exact numbered aliases (--cx-text-{size}px) ----
+   * Canonical names matching the CONSOLE_REDESIGN.md spec.
+   * Alias to --cx-type-* to keep a single source of truth.
+   * New code should prefer --cx-type-* or cx-type-* classes;
+   * these aliases exist for spec-exact naming convention. */
+  --cx-text-12: var(--cx-type-xs);
+  --cx-text-13: var(--cx-type-sm);
+  --cx-text-14: var(--cx-type-base);
+  --cx-text-16: var(--cx-type-md);
+  --cx-text-20: var(--cx-type-lg);
+  --cx-text-24: var(--cx-type-xl);
+  --cx-text-32: var(--cx-type-2xl);
+  --cx-text-44: var(--cx-type-3xl);
+
+  /* ---- Semantic size aliases (CONSOLE_REDESIGN.md issue #1022 names) ----
+   * Named aliases for the type scale matching the spec naming convention.
+   * Alias to --cx-type-* so there is a single source of truth.
+   * Prefer --cx-type-* in component code; these names are for
+   * the spec-exact issue API and for Tailwind arbitrary-value consumers. */
+  --cx-text-2xs: var(--cx-type-xs);    /* 12px — caption, tooltip, micro-copy */
+  --cx-text-xs:  var(--cx-type-sm);    /* 13px — compact labels, secondary info */
+  --cx-text-sm:  var(--cx-type-base);  /* 14px — body reading text */
+  --cx-text-base: var(--cx-type-md);   /* 16px — prominent body / action labels */
+  --cx-text-md:  var(--cx-type-lg);    /* 20px — subheadings, section titles */
+  --cx-text-lg:  var(--cx-type-xl);    /* 24px — heading 3 */
+  --cx-text-xl:  var(--cx-type-2xl);   /* 32px — heading 2 / display */
+  --cx-text-2xl: var(--cx-type-3xl);   /* 44px — hero display */
+
+  /* ---- Issue-spec semantic aliases (CONSOLE_REDESIGN issue #986 names) ---- */
+  --cx-type-body:    var(--cx-type-base);   /* 14px — comfortable reading */
+  --cx-type-display: var(--cx-type-3xl);   /* 44px — hero/display */
 
   --cx-lh-heading: 1.10;
   --cx-lh-body:    1.60;
@@ -117,6 +189,15 @@
   /* Symmetric — used for exits, fades */
   --cx-ease-inout:  cubic-bezier(0.4, 0, 0.2, 1);
 
+  /* ---- Typography: console mono font (Geist Mono) ----
+   * Scoped to .praxis-root so marketing pages keep JetBrains Mono.
+   * --font-geist-mono is bound in layout.tsx via GeistMono.variable.
+   * Overriding --font-mono here means every existing font-mono / cx-mono /
+   * cx-meta / cx-stat and var(--font-mono) reference in the console
+   * automatically resolves to Geist Mono without per-component changes. */
+  --cx-font-mono: var(--font-geist-mono, ui-monospace, "SFMono-Regular", "Roboto Mono", Menlo, monospace);
+  --font-mono:    var(--cx-font-mono);
+
   /* ================================================================
    * Bridge: remap existing semantic tokens → --cx-* values
    *
@@ -144,14 +225,43 @@
   --color-accent-deep:  #5548CC;
   --color-accent-soft:  var(--cx-accent-tint);
 
+  /* -- Tailwind v4 ring bridge — routes shadcn focus-visible:ring-ring/50
+     utilities to the console accent so shadcn components (Switch, Tabs,
+     Input, Button etc.) automatically show the electric-violet ring
+     without per-component edits. -- */
+  --color-ring:         var(--cx-accent);
+
   /* -- Existing --color-green / --color-danger -- */
   --color-green:  var(--cx-reward);
+  --color-amber:  var(--cx-warn);
+  --color-yellow: var(--cx-warn);
   --color-pink:   var(--cx-danger);
 
   /* -- Destructive / semantic signal bridges -- */
   --color-destructive: var(--cx-danger);
   --color-red:         var(--cx-danger);
   --color-yellow:      #EAB308;
+
+  /* -- Success bridge — used by SettingsTabs integration status rows -- */
+  --color-success: var(--cx-reward);
+
+  /* -- Ember token bridge — retires warm-orange accent inside the console.
+     Any component still reading --color-ember-* in a .praxis-root context
+     now resolves to the electric-violet palette instead of warm orange.
+     New code must use --cx-accent / --cx-reward / --cx-danger directly. -- */
+  --color-ember-50:  rgba(124, 108, 255, 0.06);
+  --color-ember-100: rgba(124, 108, 255, 0.12);
+  --color-ember-300: var(--cx-accent-bright);
+  --color-ember-500: var(--cx-accent);
+  --color-ember-700: #5548CC;
+  --color-ember-900: #3B2FA0;
+
+  /* -- Cream bridge — marketing warm-text tokens used in some console components
+     (PwaInstaller, etc.). Re-map to the ink scale so they read correctly on
+     the dark canvas. New code must use --cx-text / --cx-text-muted directly. -- */
+  --color-cream:      var(--cx-text);
+  --color-cream-soft: var(--cx-text-muted);
+  --color-cream-mute: var(--cx-text-faint);
 
   /* -- Indigo palette → electric violet (retire old --color-indigo-* in console) -- */
   --color-indigo-50:  rgba(124, 108, 255, 0.08);
@@ -220,6 +330,63 @@
   --color-border-strong:          var(--cx-border-strong);
   --color-border-on-inverse:      var(--cx-border);
   --color-border-on-inverse-strong: var(--cx-border-strong);
+
+  /* ================================================================
+   * Spec-exact public API — CONSOLE_REDESIGN.md § Color system
+   *
+   * These names are the canonical API exposed to all subsequent
+   * [REDESIGN] surface PRs. Always alias to --cx-* so the single
+   * source of truth stays in the raw token block above.
+   *
+   * Rule: every new /app surface must use these names (or --cx-*)
+   * and must NEVER introduce a one-off hex value.
+   * ================================================================ */
+
+  /* -- Ink: background tiers -- */
+  --ink-canvas:  var(--cx-canvas);
+  --ink-surface: var(--cx-surface);
+  --ink-raised:  var(--cx-surface-raised);
+  --ink-overlay: var(--cx-surface-overlay);
+
+  /* -- Borders / hairlines -- */
+  --border-subtle: var(--cx-border);
+  --border-strong: var(--cx-border-strong);
+
+  /* -- Text color scale -- */
+  --text-primary: var(--cx-text);
+  --text-muted:   var(--cx-text-muted);
+  --text-faint:   var(--cx-text-faint);
+
+  /* -- Type size scale (spec-exact names — alias to --cx-type-*) --
+   * 12 / 13 / 14 (body) / 16 / 20 / 24 / 32 / 44 px
+   * These are the canonical names from CONSOLE_REDESIGN.md §Typography.
+   * New code may use either --text-{step} or --cx-type-{name}. */
+  --text-xs:   var(--cx-type-xs);    /* 12px — caption, tooltip, micro-copy */
+  --text-sm:   var(--cx-type-sm);    /* 13px — compact labels, secondary info */
+  --text-base: var(--cx-type-base);  /* 14px — body reading text */
+  --text-md:   var(--cx-type-md);    /* 16px — prominent body / action labels */
+  --text-lg:   var(--cx-type-lg);    /* 20px — subheadings, section titles */
+  --text-xl:   var(--cx-type-xl);    /* 24px — heading 3 */
+  --text-2xl:  var(--cx-type-2xl);   /* 32px — heading 2 / display */
+  --text-3xl:  var(--cx-type-3xl);   /* 44px — hero display */
+
+  /* -- Line-height scale (spec-exact names) -- */
+  --lh-heading: var(--cx-lh-heading); /* 1.10 — tight headings (1.05–1.15 range) */
+  --lh-body:    var(--cx-lh-body);    /* 1.60 — comfortable body (1.55–1.65 range) */
+
+  /* -- Letter-spacing scale (spec-exact names) -- */
+  --ls-tight:   var(--cx-ls-tight);   /* -0.01em — h3/h4, 20px+ */
+  --ls-tighter: var(--cx-ls-tighter); /* -0.02em — h1/h2, 32px+ */
+
+  /* -- Accent (electric violet — the ONE accent) -- */
+  --accent-base:   var(--cx-accent);
+  --accent-bright: var(--cx-accent-bright);
+  --accent-tint:   var(--cx-accent-tint);
+  --accent-glow:   var(--cx-accent-glow);
+
+  /* -- Semantic signals -- */
+  --reward-green: var(--cx-reward);
+  --danger:       var(--cx-danger);
 }
 
 /* ------------------------------------------------------------
@@ -246,6 +413,10 @@
   -webkit-backdrop-filter: var(--cx-glass-blur);
   border-color: var(--cx-glass-border);
   box-shadow: var(--cx-glass-highlight);
+  /* Console uses faster spec timing; suppress marketing 400ms + lift transform */
+  transition:
+    border-color var(--cx-dur-default) var(--cx-ease),
+    box-shadow var(--cx-dur-default) var(--cx-ease);
 }
 
 /* Opaque card fallback */
@@ -264,7 +435,9 @@
   }
 }
 
-/* Card hover — electric violet edge + glow (replaces old purple) */
+/* Card hover — electric violet edge + glow (replaces old purple).
+ * transform: none explicitly suppresses the translateY(-4px) lift that the
+ * marketing card rule in globals.css applies — panels in the console don't lift. */
 .praxis-root .conduit-card:hover {
   border-color: rgba(124, 108, 255, 0.30);
   box-shadow:
@@ -272,6 +445,7 @@
     0 0 0 1px rgba(124, 108, 255, 0.08),
     0 0 24px rgba(124, 108, 255, 0.10),
     0 12px 40px rgba(0, 0, 0, 0.50);
+  transform: none;
 }
 
 /* Praxis brand-mark glow — electric violet */
@@ -282,20 +456,93 @@
 }
 
 /* ------------------------------------------------------------
- * Focus-visible ring utility — accent glow ring
+ * Global focus-visible ring — all interactive console elements
  *
- * Apply .cx-focus-ring on interactive elements for a premium
- * focus experience matching the spec's accent glow definition.
+ * A single source of truth: every button, link, input, textarea,
+ * select, and interactive element inside .praxis-root gets the
+ * spec-precise two-layer focus ring automatically.
+ *
+ *   layer 1: 2px solid violet ring (WCAG-visible, crisp edge)
+ *   layer 2: 4px soft halo         (premium glow depth)
+ *
+ * :focus-visible fires only on keyboard / programmatic focus —
+ * never on mouse clicks. :focus:not(:focus-visible) suppresses
+ * the fallback outline so mouse users see no ring.
+ *
+ * Specificity: (0,1,0) — deliberately low so element-specific
+ * overrides (form inputs that also need border-color, buttons
+ * that combine the ring with a glass highlight) win naturally.
  * ------------------------------------------------------------ */
 
-.praxis-root .cx-focus-ring:focus-visible {
+.praxis-root :focus-visible {
   outline: none;
-  box-shadow: var(--cx-accent-glow);
+  box-shadow: var(--cx-focus-ring);
 }
 
-/* Fallback for elements that don't support :focus-visible */
-.praxis-root .cx-focus-ring:focus:not(:focus-visible) {
+.praxis-root :focus:not(:focus-visible) {
   outline: none;
+  box-shadow: none;
+}
+
+/* .cx-focus-ring: standalone utility for elements rendered outside
+ * .praxis-root (portals, overlays) that still need the console ring. */
+.cx-focus-ring:focus-visible {
+  outline: none;
+  box-shadow: var(--cx-focus-ring, 0 0 0 2px #7C6CFF, 0 0 0 4px rgba(124, 108, 255, 0.20));
+}
+.cx-focus-ring:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Reduced-motion: swap the glow box-shadow for a plain solid outline.
+ * Keeps WCAG-visible keyboard focus without any visual complexity. */
+@media (prefers-reduced-motion: reduce) {
+  .praxis-root :focus-visible,
+  .cx-focus-ring:focus-visible {
+    outline: 2px solid var(--cx-accent, #7C6CFF);
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+}
+
+/* ------------------------------------------------------------
+ * Form control focus — same ring + accent border-color signal
+ *
+ * These rules have higher specificity (0,2,1) than the global
+ * rule so they add border-color on top of the inherited ring.
+ * ------------------------------------------------------------ */
+
+.praxis-root input[type="text"]:focus-visible,
+.praxis-root input[type="password"]:focus-visible,
+.praxis-root input[type="email"]:focus-visible,
+.praxis-root input[type="search"]:focus-visible,
+.praxis-root input[type="url"]:focus-visible,
+.praxis-root input[type="number"]:focus-visible,
+.praxis-root input[type="tel"]:focus-visible,
+.praxis-root textarea:focus-visible,
+.praxis-root select:focus-visible {
+  outline: none;
+  box-shadow: var(--cx-focus-ring);
+  border-color: var(--cx-accent) !important;
+}
+
+/* Reduced-motion: swap glow for outline; keep border-color signal */
+@media (prefers-reduced-motion: reduce) {
+  .praxis-root input[type="text"]:focus-visible,
+  .praxis-root input[type="password"]:focus-visible,
+  .praxis-root input[type="email"]:focus-visible,
+  .praxis-root input[type="search"]:focus-visible,
+  .praxis-root input[type="url"]:focus-visible,
+  .praxis-root input[type="number"]:focus-visible,
+  .praxis-root input[type="tel"]:focus-visible,
+  .praxis-root textarea:focus-visible,
+  .praxis-root select:focus-visible {
+    outline: 2px solid var(--cx-accent, #7C6CFF);
+    outline-offset: 2px;
+    box-shadow: none;
+    border-color: var(--cx-accent) !important;
+  }
 }
 
 /* ------------------------------------------------------------
@@ -318,17 +565,61 @@
 .praxis-root .cx-text-faint      { color: var(--cx-text-faint); }
 .praxis-root .cx-text-accent     { color: var(--cx-accent); }
 .praxis-root .cx-text-reward     { color: var(--cx-reward); }
+.praxis-root .cx-text-warn       { color: var(--cx-warn); }
 .praxis-root .cx-text-danger     { color: var(--cx-danger); }
 
+/* ---- Semantic tint backgrounds ---- */
+.praxis-root .cx-bg-danger-tint  { background-color: var(--cx-danger-tint); }
+.praxis-root .cx-bg-reward-tint  { background-color: var(--cx-reward-tint); }
+.praxis-root .cx-bg-warn-tint    { background-color: var(--cx-warn-tint); }
+.praxis-root .cx-bg-accent-tint  { background-color: var(--cx-accent-tint); }
+
 /* ---- Type scale utilities ---- */
-.praxis-root .cx-type-xs   { font-size: var(--cx-type-xs); }
-.praxis-root .cx-type-sm   { font-size: var(--cx-type-sm); }
-.praxis-root .cx-type-base { font-size: var(--cx-type-base); }
-.praxis-root .cx-type-md   { font-size: var(--cx-type-md); }
-.praxis-root .cx-type-lg   { font-size: var(--cx-type-lg); }
-.praxis-root .cx-type-xl   { font-size: var(--cx-type-xl); }
-.praxis-root .cx-type-2xl  { font-size: var(--cx-type-2xl); }
-.praxis-root .cx-type-3xl  { font-size: var(--cx-type-3xl); }
+.praxis-root .cx-type-xs      { font-size: var(--cx-type-xs); }
+.praxis-root .cx-type-sm      { font-size: var(--cx-type-sm); }
+.praxis-root .cx-type-base    { font-size: var(--cx-type-base); }
+.praxis-root .cx-type-body    { font-size: var(--cx-type-body); }
+.praxis-root .cx-type-md      { font-size: var(--cx-type-md); }
+.praxis-root .cx-type-lg      { font-size: var(--cx-type-lg); }
+.praxis-root .cx-type-xl      { font-size: var(--cx-type-xl); }
+.praxis-root .cx-type-2xl     { font-size: var(--cx-type-2xl); }
+.praxis-root .cx-type-3xl     { font-size: var(--cx-type-3xl); }
+.praxis-root .cx-type-display { font-size: var(--cx-type-display); }
+
+/* ---- Spec-exact numbered font-size utilities ----
+ * Parallel to cx-type-* but use the --cx-text-{size} alias names.
+ * Both sets are canonical; cx-type-* is the preferred shorthand. */
+.praxis-root .cx-text-12 { font-size: var(--cx-text-12); }
+.praxis-root .cx-text-13 { font-size: var(--cx-text-13); }
+.praxis-root .cx-text-14 { font-size: var(--cx-text-14); }
+.praxis-root .cx-text-16 { font-size: var(--cx-text-16); }
+.praxis-root .cx-text-20 { font-size: var(--cx-text-20); }
+.praxis-root .cx-text-24 { font-size: var(--cx-text-24); }
+.praxis-root .cx-text-32 { font-size: var(--cx-text-32); }
+.praxis-root .cx-text-44 { font-size: var(--cx-text-44); }
+
+/* ---- Semantic size utilities (issue #1022 names) ----
+ * Alias to cx-type-* so both naming conventions work.
+ * cx-text-2xs (12px) through cx-text-2xl (44px). */
+.praxis-root .cx-text-2xs  { font-size: var(--cx-text-2xs); }
+.praxis-root .cx-text-xs   { font-size: var(--cx-text-xs); }
+.praxis-root .cx-text-sm   { font-size: var(--cx-text-sm); }
+.praxis-root .cx-text-base { font-size: var(--cx-text-base); }
+.praxis-root .cx-text-md   { font-size: var(--cx-text-md); }
+.praxis-root .cx-text-lg   { font-size: var(--cx-text-lg); }
+.praxis-root .cx-text-xl   { font-size: var(--cx-text-xl); }
+.praxis-root .cx-text-2xl  { font-size: var(--cx-text-2xl); }
+
+/* ---- Body text compound utility ----
+ * Applies spec body size (14px) + comfortable line-height (1.60).
+ * Use on <p> and descriptive spans to get the spec body treatment.
+ * Prefer cx-body over text-sm on multi-line paragraph copy so the
+ * line-height (1.60) is always explicit — Tailwind's text-sm default
+ * (line-height: 1.25rem) is too tight for reading-length text. */
+.praxis-root .cx-body {
+  font-size: var(--cx-type-base);
+  line-height: var(--cx-lh-body);
+}
 
 /* ---- Heading auto-treatment ----
  * Scoped to .praxis-root so marketing pages are never affected.
@@ -347,6 +638,15 @@
 .praxis-root h2 { letter-spacing: var(--cx-ls-tighter); }
 .praxis-root h3 { letter-spacing: var(--cx-ls-tight); }
 .praxis-root h4 { letter-spacing: var(--cx-ls-tight); }
+
+/* Body text baseline — comfortable reading line-height for paragraphs and lists.
+ * Tailwind's default (leading-normal = 1.5) is subtly tighter than the spec
+ * body line-height (1.60). This rule applies only inside .praxis-root so
+ * marketing pages are unaffected. */
+.praxis-root p,
+.praxis-root li {
+  line-height: var(--cx-lh-body);
+}
 
 /* ---- Heading compound utilities ----
  * Use cx-heading-* on any element (div, h1, etc.) to get size +
@@ -379,6 +679,44 @@
   letter-spacing: var(--cx-ls-tight);
   font-weight: 600;
 }
+.praxis-root .cx-heading-md {
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: var(--cx-type-md);
+  line-height: var(--cx-lh-heading);
+  letter-spacing: var(--cx-ls-tight);
+  font-weight: 600;
+}
+.praxis-root .cx-heading-sm {
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: var(--cx-type-base);
+  line-height: var(--cx-lh-heading);
+  letter-spacing: 0;
+  font-weight: 600;
+}
+
+/* ---- Semantic mono utilities — "engineered data" feel ----
+ * cx-timestamp: for relative/absolute time values
+ * cx-count:     for integer counts, usage numbers, stats
+ * cx-model:     for AI model names (mono + accent-faint tint) */
+.praxis-root .cx-timestamp {
+  font-family: var(--cx-font-mono);
+  font-size: var(--cx-type-xs);
+  color: var(--cx-text-faint);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.praxis-root .cx-count {
+  font-family: var(--cx-font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.praxis-root .cx-model {
+  font-family: var(--cx-font-mono);
+  font-size: var(--cx-type-xs);
+  color: var(--cx-text-muted);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
 
 /* Mono label utility — "engineered" numbers/metadata */
 .praxis-root .cx-mono {
@@ -396,6 +734,18 @@
   letter-spacing: 0;
 }
 
+/* Section label — the most common console pattern:
+ * ALL CAPS mono eyebrow above a form group, table column, or setting block.
+ * Replaces the repeated: cx-type-xs cx-mono uppercase tracking-[0.14em] text-muted */
+.praxis-root .cx-label {
+  font-family: var(--font-mono, monospace);
+  font-size: var(--cx-type-xs);
+  color: var(--cx-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Stat number display — mono + 32px for metric cards */
 .praxis-root .cx-stat {
   font-family: var(--font-mono, monospace);
@@ -404,6 +754,101 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
   font-weight: 600;
+}
+
+/* Inline code — first-class mono treatment for `code` spans inside prose.
+ * Relative font-size (0.85em) scales with surrounding text so it reads
+ * naturally at any paragraph size. Background/border match the ink surface. */
+.praxis-root .cx-code-inline {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--cx-surface-raised);
+  border: 1px solid var(--cx-border);
+  color: var(--cx-accent-bright);
+}
+
+/* ---- Global code/kbd auto-treatment ----
+ * Any <code> or <kbd> inside .praxis-root automatically gets Geist Mono.
+ * This mirrors how h1–h4 get sans-serif + heading metrics automatically.
+ * Individual cx-code-inline / cx-kbd classes layer on top for full styling. */
+.praxis-root code,
+.praxis-root kbd {
+  font-family: var(--cx-font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+/* Keyboard shortcut chip — engineered look for key combos.
+ * Use on <kbd> elements for keybinding displays.
+ * Visual: mono text, hairline border, raised surface, tight padding. */
+.praxis-root .cx-kbd {
+  font-family: var(--cx-font-mono);
+  font-size: var(--cx-type-xs);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--cx-surface-raised);
+  border: 1px solid var(--cx-border-strong);
+  color: var(--cx-text-muted);
+  line-height: 1.4;
+  box-shadow: inset 0 -1px 0 var(--cx-border-strong);
+}
+
+/* ---- Form control utilities ----
+ * Opaque surface inputs — do NOT use conduit-card/glass here; inputs live
+ * inside glass cards and a second backdrop-filter layer exceeds the two-layer cap.
+ * Focus ring + accent border-color are handled globally by the :focus-visible
+ * rules above. Use cx-input on <input>, cx-select on <select>, cx-textarea on
+ * <textarea>. Width must be set by the call-site (w-full, flex-1, max-w-*).
+ * cx-input-sm: compact 8/12 variant for dense lists (e.g. per-specialist selectors). */
+
+.praxis-root .cx-input,
+.praxis-root .cx-select,
+.praxis-root .cx-textarea {
+  background: var(--cx-surface-raised);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-sm);
+  padding: 12px 16px;
+  font-size: var(--cx-type-sm);
+  line-height: var(--cx-lh-body);
+  color: var(--cx-text);
+  outline: none;
+  transition: border-color var(--cx-dur-fast) var(--cx-ease);
+}
+
+.praxis-root .cx-input::placeholder,
+.praxis-root .cx-textarea::placeholder {
+  color: var(--cx-text-faint);
+}
+
+.praxis-root .cx-textarea {
+  resize: vertical;
+}
+
+/* Compact variant for dense list contexts */
+.praxis-root .cx-input-sm,
+.praxis-root .cx-select-sm {
+  background: var(--cx-surface-raised);
+  border: 1px solid var(--cx-border);
+  border-radius: var(--cx-radius-sm);
+  padding: 8px 12px;
+  font-size: var(--cx-type-sm);
+  color: var(--cx-text);
+  outline: none;
+  transition: border-color var(--cx-dur-fast) var(--cx-ease);
+}
+
+.praxis-root .cx-input-sm::placeholder {
+  color: var(--cx-text-faint);
 }
 
 /* ------------------------------------------------------------
@@ -431,6 +876,26 @@
 .praxis-root .cx-radius-full { border-radius: var(--cx-radius-full); }
 
 /* ------------------------------------------------------------
+ * Iconography system — uniform 1.75px stroke for all Lucide icons
+ *
+ * CONSOLE_REDESIGN.md §Iconography: "uniform stroke (1.75–2px),
+ * 20/24 optical sizes." Lucide outputs stroke-width="2" as an SVG
+ * presentation attribute by default. CSS rules have higher cascade
+ * priority than SVG presentation attributes, so this one rule
+ * enforces the 1.75 default system-wide without per-icon props.
+ *
+ * Exceptions: use inline style={{ strokeWidth: X }} on specific
+ * elements where optical correction is needed (tiny indicators at
+ * ≤8px, checkmarks inside filled circles, loading spinners).
+ * Custom SVGs (SpinnerIcon, SpecialistEmptyArt backdrops) are raw
+ * <svg> elements without the .lucide class — they are not affected.
+ * ------------------------------------------------------------ */
+
+.praxis-root svg.lucide {
+  stroke-width: 1.75;
+}
+
+/* ------------------------------------------------------------
  * .cx-icon-btn — square icon-only button
  *
  * Pairs with any PraxisButton variant or standalone.
@@ -451,7 +916,8 @@
   flex-shrink: 0;
   transition:
     background var(--cx-dur-fast, 120ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
-    color var(--cx-dur-fast, 120ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1));
+    color var(--cx-dur-fast, 120ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1)),
+    transform var(--cx-dur-fast, 120ms) var(--cx-ease, cubic-bezier(0.22,1,0.36,1));
 }
 .praxis-root .cx-icon-btn:hover {
   background: var(--cx-surface-raised, #1C1C26);
@@ -463,7 +929,7 @@
 }
 .praxis-root .cx-icon-btn:focus-visible {
   outline: none;
-  box-shadow: var(--cx-accent-glow);
+  box-shadow: var(--cx-focus-ring);
 }
 .praxis-root .cx-icon-btn.cx-icon-btn--accent:hover {
   background: var(--cx-accent-tint);
@@ -504,7 +970,7 @@
 }
 .praxis-root .cx-interactive:focus-visible {
   outline: none;
-  box-shadow: var(--cx-accent-glow);
+  box-shadow: var(--cx-focus-ring);
 }
 
 /* Selected / active state within a list */
@@ -541,6 +1007,33 @@
 }
 
 /* ------------------------------------------------------------
+ * Code block scrollbar — thin accent-colored horizontal bar
+ *
+ * Overrides the global scrollbar rule above for elements that
+ * carry the .cx-code-scroll class (the <pre> inside code blocks).
+ * Horizontal axis only (height); accent thumb signals "scrollable".
+ * ------------------------------------------------------------ */
+
+.praxis-root .cx-code-scroll::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+.praxis-root .cx-code-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.praxis-root .cx-code-scroll::-webkit-scrollbar-thumb {
+  background: var(--cx-accent, #7C6CFF);
+  border-radius: var(--cx-radius-full);
+  opacity: 0.6;
+}
+
+.praxis-root .cx-code-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--cx-accent-bright, #9B8CFF);
+}
+
+/* ------------------------------------------------------------
  * Selection highlight — accent tint
  * ------------------------------------------------------------ */
 
@@ -571,11 +1064,12 @@ html[data-praxis-theme="light"] .praxis-root {
   --cx-text-faint: #8F8FA0;
 
   /* Electric violet deepens slightly for legibility on light canvas */
-  --cx-accent:        #6054E8;
-  --cx-accent-bright: #7C6CFF;
-  --cx-accent-tint:   rgba(96, 84, 232, 0.10);
-  --cx-accent-glow:   0 0 0 3px rgba(96, 84, 232, 0.20);
+  --cx-accent:          #6054E8;
+  --cx-accent-bright:   #7C6CFF;
+  --cx-accent-tint:     rgba(96, 84, 232, 0.10);
+  --cx-accent-glow:     0 0 0 3px rgba(96, 84, 232, 0.20);
   --cx-accent-glow-raw: rgba(96, 84, 232, 0.20);
+  --cx-focus-ring:      0 0 0 2px #6054E8, 0 0 0 4px rgba(96, 84, 232, 0.20);
 
   /* Glass overrides — light canvas: translucent white surface instead of dark ink overlay */
   --cx-glass-bg:          rgba(255, 255, 255, 0.65);
@@ -590,6 +1084,35 @@ html[data-praxis-theme="light"] .praxis-root {
   --pdl-elev-1: 0 1px 2px rgba(15, 15, 20, 0.06);
   --pdl-elev-2: 0 4px 16px rgba(15, 15, 20, 0.08);
   --pdl-elev-3: 0 16px 48px rgba(15, 15, 20, 0.12);
+
+  /* Spec-exact aliases inherit from --cx-* (already overridden above),
+     so these cascade automatically. Restated explicitly for clarity. */
+  --ink-canvas:  var(--cx-canvas);
+  --ink-surface: var(--cx-surface);
+  --ink-raised:  var(--cx-surface-raised);
+  --ink-overlay: var(--cx-surface-overlay);
+  --border-subtle: var(--cx-border);
+  --border-strong: var(--cx-border-strong);
+  --text-primary: var(--cx-text);
+  --text-muted:   var(--cx-text-muted);
+  --text-faint:   var(--cx-text-faint);
+  --accent-base:   var(--cx-accent);
+  --accent-bright: var(--cx-accent-bright);
+  --accent-tint:   var(--cx-accent-tint);
+  --accent-glow:   var(--cx-accent-glow);
+  --reward-green: var(--cx-reward);
+  --danger:       var(--cx-danger);
+
+  /* Overlay tints — light canvas: use a warm-surface alpha instead of near-black */
+  --cx-canvas-scrim:   rgba(245, 245, 248, 0.70);
+  --cx-canvas-dim:     rgba(245, 245, 248, 0.80);
+  --cx-modal-scrim:    rgba(245, 245, 248, 0.85);
+
+  /* Toggle thumb stays white-ish on accent track in light mode too */
+  --cx-toggle-thumb:   rgba(255, 255, 255, 0.98);
+
+  /* Text-muted tint on light canvas */
+  --cx-text-muted-tint: rgba(90, 90, 112, 0.12);
 }
 
 html[data-praxis-theme="light"] .praxis-root .conduit-canvas {
@@ -644,13 +1167,23 @@ html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-thumb {
     var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
 }
 
-/* ---- Tier 2: floating glass (heavier blur + stronger shadow) ---- */
+/* ---- Tier 2: floating glass (menus, popovers, toasts) ---- */
 .cx-glass-float {
   background: var(--cx-glass-bg-float, rgba(255, 255, 255, 0.06));
-  backdrop-filter: var(--cx-glass-blur-float, blur(28px) saturate(140%));
-  -webkit-backdrop-filter: var(--cx-glass-blur-float, blur(28px) saturate(140%));
+  backdrop-filter: var(--cx-glass-blur-float, blur(24px) saturate(150%));
+  -webkit-backdrop-filter: var(--cx-glass-blur-float, blur(24px) saturate(150%));
   box-shadow:
     var(--cx-glass-shadow-float, 0 4px 24px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40)),
+    var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
+}
+
+/* ---- Tier 3: overlay glass (modals, drawers) — heaviest blur + deepest shadow ---- */
+.cx-glass-overlay {
+  background: var(--cx-glass-bg-overlay, rgba(255, 255, 255, 0.06));
+  backdrop-filter: var(--cx-glass-blur-overlay, blur(28px) saturate(160%));
+  -webkit-backdrop-filter: var(--cx-glass-blur-overlay, blur(28px) saturate(160%));
+  box-shadow:
+    var(--cx-glass-shadow-overlay, 0 8px 40px rgba(0, 0, 0, 0.70), 0 4px 12px rgba(0, 0, 0, 0.50)),
     var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
 }
 
@@ -676,6 +1209,11 @@ html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-thumb {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
+  .cx-glass-overlay {
+    background: var(--cx-surface-overlay, #23232E);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
   .cx-glass-accent {
     background: var(--cx-surface-raised, #1C1C26);
     backdrop-filter: none;
@@ -695,10 +1233,47 @@ html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-thumb {
     -webkit-backdrop-filter: none;
     background: var(--cx-surface-overlay, #23232E);
   }
+  .cx-glass-overlay {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--cx-surface-overlay, #23232E);
+  }
   .cx-glass-accent {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     background: var(--cx-surface-raised, #1C1C26);
+  }
+}
+
+/* ---- Mobile blur reduction (≤480px) ----
+ * High blur values (20–28px) can produce artifacts and GPU pressure on
+ * mid/low-end mobile. Reduce to a lighter blur; opaque backgrounds are
+ * slightly more opaque to compensate.
+ *
+ * Two rules are needed:
+ *   1. `html` — covers Radix portal elements (dialogs, dropdowns) that
+ *      render outside .praxis-root but are still inside <html>. Mirrors
+ *      the pattern used for light-theme portal overrides below.
+ *   2. `.praxis-root` — wins over the main .praxis-root token block by
+ *      specificity order (later rule on same element wins).
+ * Cap: max two glass layers on mobile.
+ * ----------------------------------------------------------------- */
+@media (max-width: 480px) {
+  html {
+    --cx-glass-blur:         blur(12px) saturate(130%);
+    --cx-glass-blur-float:   blur(14px) saturate(130%);
+    --cx-glass-blur-overlay: blur(16px) saturate(130%);
+    --cx-glass-bg:           rgba(255, 255, 255, 0.06);
+    --cx-glass-bg-float:     rgba(255, 255, 255, 0.08);
+    --cx-glass-bg-overlay:   rgba(255, 255, 255, 0.08);
+  }
+  .praxis-root {
+    --cx-glass-blur:         blur(12px) saturate(130%);
+    --cx-glass-blur-float:   blur(14px) saturate(130%);
+    --cx-glass-blur-overlay: blur(16px) saturate(130%);
+    --cx-glass-bg:           rgba(255, 255, 255, 0.06);
+    --cx-glass-bg-float:     rgba(255, 255, 255, 0.08);
+    --cx-glass-bg-overlay:   rgba(255, 255, 255, 0.08);
   }
 }
 
@@ -708,16 +1283,255 @@ html[data-praxis-theme="light"] .praxis-root ::-webkit-scrollbar-thumb {
  * they render outside .praxis-root but are still descendants of <html>.
  * ----------------------------------------------------------------- */
 html[data-praxis-theme="light"] {
-  --cx-glass-bg:           rgba(255, 255, 255, 0.65);
-  --cx-glass-bg-float:     rgba(255, 255, 255, 0.82);
-  --cx-glass-bg-accent:    rgba(96, 84, 232, 0.08);
-  --cx-glass-border:       rgba(0, 0, 0, 0.07);
-  --cx-glass-highlight:    inset 0 1px 0 rgba(255, 255, 255, 0.80);
-  --cx-glass-shadow:       0 1px 3px rgba(15, 15, 20, 0.08), 0 4px 16px rgba(15, 15, 20, 0.06);
-  --cx-glass-shadow-float: 0 4px 24px rgba(15, 15, 20, 0.14), 0 2px 8px rgba(15, 15, 20, 0.08);
+  --cx-glass-bg:             rgba(255, 255, 255, 0.65);
+  --cx-glass-bg-float:       rgba(255, 255, 255, 0.82);
+  --cx-glass-bg-overlay:     rgba(255, 255, 255, 0.90);
+  --cx-glass-bg-accent:      rgba(96, 84, 232, 0.08);
+  --cx-glass-border:         rgba(0, 0, 0, 0.07);
+  --cx-glass-highlight:      inset 0 1px 0 rgba(255, 255, 255, 0.80);
+  --cx-glass-shadow:         0 1px 3px rgba(15, 15, 20, 0.08), 0 4px 16px rgba(15, 15, 20, 0.06);
+  --cx-glass-shadow-float:   0 4px 24px rgba(15, 15, 20, 0.14), 0 2px 8px rgba(15, 15, 20, 0.08);
+  --cx-glass-shadow-overlay: 0 8px 40px rgba(15, 15, 20, 0.20), 0 4px 12px rgba(15, 15, 20, 0.12);
 }
 
 /* ---- Glass border utility — add hairline to glass panels ---- */
 .cx-glass-border {
   border: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08));
+}
+
+/* ================================================================
+ * Semantic modal / popover all-in-one utilities
+ *
+ * Convenience classes that combine the glass recipe + spec radius
+ * so component call-sites don't hand-roll per surface.
+ *
+ * .cx-glass-modal   — Tier 3 overlay (dialogs, drawers):
+ *                     28px blur + deepest shadow + 16px radius
+ * .cx-glass-popover — Tier 2 float (menus, popovers, context menus):
+ *                     24px blur + float shadow + 12px radius
+ *
+ * Both include border, highlight, opaque and transparency fallbacks.
+ * Defined globally (not scoped to .praxis-root) so they work inside
+ * Radix / React portals that render outside the praxis-root tree.
+ * ================================================================ */
+
+.cx-glass-modal {
+  background: var(--cx-glass-bg-overlay, rgba(255, 255, 255, 0.06));
+  backdrop-filter: var(--cx-glass-blur-overlay, blur(28px) saturate(160%));
+  -webkit-backdrop-filter: var(--cx-glass-blur-overlay, blur(28px) saturate(160%));
+  border: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08));
+  box-shadow:
+    var(--cx-glass-shadow-overlay, 0 8px 40px rgba(0, 0, 0, 0.70), 0 4px 12px rgba(0, 0, 0, 0.50)),
+    var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
+  border-radius: var(--cx-radius-lg, 16px);
+  color: var(--cx-text, #F4F4F7);
+}
+
+.cx-glass-popover {
+  background: var(--cx-glass-bg-float, rgba(255, 255, 255, 0.06));
+  backdrop-filter: var(--cx-glass-blur-float, blur(24px) saturate(150%));
+  -webkit-backdrop-filter: var(--cx-glass-blur-float, blur(24px) saturate(150%));
+  border: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08));
+  box-shadow:
+    var(--cx-glass-shadow-float, 0 4px 24px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40)),
+    var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
+  border-radius: var(--cx-radius-md, 12px);
+  color: var(--cx-text, #F4F4F7);
+}
+
+/* Opaque fallback when backdrop-filter is unsupported */
+@supports not (backdrop-filter: blur(1px)) {
+  .cx-glass-modal {
+    background: var(--cx-surface-overlay, #23232E);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .cx-glass-popover {
+    background: var(--cx-surface-overlay, #23232E);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* Opaque fallback when user prefers reduced transparency */
+@media (prefers-reduced-transparency: reduce) {
+  .cx-glass-modal {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--cx-surface-overlay, #23232E);
+  }
+  .cx-glass-popover {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--cx-surface-overlay, #23232E);
+  }
+}
+
+/* Light theme overrides — placed on html[data-praxis-theme="light"] so portal
+ * elements outside .praxis-root also pick up the correct light-mode values. */
+html[data-praxis-theme="light"] .cx-glass-modal {
+  background: var(--cx-glass-bg-overlay, rgba(255, 255, 255, 0.90));
+  border-color: var(--cx-glass-border, rgba(0, 0, 0, 0.07));
+  box-shadow:
+    var(--cx-glass-shadow-overlay, 0 8px 40px rgba(15, 15, 20, 0.20), 0 4px 12px rgba(15, 15, 20, 0.12)),
+    var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.80));
+  color: var(--cx-text, #0F0F14);
+}
+
+html[data-praxis-theme="light"] .cx-glass-popover {
+  background: var(--cx-glass-bg-float, rgba(255, 255, 255, 0.82));
+  border-color: var(--cx-glass-border, rgba(0, 0, 0, 0.07));
+  box-shadow:
+    var(--cx-glass-shadow-float, 0 4px 24px rgba(15, 15, 20, 0.14), 0 2px 8px rgba(15, 15, 20, 0.08)),
+    var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.80));
+  color: var(--cx-text, #0F0F14);
+}
+
+/* Mobile blur reduction for .cx-glass-modal / .cx-glass-popover — mirrors the
+ * mobile overrides for .cx-glass-overlay / .cx-glass-float above.
+ * Use token vars (already overridden at html level above) so there is a
+ * single source of truth for mobile blur values. */
+@media (max-width: 480px) {
+  .cx-glass-modal {
+    backdrop-filter: var(--cx-glass-blur-overlay, blur(16px) saturate(130%));
+    -webkit-backdrop-filter: var(--cx-glass-blur-overlay, blur(16px) saturate(130%));
+    background: var(--cx-glass-bg-overlay, rgba(255, 255, 255, 0.08));
+  }
+  .cx-glass-popover {
+    backdrop-filter: var(--cx-glass-blur-float, blur(14px) saturate(130%));
+    -webkit-backdrop-filter: var(--cx-glass-blur-float, blur(14px) saturate(130%));
+    background: var(--cx-glass-bg-float, rgba(255, 255, 255, 0.08));
+  }
+}
+
+/* ---- Scrim utility — modal/dialog overlay backdrop ----
+ * NOT a glass surface: intentionally lighter blur (2px) so the
+ * floating panel reads clearly against it. Background opacity set
+ * per-use-case via bg-black/xx Tailwind class or inline style.
+ * Max 2 stacked backdrop-filter layers at once (e.g. scrim + modal
+ * panel) — never add a third glass layer behind these.
+ * ------------------------------------------------------------ */
+.cx-scrim {
+  backdrop-filter: var(--cx-scrim-blur, blur(2px));
+  -webkit-backdrop-filter: var(--cx-scrim-blur, blur(2px));
+}
+@media (prefers-reduced-transparency: reduce) {
+  .cx-scrim {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .cx-scrim {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* ============================================================
+ * Data-viz: chart animate-in keyframes
+ *
+ * cx-bar-anim  — bar chart bars grow up from 0 (scaleY)
+ * cx-chart-anim — whole chart fades in with a subtle scale
+ *
+ * Stagger delay per bar is set via inline animationDelay.
+ * Both classes respect prefers-reduced-motion.
+ * ============================================================ */
+
+@keyframes cx-bar-grow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+@keyframes cx-chart-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.cx-bar-anim {
+  animation: cx-bar-grow 280ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  transform-origin: bottom;
+}
+
+.cx-chart-anim {
+  animation: cx-chart-in 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cx-bar-anim  { animation: none !important; }
+  .cx-chart-anim { animation: none !important; }
+}
+
+/* ============================================================
+ * Modal / dialog enter–exit animation
+ *
+ * cx-modal-animate  — centered panel: scale 0.96⇄1 + fade
+ * cx-overlay-animate — scrim: fade 140ms
+ *
+ * Enter: 180ms (--cx-dur-default) with spec ease [0.22,1,0.36,1]
+ * Exit:  120ms (--cx-dur-fast)    with same ease
+ * Applied via data-state="open"/"closed" (Radix sets these).
+ * Uses standalone `scale` property to avoid conflicting with
+ * translate-x/y centering transforms on the same element.
+ * ============================================================ */
+
+@keyframes cx-modal-in {
+  from { opacity: 0; scale: 0.96; }
+  to   { opacity: 1; scale: 1; }
+}
+
+@keyframes cx-modal-out {
+  from { opacity: 1; scale: 1; }
+  to   { opacity: 0; scale: 0.96; }
+}
+
+@keyframes cx-overlay-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes cx-overlay-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+.cx-modal-animate[data-state="open"] {
+  animation: cx-modal-in var(--cx-dur-default, 180ms) var(--cx-ease, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+
+.cx-modal-animate[data-state="closed"] {
+  animation: cx-modal-out var(--cx-dur-fast, 120ms) var(--cx-ease, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+
+.cx-overlay-animate[data-state="open"] {
+  animation: cx-overlay-fade-in 140ms ease-out both;
+}
+
+.cx-overlay-animate[data-state="closed"] {
+  animation: cx-overlay-fade-out 140ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cx-modal-animate,
+  .cx-overlay-animate { animation: none !important; }
+}
+
+/* ============================================================
+ * Toast reward pulse — subtle glow beat on reward variant.
+ * Applied as .toast-reward-pulse on the toast card element.
+ * Uses the reward-green as the pulse color.
+ * ============================================================ */
+
+@keyframes cx-reward-pulse {
+  0%   { box-shadow: var(--cx-glass-shadow-float, 0 4px 24px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40)), var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10)); }
+  40%  { box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.20), 0 4px 24px rgba(52, 211, 153, 0.15), var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10)); }
+  100% { box-shadow: var(--cx-glass-shadow-float, 0 4px 24px rgba(0, 0, 0, 0.60), 0 2px 8px rgba(0, 0, 0, 0.40)), var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10)); }
+}
+
+.toast-reward-pulse {
+  animation: cx-reward-pulse 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.1s 1 forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-reward-pulse { animation: none !important; }
 }

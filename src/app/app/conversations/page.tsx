@@ -12,6 +12,7 @@ import { ConversationLabelsDisplay, ConversationLabelManager } from "@/component
 import type { ConversationLabel } from "@/components/conduit/ConversationLabels";
 import { ConversationLabelFilter } from "@/components/conduit/ConversationLabelFilter";
 import { ConversationTitleEditor } from "@/components/conduit/ConversationTitleEditor";
+import { EmptyState, ConversationsEmptySVG } from "@/components/conduit/EmptyState";
 
 export const dynamic = "force-dynamic";
 
@@ -80,7 +81,7 @@ function ConversationRow({
                 boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 60%, transparent)`,
               }}
             >
-              <RecentIcon size={11} strokeWidth={2.5} />
+              <RecentIcon size={11} strokeWidth={1.75} />
             </span>
           )}
         </Link>
@@ -187,9 +188,9 @@ export default async function ConversationsPage({
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8">
       <div className="mx-auto max-w-3xl">
         <h1 className="cx-heading-2xl mb-2 flex items-center gap-2">
-          <MessageSquare size={22} /> Conversations
+          <MessageSquare size={22} strokeWidth={1.75} /> Conversations
         </h1>
-        <p className="text-sm text-[var(--color-text-muted)] mb-6">
+        <p className="cx-body text-[var(--color-text-muted)] mb-6">
           Your full chat history — click any conversation to continue it. Hover
           to star up to {MAX_PINNED}.
         </p>
@@ -205,34 +206,19 @@ export default async function ConversationsPage({
         )}
 
         {conversations.length === 0 ? (
-          <div className="conduit-card p-10 flex flex-col items-center text-center gap-4 max-w-sm mx-auto">
-            <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center"
-              style={{
-                background: "var(--cx-accent-tint)",
-                border: "1px solid rgba(124,108,255,0.20)",
-              }}
-            >
-              <MessageSquare size={24} style={{ color: "var(--color-accent)" }} />
-            </div>
-            <div>
-              <p className="text-[15px] font-semibold text-[var(--color-text)] mb-1">
-                {activeLabelId ? "No conversations with this label" : "No conversations yet"}
-              </p>
-              <p className="text-[13px] text-[var(--color-text-muted)] leading-relaxed">
-                {activeLabelId
-                  ? "Try a different label filter or start a new conversation."
-                  : "Ask Atlas anything — strategy, execution, or hand it to a specialist. Every exchange lives here."}
-              </p>
-            </div>
-            {!activeLabelId && (
-              <Link
-                href="/app"
-                className="conduit-btn-primary text-[13px] px-4 py-2"
-              >
-                Start your first conversation
-              </Link>
-            )}
+          <div className="max-w-sm mx-auto">
+            <EmptyState
+              icon={<ConversationsEmptySVG />}
+              title={activeLabelId ? "No conversations with this label" : "No conversations yet"}
+              body={activeLabelId
+                ? "Try a different label filter or start a new conversation."
+                : "Ask Atlas anything — strategy, execution, or hand it to a specialist. Every exchange lives here."}
+              action={!activeLabelId ? (
+                <Link href="/app" className="btn-primary btn-sz-sm">
+                  Start your first conversation
+                </Link>
+              ) : undefined}
+            />
           </div>
         ) : (
           <div className="space-y-6">
@@ -245,7 +231,7 @@ export default async function ConversationsPage({
                     className="text-[var(--color-amber)]"
                     style={{ fill: "currentColor" }}
                   />
-                  <span className="text-[11px] uppercase tracking-[0.12em] font-medium text-[var(--color-text-muted)]">
+                  <span className="cx-type-xs uppercase tracking-[0.12em] font-medium text-[var(--color-text-muted)]">
                     Pinned · {pinned.length}/{MAX_PINNED}
                   </span>
                 </div>
@@ -262,7 +248,7 @@ export default async function ConversationsPage({
               <div>
                 {pinned.length > 0 && (
                   <div className="mb-2">
-                    <span className="text-[11px] uppercase tracking-[0.12em] font-medium text-[var(--color-text-muted)]">
+                    <span className="cx-type-xs uppercase tracking-[0.12em] font-medium text-[var(--color-text-muted)]">
                       Recent
                     </span>
                   </div>

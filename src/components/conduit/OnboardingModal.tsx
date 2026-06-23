@@ -120,18 +120,19 @@ export function OnboardingModal({
           <div className="flex items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2">
               <PraxisLogo size={24} />
-              <span className="text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
+              <span className="cx-type-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
                 Praxis · Step {displayStep} of {TOTAL_STEPS}
               </span>
             </div>
             {step < 5 && (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={dismiss}
-                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
               >
                 Skip for now
-              </button>
+              </Button>
             )}
           </div>
           <div className="h-[2px] bg-[var(--color-border)] relative rounded-full overflow-hidden">
@@ -148,10 +149,10 @@ export function OnboardingModal({
         <div className="w-full max-w-2xl">
           {step === 1 && (
             <div className="onboarding-step">
-              <h2 className="serif text-3xl md:text-5xl leading-[1.05]">
+              <h2 className="serif text-cx-2xl md:text-cx-3xl leading-[1.05]">
                 What&apos;s your business called?
               </h2>
-              <p className="mt-3 text-sm md:text-base text-[var(--color-text-muted)]">
+              <p className="mt-3 cx-body text-[var(--color-text-muted)]">
                 This is the name Atlas and your team will use.
               </p>
               <input
@@ -163,7 +164,7 @@ export function OnboardingModal({
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && name.trim()) setStep(2);
                 }}
-                className="mt-8 w-full bg-transparent border-b border-[var(--color-border)] focus:border-[var(--color-accent)] outline-none px-1 py-3 text-2xl md:text-3xl serif placeholder:text-[var(--color-text-muted)]"
+                className="mt-8 w-full bg-transparent border-b border-[var(--color-border)] focus:border-[var(--color-accent)] outline-none px-1 py-3 text-cx-xl md:text-cx-2xl serif placeholder:text-[var(--color-text-muted)]"
               />
               <div className="mt-10 flex justify-end">
                 <Button
@@ -171,7 +172,7 @@ export function OnboardingModal({
                   disabled={!name.trim()}
                   className="disabled:opacity-40"
                 >
-                  Continue <ArrowRight size={16} />
+                  Continue <ArrowRight size={16} strokeWidth={1.75} />
                 </Button>
               </div>
             </div>
@@ -179,10 +180,10 @@ export function OnboardingModal({
 
           {step === 2 && (
             <div className="onboarding-step">
-              <h2 className="serif text-3xl md:text-5xl leading-[1.05]">
+              <h2 className="serif text-cx-2xl md:text-cx-3xl leading-[1.05]">
                 What kind of business is it?
               </h2>
-              <p className="mt-3 text-sm md:text-base text-[var(--color-text-muted)]">
+              <p className="mt-3 cx-body text-[var(--color-text-muted)]">
                 Pick one or describe your own.
               </p>
               <div className="mt-8 flex flex-wrap gap-2">
@@ -191,7 +192,7 @@ export function OnboardingModal({
                     key={t}
                     type="button"
                     onClick={() => setBusinessType(t)}
-                    className={`px-4 py-2 text-sm rounded-full border transition-colors ${
+                    className={`px-4 py-2 cx-type-base rounded-full border transition-colors ${
                       businessType === t
                         ? "border-[var(--color-accent)] text-[var(--color-accent-hi)] bg-[color-mix(in_srgb,var(--color-accent)_10%,transparent)]"
                         : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-text)] hover:text-[var(--color-text)]"
@@ -208,7 +209,7 @@ export function OnboardingModal({
                   onChange={(e) => setCustomType(e.target.value)}
                   autoFocus
                   placeholder="What kind?"
-                  className="mt-6 w-full bg-transparent border-b border-[var(--color-border)] focus:border-[var(--color-accent)] outline-none px-1 py-2 text-xl"
+                  className="mt-6 w-full bg-transparent border-b border-[var(--color-border)] focus:border-[var(--color-accent)] outline-none px-1 py-2 cx-type-lg"
                 />
               )}
               <div className="mt-10 flex justify-between">
@@ -220,7 +221,7 @@ export function OnboardingModal({
                   disabled={!finalType.trim()}
                   className="disabled:opacity-40"
                 >
-                  Continue <ArrowRight size={16} />
+                  Continue <ArrowRight size={16} strokeWidth={1.75} />
                 </Button>
               </div>
             </div>
@@ -228,10 +229,10 @@ export function OnboardingModal({
 
           {step === 3 && (
             <div className="onboarding-step">
-              <h2 className="serif text-3xl md:text-5xl leading-[1.05]">
+              <h2 className="serif text-cx-2xl md:text-cx-3xl leading-[1.05]">
                 What are you working toward?
               </h2>
-              <p className="mt-3 text-sm md:text-base text-[var(--color-text-muted)]">
+              <p className="mt-3 cx-body text-[var(--color-text-muted)]">
                 Pick up to {MAX_GOALS}. Your team will keep these front of mind.
               </p>
               <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -244,7 +245,7 @@ export function OnboardingModal({
                       type="button"
                       onClick={() => toggleGoal(goal)}
                       disabled={atMax}
-                      className={`flex items-center gap-3 px-4 py-3 text-sm rounded-xl border text-left transition-colors ${
+                      className={`flex items-center gap-3 px-4 py-3 cx-type-base rounded-xl border text-left transition-colors ${
                         selected
                           ? "border-[var(--color-accent)] text-[var(--color-accent-hi)] bg-[color-mix(in_srgb,var(--color-accent)_10%,transparent)]"
                           : atMax
@@ -259,14 +260,14 @@ export function OnboardingModal({
                             : "border-[var(--color-border)]"
                         }`}
                       >
-                        {selected && <Check size={12} strokeWidth={3} className="text-white" />}
+                        {selected && <Check size={12} className="text-white" style={{ strokeWidth: 3 }} />}
                       </span>
                       {goal}
                     </button>
                   );
                 })}
               </div>
-              <p className="mt-4 text-xs text-[var(--color-text-muted)]">
+              <p className="mt-4 cx-type-xs text-[var(--color-text-muted)]">
                 {goals.length}/{MAX_GOALS} selected
               </p>
               <div className="mt-10 flex justify-between">
@@ -274,7 +275,7 @@ export function OnboardingModal({
                   Back
                 </Button>
                 <Button onClick={() => setStep(4)}>
-                  Continue <ArrowRight size={16} />
+                  Continue <ArrowRight size={16} strokeWidth={1.75} />
                 </Button>
               </div>
             </div>
@@ -282,10 +283,10 @@ export function OnboardingModal({
 
           {step === 4 && (
             <div className="onboarding-step">
-              <h2 className="serif text-3xl md:text-5xl leading-[1.05]">
+              <h2 className="serif text-cx-2xl md:text-cx-3xl leading-[1.05]">
                 Tell Atlas what you&apos;re working on.
               </h2>
-              <p className="mt-3 text-sm md:text-base text-[var(--color-text-muted)]">
+              <p className="mt-3 cx-body text-[var(--color-text-muted)]">
                 A sentence or two. Context, constraints, what success looks like.
               </p>
               <textarea
@@ -294,10 +295,10 @@ export function OnboardingModal({
                 autoFocus
                 rows={5}
                 placeholder="I'm trying to land my first 10 cleaning contracts in Houston…"
-                className="mt-8 w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-2xl focus:border-[var(--color-accent)] outline-none p-4 text-base resize-none leading-relaxed"
+                className="mt-8 w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-2xl focus:border-[var(--color-accent)] outline-none p-4 cx-type-md resize-none leading-relaxed"
               />
               {error && (
-                <p className="mt-3 text-sm text-[var(--color-pink)]">
+                <p className="mt-3 cx-type-base text-[var(--color-pink)]">
                   {error}
                 </p>
               )}
@@ -310,7 +311,7 @@ export function OnboardingModal({
                   disabled={!description.trim() || submitting}
                   className="disabled:opacity-40"
                 >
-                  Meet Atlas <ArrowRight size={16} />
+                  Meet Atlas <ArrowRight size={16} strokeWidth={1.75} />
                 </Button>
               </div>
             </div>
@@ -344,10 +345,10 @@ export function OnboardingModal({
                   }}
                 />
               </div>
-              <h2 className="serif text-3xl md:text-4xl leading-tight">
+              <h2 className="serif text-cx-2xl leading-tight">
                 Setting up your team…
               </h2>
-              <p className="mt-3 text-sm text-[var(--color-text-muted)]">
+              <p className="mt-3 cx-type-base text-[var(--color-text-muted)]">
                 Briefing Atlas. Bringing Marketing, Sales, and Engineering
                 online.
               </p>
@@ -358,7 +359,7 @@ export function OnboardingModal({
 
       {/* Footer */}
       <div className="px-8 pb-6">
-        <div className="max-w-2xl mx-auto text-center text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
+        <div className="max-w-2xl mx-auto text-center cx-type-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
           Praxis · By Conduit
         </div>
       </div>

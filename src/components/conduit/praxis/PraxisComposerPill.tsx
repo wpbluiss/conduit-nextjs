@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion, useAnimate, useReducedMotion } from "framer-motion";
+import { CX_SPRING_SNAPPY, CX_DUR_FAST, CX_EASE } from "@/lib/ui/motion";
 import { Mic, Mic2, MicOff, Send, Square } from "lucide-react";
 import { Button } from "@/components/conduit/ui/Button";
 import { EMPLOYEE_ORDER, EMPLOYEES, type EmployeeId } from "@/lib/conduit/employees";
@@ -99,6 +101,8 @@ export function PraxisComposerPill({
   const tint = useDeptTint();
   const composerRef = useRef<HTMLFormElement>(null);
   const { labelFor } = useNicknames();
+  const [sendScope, sendAnimate] = useAnimate();
+  const prefersReduced = useReducedMotion();
 
   const CHAR_LIMIT = 4000;
   const COUNTER_THRESHOLD = 200;
@@ -177,9 +181,20 @@ export function PraxisComposerPill({
       ref={composerRef}
       onSubmit={(e) => {
         e.preventDefault();
-        if (!mentionOpen) onSubmit();
+        if (!mentionOpen) {
+          // Spring bounce on send — fire concurrently with the submit so
+          // keyboard (Cmd+Enter) users get the same tactile feedback as mouse.
+          if (sendScope.current) {
+            void sendAnimate(
+              sendScope.current,
+              { scale: [1, 0.82, 1.1, 0.97, 1] },
+              { duration: 0.38, ease: [0.22, 1, 0.36, 1] },
+            );
+          }
+          onSubmit();
+        }
       }}
-      className="praxis-composer-pill"
+      className="praxis-composer-pill cx-glass"
       data-dept={composerDept}
       data-state={streamingEmployee ? "streaming" : undefined}
       style={{
@@ -207,7 +222,7 @@ export function PraxisComposerPill({
           cursor: "pointer",
           letterSpacing: 0,
           textTransform: "none",
-          fontSize: "12px",
+          fontSize: "var(--cx-type-xs)",
           position: "relative",
           flexShrink: 0,
           border: "none",
@@ -266,7 +281,7 @@ export function PraxisComposerPill({
                     alignItems: "center",
                     gap: "var(--space-2)",
                     padding: "var(--space-2) var(--space-3)",
-                    fontSize: "12px",
+                    fontSize: "var(--cx-type-xs)",
                     textAlign: "left",
                     background: active
                       ? "var(--color-surface-raised)"
@@ -324,7 +339,7 @@ export function PraxisComposerPill({
                     alignItems: "center",
                     gap: "var(--space-3)",
                     padding: "var(--space-2) var(--space-3)",
-                    fontSize: "13px",
+                    fontSize: "var(--cx-type-sm)",
                     textAlign: "left",
                     background: highlighted ? "var(--color-surface-raised)" : "transparent",
                     color: "var(--color-text)",
@@ -335,13 +350,13 @@ export function PraxisComposerPill({
                   <PraxisAvatar employee={id} size="sm" />
                   <span style={{ flex: 1, minWidth: 0 }}>
                     <span style={{ display: "block" }}>{nick}</span>
-                    <span style={{ display: "block", fontSize: "11px", color: "var(--color-text-muted)" }}>
+                    <span style={{ display: "block", fontSize: "var(--cx-type-xs)", color: "var(--color-text-muted)" }}>
                       {emp.role}
                     </span>
                   </span>
                   <span
                     style={{
-                      fontSize: "11px",
+                      fontSize: "var(--cx-type-xs)",
                       color: "var(--color-text-muted)",
                       fontFamily: "var(--font-mono)",
                       flexShrink: 0,
@@ -368,7 +383,7 @@ export function PraxisComposerPill({
                 borderRadius: "var(--radius-pill)",
                 background: EMPLOYEES[mentionOverride].colorSoft,
                 border: `1px solid ${EMPLOYEES[mentionOverride].color}`,
-                fontSize: "12px",
+                fontSize: "var(--cx-type-xs)",
                 color: EMPLOYEES[mentionOverride].color,
                 flexShrink: 0,
                 lineHeight: 1,
@@ -393,7 +408,7 @@ export function PraxisComposerPill({
                   border: "none",
                   color: "inherit",
                   cursor: "pointer",
-                  fontSize: "11px",
+                  fontSize: "var(--cx-type-xs)",
                   lineHeight: 1,
                   padding: 0,
                   opacity: 0.7,
@@ -405,6 +420,7 @@ export function PraxisComposerPill({
           )}
           <textarea
             value={value}
+            readOnly={loading}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={(e) => {
               // Backspace on empty input clears the @mention chip.
@@ -444,7 +460,9 @@ export function PraxisComposerPill({
             }}
           rows={1}
           placeholder={
-            placeholder ?? (speechListening ? "Listening…" : "Talk to your team…")
+            loading
+              ? "Specialist is responding…"
+              : (placeholder ?? (speechListening ? "Listening…" : "Talk to your team…"))
           }
           style={{
             flex: 1,
@@ -454,22 +472,27 @@ export function PraxisComposerPill({
             border: "none",
             outline: "none",
             padding: "var(--space-2)",
-            fontSize: "15px",
+            fontSize: "var(--cx-type-base)",
             lineHeight: 1.4,
             maxHeight: "8rem",
             color: "var(--color-text)",
             fontFamily: "var(--font-sans)",
+            cursor: loading ? "not-allowed" : "text",
+            transition: "opacity 150ms ease",
           }}
         />
         </div>
       </div>
 
       {speechSupported ? (
-        <button
+        <motion.button
           type="button"
           onClick={onSpeechToggle}
           aria-label={speechListening ? "Stop listening" : "Start voice input"}
           title={speechListening ? "Stop and send" : "Click to talk"}
+          whileHover={prefersReduced ? undefined : { scale: 1.06 }}
+          whileTap={prefersReduced ? undefined : { scale: 0.92 }}
+          transition={CX_SPRING_SNAPPY}
           style={{
             flexShrink: 0,
             width: "40px",
@@ -482,11 +505,10 @@ export function PraxisComposerPill({
             color: speechListening ? "var(--color-surface)" : "var(--color-text-muted)",
             border: speechListening ? "none" : "1px solid var(--color-border)",
             cursor: "pointer",
-            transition: "all 180ms var(--praxis-ease-out-quart)",
           }}
         >
-          <Mic size={16} />
-        </button>
+          <Mic size={16} strokeWidth={1.75} />
+        </motion.button>
       ) : !whisperSupported ? (
         <button
           type="button"
@@ -508,7 +530,7 @@ export function PraxisComposerPill({
             opacity: 0.4,
           }}
         >
-          <MicOff size={16} />
+          <MicOff size={16} strokeWidth={1.75} />
         </button>
       ) : null}
 
@@ -536,7 +558,7 @@ export function PraxisComposerPill({
             />
             <span
               style={{
-                fontSize: "11px",
+                fontSize: "var(--cx-type-xs)",
                 fontVariantNumeric: "tabular-nums",
                 color: "var(--color-text-muted)",
                 minWidth: "2.8ch",
@@ -546,11 +568,13 @@ export function PraxisComposerPill({
             >
               {formatSeconds(voiceRecordingSeconds)}
             </span>
-            <button
+            <motion.button
               type="button"
               onClick={onVoiceRecordStop}
               aria-label="Send voice message"
               title="Send voice message"
+              whileTap={prefersReduced ? undefined : { scale: 0.91 }}
+              transition={CX_SPRING_SNAPPY}
               style={{
                 width: "40px",
                 height: "40px",
@@ -565,13 +589,16 @@ export function PraxisComposerPill({
                 flexShrink: 0,
               }}
             >
-              <Square size={14} fill="currentColor" />
-            </button>
-            <button
+              <Square size={14} fill="currentColor" strokeWidth={1.75} />
+            </motion.button>
+            <motion.button
               type="button"
               onClick={onVoiceRecordCancel}
               aria-label="Cancel recording"
               title="Cancel recording"
+              whileHover={prefersReduced ? undefined : { scale: 1.06 }}
+              whileTap={prefersReduced ? undefined : { scale: 0.93 }}
+              transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
               style={{
                 width: "32px",
                 height: "32px",
@@ -583,15 +610,15 @@ export function PraxisComposerPill({
                 color: "var(--color-text-muted)",
                 border: "1px solid var(--color-border)",
                 cursor: "pointer",
-                fontSize: "12px",
+                fontSize: "var(--cx-type-xs)",
                 flexShrink: 0,
               }}
             >
               ✕
-            </button>
+            </motion.button>
           </div>
         ) : (
-          <button
+          <motion.button
             type="button"
             onClick={onVoiceRecordStart}
             disabled={voiceRecordingState === "uploading" || loading}
@@ -605,6 +632,9 @@ export function PraxisComposerPill({
                 ? "Uploading…"
                 : "Record a voice message"
             }
+            whileHover={prefersReduced || voiceRecordingState === "uploading" || loading ? undefined : { scale: 1.06 }}
+            whileTap={prefersReduced || voiceRecordingState === "uploading" || loading ? undefined : { scale: 0.92 }}
+            transition={CX_SPRING_SNAPPY}
             style={{
               flexShrink: 0,
               width: "40px",
@@ -624,11 +654,10 @@ export function PraxisComposerPill({
                   ? "not-allowed"
                   : "pointer",
               opacity: voiceRecordingState === "uploading" || loading ? 0.5 : 1,
-              transition: "all 180ms var(--praxis-ease-out-quart)",
             }}
           >
-            <Mic2 size={16} />
-          </button>
+            <Mic2 size={16} strokeWidth={1.75} />
+          </motion.button>
         )
       )}
 
@@ -662,11 +691,13 @@ export function PraxisComposerPill({
                 />
               ))}
             </span>
-            <button
+            <motion.button
               type="button"
               onClick={onWhisperStop}
               aria-label="Transcribe recording"
               title="Release to transcribe"
+              whileTap={prefersReduced ? undefined : { scale: 0.91 }}
+              transition={CX_SPRING_SNAPPY}
               style={{
                 width: "36px",
                 height: "36px",
@@ -681,13 +712,16 @@ export function PraxisComposerPill({
                 flexShrink: 0,
               }}
             >
-              <Square size={12} fill="currentColor" />
-            </button>
-            <button
+              <Square size={12} fill="currentColor" strokeWidth={1.75} />
+            </motion.button>
+            <motion.button
               type="button"
               onClick={onWhisperCancel}
               aria-label="Cancel transcription"
               title="Cancel"
+              whileHover={prefersReduced ? undefined : { scale: 1.06 }}
+              whileTap={prefersReduced ? undefined : { scale: 0.93 }}
+              transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
               style={{
                 width: "28px",
                 height: "28px",
@@ -699,15 +733,15 @@ export function PraxisComposerPill({
                 color: "var(--color-text-muted)",
                 border: "1px solid var(--color-border)",
                 cursor: "pointer",
-                fontSize: "11px",
+                fontSize: "var(--cx-type-xs)",
                 flexShrink: 0,
               }}
             >
               ✕
-            </button>
+            </motion.button>
           </div>
         ) : (
-          <button
+          <motion.button
             type="button"
             onMouseDown={(e) => { e.preventDefault(); onWhisperStart?.(); }}
             onTouchStart={(e) => { e.preventDefault(); onWhisperStart?.(); }}
@@ -722,6 +756,9 @@ export function PraxisComposerPill({
                 ? "Transcribing…"
                 : "Hold to record · release to transcribe"
             }
+            whileHover={prefersReduced || whisperState === "transcribing" || loading ? undefined : { scale: 1.06 }}
+            whileTap={prefersReduced || whisperState === "transcribing" || loading ? undefined : { scale: 0.92 }}
+            transition={CX_SPRING_SNAPPY}
             style={{
               flexShrink: 0,
               width: "40px",
@@ -735,7 +772,6 @@ export function PraxisComposerPill({
               border: whisperState === "transcribing" ? "none" : "1px solid var(--color-border)",
               cursor: whisperState === "transcribing" || loading ? "not-allowed" : "pointer",
               opacity: whisperState === "transcribing" || loading ? 0.6 : 1,
-              transition: "all 180ms var(--praxis-ease-out-quart)",
             }}
           >
             {whisperState === "transcribing" ? (
@@ -751,9 +787,9 @@ export function PraxisComposerPill({
                 }}
               />
             ) : (
-              <Mic size={16} />
+              <Mic size={16} strokeWidth={1.75} />
             )}
-          </button>
+          </motion.button>
         )
       )}
 
@@ -763,7 +799,7 @@ export function PraxisComposerPill({
           aria-label={`${charCount} characters, approximately ${tokenEstimate} tokens`}
           style={{
             flexShrink: 0,
-            fontSize: "11px",
+            fontSize: "var(--cx-type-xs)",
             fontFamily: "var(--font-mono)",
             color: counterColor,
             whiteSpace: "nowrap",
@@ -775,16 +811,18 @@ export function PraxisComposerPill({
         </span>
       )}
 
-      <Button
-        type="submit"
-        variant="primary"
-        size="icon"
-        isDisabled={loading || !value.trim()}
-        isLoading={loading}
-        aria-label="Send"
-      >
-        <Send size={16} />
-      </Button>
+      <span ref={sendScope} style={{ display: "inline-flex", flexShrink: 0 }}>
+        <Button
+          type="submit"
+          variant="primary"
+          size="icon"
+          isDisabled={loading || !value.trim()}
+          isLoading={loading}
+          aria-label="Send"
+        >
+          <Send size={16} strokeWidth={1.75} />
+        </Button>
+      </span>
     </form>
   );
 }

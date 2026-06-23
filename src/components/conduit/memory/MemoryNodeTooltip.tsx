@@ -13,6 +13,7 @@
 
 import { useState } from "react";
 import { Pin, PinOff, Lock, LockOpen, Edit3, Archive } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 import type { MemoryRecord, MemoryKind } from "@/lib/ai/memory";
 import { EMPLOYEES, type EmployeeId } from "@/lib/conduit/employees";
 import { DeptIcon } from "@/components/conduit/pdl/DeptIcon";
@@ -42,7 +43,7 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
       {text.slice(0, idx)}
       <mark
         style={{
-          background: "color-mix(in srgb, var(--pdl-accent, #7C6CFF) 25%, transparent)",
+          background: "color-mix(in srgb, var(--pdl-accent) 25%, transparent)",
           color: "inherit",
           borderRadius: "2px",
           padding: "0 1px",
@@ -133,8 +134,9 @@ export function MemoryNodeTooltip({
       </div>
 
       <div className="mem-tooltip-actions">
-        <button
-          type="button"
+        <PraxisButton
+          variant="ghost"
+          size="icon-sm"
           className="mem-tooltip-action"
           data-active={memory.pinned || undefined}
           onClick={() => patch({ pinned: !memory.pinned })}
@@ -142,10 +144,11 @@ export function MemoryNodeTooltip({
           title={memory.pinned ? "Unpin" : "Pin (always include in prompts)"}
           aria-label={memory.pinned ? "Unpin memory" : "Pin memory"}
         >
-          {memory.pinned ? <PinOff size={13} /> : <Pin size={13} />}
-        </button>
-        <button
-          type="button"
+          {memory.pinned ? <PinOff size={13} strokeWidth={1.75} /> : <Pin size={13} strokeWidth={1.75} />}
+        </PraxisButton>
+        <PraxisButton
+          variant="ghost"
+          size="icon-sm"
           className="mem-tooltip-action"
           data-active={memory.locked || undefined}
           onClick={() => patch({ locked: !memory.locked })}
@@ -153,20 +156,22 @@ export function MemoryNodeTooltip({
           title={memory.locked ? "Unlock (Atlas can supersede)" : "Lock (Atlas can't overwrite)"}
           aria-label={memory.locked ? "Unlock memory" : "Lock memory"}
         >
-          {memory.locked ? <LockOpen size={13} /> : <Lock size={13} />}
-        </button>
-        <button
-          type="button"
+          {memory.locked ? <LockOpen size={13} strokeWidth={1.75} /> : <Lock size={13} strokeWidth={1.75} />}
+        </PraxisButton>
+        <PraxisButton
+          variant="ghost"
+          size="icon-sm"
           className="mem-tooltip-action"
           onClick={onEdit}
           disabled={busy}
           title="Edit"
           aria-label="Edit memory"
         >
-          <Edit3 size={13} />
-        </button>
-        <button
-          type="button"
+          <Edit3 size={13} strokeWidth={1.75} />
+        </PraxisButton>
+        <PraxisButton
+          variant="danger"
+          size="icon-sm"
           className="mem-tooltip-action"
           data-destructive="true"
           onClick={archive}
@@ -174,8 +179,8 @@ export function MemoryNodeTooltip({
           title="Archive"
           aria-label="Archive memory"
         >
-          <Archive size={13} />
-        </button>
+          <Archive size={13} strokeWidth={1.75} />
+        </PraxisButton>
       </div>
     </div>
   );

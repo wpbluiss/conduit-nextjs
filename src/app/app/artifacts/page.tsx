@@ -47,7 +47,7 @@ export default async function ArtifactsPage() {
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8">
       <div className="mx-auto max-w-4xl">
         <h1 className="cx-heading-2xl mb-2">Artifacts</h1>
-        <p className="text-sm text-[var(--color-text-muted)] mb-8">
+        <p className="cx-body text-[var(--color-text-muted)] mb-8">
           Everything your team has produced.
         </p>
         {empty ? (
@@ -55,10 +55,10 @@ export default async function ArtifactsPage() {
             icon={<ArtifactsEmptySVG />}
             headline="Your AI team's output lands here"
             body="Praxis saves every doc, plan, and report your specialists generate — ask any specialist to draft something and it will appear here."
-            cta={
+            action={
               <Link
                 href="/app"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity"
+                className="btn-primary btn-sz-sm"
               >
                 Chat with a specialist →
               </Link>
@@ -84,9 +84,9 @@ export default async function ArtifactsPage() {
                       className="inline-flex items-center justify-center w-7 h-7 rounded-lg"
                       style={{ background: DEPT_COLOR_SOFT[emp] }}
                     >
-                      <FileText size={13} style={{ color: DEPT_COLOR[emp] }} />
+                      <FileText size={13} strokeWidth={1.75} style={{ color: DEPT_COLOR[emp] }} />
                     </span>
-                    <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] flex-1 min-w-0">
+                    <span className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] flex-1 min-w-0">
                       {(a.type as string).replace("_", " ")} ·{" "}
                       <span style={{ color: DEPT_COLOR[emp] }}>
                         {employeeLabel(emp)}
@@ -104,7 +104,7 @@ export default async function ArtifactsPage() {
                     <div className="cx-heading-lg group-hover:text-[var(--color-accent)] transition-colors">
                       {a.title}
                     </div>
-                    <p className="text-xs text-[var(--color-text-muted)] line-clamp-2">
+                    <p className="cx-type-xs text-[var(--color-text-muted)] line-clamp-2">
                       {preview}…
                     </p>
                     <div className="cx-meta mt-auto pt-2">

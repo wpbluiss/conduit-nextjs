@@ -62,13 +62,13 @@ export function PinConversationButton({ conversationId, pinned, atLimit }: Props
               ? "Unpin"
               : "Pin"
         }
-        className="p-1.5 rounded-md transition-colors hover:bg-[var(--color-surface-raised)] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
+        className="cx-icon-btn cx-focus-ring disabled:opacity-50"
       >
         <Star
           size={14}
-          strokeWidth={2}
           className={optimistic ? "fill-current" : ""}
           style={{
+            strokeWidth: 2,
             color: optimistic
               ? "var(--color-amber)"
               : "var(--color-text-muted)",
@@ -77,7 +77,7 @@ export function PinConversationButton({ conversationId, pinned, atLimit }: Props
       </button>
       {error && (
         <span
-          className="absolute right-0 top-full mt-1 whitespace-nowrap text-[11px] px-2 py-0.5 rounded pointer-events-none z-10"
+          className="absolute right-0 top-full mt-1 whitespace-nowrap cx-type-xs px-2 py-0.5 rounded pointer-events-none z-10"
           style={{
             background: "var(--color-surface-elevated)",
             border: "1px solid var(--color-border)",

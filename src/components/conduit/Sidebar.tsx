@@ -4,41 +4,46 @@ import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { CX_EASE, CX_DUR_FAST, CX_DUR_BASE } from "@/lib/ui/motion";
 import {
   Activity,
   BarChart3,
   Bookmark,
   Brain,
+  Check,
   CircleHelp,
   CreditCard,
   Hammer,
   LayoutGrid,
   Lock,
   LogOut,
+  MessageSquare,
   Mic,
   Moon,
   PanelLeftClose,
   PanelLeftOpen,
+  Pencil,
   Pin,
   Plus,
   Search,
   Settings,
   Sparkles,
   Sun,
+  Trash2,
   Users2,
-  Menu,
   Monitor,
   X,
 } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
 import { SpecialistAvatar } from "./SpecialistAvatar";
-import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
+import { EMPLOYEE_ORDER, EMPLOYEES } from "@/lib/conduit/employees";
 import { useNicknames } from "@/context/NicknameContext";
 import { PraxisLogo } from "./PraxisLogo";
 import { SidebarBuildPip } from "./builds/in-flight/SidebarBuildPip";
 import { SidebarBuildsSection } from "./builds/in-flight/SidebarBuildsSection";
+import { Button, PraxisButton } from "@/components/conduit/ui/Button";
 import type { InFlightBuild } from "@/lib/engineering/in-flight";
 import { ChangelogPopover } from "./ChangelogPopover";
 import { NotificationCenter } from "./NotificationCenter";
@@ -46,6 +51,7 @@ import { PaywallModal } from "./PaywallModal";
 import type { PaywallPayload } from "./PaywallModal";
 import { GettingStartedChecklist } from "./GettingStartedChecklist";
 import { OnboardingChecklist } from "./OnboardingChecklist";
+import { Tooltip } from "./pdl/Tooltip";
 
 const BANNER_SESSION_KEY = "praxis:upgrade_banner_dismissed";
 const PINNED_SPECIALISTS_KEY = "praxis:pinned-specialists";
@@ -126,59 +132,59 @@ function SidebarUpgradeBanner({
 
   return (
     <div
-      className="mx-3 mb-2 rounded-xl"
+      className="mx-3 mb-2 rounded-[var(--cx-radius-md)]"
       style={{
-        background: "color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-elevated))",
-        border: "1px solid color-mix(in srgb, var(--color-accent) 20%, var(--color-border))",
+        background: "color-mix(in srgb, var(--cx-accent) 6%, var(--cx-surface))",
+        border: "1px solid color-mix(in srgb, var(--cx-accent) 20%, var(--cx-border))",
       }}
     >
-      <div className="px-3 pt-2.5 pb-2.5">
+      <div className="px-3 pt-3 pb-3">
         <div className="flex items-start justify-between gap-1 mb-2">
-          <div className="flex items-center gap-1.5">
-            <Sparkles size={11} style={{ color: "var(--color-accent)", flexShrink: 0 }} />
-            <span className="text-[11px] font-semibold" style={{ color: "var(--color-text)" }}>
+          <div className="flex items-center gap-2">
+            <Sparkles size={11} strokeWidth={1.75} style={{ color: "var(--cx-accent)", flexShrink: 0 }} />
+            <span className="cx-type-xs font-semibold" style={{ color: "var(--cx-text)" }}>
               Unlock all 9 specialists
             </span>
           </div>
-          <button
+          <PraxisButton
             type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={dismiss}
             aria-label="Dismiss upgrade prompt"
-            className="shrink-0 transition-colors"
-            style={{ color: "var(--color-text-muted)" }}
           >
-            <X size={12} />
-          </button>
+            <X size={12} strokeWidth={1.75} />
+          </PraxisButton>
         </div>
 
         {/* Usage meter */}
-        <div className="mb-2.5">
+        <div className="mb-3">
           <div
             className="w-full rounded-full overflow-hidden"
-            style={{ height: 4, background: "var(--color-border)" }}
+            style={{ height: 4, background: "var(--cx-border)" }}
           >
             <div
               className="h-full rounded-full"
               style={{
                 width: `${pct * 100}%`,
-                background: pct >= 0.8 ? "var(--cx-danger, #F4607D)" : "var(--color-accent)",
+                background: pct >= 0.8 ? "var(--cx-danger)" : "var(--cx-accent)",
                 transition: "width 0.3s ease",
               }}
             />
           </div>
-          <p className="cx-mono cx-type-xs mt-1" style={{ color: "var(--color-text-muted)" }}>
+          <p className="cx-mono cx-type-xs mt-1" style={{ color: "var(--cx-text-muted)" }}>
             {usedK}k / {capK}k tokens used ({pctDisplay}%)
           </p>
         </div>
 
-        <button
-          type="button"
+        <Button
           onClick={() => { dismiss(); onUpgradeClick(); }}
-          className="w-full py-1.5 rounded-lg text-[11px] font-semibold transition-opacity hover:opacity-90"
-          style={{ background: "var(--color-accent)", color: "#fff" }}
+          variant="primary"
+          size="sm"
+          className="w-full"
         >
           Upgrade to Pro
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -205,7 +211,10 @@ const COLLAPSED_KEY = "praxis:sidebar:collapsed";
 function readCollapsed(): boolean {
   if (typeof window === "undefined") return false;
   try {
-    return localStorage.getItem(COLLAPSED_KEY) === "1";
+    const stored = localStorage.getItem(COLLAPSED_KEY);
+    if (stored !== null) return stored === "1";
+    // No explicit preference — auto-collapse on tablet (768–1023px)
+    return window.innerWidth >= 768 && window.innerWidth < 1024;
   } catch {
     return false;
   }
@@ -264,9 +273,9 @@ function SidebarThemeButton({ collapsed = false }: { collapsed?: boolean }) {
   }
 
   const icons: Record<ThemePref, React.ReactNode> = {
-    light: <Sun size={14} />,
-    dark: <Moon size={14} />,
-    system: <Monitor size={14} />,
+    light: <Sun size={16} strokeWidth={1.75} />,
+    dark: <Moon size={16} strokeWidth={1.75} />,
+    system: <Monitor size={16} strokeWidth={1.75} />,
   };
   const labels: Record<ThemePref, string> = {
     light: "Light",
@@ -281,28 +290,31 @@ function SidebarThemeButton({ collapsed = false }: { collapsed?: boolean }) {
 
   if (collapsed) {
     return (
-      <button
+      <PraxisButton
         type="button"
+        variant="ghost"
+        size="icon-sm"
         onClick={cycle}
         title={nextLabels[pref]}
         aria-label={nextLabels[pref]}
-        className="flex items-center justify-center w-8 h-8 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors duration-100"
       >
         {icons[pref]}
-      </button>
+      </PraxisButton>
     );
   }
 
   return (
-    <button
+    <PraxisButton
       type="button"
+      variant="ghost"
+      size="sm"
       onClick={cycle}
       title={nextLabels[pref]}
-      className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] rounded-lg transition-colors duration-100"
+      className="w-full justify-start"
     >
       {icons[pref]}
       {labels[pref]}
-    </button>
+    </PraxisButton>
   );
 }
 
@@ -356,7 +368,6 @@ export function Sidebar({
   // Suppress the width transition on initial hydration to avoid CLS.
   const [skipTransition, setSkipTransition] = useState(true);
   const sidebarRef = useRef<HTMLElement>(null);
-  const openBtnRef = useRef<HTMLButtonElement>(null);
   // Conversation list search
   const [convSearch, setConvSearch] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -367,6 +378,13 @@ export function Sidebar({
   // Specialist filter chip — null = "All"
   const [specialistFilter, setSpecialistFilter] = useState<EmployeeKey | null>(null);
 
+  // Inline rename / delete for conversation rows
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const { pinned, pin, unpin } = usePinnedSpecialists();
 
   // Specialist context menu (right-click / long-press to pin/unpin)
@@ -407,9 +425,18 @@ export function Sidebar({
   // the animated transition, preventing a visible collapse animation on load.
   useEffect(() => {
     setCollapsed(readCollapsed());
+    // Responsive: auto-collapse/expand on resize when user has no stored preference.
+    const onResize = () => {
+      try {
+        if (localStorage.getItem(COLLAPSED_KEY) !== null) return;
+      } catch { /* ignore */ }
+      setCollapsed(window.innerWidth >= 768 && window.innerWidth < 1024);
+    };
+    window.addEventListener("resize", onResize, { passive: true });
     requestAnimationFrame(() => {
       requestAnimationFrame(() => setSkipTransition(false));
     });
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   useEffect(() => {
@@ -490,17 +517,19 @@ export function Sidebar({
     return () => window.removeEventListener("keydown", trap);
   }, [open]);
 
-  // Return focus to the hamburger button when the mobile drawer closes
-  useEffect(() => {
-    if (open || typeof window === "undefined" || window.innerWidth >= 768) return;
-    openBtnRef.current?.focus();
-  }, [open]);
 
   // Keyboard shortcut: Cmd/Ctrl+Shift+S → toggle sidebar collapsed state
   useEffect(() => {
     const onToggle = () => toggleCollapsed();
     window.addEventListener("praxis:sidebar:toggle", onToggle);
     return () => window.removeEventListener("praxis:sidebar:toggle", onToggle);
+  }, []);
+
+  // ConsoleTopBar → open mobile drawer via event (avoids prop-drilling through layout)
+  useEffect(() => {
+    const onOpen = () => setOpen(true);
+    window.addEventListener("praxis:sidebar:open", onOpen);
+    return () => window.removeEventListener("praxis:sidebar:open", onOpen);
   }, []);
 
   // Streaming employee: pulsed strong + steady while a Chat is streaming.
@@ -541,7 +570,63 @@ export function Sidebar({
     return () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
   }, []);
 
-  const openPeek = (id: string, el: HTMLAnchorElement, fromFocus = false) => {
+  const startRename = (id: string, currentTitle: string) => {
+    setDeletingId(null);
+    setRenamingId(id);
+    setRenameValue(currentTitle);
+  };
+
+  const commitRename = async () => {
+    if (!renamingId) return;
+    const idToRename = renamingId;
+    const trimmed = renameValue.trim();
+    if (!trimmed) { setRenamingId(null); return; }
+    const prev = titleOverrides[idToRename] ?? conversations.find((c) => c.id === idToRename)?.title ?? "Untitled chat";
+    setRenamingId(null);
+    if (trimmed === prev) return;
+    setTitleOverrides((p) => ({ ...p, [idToRename]: trimmed }));
+    window.dispatchEvent(new CustomEvent("praxis:title_updated", { detail: { conversation_id: idToRename, title: trimmed } }));
+    try {
+      const res = await fetch(`/api/conduit/conversations/${idToRename}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ title: trimmed }),
+      });
+      if (!res.ok) {
+        setTitleOverrides((p) => ({ ...p, [idToRename]: prev }));
+        window.dispatchEvent(new CustomEvent("praxis:title_updated", { detail: { conversation_id: idToRename, title: prev } }));
+      }
+    } catch {
+      setTitleOverrides((p) => ({ ...p, [idToRename]: prev }));
+      window.dispatchEvent(new CustomEvent("praxis:title_updated", { detail: { conversation_id: idToRename, title: prev } }));
+    }
+  };
+
+  const cancelRename = () => { setRenamingId(null); setRenameValue(""); };
+
+  const handleRenameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") { e.preventDefault(); void commitRename(); }
+    if (e.key === "Escape") { e.preventDefault(); cancelRename(); }
+  };
+
+  const confirmDelete = async (id: string) => {
+    setDeleteLoading(true);
+    try {
+      const res = await fetch(`/api/conduit/conversations/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setDeletingId(null);
+        setDeleteLoading(false);
+        if (activeId === id) router.push("/app");
+        router.refresh();
+      } else {
+        setDeleteLoading(false);
+      }
+    } catch {
+      setDeleteLoading(false);
+    }
+  };
+
+  const openPeek = (id: string, el: HTMLElement, fromFocus = false) => {
     // Suppress hover tooltip on touch/coarse-pointer devices; always allow keyboard focus.
     if (!fromFocus && isCoarsePointer) return;
     if (peekOpenTimer.current) clearTimeout(peekOpenTimer.current);
@@ -578,18 +663,6 @@ export function Sidebar({
 
   return (
     <>
-      <button
-        ref={openBtnRef}
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label="Open navigation menu"
-        aria-expanded={open}
-        aria-controls="app-sidebar"
-        className="md:hidden fixed top-3 left-3 z-30 conduit-card p-2"
-      >
-        <Menu size={18} />
-      </button>
-
       {/* Mobile backdrop — framer-motion fade, closes on outside tap */}
       <AnimatePresence>
         {open && (
@@ -612,18 +685,21 @@ export function Sidebar({
         role="dialog"
         aria-modal={open ? "true" : undefined}
         aria-label="Navigation"
-        animate={{ width: collapsed ? 56 : 256 }}
-        transition={skipTransition ? { duration: 0 } : { duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
-        className={`cx-glass fixed md:static z-40 inset-y-0 left-0 border-r flex flex-col overflow-hidden transform transition-transform duration-200 ease-in-out ${
+        animate={{ width: collapsed ? 52 : 256, minWidth: collapsed ? 52 : 256 }}
+        transition={skipTransition || shouldReduceMotion ? { duration: 0 } : { duration: 0.22, ease: [...CX_EASE] }}
+        className={`cx-glass border-r border-[var(--cx-glass-border)] fixed md:static z-40 inset-y-0 left-0 flex flex-col overflow-hidden ${
           open ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
-        style={{ minWidth: collapsed ? 56 : 256, borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}
+        style={{
+          transition: shouldReduceMotion ? "none" : "transform 180ms cubic-bezier(0.22,1,0.36,1)",
+        }}
       >
         {/* Header — workspace logo / Praxis wordmark + collapse toggle */}
         <div
-          className={`px-3 py-4 flex items-center border-b border-[var(--color-border)] ${
+          className={`px-3 py-3 flex items-center border-b ${
             collapsed ? "justify-center" : "justify-between"
           }`}
+          style={{ borderColor: "var(--cx-glass-border)" }}
         >
           {!collapsed && (
             <Link
@@ -637,9 +713,10 @@ export function Sidebar({
                   <img
                     src={avatarUrl}
                     alt="Workspace logo"
-                    className="w-7 h-7 rounded-lg object-cover shrink-0 border border-[var(--color-border)]"
+                    className="w-7 h-7 rounded-lg object-cover shrink-0"
+                    style={{ border: "1px solid var(--cx-border)" }}
                   />
-                  <span className="text-sm font-semibold truncate" style={{ color: "var(--color-text)" }}>
+                  <span className="cx-type-sm font-semibold truncate" style={{ color: "var(--cx-text)" }}>
                     {workspaceName || accountName}
                   </span>
                 </>
@@ -660,7 +737,7 @@ export function Sidebar({
                 <img
                   src={avatarUrl}
                   alt="Workspace logo"
-                  className="w-7 h-7 rounded-lg object-cover border border-[var(--color-border)]"
+                  className="w-7 h-7 rounded-lg object-cover border border-[var(--cx-border)]"
                 />
               ) : (
                 <PraxisLogo size={28} glow />
@@ -671,93 +748,86 @@ export function Sidebar({
           {!collapsed && (
             <>
               <div className="hidden md:flex items-center gap-1">
-                <button
+                <PraxisButton
                   type="button"
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={toggleCollapsed}
                   aria-label="Collapse sidebar"
                   title="Collapse sidebar"
-                  className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors p-1 rounded"
                 >
-                  <PanelLeftClose size={15} />
-                </button>
+                  <PanelLeftClose size={16} strokeWidth={1.75} />
+                </PraxisButton>
               </div>
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="icon-sm"
                 onClick={close}
                 aria-label="Close menu"
-                className="md:hidden text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors p-1 rounded"
+                className="md:hidden"
               >
-                <X size={18} />
-              </button>
+                <X size={18} strokeWidth={1.75} />
+              </PraxisButton>
             </>
           )}
         </div>
 
         {/* Expand button when collapsed — desktop only */}
         {collapsed && (
-          <div className="hidden md:flex justify-center py-2 border-b border-[var(--color-border)]">
-            <button
+          <div className="hidden md:flex justify-center py-2 border-b border-[var(--cx-glass-border)]">
+            <PraxisButton
               type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={toggleCollapsed}
               aria-label="Expand sidebar"
               title="Expand sidebar"
-              className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors p-1 rounded"
             >
-              <PanelLeftOpen size={15} />
-            </button>
+              <PanelLeftOpen size={16} strokeWidth={1.75} />
+            </PraxisButton>
           </div>
         )}
 
         {/* New chat — quick action */}
         {collapsed ? (
-          <motion.button
-            type="button"
-            onClick={() => {
-              close();
-              router.push("/app");
-              router.refresh();
-            }}
-            title="New chat"
-            aria-label="New chat"
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.94 }}
-            transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
-            className="mx-auto my-2 flex items-center justify-center w-8 h-8 rounded-lg"
-            style={{
-              background: "color-mix(in srgb, var(--color-accent) 12%, var(--color-surface-elevated))",
-              border: "1px solid color-mix(in srgb, var(--color-accent) 25%, var(--color-border))",
-              color: "var(--color-accent)",
-            }}
-          >
-            <Plus size={14} />
-          </motion.button>
+          <div className="flex justify-center my-2">
+            <Button
+              variant="primary"
+              size="icon-sm"
+              onClick={() => {
+                close();
+                router.push("/app");
+                router.refresh();
+              }}
+              aria-label="New chat"
+              title="New chat"
+            >
+              <Plus size={14} strokeWidth={1.75} />
+            </Button>
+          </div>
         ) : (
-          <motion.button
-            type="button"
-            onClick={() => {
-              close();
-              router.push("/app");
-              router.refresh();
-            }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
-            className="mx-3 my-2 flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] font-medium"
-            style={{
-              background: "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))",
-              border: "1px solid color-mix(in srgb, var(--color-accent) 22%, var(--color-border))",
-              color: "var(--color-accent-hi, var(--color-accent))",
-            }}
-          >
-            <Plus size={14} /> New chat
-          </motion.button>
+          <div className="mx-3 my-2">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                close();
+                router.push("/app");
+                router.refresh();
+              }}
+              className="w-full justify-start"
+            >
+              <Plus size={14} strokeWidth={1.75} /> New chat
+            </Button>
+          </div>
         )}
 
         {/* Primary nav sections */}
         <nav className="flex-1 overflow-y-auto pb-3" aria-label="Main navigation">
           <NavLink
             href="/app/workspace"
-            icon={<LayoutGrid size={14} />}
+            icon={<LayoutGrid size={20} strokeWidth={1.75} />}
             label="Workspace"
             active={isActive("/app/workspace")}
             onClick={close}
@@ -766,7 +836,7 @@ export function Sidebar({
           <div data-tour-target="specialists">
           <NavLink
             href="/app/team"
-            icon={<Users2 size={14} />}
+            icon={<Users2 size={20} strokeWidth={1.75} />}
             label="Team"
             active={pathname === "/app/team"}
             onClick={close}
@@ -777,19 +847,30 @@ export function Sidebar({
           {/* Pinned specialists — non-collapsed, shown above the full team list */}
           {!collapsed && pinned.length > 0 && (
             <div className="mt-3">
-              <div className="px-3 py-1 flex items-center gap-1.5 cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-                <Pin size={9} aria-hidden /> Pinned
+              <div
+                className="mx-3 mt-0 mb-2 pb-1 flex items-center gap-2"
+                style={{ borderBottom: "1px solid var(--cx-glass-border)" }}
+              >
+                <Pin size={10} strokeWidth={1.75} aria-hidden style={{ color: "var(--cx-text-faint)" }} />
+                <span className="cx-label" style={{ color: "var(--cx-text-faint)" }}>
+                  Pinned
+                </span>
               </div>
-              <ul className="space-y-0.5 mt-0.5">
+              <ul className="space-y-1 mt-1">
                 {pinned.map((emp) => {
                   const isStreaming = streamingEmployee === emp;
                   const allowed = allowedEmployees.includes(emp);
                   const active = pathname === `/app/team/${emp}`;
+                  const empRole = EMPLOYEES[emp]?.role ?? "";
+                  const deptColor = DEPT_COLOR[emp];
                   const rowInner = (
-                    <span
-                      className={`relative flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-colors duration-100 ${!active ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]" : ""}`}
+                    <motion.span
+                      whileHover={shouldReduceMotion ? undefined : { y: -1 }}
+                      whileTap={shouldReduceMotion ? undefined : { scale: 0.98, y: 0 }}
+                      transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
+                      className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[var(--cx-surface-raised)]" : ""}`}
                       style={{
-                        background: active ? "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))" : undefined,
+                        background: active ? "var(--cx-accent-tint)" : undefined,
                       }}
                       onContextMenu={(e) => handleSpecialistContextMenu(e, emp)}
                       onTouchStart={(e) => handleSpecialistTouchStart(e, emp)}
@@ -799,34 +880,49 @@ export function Sidebar({
                       {active && (
                         <span
                           aria-hidden
-                          className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
+                          className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full"
+                          style={{ background: "var(--cx-accent)" }}
                         />
                       )}
-                      <SpecialistAvatar employee={emp} size={28} active={active} streaming={isStreaming} />
-                      <span
-                        className="truncate flex-1"
-                        style={{ color: active ? "var(--color-text)" : "var(--color-text-muted)", fontWeight: active ? 500 : 400 }}
-                      >
-                        {labelFor(emp)}
-                      </span>
+                      <SpecialistAvatar employee={emp} size={20} active={active} streaming={isStreaming} />
+                      <div className="min-w-0 flex-1">
+                        <span
+                          className="block truncate cx-type-sm"
+                          style={{
+                            color: active ? "var(--cx-accent)" : "var(--cx-text-muted)",
+                            fontWeight: active ? 600 : 400,
+                          }}
+                        >
+                          {labelFor(emp)}
+                        </span>
+                        {empRole && (
+                          <span
+                            className="block truncate cx-mono cx-type-xs"
+                            style={{ color: "var(--cx-text-faint)" }}
+                          >
+                            {empRole}
+                          </span>
+                        )}
+                      </div>
                       {!allowed ? (
                         <Lock
                           size={10}
+                          strokeWidth={1.75}
                           aria-label="Locked — upgrade to unlock"
-                          className="text-[var(--color-text-muted)]"
+                          style={{ color: "var(--cx-text-muted)" }}
                         />
                       ) : (
                         <span
                           className="w-1.5 h-1.5 rounded-full shrink-0"
                           style={{
-                            background: isStreaming ? "var(--color-accent)" : DEPT_COLOR[emp],
-                            opacity: isStreaming ? 1 : 0.5,
-                            boxShadow: isStreaming ? "0 0 6px var(--color-accent)" : "none",
+                            background: deptColor,
+                            opacity: isStreaming ? 1 : active ? 0.7 : 0.45,
+                            boxShadow: isStreaming ? `0 0 5px ${deptColor}` : "none",
                           }}
                           aria-label={isStreaming ? "Active" : "Online"}
                         />
                       )}
-                    </span>
+                    </motion.span>
                   );
                   return (
                     <li key={emp} title={allowed ? undefined : "Available on a higher plan"}>
@@ -848,26 +944,40 @@ export function Sidebar({
               <button
                 type="button"
                 onClick={() => setTeamExpanded((v) => !v)}
-                className="w-full flex items-center justify-between px-3 py-1.5 cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                className="w-full mx-0 flex items-center justify-between px-3 pt-1 pb-2 rounded-lg transition-colors duration-150 hover:bg-[var(--cx-surface-raised)]"
+                style={{ borderBottom: "1px solid var(--cx-glass-border)", marginBottom: "4px" }}
               >
-                <span className="inline-flex items-center gap-1.5">
-                  <Users2 size={11} /> Team
+                <span className="cx-label inline-flex items-center gap-2" style={{ color: "var(--cx-text-faint)" }}>
+                  <Users2 size={10} strokeWidth={1.75} aria-hidden /> Specialists
                 </span>
-                <span aria-hidden>
+                <span aria-hidden style={{ fontSize: "var(--cx-type-xs)" }}>
                   {teamExpanded ? "−" : "+"}
                 </span>
               </button>
+              <AnimatePresence initial={false}>
               {teamExpanded && (
-                <ul className="space-y-0.5 mt-1">
+                <motion.ul
+                  key="specialists-list"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={shouldReduceMotion ? { duration: 0 } : { duration: CX_DUR_BASE, ease: [...CX_EASE] }}
+                  className="space-y-1 mt-1 overflow-hidden"
+                >
                   {TEAM.map((emp) => {
                     const isStreaming = streamingEmployee === emp;
                     const allowed = allowedEmployees.includes(emp);
                     const active = pathname === `/app/team/${emp}`;
+                    const empRole = EMPLOYEES[emp]?.role ?? "";
+                    const deptColor = DEPT_COLOR[emp];
                     const rowInner = (
-                      <span
-                        className="relative flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-colors duration-100"
+                      <motion.span
+                        whileHover={shouldReduceMotion ? undefined : { y: -1 }}
+                        whileTap={shouldReduceMotion ? undefined : { scale: 0.98, y: 0 }}
+                        transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
+                        className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[var(--cx-surface-raised)]" : ""}`}
                         style={{
-                          background: active ? "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))" : undefined,
+                          background: active ? "var(--cx-accent-tint)" : undefined,
                         }}
                         onContextMenu={(e) => handleSpecialistContextMenu(e, emp)}
                         onTouchStart={(e) => handleSpecialistTouchStart(e, emp)}
@@ -877,34 +987,49 @@ export function Sidebar({
                         {active && (
                           <span
                             aria-hidden
-                            className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
+                            className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full"
+                            style={{ background: "var(--cx-accent)" }}
                           />
                         )}
-                        <SpecialistAvatar employee={emp} size={28} active={active} streaming={isStreaming} />
-                        <span
-                          className="truncate flex-1"
-                          style={{ color: active ? "var(--color-text)" : "var(--color-text-muted)", fontWeight: active ? 500 : 400 }}
-                        >
-                          {labelFor(emp)}
-                        </span>
+                        <SpecialistAvatar employee={emp} size={20} active={active} streaming={isStreaming} />
+                        <div className="min-w-0 flex-1">
+                          <span
+                            className="block truncate cx-type-sm"
+                            style={{
+                              color: active ? "var(--cx-accent)" : "var(--cx-text-muted)",
+                              fontWeight: active ? 600 : 400,
+                            }}
+                          >
+                            {labelFor(emp)}
+                          </span>
+                          {empRole && (
+                            <span
+                              className="block truncate cx-mono cx-type-xs"
+                              style={{ color: "var(--cx-text-faint)" }}
+                            >
+                              {empRole}
+                            </span>
+                          )}
+                        </div>
                         {!allowed ? (
                           <Lock
                             size={10}
+                            strokeWidth={1.75}
                             aria-label="Locked — upgrade to unlock"
-                            className="text-[var(--color-text-muted)]"
+                            style={{ color: "var(--cx-text-muted)" }}
                           />
                         ) : (
                           <span
                             className="w-1.5 h-1.5 rounded-full shrink-0"
                             style={{
-                              background: isStreaming ? "var(--color-accent)" : DEPT_COLOR[emp],
-                              opacity: isStreaming ? 1 : 0.5,
-                              boxShadow: isStreaming ? "0 0 6px var(--color-accent)" : "none",
+                              background: deptColor,
+                              opacity: isStreaming ? 1 : active ? 0.7 : 0.45,
+                              boxShadow: isStreaming ? `0 0 5px ${deptColor}` : "none",
                             }}
                             aria-label={isStreaming ? "Active" : "Online"}
                           />
                         )}
-                      </span>
+                      </motion.span>
                     );
                     return (
                       <li
@@ -931,8 +1056,9 @@ export function Sidebar({
                       </li>
                     );
                   })}
-                </ul>
+                </motion.ul>
               )}
+              </AnimatePresence>
             </div>
           )}
 
@@ -944,9 +1070,14 @@ export function Sidebar({
                 const allowed = allowedEmployees.includes(emp);
                 const active = pathname === `/app/team/${emp}`;
                 const isPinned = pinned.includes(emp);
+                const deptColor = DEPT_COLOR[emp];
                 const btn = (
-                  <span
-                    className="relative flex items-center justify-center"
+                  <motion.span
+                    whileHover={shouldReduceMotion ? undefined : { scale: 1.06 }}
+                    whileTap={shouldReduceMotion ? undefined : { scale: 0.94 }}
+                    transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
+                    className="relative flex items-center justify-center w-9 h-9 rounded-lg"
+                    style={{ background: active ? "var(--cx-accent-tint)" : undefined }}
                     onContextMenu={(e) => handleSpecialistContextMenu(e, emp)}
                     onTouchStart={(e) => handleSpecialistTouchStart(e, emp)}
                     onTouchEnd={handleSpecialistTouchEnd}
@@ -955,57 +1086,61 @@ export function Sidebar({
                     {active && (
                       <span
                         aria-hidden
-                        className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)] z-10"
+                        className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full z-10"
+                        style={{ background: "var(--cx-accent)" }}
                       />
                     )}
-                    <SpecialistAvatar employee={emp} size={32} active={active} streaming={isStreaming} />
+                    <SpecialistAvatar employee={emp} size={28} active={active} streaming={isStreaming} />
                     {!allowed && (
                       <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 flex items-center justify-center z-10">
-                        <Lock size={8} className="text-[var(--color-text-muted)]" />
+                        <Lock size={8} strokeWidth={1.75} style={{ color: "var(--cx-text-muted)" }} />
                       </span>
                     )}
                     {allowed && !isPinned && (
                       <span
-                        className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full border border-[var(--color-surface)] z-10"
+                        className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full border border-[var(--cx-canvas)] z-10"
                         style={{
-                          background: DEPT_COLOR[emp],
-                          opacity: isStreaming ? 1 : 0.55,
-                          boxShadow: isStreaming ? `0 0 4px ${DEPT_COLOR[emp]}` : "none",
+                          background: deptColor,
+                          opacity: isStreaming ? 1 : active ? 0.7 : 0.5,
+                          boxShadow: isStreaming ? `0 0 4px ${deptColor}` : "none",
                         }}
                       />
                     )}
                     {allowed && isPinned && (
                       <span
-                        className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 flex items-center justify-center rounded-full border border-[var(--color-surface)] z-10"
-                        style={{ background: DEPT_COLOR[emp] }}
+                        className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 flex items-center justify-center rounded-full border border-[var(--cx-canvas)] z-10"
+                        style={{ background: deptColor }}
                         aria-label="Pinned"
                       >
-                        <Pin size={7} style={{ color: "var(--color-canvas, #fff)" }} strokeWidth={2.5} />
+                        <Pin size={7} style={{ color: "var(--cx-canvas)", strokeWidth: 2.5 }} />
                       </span>
                     )}
-                  </span>
+                  </motion.span>
+                );
+                const linkEl = allowed ? (
+                  <Link href={`/app/team/${emp}`} onClick={close} className="block">
+                    {btn}
+                  </Link>
+                ) : (
+                  <Link href="/app/settings" onClick={close} className="block">
+                    {btn}
+                  </Link>
                 );
                 return (
-                  <li key={emp} className="list-none flex justify-center" title={labelFor(emp)}>
-                    {allowed ? (
-                      <Link href={`/app/team/${emp}`} onClick={close} className="block">
-                        {btn}
-                      </Link>
-                    ) : (
-                      <Link href="/app/settings" onClick={close} className="block">
-                        {btn}
-                      </Link>
-                    )}
+                  <li key={emp} className="list-none flex justify-center">
+                    <Tooltip trigger={linkEl} side="right" triggerClassName="block" delay={180}>
+                      <span className="cx-type-xs font-medium">{labelFor(emp)}</span>
+                    </Tooltip>
                   </li>
                 );
               })}
             </div>
           )}
 
-          <div className="mt-3 space-y-0.5">
+          <div className="mt-3 space-y-1">
             <NavLink
               href="/app/voice"
-              icon={<Mic size={14} />}
+              icon={<Mic size={20} strokeWidth={1.75} />}
               label="Voice Room"
               active={isActive("/app/voice")}
               onClick={close}
@@ -1014,7 +1149,7 @@ export function Sidebar({
             {allowedEmployees.includes("sales") && (
               <NavLink
                 href="/app/team/sales"
-                icon={<Sparkles size={14} />}
+                icon={<Sparkles size={20} strokeWidth={1.75} />}
                 label="Leads"
                 active={pathname === "/app/team/sales"}
                 onClick={close}
@@ -1024,7 +1159,7 @@ export function Sidebar({
             <div data-tour-target="memory">
             <NavLink
               href="/app/activity"
-              icon={<Activity size={14} />}
+              icon={<Activity size={20} strokeWidth={1.75} />}
               label="Activity"
               active={isActive("/app/activity")}
               onClick={close}
@@ -1032,7 +1167,7 @@ export function Sidebar({
             />
             <NavLink
               href="/app/memory"
-              icon={<Brain size={14} />}
+              icon={<Brain size={20} strokeWidth={1.75} />}
               label="Memory"
               active={isActive("/app/memory")}
               onClick={close}
@@ -1041,65 +1176,74 @@ export function Sidebar({
             </div>
             <NavLink
               href="/app/outputs"
-              icon={<Bookmark size={14} />}
+              icon={<Bookmark size={20} strokeWidth={1.75} />}
               label="Outputs"
               active={isActive("/app/outputs")}
               onClick={close}
               collapsed={collapsed}
             />
-            {allowedEmployees.includes("engineering") && (
-              collapsed ? (
-                <div className="flex justify-center">
-                  <Link
-                    href="/app/builds"
-                    onClick={close}
-                    title="Builds"
-                    aria-label="Builds"
-                    className={`relative flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-100 ${
-                      isActive("/app/builds")
-                        ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
-                        : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
-                    }`}
-                  >
-                    <span className="relative inline-flex">
-                      <Hammer size={14} />
-                      <SidebarBuildPip
-                        initial={inFlightBuildsInitial}
-                        accountId={accountId}
-                      />
-                    </span>
-                  </Link>
-                </div>
-              ) : (
+            {allowedEmployees.includes("engineering") && (() => {
+              const buildsLink = (
                 <Link
                   href="/app/builds"
                   onClick={close}
-                  className={`relative flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors duration-100 ${
+                  aria-label={collapsed ? "Builds" : undefined}
+                  className={[
+                    "relative flex items-center rounded-lg transition-colors duration-150",
+                    collapsed ? "justify-center mx-auto w-8 h-8" : "gap-2 px-3 py-2",
                     isActive("/app/builds")
-                      ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
-                      : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
-                  }`}
+                      ? "text-[var(--cx-text)]"
+                      : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[var(--cx-surface-raised)]",
+                  ].join(" ")}
+                  style={{
+                    background: isActive("/app/builds") ? "var(--cx-accent-tint)" : undefined,
+                    fontSize: collapsed ? undefined : "var(--cx-type-sm)",
+                  }}
                 >
                   {isActive("/app/builds") && (
                     <span
                       aria-hidden
-                      className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
+                      className={`absolute left-0 rounded-full ${
+                        collapsed ? "top-1.5 bottom-1.5 w-0.5" : "top-2 bottom-2 w-[2px]"
+                      }`}
+                      style={{ background: "var(--cx-accent)" }}
                     />
                   )}
-                  <span className="relative inline-flex">
-                    <Hammer size={14} />
+                  <span
+                    className="relative inline-flex shrink-0"
+                    style={{ color: isActive("/app/builds") ? "var(--cx-accent)" : undefined }}
+                  >
+                    <Hammer size={collapsed ? 20 : 16} strokeWidth={1.75} />
                     <SidebarBuildPip
                       initial={inFlightBuildsInitial}
                       accountId={accountId}
                     />
                   </span>
-                  <span>Builds</span>
+                  <AnimatePresence mode="popLayout">
+                    {!collapsed && (
+                      <motion.span
+                        key="builds-label"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={shouldReduceMotion ? { duration: 0 } : { duration: CX_DUR_FAST, ease: [...CX_EASE] }}
+                        className="truncate"
+                      >
+                        Builds
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                 </Link>
-              )
-            )}
+              );
+              return collapsed ? (
+                <Tooltip trigger={buildsLink} side="right" triggerClassName="block" delay={180}>
+                  <span className="cx-type-xs font-medium">Builds</span>
+                </Tooltip>
+              ) : buildsLink;
+            })()}
             <NavLink
               href="/app/analytics"
-              icon={<BarChart3 size={14} />}
+              icon={<BarChart3 size={20} strokeWidth={1.75} />}
               label="Analytics"
               active={isActive("/app/analytics")}
               onClick={close}
@@ -1118,29 +1262,44 @@ export function Sidebar({
           {/* Empty state — no conversations yet, not in icon-only mode */}
           {!collapsed && conversations.length === 0 && (
             <div className="mt-8 px-4 flex flex-col items-center text-center gap-3">
-              <PraxisLogo size={28} withWordmark glow />
-              <p className="text-sm font-semibold text-[var(--color-text)] mt-1">
-                Your specialists are ready
-              </p>
-              <p className="text-xs text-[var(--color-text-muted)] max-w-[13rem] leading-relaxed">
-                Nine specialists. Zero payroll. Start a conversation to put your team to work.
-              </p>
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{
+                  background: "var(--cx-accent-tint)",
+                  border: "1px solid color-mix(in srgb, var(--cx-accent) 20%, transparent)",
+                }}
+              >
+                <MessageSquare size={18} strokeWidth={1.75} style={{ color: "var(--cx-accent)" }} />
+              </div>
+              <div>
+                <p className="cx-type-sm font-semibold" style={{ color: "var(--cx-text)" }}>
+                  No conversations yet
+                </p>
+                <p className="cx-type-xs mt-1 max-w-[11rem] mx-auto" style={{ color: "var(--cx-text-muted)", lineHeight: "var(--cx-lh-body)" }}>
+                  Pick a specialist and start a conversation
+                </p>
+              </div>
               <Link
                 href="/app"
                 onClick={close}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity mt-1"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg cx-type-xs font-medium hover:opacity-90 transition-opacity"
+                style={{ background: "var(--cx-accent)", color: "var(--cx-canvas)" }}
               >
-                <Plus size={12} />
-                Start a conversation
+                Start your first conversation →
               </Link>
             </div>
           )}
 
           {/* Recent conversations — hidden in icon-only mode */}
           {!collapsed && conversations.length > 0 && (
-            <div className="mt-4">
-              <div className="px-3 py-1.5 cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-                Recent
+            <div className="mt-3">
+              <div
+                className="mx-3 mt-3 mb-2 pb-2 flex items-center gap-2"
+                style={{ borderBottom: "1px solid var(--cx-glass-border)" }}
+              >
+                <span className="cx-label" style={{ color: "var(--cx-text-faint)" }}>
+                  Conversations
+                </span>
               </div>
 
               {/* Specialist filter chips — only when 2+ specialists appear in the list */}
@@ -1152,30 +1311,33 @@ export function Sidebar({
                   aria-label="Filter by specialist"
                 >
                   {/* "All" chip */}
-                  <button
+                  <motion.button
                     type="button"
                     onClick={() => setSpecialistFilter(null)}
-                    className="shrink-0 flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors duration-100 whitespace-nowrap"
+                    whileHover={shouldReduceMotion ? undefined : { scale: 1.04 }}
+                    whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
+                    transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
+                    className="shrink-0 flex items-center px-2 py-1 rounded-full cx-type-xs font-medium whitespace-nowrap"
                     style={
                       specialistFilter === null
                         ? {
-                            background: "var(--color-accent)",
-                            color: "#fff",
+                            background: "var(--cx-accent)",
+                            color: "var(--cx-canvas)",
                           }
                         : {
-                            background: "var(--color-surface-elevated)",
-                            color: "var(--color-text-muted)",
-                            border: "1px solid var(--color-border)",
+                            background: "var(--cx-surface-raised)",
+                            color: "var(--cx-text-muted)",
+                            border: "1px solid var(--cx-border)",
                           }
                     }
                     aria-pressed={specialistFilter === null}
                   >
                     All
-                  </button>
+                  </motion.button>
                   {activeSpecialists.map((emp) => {
                     const active = specialistFilter === emp;
                     return (
-                      <button
+                      <motion.button
                         key={emp}
                         type="button"
                         onClick={() =>
@@ -1184,24 +1346,27 @@ export function Sidebar({
                         title={labelFor(emp)}
                         aria-label={`Filter by ${labelFor(emp)}`}
                         aria-pressed={active}
-                        className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors duration-100 whitespace-nowrap"
+                        whileHover={shouldReduceMotion ? undefined : { scale: 1.04 }}
+                        whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
+                        transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
+                        className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-full cx-type-xs font-medium whitespace-nowrap"
                         style={
                           active
                             ? {
-                                background: `color-mix(in srgb, ${DEPT_COLOR[emp]} 20%, var(--color-surface-elevated))`,
+                                background: `color-mix(in srgb, ${DEPT_COLOR[emp]} 20%, var(--cx-surface-raised))`,
                                 color: DEPT_COLOR[emp],
                                 border: `1px solid color-mix(in srgb, ${DEPT_COLOR[emp]} 50%, transparent)`,
                               }
                             : {
-                                background: "var(--color-surface-elevated)",
-                                color: "var(--color-text-muted)",
-                                border: "1px solid var(--color-border)",
+                                background: "var(--cx-surface-raised)",
+                                color: "var(--cx-text-muted)",
+                                border: "1px solid var(--cx-border)",
                               }
                         }
                       >
                         <SpecialistAvatar employee={emp} size={12} active={active} />
                         {labelFor(emp)}
-                      </button>
+                      </motion.button>
                     );
                   })}
                 </div>
@@ -1210,30 +1375,32 @@ export function Sidebar({
               {/* Search input */}
               <div className="px-2 pb-1">
                 {/* Mobile: icon-only trigger — collapses the search to a single tap target */}
-                <button
+                <PraxisButton
                   type="button"
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => {
                     setSearchExpanded(true);
                     requestAnimationFrame(() => searchInputRef.current?.focus());
                   }}
                   aria-label="Search conversations"
-                  className={`${searchExpanded ? "hidden" : "md:hidden"} flex items-center justify-center w-7 h-7 rounded-lg transition-colors duration-100`}
-                  style={{ color: "var(--color-text-muted)" }}
+                  className={`${searchExpanded ? "hidden" : "md:hidden"}`}
                 >
-                  <Search size={13} />
-                </button>
+                  <Search size={13} strokeWidth={1.75} />
+                </PraxisButton>
                 {/* Full input: always on desktop; on mobile only when expanded */}
                 <div
-                  className={`${searchExpanded ? "flex" : "hidden md:flex"} items-center gap-1.5 px-2 py-1.5 rounded-lg`}
+                  className={`${searchExpanded ? "flex" : "hidden md:flex"} items-center gap-2 px-2 py-1.5 rounded-lg transition-shadow duration-150 focus-within:[box-shadow:var(--cx-accent-glow)]`}
                   style={{
-                    background: "var(--color-surface-elevated)",
-                    border: "1px solid var(--color-border)",
+                    background: "var(--cx-glass-bg)",
+                    border: "1px solid var(--cx-glass-border)",
                   }}
                 >
                   <Search
                     size={11}
+                    strokeWidth={1.75}
                     className="shrink-0"
-                    style={{ color: "var(--color-text-muted)" }}
+                    style={{ color: "var(--cx-text-muted)" }}
                   />
                   <input
                     ref={searchInputRef}
@@ -1243,19 +1410,20 @@ export function Sidebar({
                     placeholder="Search conversations…"
                     aria-label="Search conversations"
                     autoComplete="off"
-                    className="flex-1 min-w-0 bg-transparent text-xs outline-none placeholder:text-[var(--color-text-muted)]"
-                    style={{ color: "var(--color-text)" }}
+                    className="flex-1 min-w-0 bg-transparent text-xs outline-none placeholder:text-[var(--cx-text-muted)]"
+                    style={{ color: "var(--cx-text)" }}
                   />
                   {convSearch && (
-                    <button
+                    <PraxisButton
                       type="button"
+                      variant="ghost"
+                      size="icon-sm"
                       onClick={() => { setConvSearch(""); searchInputRef.current?.focus(); }}
                       aria-label="Clear search"
                       className="shrink-0"
-                      style={{ color: "var(--color-text-muted)" }}
                     >
-                      <X size={11} />
-                    </button>
+                      <X size={11} strokeWidth={1.75} />
+                    </PraxisButton>
                   )}
                 </div>
               </div>
@@ -1275,7 +1443,7 @@ export function Sidebar({
                   : bySearch.slice(0, 8);
                 return (
                   <>
-                    <div className="space-y-0.5">
+                    <div className="space-y-2">
                       {filtered.slice(0, 8).map((c) => {
                         const active = isChat && activeId === c.id;
                         const dom = c.dominant_employee;
@@ -1283,72 +1451,209 @@ export function Sidebar({
                         const empKey = (
                           dom && (TEAM as string[]).includes(dom) ? dom : "jarvis"
                         ) as EmployeeKey;
-                        return (
-                          <Link
-                            key={c.id}
-                            href={`/app?c=${c.id}`}
-                            onClick={close}
-                            className={`relative flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-lg transition-colors duration-100 group ${!active ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]" : ""}`}
-                            style={{
-                              background: active ? "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))" : undefined,
-                            }}
-                            onMouseEnter={(e) => openPeek(c.id, e.currentTarget)}
-                            onMouseLeave={closePeek}
-                            onFocus={(e) => openPeek(c.id, e.currentTarget, true)}
-                            onBlur={closePeek}
-                          >
-                            {active && (
-                              <span
-                                aria-hidden
-                                className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
-                              />
-                            )}
+                        const preview = c.last_message
+                          ? c.last_message.replace(/\n+/g, " ").trim().slice(0, 100)
+                          : null;
+                        const displayTitle = titleOverrides[c.id] ?? c.title ?? "Untitled chat";
+
+                        const avatarEl = (
+                          <span className="shrink-0 mt-1">
                             {isTeam ? (
                               <span
                                 aria-hidden
-                                className="inline-block w-3.5 h-3.5 rounded-full shrink-0"
+                                className="inline-block w-3.5 h-3.5 rounded-full"
                                 style={{
-                                  background:
-                                    "conic-gradient(from 90deg, var(--color-dept-marketing), var(--color-dept-sales), var(--color-dept-engineering), var(--color-dept-jarvis), var(--color-dept-marketing))",
+                                  background: "conic-gradient(from 90deg, var(--color-dept-marketing), var(--color-dept-sales), var(--color-dept-engineering), var(--color-dept-jarvis), var(--color-dept-marketing))",
                                 }}
                               />
                             ) : (
                               <SpecialistAvatar employee={empKey} size={16} active={active} />
                             )}
-                            <span
-                              className="truncate flex-1 text-[12px] leading-snug"
-                              style={{
-                                color: active ? "var(--color-text)" : "var(--color-text-muted)",
-                                fontWeight: active ? 500 : 400,
-                              }}
-                            >
-                              {titleOverrides[c.id] ?? c.title ?? "Untitled chat"}
-                            </span>
-                            <span
-                              className="shrink-0 cx-mono cx-type-xs opacity-0 group-hover:opacity-100 transition-opacity duration-100"
-                              style={{ color: "var(--color-text-muted)" }}
-                            >
-                              {relativeDate(c.updated_at)}
-                            </span>
-                            {c.labels && c.labels.length > 0 && (
-                              <span className="flex items-center gap-0.5 shrink-0">
-                                {c.labels.slice(0, 3).map((l) => (
+                          </span>
+                        );
+
+                        return (
+                          <motion.div
+                            key={c.id}
+                            className="group relative"
+                            whileHover={shouldReduceMotion ? undefined : { y: -1 }}
+                            whileTap={shouldReduceMotion ? undefined : { y: 0, scale: 0.99 }}
+                            transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
+                          >
+                            {deletingId === c.id ? (
+                              /* Delete confirmation inline strip */
+                              <div
+                                className="flex items-center gap-2 px-3 py-2 rounded-lg"
+                                style={{
+                                  background: "color-mix(in srgb, var(--cx-danger) 8%, var(--cx-surface))",
+                                  border: "1px solid color-mix(in srgb, var(--cx-danger) 20%, var(--cx-border))",
+                                }}
+                              >
+                                <Trash2 size={12} strokeWidth={1.75} style={{ color: "var(--cx-danger)", flexShrink: 0 }} />
+                                <span className="cx-type-xs flex-1 truncate" style={{ color: "var(--cx-text)" }}>
+                                  Delete this conversation?
+                                </span>
+                                <div className="flex items-center gap-1 shrink-0">
+                                  <PraxisButton
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    onClick={() => setDeletingId(null)}
+                                    aria-label="Cancel delete"
+                                    disabled={deleteLoading}
+                                  >
+                                    <X size={11} strokeWidth={1.75} />
+                                  </PraxisButton>
+                                  <PraxisButton
+                                    type="button"
+                                    variant="danger"
+                                    size="sm"
+                                    onClick={() => confirmDelete(c.id)}
+                                    disabled={deleteLoading}
+                                    aria-label="Confirm delete"
+                                  >
+                                    Delete
+                                  </PraxisButton>
+                                </div>
+                              </div>
+                            ) : renamingId === c.id ? (
+                              /* Rename inline mode */
+                              <div
+                                className="relative flex items-start gap-2 pl-3 pr-2 py-2 rounded-lg"
+                                style={{ background: active ? "var(--cx-accent-tint)" : "var(--cx-glass-bg)" }}
+                              >
+                                {active && (
                                   <span
-                                    key={l.id}
-                                    aria-label={l.name}
-                                    title={l.name}
-                                    className="inline-block w-2 h-2 rounded-full"
-                                    style={{ background: l.color }}
+                                    aria-hidden
+                                    className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full"
+                                    style={{ background: "var(--cx-accent)" }}
                                   />
-                                ))}
-                              </span>
+                                )}
+                                {avatarEl}
+                                <div className="flex-1 min-w-0 flex items-center gap-1">
+                                  <input
+                                    type="text"
+                                    value={renameValue}
+                                    onChange={(e) => setRenameValue(e.target.value)}
+                                    onKeyDown={handleRenameKeyDown}
+                                    onBlur={() => void commitRename()}
+                                    autoFocus
+                                    maxLength={160}
+                                    aria-label="Rename conversation"
+                                    className="flex-1 min-w-0 bg-transparent cx-type-sm outline-none pb-px"
+                                    style={{
+                                      color: "var(--cx-text)",
+                                      borderBottom: "1px solid var(--cx-accent)",
+                                    }}
+                                  />
+                                  <PraxisButton
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    onMouseDown={(e) => { e.preventDefault(); void commitRename(); }}
+                                    aria-label="Save rename"
+                                  >
+                                    <Check size={11} strokeWidth={2} style={{ color: "var(--cx-accent)" }} />
+                                  </PraxisButton>
+                                  <PraxisButton
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    onMouseDown={(e) => { e.preventDefault(); cancelRename(); }}
+                                    aria-label="Cancel rename"
+                                  >
+                                    <X size={11} strokeWidth={1.75} />
+                                  </PraxisButton>
+                                </div>
+                              </div>
+                            ) : (
+                              /* Normal state — link + hover action buttons */
+                              <>
+                                <Link
+                                  href={`/app?c=${c.id}`}
+                                  onClick={close}
+                                  className={`relative flex items-start gap-2 pl-3 pr-9 py-2 rounded-lg transition-[background] duration-150 ${!active ? "hover:bg-[var(--cx-surface-raised)]" : ""}`}
+                                  style={{ background: active ? "var(--cx-accent-tint)" : undefined }}
+                                  onMouseEnter={(e) => openPeek(c.id, e.currentTarget)}
+                                  onMouseLeave={closePeek}
+                                  onFocus={(e) => openPeek(c.id, e.currentTarget, true)}
+                                  onBlur={closePeek}
+                                >
+                                  {active && (
+                                    <span
+                                      aria-hidden
+                                      className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full"
+                                      style={{ background: "var(--cx-accent)" }}
+                                    />
+                                  )}
+                                  {avatarEl}
+                                  {/* Content: title + date on one line, preview below */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-baseline gap-1">
+                                      <span
+                                        className="truncate flex-1 cx-type-sm leading-snug"
+                                        style={{ color: "var(--cx-text)", fontWeight: active ? 600 : 400 }}
+                                      >
+                                        {displayTitle}
+                                      </span>
+                                      <span
+                                        className="shrink-0 cx-mono cx-type-xs"
+                                        style={{ color: "var(--cx-text-faint)" }}
+                                      >
+                                        {relativeDate(c.updated_at)}
+                                      </span>
+                                    </div>
+                                    {preview && (
+                                      <p className="truncate cx-type-xs mt-1" style={{ color: "var(--cx-text-muted)" }}>
+                                        {preview}
+                                      </p>
+                                    )}
+                                    {c.labels && c.labels.length > 0 && (
+                                      <span className="flex items-center gap-1 mt-1">
+                                        {c.labels.slice(0, 3).map((l) => (
+                                          <span
+                                            key={l.id}
+                                            aria-label={l.name}
+                                            title={l.name}
+                                            className="inline-block w-2 h-2 rounded-full"
+                                            style={{ background: l.color }}
+                                          />
+                                        ))}
+                                      </span>
+                                    )}
+                                  </div>
+                                </Link>
+                                {/* Hover action affordances — hidden at rest, revealed on group hover */}
+                                <div className="absolute right-1 top-1.5 flex items-center gap-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-100 z-10">
+                                  <PraxisButton
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); startRename(c.id, displayTitle); }}
+                                    aria-label="Rename conversation"
+                                    title="Rename"
+                                  >
+                                    <Pencil size={11} strokeWidth={1.75} />
+                                  </PraxisButton>
+                                  <PraxisButton
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); setDeletingId(c.id); }}
+                                    aria-label="Delete conversation"
+                                    title="Delete"
+                                  >
+                                    <Trash2 size={11} strokeWidth={1.75} style={{ color: "var(--cx-danger)" }} />
+                                  </PraxisButton>
+                                </div>
+                              </>
                             )}
-                          </Link>
+                          </motion.div>
                         );
                       })}
                     </div>
                     {(q || specialistFilter) && filtered.length === 0 && (
-                      <p className="px-3 py-2 text-[11px]" style={{ color: "var(--color-text-muted)" }}>
+                      <p className="px-3 py-2 cx-type-xs" style={{ color: "var(--cx-text-muted)" }}>
                         {specialistFilter && !q
                           ? `No conversations with ${labelFor(specialistFilter)} yet`
                           : "No conversations match"}
@@ -1358,13 +1663,13 @@ export function Sidebar({
                       <Link
                         href="/app/conversations"
                         onClick={close}
-                        className="mt-1 flex items-center px-3 py-1.5 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+                        className="mt-1 flex items-center px-3 py-2 cx-type-xs uppercase tracking-[0.15em] text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] transition-colors"
                       >
-                        See all ({conversations.length})
+                        See all <span className="cx-mono">({conversations.length})</span>
                       </Link>
                     )}
                     {filtered.length > 8 && (
-                      <p className="px-3 py-1 text-[10px]" style={{ color: "var(--color-text-muted)" }}>
+                      <p className="px-3 py-1 cx-type-xs" style={{ color: "var(--cx-text-muted)" }}>
                         Showing 8 of {filtered.length} matches
                       </p>
                     )}
@@ -1399,69 +1704,91 @@ export function Sidebar({
 
         {/* Bottom — settings, billing, sign out, email, tier */}
         <div
-          className="pt-2 pb-3 border-t border-[var(--color-border)] space-y-0.5"
-          style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0.75rem))" }}
+          className="pt-2 pb-3 space-y-1"
+          style={{
+            borderTop: "1px solid var(--cx-glass-border)",
+            paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0.75rem))",
+          }}
         >
           {collapsed ? (
             // Icon-only bottom strip
             <div className="flex flex-col items-center gap-1 px-2">
               <div className="flex justify-center"><ChangelogPopover /></div>
               <div className="flex justify-center"><NotificationCenter /></div>
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="icon-sm"
                 onClick={() => window.dispatchEvent(new CustomEvent("praxis:shortcuts:open"))}
                 title="Keyboard shortcuts"
                 aria-label="Keyboard shortcuts"
-                className="flex items-center justify-center w-8 h-8 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors duration-100"
               >
-                <CircleHelp size={14} />
-              </button>
+                <CircleHelp size={16} strokeWidth={1.75} />
+              </PraxisButton>
               <SidebarThemeButton collapsed />
               <Link href="/app/settings" title="Settings" aria-label="Settings" onClick={close} data-tour-target="settings"
-                className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-100 ${isActive("/app/settings") ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"}`}>
-                <Settings size={14} />
+                className="cx-icon-btn cx-icon-btn-lg"
+                style={{
+                  background: isActive("/app/settings") ? "var(--cx-accent-tint)" : undefined,
+                  color: isActive("/app/settings") ? "var(--cx-accent)" : "var(--cx-text-muted)",
+                }}>
+                <Settings size={16} strokeWidth={1.75} />
               </Link>
               <Link href="/app/settings/billing" title="Billing" aria-label="Billing" onClick={close}
-                className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-100 ${isActive("/app/settings/billing") ? "bg-[var(--color-surface-elevated)] text-[var(--color-text)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"}`}>
-                <CreditCard size={14} />
+                className="cx-icon-btn cx-icon-btn-lg"
+                style={{
+                  background: isActive("/app/settings/billing") ? "var(--cx-accent-tint)" : undefined,
+                  color: isActive("/app/settings/billing") ? "var(--cx-accent)" : "var(--cx-text-muted)",
+                }}>
+                <CreditCard size={16} strokeWidth={1.75} />
               </Link>
               <form action="/auth/sign-out" method="post">
-                <button type="submit" title="Sign out" aria-label="Sign out"
-                  className="flex items-center justify-center w-8 h-8 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors">
-                  <LogOut size={14} />
-                </button>
+                <PraxisButton
+                  type="submit"
+                  variant="ghost"
+                  size="icon-sm"
+                  title="Sign out"
+                  aria-label="Sign out"
+                >
+                  <LogOut size={16} strokeWidth={1.75} />
+                </PraxisButton>
               </form>
               <div
-                className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-semibold shrink-0 overflow-hidden border border-[var(--color-border)] mt-1"
-                style={{ background: "var(--color-surface-elevated)" }}
+                className="w-6 h-6 rounded-full flex items-center justify-center cx-type-xs font-semibold shrink-0 overflow-hidden mt-1"
+                style={{
+                  background: "color-mix(in srgb, var(--cx-accent) 15%, var(--cx-surface))",
+                  border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, var(--cx-border))",
+                }}
                 title={displayName || userEmail}
               >
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <span style={{ color: "var(--color-accent-hi)" }}>
+                  <span style={{ color: "var(--cx-accent-bright)" }}>
                     {(displayName || userEmail)[0]?.toUpperCase() ?? "?"}
                   </span>
                 )}
               </div>
             </div>
           ) : (
-            <div className="px-2 space-y-0.5">
+            <div className="px-2 space-y-1">
               <ChangelogPopover />
               <div className="px-1"><NotificationCenter /></div>
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => window.dispatchEvent(new CustomEvent("praxis:shortcuts:open"))}
-                className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] rounded-lg transition-colors duration-100"
+                className="w-full justify-start"
               >
-                <CircleHelp size={14} /> Shortcuts
-              </button>
+                <CircleHelp size={16} strokeWidth={1.75} /> Shortcuts
+              </PraxisButton>
               <SidebarThemeButton />
               <div data-tour-target="settings">
               <NavLink
                 href="/app/settings"
-                icon={<Settings size={14} />}
+                icon={<Settings size={16} strokeWidth={1.75} />}
                 label="Settings"
                 active={
                   pathname === "/app/settings" ||
@@ -1474,46 +1801,63 @@ export function Sidebar({
               </div>
               <NavLink
                 href="/app/settings/billing"
-                icon={<CreditCard size={14} />}
+                icon={<CreditCard size={16} strokeWidth={1.75} />}
                 label="Billing"
                 active={isActive("/app/settings/billing")}
                 onClick={close}
                 small
               />
               <form action="/auth/sign-out" method="post">
-                <button
+                <PraxisButton
                   type="submit"
-                  className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] rounded-lg transition-colors duration-100"
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start"
                 >
-                  <LogOut size={14} /> Sign out
-                </button>
+                  <LogOut size={16} strokeWidth={1.75} /> Sign out
+                </PraxisButton>
               </form>
               <div className="px-3 pt-2 flex items-center gap-2">
                 <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold shrink-0 overflow-hidden"
+                  className="w-6 h-6 rounded-full flex items-center justify-center cx-type-xs font-semibold shrink-0 overflow-hidden"
                   style={{
-                    background: "color-mix(in srgb, var(--color-accent) 15%, var(--color-surface-elevated))",
-                    border: "1px solid color-mix(in srgb, var(--color-accent) 25%, var(--color-border))",
+                    background: "color-mix(in srgb, var(--cx-accent) 15%, var(--cx-surface))",
+                    border: "1px solid color-mix(in srgb, var(--cx-accent) 25%, var(--cx-border))",
                   }}
                 >
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <span style={{ color: "var(--color-accent-hi, var(--color-accent))" }}>
+                    <span style={{ color: "var(--cx-accent-bright)" }}>
                       {(displayName || userEmail)[0]?.toUpperCase() ?? "?"}
                     </span>
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-[11px] font-medium truncate" style={{ color: "var(--color-text)" }}>
+                  <div className="cx-type-xs font-medium truncate" style={{ color: "var(--cx-text)" }}>
                     {displayName || userEmail.split("@")[0]}
                   </div>
-                  <div className="text-[10px] truncate" style={{ color: "var(--color-text-muted)" }}>
+                  <div className="cx-type-xs truncate" style={{ color: "var(--cx-text-muted)" }}>
                     {tierName ? tierName : "Free"}{" "}
                     {workspaceName || accountName ? `· ${(workspaceName || accountName).slice(0, 16)}` : ""}
                   </div>
                 </div>
+              </div>
+              {/* Bottom collapse toggle — desktop only, spec-required position */}
+              <div className="hidden md:block">
+                <PraxisButton
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleCollapsed}
+                  aria-label="Collapse sidebar"
+                  title="Collapse sidebar"
+                  className="w-full justify-start"
+                >
+                  <PanelLeftClose size={16} strokeWidth={1.75} />
+                  Collapse
+                </PraxisButton>
               </div>
             </div>
           )}
@@ -1537,33 +1881,31 @@ export function Sidebar({
           role="menu"
           aria-label="Specialist options"
           onClick={(e) => e.stopPropagation()}
-          className="praxis-root"
+          className="praxis-root cx-glass-float cx-glass-border"
           style={{
             position: "fixed",
             top: ctxMenu.y,
             left: ctxMenu.x,
             zIndex: 100,
             minWidth: 140,
-            borderRadius: 10,
-            border: "1px solid var(--color-border)",
-            background: "var(--color-surface-elevated)",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+            borderRadius: "var(--cx-radius-md)",
             padding: "4px",
           }}
         >
-          <button
-            role="menuitem"
+          <PraxisButton
             type="button"
+            role="menuitem"
+            variant="ghost"
+            size="sm"
             onClick={() => {
               pinned.includes(ctxMenu.emp) ? unpin(ctxMenu.emp) : pin(ctxMenu.emp);
               setCtxMenu(null);
             }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-lg transition-colors duration-100 hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
-            style={{ color: "var(--color-text)" }}
+            className="w-full justify-start"
           >
-            <Pin size={12} style={{ color: "var(--color-text-muted)" }} />
+            <Pin size={12} strokeWidth={1.75} style={{ color: "var(--cx-text-muted)" }} />
             {pinned.includes(ctxMenu.emp) ? "Unpin specialist" : "Pin specialist"}
-          </button>
+          </PraxisButton>
         </div>,
         document.body
       )}
@@ -1584,7 +1926,7 @@ export function Sidebar({
         return createPortal(
           <div
             role="tooltip"
-            className="praxis-root pdl-tooltip pdl-glass"
+            className="praxis-root pdl-tooltip cx-glass-popover"
             style={{
               position: "fixed",
               top: tooltipTop,
@@ -1595,7 +1937,7 @@ export function Sidebar({
               zIndex: 50,
             }}
           >
-            <div className="flex items-center gap-1.5 mb-1">
+            <div className="flex items-center gap-2 mb-1">
               {isTeam ? (
                 <span
                   aria-hidden
@@ -1609,18 +1951,18 @@ export function Sidebar({
                 <SpecialistAvatar employee={empKey} size={14} />
               )}
               <span
-                className="text-[10px] font-semibold truncate"
-                style={{ color: isTeam ? "var(--color-accent-hi)" : DEPT_COLOR[empKey] }}
+                className="cx-type-xs font-semibold truncate"
+                style={{ color: isTeam ? "var(--cx-accent-bright)" : DEPT_COLOR[empKey] }}
               >
                 {isTeam ? "Team" : employeeLabel(empKey)}
               </span>
             </div>
             {preview ? (
-              <p className="text-[11px] leading-snug" style={{ color: "var(--pdl-text-muted, var(--color-text-muted))" }}>
+              <p className="cx-type-xs leading-snug" style={{ color: "var(--cx-text-muted)" }}>
                 {preview}
               </p>
             ) : (
-              <p className="text-[11px] italic" style={{ color: "var(--pdl-text-muted, var(--color-text-muted))" }}>
+              <p className="cx-type-xs italic" style={{ color: "var(--cx-text-muted)" }}>
                 No messages yet
               </p>
             )}
@@ -1649,66 +1991,81 @@ function NavLink({
   small?: boolean;
   collapsed?: boolean;
 }) {
+  const shouldReduceMotion = useReducedMotion() ?? false;
+
+  const inner = (
+    <motion.div
+      whileHover={!shouldReduceMotion ? { y: -1 } : undefined}
+      whileTap={!shouldReduceMotion ? { scale: 0.97 } : undefined}
+      transition={{ duration: 0.15, ease: [...CX_EASE] }}
+    >
+      <Link
+        href={href}
+        onClick={onClick}
+        aria-label={collapsed ? label : undefined}
+        className={[
+          "relative flex items-center rounded-lg transition-colors duration-150",
+          collapsed
+            ? "justify-center mx-auto w-8 h-8"
+            : `gap-2 px-3 ${small ? "py-1" : "py-2"}`,
+          !active
+            ? "hover:bg-[var(--cx-surface-raised)] hover:text-[var(--cx-text)]"
+            : "",
+        ].join(" ")}
+        style={{
+          fontSize: !collapsed && small ? "var(--cx-type-xs)" : "var(--cx-type-sm)",
+          background: active ? "var(--cx-accent-tint)" : undefined,
+          color: active ? "var(--cx-text)" : "var(--cx-text-muted)",
+          fontWeight: active ? 500 : 400,
+        }}
+      >
+        {active && (
+          <span
+            aria-hidden
+            className={`absolute left-0 rounded-full ${
+              collapsed ? "top-1.5 bottom-1.5 w-0.5" : "top-2 bottom-2 w-[2px]"
+            }`}
+            style={{ background: "var(--cx-accent)" }}
+          />
+        )}
+        <motion.span
+          whileHover={shouldReduceMotion ? undefined : { scale: collapsed ? 1.15 : 1.12 }}
+          whileTap={shouldReduceMotion ? undefined : { scale: 0.92 }}
+          transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
+          className="shrink-0 inline-flex"
+          style={{ color: active ? "var(--cx-accent)" : undefined }}
+        >
+          {icon}
+        </motion.span>
+        <AnimatePresence mode="popLayout">
+          {!collapsed && (
+            <motion.span
+              key="nav-label"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={
+                shouldReduceMotion
+                  ? { duration: 0 }
+                  : { duration: CX_DUR_FAST, ease: [...CX_EASE] }
+              }
+              className="truncate"
+            >
+              {label}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </Link>
+    </motion.div>
+  );
+
   if (collapsed) {
     return (
-      <div className="flex justify-center">
-        <Link
-          href={href}
-          onClick={onClick}
-          title={label}
-          aria-label={label}
-          className={`relative flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-100 ${!active ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] hover:text-[var(--color-text)]" : ""}`}
-          style={{
-            background: active ? "color-mix(in srgb, var(--color-accent) 12%, var(--color-surface-elevated))" : undefined,
-            color: active ? "var(--color-text)" : "var(--color-text-muted)",
-          }}
-        >
-          {active && (
-            <span
-              aria-hidden
-              className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
-            />
-          )}
-          <motion.span
-            whileHover={{ scale: 1.15 }}
-            transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
-            className="inline-flex"
-          >
-            {icon}
-          </motion.span>
-        </Link>
-      </div>
+      <Tooltip trigger={inner} side="right" triggerClassName="block" delay={180}>
+        <span className="cx-type-xs font-medium">{label}</span>
+      </Tooltip>
     );
   }
 
-  return (
-    <Link
-      href={href}
-      onClick={onClick}
-      className={`relative flex items-center gap-2 px-3 rounded-lg transition-colors duration-100 ${!active ? "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] hover:text-[var(--color-text)]" : ""}`}
-      style={{
-        paddingTop: small ? "0.375rem" : "0.5rem",
-        paddingBottom: small ? "0.375rem" : "0.5rem",
-        fontSize: small ? "0.75rem" : "0.8125rem",
-        background: active ? "color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-elevated))" : undefined,
-        color: active ? "var(--color-text)" : "var(--color-text-muted)",
-        fontWeight: active ? 500 : 400,
-      }}
-    >
-      {active && (
-        <span
-          aria-hidden
-          className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--color-accent)]"
-        />
-      )}
-      <motion.span
-        whileHover={{ scale: 1.12 }}
-        transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
-        className="shrink-0 inline-flex"
-      >
-        {icon}
-      </motion.span>
-      <span>{label}</span>
-    </Link>
-  );
+  return inner;
 }

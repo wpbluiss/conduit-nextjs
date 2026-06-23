@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Hammer, Lock, Loader2, X } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/conduit/ui/Button";
 
 interface Props {
@@ -38,6 +39,7 @@ export default function EngineeringBuildButton({
   deptColor,
 }: Props) {
   const router = useRouter();
+  const reduced = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,12 +48,14 @@ export default function EngineeringBuildButton({
 
   if (!internalAccount) {
     return (
-      <span
-        className="btn-primary !text-sm opacity-50 cursor-not-allowed inline-flex items-center gap-1.5"
+      <Button
+        variant="primary"
+        size="sm"
+        isDisabled
         title="Engineering builds are in early access."
       >
-        <Lock size={12} /> Start a build
-      </span>
+        <Lock size={12} strokeWidth={1.75} /> Start a build
+      </Button>
     );
   }
 
@@ -88,37 +92,51 @@ export default function EngineeringBuildButton({
     <>
       <Button
         onClick={() => setOpen(true)}
-        className="!text-sm inline-flex items-center gap-1.5"
-        style={{ background: deptColor, color: "var(--cx-canvas, #0B0B0F)" }}
+        className="!cx-type-base inline-flex items-center gap-1.5"
+        style={{ background: deptColor, color: "var(--cx-canvas)" }}
       >
-        <Hammer size={13} /> Start a build
+        <Hammer size={13} strokeWidth={1.75} /> Start a build
       </Button>
 
-      {open && (
-        <div
-          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/55 px-4"
-          role="dialog"
-          aria-modal="true"
+      <AnimatePresence>
+        {open && (
+        <motion.div
+          key="build-modal-scrim"
+          className="fixed inset-0 z-[90] cx-scrim flex items-center justify-center px-4"
+          style={{ background: "var(--cx-modal-scrim, rgba(11,11,15,0.65))" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.14 }}
         >
-          <div className="conduit-card w-full max-w-lg p-6">
+          <motion.div
+            className="cx-glass-overlay cx-glass-border w-full max-w-lg rounded-[16px] p-6"
+            role="dialog"
+            aria-modal="true"
+            initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
+            animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
+            transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+          >
             <div className="flex items-start justify-between gap-3 mb-4">
               <div>
-                <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                <div className="cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                   Engineering · early access
                 </div>
-                <h2 className="serif text-xl mt-1">Start a build</h2>
+                <h2 className="cx-type-lg font-semibold mt-1">Start a build</h2>
               </div>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-sm"
                 onClick={() => setOpen(false)}
-                className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                 aria-label="Close"
               >
-                <X size={16} />
-              </button>
+                <X size={16} strokeWidth={1.75} />
+              </Button>
             </div>
 
-            <label className="block text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-1.5">
+            <label className="block cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-1.5">
               Build type
             </label>
             <div className="grid grid-cols-2 gap-2 mb-4">
@@ -137,15 +155,15 @@ export default function EngineeringBuildButton({
                         : "transparent",
                   }}
                 >
-                  <div className="text-sm">{t.label}</div>
-                  <div className="text-[10px] text-[var(--color-text-muted)] mt-0.5">
+                  <div className="cx-type-base">{t.label}</div>
+                  <div className="cx-type-xs text-[var(--color-text-muted)] mt-0.5">
                     {t.hint}
                   </div>
                 </button>
               ))}
             </div>
 
-            <label className="block text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-1.5">
+            <label className="block cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)] mb-1.5">
               What should I build?
             </label>
             <textarea
@@ -153,39 +171,40 @@ export default function EngineeringBuildButton({
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Build me a one-page landing for a fictional barbershop in West Palm Beach with a contact form."
               rows={5}
-              className="w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-md focus:border-[var(--color-accent)] outline-none p-3 text-sm resize-none leading-relaxed"
+              className="w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-md focus:border-[var(--color-accent)] outline-none p-3 cx-type-base resize-none leading-relaxed"
               maxLength={4000}
             />
-            <div className="text-[10px] text-[var(--color-text-muted)] mt-1">
+            <div className="cx-type-xs text-[var(--color-text-muted)] mt-1">
               {prompt.length}/4000
             </div>
 
             {error && (
-              <p className="mt-3 text-xs text-[var(--color-pink)]">{error}</p>
+              <p className="mt-3 cx-type-xs text-[var(--color-pink)]">{error}</p>
             )}
 
             <div className="mt-5 flex justify-end gap-2">
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => setOpen(false)}
-                className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] px-3 py-1.5"
               >
                 Cancel
-              </button>
+              </Button>
               <Button
                 onClick={submit}
                 disabled={submitting || prompt.trim().length < 8}
-                className="!text-sm inline-flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ background: deptColor, color: "var(--cx-canvas, #0B0B0F)" }}
+                className="!cx-type-base inline-flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ background: deptColor, color: "var(--cx-canvas)" }}
               >
-                {submitting && <Loader2 size={12} className="animate-spin" />}
+                {submitting && <Loader2 size={12} strokeWidth={1.75} className="animate-spin" />}
                 Ship it
               </Button>
             </div>
-          </div>
-        </div>
-      )}
-
+          </motion.div>
+        </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

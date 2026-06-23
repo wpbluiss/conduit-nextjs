@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronUp, MapPin, X } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 export interface PinnedMessage {
   id: string;
@@ -37,13 +38,13 @@ export function PinnedMessagesBanner({ pins, onUnpin, onJumpTo }: Props) {
       }}
     >
       {/* Header row */}
-      <button
+      <PraxisButton
         type="button"
+        variant="ghost"
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left"
         aria-expanded={expanded}
         aria-label={expanded ? "Collapse pinned messages" : "Expand pinned messages"}
-        style={{ background: "transparent" }}
+        className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left"
       >
         <div className="flex items-center gap-2">
           <MapPin
@@ -51,13 +52,13 @@ export function PinnedMessagesBanner({ pins, onUnpin, onJumpTo }: Props) {
             style={{ color: "var(--color-accent)", flexShrink: 0 }}
           />
           <span
-            className="text-[11px] font-semibold uppercase tracking-[0.12em]"
+            className="cx-type-xs font-semibold uppercase tracking-[0.12em]"
             style={{ color: "var(--color-text-muted)" }}
           >
             Pinned
           </span>
           <span
-            className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold"
+            className="inline-flex items-center justify-center w-4 h-4 rounded-full cx-type-xs font-bold"
             style={{
               background: "var(--color-accent)",
               color: "#fff",
@@ -67,11 +68,11 @@ export function PinnedMessagesBanner({ pins, onUnpin, onJumpTo }: Props) {
           </span>
         </div>
         {expanded ? (
-          <ChevronUp size={13} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} />
+          <ChevronUp size={13} strokeWidth={1.75} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} />
         ) : (
-          <ChevronDown size={13} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} />
+          <ChevronDown size={13} strokeWidth={1.75} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} />
         )}
-      </button>
+      </PraxisButton>
 
       {/* Expanded list */}
       {expanded && (
@@ -89,49 +90,34 @@ export function PinnedMessagesBanner({ pins, onUnpin, onJumpTo }: Props) {
               style={{ borderColor: "var(--color-border)" }}
             >
               <p
-                className="flex-1 text-[13px] leading-snug truncate"
+                className="flex-1 cx-type-sm leading-snug truncate"
                 style={{ color: "var(--color-text)" }}
                 title={pin.content}
               >
                 {truncate(pin.content)}
               </p>
               <div className="flex items-center gap-1.5 shrink-0">
-                <button
+                <PraxisButton
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => onJumpTo(pin.message_id)}
                   aria-label="Jump to message"
                   title="Jump to message"
-                  className="text-[11px] px-2 py-0.5 rounded transition-colors"
-                  style={{
-                    color: "var(--color-accent)",
-                    border: "1px solid var(--color-border)",
-                    background: "transparent",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "var(--color-surface-raised)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "transparent";
-                  }}
+                  className="cx-type-xs"
                 >
                   ↑ Go
-                </button>
-                <button
+                </PraxisButton>
+                <PraxisButton
                   type="button"
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => onUnpin(pin.message_id)}
                   aria-label="Unpin message"
                   title="Unpin"
-                  className="p-1 rounded transition-colors"
-                  style={{ color: "var(--color-text-muted)" }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-                  }}
                 >
-                  <X size={11} />
-                </button>
+                  <X size={11} strokeWidth={1.75} />
+                </PraxisButton>
               </div>
             </div>
           ))}

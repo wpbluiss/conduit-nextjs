@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ArrowRight, Check, ExternalLink } from "lucide-react";
 import { ORDERED_TIERS, TOPUPS, tierById, type TierId } from "@/lib/billing/tiers";
 import { track } from "@/lib/analytics/track";
-import { PraxisButton } from "./PraxisButton";
+import { Button as PraxisButton } from "@/components/conduit/ui/Button";
 
 interface UsageData {
   totals: { input: number; output: number; cost: number };
@@ -44,13 +44,13 @@ export function BillingDashboard({
 
   if (internal) {
     return (
-      <div className="space-y-6 text-sm">
+      <div className="space-y-6">
         <div className="conduit-card p-6">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
+          <div className="cx-label text-[var(--color-accent-hi)] mb-1">
             Internal Account · Conduit AI Team
           </div>
-          <div className="serif text-2xl">No charge, full access</div>
-          <p className="mt-2 text-[var(--color-text-muted)]">
+          <div className="cx-heading-xl mt-1">No charge, full access</div>
+          <p className="cx-body mt-2 text-[var(--cx-text-muted)]">
             Internal team account — all tiers, all employees, no token cap.
           </p>
         </div>
@@ -150,16 +150,16 @@ export function BillingDashboard({
   };
 
   return (
-    <div className="space-y-6 text-sm">
+    <div className="space-y-6">
       {/* Current plan card */}
       <div className="conduit-card p-6 flex items-start justify-between gap-4">
         <div>
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+          <div className="cx-label text-[var(--cx-text-muted)]">
             Current plan ·{" "}
             {(account.subscription_status ?? "inactive").replace("_", " ")}
           </div>
-          <div className="serif text-3xl mt-1">{tier.name}</div>
-          <div className="text-[var(--color-text-muted)] text-xs mt-1.5">
+          <div className="cx-heading-2xl mt-1">{tier.name}</div>
+          <div className="cx-meta mt-1.5">
             {tier.monthlyPriceCents > 0
               ? `$${tier.monthlyPriceCents / 100} / month`
               : "Free forever"}{" "}
@@ -180,7 +180,7 @@ export function BillingDashboard({
             className="shrink-0"
           >
             Manage in Stripe
-            <ExternalLink size={12} />
+            <ExternalLink size={12} strokeWidth={1.75} />
           </PraxisButton>
         )}
       </div>
@@ -188,11 +188,11 @@ export function BillingDashboard({
       {/* Token usage */}
       <TokenUsageBar usage={usage} cap={tier.monthlyTokenAllowance} bonus={account.bonus_tokens ?? 0} />
 
-      {error && <p className="text-sm text-[var(--color-pink)]">{error}</p>}
+      {error && <p className="cx-body text-[var(--cx-danger)]">{error}</p>}
 
       {/* Plan comparison */}
       <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+        <div className="cx-label mb-3">
           Plans
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -210,20 +210,18 @@ export function BillingDashboard({
                 }`}
               >
                 {isCurrent && (
-                  <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-accent-hi)] mb-1">
+                  <div className="cx-label text-[var(--cx-accent-bright)] mb-1">
                     Current plan
                   </div>
                 )}
-                <div className="serif text-2xl">{t.name}</div>
-                <div className="mt-1 mb-3">
-                  <span className="text-2xl font-medium">
+                <div className="cx-heading-lg mt-1">{t.name}</div>
+                <div className="mt-1 mb-3 flex items-baseline gap-1">
+                  <span className="cx-type-xl cx-mono font-semibold">
                     ${t.monthlyPriceCents / 100}
                   </span>
-                  <span className="text-xs text-[var(--color-text-muted)]">
-                    {" "}/mo
-                  </span>
+                  <span className="cx-meta">/mo</span>
                 </div>
-                <ul className="space-y-1.5 text-xs text-[var(--color-text-muted)] flex-1">
+                <ul className="space-y-1.5 cx-type-xs text-[var(--cx-text-muted)] flex-1">
                   <li className="flex items-start gap-1.5">
                     <Check
                       size={12}
@@ -269,7 +267,7 @@ export function BillingDashboard({
                     className="mt-4 w-full justify-center"
                   >
                     {`Upgrade to ${t.name}`}
-                    <ArrowRight size={12} />
+                    <ArrowRight size={12} strokeWidth={1.75} />
                   </PraxisButton>
                 )}
               </div>
@@ -280,34 +278,37 @@ export function BillingDashboard({
 
       {/* Token top-ups */}
       <div>
-        <div className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-3">
+        <div className="cx-label mb-3">
           Buy more tokens
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {TOPUPS.map((t) => (
-            <button
+            <PraxisButton
               key={t.id}
+              type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => buyTopup(t.id)}
-              disabled={busy !== null}
-              className="conduit-card p-5 text-left hover:border-[var(--color-accent)] transition-colors disabled:opacity-50"
+              isDisabled={busy !== null}
+              className="conduit-card p-5 text-left hover:border-[var(--cx-accent)] transition-colors disabled:opacity-50 flex-col items-start"
             >
-              <div className="serif text-2xl">${t.amountCents / 100}</div>
-              <div className="mt-1 text-sm">
+              <div className="cx-type-xl cx-mono font-semibold">${t.amountCents / 100}</div>
+              <div className="cx-body mt-1 text-[var(--cx-text-muted)]">
                 {(t.tokensGranted / 1000).toLocaleString()}k tokens
               </div>
-              <span className="mt-3 inline-flex items-center gap-1 text-xs text-[var(--color-accent)]">
+              <span className="mt-3 inline-flex items-center gap-1 cx-type-xs text-[var(--cx-accent)]">
                 {busy === t.id ? "Opening Stripe…" : "Buy"}
-                <ArrowRight size={11} />
+                <ArrowRight size={11} strokeWidth={1.75} />
               </span>
-            </button>
+            </PraxisButton>
           ))}
         </div>
-        <p className="mt-2 text-[10px] text-[var(--color-text-muted)]">
+        <p className="mt-2 cx-meta">
           Bonus tokens stack on your monthly allowance and roll over until used.
         </p>
       </div>
 
-      <p className="text-[10px] text-[var(--color-text-muted)]">
+      <p className="cx-meta tabular-nums">
         Allowance this cycle: {allowance.toLocaleString()} tokens.
       </p>
     </div>
@@ -330,29 +331,27 @@ function TokenUsageBar({
   return (
     <div className="conduit-card p-5">
       <div className="flex items-baseline justify-between gap-3 mb-2">
-        <span className="text-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
-          Tokens this cycle
-        </span>
-        <span className="text-sm">
+        <span className="cx-label">Tokens this cycle</span>
+        <span className="cx-mono cx-type-base tabular-nums">
           {used.toLocaleString()} / {total.toLocaleString()}
         </span>
       </div>
-      <div className="h-2 rounded-full bg-[var(--color-border)] overflow-hidden">
+      <div className="h-2 rounded-full bg-[var(--cx-border)] overflow-hidden">
         <div
           className="h-2 rounded-full transition-all"
           style={{
             width: `${pct}%`,
             background:
               pct >= 100
-                ? "var(--color-pink)"
+                ? "var(--cx-danger)"
                 : pct >= 80
-                  ? "var(--color-amber)"
-                  : "var(--color-accent)",
+                  ? "var(--cx-warn)"
+                  : "var(--cx-accent)",
           }}
         />
       </div>
       {pct >= 80 && (
-        <p className="mt-2 text-xs text-[var(--color-amber)]">
+        <p className="mt-2 cx-type-xs text-[var(--cx-warn)]">
           {pct >= 100
             ? "Token cap reached. Top up or upgrade to continue."
             : `${pct}% used — consider a top-up or upgrade.`}

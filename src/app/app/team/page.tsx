@@ -69,7 +69,7 @@ export default async function TeamPage() {
               style={{ background: "var(--color-surface-elevated)" }}
               aria-hidden
             >
-              <Users2 size={16} style={{ color: "var(--color-text-muted)" }} />
+              <Users2 size={16} strokeWidth={1.75} style={{ color: "var(--color-text-muted)" }} />
             </span>
             <h1 className="praxis-display-1">Your team</h1>
           </div>
@@ -104,13 +104,13 @@ export default async function TeamPage() {
             >
               <div className="flex-1">
                 <p
-                  className="text-sm font-medium"
+                  className="cx-type-base font-medium"
                   style={{ color: "var(--color-text)" }}
                 >
                   Your team is ready — start a task
                 </p>
                 <p
-                  className="text-sm mt-1"
+                  className="cx-type-base mt-1"
                   style={{ color: "var(--color-text-muted)" }}
                 >
                   Ask Atlas to route your first request, or pick a specialist
@@ -119,10 +119,10 @@ export default async function TeamPage() {
               </div>
               <Link
                 href="/app"
-                className="inline-flex items-center gap-1.5 text-sm font-medium shrink-0"
+                className="inline-flex items-center gap-1.5 cx-type-base font-medium shrink-0"
                 style={{ color: "var(--color-accent)" }}
               >
-                Open the console <ArrowRight size={14} />
+                Open the console <ArrowRight size={14} strokeWidth={1.75} />
               </Link>
             </div>
           </>

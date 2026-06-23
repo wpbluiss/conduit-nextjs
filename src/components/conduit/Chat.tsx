@@ -4,7 +4,9 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle, ArrowRight, Check, Copy, Download, FileText, Link, Pin, Search, Share2, Tag, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import { UpgradeCTABanner } from "./UpgradeCTABanner";
-import { motion } from "framer-motion";
+import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, useTransform } from "framer-motion";
+import { MESSAGE_SENT } from "@/lib/ui/motion";
+import { CX_ACCENT_BRIGHT, CX_REWARD } from "@/lib/design-system/cx-tokens";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import {
   DEPT_COLOR,
@@ -26,7 +28,7 @@ import {
 } from "./praxis/PraxisComposerPill";
 import { composeChatEmptyCopy, timeOfDayBucket } from "@/lib/conduit/welcome-copy";
 import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
-import { TypingIndicator } from "./TypingIndicator";
+import { ThinkingBubble, THINKING_STATUS, ROUTING_TO_STATUS } from "./TypingIndicator";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import {
   SpecialistSelectorModal,
@@ -43,7 +45,7 @@ import { track } from "@/lib/analytics/track";
 import { ConversationLabelManager, type ConversationLabel } from "./ConversationLabels";
 import { Tooltip } from "./pdl/Tooltip";
 import { SpecialistEmptyArt } from "./SpecialistEmptyArt";
-import { Button } from "@/components/conduit/ui/Button";
+import { Button, PraxisButton } from "@/components/conduit/ui/Button";
 
 export interface VoicePrefs {
   enabled: boolean;
@@ -137,18 +139,6 @@ function suggestionsForTier(allowed: Set<EmployeeKey>): Suggestion[] {
   return [...base, ...extras].slice(0, 4);
 }
 
-// Mono micro-copy shown in the composer presence line while a specialist is active.
-const SPECIALIST_THINKING_HINT: Partial<Record<EmployeeKey, string>> = {
-  jarvis:      "is routing to your team…",
-  marketing:   "is reviewing your brief…",
-  engineering: "is analyzing the problem…",
-  sales:       "is building the play…",
-  finance:     "is reviewing the numbers…",
-  compliance:  "is checking requirements…",
-  hr:          "is reviewing your request…",
-  ops:         "is mapping the process…",
-  legal:       "is reviewing the brief…",
-};
 
 const SPECIALIST_PROMPTS: Record<EmployeeId, string> = {
   jarvis: "Help me prioritize what to work on this week across my business",
@@ -293,6 +283,16 @@ export function Chat({
   // Message edit: id of the user message currently being edited inline.
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [streamingEmployee, setStreamingEmployee] =
+    useState<EmployeeKey | null>(null);
+  // Routing target: set briefly during a handoff so the Atlas thinking bubble
+  // can show "routing to Engineering…" before the new specialist slot appears.
+  const [routingTarget, setRoutingTarget] = useState<EmployeeKey | null>(null);
+  // Reward beat: set on message_end, auto-cleared after 700ms
+  const [rewardEmployee, setRewardEmployee] = useState<EmployeeKey | null>(null);
+  const rewardClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Round-table: tracks which specialist is currently active (thinking/streaming).
+  // null = none active yet, or round-table just ended.
+  const [roundTableActiveEmployee, setRoundTableActiveEmployee] =
     useState<EmployeeKey | null>(null);
   const [sendError, setSendError] = useState<{
     text: string;
@@ -1073,6 +1073,32 @@ export function Chat({
       let buf = "";
       let currentEmployee: EmployeeKey = placeholderEmp;
 
+      // RAF-batched token accumulation — collapse per-token setStates into
+      // one DOM update per animation frame (~60fps) for smooth streaming perf.
+      let tokenBuf = "";
+      let tokenBufEmployee: EmployeeKey = placeholderEmp;
+      let tokenRafId: number | null = null;
+
+      const flushTokenBuf = () => {
+        if (tokenBuf) {
+          appendTo(tokenBufEmployee, tokenBuf);
+          tokenBuf = "";
+        }
+        tokenRafId = null;
+      };
+
+      const scheduleTokenFlush = () => {
+        if (!tokenRafId) tokenRafId = requestAnimationFrame(flushTokenBuf);
+      };
+
+      const flushTokenBufNow = () => {
+        if (tokenRafId !== null) {
+          cancelAnimationFrame(tokenRafId);
+          tokenRafId = null;
+        }
+        flushTokenBuf();
+      };
+
       const ensurePendingFor = (employee: EmployeeKey, handoffFrom?: EmployeeKey) => {
         setMessages((prev) => {
           const next = [...prev];
@@ -1145,7 +1171,7 @@ export function Chat({
         });
       };
 
-      const handleEvent = (event: string, data: Record<string, unknown>) => {
+      const handleEvent = (event: string, data: Record<string, unknown>): Promise<void> | void => {
         if (event === "audio") {
           // R13: PCM16 chunk piggybacking on the chat SSE stream. Decode +
           // queue into the Web Audio scheduler so playback overlaps with
@@ -1167,28 +1193,62 @@ export function Chat({
         }
         if (event === "token") {
           const employee = (data.employee as EmployeeKey) || currentEmployee;
+          if (employee !== tokenBufEmployee) {
+            // Employee changed mid-stream — flush the old buffer before switching
+            flushTokenBufNow();
+            tokenBufEmployee = employee;
+          }
           currentEmployee = employee;
           setStreamingEmployee(employee);
           ensurePendingFor(employee);
-          appendTo(employee, (data.delta as string) || "");
+          tokenBuf += (data.delta as string) || "";
+          scheduleTokenFlush();
         } else if (event === "handoff") {
+          flushTokenBufNow();
           const from = currentEmployee;
           const to = data.to as EmployeeKey;
-          finishCurrent(from);
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: "system",
-              content: `→ ${employeeLabel(to)} taking this`,
-              handoffTo: to,
-            },
-          ]);
-          currentEmployee = to;
-          setStreamingEmployee(to);
-          ensurePendingFor(to, from);
+          // Stage 3: show "routing to Engineering…" in Atlas's bubble for 350ms
+          // before transitioning to the new specialist's pending slot.
+          return new Promise<void>((resolve) => {
+            // Mark Atlas's pending message with the routing target so TypingIndicator
+            // can render "routing to Engineering…" instead of "routing to your team…"
+            setMessages((prev) => {
+              const next = [...prev];
+              const last = next[next.length - 1];
+              if (last?.role === "assistant" && last.pending && last.employee === from) {
+                next[next.length - 1] = {
+                  ...last,
+                  metadata: { ...(last.metadata ?? {}), routingTo: to },
+                };
+              }
+              return next;
+            });
+            setRoutingTarget(to);
+            setTimeout(() => {
+              finishCurrent(from);
+              setMessages((prev) => [
+                ...prev,
+                {
+                  role: "system",
+                  content: `→ ${employeeLabel(to)} taking this`,
+                  handoffTo: to,
+                },
+              ]);
+              currentEmployee = to;
+              setStreamingEmployee(to);
+              setRoutingTarget(null);
+              ensurePendingFor(to, from);
+              resolve();
+            }, 350);
+          });
         } else if (event === "message_end") {
+          flushTokenBufNow();
           const employee = (data.employee as EmployeeKey) || currentEmployee;
           finishCurrent(employee);
+          // Reward beat — ring pulse on every completion (sparks computed in render for significant)
+          if (rewardClearTimerRef.current) clearTimeout(rewardClearTimerRef.current);
+          setRewardEmployee(employee);
+          rewardClearTimerRef.current = setTimeout(() => setRewardEmployee(null), 750);
           // Auto-play the just-finished message if voice is on AND R13's
           // streaming TTS didn't already produce audio for this turn.
           const streamingPlayed = streamingAudioActiveRef.current;
@@ -1249,6 +1309,7 @@ export function Chat({
           });
         } else if (event === "round_table_thinking") {
           const emp = data.employee as EmployeeKey;
+          setRoundTableActiveEmployee(emp);
           // Insert a placeholder pending bubble for this employee
           setMessages((prev) => [
             ...prev,
@@ -1262,6 +1323,8 @@ export function Chat({
           ]);
         } else if (event === "round_table_response") {
           const emp = data.employee as EmployeeKey;
+          // Mark this specialist as no longer active; next thinking event will set the new one.
+          setRoundTableActiveEmployee((prev) => (prev === emp ? null : prev));
           const content = (data.content as string) || "";
           // Resolve the matching pending bubble (last one for this employee)
           setMessages((prev) => {
@@ -1429,14 +1492,18 @@ export function Chat({
             if (!dataLine) continue;
             try {
               const data = JSON.parse(dataLine);
-              handleEvent(event, data);
+              // Handoff events return a Promise (350ms routing pause); await it
+              // so the routing micro-copy is visible before the transition.
+              const maybePromise = handleEvent(event, data);
+              if (maybePromise) await maybePromise;
             } catch {
               // ignore malformed event
             }
           }
         }
       } catch {
-        // Stream dropped mid-response — mark the in-flight message as incomplete.
+        // Stream dropped mid-response — flush buffer then mark incomplete.
+        flushTokenBufNow();
         setMessages((prev) => {
           const next = [...prev];
           const last = next[next.length - 1];
@@ -1447,7 +1514,10 @@ export function Chat({
           return next;
         });
       } finally {
+        flushTokenBufNow();
         setStreamingEmployee(null);
+        setRoutingTarget(null);
+        setRoundTableActiveEmployee(null);
         setLoading(false);
         router.refresh();
       }
@@ -1512,14 +1582,14 @@ export function Chat({
               <div ref={topSentinelRef} className="flex-1 flex justify-center">
                 {loadingOlder ? (
                   <span
-                    className="text-[11px] uppercase tracking-wider"
+                    className="cx-type-xs uppercase tracking-wider"
                     style={{ color: "var(--color-text-muted)" }}
                   >
                     Loading older messages…
                   </span>
                 ) : !hasMore && messages.length > 0 ? (
                   <span
-                    className="text-[11px] uppercase tracking-wider"
+                    className="cx-type-xs uppercase tracking-wider"
                     style={{ color: "var(--color-text-muted)" }}
                   >
                     All messages loaded
@@ -1528,46 +1598,34 @@ export function Chat({
               </div>
               {messages.length > 0 && (
                 <div className="shrink-0 flex items-center gap-1">
-                  <button
+                  <PraxisButton
                     type="button"
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setSearchOpen((v) => !v)}
                     title="Search messages"
                     aria-label="Search messages"
                     aria-pressed={searchOpen}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
-                    style={{
-                      color: searchOpen ? "var(--color-text)" : "var(--color-text-muted)",
-                      border: searchOpen ? "1px solid var(--color-border)" : "1px solid transparent",
-                    }}
                   >
-                    <Search size={12} />
+                    <Search size={12} strokeWidth={1.75} />
                     <span className="hidden sm:inline">Search</span>
-                  </button>
-                  <button
+                  </PraxisButton>
+                  <PraxisButton
                     type="button"
+                    variant="ghost"
+                    size="sm"
                     onClick={exportConversation}
                     title="Export as Markdown"
                     aria-label="Export conversation as Markdown"
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
-                    style={{
-                      color: "var(--color-text-muted)",
-                      border: "1px solid transparent",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
-                      (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-                      (e.currentTarget as HTMLElement).style.borderColor = "transparent";
-                    }}
                   >
-                    <Download size={12} />
+                    <Download size={12} strokeWidth={1.75} />
                     <span className="hidden sm:inline">Markdown</span>
-                  </button>
+                  </PraxisButton>
                   {conversationId && (
-                    <button
+                    <PraxisButton
                       type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={() =>
                         window.open(
                           `/api/conduit/conversations/${conversationId}/export`,
@@ -1576,23 +1634,10 @@ export function Chat({
                       }
                       title="Print / Save as PDF"
                       aria-label="Print conversation or save as PDF"
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
-                      style={{
-                        color: "var(--color-text-muted)",
-                        border: "1px solid transparent",
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
-                        (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-                        (e.currentTarget as HTMLElement).style.borderColor = "transparent";
-                      }}
                     >
-                      <FileText size={12} />
+                      <FileText size={12} strokeWidth={1.75} />
                       <span className="hidden sm:inline">PDF</span>
-                    </button>
+                    </PraxisButton>
                   )}
                   {/* Tag button — only when a conversation exists */}
                   {conversationId && (
@@ -1606,60 +1651,34 @@ export function Chat({
                   )}
                   {/* Copy permalink button — only when a conversation exists */}
                   {conversationId && (
-                    <button
+                    <PraxisButton
                       type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => void copyPermalink()}
                       title="Copy link to this conversation"
                       aria-label="Copy link to this conversation"
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors"
-                      style={{
-                        color: linkCopied ? "var(--color-text)" : "var(--color-text-muted)",
-                        border: linkCopied ? "1px solid var(--color-border)" : "1px solid transparent",
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!linkCopied) {
-                          (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
-                          (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!linkCopied) {
-                          (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-                          (e.currentTarget as HTMLElement).style.borderColor = "transparent";
-                        }
-                      }}
                     >
-                      <Link size={12} />
+                      <Link size={12} strokeWidth={1.75} />
                       <span className="hidden sm:inline">{linkCopied ? "Copied!" : "Copy link"}</span>
-                    </button>
+                    </PraxisButton>
                   )}
                   {/* Handoff button — only when conversation has messages and no existing handoff */}
                   {conversationId && !handoffInfo && (
-                    <button
+                    <PraxisButton
                       type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => setShowHandoffPicker(true)}
-                      disabled={handoffLoading}
+                      isDisabled={handoffLoading}
                       title="Hand off to another specialist"
                       aria-label="Hand off to another specialist"
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] transition-colors disabled:opacity-50"
-                      style={{
-                        color: "var(--color-text-muted)",
-                        border: "1px solid transparent",
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
-                        (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-                        (e.currentTarget as HTMLElement).style.borderColor = "transparent";
-                      }}
                     >
-                      <Share2 size={12} />
+                      <Share2 size={12} strokeWidth={1.75} />
                       <span className="hidden sm:inline">
                         {handoffLoading ? "Handing off…" : "Handoff"}
                       </span>
-                    </button>
+                    </PraxisButton>
                   )}
                 </div>
               )}
@@ -1671,7 +1690,7 @@ export function Chat({
             <div
               className="cx-glass cx-glass-border flex items-center gap-2 px-2 py-2 mb-2 rounded-[8px]"
             >
-              <Search size={13} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} aria-hidden />
+              <Search size={13} strokeWidth={1.75} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} aria-hidden />
               <input
                 ref={searchInputRef}
                 type="search"
@@ -1682,30 +1701,28 @@ export function Chat({
                 }}
                 placeholder="Search messages…"
                 aria-label="Search messages in this conversation"
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--color-text-muted)]"
+                className="flex-1 bg-transparent cx-body outline-none placeholder:text-[var(--cx-text-muted)]"
               />
               {searchQuery && (
-                <span className="text-[11px] shrink-0" style={{ color: "var(--color-text-muted)" }}>
+                <span className="cx-type-xs shrink-0" style={{ color: "var(--color-text-muted)" }}>
                   {searchMatchSet.size} match{searchMatchSet.size !== 1 ? "es" : ""}
                 </span>
               )}
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="icon-sm"
                 onClick={() => setSearchOpen(false)}
                 aria-label="Close search"
-                className="shrink-0 p-0.5 rounded transition-colors"
-                style={{ color: "var(--color-text-muted)" }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
               >
-                <X size={13} />
-              </button>
+                <X size={13} strokeWidth={1.75} />
+              </PraxisButton>
             </div>
           )}
 
           {companyBrief && messages.length === 0 && (
             <div
-              className="flex items-start gap-2 px-3 py-2 rounded-lg text-xs"
+              className="flex items-start gap-2 px-3 py-2 rounded-lg cx-type-xs"
               style={{
                 background: "color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-elevated))",
                 border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)",
@@ -1764,50 +1781,76 @@ export function Chat({
             />
           )}
 
-          {messages.map((m, i) => (
-            <MessageBubble
-              key={m.id ?? i}
-              message={m}
-              onOpenArtifact={(id) => setDrawerArtifactId(id)}
-              playing={playingMessageIdx === i}
-              onStopAudio={stopAudio}
-              onReplayAudio={
-                voice.ttsAllowed && m.role === "assistant" && m.employee
-                  ? () => playTTS(m.content, m.employee as EmployeeKey, i)
-                  : undefined
+          <AnimatePresence mode="sync">
+            {(() => {
+              // Index + significance of the last completed assistant message from the rewarded specialist.
+              // Significance (> 300 chars) controls whether sparks fire in addition to the ring pulse.
+              let lastRewardIdx = -1;
+              let lastRewardSignificant = false;
+              if (rewardEmployee) {
+                for (let j = 0; j < messages.length; j++) {
+                  const msg = messages[j];
+                  if (msg.role === "assistant" && msg.employee === rewardEmployee && !msg.pending) {
+                    lastRewardIdx = j;
+                    lastRewardSignificant = msg.content.length > 300;
+                  }
+                }
               }
-              isEditing={editingMessageId === m.id}
-              onEditStart={
-                m.role === "user" && m.id && !loading
-                  ? () => setEditingMessageId(m.id!)
-                  : undefined
-              }
-              onEditCancel={() => setEditingMessageId(null)}
-              onEditSubmit={
-                m.id ? (text) => void submitEdit(m.id!, text) : undefined
-              }
-              pinned={m.id ? pinnedMessages.some((p) => p.message_id === m.id) : false}
-              onPinToggle={
-                m.role === "assistant" && m.id && conversationId
-                  ? (shouldPin) => void handlePinToggle(m.id!, shouldPin)
-                  : undefined
-              }
-              searchMatch={searchMatchSet.has(i)}
-              conversationId={conversationId}
-            />
-          ))}
+              return messages.map((m, i) => {
+                // Stable key throughout the message lifecycle. The empty→streaming
+                // transition is handled by internal AnimatePresence inside MessageBubble
+                // so there's no layout jump when the first token arrives.
+                const msgKey = m.id ?? i;
+                return (
+                  <MessageBubble
+                    key={msgKey}
+                    message={m}
+                    onOpenArtifact={(id) => setDrawerArtifactId(id)}
+                    playing={playingMessageIdx === i}
+                    onStopAudio={stopAudio}
+                    onReplayAudio={
+                      voice.ttsAllowed && m.role === "assistant" && m.employee
+                        ? () => playTTS(m.content, m.employee as EmployeeKey, i)
+                        : undefined
+                    }
+                    isEditing={editingMessageId === m.id}
+                    onEditStart={
+                      m.role === "user" && m.id && !loading
+                        ? () => setEditingMessageId(m.id!)
+                        : undefined
+                    }
+                    onEditCancel={() => setEditingMessageId(null)}
+                    onEditSubmit={
+                      m.id ? (text) => void submitEdit(m.id!, text) : undefined
+                    }
+                    pinned={m.id ? pinnedMessages.some((p) => p.message_id === m.id) : false}
+                    onPinToggle={
+                      m.role === "assistant" && m.id && conversationId
+                        ? (shouldPin) => void handlePinToggle(m.id!, shouldPin)
+                        : undefined
+                    }
+                    searchMatch={searchMatchSet.has(i)}
+                    conversationId={conversationId}
+                    roundTableActiveEmployee={roundTableActiveEmployee}
+                    rewarded={i === lastRewardIdx}
+                    rewardSignificant={i === lastRewardIdx && lastRewardSignificant}
+                  />
+                );
+              });
+            })()}
+          </AnimatePresence>
 
           {/* Handoff banner — shown when this conversation was handed off */}
           {handoffInfo && (
             <div
-              className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-sm mt-2"
+              className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl cx-body mt-2"
               style={{
                 background: "color-mix(in srgb, var(--color-accent) 7%, var(--color-surface-elevated))",
                 border: "1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)",
               }}
             >
               <div className="flex items-center gap-2 min-w-0">
-                <Share2 size={14} style={{ color: "var(--color-accent-hi)", flexShrink: 0 }} />
+                <Share2 size={14} strokeWidth={1.75} style={{ color: "var(--color-accent-hi)", flexShrink: 0 }} />
                 <span style={{ color: "var(--color-text-muted)" }}>
                   Continued by{" "}
                   <span style={{ color: "var(--color-accent-hi)", fontWeight: 500 }}>
@@ -1817,10 +1860,10 @@ export function Chat({
               </div>
               <a
                 href={`/app?c=${handoffInfo.conversationId}`}
-                className="flex items-center gap-1 text-xs font-medium shrink-0 transition-opacity hover:opacity-80"
+                className="flex items-center gap-1 cx-type-xs font-medium shrink-0 transition-opacity hover:opacity-80"
                 style={{ color: "var(--color-accent-hi)" }}
               >
-                Open <ArrowRight size={11} />
+                Open <ArrowRight size={11} strokeWidth={1.75} />
               </a>
             </div>
           )}
@@ -1830,14 +1873,17 @@ export function Chat({
             <div className="mx-auto px-2 pb-1" style={{ maxWidth: "48rem" }}>
               <div className="flex flex-wrap gap-2 pt-1">
                 {followUpSuggestions.map((s) => (
-                  <button
+                  <motion.button
                     key={s}
                     type="button"
                     onClick={() => {
                       setFollowUpSuggestions([]);
                       void send(s);
                     }}
-                    className="px-3 py-1.5 text-xs rounded-full border transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+                    whileHover={{ y: -1 }}
+                    whileTap={{ scale: 0.96 }}
+                    transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
+                    className="px-3 py-2 cx-type-xs rounded-full border transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
                     style={{
                       borderColor: "var(--color-border)",
                       background: "var(--color-surface-elevated)",
@@ -1845,7 +1891,7 @@ export function Chat({
                     }}
                   >
                     {s}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -1857,38 +1903,39 @@ export function Chat({
               style={
                 sendError.capacity
                   ? {
-                      borderColor: "rgba(202, 138, 4, 0.25)",
-                      background: "rgba(202, 138, 4, 0.06)",
+                      borderColor: "color-mix(in srgb, var(--color-amber) 25%, transparent)",
+                      background: "color-mix(in srgb, var(--color-amber) 6%, transparent)",
                     }
                   : {
-                      borderColor: "rgba(248, 113, 113, 0.25)",
-                      background: "rgba(248, 113, 113, 0.06)",
+                      borderColor: "color-mix(in srgb, var(--cx-danger) 25%, transparent)",
+                      background: "color-mix(in srgb, var(--cx-danger) 6%, transparent)",
                     }
               }
             >
               <AlertCircle
                 size={16}
+                strokeWidth={1.75}
                 className="shrink-0 mt-0.5"
-                style={{ color: sendError.capacity ? "#ca8a04" : "#f87171" }}
+                style={{ color: sendError.capacity ? "var(--color-yellow)" : "var(--cx-danger)" }}
               />
               <p
-                className="flex-1 text-sm leading-relaxed"
-                style={{ color: "var(--color-text)" }}
+                className="flex-1 cx-body"
+                style={{ color: "var(--cx-text)" }}
               >
                 {sendError.text}
               </p>
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => {
                   const retry = sendError.retryText;
                   setSendError(null);
                   void send(retry);
                 }}
-                className="shrink-0 text-sm font-medium transition-colors hover:opacity-80"
-                style={{ color: "var(--color-ember-500)" }}
               >
                 Try again
-              </button>
+              </PraxisButton>
             </div>
           )}
           {rateLimitUntil && (
@@ -1900,18 +1947,19 @@ export function Chat({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
               style={{
-                borderColor: "rgba(202, 138, 4, 0.30)",
-                background: "rgba(202, 138, 4, 0.06)",
+                borderColor: "color-mix(in srgb, var(--color-amber) 30%, transparent)",
+                background: "color-mix(in srgb, var(--color-amber) 6%, transparent)",
               }}
             >
               <AlertCircle
                 size={16}
+                strokeWidth={1.75}
                 className="shrink-0"
-                style={{ color: "var(--color-amber, #ca8a04)" }}
+                style={{ color: "var(--color-amber)" }}
               />
-              <p className="flex-1 text-sm" style={{ color: "var(--color-text)" }}>
+              <p className="flex-1 cx-body" style={{ color: "var(--cx-text)" }}>
                 Ready again in{" "}
-                <span className="font-medium tabular-nums">{rateLimitSecondsLeft} s</span>
+                <span className="cx-mono font-medium">{rateLimitSecondsLeft} s</span>
               </p>
             </motion.div>
           )}
@@ -1922,19 +1970,19 @@ export function Chat({
         <div
           role="status"
           aria-live="polite"
-          className="flex items-center justify-between gap-3 px-4 md:px-8 py-2 text-xs"
+          className="flex items-center justify-between gap-3 px-4 md:px-8 py-2 cx-type-xs"
           style={{
             background: connStatus === 'reconnected'
-              ? 'rgba(34, 197, 94, 0.08)'
+              ? 'color-mix(in srgb, var(--cx-reward) 8%, transparent)'
               : connStatus === 'failed'
-              ? 'rgba(248, 113, 113, 0.08)'
-              : 'rgba(202, 138, 4, 0.08)',
+              ? 'color-mix(in srgb, var(--cx-danger) 8%, transparent)'
+              : 'color-mix(in srgb, var(--color-amber) 8%, transparent)',
             borderTop: `1px solid ${
               connStatus === 'reconnected'
-                ? 'rgba(34, 197, 94, 0.2)'
+                ? 'color-mix(in srgb, var(--cx-reward) 20%, transparent)'
                 : connStatus === 'failed'
-                ? 'rgba(248, 113, 113, 0.2)'
-                : 'rgba(202, 138, 4, 0.2)'
+                ? 'color-mix(in srgb, var(--cx-danger) 20%, transparent)'
+                : 'color-mix(in srgb, var(--color-amber) 20%, transparent)'
             }`,
           }}
         >
@@ -1942,13 +1990,13 @@ export function Chat({
             className="flex items-center gap-2"
             style={{
               color: connStatus === 'reconnected'
-                ? '#22c55e'
+                ? 'var(--cx-reward)'
                 : connStatus === 'failed'
-                ? '#f87171'
-                : '#ca8a04',
+                ? 'var(--cx-danger)'
+                : 'var(--color-amber)',
             }}
           >
-            <AlertCircle size={12} aria-hidden />
+            <AlertCircle size={12} strokeWidth={1.75} aria-hidden />
             <span>
               {connStatus === 'reconnecting' && 'Connection lost — reconnecting…'}
               {connStatus === 'reconnected' && 'Reconnected'}
@@ -1956,17 +2004,15 @@ export function Chat({
             </span>
           </div>
           {(connStatus === 'reconnecting' || connStatus === 'reconnected') && (
-            <button
+            <PraxisButton
               type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => setConnStatus('connected')}
               aria-label="Dismiss"
-              className="shrink-0 p-0.5 rounded transition-colors"
-              style={{ color: 'var(--color-text-muted)' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--color-text)'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'; }}
             >
-              <X size={11} />
-            </button>
+              <X size={11} strokeWidth={1.75} />
+            </PraxisButton>
           )}
         </div>
       )}
@@ -1974,8 +2020,7 @@ export function Chat({
       <UpgradeCTABanner internalAccount={internalAccount} />
 
       <div
-        className="px-4 md:px-8 py-3 md:py-4"
-        style={{ background: "var(--color-surface)" }}
+        className="cx-glass cx-glass-border border-t px-4 md:px-8 py-3 md:py-4"
       >
         <div className="mx-auto" style={{ maxWidth: "48rem" }}>
           <PraxisComposerPill
@@ -2028,39 +2073,68 @@ export function Chat({
             onWhisperStop={() => whisperRecorder.stop()}
             onWhisperCancel={() => whisperRecorder.cancel()}
           />
+          {/* Presence line — aria-live region so screen readers announce
+              specialist activity without interrupting the conversation flow. */}
           <div
-            className="mt-2 h-4 flex items-center justify-center"
-            style={{ fontSize: "11px" }}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className="mt-2 min-h-4 flex items-center justify-center cx-type-xs overflow-hidden"
           >
-            {streamingEmployee ? (
-              <span className="presence-line flex items-center gap-1.5">
-                <span
-                  aria-hidden="true"
-                  className="presence-dot inline-block w-1.5 h-1.5 rounded-full shrink-0"
-                  style={{ background: DEPT_COLOR[streamingEmployee] }}
-                />
-                <span style={{ color: DEPT_COLOR[streamingEmployee], fontWeight: 500 }}>
-                  {labelFor(streamingEmployee)}
-                </span>
-                <span
-                  style={{
-                    color: "var(--color-text-muted)",
-                    fontFamily: "var(--font-mono, monospace)",
-                  }}
+            <AnimatePresence mode="wait">
+              {streamingEmployee ? (
+                <motion.span
+                  key={streamingEmployee}
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                  className="presence-line flex items-center gap-1.5 min-w-0"
                 >
-                  {SPECIALIST_THINKING_HINT[streamingEmployee] ?? "is thinking…"}
-                </span>
-              </span>
-            ) : (
-              <>
-                <span className="hidden sm:inline" style={{ color: "var(--color-text-muted)" }}>
-                  Shift+Enter for newline
-                </span>
-                <span className="sm:hidden" style={{ color: "var(--color-text-muted)" }}>
-                  Tap send to submit
-                </span>
-              </>
-            )}
+                  <span
+                    aria-hidden="true"
+                    className="presence-dot inline-block w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{ background: "var(--cx-accent, #7C6CFF)" }}
+                  />
+                  <span
+                    className="shrink-0 font-medium"
+                    style={{ color: DEPT_COLOR[streamingEmployee] }}
+                  >
+                    {labelFor(streamingEmployee)}
+                  </span>
+                  {/* Status text re-animates when routing resolves */}
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={routingTarget && streamingEmployee === "jarvis" ? `routing-${routingTarget}` : `thinking-${streamingEmployee}`}
+                      className="cx-mono cx-text-muted truncate"
+                      initial={{ opacity: 0, y: 3 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.14, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      {routingTarget && streamingEmployee === "jarvis"
+                        ? `is ${ROUTING_TO_STATUS[routingTarget] ?? `routing to ${labelFor(routingTarget)}…`}`
+                        : `is ${THINKING_STATUS[streamingEmployee] ?? "thinking…"}`}
+                    </motion.span>
+                  </AnimatePresence>
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="hint"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.12 }}
+                >
+                  <span className="hidden sm:inline cx-text-faint">
+                    Shift+Enter for newline
+                  </span>
+                  <span className="sm:hidden cx-text-faint">
+                    Tap send to submit
+                  </span>
+                </motion.span>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
@@ -2083,7 +2157,7 @@ export function Chat({
       {showHandoffPicker && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-black/40 cx-scrim"
             aria-hidden
             onClick={() => setShowHandoffPicker(false)}
           />
@@ -2099,38 +2173,38 @@ export function Chat({
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p
-                    className="text-[11px] uppercase tracking-[0.15em] mb-1"
+                    className="cx-type-xs uppercase tracking-[0.15em] mb-1"
                     style={{ color: "var(--color-text-muted)" }}
                   >
                     Hand off to…
                   </p>
-                  <h2 className="text-base font-semibold" style={{ color: "var(--color-text)" }}>
+                  <h2 className="cx-type-md font-semibold" style={{ color: "var(--color-text)" }}>
                     Choose a specialist
                   </h2>
                 </div>
-                <button
+                <PraxisButton
                   type="button"
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => setShowHandoffPicker(false)}
                   aria-label="Close"
-                  className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors"
-                  style={{
-                    color: "var(--color-text-muted)",
-                    background: "var(--color-surface)",
-                  }}
                 >
-                  <X size={14} />
-                </button>
+                  <X size={14} strokeWidth={1.75} />
+                </PraxisButton>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {EMPLOYEE_ORDER.map((empId) => {
                   const emp = EMPLOYEES[empId];
                   const isAllowed = allowedSet.has(empId as EmployeeKey);
                   return (
-                    <button
+                    <motion.button
                       key={empId}
                       type="button"
                       disabled={!isAllowed}
                       onClick={() => void performHandoff(empId as EmployeeKey)}
+                      whileHover={isAllowed ? { y: -1 } : undefined}
+                      whileTap={isAllowed ? { scale: 0.96 } : undefined}
+                      transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
                       className="flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       style={{
                         background: isAllowed
@@ -2150,7 +2224,7 @@ export function Chat({
                       }}
                     >
                       <span
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center cx-type-base font-bold"
                         style={{
                           background: emp.colorSoft,
                           color: emp.color,
@@ -2160,22 +2234,22 @@ export function Chat({
                         {emp.initial}
                       </span>
                       <span
-                        className="text-[11px] font-medium text-center leading-tight"
+                        className="cx-type-xs font-medium text-center leading-tight"
                         style={{ color: "var(--color-text)" }}
                       >
                         {emp.name}
                       </span>
                       <span
-                        className="text-[9px] text-center leading-tight"
+                        className="cx-type-xs text-center leading-tight"
                         style={{ color: "var(--color-text-muted)" }}
                       >
                         {emp.role}
                       </span>
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
-              <p className="text-[11px] mt-4" style={{ color: "var(--color-text-muted)" }}>
+              <p className="cx-type-xs mt-4" style={{ color: "var(--color-text-muted)" }}>
                 A new conversation will open with context from this thread.
                 {allowedEmployees.length < EMPLOYEE_ORDER.length && (
                   <> Dimmed specialists require a higher plan.</>
@@ -2195,7 +2269,7 @@ export function Chat({
         return (
           <button
             onClick={stopAudio}
-            className="fixed bottom-24 right-6 md:bottom-6 z-30 conduit-card px-4 py-2.5 text-xs flex items-center gap-2 transition-colors"
+            className="fixed bottom-24 right-6 md:bottom-6 z-30 conduit-card px-4 py-3 cx-type-xs flex items-center gap-2 transition-colors"
             style={{
               borderColor: deptColor,
               color: deptColor,
@@ -2298,13 +2372,16 @@ function EmptyState({
               const emp = EMPLOYEES[id];
               const prompt = SPECIALIST_PROMPTS[id];
               return (
-                <button
+                <motion.button
                   key={emp.id}
                   type="button"
                   onClick={() => {
                     onPinSelect?.(emp.id as EmployeeKey);
                     onPromptInsert?.(prompt);
                   }}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
                   className="praxis-card praxis-card-team text-left"
                   data-dept={emp.id}
                   style={{ cursor: "pointer", width: "100%" }}
@@ -2321,7 +2398,7 @@ function EmptyState({
                     <div>
                       <p
                         style={{
-                          fontSize: 13,
+                          fontSize: "var(--cx-type-sm)",
                           fontWeight: 600,
                           color: "var(--color-text)",
                           lineHeight: 1.3,
@@ -2339,14 +2416,14 @@ function EmptyState({
                   </div>
                   <p
                     style={{
-                      fontSize: 12,
+                      fontSize: "var(--cx-type-xs)",
                       color: "var(--color-text-muted)",
-                      lineHeight: 1.5,
+                      lineHeight: "var(--cx-lh-body)",
                     }}
                   >
                     {prompt}
                   </p>
-                </button>
+                </motion.button>
               );
             })}
           </div>
@@ -2396,11 +2473,14 @@ function EmptyState({
             }}
           >
             {SPECIALIST_STARTER_PROMPTS[pin as EmployeeId].map((prompt) => (
-              <button
+              <motion.button
                 key={prompt}
                 type="button"
                 onClick={() => onPromptInsert?.(prompt)}
-                className="px-4 py-2.5 rounded-xl text-sm text-left transition-all"
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
+                className="px-4 py-3 rounded-xl cx-body text-left transition-all"
                 style={{
                   border: `1px solid color-mix(in srgb, ${EMPLOYEES[pin as EmployeeId].color} 30%, var(--color-border))`,
                   background: `color-mix(in srgb, ${EMPLOYEES[pin as EmployeeId].color} 6%, var(--color-surface-elevated))`,
@@ -2417,7 +2497,7 @@ function EmptyState({
                 }}
               >
                 {prompt}
-              </button>
+              </motion.button>
             ))}
           </div>
         </>
@@ -2538,31 +2618,28 @@ function CopyButton({ content }: { content: string }) {
 
   const Icon = copied ? Check : Copy;
   return (
-    <button
+    <PraxisButton
       type="button"
+      variant="ghost"
+      size="sm"
       onClick={handleCopy}
       aria-label={copied ? "Copied!" : "Copy message"}
       title={copied ? "Copied!" : "Copy message"}
-      className="flex items-center gap-1 p-1 rounded transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100"
-      style={{ color: copied ? "var(--color-accent)" : "var(--color-text-muted)" }}
-      onMouseEnter={(e) => {
-        if (!copied) (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
-      }}
-      onMouseLeave={(e) => {
-        if (!copied) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-      }}
+      className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100"
     >
-      <Icon size={13} />
-      <span className="hidden md:inline text-[11px]">{copied ? "Copied" : "Copy"}</span>
-    </button>
+      <Icon size={13} strokeWidth={1.75} />
+      <span className="hidden md:inline cx-type-xs">{copied ? "Copied" : "Copy"}</span>
+    </PraxisButton>
   );
 }
 
 function MessageFeedbackButtons({
   messageId,
+  conversationId,
   initialRating = null,
 }: {
   messageId: string;
+  conversationId?: string | null;
   initialRating?: 1 | -1 | null;
 }) {
   const [rating, setRating] = useState<1 | -1 | null>(initialRating);
@@ -2575,7 +2652,11 @@ function MessageFeedbackButtons({
       const res = await fetch("/api/conduit/chat/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message_id: messageId, rating: value }),
+        body: JSON.stringify({
+          message_id: messageId,
+          ...(conversationId ? { conversation_id: conversationId } : {}),
+          rating: value,
+        }),
       });
       if (res.ok) {
         const data = (await res.json()) as { action: string };
@@ -2601,7 +2682,7 @@ function MessageFeedbackButtons({
         onMouseEnter={(e) => { if (rating !== 1) (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
         onMouseLeave={(e) => { if (rating !== 1) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
       >
-        <ThumbsUp size={13} fill={rating === 1 ? "currentColor" : "none"} />
+        <ThumbsUp size={13} strokeWidth={1.75} fill={rating === 1 ? "currentColor" : "none"} />
       </button>
       <button
         type="button"
@@ -2611,12 +2692,12 @@ function MessageFeedbackButtons({
         disabled={busy}
         className="min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center p-1 rounded transition-colors disabled:pointer-events-none"
         style={{
-          color: rating === -1 ? "#f87171" : "var(--color-text-muted)",
+          color: rating === -1 ? "var(--cx-danger)" : "var(--color-text-muted)",
         }}
         onMouseEnter={(e) => { if (rating !== -1) (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
         onMouseLeave={(e) => { if (rating !== -1) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
       >
-        <ThumbsDown size={13} fill={rating === -1 ? "currentColor" : "none"} />
+        <ThumbsDown size={13} strokeWidth={1.75} fill={rating === -1 ? "currentColor" : "none"} />
       </button>
     </div>
   );
@@ -2681,35 +2762,30 @@ function MessageHandoffButton({
 
   return (
     <div ref={ref} className="relative">
-      <button
+      <PraxisButton
         type="button"
+        variant="ghost"
+        size="icon-sm"
+        onClick={() => setOpen((o) => !o)}
         aria-label="Hand off to another specialist"
         title="Hand off to another specialist"
-        disabled={loading}
-        onClick={() => setOpen((o) => !o)}
-        className="p-1 rounded transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
-        style={{ color: "var(--color-text-muted)" }}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
+        isDisabled={loading}
+        className="opacity-0 group-hover:opacity-100 disabled:opacity-50"
       >
-        <Share2 size={13} />
-      </button>
+        <Share2 size={13} strokeWidth={1.75} />
+      </PraxisButton>
       {open && (
         <div
-          className="absolute left-0 top-full mt-1 z-20 rounded-xl shadow-xl py-1 min-w-[170px]"
-          style={{
-            background: "var(--color-surface-elevated)",
-            border: "1px solid var(--color-border)",
-          }}
+          className="cx-glass-float cx-glass-border absolute left-0 top-full mt-1 z-20 rounded-xl py-1 min-w-[170px]"
         >
-          <p className="px-3 py-1.5 text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+          <p className="px-3 py-2 cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
             Hand off to…
           </p>
           {targets.map((emp) => (
             <button
               key={emp}
               onClick={() => handoff(emp)}
-              className="w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 transition-colors"
+              className="w-full text-left px-3 py-2 cx-type-xs flex items-center gap-2 transition-colors"
               style={{ color: "var(--color-text)" }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.background = "color-mix(in srgb, var(--color-accent) 8%, transparent)";
@@ -2719,7 +2795,7 @@ function MessageHandoffButton({
               }}
             >
               <span
-                className="w-5 h-5 rounded-full shrink-0 flex items-center justify-center text-[8px] font-bold uppercase"
+                className="w-5 h-5 rounded-full shrink-0 flex items-center justify-center cx-type-xs font-bold uppercase"
                 style={{ background: DEPT_COLOR[emp], color: "#fff" }}
               >
                 {labelFor(emp).slice(0, 2)}
@@ -2743,6 +2819,85 @@ function formatMessageTimestamp(iso: string): string {
   });
 }
 
+/**
+ * CountTick — animated word-count readout shown when a specialist completes a turn.
+ * Counts from 0 → word count over 380ms (easing [0.22,1,0.36,1]).
+ * prefers-reduced-motion: renders the final value without animation.
+ */
+function CountTick({ target, active }: { target: number; active: boolean }) {
+  const prefersReducedMotion = useReducedMotion();
+  const count = useMotionValue(0);
+  const displayCount = useTransform(count, (v) => String(Math.round(v)));
+
+  useEffect(() => {
+    if (!active) {
+      count.set(0);
+      return;
+    }
+    if (prefersReducedMotion) {
+      count.set(target);
+      return;
+    }
+    const controls = animate(count, target, {
+      duration: 0.38,
+      ease: [0.22, 1, 0.36, 1],
+    });
+    return () => controls.stop();
+  }, [active, target, count, prefersReducedMotion]);
+
+  return (
+    <AnimatePresence>
+      {active && (
+        <motion.span
+          key="count-tick"
+          aria-hidden
+          className="cx-mono tabular-nums select-none inline-flex items-center gap-0.5"
+          style={{ color: CX_REWARD, fontSize: "var(--cx-type-xs)" }}
+          initial={{ opacity: 0, x: -3 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, transition: { duration: 0.2, ease: "easeOut" } }}
+          transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <motion.span>{displayCount}</motion.span>
+          <span>{"w"}</span>
+        </motion.span>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// 3 spark particles fanning toward bottom-right — fires on significant completions only.
+const TAIL_SPARKS = [
+  { angle: 25,  color: CX_REWARD,        dist: 18 },
+  { angle: 65,  color: CX_ACCENT_BRIGHT, dist: 22 },
+  { angle: 105, color: CX_REWARD,        dist: 15 },
+] as const;
+
+function MessageTailSpark({ active }: { active: boolean }) {
+  return (
+    <AnimatePresence>
+      {active &&
+        TAIL_SPARKS.map(({ angle, color, dist }, i) => {
+          const rad = (angle * Math.PI) / 180;
+          const tx = Math.round(Math.cos(rad) * dist);
+          const ty = Math.round(Math.sin(rad) * dist);
+          return (
+            <motion.span
+              key={`tail-spark-${i}`}
+              aria-hidden
+              className="absolute pointer-events-none rounded-full"
+              initial={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+              animate={{ opacity: 0, x: tx, y: ty, scale: 0 }}
+              exit={{}}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1], delay: i * 0.04 }}
+              style={{ width: 3, height: 3, right: 10, bottom: 10, background: color }}
+            />
+          );
+        })}
+    </AnimatePresence>
+  );
+}
+
 function MessageTimestamp({
   createdAt,
   touchVisible,
@@ -2762,7 +2917,7 @@ function MessageTimestamp({
     return (
       <time
         dateTime={createdAt}
-        className="text-[11px] select-none"
+        className="cx-mono cx-type-xs select-none tabular-nums"
         style={{ color: "var(--color-text-muted)" }}
       >
         {full}
@@ -2775,7 +2930,7 @@ function MessageTimestamp({
       trigger={
         <time
           dateTime={createdAt}
-          className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity text-[11px] cursor-default select-none"
+          className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity cx-mono cx-type-xs cursor-default select-none tabular-nums"
           style={{ color: "var(--color-text-muted)" }}
         >
           {short}
@@ -2784,7 +2939,7 @@ function MessageTimestamp({
       side={side}
       delay={300}
     >
-      <span className="text-xs whitespace-nowrap">{full}</span>
+      <span className="cx-type-xs whitespace-nowrap">{full}</span>
     </Tooltip>
   );
 }
@@ -2803,6 +2958,9 @@ const MessageBubble = memo(function MessageBubble({
   onPinToggle,
   searchMatch = false,
   conversationId,
+  roundTableActiveEmployee = null,
+  rewarded = false,
+  rewardSignificant = false,
 }: {
   message: MessageRow;
   onOpenArtifact: (id: string) => void;
@@ -2817,6 +2975,9 @@ const MessageBubble = memo(function MessageBubble({
   onPinToggle?: (shouldPin: boolean) => void;
   searchMatch?: boolean;
   conversationId?: string | null;
+  roundTableActiveEmployee?: EmployeeKey | null;
+  rewarded?: boolean;
+  rewardSignificant?: boolean;
 }) {
   const [editDraft, setEditDraft] = useState(message.content);
   const editRef = useRef<HTMLTextAreaElement>(null);
@@ -2853,6 +3014,8 @@ const MessageBubble = memo(function MessageBubble({
     }
   }, [isEditing]);
 
+  const prefersReducedMotion = useReducedMotion();
+
   if (message.role === "user") {
     const meta = (message.metadata ?? {}) as Record<string, unknown>;
     const isVoice = meta.type === "voice";
@@ -2879,7 +3042,7 @@ const MessageBubble = memo(function MessageBubble({
                 if (e.key === "Escape") onEditCancel?.();
               }}
               rows={Math.max(2, editDraft.split("\n").length)}
-              className="w-full px-4 py-3 rounded-xl text-sm leading-relaxed resize-none outline-none"
+              className="w-full px-4 py-3 rounded-xl cx-body resize-none outline-none"
               style={{
                 background: "var(--color-surface-elevated)",
                 border: "1px solid var(--color-accent)",
@@ -2889,32 +3052,23 @@ const MessageBubble = memo(function MessageBubble({
               aria-label="Edit message"
             />
             <div className="flex justify-end gap-2">
-              <button
+              <PraxisButton
                 type="button"
+                variant="secondary"
+                size="sm"
                 onClick={onEditCancel}
-                className="px-3 py-1.5 text-xs rounded-lg transition-colors"
-                style={{
-                  color: "var(--color-text-muted)",
-                  border: "1px solid var(--color-border)",
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
               >
                 Cancel
-              </button>
-              <button
+              </PraxisButton>
+              <PraxisButton
                 type="button"
-                disabled={!editDraft.trim()}
+                variant="primary"
+                size="sm"
+                isDisabled={!editDraft.trim()}
                 onClick={() => { if (editDraft.trim()) onEditSubmit?.(editDraft.trim()); }}
-                className="px-3 py-1.5 text-xs rounded-lg transition-colors disabled:opacity-40"
-                style={{
-                  background: "var(--color-accent)",
-                  color: "#FFFFFF",
-                  fontWeight: 600,
-                }}
               >
                 Save &amp; resend
-              </button>
+              </PraxisButton>
             </div>
           </div>
         </motion.div>
@@ -2925,9 +3079,9 @@ const MessageBubble = memo(function MessageBubble({
       <motion.div
         data-search-match={searchMatch || undefined}
         className="flex justify-end group"
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+        initial={MESSAGE_SENT.initial}
+        animate={MESSAGE_SENT.animate}
+        transition={MESSAGE_SENT.transition}
         style={searchMatch ? { outline: "2px solid var(--color-accent)", outlineOffset: "3px", borderRadius: "12px" } : undefined}
         onTouchStart={handleTouchStart}
         onTouchEnd={cancelTouchTimer}
@@ -2943,20 +3097,21 @@ const MessageBubble = memo(function MessageBubble({
                 style={{ maxWidth: "260px", outline: "none" }}
               />
             ) : (
-              <span className="whitespace-pre-wrap">{message.content}</span>
+              <MarkdownRenderer content={message.content} />
             )}
           </div>
           <div className="flex items-center gap-2">
             {onEditStart && !isVoice && (
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={onEditStart}
-                className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-[11px] px-2 py-0.5 rounded"
-                style={{ color: "var(--color-text-muted)" }}
                 aria-label="Edit message"
+                className="opacity-0 group-hover:opacity-100 focus:opacity-100"
               >
                 Edit
-              </button>
+              </PraxisButton>
             )}
             {message.created_at && !message.pending && (
               <MessageTimestamp
@@ -2995,7 +3150,7 @@ const MessageBubble = memo(function MessageBubble({
       return (
         <div className="handoff-card flex items-center gap-3 my-2">
           <div className="flex-1 h-px bg-[var(--color-border)]" />
-          <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
+          <span className="cx-type-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
             {message.content}
           </span>
           <div className="flex-1 h-px bg-[var(--color-border)]" />
@@ -3008,19 +3163,15 @@ const MessageBubble = memo(function MessageBubble({
   const employee = (message.employee as EmployeeKey) ?? "jarvis";
   const empty = !message.content && message.pending;
   const isRoundTable = Boolean((message.metadata as Record<string, unknown>)?.round_table);
+  // Active when: not a round-table message, OR no specialist is currently designated active,
+  // OR this specialist is the one currently generating.
+  const isActive =
+    !isRoundTable ||
+    roundTableActiveEmployee === null ||
+    roundTableActiveEmployee === employee;
 
-  // Before any tokens arrive: render a dedicated accessible typing indicator.
-  if (empty) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <TypingIndicator employee={employee} roundTable={isRoundTable} />
-      </motion.div>
-    );
-  }
+  const msgMeta = (message.metadata ?? {}) as Record<string, unknown>;
+  const routingTo = msgMeta.routingTo as EmployeeKey | undefined;
 
   return (
     <motion.div
@@ -3041,106 +3192,202 @@ const MessageBubble = memo(function MessageBubble({
       onTouchMove={cancelTouchTimer}
     >
       <div className="pt-1 shrink-0">
-        <SpecialistAvatar employee={employee} size={32} streaming={message.pending} />
+        <SpecialistAvatar employee={employee} size={32} streaming={message.pending} rewarded={rewarded} rewardSignificant={rewardSignificant} />
       </div>
-      <div className="min-w-0 flex-1 space-y-1">
-        <div className="flex items-center gap-2 flex-wrap">
-          <SpecialistChip employee={employee} label={nickLabelFor(employee)} />
-          {message.created_at && !message.pending && (
-            <MessageTimestamp
-              createdAt={message.created_at}
-              touchVisible={touchTimestamp}
-              side="top"
-            />
-          )}
-          {message.handoffFrom && (
-            <motion.span
-              initial={{ opacity: 0, x: -6 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
-              aria-label={`Handed off from ${nickLabelFor(message.handoffFrom as EmployeeKey)}`}
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] uppercase tracking-[0.1em]"
-              style={{
-                background: `color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 12%, var(--color-surface-elevated))`,
-                color: DEPT_COLOR[message.handoffFrom as EmployeeKey],
-                border: `1px solid color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 28%, transparent)`,
-              }}
+      {/* Inner content area — AnimatePresence crossfades thinking↔streaming
+          within a stable layout shell, eliminating the layout-jump that occurred
+          when the key changed (typing-N → N) under the old approach. */}
+      <motion.div className="min-w-0 flex-1" layout>
+        <AnimatePresence mode="popLayout" initial={false}>
+          {empty ? (
+            <motion.div
+              key="thinking"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -2, transition: { duration: 0.14, ease: [0.22, 1, 0.36, 1] } }}
+              transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
             >
-              ← {nickLabelFor(message.handoffFrom as EmployeeKey)}
-            </motion.span>
-          )}
-          {message.pending && (
-            <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-              writing…
+              <ThinkingBubble
+                employee={employee}
+                roundTable={isRoundTable}
+                isActive={isActive}
+                routingTarget={routingTo ?? null}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="content"
+              className="space-y-1"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            >
+        {/* Glass bubble — chip header + content in one pane */}
+        <div className="conduit-bubble-assistant max-w-[68ch] relative">
+          {/* Reward shimmer — green glow ring that fades when specialist completes */}
+          <AnimatePresence>
+            {rewarded && !prefersReducedMotion && (
+              <motion.span
+                key="bubble-reward-shimmer"
+                aria-hidden
+                className="pointer-events-none absolute inset-0"
+                style={{ borderRadius: "var(--cx-radius-md, 12px)", zIndex: 1 }}
+                initial={{ opacity: 0.85 }}
+                animate={{ opacity: 0 }}
+                exit={{}}
+                transition={{ duration: 0.52, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <span
+                  aria-hidden
+                  className="absolute inset-0"
+                  style={{
+                    borderRadius: "var(--cx-radius-md, 12px)",
+                    boxShadow: `0 0 0 1px ${CX_REWARD}38, 0 0 18px 5px ${CX_REWARD}16`,
+                    pointerEvents: "none",
+                  }}
+                />
+              </motion.span>
+            )}
+          </AnimatePresence>
+          {/* Bubble header: specialist chip + timestamp + meta */}
+          <div className="px-4 pt-3 pb-2 flex items-center gap-2 flex-wrap">
+            {/* Chip with reward pulse ring — accent→green burst on specialist completion */}
+            <span className="relative inline-flex">
+              <SpecialistChip employee={employee} label={nickLabelFor(employee)} />
+              <AnimatePresence>
+                {rewarded && !prefersReducedMotion && (
+                  <motion.span
+                    key="chip-reward-ring"
+                    aria-hidden
+                    className="pointer-events-none absolute"
+                    style={{
+                      top: -4,
+                      right: -4,
+                      bottom: -4,
+                      left: -4,
+                      borderRadius: 9999,
+                      boxShadow: `0 0 0 2px ${DEPT_COLOR[employee]}77, 0 0 10px 3px ${CX_REWARD}40`,
+                    }}
+                    initial={{ opacity: 0.9, scale: 0.88 }}
+                    animate={{ opacity: 0, scale: 1.3 }}
+                    exit={{}}
+                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                )}
+              </AnimatePresence>
             </span>
-          )}
-          {playing && (
-            <button
-              onClick={onStopAudio}
-              className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em]"
-              style={{ color: DEPT_COLOR[employee] }}
-              aria-label="Stop audio"
-            >
-              <span className="inline-flex items-end gap-[2px] h-3">
-                <span
-                  className="w-[2px] rounded-sm"
-                  style={{
-                    background: DEPT_COLOR[employee],
-                    height: "8px",
-                    animation: "wave1 1s ease-in-out infinite",
-                  }}
-                />
-                <span
-                  className="w-[2px] rounded-sm"
-                  style={{
-                    background: DEPT_COLOR[employee],
-                    height: "12px",
-                    animation: "wave2 1s ease-in-out infinite",
-                  }}
-                />
-                <span
-                  className="w-[2px] rounded-sm"
-                  style={{
-                    background: DEPT_COLOR[employee],
-                    height: "6px",
-                    animation: "wave3 1s ease-in-out infinite",
-                  }}
-                />
+            {/* Word-count tick — counts up when specialist finishes */}
+            <CountTick
+              target={message.content.split(/\s+/).filter(Boolean).length}
+              active={rewarded}
+            />
+            {message.created_at && !message.pending && (
+              <MessageTimestamp
+                createdAt={message.created_at}
+                touchVisible={touchTimestamp}
+                side="top"
+              />
+            )}
+            {message.handoffFrom && (
+              <motion.span
+                initial={{ opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
+                aria-label={`Handed off from ${nickLabelFor(message.handoffFrom as EmployeeKey)}`}
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full cx-type-xs uppercase tracking-[0.1em]"
+                style={{
+                  background: `color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 12%, var(--color-surface-elevated))`,
+                  color: DEPT_COLOR[message.handoffFrom as EmployeeKey],
+                  border: `1px solid color-mix(in srgb, ${DEPT_COLOR[message.handoffFrom as EmployeeKey]} 28%, transparent)`,
+                }}
+              >
+                ← {nickLabelFor(message.handoffFrom as EmployeeKey)}
+              </motion.span>
+            )}
+            {message.pending && (
+              <span
+                className="cx-mono cx-type-xs uppercase tracking-[0.18em]"
+                style={{ color: "var(--cx-text-faint, var(--color-text-muted))" }}
+              >
+                writing…
               </span>
-              Speaking
-            </button>
+            )}
+            {playing && (
+              <button
+                onClick={onStopAudio}
+                className="inline-flex items-center gap-1.5 cx-type-xs uppercase tracking-[0.18em]"
+                style={{ color: DEPT_COLOR[employee] }}
+                aria-label="Stop audio"
+              >
+                <span className="inline-flex items-end gap-[2px] h-3">
+                  <span
+                    className="w-[2px] rounded-sm"
+                    style={{
+                      background: DEPT_COLOR[employee],
+                      height: "8px",
+                      animation: "wave1 1s ease-in-out infinite",
+                    }}
+                  />
+                  <span
+                    className="w-[2px] rounded-sm"
+                    style={{
+                      background: DEPT_COLOR[employee],
+                      height: "12px",
+                      animation: "wave2 1s ease-in-out infinite",
+                    }}
+                  />
+                  <span
+                    className="w-[2px] rounded-sm"
+                    style={{
+                      background: DEPT_COLOR[employee],
+                      height: "6px",
+                      animation: "wave3 1s ease-in-out infinite",
+                    }}
+                  />
+                </span>
+                Speaking
+              </button>
+            )}
+            {!playing && !message.pending && onReplayAudio && (
+              <PraxisButton
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onReplayAudio}
+                aria-label="Replay audio"
+                className="cx-type-xs uppercase tracking-[0.18em]"
+              >
+                ▶ Listen
+              </PraxisButton>
+            )}
+          </div>
+          {/* Bubble content */}
+          <div className="px-4 pb-3 text-[var(--color-text)]">
+            <MarkdownRenderer
+              content={message.content}
+              streaming={message.pending}
+              caretColor={message.pending ? "var(--cx-accent)" : undefined}
+            />
+          </div>
+          {/* Tail spark — 3 particles at bottom-right corner on significant completions */}
+          {!prefersReducedMotion && (
+            <MessageTailSpark active={rewarded && rewardSignificant} />
           )}
-          {!playing && !message.pending && onReplayAudio && (
-            <button
-              onClick={onReplayAudio}
-              className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-              aria-label="Replay audio"
-            >
-              ▶ Listen
-            </button>
-          )}
-        </div>
-        <div className="conduit-bubble-assistant px-4 py-3 text-[var(--color-text)]">
-          <MarkdownRenderer
-            content={message.content}
-            streaming={message.pending}
-            caretColor={message.pending ? DEPT_COLOR[employee] : undefined}
-          />
         </div>
         {!!(message.metadata as Record<string, unknown>)?.incomplete && (
           <div
-            className="flex items-center gap-1.5 mt-2 text-[11px]"
-            style={{ color: '#ca8a04' }}
+            className="flex items-center gap-1.5 mt-2 cx-type-xs"
+            style={{ color: "var(--color-amber)" }}
             aria-label="Response was cut short due to a connection drop"
           >
-            <AlertCircle size={11} aria-hidden />
+            <AlertCircle size={11} strokeWidth={1.75} aria-hidden />
             <span>⚠ Incomplete response</span>
           </div>
         )}
         {message.memories?.map((mem) => (
           <div
             key={mem.id}
-            className="mt-2 inline-flex items-center gap-2 text-[11px] hairline rounded-full pl-2 pr-3 py-1 max-w-full"
+            className="mt-2 inline-flex items-center gap-2 cx-type-xs hairline rounded-full pl-2 pr-3 py-1 max-w-full"
             style={{
               borderColor: "color-mix(in srgb, var(--color-accent) 35%, transparent)",
               background: "color-mix(in srgb, var(--color-accent) 6%, transparent)",
@@ -3151,7 +3398,7 @@ const MessageBubble = memo(function MessageBubble({
               className="inline-block w-1.5 h-1.5 rounded-full"
               style={{ background: "var(--color-accent)" }}
             />
-            <span className="text-[var(--color-text-muted)] uppercase tracking-[0.15em] text-[10px]">
+            <span className="text-[var(--color-text-muted)] uppercase tracking-[0.15em] cx-type-xs">
               {mem.kind} remembered
             </span>
             <span className="text-[var(--color-text)] truncate max-w-[40ch]">
@@ -3172,45 +3419,48 @@ const MessageBubble = memo(function MessageBubble({
               className="mt-0.5 inline-flex items-center justify-center w-9 h-9 rounded-lg shrink-0"
               style={{ background: DEPT_COLOR_SOFT[employee] }}
             >
-              <FileText size={16} style={{ color: DEPT_COLOR[employee] }} />
+              <FileText size={16} strokeWidth={1.75} style={{ color: DEPT_COLOR[employee] }} />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+              <span className="block cx-type-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
                 {a.type.replace("_", " ")} · by {nickLabelFor(employee)}
               </span>
-              <span className="block text-sm text-[var(--color-text)] mt-0.5 truncate">
+              <span className="block cx-body text-[var(--cx-text)] mt-0.5 truncate">
                 {a.title}
               </span>
-              <span className="block text-[11px] text-[var(--color-text-muted)] mt-1 inline-flex items-center gap-1 group-hover:text-[var(--color-text)]">
+              <span className="block cx-type-xs text-[var(--color-text-muted)] mt-1 inline-flex items-center gap-1 group-hover:text-[var(--color-text)]">
                 Open in drawer
-                <ArrowRight size={11} />
+                <ArrowRight size={11} strokeWidth={1.75} />
               </span>
             </span>
           </button>
         ))}
         {message.id && !message.pending && (
-          <div className="flex items-center gap-2">
+          <motion.div
+            className="flex items-center gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.12, ease: "easeOut" }}
+          >
             <CopyButton content={message.content} />
-            <MessageFeedbackButtons messageId={message.id} initialRating={message.feedback ?? null} />
+            <MessageFeedbackButtons
+              messageId={message.id}
+              conversationId={conversationId}
+              initialRating={message.feedback ?? null}
+            />
             {onPinToggle && (
-              <button
+              <PraxisButton
                 type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => onPinToggle(!pinned)}
                 aria-label={pinned ? "Unpin message" : "Pin message"}
                 title={pinned ? "Unpin" : "Pin message (max 5)"}
-                onClick={() => onPinToggle(!pinned)}
-                className="p-1 rounded transition-colors opacity-0 group-hover:opacity-100"
-                style={{
-                  color: pinned ? "var(--color-accent)" : "var(--color-text-muted)",
-                }}
-                onMouseEnter={(e) => {
-                  if (!pinned) (e.currentTarget as HTMLElement).style.color = "var(--color-text)";
-                }}
-                onMouseLeave={(e) => {
-                  if (!pinned) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)";
-                }}
+                className="opacity-0 group-hover:opacity-100"
+                style={{ color: pinned ? "var(--color-accent)" : undefined }}
               >
-                <Pin size={13} fill={pinned ? "currentColor" : "none"} />
-              </button>
+                <Pin size={13} strokeWidth={1.75} fill={pinned ? "currentColor" : "none"} />
+              </PraxisButton>
             )}
             {message.employee && message.content && (
               <SaveOutputButton
@@ -3228,9 +3478,12 @@ const MessageBubble = memo(function MessageBubble({
                 sourceEmployee={message.employee as EmployeeKey}
               />
             )}
-          </div>
+          </motion.div>
         )}
-      </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </motion.div>
   );
 });
@@ -3262,17 +3515,25 @@ function ArtifactDrawer({
   return (
     <div className="fixed inset-0 z-40 flex">
       <div onClick={onClose} className="flex-1 bg-black/60" />
-      <div className="w-full max-w-2xl bg-[var(--color-surface-elevated)] border-l border-[var(--color-border)] overflow-y-auto p-6 md:p-8">
+      <div className="cx-glass w-full max-w-2xl border-l overflow-y-auto p-6 md:p-8" style={{ borderLeftColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>
         {!data ? (
-          <p className="text-sm text-[var(--color-text-muted)]">Loading…</p>
+          <div className="space-y-4 pt-2" aria-busy aria-label="Loading artifact">
+            <div className="cx-skeleton" style={{ height: 10, width: 120, borderRadius: 9999, opacity: 0.4 }} />
+            <div className="cx-skeleton" style={{ height: 32, width: "75%", borderRadius: 6, opacity: 0.5 }} />
+            <div className="space-y-2 mt-6">
+              {[100, 90, 95, 70, 85].map((w, i) => (
+                <div key={i} className="cx-skeleton" style={{ height: 11, width: `${w}%`, borderRadius: 9999, opacity: 0.3 - i * 0.02 }} />
+              ))}
+            </div>
+          </div>
         ) : (
           <>
             <div className="flex items-start justify-between gap-3 mb-6">
               <div className="min-w-0">
-                <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
+                <div className="cx-type-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
                   {data.type.replace("_", " ")} · by {data.produced_by}
                 </div>
-                <h2 className="serif text-2xl md:text-3xl mt-1 leading-tight">
+                <h2 className="cx-heading-xl md:cx-heading-2xl mt-1">
                   {data.title}
                 </h2>
               </div>
@@ -3282,7 +3543,7 @@ function ArtifactDrawer({
                   onClick={() =>
                     navigator.clipboard?.writeText(data.content)
                   }
-                  className="!px-3 !py-2 !text-xs"
+                  className="!px-3 !py-2 cx-type-xs"
                 >
                   Copy
                 </Button>
@@ -3301,20 +3562,22 @@ function ArtifactDrawer({
                     a.click();
                     URL.revokeObjectURL(url);
                   }}
-                  className="!px-3 !py-2 !text-xs"
+                  className="!px-3 !py-2 cx-type-xs"
                 >
                   Download
                 </Button>
-                <button
+                <PraxisButton
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={onClose}
-                  className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] px-2"
                   aria-label="Close"
                 >
                   ✕
-                </button>
+                </PraxisButton>
               </div>
             </div>
-            <pre className="whitespace-pre-wrap font-sans text-[var(--color-text)] leading-relaxed text-[15px]">
+            <pre className="whitespace-pre-wrap font-sans text-[var(--cx-text)] cx-body">
               {data.content}
             </pre>
           </>

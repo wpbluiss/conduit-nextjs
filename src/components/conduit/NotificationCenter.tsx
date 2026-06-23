@@ -13,6 +13,7 @@ import {
   Inbox,
   X,
 } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 interface Notification {
   id: string;
@@ -36,11 +37,11 @@ function relativeTime(iso: string): string {
 
 function NotifIcon({ type }: { type: string }) {
   const size = 14;
-  if (type === "build_complete") return <Hammer size={size} />;
-  if (type === "artifact_ready") return <FileText size={size} />;
-  if (type === "memory_saved") return <MemoryStick size={size} />;
-  if (type === "billing") return <CreditCard size={size} />;
-  return <Bell size={size} />;
+  if (type === "build_complete") return <Hammer size={size} strokeWidth={1.75} />;
+  if (type === "artifact_ready") return <FileText size={size} strokeWidth={1.75} />;
+  if (type === "memory_saved") return <MemoryStick size={size} strokeWidth={1.75} />;
+  if (type === "billing") return <CreditCard size={size} strokeWidth={1.75} />;
+  return <Bell size={size} strokeWidth={1.75} />;
 }
 
 export function NotificationCenter() {
@@ -119,24 +120,24 @@ export function NotificationCenter() {
   return (
     <>
       {/* Notification bell — matches sidebar NavLink style */}
-      <button
-        type="button"
+      <PraxisButton
+        variant="ghost"
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
         onClick={() => setOpen((v: boolean) => !v)}
-        className="relative flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)] rounded-lg transition-colors duration-100 w-full"
+        className="relative flex items-center gap-2 px-3 py-2 cx-type-xs w-full"
       >
-        <Inbox size={14} className="shrink-0" />
+        <Inbox size={14} strokeWidth={1.75} className="shrink-0" />
         <span>Notifications</span>
         {unreadCount > 0 && (
           <span
             aria-hidden
-            className="absolute top-1 left-5 flex items-center justify-center w-3.5 h-3.5 rounded-full text-[9px] font-bold leading-none"
+            className="absolute top-1 left-5 flex items-center justify-center w-3.5 h-3.5 rounded-full cx-type-xs font-bold leading-none"
             style={{ background: "var(--color-red, var(--cx-danger))", color: "#fff" }}
           >
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
-      </button>
+      </PraxisButton>
 
       <AnimatePresence>
         {open && (
@@ -164,42 +165,41 @@ export function NotificationCenter() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
-              className="fixed top-0 right-0 bottom-0 z-[199] w-full max-w-sm flex flex-col border-l border-[var(--color-border)] shadow-2xl"
-              style={{ background: "var(--color-surface-elevated)" }}
+              className="cx-glass-float cx-glass-border fixed top-0 right-0 bottom-0 z-[199] w-full max-w-sm flex flex-col border-l"
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3.5 border-b border-[var(--color-border)]">
+              <div className="flex items-center justify-between px-4 py-4 border-b border-[var(--color-border)]">
                 <div className="flex items-center gap-2">
-                  <Bell size={14} className="text-[var(--color-text-muted)]" />
-                  <span className="text-sm font-medium">Notifications</span>
+                  <Bell size={14} strokeWidth={1.75} className="text-[var(--color-text-muted)]" />
+                  <span className="cx-type-base font-medium">Notifications</span>
                   {unreadCount > 0 && (
-                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-red-500 text-white leading-none">
+                    <span className="cx-type-xs font-semibold px-1.5 py-0.5 rounded-full bg-red-500 text-white leading-none">
                       {unreadCount}
                     </span>
                   )}
                 </div>
                 <div className="flex items-center gap-1">
                   {unreadCount > 0 && (
-                    <button
-                      type="button"
+                    <PraxisButton
+                      variant="ghost"
+                      size="sm"
                       onClick={markAllRead}
-                      disabled={loading}
+                      isDisabled={loading}
                       title="Mark all as read"
                       aria-label="Mark all as read"
-                      className="flex items-center gap-1 px-2 py-1 text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-text)] rounded-md hover:bg-[var(--color-surface)] transition-colors disabled:opacity-50"
                     >
-                      <CheckCheck size={12} />
+                      <CheckCheck size={12} strokeWidth={1.75} />
                       Mark all read
-                    </button>
+                    </PraxisButton>
                   )}
-                  <button
-                    type="button"
+                  <PraxisButton
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={() => setOpen(false)}
                     aria-label="Close notifications"
-                    className="flex items-center justify-center w-7 h-7 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors"
                   >
-                    <X size={14} />
-                  </button>
+                    <X size={14} strokeWidth={1.75} />
+                  </PraxisButton>
                 </div>
               </div>
 
@@ -209,12 +209,13 @@ export function NotificationCenter() {
                   <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-6">
                     <Bell
                       size={28}
-                      className="text-[var(--color-text-muted)] opacity-40"
+                      strokeWidth={1.75}
+                      style={{ color: "var(--cx-text-muted)", opacity: 0.4 }}
                     />
-                    <p className="text-sm text-[var(--color-text-muted)]">
+                    <p className="cx-type-base" style={{ color: "var(--cx-text-muted)" }}>
                       No notifications yet
                     </p>
-                    <p className="text-[11px] text-[var(--color-text-muted)] opacity-70">
+                    <p className="cx-type-xs" style={{ color: "var(--cx-text-faint)" }}>
                       Build completions, artifact events, and billing updates will appear here.
                     </p>
                   </div>
@@ -225,7 +226,7 @@ export function NotificationCenter() {
                         <button
                           type="button"
                           onClick={() => markRead(n)}
-                          className="w-full text-left flex items-start gap-3 px-4 py-3.5 hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)] last:border-b-0"
+                          className="w-full text-left flex items-start gap-3 px-4 py-4 hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)] last:border-b-0"
                           style={{
                             background: n.read_at
                               ? "transparent"
@@ -247,15 +248,15 @@ export function NotificationCenter() {
                             <NotifIcon type={n.type} />
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className="block text-sm text-[var(--color-text)] leading-snug">
+                            <span className="block cx-type-base text-[var(--color-text)] leading-snug">
                               {n.title}
                             </span>
                             {n.body && (
-                              <span className="block text-[11px] text-[var(--color-text-muted)] mt-0.5 truncate">
+                              <span className="block cx-type-xs text-[var(--color-text-muted)] mt-0.5 truncate">
                                 {n.body}
                               </span>
                             )}
-                            <span className="block text-[10px] text-[var(--color-text-muted)] mt-1 opacity-70">
+                            <span className="block cx-type-xs text-[var(--color-text-muted)] mt-1 opacity-70">
                               {relativeTime(n.created_at)}
                             </span>
                           </span>

@@ -65,14 +65,14 @@ export default async function BuildsPage({ searchParams }: Ctx) {
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8">
       <div className="mx-auto max-w-4xl">
         <h1 className="cx-heading-2xl mb-2 flex items-center gap-2">
-          <Hammer size={22} /> Builds
+          <Hammer size={22} strokeWidth={1.75} /> Builds
         </h1>
-        <p className="text-sm text-[var(--color-text-muted)] mb-6">
+        <p className="cx-body text-[var(--color-text-muted)] mb-6">
           Every site Engineering has shipped for you.
         </p>
 
         {!configured && (
-          <div className="conduit-card p-4 mb-6 text-xs text-[var(--color-amber)] border-[var(--color-amber)]/40">
+          <div className="conduit-card p-4 mb-6 cx-type-xs text-[var(--color-amber)] border-[var(--color-amber)]/40">
             Build provider not connected yet. Engineering can describe a
             build but won&apos;t ship a live site until upstream keys land.
           </div>
@@ -87,7 +87,7 @@ export default async function BuildsPage({ searchParams }: Ctx) {
         />
 
         {!internal && tier.id === "free" && (
-          <p className="mt-6 text-xs text-[var(--color-text-muted)]">
+          <p className="mt-6 cx-type-xs text-[var(--color-text-muted)]">
             On the Free plan you get 1 engineering build per day.{" "}
             <Link
               href="/app/settings/billing"

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Sparkles, X } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 const STORAGE_KEY = "conduit_upgrade_nudge_dismissed";
 
@@ -35,13 +36,13 @@ export function UpgradeNudge({
 
   return (
     <div
-      className="hairline border-l-0 border-r-0 border-t-0 px-4 py-2 flex items-center gap-3 text-xs"
+      className="hairline border-l-0 border-r-0 border-t-0 px-4 py-2 flex items-center gap-3 cx-type-xs"
       style={{
         background:
           "color-mix(in srgb, var(--color-accent) 6%, transparent)",
       }}
     >
-      <Sparkles size={14} className="text-[var(--color-accent)]" />
+      <Sparkles size={14} strokeWidth={1.75} className="text-[var(--color-accent)]" />
       <span className="text-[var(--color-text)]">
         You&apos;re on Praxis Free. Want premium routing?
       </span>
@@ -52,13 +53,9 @@ export function UpgradeNudge({
       >
         Upgrade →
       </Link>
-      <button
-        onClick={close}
-        aria-label="Dismiss"
-        className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-      >
-        <X size={14} />
-      </button>
+      <PraxisButton type="button" variant="ghost" size="icon-sm" onClick={close} aria-label="Dismiss">
+        <X size={14} strokeWidth={1.75} />
+      </PraxisButton>
     </div>
   );
 }

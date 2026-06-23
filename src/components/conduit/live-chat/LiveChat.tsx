@@ -12,23 +12,25 @@ import * as React from "react";
 import { useUser } from "@/context/UserContext";
 import { useRouter } from "next/navigation";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import {
-  Sparkles, Code2, TrendingUp, Megaphone, DollarSign, Wrench, ShieldCheck,
-  Users, Scale, SquarePen, Menu, ArrowUp, Paperclip, Search, Settings,
-  MoreHorizontal, Command, Slash, AtSign, Copy, RefreshCw, Hammer, FileText, Download, Printer, X, AudioLines,
+  Sparkles, Scale, SquarePen, Menu, ArrowUp, Paperclip, Search, Settings,
+  MoreHorizontal, Command, Slash, AtSign, Copy, RefreshCw, Hammer, FileText, Download, Printer, X, AudioLines, DollarSign,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/conduit/ui/Button";
+import { MarkdownRenderer } from "@/components/conduit/MarkdownRenderer";
 import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
+import { SPECIALIST_ICON } from "@/lib/ui/specialist-icons";
 import PraxisLiveRoom from "@/components/conduit/voice/PraxisLiveRoom";
 import type { VoiceTokenResponse } from "@/components/conduit/voice/VoiceRoom";
 import { PaywallModal, type PaywallPayload } from "@/components/conduit/PaywallModal";
+import { CX_ACCENT_RING, CX_ACCENT_RING_FADE, CX_REWARD_RING, CX_REWARD_RING_FADE } from "@/lib/design-system/cx-tokens";
+import { useRewardMoment } from "@/context/RewardMomentContext";
 
 type Icon = React.ComponentType<{ className?: string }>;
-const ICON: Record<EmployeeId, Icon> = {
-  jarvis: Sparkles, engineering: Code2, sales: TrendingUp, marketing: Megaphone,
-  finance: DollarSign, ops: Wrench, compliance: ShieldCheck, hr: Users, legal: Scale,
-};
+// Use canonical SPECIALIST_ICON registry — ensures all dept icons are consistent
+// across the full console (Compass for jarvis, Workflow for ops, HeartHandshake for hr, etc.)
+const ICON: Record<EmployeeId, Icon> = SPECIALIST_ICON as unknown as Record<EmployeeId, Icon>;
 
 const SLASH: { cmd: string; desc: string; emp: EmployeeId; template: string; icon: Icon }[] = [
   { cmd: "/build", desc: "Build with Engineering", emp: "engineering", template: "Build me ", icon: Hammer },
@@ -44,6 +46,170 @@ const DOC_TYPES = new Set(["post", "doc", "brief", "proposal", "report", "letter
 function extFor(type: string) { return type === "migration" || type === "sql" ? "sql" : type === "code" || type === "build" ? "ts" : "md"; }
 function slugify(s: string) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "artifact"; }
 function escapeHtml(s: string) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+// Dept-accent RGB values for pulsing avatar glow while specialist is pending.
+// Parallel to the CSS variable dept palette — keeps glow computation in JS where
+// framer-motion can interpolate the rgba() strings.
+const DEPT_GLOW_RGB: Record<EmployeeId, string> = {
+  jarvis:      "200,197,189",
+  marketing:   "255,138,61",
+  sales:       "52,211,153",
+  engineering: "96,165,250",
+  finance:     "234,179,8",
+  compliance:  "168,85,247",
+  hr:          "236,72,153",
+  ops:         "20,184,166",
+  legal:       "59,130,246",
+};
+
+// Mono micro-copy shown while the specialist is thinking/processing.
+// Phrased to feel purposeful — not generic "loading…" — per CONSOLE_REDESIGN.md
+const THINKING_COPY: Record<EmployeeId, string> = {
+  jarvis:      "routing to the right specialist…",
+  engineering: "reviewing the build requirements…",
+  sales:       "reviewing your pipeline…",
+  marketing:   "crafting content strategy…",
+  finance:     "running the numbers…",
+  hr:          "reviewing people strategy…",
+  ops:         "mapping out the process…",
+  compliance:  "checking compliance requirements…",
+  legal:       "reviewing legal considerations…",
+};
+
+function SpecialistChip({ icon: I, complete, pending, employee, reducedMotion, onComplete }: {
+  icon: React.ComponentType<{ className?: string }>;
+  complete: boolean;
+  pending: boolean;
+  employee: EmployeeId;
+  reducedMotion: boolean;
+  onComplete?: (rect: DOMRect) => void;
+}) {
+  const controls = useAnimation();
+  // Pre-initialize to true for messages already complete on mount (loaded from history)
+  const firedRef = React.useRef(complete);
+  const chipRef = React.useRef<HTMLSpanElement>(null);
+  const rgb = DEPT_GLOW_RGB[employee] ?? "124,108,255";
+
+  React.useEffect(() => {
+    if (complete && !firedRef.current) {
+      firedRef.current = true;
+      // Notify caller with chip position so confetti can originate there
+      if (chipRef.current) {
+        onComplete?.(chipRef.current.getBoundingClientRect());
+      }
+      if (!reducedMotion) {
+        // Accent (electric-violet) → reward-green pulse per CONSOLE_REDESIGN.md §Motion
+        controls.start({
+          scale: [1, 1.18, 0.95, 1],
+          boxShadow: [
+            `0 0 0 0px ${CX_ACCENT_RING_FADE}`,
+            `0 0 0 5px ${CX_ACCENT_RING}`,
+            `0 0 0 5px ${CX_REWARD_RING}`,
+            `0 0 0 0px ${CX_REWARD_RING_FADE}`,
+          ],
+        }, { duration: 0.44, ease: [0.22, 1, 0.36, 1] });
+      }
+    }
+  }, [complete, reducedMotion, controls, onComplete]);
+
+  return (
+    <motion.span
+      ref={chipRef}
+      animate={controls}
+      className="relative mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-secondary text-primary"
+      style={{ willChange: "transform, box-shadow" }}
+    >
+      <I className="size-4" />
+      {/* Dept-accent pulsing ring while specialist is thinking — fades out on completion */}
+      <AnimatePresence>
+        {pending && !reducedMotion && (
+          <motion.span
+            key="pending-ring"
+            className="pointer-events-none absolute inset-0 rounded-lg"
+            animate={{
+              boxShadow: [
+                `0 0 0 0px rgba(${rgb},0)`,
+                `0 0 0 3px rgba(${rgb},0.45)`,
+                `0 0 0 0px rgba(${rgb},0)`,
+              ],
+            }}
+            exit={{ boxShadow: `0 0 0 0px rgba(${rgb},0)`, transition: { duration: 0.2 } }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+          />
+        )}
+      </AnimatePresence>
+    </motion.span>
+  );
+}
+
+// Premium thinking indicator — accent shimmer bar + pulsing dots + specialist micro-copy.
+// Per CONSOLE_REDESIGN.md §"AI is thinking / processing": GPU-cheap (transform/opacity only),
+// staggered for personality, instant acknowledge then meaningful wait feedback.
+function ThinkingIndicator({ employee, reducedMotion }: {
+  employee: EmployeeId;
+  reducedMotion: boolean;
+}) {
+  const label = THINKING_COPY[employee] ?? "thinking…";
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4, transition: { duration: 0.12, ease: [0.22, 1, 0.36, 1] } }}
+      transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+      className="space-y-2.5 py-1"
+      aria-live="polite"
+    >
+      {/* Thin accent progress shimmer — slides left-to-right, GPU-only (translateX) */}
+      <div
+        className="relative h-0.5 w-40 overflow-hidden rounded-full"
+        style={{ background: "color-mix(in srgb, var(--cx-accent, #7C6CFF) 10%, transparent)" }}
+        role="status"
+        aria-label={`${EMPLOYEES[employee]?.name ?? "Specialist"} is thinking`}
+      >
+        {reducedMotion ? (
+          <div className="absolute inset-y-0 left-0 w-1/2 rounded-full" style={{ background: "color-mix(in srgb, var(--cx-accent, #7C6CFF) 40%, transparent)" }} />
+        ) : (
+          <motion.div
+            className="absolute inset-y-0 left-0 w-2/5 rounded-full"
+            style={{ background: "linear-gradient(90deg, transparent, color-mix(in srgb, var(--cx-accent, #7C6CFF) 75%, transparent), var(--cx-accent, #7C6CFF), color-mix(in srgb, var(--cx-accent, #7C6CFF) 75%, transparent), transparent)" }}
+            animate={{ x: ["-100%", "350%"] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.1 }}
+          />
+        )}
+      </div>
+      {/* Three staggered pulsing dots — wave pattern gives personality */}
+      <div className="flex items-center gap-1.5">
+        {[0, 1, 2].map((j) => (
+          <motion.span
+            key={j}
+            className="size-1.5 rounded-full"
+            style={{ backgroundColor: "var(--cx-accent, #7C6CFF)" }}
+            animate={reducedMotion ? { opacity: 0.5 } : {
+              opacity: [0.25, 1, 0.25],
+              scale:   [0.75, 1.15, 0.75],
+            }}
+            transition={{
+              duration: 1.4,
+              repeat: Infinity,
+              delay: j * 0.22,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </div>
+      {/* Specialist-specific mono micro-copy — fades in after a beat */}
+      <motion.p
+        className="cx-mono cx-type-xs"
+        style={{ color: "var(--cx-text-faint, #6B6B7B)" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: reducedMotion ? 0 : 1 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+      >
+        {label}
+      </motion.p>
+    </motion.div>
+  );
+}
 
 export type LiveMsg = {
   id?: string;
@@ -72,6 +238,7 @@ export function LiveChat({
   const router = useRouter();
   const ctxUser = useUser();
   const reducedMotion = useReducedMotion();
+  const { triggerReward } = useRewardMoment();
   const allowedSet = new Set<EmployeeId>(allowedEmployees);
   const roster = EMPLOYEE_ORDER.filter((id) => id === "jarvis" || allowedSet.has(id));
 
@@ -307,14 +474,14 @@ export function LiveChat({
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between gap-2 p-3">
         <div className="flex items-center gap-2 px-1"><div className="grid size-8 place-items-center rounded-lg bg-primary"><span className="font-mono text-sm font-bold text-primary-foreground">P</span></div><span className="font-semibold tracking-tight">Praxis</span></div>
-        <Button size="icon" variant="secondary" className="size-9 rounded-lg bg-secondary hover:bg-input" onClick={() => { setDrawer(false); router.push("/chat?new=1"); }}><SquarePen className="size-4" /></Button>
+        <Button size="icon-sm" variant="secondary" className="!rounded-lg bg-secondary hover:bg-input" onClick={() => { setDrawer(false); router.push("/chat?new=1"); }} aria-label="New conversation"><SquarePen className="size-4" /></Button>
       </div>
       <div className="px-3 pb-2">
-        <button onClick={() => setPalette(true)} className="flex h-9 w-full items-center gap-2 rounded-lg border border-input bg-secondary/50 px-3 text-sm text-muted-foreground hover:bg-secondary"><Search className="size-4" /> Search<span className="ml-auto flex items-center gap-0.5 rounded border border-white/10 px-1.5 py-0.5 text-[10px] font-mono"><Command className="size-2.5" />K</span></button>
+        <button onClick={() => setPalette(true)} aria-label="Search conversations (⌘K)" className="flex h-9 w-full items-center gap-2 rounded-lg border border-input bg-secondary/50 px-3 text-sm text-muted-foreground hover:bg-secondary"><Search className="size-4" /> Search<span className="ml-auto flex items-center gap-0.5 rounded border border-white/10 px-1.5 py-0.5 cx-type-xs font-mono"><Command className="size-2.5" />K</span></button>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
         <p className="wm-label px-2 py-2">Recent</p>
-        {conversations.length === 0 && <p className="px-2 py-3 text-sm text-muted-foreground">No conversations yet.</p>}
+        {conversations.length === 0 && <p className="px-2 py-3 cx-type-sm" style={{ color: "var(--cx-text-muted)" }}>No conversations yet.</p>}
         {conversations.map((c) => { const on = c.id === convoId; return (
           <button key={c.id} onClick={() => { setDrawer(false); router.push(`/chat?c=${c.id}`); }} className={`mb-1 flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors ${on ? "bg-secondary" : "hover:bg-secondary/60"}`}>
             <span className={`grid size-8 shrink-0 place-items-center rounded-lg bg-card text-primary ${on ? "ring-1 ring-primary/40" : ""}`}><Sparkles className="size-4" /></span>
@@ -329,20 +496,20 @@ export function LiveChat({
   return (
     <>
     <div className="wm-rebrand flex h-[100dvh] w-full overflow-hidden text-foreground">
-      <aside className="hidden w-72 shrink-0 border-r border-white/8 bg-card/40 backdrop-blur-xl lg:block">{Rail}</aside>
+      <aside className="cx-glass hidden w-72 shrink-0 border-r lg:block" style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>{Rail}</aside>
       <AnimatePresence>
         {drawer && (<>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDrawer(false)} className="fixed inset-0 z-40 bg-black/60 lg:hidden" />
-          <motion.aside initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", stiffness: 320, damping: 34 }} className="fixed inset-y-0 left-0 z-50 w-[82%] max-w-xs border-r border-white/8 bg-card lg:hidden">{Rail}</motion.aside>
+          <motion.aside initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", stiffness: 320, damping: 34 }} className="cx-glass fixed inset-y-0 left-0 z-50 w-[82%] max-w-xs border-r lg:hidden" style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>{Rail}</motion.aside>
         </>)}
       </AnimatePresence>
 
       <AnimatePresence>
         {palette && (
           <div className="fixed inset-0 z-[60] flex items-start justify-center p-4 pt-[12vh]">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setPalette(false)} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, y: -12, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8, scale: 0.98 }} transition={{ type: "spring", stiffness: 300, damping: 26 }} className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-card wm-glow">
-              <div className="flex items-center gap-2 border-b border-white/8 px-4"><Search className="size-4 text-muted-foreground" /><input autoFocus value={paletteQ} onChange={(e) => setPaletteQ(e.target.value)} placeholder="Jump to a teammate, start a chat…" className="h-12 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground" /><kbd className="rounded border border-white/10 px-1.5 py-0.5 text-[10px] text-muted-foreground">esc</kbd></div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setPalette(false)} className="cx-scrim absolute inset-0 bg-black/60" />
+            <motion.div initial={{ opacity: 0, y: -12, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8, scale: 0.98 }} transition={{ type: "spring", stiffness: 300, damping: 26 }} className="cx-glass-float cx-glass-border relative w-full max-w-lg overflow-hidden rounded-2xl wm-glow">
+              <div className="flex items-center gap-2 border-b border-white/8 px-4"><Search className="size-4 text-muted-foreground" /><input autoFocus value={paletteQ} onChange={(e) => setPaletteQ(e.target.value)} placeholder="Jump to a teammate, start a chat…" className="h-12 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground" /><kbd className="rounded border border-white/10 px-1.5 py-0.5 cx-type-xs text-muted-foreground">esc</kbd></div>
               <div className="max-h-72 overflow-y-auto p-2">
                 <p className="wm-label px-2 py-1.5">Actions</p>
                 <button onClick={() => { setPalette(false); router.push("/chat?new=1"); }} className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm hover:bg-secondary"><span className="grid size-7 place-items-center rounded-md bg-secondary text-primary"><SquarePen className="size-4" /></span>New chat</button>
@@ -358,17 +525,17 @@ export function LiveChat({
         {openArtifact && (
           <div className="fixed inset-0 z-50 flex">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setOpenArtifact(null)} className="flex-1 bg-black/50" />
-            <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", stiffness: 300, damping: 32 }} className="flex h-full w-full max-w-2xl flex-col border-l border-white/10 bg-card">
+            <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", stiffness: 300, damping: 32 }} className="cx-glass-float flex h-full w-full max-w-2xl flex-col border-l" style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>
               <div className="flex items-center gap-2 border-b border-white/8 px-5 py-4">
                 <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-secondary text-primary"><FileText className="size-5" /></span>
-                <div className="min-w-0 flex-1"><p className="wm-label">{openArtifact.type} · by {EMPLOYEES[openArtifact.by]?.name ?? "Praxis"}</p><h2 className="truncate text-lg font-semibold">{openArtifact.title}</h2></div>
-                <Button onClick={copyArt} disabled={!artContent} size="icon" variant="ghost" className="size-9 rounded-lg text-muted-foreground hover:bg-secondary" title="Copy">{artCopied ? <span className="text-xs text-primary">✓</span> : <Copy className="size-4" />}</Button>
-                <Button onClick={downloadArt} disabled={!artContent} size="sm" variant="secondary" className="gap-1.5 rounded-lg bg-secondary text-xs"><Download className="size-3.5" /> {extFor(openArtifact.type).toUpperCase()}</Button>
-                {DOC_TYPES.has(openArtifact.type) && <Button onClick={pdfArt} disabled={!artContent} size="sm" variant="secondary" className="gap-1.5 rounded-lg bg-secondary text-xs"><Printer className="size-3.5" /> PDF</Button>}
-                <Button onClick={() => setOpenArtifact(null)} size="icon" variant="ghost" className="size-9 rounded-lg text-muted-foreground hover:bg-secondary"><X className="size-4" /></Button>
+                <div className="min-w-0 flex-1"><p className="wm-label">{openArtifact.type} · by {EMPLOYEES[openArtifact.by]?.name ?? "Praxis"}</p><h2 className="truncate cx-type-md font-semibold">{openArtifact.title}</h2></div>
+                <Button onClick={copyArt} disabled={!artContent} size="icon-sm" variant="ghost" className="!rounded-lg text-muted-foreground hover:bg-secondary" title="Copy" aria-label="Copy artifact">{artCopied ? <span className="text-xs text-primary">✓</span> : <Copy className="size-4" />}</Button>
+                <Button onClick={downloadArt} disabled={!artContent} size="sm" variant="secondary" className="gap-1.5 !rounded-lg bg-secondary text-xs"><Download className="size-3.5" /> {extFor(openArtifact.type).toUpperCase()}</Button>
+                {DOC_TYPES.has(openArtifact.type) && <Button onClick={pdfArt} disabled={!artContent} size="sm" variant="secondary" className="gap-1.5 !rounded-lg bg-secondary text-xs"><Printer className="size-3.5" /> PDF</Button>}
+                <Button onClick={() => setOpenArtifact(null)} size="icon-sm" variant="ghost" className="!rounded-lg text-muted-foreground hover:bg-secondary" aria-label="Close artifact"><X className="size-4" /></Button>
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto p-5">
-                {artLoading || artContent === null ? <p className="text-sm text-muted-foreground">Loading…</p> : <pre className="whitespace-pre-wrap font-mono text-[13px] leading-relaxed text-foreground/90">{artContent}</pre>}
+                {artLoading || artContent === null ? <p className="text-sm text-muted-foreground">Loading…</p> : <pre className="whitespace-pre-wrap font-mono cx-type-sm leading-relaxed text-foreground/90">{artContent}</pre>}
               </div>
             </motion.div>
           </div>
@@ -377,20 +544,20 @@ export function LiveChat({
 
       {roomToken && <PraxisLiveRoom tokenResponse={roomToken} onClose={() => { setRoomToken(null); router.refresh(); }} />}
       {voiceErr && (
-        <div className="fixed top-4 left-1/2 z-[80] -translate-x-1/2 rounded-lg border border-destructive/40 bg-card px-4 py-2.5 text-sm wm-glow">
+        <div className="cx-glass-float fixed top-4 left-1/2 z-[80] -translate-x-1/2 rounded-lg border border-destructive/40 px-4 py-2.5 text-sm wm-glow">
           <span className="text-destructive">{voiceErr}</span>
-          <button onClick={() => setVoiceErr(null)} className="ml-3 text-xs text-muted-foreground underline">dismiss</button>
+          <Button variant="ghost" size="sm" onClick={() => setVoiceErr(null)} className="ml-3 text-xs underline">dismiss</Button>
         </div>
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-3 border-b border-white/8 bg-background/70 px-4 py-3 backdrop-blur">
-          <Button size="icon" variant="secondary" className="size-9 rounded-lg bg-secondary lg:hidden" onClick={() => setDrawer(true)}><Menu className="size-4" /></Button>
+        <header className="cx-glass flex items-center gap-3 border-b px-4 py-3" style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>
+          <Button size="icon-sm" variant="secondary" className="!rounded-lg bg-secondary lg:hidden" onClick={() => setDrawer(true)} aria-label="Open navigation"><Menu className="size-4" /></Button>
           <span className="grid size-9 place-items-center rounded-xl bg-secondary text-primary"><EmpIcon className="size-5" /></span>
           <div className="min-w-0"><p className="truncate font-semibold leading-tight">{emp.name}</p><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="size-1.5 rounded-full bg-primary" /> {emp.role}</p></div>
           <div className="ml-auto flex items-center gap-1.5">
-            <button onClick={openLive} disabled={launching} className="flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground wm-glow disabled:opacity-50"><AudioLines className="size-3.5" /> {launching ? "Connecting…" : "Live"}</button>
-            <button onClick={() => setPalette(true)} className="hidden items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground sm:flex"><Command className="size-3" />K</button>
+            <Button variant="primary" size="sm" onClick={openLive} isLoading={launching} loadingText="Connecting…" className="!rounded-full gap-1.5 text-xs font-semibold"><AudioLines className="size-3.5" /> Live</Button>
+            <Button variant="ghost" size="sm" onClick={() => setPalette(true)} className="hidden gap-1.5 border border-white/10 text-xs sm:flex" aria-label="Open command palette"><Command className="size-3" />K</Button>
           </div>
         </header>
 
@@ -403,16 +570,16 @@ export function LiveChat({
           <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-7">
             {hasOlderMessages && (
               <div className="flex justify-center">
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={loadOlderMessages}
-                  disabled={loadingOlder}
-                  className="flex items-center gap-2 rounded-full border border-white/10 bg-secondary/50 px-4 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-secondary disabled:opacity-50"
+                  isLoading={loadingOlder}
+                  loadingText="Loading…"
+                  className="!rounded-full border border-white/10 bg-secondary/50 text-xs text-muted-foreground hover:bg-secondary"
                 >
-                  {loadingOlder ? (
-                    <span className="animate-spin inline-block size-3 rounded-full border border-current border-t-transparent" />
-                  ) : null}
-                  {loadingOlder ? "Loading…" : "Load older messages"}
-                </button>
+                  Load older messages
+                </Button>
               </div>
             )}
             {messages.length === 0 && (
@@ -443,18 +610,21 @@ export function LiveChat({
                             if (e.key === "Escape") cancelEdit();
                           }}
                           rows={3}
-                          className="w-full resize-none rounded-2xl rounded-br-md bg-secondary px-4 py-2.5 text-[15px] leading-relaxed outline-none ring-1 ring-primary/50 focus:ring-primary"
+                          className="w-full resize-none rounded-2xl rounded-br-md bg-secondary px-4 py-2.5 text-sm leading-relaxed outline-none ring-1 ring-primary/50 focus:ring-primary"
                         />
                         <div className="flex justify-end gap-2">
-                          <button onClick={cancelEdit} className="rounded-lg px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">Cancel</button>
-                          <button
+                          <Button variant="ghost" size="sm" onClick={cancelEdit} className="text-xs">Cancel</Button>
+                          <Button
+                            variant="primary"
+                            size="sm"
                             onClick={() => submitEdit(m.id!)}
-                            disabled={editSaving || !editText.trim()}
-                            className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                            isDisabled={!editText.trim()}
+                            isLoading={editSaving}
+                            loadingText="Saving…"
+                            className="text-xs"
                           >
-                            {editSaving ? <span className="animate-spin inline-block size-3 rounded-full border border-current border-t-transparent" /> : null}
-                            {editSaving ? "Saving…" : "Save & resubmit"}
-                          </button>
+                            Save &amp; resubmit
+                          </Button>
                         </div>
                       </div>
                     ) : (
@@ -463,12 +633,13 @@ export function LiveChat({
                           <button
                             onClick={() => startEdit(m)}
                             title="Edit message"
+                            aria-label="Edit message"
                             className="mt-1.5 shrink-0 rounded-md p-1 text-muted-foreground opacity-0 transition-opacity group-hover/user:opacity-100 hover:text-foreground hover:bg-secondary"
                           >
                             <SquarePen className="size-3.5" />
                           </button>
                         )}
-                        <div className="whitespace-pre-wrap rounded-2xl rounded-br-md bg-secondary px-4 py-2.5 text-[15px] leading-relaxed">{m.content}</div>
+                        <div className="whitespace-pre-wrap rounded-2xl rounded-br-md bg-secondary px-4 py-2.5 text-sm leading-relaxed">{m.content}</div>
                       </div>
                     )}
                   </motion.div>
@@ -477,39 +648,52 @@ export function LiveChat({
               const e = (m.employee as EmployeeId) ?? "jarvis"; const I = ICON[e] ?? Sparkles; const k = m.id ?? String(i);
               return (
                 <motion.div key={m.id ?? i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 28 }} className="group flex gap-3">
-                  <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-secondary text-primary"><I className="size-4" /></span>
+                  <SpecialistChip
+                    icon={I}
+                    complete={!m.pending}
+                    pending={!!m.pending}
+                    employee={e}
+                    reducedMotion={reducedMotion}
+                    onComplete={(rect) => triggerReward({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })}
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="mb-1 text-sm font-semibold">{EMPLOYEES[e]?.name ?? "Atlas"}</p>
-                    {m.pending && !m.content ? (
-                      <div className="flex items-center gap-1 py-2" aria-label="Typing…" aria-live="polite">
-                        {[0, 1, 2].map((j) => (
-                          <motion.span
-                            key={j}
-                            className="size-1.5 rounded-full bg-muted-foreground"
-                            animate={reducedMotion ? {} : { opacity: [0.3, 1, 0.3], y: [0, -2, 0] }}
-                            transition={{ duration: 1, repeat: Infinity, delay: j * 0.18 }}
-                            style={reducedMotion ? { opacity: 0.6 } : undefined}
+                    <AnimatePresence mode="sync" initial={false}>
+                      {m.pending && !m.content ? (
+                        <ThinkingIndicator key="thinking" employee={e} reducedMotion={reducedMotion} />
+                      ) : m.error ? (
+                        <div key="error" className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3">
+                          <p className="text-sm text-destructive/90 leading-relaxed">{m.content}</p>
+                          {lastSentMsg.current && (
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => send(lastSentMsg.current)}
+                              isLoading={loading}
+                              loadingText="Retrying…"
+                              className="mt-2 gap-1.5 text-xs"
+                            >
+                              <RefreshCw className="size-3" /> Retry
+                            </Button>
+                          )}
+                        </div>
+                      ) : (
+                        <motion.div
+                          key="content"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                        >
+                          <MarkdownRenderer
+                            content={m.content}
+                            streaming={m.pending}
+                            caretColor={m.pending ? "var(--cx-accent)" : undefined}
                           />
-                        ))}
-                      </div>
-                    ) : m.error ? (
-                      <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3">
-                        <p className="text-[14px] text-destructive/90 leading-relaxed">{m.content}</p>
-                        {lastSentMsg.current && (
-                          <button
-                            onClick={() => send(lastSentMsg.current)}
-                            disabled={loading}
-                            className="mt-2 flex items-center gap-1.5 rounded-lg bg-destructive/15 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/25 transition-colors disabled:opacity-50"
-                          >
-                            <RefreshCw className="size-3" /> Retry
-                          </button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">{m.content}{m.pending && <span className={`ml-0.5 inline-block h-4 w-[3px] translate-y-0.5 rounded-full bg-primary align-middle${reducedMotion ? "" : " animate-pulse"}`} />}</div>
-                    )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                     {m.artifacts?.map((a) => (
-                      <button key={a.id} onClick={() => setOpenArtifact(a)} className="mt-3 flex w-full max-w-sm items-center gap-3 rounded-xl border border-white/10 bg-secondary/40 p-3 text-left transition-colors hover:border-primary/40 hover:bg-secondary">
+                      <button key={a.id} onClick={() => setOpenArtifact(a)} aria-label={`Open artifact: ${a.title}`} className="mt-3 flex w-full max-w-sm items-center gap-3 rounded-xl border border-white/10 bg-secondary/40 p-3 text-left transition-colors hover:border-primary/40 hover:bg-secondary">
                         <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary"><FileText className="size-5" /></span>
                         <span className="min-w-0 flex-1"><span className="wm-label block">{a.type}</span><span className="block truncate text-sm font-medium">{a.title}</span></span>
                         <span className="shrink-0 text-xs text-primary">Open →</span>
@@ -517,10 +701,10 @@ export function LiveChat({
                     ))}
                     {!m.pending && (
                       <div className="mt-2 flex items-center gap-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
-                        <button onClick={() => copyMsg(m)} className="flex items-center gap-1 rounded-md px-1.5 py-1 text-xs hover:bg-secondary hover:text-foreground">{copiedId === k ? <span className="text-primary">Copied</span> : <Copy className="size-3.5" />}</button>
+                        <Button variant="ghost" size="sm" onClick={() => copyMsg(m)} className="gap-1 px-1.5 py-1 text-xs" aria-label="Copy message">{copiedId === k ? <span className="text-primary">Copied</span> : <Copy className="size-3.5" />}</Button>
                         <span className="mx-1 h-3 w-px bg-white/10" />
-                        <button onClick={() => react(k, "🔥")} className="rounded-md px-1.5 py-1 text-sm hover:bg-secondary">🔥</button>
-                        <button onClick={() => react(k, "👍")} className="rounded-md px-1.5 py-1 text-sm hover:bg-secondary">👍</button>
+                        <button onClick={() => react(k, "🔥")} aria-label="React with fire" className="rounded-md px-1.5 py-1 text-sm hover:bg-secondary">🔥</button>
+                        <button onClick={() => react(k, "👍")} aria-label="React with thumbs up" className="rounded-md px-1.5 py-1 text-sm hover:bg-secondary">👍</button>
                       </div>
                     )}
                     {reactions[k] && <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs">{reactions[k]}</span>}
@@ -532,11 +716,11 @@ export function LiveChat({
           </div>
         </div>
 
-        <div className="border-t border-white/8 bg-background/70 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
+        <div className="cx-glass border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]" style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>
           <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="relative mx-auto w-full max-w-3xl">
             <AnimatePresence>
               {menu && (
-                <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 6 }} className="absolute bottom-full left-0 mb-2 w-72 overflow-hidden rounded-xl border border-white/10 bg-card wm-glow">
+                <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 6 }} className="cx-glass-float cx-glass-border absolute bottom-full left-0 mb-2 w-72 overflow-hidden rounded-xl wm-glow">
                   <p className="wm-label flex items-center gap-1.5 px-3 py-2">{menu === "slash" ? <><Slash className="size-3" /> Commands</> : <><AtSign className="size-3" /> Route to teammate</>}</p>
                   <div className="max-h-60 overflow-y-auto pb-1">
                     {menu === "slash" ? (slashItems.length ? slashItems : SLASH).map((s) => (
@@ -548,10 +732,31 @@ export function LiveChat({
                 </motion.div>
               )}
             </AnimatePresence>
-            <div data-tour-target="chat-input" className="flex items-end gap-2 rounded-2xl border border-white/10 bg-secondary/60 p-2 transition-all focus-within:border-primary/50 focus-within:bg-secondary focus-within:wm-glow">
-              <Button type="button" size="icon" variant="ghost" className="size-9 shrink-0 rounded-xl text-muted-foreground hover:bg-input hover:text-foreground"><Paperclip className="size-4" /></Button>
-              <textarea ref={taRef} value={input} rows={1} onChange={(e) => { setInput(e.target.value); grow(); }} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !menu) { e.preventDefault(); send(input); } }} placeholder={`Message ${emp.name}…  ·  / for commands  ·  @ to route`} className="max-h-40 flex-1 resize-none bg-transparent py-2 text-[15px] leading-relaxed outline-none placeholder:text-muted-foreground" />
-              <motion.div whileTap={{ scale: 0.9 }}><Button type="submit" size="icon" disabled={!input.trim() || loading} className="size-9 shrink-0 rounded-xl wm-glow disabled:opacity-40"><ArrowUp className="size-4" /></Button></motion.div>
+            <div
+              data-tour-target="chat-input"
+              className="flex items-end gap-2 rounded-2xl border bg-secondary/60 p-2 transition-all focus-within:bg-secondary focus-within:wm-glow"
+              style={{
+                borderColor: loading
+                  ? "var(--cx-accent, #7C6CFF)"
+                  : "var(--cx-glass-border, rgba(255,255,255,0.08))",
+                boxShadow: loading
+                  ? "0 0 0 3px var(--cx-accent-glow-raw, rgba(124,108,255,0.18))"
+                  : undefined,
+                transition: "border-color 120ms cubic-bezier(0.22,1,0.36,1), box-shadow 120ms cubic-bezier(0.22,1,0.36,1)",
+              }}
+            >
+              <Button type="button" size="icon-sm" variant="ghost" className="!rounded-xl shrink-0 text-muted-foreground hover:bg-input hover:text-foreground" aria-label="Attach file"><Paperclip className="size-4" /></Button>
+              <textarea
+                ref={taRef}
+                value={input}
+                rows={1}
+                readOnly={loading}
+                onChange={(e) => { setInput(e.target.value); grow(); }}
+                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !menu) { e.preventDefault(); send(input); } }}
+                placeholder={loading ? "Waiting for response…" : `Message ${emp.name}…  ·  / for commands  ·  @ to route`}
+                className="max-h-40 flex-1 resize-none bg-transparent py-2 text-sm leading-relaxed outline-none placeholder:text-muted-foreground"
+              />
+              <Button type="submit" variant="primary" size="icon-sm" isDisabled={!input.trim() || loading} className="!rounded-xl shrink-0 disabled:opacity-40" aria-label="Send message"><ArrowUp className="size-4" /></Button>
             </div>
             <p className="wm-label mt-2 flex items-center justify-center gap-3"><span className="flex items-center gap-1"><Command className="size-3" />K</span><span className="flex items-center gap-1"><Slash className="size-3" />commands</span><span className="flex items-center gap-1"><AtSign className="size-3" />route</span></p>
           </form>

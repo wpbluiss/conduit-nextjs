@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Mic, Lock } from "lucide-react";
+import { AnimatedStat } from "@/components/conduit/ui/AnimatedStat";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentAccount } from "@/lib/conduit/account";
 import { tierById } from "@/lib/billing/tiers";
@@ -110,14 +111,14 @@ export default async function VoiceRoomLanding() {
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-10">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
+          <p className="cx-label">
             Praxis Console · Voice Room
           </p>
           <h1 className="cx-heading-3xl mt-2 inline-flex items-center gap-3">
-            <Mic className="text-[var(--color-accent)]" size={32} />
+            <Mic className="text-[var(--color-accent)]" size={32} strokeWidth={1.75} />
             Voice Room
           </h1>
-          <p className="mt-3 text-sm text-[var(--color-text-muted)] max-w-xl">
+          <p className="mt-3 cx-body text-[var(--color-text-muted)] max-w-xl">
             Talk to your team like a Zoom call. Pick an employee to start a
             session.
           </p>
@@ -125,10 +126,10 @@ export default async function VoiceRoomLanding() {
 
         {!ttsAllowed && (
           <div className="conduit-card p-5 mb-6 inline-flex items-center gap-3 max-w-xl">
-            <Lock size={14} className="text-[var(--color-accent-hi)]" />
+            <Lock size={14} strokeWidth={1.75} className="text-[var(--color-accent-hi)]" />
             <div>
-              <div className="text-sm">Voice mode is a Pro perk</div>
-              <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5">
+              <div className="cx-type-base">Voice mode is a Pro perk</div>
+              <p className="cx-type-xs text-[var(--color-text-muted)] mt-0.5">
                 Free accounts can still use voice <em>input</em> in chat.{" "}
                 <Link
                   href="/app/settings/billing"
@@ -144,12 +145,12 @@ export default async function VoiceRoomLanding() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-10">
           <div className="conduit-card p-5">
-            <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+            <div className="cx-label">
               Today
             </div>
-            <div className="cx-stat mt-2">
-              {usedTodayMin}{" "}
-              <span className="text-base text-[var(--color-text-muted)]">
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <AnimatedStat value={usedTodayMin} format={(n) => String(n)} />
+              <span className="cx-mono cx-type-md text-[var(--color-text-muted)]">
                 / {ceilings.dailyMinutes} min
               </span>
             </div>
@@ -167,32 +168,35 @@ export default async function VoiceRoomLanding() {
                 }}
               />
             </div>
-            <div className="text-[10px] text-[var(--color-text-muted)] mt-1.5">
+            <div className="cx-type-xs text-[var(--color-text-muted)] mt-1.5">
               Daily cap resets at midnight
             </div>
           </div>
           <div className="conduit-card p-5">
-            <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+            <div className="cx-label">
               Per-session cap
             </div>
-            <div className="cx-stat mt-2">
-              {Math.floor(ceilings.maxSeconds / 60)} min
+            <div className="mt-2">
+              <AnimatedStat
+                value={Math.floor(ceilings.maxSeconds / 60)}
+                format={(n) => `${n} min`}
+              />
             </div>
-            <div className="text-[11px] text-[var(--color-text-muted)] mt-1.5">
+            <div className="cx-type-xs text-[var(--color-text-muted)] mt-1.5">
               You&apos;ll hear a soft warning at{" "}
               {Math.floor(ceilings.warnSeconds / 60)} min
             </div>
           </div>
           <div className="conduit-card p-5">
-            <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+            <div className="cx-label">
               Voice settings
             </div>
-            <p className="text-[12px] mt-2 text-[var(--color-text-muted)]">
+            <p className="cx-type-xs mt-2 text-[var(--color-text-muted)]">
               Per-employee voices, auto-play, streaming.
             </p>
             <Link
               href="/app/settings/voice"
-              className="mt-3 inline-flex items-center gap-1 text-[12px] text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+              className="mt-3 inline-flex items-center gap-1 cx-type-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
             >
               Manage →
             </Link>
@@ -208,10 +212,10 @@ export default async function VoiceRoomLanding() {
 
         {/* Pick an employee for a 1:1. */}
         <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="text-[12px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+          <h2 className="cx-label">
             Talk solo
           </h2>
-          <span className="text-[10px] text-[var(--color-text-muted)]">
+          <span className="cx-type-xs text-[var(--color-text-muted)]">
             1-on-1 conversation · opens the workspace
           </span>
         </div>
@@ -233,17 +237,17 @@ export default async function VoiceRoomLanding() {
                 <EmployeeAvatar employee={emp} size={32} />
                 <div className="min-w-0 flex-1">
                   <div
-                    className="text-sm font-medium truncate"
+                    className="cx-type-base font-medium truncate"
                     style={{ color: meta.color }}
                   >
                     {meta.name}
                   </div>
-                  <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)] truncate">
+                  <div className="cx-mono cx-type-xs text-[var(--color-text-muted)] truncate">
                     {meta.role}
                   </div>
                 </div>
                 {!isAllowed && (
-                  <Lock size={12} className="text-[var(--color-text-muted)]" />
+                  <Lock size={12} strokeWidth={1.75} className="text-[var(--color-text-muted)]" />
                 )}
               </Link>
             );
@@ -252,18 +256,18 @@ export default async function VoiceRoomLanding() {
 
         {/* Recent sessions */}
         <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="text-[12px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+          <h2 className="cx-label">
             Recent sessions
           </h2>
           <Link
             href="/app/settings/voice-history"
-            className="text-[10px] text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+            className="cx-type-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
           >
             See full history →
           </Link>
         </div>
         {recent.length === 0 ? (
-          <p className="text-[12px] text-[var(--color-text-muted)] mt-2">
+          <p className="cx-type-xs text-[var(--color-text-muted)] mt-2">
             No voice sessions yet. Pick an employee above to start your first
             room.
           </p>
@@ -284,10 +288,10 @@ export default async function VoiceRoomLanding() {
                 >
                   <EmployeeAvatar employee={empKey} size={24} />
                   <div className="min-w-0 flex-1">
-                    <div className="text-sm" style={{ color: meta.color }}>
+                    <div className="cx-type-base" style={{ color: meta.color }}>
                       {meta.name}
                     </div>
-                    <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+                    <div className="cx-mono cx-type-xs tabular-nums text-[var(--color-text-muted)]">
                       {fmtDuration(s.duration_seconds ?? 0)} ·{" "}
                       {relativeTime(s.started_at)}
                     </div>

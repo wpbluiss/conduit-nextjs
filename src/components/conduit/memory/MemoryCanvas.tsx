@@ -16,6 +16,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Download, Search, X } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 import type { MemoryRecord, MemoryKind } from "@/lib/ai/memory";
 import { Canvas } from "@/components/conduit/pdl/Canvas";
 import { Edge } from "@/components/conduit/pdl/Edge";
@@ -261,13 +262,7 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
     <div className="mem-canvas-page">
       {/* Filter toolbar */}
       <div
-        style={{
-          background: "var(--pdl-surface-glass, var(--color-surface-elevated))",
-          backdropFilter: "blur(16px)",
-          borderBottom: "1px solid var(--pdl-border-hairline, var(--color-border))",
-          zIndex: 20,
-          position: "relative",
-        }}
+        className="cx-glass relative z-20 border-b border-[var(--cx-glass-border,rgba(255,255,255,0.08))]"
       >
         {/* Search row */}
         <div className="flex items-center gap-2 px-4 py-2">
@@ -278,66 +273,50 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
               border: "1px solid var(--pdl-border-hairline, var(--color-border))",
             }}
           >
-            <Search size={13} style={{ color: "var(--pdl-text-muted, var(--color-text-muted))", flexShrink: 0 }} />
+            <Search size={13} strokeWidth={1.75} style={{ color: "var(--pdl-text-muted, var(--color-text-muted))", flexShrink: 0 }} />
             <input
               type="text"
               value={query}
               onChange={(e) => handleQueryChange(e.target.value)}
               placeholder="Search memories…"
               aria-label="Search memories"
-              className="flex-1 bg-transparent outline-none text-[13px] placeholder:text-[var(--pdl-text-muted,var(--color-text-muted))]"
+              className="flex-1 bg-transparent outline-none cx-type-sm placeholder:text-[var(--pdl-text-muted,var(--color-text-muted))]"
               style={{ color: "var(--pdl-text, var(--color-text))", minWidth: 0 }}
             />
             {query && (
-              <button
-                type="button"
+              <PraxisButton
+                variant="ghost"
+                size="icon-sm"
                 onClick={() => handleQueryChange("")}
                 aria-label="Clear search"
                 className="shrink-0"
-                style={{ color: "var(--pdl-text-muted, var(--color-text-muted))" }}
               >
-                <X size={12} />
-              </button>
+                <X size={12} strokeWidth={1.75} />
+              </PraxisButton>
             )}
           </div>
           {hasFilters && (
-            <button
-              type="button"
+            <PraxisButton
+              variant="ghost"
+              size="sm"
               onClick={clearFilters}
-              className="text-[11px] px-2.5 py-1.5 rounded-lg transition-colors"
-              style={{
-                color: "var(--pdl-text-muted, var(--color-text-muted))",
-                border: "1px solid var(--pdl-border-hairline, var(--color-border))",
-              }}
             >
               Clear
-            </button>
+            </PraxisButton>
           )}
           {memories.length > 0 && (
-            <button
-              type="button"
+            <PraxisButton
+              variant="ghost"
+              size="sm"
               onClick={exportMemories}
               disabled={exportingMemories}
               title={`Export all ${memories.length} memories as JSON`}
               aria-label="Export memories as JSON"
-              className="ml-auto flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg transition-colors shrink-0"
-              style={{
-                color: "var(--pdl-text-muted, var(--color-text-muted))",
-                border: "1px solid var(--pdl-border-hairline, var(--color-border))",
-                opacity: exportingMemories ? 0.5 : 1,
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "var(--pdl-text, var(--color-text))";
-                (e.currentTarget as HTMLElement).style.borderColor = "var(--pdl-border, var(--color-border))";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "var(--pdl-text-muted, var(--color-text-muted))";
-                (e.currentTarget as HTMLElement).style.borderColor = "var(--pdl-border-hairline, var(--color-border))";
-              }}
+              className="ml-auto shrink-0"
             >
-              <Download size={12} />
+              <Download size={12} strokeWidth={1.75} />
               <span className="hidden sm:inline">Export</span>
-            </button>
+            </PraxisButton>
           )}
         </div>
 
@@ -350,7 +329,7 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
           <button
             type="button"
             onClick={() => handleDeptChange("all")}
-            className="shrink-0 text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded-full transition-colors"
+            className="shrink-0 cx-type-xs uppercase tracking-[0.12em] px-2.5 py-1 rounded-full transition-colors"
             style={{
               background: deptFilter === "all"
                 ? "color-mix(in srgb, var(--pdl-accent, var(--color-accent)) 15%, transparent)"
@@ -374,7 +353,7 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
                 key={empId}
                 type="button"
                 onClick={() => handleDeptChange(active ? "all" : empId)}
-                className="shrink-0 text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded-full transition-colors"
+                className="shrink-0 cx-type-xs uppercase tracking-[0.12em] px-2.5 py-1 rounded-full transition-colors"
                 style={{
                   background: active
                     ? `color-mix(in srgb, ${emp.color} 15%, transparent)`
@@ -406,7 +385,7 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
                 key={kind}
                 type="button"
                 onClick={() => handleKindToggle(kind)}
-                className="shrink-0 text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded-full transition-colors"
+                className="shrink-0 cx-type-xs uppercase tracking-[0.12em] px-2.5 py-1 rounded-full transition-colors"
                 style={{
                   background: active
                     ? "color-mix(in srgb, var(--pdl-accent, var(--color-accent)) 12%, transparent)"
@@ -487,7 +466,7 @@ export function MemoryCanvas({ initial, cap, initialQ = "", initialDept = "all",
               icon={<MemoryEmptySVG />}
               headline="Praxis learns as you work"
               body="Memory nodes appear here as your specialists accumulate context about your business — goals, preferences, and decisions. Click anywhere on the canvas to add a node manually."
-              className="max-w-sm pointer-events-auto bg-[var(--color-surface-elevated)]/80 backdrop-blur-sm"
+              className="max-w-sm pointer-events-auto cx-glass cx-glass-border"
             />
           </div>
         )}

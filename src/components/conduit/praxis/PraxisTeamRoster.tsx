@@ -304,7 +304,7 @@ export function PraxisTeamRoster({
               <div>
                 <div
                   style={{
-                    fontSize: "13px",
+                    fontSize: "var(--cx-type-sm)",
                     fontWeight: 500,
                     color: c.isAllowed ? "var(--dept)" : "var(--color-text-muted)",
                   }}
@@ -320,7 +320,7 @@ export function PraxisTeamRoster({
                   color: c.isAllowed ? "var(--color-text-muted)" : "var(--color-text-muted)",
                   textTransform: "none",
                   letterSpacing: 0,
-                  fontSize: "11px",
+                  fontSize: "var(--cx-type-xs)",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",

@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { PraxisLogo } from "@/components/conduit/PraxisLogo";
+import { Button } from "@/components/conduit/ui/Button";
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 const CONTAINER = {
@@ -143,24 +144,16 @@ export default function ForgotPasswordPage() {
                 </motion.p>
               )}
 
-              <motion.button
+              <Button
                 variants={ITEM}
                 type="submit"
-                disabled={loading}
-                className="btn-primary w-full justify-center disabled:opacity-60"
+                isLoading={loading}
+                loadingText="Sending…"
+                className="w-full justify-center"
               >
-                {loading ? (
-                  <>
-                    <SpinnerIcon />
-                    Sending…
-                  </>
-                ) : (
-                  <>
-                    Send reset link
-                    <ArrowRight size={15} weight="bold" />
-                  </>
-                )}
-              </motion.button>
+                Send reset link
+                <ArrowRight size={15} weight="bold" />
+              </Button>
             </form>
           )}
         </motion.div>
@@ -181,25 +174,3 @@ export default function ForgotPasswordPage() {
   );
 }
 
-function SpinnerIcon() {
-  return (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-      className="animate-spin"
-    >
-      <circle
-        cx="12"
-        cy="12"
-        r="9"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeDasharray="30 28"
-      />
-    </svg>
-  );
-}

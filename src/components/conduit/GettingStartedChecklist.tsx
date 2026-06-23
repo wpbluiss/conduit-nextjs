@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Check, X } from "lucide-react";
 import Link from "next/link";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 type GsKey = "gs_msg" | "gs_connector" | "gs_template" | "gs_invite";
 type GsState = Partial<Record<GsKey | "gs_dismissed", boolean>>;
@@ -100,27 +101,27 @@ export function GettingStartedChecklist({
         <div className="flex items-center justify-between mb-1.5">
           <div>
             <div
-              className="text-[11px] font-semibold"
+              className="cx-type-xs font-semibold"
               style={{ color: "var(--color-text)" }}
             >
               Get started
             </div>
             <div
-              className="text-[10px]"
+              className="cx-type-xs"
               style={{ color: "var(--color-text-muted)" }}
             >
               {done} of {ITEMS.length} complete
             </div>
           </div>
-          <button
+          <PraxisButton
             type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={dismiss}
             aria-label="Dismiss getting started checklist"
-            className="transition-colors p-0.5 rounded hover:opacity-70"
-            style={{ color: "var(--color-text-muted)" }}
           >
-            <X size={12} />
-          </button>
+            <X size={12} strokeWidth={1.75} />
+          </PraxisButton>
         </div>
 
         <div
@@ -146,7 +147,7 @@ export function GettingStartedChecklist({
               <Link
                 href={item.href}
                 onClick={() => !checked && check(item.key)}
-                className={`flex items-center gap-2 px-3 py-1.5 text-[11px] transition-colors ${
+                className={`flex items-center gap-2 px-3 py-1.5 cx-type-xs transition-colors ${
                   checked
                     ? "pointer-events-none opacity-50"
                     : "hover:bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]"
@@ -164,7 +165,7 @@ export function GettingStartedChecklist({
                     transition: "background 0.2s, border-color 0.2s",
                   }}
                 >
-                  {checked && <Check size={8} color="#fff" strokeWidth={3} />}
+                  {checked && <Check size={8} color="#fff" strokeWidth={2} />}
                 </span>
                 <span
                   className={checked ? "line-through" : ""}

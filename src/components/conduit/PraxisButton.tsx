@@ -2,6 +2,7 @@
 
 import { type ReactNode } from "react";
 import { motion, useReducedMotion, type HTMLMotionProps } from "framer-motion";
+import { CX_SPRING_SNAPPY, TX_FAST } from "@/lib/ui/motion";
 
 export type PraxisButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export type PraxisButtonSize = "sm" | "md" | "lg" | "icon" | "icon-sm";
@@ -29,9 +30,6 @@ const SIZE_CLASS: Record<PraxisButtonSize, string> = {
   icon: "btn-sz-icon",
   "icon-sm": "btn-sz-icon-sm",
 };
-
-/* Spec: 120–220ms, easing [0.22,1,0.36,1] "snappy spring" */
-const SPRING = { duration: 0.15, ease: [0.22, 1, 0.36, 1] as const };
 
 export function SpinnerIcon({ size = 14 }: { size?: number }) {
   return (
@@ -79,24 +77,44 @@ export function PraxisButton({
       type={type}
       disabled={isActuallyDisabled}
       aria-busy={isLoading || undefined}
-      /* Hover lift — CSS handles bg/border/shadow, framer-motion handles transform */
+      /* Hover: CSS handles bg/border/shadow; framer-motion handles the lift transform */
       whileHover={isActuallyDisabled || prefersReduced ? undefined : { y: -1 }}
-      /* Press: scale down + snap back to y=0 (overrides hover lift) */
-      whileTap={isActuallyDisabled || prefersReduced ? undefined : { scale: 0.97, y: 0 }}
-      transition={SPRING}
+      /* Press: scale 0.96 + return to baseline y; springy release on pointer-up */
+      whileTap={isActuallyDisabled || prefersReduced ? undefined : { scale: 0.96, y: 0 }}
+      /* Per-property: scale gets the spring (tactile snap+rebound); y gets a quick ease (hover lift) */
+      transition={prefersReduced ? TX_FAST : { scale: CX_SPRING_SNAPPY, y: TX_FAST }}
       className={`${variantClass} ${sizeClass} disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
-      {isLoading && <SpinnerIcon />}
-      <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "8px",
-          opacity: isLoading ? 0.65 : 1,
-          transition: "opacity 0.2s ease-out",
-        }}
-      >
-        {isLoading && loadingText ? loadingText : children}
+      {/* Relative wrapper so spinner can overlay without shifting button width */}
+      <span style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+        {/* Children always rendered — preserves natural button width during loading */}
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "var(--cx-space-2, 8px)",
+            opacity: isLoading ? 0 : 1,
+            transition: "opacity var(--cx-dur-fast, 120ms) ease-out",
+          }}
+        >
+          {children}
+        </span>
+        {/* Spinner + optional loading label — absolutely overlaid, zero layout impact */}
+        {isLoading && (
+          <span
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "var(--cx-space-1, 4px)",
+            }}
+          >
+            <SpinnerIcon />
+            {loadingText && <span>{loadingText}</span>}
+          </span>
+        )}
       </span>
     </motion.button>
   );

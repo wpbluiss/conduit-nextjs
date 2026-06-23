@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 const STORAGE_KEY = "praxis.cookie_consent";
 
@@ -48,13 +49,9 @@ export function CookieConsentBanner() {
       className={`fixed bottom-0 left-0 right-0 z-[55] px-4 pb-4 md:px-6 ${isAuthPage ? "md:pb-6" : "md:top-0 md:bottom-auto md:pt-6 md:pb-0"}`}
     >
       <div
-        className="mx-auto max-w-3xl conduit-card flex flex-row items-center gap-2 p-3 md:flex-row md:items-center md:gap-6 md:p-4"
-        style={{
-          background: "var(--color-surface-elevated)",
-          boxShadow: "0 4px 32px rgba(10,9,8,0.4)",
-        }}
+        className="mx-auto max-w-3xl cx-glass-float cx-glass-border flex flex-row items-center gap-2 p-3 md:flex-row md:items-center md:gap-6 md:p-4"
       >
-        <p className="flex-1 text-xs md:text-sm text-[var(--color-text-muted)] leading-relaxed">
+        <p className="flex-1 cx-body text-[var(--color-text-muted)]">
           We use analytics to improve Praxis.{" "}
           <a
             href="/legal/privacy"
@@ -65,29 +62,20 @@ export function CookieConsentBanner() {
           .
         </p>
         <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={decline}
-            className="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors border border-[var(--color-border)] hover:border-[var(--color-accent)]"
-          >
+          <PraxisButton onClick={decline} variant="ghost" size="sm">
             Decline
-          </button>
-          <button
-            onClick={accept}
-            className="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium transition-colors"
-            style={{
-              background: "var(--color-accent)",
-              color: "#fff",
-            }}
-          >
+          </PraxisButton>
+          <PraxisButton onClick={accept} variant="primary" size="sm">
             Accept
-          </button>
-          <button
+          </PraxisButton>
+          <PraxisButton
             onClick={decline}
+            variant="ghost"
+            size="icon-sm"
             aria-label="Dismiss"
-            className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
           >
-            <X size={16} />
-          </button>
+            <X size={14} strokeWidth={1.75} />
+          </PraxisButton>
         </div>
       </div>
     </div>

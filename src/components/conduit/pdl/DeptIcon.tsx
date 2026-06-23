@@ -7,6 +7,7 @@
 // the wrapping surface (badge, chip, node glow), not to this glyph.
 
 import { EMPLOYEE_ICON } from "@/components/conduit/EmployeeBadge";
+import { SPECIALIST_ICON_STROKE } from "@/lib/ui/specialist-icons";
 import type { EmployeeKey } from "@/lib/ai/provider";
 
 interface Props {
@@ -25,5 +26,5 @@ export function DeptIcon({ employee, size = 16, className }: Props) {
     }
     return null;
   }
-  return <Icon size={size} strokeWidth={2.25} className={className} aria-hidden />;
+  return <Icon size={size} strokeWidth={SPECIALIST_ICON_STROKE} className={className} aria-hidden />;
 }

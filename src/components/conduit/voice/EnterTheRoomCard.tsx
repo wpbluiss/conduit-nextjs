@@ -6,8 +6,9 @@
 // "go around" round-robin trigger phrases handled by the worker per R12.5.
 
 import { useState } from "react";
-import { Mic, Lock, Loader2, AlertCircle } from "lucide-react";
+import { Mic, Lock } from "lucide-react";
 import { Button } from "@/components/conduit/ui/Button";
+import { useToast } from "@/context/ToastContext";
 import VoiceRoom, {
   type ParticipantDisplay,
   type VoiceTokenResponse,
@@ -29,8 +30,8 @@ export default function EnterTheRoomCard({
   tierLabel,
   conversationId,
 }: Props) {
+  const toast = useToast();
   const [requesting, setRequesting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<VoiceTokenResponse | null>(null);
 
   const displays: ParticipantDisplay[] = participants.map((p) => ({
@@ -47,7 +48,6 @@ export default function EnterTheRoomCard({
 
   async function start() {
     if (!available || requesting) return;
-    setError(null);
     setRequesting(true);
     try {
       const probe = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -69,13 +69,13 @@ export default function EnterTheRoomCard({
           message?: string;
         };
         if (r.status === 503) {
-          setError(j.message ?? "Voice mode is being set up.");
+          toast.error(j.message ?? "Voice mode is being set up. Try again shortly.");
         } else if (r.status === 429) {
-          setError(j.message ?? "Daily voice cap reached.");
+          toast.error(j.message ?? "Daily voice cap reached.");
         } else if (r.status === 403) {
-          setError(j.message ?? "Voice Mode requires a paid tier.");
+          toast.error(j.message ?? "Voice Mode requires a paid tier.");
         } else {
-          setError(j.error ?? "Couldn't start voice mode.");
+          toast.error(j.error ?? "Couldn't start voice mode.");
         }
         return;
       }
@@ -88,9 +88,9 @@ export default function EnterTheRoomCard({
         e.name === "PermissionDeniedError" ||
         e.name === "SecurityError"
       ) {
-        setError("Mic permission denied — enable in browser settings.");
+        toast.error("Mic permission denied — enable in browser settings.");
       } else {
-        setError(e.message ?? "Couldn't start voice mode.");
+        toast.error(e.message ?? "Couldn't start voice mode.");
       }
     } finally {
       setRequesting(false);
@@ -101,14 +101,14 @@ export default function EnterTheRoomCard({
     return (
       <div className="conduit-card p-6 md:p-7 mb-10 border border-[var(--color-border)] flex flex-col md:flex-row items-start md:items-center gap-5">
         <div className="shrink-0 inline-flex items-center justify-center w-14 h-14 rounded-full bg-[var(--color-surface-elevated)]">
-          <Lock size={20} className="text-[var(--color-accent-hi)]" />
+          <Lock size={20} strokeWidth={1.75} className="text-[var(--color-accent-hi)]" />
         </div>
         <div className="flex-1">
-          <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-accent-hi)] mb-1">
+          <div className="cx-type-xs uppercase tracking-[0.2em] text-[var(--color-accent-hi)] mb-1">
             Pro perk
           </div>
-          <h2 className="serif text-2xl mb-1">Enter the room</h2>
-          <p className="text-sm text-[var(--color-text-muted)]">
+          <h2 className="cx-type-xl font-semibold mb-1">Enter the room</h2>
+          <p className="cx-type-base text-[var(--color-text-muted)]">
             Get the whole team on the line. Atlas moderates; say{" "}
             <span className="text-[var(--color-text)]">team</span> for a
             round-robin or address an employee directly. Available on Pro and up.
@@ -116,7 +116,7 @@ export default function EnterTheRoomCard({
         </div>
         <a
           href="/app/settings/billing"
-          className="btn-primary !text-sm shrink-0"
+          className="btn-primary btn-sz-sm shrink-0"
         >
           Upgrade
         </a>
@@ -135,49 +135,28 @@ export default function EnterTheRoomCard({
       >
         <AvatarStack displays={displays} />
         <div className="flex-1 min-w-0">
-          <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-text-muted)] mb-1 inline-flex items-center gap-2">
+          <div className="cx-type-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)] mb-1 inline-flex items-center gap-2">
             <span className="live-dot" aria-hidden /> {tierLabel}
           </div>
-          <h2 className="serif text-2xl md:text-3xl mb-1">Enter the room</h2>
-          <p className="text-sm text-[var(--color-text-muted)]">
+          <h2 className="cx-type-xl md:cx-type-2xl font-semibold mb-1">Enter the room</h2>
+          <p className="cx-type-base text-[var(--color-text-muted)]">
             Talk to your whole team at once. Address anyone, or say{" "}
             <span className="text-[var(--color-text)]">team</span> for a
             round-robin. Atlas closes.
           </p>
         </div>
         <Button
+          variant="primary"
+          size="lg"
           onClick={start}
-          disabled={requesting}
-          className="!text-base shrink-0 inline-flex items-center gap-2 disabled:opacity-50"
-          style={{ background: "var(--color-accent)", color: "#FFFFFF" }}
+          isLoading={requesting}
+          loadingText="Connecting…"
+          className="shrink-0"
         >
-          {requesting ? (
-            <Loader2 size={14} className="animate-spin" />
-          ) : (
-            <Mic size={14} />
-          )}
-          {requesting ? "Connecting…" : "Enter the room"}
+          <Mic size={14} strokeWidth={1.75} />
+          Enter the room
         </Button>
       </div>
-
-      {error && (
-        <div
-          role="alert"
-          className="fixed top-4 right-4 z-[70] max-w-sm text-sm bg-red-950/90 border border-red-500/40 rounded-md px-3 py-2 text-red-100 inline-flex items-start gap-2 shadow-lg"
-        >
-          <AlertCircle size={14} className="mt-0.5 shrink-0" />
-          <div>
-            <div>{error}</div>
-            <button
-              type="button"
-              onClick={() => setError(null)}
-              className="text-xs underline mt-0.5 text-red-200/70"
-            >
-              dismiss
-            </button>
-          </div>
-        </div>
-      )}
 
       {token && (
         <VoiceRoom
@@ -204,8 +183,8 @@ function AvatarStack({ displays }: { displays: ParticipantDisplay[] }) {
       {visible.map((d) => (
         <div
           key={d.id}
-          className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-base serif border-2 border-[var(--color-bg)]"
-          style={{ background: d.color, color: "var(--cx-canvas, #0B0B0F)" }}
+          className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center cx-type-base md:cx-type-md font-semibold border-2 border-[var(--color-bg)]"
+          style={{ background: d.color, color: "var(--cx-canvas)" }}
           title={d.name}
         >
           {d.initial}
@@ -213,7 +192,7 @@ function AvatarStack({ displays }: { displays: ParticipantDisplay[] }) {
       ))}
       {overflow > 0 && (
         <div
-          className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-xs serif border-2 border-[var(--color-bg)] bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)]"
+          className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center cx-type-xs font-semibold border-2 border-[var(--color-bg)] bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)]"
           title={`+${overflow} more`}
         >
           +{overflow}

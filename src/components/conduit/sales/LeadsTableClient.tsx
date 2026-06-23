@@ -149,30 +149,30 @@ export default function LeadsTableClient({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div
-              className="text-[10px] uppercase tracking-[0.18em]"
+              className="cx-type-xs uppercase tracking-[0.18em]"
               style={{ color: deptColor }}
             >
               Fresh Leads
             </div>
-            <h2 className="serif text-xl mt-0.5">
+            <h2 className="cx-type-lg font-semibold mt-0.5">
               {filtered.length}{" "}
-              <span className="text-[var(--color-text-muted)] text-sm font-normal">
+              <span className="text-[var(--color-text-muted)] cx-type-base font-normal">
                 {filtered.length === 1 ? "prospect" : "prospects"}
               </span>
             </h2>
           </div>
           <Button
             onClick={() => setShowModal(true)}
-            className="!text-sm inline-flex items-center gap-2"
-            style={{ background: deptColor, color: "var(--cx-canvas, #0B0B0F)" }}
+            className="cx-type-base inline-flex items-center gap-2"
+            style={{ background: deptColor, color: "var(--cx-canvas)" }}
           >
-            <Search size={14} />
+            <Search size={14} strokeWidth={1.75} />
             Run Discovery
           </Button>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap items-center gap-2 text-sm">
+        <div className="flex flex-wrap items-center gap-2 cx-type-base">
           <FilterSelect
             label="Vertical"
             value={filterVertical}
@@ -218,8 +218,8 @@ export default function LeadsTableClient({
             ]}
           />
           {refetching && (
-            <span className="text-xs text-[var(--color-text-muted)] inline-flex items-center gap-1">
-              <Loader2 size={12} className="animate-spin" />
+            <span className="cx-type-xs text-[var(--color-text-muted)] inline-flex items-center gap-1">
+              <Loader2 size={12} className="animate-spin" strokeWidth={1.75} />
               refreshing
             </span>
           )}
@@ -234,17 +234,17 @@ export default function LeadsTableClient({
               background: `linear-gradient(180deg, ${deptColorSoft}, transparent 80%)`,
             }}
           >
-            <p className="text-[var(--color-text)]">
+            <p className="cx-type-sm" style={{ color: "var(--cx-text-muted)" }}>
               No leads match these filters.
             </p>
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={() => setShowModal(true)}
-              className="mt-3 text-sm"
-              style={{ color: deptColor }}
             >
               Run Discovery →
-            </button>
+            </Button>
           </div>
         ) : (
           <ul className="space-y-2">
@@ -289,14 +289,14 @@ function FilterSelect({
   options: Array<{ value: string; label: string }>;
 }) {
   return (
-    <label className="inline-flex items-center gap-1.5 text-xs">
+    <label className="inline-flex items-center gap-1.5 cx-type-xs">
       <span className="text-[var(--color-text-muted)] uppercase tracking-[0.12em]">
         {label}
       </span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="bg-[var(--color-bg-elevated,rgba(255,255,255,0.03))] border border-[var(--color-border)] rounded-md px-2 py-1 text-[var(--color-text)] text-sm"
+        className="bg-[var(--color-bg-elevated,rgba(255,255,255,0.03))] border border-[var(--color-border)] rounded-md px-2 py-1 text-[var(--color-text)] cx-type-base"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -344,70 +344,73 @@ function LeadCard({
               <span className="text-[var(--color-text)] font-medium truncate">
                 {lead.business_name}
               </span>
-              <span className="text-[10px] uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+              <span className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
                 {lead.vertical.replace("_", " ")} · {lead.city}
               </span>
               {lead.intent_signal_score > 0 && (
                 <span
-                  className="text-[10px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded"
+                  className="cx-type-xs uppercase tracking-[0.12em] px-1.5 py-0.5 rounded"
                   style={{ background: deptColorSoft, color: deptColor }}
                 >
                   intent {lead.intent_signal_score}
                 </span>
               )}
               {lead.status !== "new" && (
-                <span className="text-[10px] uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
+                <span className="cx-type-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
                   {STATUS_LABELS[lead.status]}
                 </span>
               )}
             </div>
-            <div className="mt-1 text-xs text-[var(--color-text-muted)] truncate">
+            <div className="mt-1 cx-type-xs text-[var(--color-text-muted)] truncate">
               {lead.address || "—"}
               {lead.phone && ` · ${lead.phone}`}
               {lead.rating != null && ` · ★ ${lead.rating}`}
               {lead.review_count != null && ` (${lead.review_count})`}
             </div>
             {lead.intent_signal_text && (
-              <div className="mt-1.5 text-xs italic text-[var(--color-text-muted)] line-clamp-2">
+              <div className="mt-1.5 cx-type-xs italic text-[var(--color-text-muted)] line-clamp-2">
                 “{lead.intent_signal_text}”
               </div>
             )}
           </div>
           {!isDead && (
             <div className="flex flex-wrap items-center gap-1.5 shrink-0">
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={onDraft}
-                className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md border border-[var(--color-border)] hover:border-[var(--color-accent)]"
                 title="Draft cold outreach"
               >
-                <Send size={12} />
+                <Send size={12} strokeWidth={1.75} />
                 <span className="hidden sm:inline">Draft</span>
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={onMarkContacted}
                 disabled={lead.status === "contacted"}
-                className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md border border-[var(--color-border)] hover:border-[var(--color-accent)] disabled:opacity-50"
                 title="Mark contacted"
               >
                 {lead.status === "contacted" ? (
-                  <Check size={12} />
+                  <Check size={12} strokeWidth={1.75} />
                 ) : (
-                  <PhoneCall size={12} />
+                  <PhoneCall size={12} strokeWidth={1.75} />
                 )}
                 <span className="hidden sm:inline">
                   {lead.status === "contacted" ? "Contacted" : "Mark contacted"}
                 </span>
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-sm"
                 onClick={onDiscard}
-                className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md border border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-accent)]"
                 title="Discard"
               >
-                <Trash2 size={12} />
-              </button>
+                <Trash2 size={12} strokeWidth={1.75} />
+              </Button>
             </div>
           )}
         </div>
@@ -470,28 +473,29 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 cx-scrim"
       onClick={(e) => {
         if (e.target === e.currentTarget && !running) onClose();
       }}
     >
       <div className="conduit-card max-w-md w-full p-5 space-y-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between">
-          <h3 className="serif text-xl">Run Discovery</h3>
-          <button
+          <h3 className="cx-type-lg font-semibold">Run Discovery</h3>
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={onClose}
             disabled={running}
-            className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] disabled:opacity-30"
             aria-label="Close"
           >
-            <X size={18} />
-          </button>
+            <X size={18} strokeWidth={1.75} />
+          </Button>
         </div>
 
-        <div className="space-y-3 text-sm">
+        <div className="space-y-3 cx-type-base">
           <label className="block">
-            <span className="block text-xs text-[var(--color-text-muted)] uppercase tracking-[0.12em] mb-1">
+            <span className="block cx-type-xs text-[var(--color-text-muted)] uppercase tracking-[0.12em] mb-1">
               Vertical
             </span>
             <select
@@ -509,7 +513,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
           </label>
 
           <label className="block">
-            <span className="block text-xs text-[var(--color-text-muted)] uppercase tracking-[0.12em] mb-1">
+            <span className="block cx-type-xs text-[var(--color-text-muted)] uppercase tracking-[0.12em] mb-1">
               City
             </span>
             <select
@@ -526,7 +530,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
           </label>
 
           <fieldset className="space-y-1.5">
-            <legend className="text-xs text-[var(--color-text-muted)] uppercase tracking-[0.12em] mb-1">
+            <legend className="cx-type-xs text-[var(--color-text-muted)] uppercase tracking-[0.12em] mb-1">
               Sources
             </legend>
             <SourceToggle
@@ -552,25 +556,25 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
 
         {running && (
           <div
-            className="rounded-md p-3 text-sm flex items-center gap-2"
+            className="rounded-md p-3 cx-type-base flex items-center gap-2"
             style={{
               background: `color-mix(in srgb, ${deptColor} 10%, transparent)`,
               color: deptColor,
             }}
           >
-            <Loader2 size={14} className="animate-spin" />
+            <Loader2 size={14} className="animate-spin" strokeWidth={1.75} />
             <span>{phase || "Working…"}</span>
           </div>
         )}
 
         {result && !result.error && (
-          <div className="rounded-md p-3 text-sm space-y-1 border border-[var(--color-border)]">
+          <div className="rounded-md p-3 cx-type-base space-y-1 border border-[var(--color-border)]">
             <div className="font-medium text-[var(--color-text)]">
               {result.added ?? 0} new · {result.updated ?? 0} boosted ·{" "}
               {result.enriched ?? 0} enriched
             </div>
             {result.signals_found != null && (
-              <div className="text-xs text-[var(--color-text-muted)]">
+              <div className="cx-type-xs text-[var(--color-text-muted)]">
                 {result.signals_found} intent signal
                 {result.signals_found === 1 ? "" : "s"} captured.
               </div>
@@ -579,7 +583,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
               Object.entries(result.errors_per_source).some(
                 ([, v]) => v != null,
               ) && (
-                <div className="text-xs text-[var(--color-text-muted)]">
+                <div className="cx-type-xs text-[var(--color-text-muted)]">
                   {Object.entries(result.errors_per_source)
                     .filter(([, v]) => v)
                     .map(([k, v]) => `${k}: ${v}`)
@@ -590,7 +594,7 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
         )}
 
         {result?.error && (
-          <div className="rounded-md p-3 text-sm border border-red-500/30 text-red-400">
+          <div className="rounded-md p-3 cx-type-base border border-red-500/30 text-red-400">
             {result.error}
           </div>
         )}
@@ -599,26 +603,27 @@ function RunDiscoveryModal({ deptColor, onClose, onComplete }: ModalProps) {
           {result ? (
             <Button
               onClick={onComplete}
-              className="!text-sm"
-              style={{ background: deptColor, color: "var(--cx-canvas, #0B0B0F)" }}
+              className="cx-type-base"
+              style={{ background: deptColor, color: "var(--cx-canvas)" }}
             >
               Done
             </Button>
           ) : (
             <>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={onClose}
                 disabled={running}
-                className="text-sm px-3 py-1.5 text-[var(--color-text-muted)] disabled:opacity-30"
               >
                 Cancel
-              </button>
+              </Button>
               <Button
                 onClick={start}
                 disabled={running || (!useOverpass && !useReddit && !useMaps)}
-                className="!text-sm disabled:opacity-50"
-                style={{ background: deptColor, color: "var(--cx-canvas, #0B0B0F)" }}
+                className="cx-type-base disabled:opacity-50"
+                style={{ background: deptColor, color: "var(--cx-canvas)" }}
               >
                 {running ? "Running…" : "Start"}
               </Button>
@@ -642,7 +647,7 @@ function SourceToggle({
   disabled?: boolean;
 }) {
   return (
-    <label className="flex items-center gap-2 text-sm cursor-pointer">
+    <label className="flex items-center gap-2 cx-type-base cursor-pointer">
       <input
         type="checkbox"
         checked={checked}

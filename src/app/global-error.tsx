@@ -23,8 +23,8 @@ export default function GlobalError({
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "#0C0B09",
-          color: "#F5F1EA",
+          background: "#0B0B0F",
+          color: "#F4F4F7",
           fontFamily: "ui-sans-serif, system-ui, sans-serif",
           textAlign: "center",
           padding: "24px",
@@ -32,14 +32,14 @@ export default function GlobalError({
           position: "relative",
         }}
       >
-        {/* Ember radial — hardcoded because global-error renders before layout CSS */}
+        {/* Accent radial — hardcoded because global-error renders before layout CSS */}
         <div
           aria-hidden
           style={{
             position: "absolute",
             inset: 0,
             background:
-              "radial-gradient(ellipse 60% 40% at 50% 100%, rgba(255,138,61,0.12) 0%, transparent 65%)",
+              "radial-gradient(ellipse 60% 40% at 50% 100%, rgba(124,108,255,0.10) 0%, transparent 65%)",
             pointerEvents: "none",
           }}
         />
@@ -54,7 +54,7 @@ export default function GlobalError({
             height: 49,
             marginBottom: 24,
             opacity: 0.85,
-            filter: "drop-shadow(0 0 16px rgba(255,138,61,0.4))",
+            filter: "drop-shadow(0 0 16px rgba(124,108,255,0.35))",
           }}
         />
 
@@ -63,7 +63,7 @@ export default function GlobalError({
             fontSize: 11,
             letterSpacing: "0.18em",
             textTransform: "uppercase",
-            color: "#8C8884",
+            color: "#6B6B7B",
             marginBottom: 12,
           }}
         >
@@ -83,7 +83,7 @@ export default function GlobalError({
         <p
           style={{
             fontSize: 14,
-            color: "#8C8884",
+            color: "#A0A0B0",
             maxWidth: 320,
             lineHeight: 1.6,
             marginBottom: 32,
@@ -95,8 +95,8 @@ export default function GlobalError({
         <button
           onClick={reset}
           style={{
-            background: "#FF8A3D",
-            color: "#0A0908",
+            background: "#7C6CFF",
+            color: "#F4F4F7",
             border: "none",
             borderRadius: 12,
             padding: "12px 28px",

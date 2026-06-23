@@ -14,7 +14,7 @@ export function UpgradeCTABanner({
 
   return (
     <div
-      className="flex items-center gap-2 px-4 md:px-8 py-2 text-xs shrink-0"
+      className="flex items-center gap-2 px-4 md:px-8 py-2 cx-type-xs shrink-0"
       style={{
         background:
           "color-mix(in srgb, var(--color-accent) 7%, var(--color-surface))",
@@ -23,6 +23,7 @@ export function UpgradeCTABanner({
     >
       <Sparkles
         size={12}
+        strokeWidth={1.75}
         aria-hidden
         className="shrink-0"
         style={{ color: "var(--color-accent)" }}

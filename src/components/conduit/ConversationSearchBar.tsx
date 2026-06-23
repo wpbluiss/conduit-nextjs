@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MessageSquarePlus, Search, X } from "lucide-react";
 import type { EmployeeKey } from "@/lib/ai/provider";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 import { DEPT_COLOR, EMPLOYEE_ICON } from "./EmployeeBadge";
 import { EMPLOYEE_ORDER } from "@/lib/conduit/employees";
 
@@ -216,22 +217,25 @@ export function ConversationSearchBar() {
           placeholder="Search conversations…"
           aria-label="Search conversations"
           autoComplete="off"
-          className="flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--color-text-muted)]"
+          className="flex-1 bg-transparent cx-type-base outline-none placeholder:text-[var(--color-text-muted)]"
           style={{ color: "var(--color-text)" }}
         />
         {query && (
-          <button
+          <PraxisButton
             type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={clear}
             aria-label="Clear search"
-            className="shrink-0 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+            className="shrink-0"
           >
-            <X size={13} />
-          </button>
+            <X size={13} strokeWidth={1.75} />
+          </PraxisButton>
         )}
         {loading && (
           <span
-            className="shrink-0 w-3 h-3 rounded-full border-t border-[var(--color-accent)] animate-spin"
+            className="shrink-0 w-3 h-3 rounded-full border-t animate-spin"
+            style={{ borderColor: "var(--cx-accent)" }}
             aria-hidden
           />
         )}
@@ -243,20 +247,19 @@ export function ConversationSearchBar() {
           id={listboxId}
           role="listbox"
           aria-label="Search results"
-          className="absolute left-0 right-0 top-full mt-1 z-20 rounded-xl overflow-hidden conduit-card py-1"
-          style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}
+          className="absolute left-0 right-0 top-full mt-1 z-20 rounded-xl overflow-hidden cx-glass-float cx-glass-border py-1"
         >
           {!loading && searched && results.length === 0 && (
             <div className="px-4 py-4">
-              <p className="text-sm text-[var(--color-text-muted)] mb-3">
+              <p className="cx-type-base mb-3" style={{ color: "var(--cx-text-muted)" }}>
                 No conversations match &ldquo;{query}&rdquo;
               </p>
               <Link
                 href="/app"
-                className="inline-flex items-center gap-1.5 text-[13px] font-medium"
-                style={{ color: "var(--color-accent)" }}
+                className="inline-flex items-center gap-2 cx-type-sm font-medium"
+                style={{ color: "var(--cx-accent)" }}
               >
-                <MessageSquarePlus size={13} />
+                <MessageSquarePlus size={13} strokeWidth={1.75} />
                 Start a new one →
               </Link>
             </div>
@@ -305,21 +308,21 @@ export function ConversationSearchBar() {
                       boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 60%, transparent)`,
                     }}
                   >
-                    <RecentIcon size={9} strokeWidth={2.5} />
+                    <RecentIcon size={9} strokeWidth={1.75} />
                   </span>
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-sm font-medium text-[var(--color-text)] truncate">
+                    <span className="cx-type-base font-medium text-[var(--color-text)] truncate">
                       {r.title || "Untitled chat"}
                     </span>
                     {r.updated_at && (
-                      <span className="shrink-0 text-[11px] text-[var(--color-text-muted)]">
+                      <span className="shrink-0 cx-mono cx-type-xs tabular-nums text-[var(--color-text-muted)]">
                         {relativeDate(r.updated_at)}
                       </span>
                     )}
                   </div>
-                  <div className="mt-0.5 text-xs text-[var(--color-text-muted)] leading-snug line-clamp-2">
+                  <div className="mt-0.5 cx-type-xs text-[var(--color-text-muted)] leading-snug line-clamp-2">
                     <HighlightSnippet text={r.snippet} query={query} />
                   </div>
                 </div>

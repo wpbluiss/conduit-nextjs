@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DownloadSimple, X, Share } from "@phosphor-icons/react";
+import { Download, X, Share2 } from "lucide-react";
+import { PraxisButton } from "@/components/conduit/ui/Button";
 
 type BIPEvent = Event & {
   prompt: () => Promise<void>;
@@ -74,52 +75,56 @@ export function PwaInstaller() {
         className="conduit-card p-4 flex items-start gap-3"
         style={{
           boxShadow:
-            "0 0 0 1px rgba(214,120,23,0.2), 0 8px 32px rgba(15,17,21,0.4)",
+            "0 0 0 1px var(--cx-accent-glow-raw), 0 8px 32px rgba(0,0,0,0.4)",
         }}
       >
         <div
           className="rounded-lg p-2 shrink-0"
-          style={{ background: "rgba(214,120,23,0.12)" }}
+          style={{ background: "var(--cx-accent-tint)" }}
         >
-          <DownloadSimple
+          <Download
             size={18}
-            weight="fill"
-            style={{ color: "var(--color-ember-500)" }}
+            strokeWidth={1.75}
+            style={{ color: "var(--cx-accent)" }}
           />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold text-[var(--color-cream)]">
+          <div className="cx-type-base font-semibold text-[var(--color-cream)]">
             Install Praxis
           </div>
           {iosHint ? (
-            <p className="text-[12px] text-[var(--color-cream-mute)] mt-1 flex items-center gap-1 flex-wrap">
-              Tap <Share size={13} className="inline" /> Share →{" "}
+            <p className="cx-type-xs text-[var(--color-cream-mute)] mt-1 flex items-center gap-1 flex-wrap">
+              Tap <Share2 size={13} strokeWidth={1.75} className="inline" /> Share →{" "}
               <span className="text-[var(--color-cream)]">
                 Add to Home Screen
               </span>
             </p>
           ) : (
             <>
-              <p className="text-[12px] text-[var(--color-cream-mute)] mt-1">
+              <p className="cx-type-xs text-[var(--color-cream-mute)] mt-1">
                 Add to your home screen — opens full-screen like a native app.
               </p>
-              <button
+              <PraxisButton
+                type="button"
+                variant="primary"
+                size="sm"
                 onClick={install}
-                className="mt-2 rounded-lg px-3 py-1.5 text-xs font-medium text-[var(--color-cream)] transition-colors"
-                style={{ background: "var(--color-ember-500)" }}
+                className="mt-2"
               >
                 Install
-              </button>
+              </PraxisButton>
             </>
           )}
         </div>
-        <button
+        <PraxisButton
+          type="button"
+          variant="ghost"
+          size="icon-sm"
           onClick={dismiss}
           aria-label="Dismiss"
-          className="text-[var(--color-cream-mute)] hover:text-[var(--color-cream)] p-0.5 transition-colors"
         >
-          <X size={16} />
-        </button>
+          <X size={16} strokeWidth={1.75} />
+        </PraxisButton>
       </div>
     </div>
   );
