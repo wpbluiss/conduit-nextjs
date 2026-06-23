@@ -822,7 +822,7 @@
   line-height: var(--cx-lh-body);
   color: var(--cx-text);
   outline: none;
-  transition: border-color var(--cx-dur-fast) var(--cx-ease);
+  transition: border-color var(--cx-dur-fast) var(--cx-ease), box-shadow var(--cx-dur-fast) var(--cx-ease);
 }
 
 .praxis-root .cx-input::placeholder,
@@ -832,6 +832,13 @@
 
 .praxis-root .cx-textarea {
   resize: vertical;
+}
+
+.praxis-root .cx-input:focus-visible,
+.praxis-root .cx-select:focus-visible,
+.praxis-root .cx-textarea:focus-visible {
+  border-color: var(--cx-accent);
+  box-shadow: var(--cx-accent-glow);
 }
 
 /* Compact variant for dense list contexts */
@@ -844,7 +851,13 @@
   font-size: var(--cx-type-sm);
   color: var(--cx-text);
   outline: none;
-  transition: border-color var(--cx-dur-fast) var(--cx-ease);
+  transition: border-color var(--cx-dur-fast) var(--cx-ease), box-shadow var(--cx-dur-fast) var(--cx-ease);
+}
+
+.praxis-root .cx-input-sm:focus-visible,
+.praxis-root .cx-select-sm:focus-visible {
+  border-color: var(--cx-accent);
+  box-shadow: var(--cx-accent-glow);
 }
 
 .praxis-root .cx-input-sm::placeholder {
