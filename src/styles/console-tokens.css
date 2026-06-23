@@ -61,8 +61,9 @@
   --cx-glass-bg-overlay:  rgba(255, 255, 255, 0.06);   /* overlay — same fill, distinct blur/shadow */
   /* Accent-tinted glass — active/primary panels */
   --cx-glass-bg-accent:   rgba(124, 108, 255, 0.08);
-  /* Spec-exact alias (issue #991 uses --cx-glass-accent-bg; both resolve to the same value) */
+  /* Spec-exact aliases — all resolve to the same value */
   --cx-glass-accent-bg:   var(--cx-glass-bg-accent);
+  --glass-accent-tint:    var(--cx-glass-bg-accent);
   /* Shared hairline border — "pane of glass" edge */
   --cx-glass-border:      rgba(255, 255, 255, 0.08);
   /* Inset top highlight — simulates glass catching light */

@@ -106,7 +106,7 @@ export default async function EmployeeRightRail({
 
   return (
     <aside
-      className="w-full md:w-80 shrink-0 border-l cx-glass p-5 space-y-6"
+      className="w-full md:w-80 shrink-0 border-l cx-glass-accent p-5 space-y-6"
       style={{ borderLeftColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}
     >
       {/* About */}
