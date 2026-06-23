@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   House, Wallet, Money, Receipt, Flame, ChartLineUp,
-  Gauge, Sparkle, GearSix, SignOut, List, X, Crown, Trophy, ChartPie,
+  Gauge, Sparkle, GearSix, SignOut, List, X, Crown, Trophy, ChartPie, Buildings,
 } from "@phosphor-icons/react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { clsx } from "./clsx";
@@ -14,6 +14,7 @@ import { GradientText } from "./ui";
 const NAV = [
   { href: "/finance", label: "Home", icon: House },
   { href: "/finance/rewards", label: "Rewards", icon: Trophy },
+  { href: "/finance/fourplex", label: "Fourplex", icon: Buildings },
   { href: "/finance/accounts", label: "Accounts", icon: Wallet },
   { href: "/finance/paychecks", label: "Paychecks", icon: Money },
   { href: "/finance/expenses", label: "Expenses", icon: Receipt },
