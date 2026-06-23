@@ -4,7 +4,7 @@ import { createSupabaseServerClient, getCurrentUser } from "@/lib/supabase/serve
 import { getSnapshot, getUserHouseholdId } from "@/lib/finance/data";
 import { isPlus, FREE_AI_MONTHLY_LIMIT } from "@/lib/finance/plan";
 import {
-  pooledCash, netWorth, projectIncome, goalProgress, orderDebts,
+  pooledCash, netWorth, projectIncome, payFrequencyMap, goalProgress, orderDebts,
   daysBetween, todayISO, investmentsValue,
 } from "@/lib/finance/compute";
 
@@ -180,7 +180,7 @@ async function runTool(sb: SB, hh: string, name: string, input: Record<string, u
 
 function buildContext(snap: NonNullable<Awaited<ReturnType<typeof getSnapshot>>>): string {
   const cash = pooledCash(snap.accounts);
-  const income = projectIncome(snap.paychecks);
+  const income = projectIncome(snap.paychecks, payFrequencyMap(snap.people));
   const g = goalProgress(snap.savingsLog, snap.household.savings_goal, snap.household.goal_start_date, snap.household.goal_target_date);
   const debt = orderDebts(snap.debts);
   const due = snap.expenses

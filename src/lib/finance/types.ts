@@ -26,6 +26,7 @@ export interface Person {
   name: string;
   role: string;
   color: string;
+  pay_frequency?: string | null;
 }
 
 export interface Account {

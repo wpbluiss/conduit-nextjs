@@ -503,6 +503,24 @@ export async function updateAutofundPct(form: FormData): Promise<Result> {
   return { ok: !error, error: error?.message };
 }
 
+// Per-person pay cadence → makes the income projection exact instead of inferred.
+export async function updatePayFrequency(form: FormData): Promise<Result> {
+  const supabase = await db();
+  const hh = (await getUserHouseholdId())!;
+  const updates = [
+    { name: "Luis", freq: str(form.get("luis_freq")) },
+    { name: "Delia", freq: str(form.get("delia_freq")) },
+  ].filter((u) => u.freq);
+  let error: string | undefined;
+  for (const u of updates) {
+    const res = await supabase.from("fin_people")
+      .update({ pay_frequency: u.freq }).eq("household_id", hh).eq("name", u.name);
+    if (res.error) error = res.error.message;
+  }
+  refresh();
+  return { ok: !error, error };
+}
+
 // Daily check-in streak — the habit hook.
 export async function dailyCheckin(): Promise<Result & { streak?: number; already?: boolean }> {
   const supabase = await db();
