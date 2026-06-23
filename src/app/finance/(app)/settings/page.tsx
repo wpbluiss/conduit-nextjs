@@ -1,9 +1,9 @@
 import { getSnapshot } from "@/lib/finance/data";
 import { goalProgress, daysBetween } from "@/lib/finance/compute";
 import { fmtMoney } from "@/lib/finance/constants";
-import { updateGoalSettings, updateChildSupport, updateAutofundPct } from "@/lib/finance/actions";
+import { updateGoalSettings, updateChildSupport, updateAutofundPct, updatePayFrequency } from "@/lib/finance/actions";
 import { Card, SectionTitle, EmptyState } from "@/components/finance/ui";
-import { Field } from "@/components/finance/forms";
+import { Field, SelectField } from "@/components/finance/forms";
 import { SettingsForm } from "@/components/finance/SettingsForm";
 import { SavingsAreaChart } from "@/components/finance/Charts";
 import { DangerZone } from "@/components/finance/DangerZone";
@@ -16,6 +16,13 @@ export default async function SettingsPage() {
   if (!snap) return null;
   const h = snap.household;
   const g = goalProgress(snap.savingsLog, h.savings_goal, h.goal_start_date, h.goal_target_date);
+  const freqOf = (name: string) => snap.people.find((p) => p.name === name)?.pay_frequency ?? "";
+  const FREQ_OPTS = [
+    { value: "weekly", label: "Weekly" },
+    { value: "biweekly", label: "Biweekly" },
+    { value: "semimonthly", label: "Twice a month" },
+    { value: "monthly", label: "Monthly" },
+  ];
 
   // savings target-vs-actual line
   let running = 0;
@@ -73,6 +80,19 @@ export default async function SettingsPage() {
           </SettingsForm>
         </Card>
       </div>
+
+      <Card>
+        <SectionTitle eyebrow="Income" title="Pay frequency" />
+        <SettingsForm action={updatePayFrequency} submitLabel="Save cadence">
+          <div className="grid grid-cols-2 gap-3">
+            <SelectField label="Luis gets paid" name="luis_freq" options={FREQ_OPTS} defaultValue={freqOf("Luis") || "biweekly"} />
+            <SelectField label="Delia gets paid" name="delia_freq" options={FREQ_OPTS} defaultValue={freqOf("Delia") || "weekly"} />
+          </div>
+        </SettingsForm>
+        <p className="text-[11px] text-[var(--fin-muted)] mt-2">
+          Sets how often each of you is paid so the income projection is <span className="text-white">exact</span>, not guessed from clustered dates.
+        </p>
+      </Card>
 
       <Card>
         <SectionTitle eyebrow="Surprise engine" title="Auto-stash to Mystery Trips" />

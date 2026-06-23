@@ -53,7 +53,28 @@ export interface IncomeProjection {
   windowDays: number;
 }
 
-export function projectIncome(paychecks: Paycheck[]): IncomeProjection {
+// Build the per-person cadence map (keyed by lowercased name = person_tag) for projectIncome.
+export function payFrequencyMap(
+  people: { name: string; pay_frequency?: string | null }[],
+): Record<string, string | null> {
+  return Object.fromEntries(people.map((p) => [p.name.toLowerCase(), p.pay_frequency ?? null]));
+}
+
+// Periods per month for an explicit pay cadence, or null to fall back to inference.
+function periodsPerMonth(freq: string | null | undefined): number | null {
+  switch (freq) {
+    case "weekly": return 4.33;
+    case "biweekly": return 2.17;
+    case "semimonthly": return 2;
+    case "monthly": return 1;
+    default: return null;
+  }
+}
+
+export function projectIncome(
+  paychecks: Paycheck[],
+  frequencies: Record<string, string | null> = {},
+): IncomeProjection {
   const amt = (p: Paycheck) => Number(p.take_home) + Number(p.mileage_reimbursement || 0);
   const sorted = [...paychecks].sort(
     (a, b) => new Date(a.pay_date).getTime() - new Date(b.pay_date).getTime(),
@@ -74,12 +95,16 @@ export function projectIncome(paychecks: Paycheck[]): IncomeProjection {
   // Project one person: group their checks by payday, then scale the average
   // payday by a realistic cadence. The interval is clamped to weekly..monthly so
   // clustered historical entries can't explode the projection into fantasy land.
-  function projectPerson(rows: Paycheck[]): number {
+  function projectPerson(rows: Paycheck[], tag: string): number {
     if (rows.length === 0) return 0;
     const byDay = new Map<string, number>();
     for (const p of rows) byDay.set(p.pay_date, (byDay.get(p.pay_date) ?? 0) + amt(p));
     const days = Array.from(byDay.keys()).sort();
     const avgPayday = days.reduce((s, d) => s + byDay.get(d)!, 0) / days.length;
+    // Exact: if we know this person's cadence, use it directly.
+    const ppm = periodsPerMonth(frequencies[tag]);
+    if (ppm) return avgPayday * ppm;
+    // Otherwise infer from the data, clamped to a realistic weekly–monthly range.
     if (days.length < 2) return avgPayday * 2.17; // one payday so far — assume ~biweekly until more data
     let interval = daysBetween(days[0], days[days.length - 1]) / (days.length - 1);
     interval = Math.min(31, Math.max(7, interval));
@@ -89,7 +114,7 @@ export function projectIncome(paychecks: Paycheck[]): IncomeProjection {
   const tags = Array.from(new Set(sorted.map((p) => p.person_tag)));
   const byPerson = tags.map((tag) => {
     const rows = sorted.filter((p) => p.person_tag === tag);
-    return { tag, monthly: projectPerson(rows), count: rows.length };
+    return { tag, monthly: projectPerson(rows, tag), count: rows.length };
   });
 
   // Household monthly = sum of each person's projection (never mix cadences).

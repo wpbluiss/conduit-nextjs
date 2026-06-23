@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getSnapshot } from "@/lib/finance/data";
 import {
-  pooledCash, netWorth, projectIncome, goalProgress, orderDebts,
+  pooledCash, netWorth, projectIncome, payFrequencyMap, goalProgress, orderDebts,
   onTimeStats, dueNow, recentActivity, effectiveBalance,
 } from "@/lib/finance/compute";
 import { gameState, vaultPct, weeklyQuests } from "@/lib/finance/gamify";
@@ -29,7 +29,7 @@ export default async function FinanceHome() {
   if (!snap) return <Card>Couldn&apos;t load your household. Try refreshing.</Card>;
 
   const cash = pooledCash(snap.accounts);
-  const income = projectIncome(snap.paychecks);
+  const income = projectIncome(snap.paychecks, payFrequencyMap(snap.people));
   const g = goalProgress(snap.savingsLog, snap.household.savings_goal, snap.household.goal_start_date, snap.household.goal_target_date);
   const debt = orderDebts(snap.debts);
   const ot = onTimeStats(snap.payments);

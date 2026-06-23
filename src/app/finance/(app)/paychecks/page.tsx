@@ -1,5 +1,5 @@
 import { getSnapshot } from "@/lib/finance/data";
-import { projectIncome } from "@/lib/finance/compute";
+import { projectIncome, payFrequencyMap } from "@/lib/finance/compute";
 import { fmtMoney, personLabel } from "@/lib/finance/constants";
 import { Card, SectionTitle, Pill, EmptyState } from "@/components/finance/ui";
 import { MetricCard } from "@/components/finance/MetricCard";
@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function PaychecksPage() {
   const snap = await getSnapshot();
   if (!snap) return null;
-  const income = projectIncome(snap.paychecks);
+  const income = projectIncome(snap.paychecks, payFrequencyMap(snap.people));
 
   // monthly buckets for the chart (last 8 months)
   const byMonth = new Map<string, { luis: number; delia: number; shared: number }>();
