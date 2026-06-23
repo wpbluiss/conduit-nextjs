@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { createSupabaseServerClient, getCurrentUser } from "@/lib/supabase/server";
 import type { Snapshot } from "./types";
+import { fetchLivePrices } from "./prices";
 
 // The household id owned by the signed-in user (null if they haven't created
 // or joined one yet — which sends them to onboarding). Cached per request.
@@ -113,6 +114,35 @@ export async function getSnapshot(): Promise<Snapshot | null> {
     creditScores: creditScores.data ?? [],
     vaults: vaults.data ?? [],
   };
+}
+
+// Pulls live market prices for every holding and writes them back, so the
+// Investments page (and net-worth) always reflect real-time value. Best-effort:
+// a failed fetch leaves the prior price in place. Call before getSnapshot().
+export async function refreshInvestmentPrices(): Promise<void> {
+  const hh = await getUserHouseholdId();
+  if (!hh) return;
+  const supabase = await createSupabaseServerClient();
+  const { data: holdings } = await supabase
+    .from("fin_investments")
+    .select("id, ticker, current_price");
+  if (!holdings || holdings.length === 0) return;
+
+  const prices = await fetchLivePrices(holdings.map((h) => h.ticker));
+  if (Object.keys(prices).length === 0) return;
+
+  const today = new Date().toISOString().slice(0, 10);
+  await Promise.all(
+    holdings.map((h) => {
+      const p = prices[h.ticker.toUpperCase()];
+      if (!p || p <= 0) return Promise.resolve(undefined);
+      return supabase
+        .from("fin_investments")
+        .update({ current_price: p, last_price_update: today })
+        .eq("id", h.id)
+        .then(() => undefined);
+    }),
+  );
 }
 
 export async function getAiMessages(limit = 40) {

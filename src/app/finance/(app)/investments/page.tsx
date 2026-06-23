@@ -1,4 +1,4 @@
-import { getSnapshot } from "@/lib/finance/data";
+import { getSnapshot, refreshInvestmentPrices } from "@/lib/finance/data";
 import { investmentsValue, investmentsCost } from "@/lib/finance/compute";
 import { fmtMoney, INVESTMENT_BUCKETS } from "@/lib/finance/constants";
 import { logInvestmentBuy } from "@/lib/finance/actions";
@@ -18,6 +18,7 @@ const bucketMeta: Record<string, { label: string; color: string }> = {
 };
 
 export default async function InvestmentsPage() {
+  await refreshInvestmentPrices(); // live market sync before we read
   const snap = await getSnapshot();
   if (!snap) return null;
   const value = investmentsValue(snap.investments);
@@ -68,7 +69,8 @@ export default async function InvestmentsPage() {
         <p className="text-[12px] text-[var(--fin-muted)]">
           Honest horizon: the down payment is your 15-month priority. Investing compounds over years — keep
           contributions small and steady (Luis $25–50/check, Delia $25, Daughter $5–15) and don&apos;t expect
-          short-term gains to move the home goal. Prices are manual; live sync can be added later.
+          short-term gains to move the home goal. <span className="text-[#7cc6a0]">Prices sync live</span> — crypto via
+          CoinGecko, stocks &amp; ETFs via market data — every time you open this page.
         </p>
       </Card>
 

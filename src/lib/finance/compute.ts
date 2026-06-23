@@ -54,45 +54,46 @@ export interface IncomeProjection {
 }
 
 export function projectIncome(paychecks: Paycheck[]): IncomeProjection {
+  const amt = (p: Paycheck) => Number(p.take_home) + Number(p.mileage_reimbursement || 0);
   const sorted = [...paychecks].sort(
     (a, b) => new Date(a.pay_date).getTime() - new Date(b.pay_date).getTime(),
   );
   const count = sorted.length;
-  const totalTakeHome = sorted.reduce(
-    (s, p) => s + Number(p.take_home) + Number(p.mileage_reimbursement || 0), 0,
-  );
+  const totalTakeHome = sorted.reduce((s, p) => s + amt(p), 0);
   const perPaycheckAvg = count ? totalTakeHome / count : 0;
 
+  // Interval is measured between DISTINCT paydays (two jobs paid the same day,
+  // or two halves of one check, count as a single payday — not a 0-day cadence).
+  const allDays = Array.from(new Set(sorted.map((p) => p.pay_date))).sort();
   let avgIntervalDays: number | null = null;
-  if (count >= 2) {
-    const span = daysBetween(sorted[0].pay_date, sorted[count - 1].pay_date);
-    avgIntervalDays = span > 0 ? span / (count - 1) : null;
+  if (allDays.length >= 2) {
+    const span = daysBetween(allDays[0], allDays[allDays.length - 1]);
+    avgIntervalDays = span > 0 ? span / (allDays.length - 1) : null;
   }
 
-  // Monthly projection: if we know cadence, scale per-paycheck avg; else
-  // fall back to summing a trailing 30-day window.
-  let monthly = 0;
-  if (avgIntervalDays && avgIntervalDays > 0) {
-    monthly = perPaycheckAvg * (30.44 / avgIntervalDays);
-  } else if (count === 1) {
-    monthly = perPaycheckAvg; // single data point: treat as ~monthly
+  // Project one person: group their checks by payday, then scale the average
+  // payday by a realistic cadence. The interval is clamped to weekly..monthly so
+  // clustered historical entries can't explode the projection into fantasy land.
+  function projectPerson(rows: Paycheck[]): number {
+    if (rows.length === 0) return 0;
+    const byDay = new Map<string, number>();
+    for (const p of rows) byDay.set(p.pay_date, (byDay.get(p.pay_date) ?? 0) + amt(p));
+    const days = Array.from(byDay.keys()).sort();
+    const avgPayday = days.reduce((s, d) => s + byDay.get(d)!, 0) / days.length;
+    if (days.length < 2) return avgPayday * 2.17; // one payday so far — assume ~biweekly until more data
+    let interval = daysBetween(days[0], days[days.length - 1]) / (days.length - 1);
+    interval = Math.min(31, Math.max(7, interval));
+    return avgPayday * (30.44 / interval);
   }
 
   const tags = Array.from(new Set(sorted.map((p) => p.person_tag)));
   const byPerson = tags.map((tag) => {
     const rows = sorted.filter((p) => p.person_tag === tag);
-    const sum = rows.reduce((s, p) => s + Number(p.take_home) + Number(p.mileage_reimbursement || 0), 0);
-    let m = 0;
-    if (rows.length >= 2) {
-      const span = daysBetween(rows[0].pay_date, rows[rows.length - 1].pay_date);
-      const interval = span > 0 ? span / (rows.length - 1) : 0;
-      m = interval > 0 ? (sum / rows.length) * (30.44 / interval) : sum;
-    } else {
-      m = sum;
-    }
-    return { tag, monthly: m, count: rows.length };
+    return { tag, monthly: projectPerson(rows), count: rows.length };
   });
 
+  // Household monthly = sum of each person's projection (never mix cadences).
+  const monthly = byPerson.reduce((s, b) => s + b.monthly, 0);
   const windowDays = count >= 2 ? daysBetween(sorted[0].pay_date, sorted[count - 1].pay_date) : 0;
   return { monthly, perPaycheckAvg, count, avgIntervalDays, byPerson, windowDays };
 }
