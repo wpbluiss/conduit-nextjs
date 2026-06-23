@@ -79,7 +79,7 @@ export default async function VoiceHistoryPage() {
         </div>
 
         {sessions.length === 0 ? (
-          <div className="conduit-card p-8 text-center text-[var(--cx-text-muted)]">
+          <div className="cx-glass cx-glass-border rounded-xl p-8 text-center">
             <Mic size={20} strokeWidth={1.75} className="mx-auto mb-3 opacity-40" style={{ color: "var(--cx-accent)" }} />
             <p className="cx-type-sm font-medium text-[var(--cx-text)]">No voice conversations yet</p>
             <p className="cx-type-xs mt-1 text-[var(--cx-text-muted)]">
@@ -93,8 +93,11 @@ export default async function VoiceHistoryPage() {
               return (
                 <li
                   key={s.id}
-                  className="conduit-card border-l-[3px] px-4 py-3"
-                  style={{ borderLeftColor: employee.color }}
+                  className="cx-glass rounded-xl px-4 py-3"
+                  style={{
+                    border: "1px solid var(--cx-glass-border)",
+                    borderLeft: `3px solid ${employee.color}`,
+                  }}
                 >
                   <div className="flex flex-wrap items-baseline gap-2">
                     <span className="cx-type-sm font-medium text-[var(--cx-text)]">{employee.name}</span>
