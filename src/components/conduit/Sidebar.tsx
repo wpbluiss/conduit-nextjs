@@ -1112,7 +1112,7 @@ export function Sidebar({
                         style={{ background: deptColor }}
                         aria-label="Pinned"
                       >
-                        <Pin size={7} style={{ color: "var(--cx-canvas)", strokeWidth: 2.5 }} />
+                        <Pin size={7} strokeWidth={2.5} style={{ color: "var(--cx-canvas)" }} />
                       </span>
                     )}
                   </motion.span>
@@ -1213,7 +1213,7 @@ export function Sidebar({
                     className="relative inline-flex shrink-0"
                     style={{ color: isActive("/app/builds") ? "var(--cx-accent)" : undefined }}
                   >
-                    <Hammer size={collapsed ? 20 : 16} strokeWidth={1.75} />
+                    <Hammer size={20} strokeWidth={1.75} />
                     <SidebarBuildPip
                       initial={inFlightBuildsInitial}
                       accountId={accountId}
@@ -2033,7 +2033,7 @@ function NavLink({
           whileTap={shouldReduceMotion ? undefined : { scale: 0.92 }}
           transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
           className="shrink-0 inline-flex"
-          style={{ color: active ? "var(--cx-accent)" : undefined }}
+          style={{ color: active ? "var(--cx-accent)" : "var(--cx-text-muted)" }}
         >
           {icon}
         </motion.span>
