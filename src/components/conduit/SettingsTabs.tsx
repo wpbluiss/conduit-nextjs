@@ -4049,7 +4049,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                       onChange={(e) => setDriveSearchQuery(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") searchDriveFiles(); }}
                       placeholder="Search Docs & Sheets…"
-                      className="flex-1 cx-type-xs rounded-lg px-2 py-2 bg-[var(--cx-surface)] border border-[var(--cx-border)] text-[var(--cx-text)] outline-none"
+                      className="flex-1 cx-input-sm"
                     />
                     <PraxisButton
                       type="button"
@@ -5042,7 +5042,7 @@ function LabelsTab() {
                     type="button"
                     onClick={() => void handleSave(label.id)}
                     disabled={!editName.trim() || saving}
-                    className="px-3 py-1.5 rounded-lg cx-type-xs font-medium text-white disabled:opacity-50 transition-[opacity,transform] duration-[120ms] hover:opacity-90 active:scale-[0.96] motion-reduce:active:scale-100"
+                    className="px-3 py-1.5 rounded-lg cx-type-xs font-medium text-white disabled:opacity-50 transition-[opacity,transform] duration-[120ms] ease-[0.22,1,0.36,1] hover:opacity-90 active:scale-[0.96] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--cx-accent)] focus-visible:ring-offset-[var(--cx-canvas)]"
                     style={{ background: editColor, minHeight: 32 }}
                   >
                     {saving ? "Saving…" : "Save"}
