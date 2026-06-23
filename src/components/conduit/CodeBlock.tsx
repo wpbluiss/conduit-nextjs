@@ -74,7 +74,7 @@ function CopyButton({ text }: { text: string }) {
         color: copied ? "var(--cx-reward)" : undefined,
       }}
     >
-      {copied ? <Check size={14} style={{ strokeWidth: 2 }} /> : <Copy size={14} style={{ strokeWidth: 2 }} />}
+      {copied ? <Check size={14} strokeWidth={2} /> : <Copy size={14} strokeWidth={2} />}
     </button>
   );
 }
