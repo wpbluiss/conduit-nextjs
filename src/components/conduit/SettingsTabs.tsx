@@ -669,7 +669,7 @@ function SpecialistMetrics() {
               const sharePct = Math.round((m.totalMessages / totalMessages) * 100);
 
               return (
-                <div key={m.employee} className="conduit-card px-4 py-4">
+                <div key={m.employee} className="cx-glass cx-glass-border rounded-xl px-4 py-4">
                   <div className="flex items-center gap-3 mb-2.5">
                     <span
                       className="flex items-center justify-center w-7 h-7 rounded-full shrink-0"
@@ -815,7 +815,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="conduit-card p-4 h-20 animate-pulse bg-[var(--cx-surface-raised)]" />
+            <div key={i} className="cx-glass cx-glass-border rounded-xl p-4 h-20 animate-pulse" />
           ))}
         </div>
       </div>
@@ -886,7 +886,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
   return (
     <div className="space-y-6">
       {!voiceConfigured && (
-        <div className="conduit-card p-4 cx-type-xs text-[var(--cx-warn)] border-[var(--cx-warn)]/40">
+        <div className="cx-glass rounded-xl p-4 cx-type-xs text-[var(--cx-warn)]" style={{ borderColor: "color-mix(in srgb, var(--cx-warn) 40%, transparent)", border: "1px solid color-mix(in srgb, var(--cx-warn) 40%, transparent)" }}>
           Voice provider not connected yet. Settings save, previews are
           disabled until upstream keys land.
         </div>
@@ -943,7 +943,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
             return (
               <div
                 key={emp}
-                className="conduit-card border-l-[3px] p-4 space-y-2"
+                className="cx-glass cx-glass-border rounded-xl border-l-[3px] p-4 space-y-2"
                 style={{
                   borderLeftColor: DEPT_COLOR[emp],
                 }}
@@ -1046,7 +1046,7 @@ function ToggleRow({
         type="button"
         onClick={() => onChange(!value)}
         aria-pressed={value}
-        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-150 focus-visible:outline-none ${
+        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cx-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--cx-canvas)] ${
           value
             ? "bg-[var(--cx-accent)]"
             : "bg-[var(--cx-border-strong)]"
@@ -4668,7 +4668,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
       {loading ? (
         <div className="space-y-2" aria-busy aria-label="Loading API keys">
           {[70, 85, 60].map((w, i) => (
-            <div key={i} className="conduit-card flex items-center gap-4 px-4 py-3 rounded-xl" style={{ opacity: 0.38 - i * 0.04 }}>
+            <div key={i} className="cx-glass cx-glass-border rounded-xl flex items-center gap-4 px-4 py-3" style={{ opacity: 0.38 - i * 0.04 }}>
               <div className="flex-1 space-y-1.5">
                 <div className="cx-skeleton" style={{ height: 12, width: `${w}%`, borderRadius: 9999 }} />
                 <div className="cx-skeleton" style={{ height: 10, width: "45%", borderRadius: 9999, opacity: 0.55 }} />
@@ -4687,7 +4687,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
           {activeKeys.map((k) => (
             <div
               key={k.id}
-              className="conduit-card flex items-center gap-4 px-4 py-3 rounded-xl"
+              className="cx-glass cx-glass-border rounded-xl flex items-center gap-4 px-4 py-3"
             >
               <div className="flex-1 min-w-0">
                 <p className="cx-type-sm font-medium text-[var(--cx-text)] truncate">{k.name}</p>
@@ -4727,7 +4727,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
           {revokedKeys.map((k) => (
             <div
               key={k.id}
-              className="conduit-card flex items-center gap-4 px-4 py-3 rounded-xl opacity-50"
+              className="cx-glass cx-glass-border rounded-xl flex items-center gap-4 px-4 py-3 opacity-50"
             >
               <div className="flex-1 min-w-0">
                 <p className="cx-type-sm font-medium text-[var(--cx-text)] truncate line-through">
@@ -5004,7 +5004,7 @@ function LabelsTab() {
       {loading ? (
         <div className="space-y-2" aria-busy aria-label="Loading labels">
           {[75, 60, 82].map((w, i) => (
-            <div key={i} className="conduit-card flex items-center gap-3 px-4 py-3 rounded-xl" style={{ opacity: 0.38 - i * 0.04 }}>
+            <div key={i} className="cx-glass cx-glass-border rounded-xl flex items-center gap-3 px-4 py-3" style={{ opacity: 0.38 - i * 0.04 }}>
               <div className="cx-skeleton shrink-0" style={{ width: 14, height: 14, borderRadius: 9999 }} />
               <div className="cx-skeleton flex-1" style={{ height: 12, width: `${w}%`, borderRadius: 9999 }} />
             </div>
@@ -5023,7 +5023,7 @@ function LabelsTab() {
             editingId === label.id ? (
               <div
                 key={label.id}
-                className="conduit-card p-3 flex flex-col gap-2"
+                className="cx-glass cx-glass-border rounded-xl p-3 flex flex-col gap-2"
               >
                 <div className="flex items-center gap-2">
                   <input
@@ -5076,7 +5076,7 @@ function LabelsTab() {
             ) : (
               <div
                 key={label.id}
-                className="conduit-card p-3 flex items-center gap-3"
+                className="cx-glass cx-glass-border rounded-xl p-3 flex items-center gap-3"
               >
                 <span
                   className="w-4 h-4 rounded-full shrink-0"
@@ -5119,7 +5119,7 @@ function LabelsTab() {
 
           {/* Create new label */}
           {showCreate ? (
-            <div className="conduit-card p-3 space-y-2">
+            <div className="cx-glass cx-glass-border rounded-xl p-3 space-y-2">
               <form onSubmit={(e) => void handleCreate(e)} className="flex items-center gap-2">
                 <input
                   autoFocus
