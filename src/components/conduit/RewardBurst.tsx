@@ -3,8 +3,9 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CX_REWARD, CX_ACCENT, CX_ACCENT_BRIGHT } from "@/lib/design-system/cx-tokens";
 
-// 10 evenly-spaced angles for the spark burst (significant completions only)
-const SPARK_COUNT = 10;
+// 5 evenly-spaced angles for the spark burst (significant completions only)
+// Spec: "4-6 particles, 300ms" — 5 hits the sweet spot of tasteful without feeling sparse.
+const SPARK_COUNT = 5;
 const SPARK_ANGLES_DEG = Array.from({ length: SPARK_COUNT }, (_, i) => (360 / SPARK_COUNT) * i);
 const SPARK_COLORS = SPARK_ANGLES_DEG.map((_, i) =>
   i % 3 === 0 ? CX_ACCENT_BRIGHT : i % 3 === 1 ? CX_REWARD : CX_ACCENT,
@@ -101,9 +102,9 @@ export function RewardBurst({
                   animate={{ opacity: 0, x: tx, y: ty, scale: 0 }}
                   exit={{}}
                   transition={{
-                    duration: 0.4,
+                    duration: 0.3,
                     ease: [0.22, 1, 0.36, 1],
-                    delay: i * 0.015,
+                    delay: i * 0.018,
                   }}
                   style={{
                     width: 3,

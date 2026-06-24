@@ -290,6 +290,10 @@ export function Chat({
   // Reward beat: set on message_end, auto-cleared after 700ms
   const [rewardEmployee, setRewardEmployee] = useState<EmployeeKey | null>(null);
   const rewardClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Round-table done beat: set per-specialist when their round_table_response arrives,
+  // cleared after 600ms. Drives the per-bubble ✓ indicator.
+  const [roundTableDoneEmployee, setRoundTableDoneEmployee] = useState<EmployeeKey | null>(null);
+  const roundTableDoneClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Round-table: tracks which specialist is currently active (thinking/streaming).
   // null = none active yet, or round-table just ended.
   const [roundTableActiveEmployee, setRoundTableActiveEmployee] =
@@ -1353,6 +1357,10 @@ export function Chat({
             }
             return next;
           });
+          // Done beat: briefly flag this specialist's bubble with a ✓ indicator
+          if (roundTableDoneClearTimerRef.current) clearTimeout(roundTableDoneClearTimerRef.current);
+          setRoundTableDoneEmployee(emp);
+          roundTableDoneClearTimerRef.current = setTimeout(() => setRoundTableDoneEmployee(null), 600);
         } else if (event === "round_table_synthesis_start") {
           // Banner + pending Atlas bubble
           setMessages((prev) => [
@@ -1796,6 +1804,22 @@ export function Chat({
                   }
                 }
               }
+              // Round-table done: find the last completed round-table bubble for the done specialist.
+              let lastRoundTableDoneIdx = -1;
+              if (roundTableDoneEmployee) {
+                for (let j = 0; j < messages.length; j++) {
+                  const msg = messages[j];
+                  const meta = (msg.metadata ?? {}) as Record<string, unknown>;
+                  if (
+                    msg.role === "assistant" &&
+                    msg.employee === roundTableDoneEmployee &&
+                    !msg.pending &&
+                    meta.round_table
+                  ) {
+                    lastRoundTableDoneIdx = j;
+                  }
+                }
+              }
               return messages.map((m, i) => {
                 // Stable key throughout the message lifecycle. The empty→streaming
                 // transition is handled by internal AnimatePresence inside MessageBubble
@@ -1834,6 +1858,7 @@ export function Chat({
                     roundTableActiveEmployee={roundTableActiveEmployee}
                     rewarded={i === lastRewardIdx}
                     rewardSignificant={i === lastRewardIdx && lastRewardSignificant}
+                    roundTableDone={i === lastRoundTableDoneIdx}
                   />
                 );
               });
@@ -2898,6 +2923,34 @@ function MessageTailSpark({ active }: { active: boolean }) {
   );
 }
 
+/**
+ * RoundTableDoneBadge — small ✓ pill shown briefly when a round-table specialist
+ * finishes their response. Fades in at 0→1 on mount, then fades out when `active`
+ * goes false. Reduced-motion: same fade, no scale.
+ */
+function RoundTableDoneBadge({ active, color }: { active: boolean; color: string }) {
+  const prefersReducedMotion = useReducedMotion();
+  return (
+    <AnimatePresence>
+      {active && (
+        <motion.span
+          key="rt-done"
+          aria-label="Done"
+          className="inline-flex items-center gap-1 cx-mono select-none"
+          style={{ color: CX_REWARD, fontSize: "var(--cx-type-xs)" }}
+          initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.7 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.85 }}
+          transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <Check size={10} strokeWidth={2.5} color={CX_REWARD} aria-hidden />
+          <span style={{ color }}>done</span>
+        </motion.span>
+      )}
+    </AnimatePresence>
+  );
+}
+
 function MessageTimestamp({
   createdAt,
   touchVisible,
@@ -2961,6 +3014,7 @@ const MessageBubble = memo(function MessageBubble({
   roundTableActiveEmployee = null,
   rewarded = false,
   rewardSignificant = false,
+  roundTableDone = false,
 }: {
   message: MessageRow;
   onOpenArtifact: (id: string) => void;
@@ -2978,6 +3032,8 @@ const MessageBubble = memo(function MessageBubble({
   roundTableActiveEmployee?: EmployeeKey | null;
   rewarded?: boolean;
   rewardSignificant?: boolean;
+  /** Fires briefly when a round-table specialist completes their response. Shows a ✓ done beat. */
+  roundTableDone?: boolean;
 }) {
   const [editDraft, setEditDraft] = useState(message.content);
   const editRef = useRef<HTMLTextAreaElement>(null);
@@ -3281,6 +3337,8 @@ const MessageBubble = memo(function MessageBubble({
               target={message.content.split(/\s+/).filter(Boolean).length}
               active={rewarded}
             />
+            {/* Round-table done badge — brief ✓ that fades in/out when a RT specialist completes */}
+            <RoundTableDoneBadge active={roundTableDone} color={DEPT_COLOR[employee]} />
             {message.created_at && !message.pending && (
               <MessageTimestamp
                 createdAt={message.created_at}
