@@ -35,12 +35,7 @@ function CodeInput({
       onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, 6))}
       disabled={disabled}
       placeholder="000000"
-      className="w-full rounded-lg px-4 py-3 text-center cx-type-xl tracking-[0.4em] outline-none transition-all duration-200 font-mono disabled:opacity-50"
-      style={{
-        background: "var(--color-surface-elevated)",
-        border: "1px solid var(--color-border)",
-        color: "var(--color-text)",
-      }}
+      className="w-full cx-input text-center cx-type-xl tracking-[0.4em] font-mono disabled:opacity-50"
     />
   );
 }
@@ -363,8 +358,7 @@ export function MFASecurity() {
               value={disableConfirm}
               onChange={(e) => setDisableConfirm(e.target.value)}
               placeholder="DISABLE"
-              className="w-full rounded-lg px-3 py-2 cx-type-base outline-none"
-              style={{ background: "var(--color-surface-elevated)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
+              className="w-full cx-input"
             />
           </label>
           {error && <p className="mt-2 cx-type-xs" style={{ color: "var(--cx-danger)" }}>{error}</p>}

@@ -324,12 +324,7 @@ export function ConversationLabelManager({
                   onChange={(e) => setNewName(e.target.value.slice(0, 32))}
                   onKeyDown={(e) => { if (e.key === "Enter") void createLabel(); if (e.key === "Escape") setCreating(false); }}
                   maxLength={32}
-                  className="w-full px-2 py-1 cx-type-xs rounded-lg border outline-none"
-                  style={{
-                    background: "var(--color-surface)",
-                    borderColor: "var(--color-border)",
-                    color: "var(--color-text)",
-                  }}
+                  className="w-full cx-input-sm"
                 />
                 <div className="flex flex-wrap gap-1">
                   {PRESET_COLORS.map((c) => (

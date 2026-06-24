@@ -834,11 +834,36 @@
   resize: vertical;
 }
 
+.praxis-root .cx-input:hover:not(:focus-visible):not([disabled]):not(.cx-input--error),
+.praxis-root .cx-select:hover:not(:focus-visible):not([disabled]):not(.cx-input--error),
+.praxis-root .cx-textarea:hover:not(:focus-visible):not([disabled]):not(.cx-input--error) {
+  border-color: var(--cx-border-strong);
+}
+
 .praxis-root .cx-input:focus-visible,
 .praxis-root .cx-select:focus-visible,
 .praxis-root .cx-textarea:focus-visible {
   border-color: var(--cx-accent);
   box-shadow: var(--cx-accent-glow);
+}
+
+.praxis-root .cx-input[disabled],
+.praxis-root .cx-select[disabled],
+.praxis-root .cx-textarea[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Error state — danger border + glow */
+.praxis-root .cx-input--error,
+.praxis-root .cx-input--error:focus-visible,
+.praxis-root .cx-select--error,
+.praxis-root .cx-select--error:focus-visible,
+.praxis-root .cx-textarea--error,
+.praxis-root .cx-textarea--error:focus-visible {
+  border-color: var(--cx-danger);
+  box-shadow: 0 0 0 3px rgba(244, 96, 125, 0.22);
 }
 
 /* Compact variant for dense list contexts */

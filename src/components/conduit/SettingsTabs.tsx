@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { Button as PraxisButton, SpinnerIcon } from "@/components/conduit/ui/Button";
+import { Toggle } from "@/components/conduit/ui/Toggle";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { EMPLOYEES, EMPLOYEE_ORDER } from "@/lib/conduit/employees";
@@ -893,22 +894,22 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
       )}
 
       <div className="cx-glass cx-glass-border rounded-xl p-5 space-y-4">
-        <ToggleRow
+        <Toggle
           label="Enable voice mode"
           desc="Show the mic button and play audio replies."
-          value={prefs.voice_enabled}
+          checked={prefs.voice_enabled}
           onChange={(v) => save({ voice_enabled: v })}
         />
-        <ToggleRow
+        <Toggle
           label="Auto-play AI responses"
           desc="Speak each reply as soon as it finishes."
-          value={prefs.voice_auto_play}
+          checked={prefs.voice_auto_play}
           onChange={(v) => save({ voice_auto_play: v })}
         />
-        <ToggleRow
+        <Toggle
           label="Streaming audio"
           desc="Audio plays sentence-by-sentence instead of waiting for the full response. Lower latency, slightly higher cost."
-          value={prefs.streaming_tts_enabled}
+          checked={prefs.streaming_tts_enabled}
           onChange={(v) => save({ streaming_tts_enabled: v })}
         />
         <div>
@@ -1020,49 +1021,6 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
   );
 }
 
-
-function ToggleRow({
-  label,
-  desc,
-  value,
-  onChange,
-}: {
-  label: string;
-  desc?: string;
-  value: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  return (
-    <div className="flex items-start justify-between gap-4">
-      <div>
-        <div>{label}</div>
-        {desc && (
-          <div className="cx-type-xs text-[var(--cx-text-muted)] mt-0.5">
-            {desc}
-          </div>
-        )}
-      </div>
-      <button
-        type="button"
-        onClick={() => onChange(!value)}
-        aria-pressed={value}
-        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cx-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--cx-canvas)] ${
-          value
-            ? "bg-[var(--cx-accent)]"
-            : "bg-[var(--cx-border-strong)]"
-        }`}
-        style={undefined}
-      >
-        <span
-          className={`inline-block h-5 w-5 transform rounded-full shadow-sm transition-transform motion-safe:duration-150 motion-safe:[transition-timing-function:cubic-bezier(0.22,1,0.36,1)] ${
-            value ? "translate-x-5" : "translate-x-0.5"
-          }`}
-          style={{ background: value ? "var(--cx-toggle-thumb, rgba(255,255,255,0.95))" : "var(--cx-text-muted)" }}
-        />
-      </button>
-    </div>
-  );
-}
 
 /* ─── Password strength helper ───────────────────────────────────────────── */
 
@@ -3389,28 +3347,28 @@ function NotificationsTab() {
       </p>
 
       <div className="cx-glass cx-glass-border rounded-xl p-5 space-y-4">
-        <ToggleRow
+        <Toggle
           label="Product updates & new features"
           desc="Hear about new Praxis capabilities, releases, and tips."
-          value={prefs.product_updates}
+          checked={prefs.product_updates}
           onChange={() => toggle("product_updates")}
         />
-        <ToggleRow
+        <Toggle
           label="Weekly digest"
           desc="Monday morning summary of each specialist's activity from the past week."
-          value={prefs.weekly_digest}
+          checked={prefs.weekly_digest}
           onChange={() => toggle("weekly_digest")}
         />
-        <ToggleRow
+        <Toggle
           label="Build completion alerts"
           desc="Email when an Engineering build finishes (success or failure)."
-          value={prefs.build_completion_alerts}
+          checked={prefs.build_completion_alerts}
           onChange={() => toggle("build_completion_alerts")}
         />
-        <ToggleRow
+        <Toggle
           label="Low token balance warning"
           desc="Alert when your monthly token balance falls below 10%."
-          value={prefs.low_balance_warning}
+          checked={prefs.low_balance_warning}
           onChange={() => toggle("low_balance_warning")}
         />
 
