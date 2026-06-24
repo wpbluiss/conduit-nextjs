@@ -12,6 +12,7 @@ import {
   Bookmark,
   Brain,
   Check,
+  ChevronDown,
   CircleHelp,
   CreditCard,
   Hammer,
@@ -315,6 +316,159 @@ function SidebarThemeButton({ collapsed = false }: { collapsed?: boolean }) {
       {icons[pref]}
       {labels[pref]}
     </PraxisButton>
+  );
+}
+
+interface SpecialistRowProps {
+  emp: EmployeeKey;
+  isStreaming: boolean;
+  allowed: boolean;
+  active: boolean;
+  collapsed: boolean;
+  isPinned: boolean;
+  shouldReduceMotion: boolean;
+  onContextMenu: (e: React.MouseEvent, emp: EmployeeKey) => void;
+  onTouchStart: (e: React.TouchEvent, emp: EmployeeKey) => void;
+  onTouchEnd: () => void;
+  onClick: () => void;
+  labelFor: (emp: EmployeeKey) => string;
+}
+
+function SpecialistRow({
+  emp, isStreaming, allowed, active, collapsed, isPinned,
+  shouldReduceMotion, onContextMenu, onTouchStart, onTouchEnd, onClick, labelFor,
+}: SpecialistRowProps) {
+  const deptColor = DEPT_COLOR[emp];
+  const empRole = EMPLOYEES[emp]?.role ?? "";
+  const href = allowed ? `/app/team/${emp}` : "/app/settings";
+
+  if (collapsed) {
+    const btn = (
+      <motion.span
+        whileHover={shouldReduceMotion ? undefined : { scale: 1.06 }}
+        whileTap={shouldReduceMotion ? undefined : { scale: 0.94 }}
+        transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
+        className="relative flex items-center justify-center w-9 h-9 rounded-lg"
+        style={{ background: active ? "var(--cx-accent-tint)" : undefined }}
+        onContextMenu={(e) => onContextMenu(e, emp)}
+        onTouchStart={(e) => onTouchStart(e, emp)}
+        onTouchEnd={onTouchEnd}
+        onTouchCancel={onTouchEnd}
+      >
+        {active && (
+          <span
+            aria-hidden
+            className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full z-10"
+            style={{ background: "var(--cx-accent)" }}
+          />
+        )}
+        <SpecialistAvatar employee={emp} size={28} active={active} streaming={isStreaming} />
+        {!allowed && (
+          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 flex items-center justify-center z-10">
+            <Lock size={8} strokeWidth={1.75} style={{ color: "var(--cx-text-muted)" }} />
+          </span>
+        )}
+        {allowed && !isPinned && (
+          <span
+            className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full border border-[var(--cx-canvas)] z-10"
+            style={{
+              background: deptColor,
+              opacity: isStreaming ? 1 : active ? 0.7 : 0.5,
+              boxShadow: isStreaming ? `0 0 4px ${deptColor}` : "none",
+            }}
+          />
+        )}
+        {allowed && isPinned && (
+          <span
+            className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 flex items-center justify-center rounded-full border border-[var(--cx-canvas)] z-10"
+            style={{ background: deptColor }}
+            aria-label="Pinned"
+          >
+            <Pin size={7} strokeWidth={2.5} style={{ color: "var(--cx-canvas)" }} />
+          </span>
+        )}
+      </motion.span>
+    );
+    return (
+      <li className="list-none flex justify-center" title={allowed ? undefined : "Available on a higher plan"}>
+        <Tooltip
+          trigger={<Link href={href} onClick={onClick} className="block">{btn}</Link>}
+          side="right"
+          triggerClassName="block"
+          delay={180}
+        >
+          <span className="cx-type-xs font-medium">{labelFor(emp)}</span>
+        </Tooltip>
+      </li>
+    );
+  }
+
+  const rowInner = (
+    <motion.span
+      whileHover={shouldReduceMotion ? undefined : { y: -1 }}
+      whileTap={shouldReduceMotion ? undefined : { scale: 0.98, y: 0 }}
+      transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
+      className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[var(--cx-surface-raised)]" : ""}`}
+      style={{ background: active ? "var(--cx-accent-tint)" : undefined }}
+      onContextMenu={(e) => onContextMenu(e, emp)}
+      onTouchStart={(e) => onTouchStart(e, emp)}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchEnd}
+    >
+      {active && (
+        <span
+          aria-hidden
+          className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full"
+          style={{ background: "var(--cx-accent)" }}
+        />
+      )}
+      <SpecialistAvatar employee={emp} size={20} active={active} streaming={isStreaming} />
+      <div className="min-w-0 flex-1">
+        <span
+          className="block truncate cx-type-sm"
+          style={{
+            color: active ? "var(--cx-accent)" : "var(--cx-text-muted)",
+            fontWeight: active ? 600 : 400,
+          }}
+        >
+          {labelFor(emp)}
+        </span>
+        {empRole && (
+          <span
+            className="block truncate cx-mono cx-type-xs"
+            style={{ color: "var(--cx-text-faint)" }}
+          >
+            {empRole}
+          </span>
+        )}
+      </div>
+      {!allowed ? (
+        <Lock
+          size={10}
+          strokeWidth={1.75}
+          aria-label="Locked — upgrade to unlock"
+          style={{ color: "var(--cx-text-muted)" }}
+        />
+      ) : (
+        <span
+          className="w-1.5 h-1.5 rounded-full shrink-0"
+          style={{
+            background: deptColor,
+            opacity: isStreaming ? 1 : active ? 0.7 : 0.45,
+            boxShadow: isStreaming ? `0 0 5px ${deptColor}` : "none",
+          }}
+          aria-label={isStreaming ? "Active" : "Online"}
+        />
+      )}
+    </motion.span>
+  );
+
+  return (
+    <li title={allowed ? undefined : "Available on a higher plan"}>
+      <Link href={href} onClick={onClick} className="block">
+        {rowInner}
+      </Link>
+    </li>
   );
 }
 
@@ -857,83 +1011,23 @@ export function Sidebar({
                 </span>
               </div>
               <ul className="space-y-1 mt-1">
-                {pinned.map((emp) => {
-                  const isStreaming = streamingEmployee === emp;
-                  const allowed = allowedEmployees.includes(emp);
-                  const active = pathname === `/app/team/${emp}`;
-                  const empRole = EMPLOYEES[emp]?.role ?? "";
-                  const deptColor = DEPT_COLOR[emp];
-                  const rowInner = (
-                    <motion.span
-                      whileHover={shouldReduceMotion ? undefined : { y: -1 }}
-                      whileTap={shouldReduceMotion ? undefined : { scale: 0.98, y: 0 }}
-                      transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
-                      className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[var(--cx-surface-raised)]" : ""}`}
-                      style={{
-                        background: active ? "var(--cx-accent-tint)" : undefined,
-                      }}
-                      onContextMenu={(e) => handleSpecialistContextMenu(e, emp)}
-                      onTouchStart={(e) => handleSpecialistTouchStart(e, emp)}
-                      onTouchEnd={handleSpecialistTouchEnd}
-                      onTouchCancel={handleSpecialistTouchEnd}
-                    >
-                      {active && (
-                        <span
-                          aria-hidden
-                          className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full"
-                          style={{ background: "var(--cx-accent)" }}
-                        />
-                      )}
-                      <SpecialistAvatar employee={emp} size={20} active={active} streaming={isStreaming} />
-                      <div className="min-w-0 flex-1">
-                        <span
-                          className="block truncate cx-type-sm"
-                          style={{
-                            color: active ? "var(--cx-accent)" : "var(--cx-text-muted)",
-                            fontWeight: active ? 600 : 400,
-                          }}
-                        >
-                          {labelFor(emp)}
-                        </span>
-                        {empRole && (
-                          <span
-                            className="block truncate cx-mono cx-type-xs"
-                            style={{ color: "var(--cx-text-faint)" }}
-                          >
-                            {empRole}
-                          </span>
-                        )}
-                      </div>
-                      {!allowed ? (
-                        <Lock
-                          size={10}
-                          strokeWidth={1.75}
-                          aria-label="Locked — upgrade to unlock"
-                          style={{ color: "var(--cx-text-muted)" }}
-                        />
-                      ) : (
-                        <span
-                          className="w-1.5 h-1.5 rounded-full shrink-0"
-                          style={{
-                            background: deptColor,
-                            opacity: isStreaming ? 1 : active ? 0.7 : 0.45,
-                            boxShadow: isStreaming ? `0 0 5px ${deptColor}` : "none",
-                          }}
-                          aria-label={isStreaming ? "Active" : "Online"}
-                        />
-                      )}
-                    </motion.span>
-                  );
-                  return (
-                    <li key={emp} title={allowed ? undefined : "Available on a higher plan"}>
-                      {allowed ? (
-                        <Link href={`/app/team/${emp}`} onClick={close} className="block">{rowInner}</Link>
-                      ) : (
-                        <Link href="/app/settings" onClick={close} className="block">{rowInner}</Link>
-                      )}
-                    </li>
-                  );
-                })}
+                {pinned.map((emp) => (
+                  <SpecialistRow
+                    key={emp}
+                    emp={emp}
+                    isStreaming={streamingEmployee === emp}
+                    allowed={allowedEmployees.includes(emp)}
+                    active={pathname === `/app/team/${emp}`}
+                    collapsed={false}
+                    isPinned
+                    shouldReduceMotion={shouldReduceMotion}
+                    onContextMenu={handleSpecialistContextMenu}
+                    onTouchStart={handleSpecialistTouchStart}
+                    onTouchEnd={handleSpecialistTouchEnd}
+                    onClick={close}
+                    labelFor={labelFor}
+                  />
+                ))}
               </ul>
             </div>
           )}
@@ -950,9 +1044,14 @@ export function Sidebar({
                 <span className="cx-label inline-flex items-center gap-2" style={{ color: "var(--cx-text-faint)" }}>
                   <Users2 size={10} strokeWidth={1.75} aria-hidden /> Specialists
                 </span>
-                <span aria-hidden style={{ fontSize: "var(--cx-type-xs)" }}>
-                  {teamExpanded ? "−" : "+"}
-                </span>
+                <motion.span
+                  aria-hidden
+                  animate={shouldReduceMotion ? undefined : { rotate: teamExpanded ? 0 : -90 }}
+                  transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
+                  style={{ color: "var(--cx-text-faint)", display: "inline-flex" }}
+                >
+                  <ChevronDown size={12} strokeWidth={1.75} />
+                </motion.span>
               </button>
               <AnimatePresence initial={false}>
               {teamExpanded && (
@@ -964,98 +1063,23 @@ export function Sidebar({
                   transition={shouldReduceMotion ? { duration: 0 } : { duration: CX_DUR_BASE, ease: [...CX_EASE] }}
                   className="space-y-1 mt-1 overflow-hidden"
                 >
-                  {TEAM.map((emp) => {
-                    const isStreaming = streamingEmployee === emp;
-                    const allowed = allowedEmployees.includes(emp);
-                    const active = pathname === `/app/team/${emp}`;
-                    const empRole = EMPLOYEES[emp]?.role ?? "";
-                    const deptColor = DEPT_COLOR[emp];
-                    const rowInner = (
-                      <motion.span
-                        whileHover={shouldReduceMotion ? undefined : { y: -1 }}
-                        whileTap={shouldReduceMotion ? undefined : { scale: 0.98, y: 0 }}
-                        transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
-                        className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[var(--cx-surface-raised)]" : ""}`}
-                        style={{
-                          background: active ? "var(--cx-accent-tint)" : undefined,
-                        }}
-                        onContextMenu={(e) => handleSpecialistContextMenu(e, emp)}
-                        onTouchStart={(e) => handleSpecialistTouchStart(e, emp)}
-                        onTouchEnd={handleSpecialistTouchEnd}
-                        onTouchCancel={handleSpecialistTouchEnd}
-                      >
-                        {active && (
-                          <span
-                            aria-hidden
-                            className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full"
-                            style={{ background: "var(--cx-accent)" }}
-                          />
-                        )}
-                        <SpecialistAvatar employee={emp} size={20} active={active} streaming={isStreaming} />
-                        <div className="min-w-0 flex-1">
-                          <span
-                            className="block truncate cx-type-sm"
-                            style={{
-                              color: active ? "var(--cx-accent)" : "var(--cx-text-muted)",
-                              fontWeight: active ? 600 : 400,
-                            }}
-                          >
-                            {labelFor(emp)}
-                          </span>
-                          {empRole && (
-                            <span
-                              className="block truncate cx-mono cx-type-xs"
-                              style={{ color: "var(--cx-text-faint)" }}
-                            >
-                              {empRole}
-                            </span>
-                          )}
-                        </div>
-                        {!allowed ? (
-                          <Lock
-                            size={10}
-                            strokeWidth={1.75}
-                            aria-label="Locked — upgrade to unlock"
-                            style={{ color: "var(--cx-text-muted)" }}
-                          />
-                        ) : (
-                          <span
-                            className="w-1.5 h-1.5 rounded-full shrink-0"
-                            style={{
-                              background: deptColor,
-                              opacity: isStreaming ? 1 : active ? 0.7 : 0.45,
-                              boxShadow: isStreaming ? `0 0 5px ${deptColor}` : "none",
-                            }}
-                            aria-label={isStreaming ? "Active" : "Online"}
-                          />
-                        )}
-                      </motion.span>
-                    );
-                    return (
-                      <li
-                        key={emp}
-                        title={allowed ? undefined : "Available on a higher plan"}
-                      >
-                        {allowed ? (
-                          <Link
-                            href={`/app/team/${emp}`}
-                            onClick={close}
-                            className="block"
-                          >
-                            {rowInner}
-                          </Link>
-                        ) : (
-                          <Link
-                            href="/app/settings"
-                            onClick={close}
-                            className="block"
-                          >
-                            {rowInner}
-                          </Link>
-                        )}
-                      </li>
-                    );
-                  })}
+                  {TEAM.map((emp) => (
+                    <SpecialistRow
+                      key={emp}
+                      emp={emp}
+                      isStreaming={streamingEmployee === emp}
+                      allowed={allowedEmployees.includes(emp)}
+                      active={pathname === `/app/team/${emp}`}
+                      collapsed={false}
+                      isPinned={pinned.includes(emp)}
+                      shouldReduceMotion={shouldReduceMotion}
+                      onContextMenu={handleSpecialistContextMenu}
+                      onTouchStart={handleSpecialistTouchStart}
+                      onTouchEnd={handleSpecialistTouchEnd}
+                      onClick={close}
+                      labelFor={labelFor}
+                    />
+                  ))}
                 </motion.ul>
               )}
               </AnimatePresence>
@@ -1064,77 +1088,25 @@ export function Sidebar({
 
           {/* Team icons — icon-only mode */}
           {collapsed && (
-            <div className="mt-2 space-y-0.5 px-2">
-              {TEAM.map((emp) => {
-                const isStreaming = streamingEmployee === emp;
-                const allowed = allowedEmployees.includes(emp);
-                const active = pathname === `/app/team/${emp}`;
-                const isPinned = pinned.includes(emp);
-                const deptColor = DEPT_COLOR[emp];
-                const btn = (
-                  <motion.span
-                    whileHover={shouldReduceMotion ? undefined : { scale: 1.06 }}
-                    whileTap={shouldReduceMotion ? undefined : { scale: 0.94 }}
-                    transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
-                    className="relative flex items-center justify-center w-9 h-9 rounded-lg"
-                    style={{ background: active ? "var(--cx-accent-tint)" : undefined }}
-                    onContextMenu={(e) => handleSpecialistContextMenu(e, emp)}
-                    onTouchStart={(e) => handleSpecialistTouchStart(e, emp)}
-                    onTouchEnd={handleSpecialistTouchEnd}
-                    onTouchCancel={handleSpecialistTouchEnd}
-                  >
-                    {active && (
-                      <span
-                        aria-hidden
-                        className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full z-10"
-                        style={{ background: "var(--cx-accent)" }}
-                      />
-                    )}
-                    <SpecialistAvatar employee={emp} size={28} active={active} streaming={isStreaming} />
-                    {!allowed && (
-                      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 flex items-center justify-center z-10">
-                        <Lock size={8} strokeWidth={1.75} style={{ color: "var(--cx-text-muted)" }} />
-                      </span>
-                    )}
-                    {allowed && !isPinned && (
-                      <span
-                        className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full border border-[var(--cx-canvas)] z-10"
-                        style={{
-                          background: deptColor,
-                          opacity: isStreaming ? 1 : active ? 0.7 : 0.5,
-                          boxShadow: isStreaming ? `0 0 4px ${deptColor}` : "none",
-                        }}
-                      />
-                    )}
-                    {allowed && isPinned && (
-                      <span
-                        className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 flex items-center justify-center rounded-full border border-[var(--cx-canvas)] z-10"
-                        style={{ background: deptColor }}
-                        aria-label="Pinned"
-                      >
-                        <Pin size={7} strokeWidth={2.5} style={{ color: "var(--cx-canvas)" }} />
-                      </span>
-                    )}
-                  </motion.span>
-                );
-                const linkEl = allowed ? (
-                  <Link href={`/app/team/${emp}`} onClick={close} className="block">
-                    {btn}
-                  </Link>
-                ) : (
-                  <Link href="/app/settings" onClick={close} className="block">
-                    {btn}
-                  </Link>
-                );
-                return (
-                  <li key={emp} className="list-none flex justify-center">
-                    <Tooltip trigger={linkEl} side="right" triggerClassName="block" delay={180}>
-                      <span className="cx-type-xs font-medium">{labelFor(emp)}</span>
-                    </Tooltip>
-                  </li>
-                );
-              })}
-            </div>
+            <ul className="mt-2 space-y-0.5 px-2 list-none">
+              {TEAM.map((emp) => (
+                <SpecialistRow
+                  key={emp}
+                  emp={emp}
+                  isStreaming={streamingEmployee === emp}
+                  allowed={allowedEmployees.includes(emp)}
+                  active={pathname === `/app/team/${emp}`}
+                  collapsed
+                  isPinned={pinned.includes(emp)}
+                  shouldReduceMotion={shouldReduceMotion}
+                  onContextMenu={handleSpecialistContextMenu}
+                  onTouchStart={handleSpecialistTouchStart}
+                  onTouchEnd={handleSpecialistTouchEnd}
+                  onClick={close}
+                  labelFor={labelFor}
+                />
+              ))}
+            </ul>
           )}
 
           <div className="mt-3 space-y-1">
@@ -1443,7 +1415,7 @@ export function Sidebar({
                   : bySearch.slice(0, 8);
                 return (
                   <>
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       {filtered.slice(0, 8).map((c) => {
                         const active = isChat && activeId === c.id;
                         const dom = c.dominant_employee;
@@ -1451,9 +1423,6 @@ export function Sidebar({
                         const empKey = (
                           dom && (TEAM as string[]).includes(dom) ? dom : "jarvis"
                         ) as EmployeeKey;
-                        const preview = c.last_message
-                          ? c.last_message.replace(/\n+/g, " ").trim().slice(0, 100)
-                          : null;
                         const displayTitle = titleOverrides[c.id] ?? c.title ?? "Untitled chat";
 
                         const avatarEl = (
@@ -1603,11 +1572,6 @@ export function Sidebar({
                                         {relativeDate(c.updated_at)}
                                       </span>
                                     </div>
-                                    {preview && (
-                                      <p className="truncate cx-type-xs mt-1" style={{ color: "var(--cx-text-muted)" }}>
-                                        {preview}
-                                      </p>
-                                    )}
                                     {c.labels && c.labels.length > 0 && (
                                       <span className="flex items-center gap-1 mt-1">
                                         {c.labels.slice(0, 3).map((l) => (
@@ -1715,43 +1679,57 @@ export function Sidebar({
             <div className="flex flex-col items-center gap-1 px-2">
               <div className="flex justify-center"><ChangelogPopover /></div>
               <div className="flex justify-center"><NotificationCenter /></div>
-              <PraxisButton
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                onClick={() => window.dispatchEvent(new CustomEvent("praxis:shortcuts:open"))}
-                title="Keyboard shortcuts"
-                aria-label="Keyboard shortcuts"
-              >
-                <CircleHelp size={16} strokeWidth={1.75} />
-              </PraxisButton>
-              <SidebarThemeButton collapsed />
-              <Link href="/app/settings" title="Settings" aria-label="Settings" onClick={close} data-tour-target="settings"
-                className="cx-icon-btn cx-icon-btn-lg"
-                style={{
-                  background: isActive("/app/settings") ? "var(--cx-accent-tint)" : undefined,
-                  color: isActive("/app/settings") ? "var(--cx-accent)" : "var(--cx-text-muted)",
-                }}>
-                <Settings size={16} strokeWidth={1.75} />
-              </Link>
-              <Link href="/app/settings/billing" title="Billing" aria-label="Billing" onClick={close}
-                className="cx-icon-btn cx-icon-btn-lg"
-                style={{
-                  background: isActive("/app/settings/billing") ? "var(--cx-accent-tint)" : undefined,
-                  color: isActive("/app/settings/billing") ? "var(--cx-accent)" : "var(--cx-text-muted)",
-                }}>
-                <CreditCard size={16} strokeWidth={1.75} />
-              </Link>
-              <form action="/auth/sign-out" method="post">
+              <Tooltip trigger={
                 <PraxisButton
-                  type="submit"
+                  type="button"
                   variant="ghost"
                   size="icon-sm"
-                  title="Sign out"
-                  aria-label="Sign out"
+                  onClick={() => window.dispatchEvent(new CustomEvent("praxis:shortcuts:open"))}
+                  aria-label="Keyboard shortcuts"
                 >
-                  <LogOut size={16} strokeWidth={1.75} />
+                  <CircleHelp size={16} strokeWidth={1.75} />
                 </PraxisButton>
+              } side="right" delay={180}>
+                <span className="cx-type-xs font-medium">Keyboard shortcuts</span>
+              </Tooltip>
+              <SidebarThemeButton collapsed />
+              <Tooltip trigger={
+                <Link href="/app/settings" aria-label="Settings" onClick={close} data-tour-target="settings"
+                  className="cx-icon-btn cx-icon-btn-lg"
+                  style={{
+                    background: isActive("/app/settings") ? "var(--cx-accent-tint)" : undefined,
+                    color: isActive("/app/settings") ? "var(--cx-accent)" : "var(--cx-text-muted)",
+                  }}>
+                  <Settings size={16} strokeWidth={1.75} />
+                </Link>
+              } side="right" delay={180}>
+                <span className="cx-type-xs font-medium">Settings</span>
+              </Tooltip>
+              <Tooltip trigger={
+                <Link href="/app/settings/billing" aria-label="Billing" onClick={close}
+                  className="cx-icon-btn cx-icon-btn-lg"
+                  style={{
+                    background: isActive("/app/settings/billing") ? "var(--cx-accent-tint)" : undefined,
+                    color: isActive("/app/settings/billing") ? "var(--cx-accent)" : "var(--cx-text-muted)",
+                  }}>
+                  <CreditCard size={16} strokeWidth={1.75} />
+                </Link>
+              } side="right" delay={180}>
+                <span className="cx-type-xs font-medium">Billing</span>
+              </Tooltip>
+              <form action="/auth/sign-out" method="post">
+                <Tooltip trigger={
+                  <PraxisButton
+                    type="submit"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="Sign out"
+                  >
+                    <LogOut size={16} strokeWidth={1.75} />
+                  </PraxisButton>
+                } side="right" delay={180}>
+                  <span className="cx-type-xs font-medium">Sign out</span>
+                </Tooltip>
               </form>
               <div
                 className="w-6 h-6 rounded-full flex items-center justify-center cx-type-xs font-semibold shrink-0 overflow-hidden mt-1"
