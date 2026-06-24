@@ -15,15 +15,16 @@
  *   body     — optional supporting text (cx-type-xs, text-muted)
  *   action   — optional inline CTA button
  *
- * Animated enter/exit:
- *   Enter: slide up + fade in, 160ms [0.22,1,0.36,1]
- *   Exit:  slide right + fade + scale, 150ms
+ * Animated enter/exit (per CONSOLE_REDESIGN.md §Motion):
+ *   Enter: slide down from above (y -10→0) + fade in, 160ms [0.22,1,0.36,1]
+ *   Exit:  slide right + fade + scale, 120ms
  *   Reduced-motion: instant opacity toggle only
  *
  * Stack behaviour (managed by ToastProvider, not this component):
- *   Max 3 visible; newer toasts push older ones up.
+ *   Max 3 visible; newer toasts push older ones down.
  *   Auto-dismiss 4 s (error: never — requires manual dismiss).
  *   Progress bar shows remaining time on auto-dismiss variants.
+ *   Container: fixed top-right, offset 72px from viewport top to clear the 56px app header.
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -111,7 +112,7 @@ const AUTO_DISMISS_MS = 4000;
 // ---------------------------------------------------------------
 
 const ENTER_VARIANTS = {
-  initial: { opacity: 0, y: 12, scale: 0.94 },
+  initial: { opacity: 0, y: -10, scale: 0.96 },
   animate: {
     opacity: 1,
     y: 0,
@@ -125,7 +126,7 @@ const EXIT_VARIANTS = {
     opacity: 0,
     x: 20,
     scale: 0.96,
-    transition: { duration: 0.15, ease: [0.4, 0, 0.2, 1] as const },
+    transition: { duration: 0.12, ease: [0.4, 0, 0.2, 1] as const },
   },
 };
 
@@ -258,7 +259,7 @@ function ToastCard({
 }
 
 // ---------------------------------------------------------------
-// Toast container — fixed bottom-right stack
+// Toast container — fixed top-right stack (below the 56px app header)
 // ---------------------------------------------------------------
 
 export function ToastContainer({
@@ -274,7 +275,7 @@ export function ToastContainer({
   return (
     <div
       aria-label="Notifications"
-      className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[200] flex flex-col gap-2 pointer-events-none"
+      className="fixed top-[72px] right-4 sm:right-6 z-[200] flex flex-col gap-2 pointer-events-none"
     >
       <AnimatePresence initial={false} mode="popLayout">
         {visible.map((item) => (
