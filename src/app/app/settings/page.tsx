@@ -26,9 +26,9 @@ export default async function SettingsPage({
   return (
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8">
       <div className="mx-auto max-w-5xl">
-        <div className="mb-8 pb-6 border-b border-[var(--cx-border)]">
-          <h1 className="cx-heading-2xl">Settings</h1>
-          <p className="cx-type-sm mt-1.5 cx-text-muted">
+        <div className="mb-8 pb-5 border-b border-[var(--cx-border)]">
+          <h1 className="cx-heading-lg">Settings</h1>
+          <p className="cx-type-sm mt-1 cx-text-muted">
             Manage your account, workspace, and billing preferences.
           </p>
         </div>
