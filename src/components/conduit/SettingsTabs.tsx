@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { Button as PraxisButton, SpinnerIcon } from "@/components/conduit/ui/Button";
+import { Input, Select, Textarea } from "@/components/conduit/ui/Input";
 import { Toggle } from "@/components/conduit/ui/Toggle";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { EmployeeKey } from "@/lib/ai/provider";
@@ -443,7 +444,7 @@ function SpecialistsTab({
     <form onSubmit={handleSave} className="space-y-8">
       {/* Nicknames */}
       <div>
-        <h3 className="cx-heading-lg mb-2">Custom nicknames</h3>
+        <h3 className="cx-label mb-2">Custom nicknames</h3>
         <p className="cx-type-sm text-[var(--cx-text-muted)] max-w-xl mb-4">
           Give each specialist a custom nickname. Leave blank to use the default name.
           Nicknames appear in the sidebar, chat, and specialist picker.
@@ -474,14 +475,14 @@ function SpecialistsTab({
                       · {EMPLOYEES[emp].role}
                     </span>
                   </label>
-                  <input
+                  <Input
                     id={`nick-${emp}`}
                     type="text"
                     value={nicknames[emp]}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => handleNicknameChange(emp, e.target.value)}
                     placeholder={canonical}
                     maxLength={32}
-                    className="w-full cx-input-sm"
+                    size="sm"
                   />
                 </div>
                 {nicknames[emp] && (
@@ -504,7 +505,7 @@ function SpecialistsTab({
 
       {/* Response length */}
       <div>
-        <h3 className="cx-heading-lg mb-2">Response length</h3>
+        <h3 className="cx-label mb-2">Response length</h3>
         <p className="cx-type-sm text-[var(--cx-text-muted)] max-w-xl mb-4">
           Control how verbose each specialist is. Short is best for quick answers; Detailed for research and complex tasks.
         </p>
@@ -935,7 +936,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
       </div>
 
       <div>
-        <h3 className="cx-heading-lg mb-3">Voices</h3>
+        <h3 className="cx-label mb-3">Voices</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {VOICE_EMPLOYEES.map((emp) => {
             const current =
@@ -973,10 +974,10 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
                     )}
                   </PraxisButton>
                 </div>
-                <select
+                <Select
                   value={current}
                   onChange={(e) => setEmployeeVoice(emp, e.target.value)}
-                  className="w-full cx-select-sm"
+                  size="sm"
                 >
                   {/* Always offer the default first */}
                   <option value={DEFAULT_EMPLOYEE_VOICES[emp]}>
@@ -993,7 +994,7 @@ function VoiceTab({ ttsAllowed }: { ttsAllowed: boolean }) {
                         {v.name}
                       </option>
                     ))}
-                </select>
+                </Select>
                 {current !== DEFAULT_EMPLOYEE_VOICES[emp] && (
                   <PraxisButton
                     type="button"
@@ -1179,9 +1180,9 @@ function WorkspaceTab({
 
   return (
     <div className="space-y-6">
-      <section className="cx-glass cx-glass-border rounded-xl p-6 space-y-5">
-        <div className="pb-4 border-b border-[var(--cx-border)]">
-          <h2 className="cx-heading-lg">Workspace</h2>
+      <section className="cx-glass cx-glass-border rounded-2xl p-6 space-y-5">
+        <div className="pb-3 border-b border-[var(--cx-border)]">
+          <h2 className="cx-label">Workspace</h2>
         </div>
 
         {/* ── Workspace logo ── */}
@@ -1275,7 +1276,7 @@ function WorkspaceTab({
             Shown in the sidebar. Leave blank to use your account name.
           </p>
           <div className="relative">
-            <input
+            <Input
               value={wsName}
               onChange={(e) => {
                 setWsName(e.target.value.slice(0, WS_NAME_MAX));
@@ -1284,7 +1285,6 @@ function WorkspaceTab({
               }}
               maxLength={WS_NAME_MAX}
               placeholder="e.g. Acme AI Team"
-              className="w-full cx-input"
               style={{ paddingRight: "3rem" }}
             />
             <span
@@ -1563,9 +1563,9 @@ function ProfileTab({
   return (
     <div className="space-y-6">
       {/* ── Identity card ── */}
-      <section className="cx-glass cx-glass-border rounded-xl p-6 space-y-5">
-        <div className="pb-4 border-b border-[var(--cx-border)]">
-          <h2 className="cx-heading-lg">Profile</h2>
+      <section className="cx-glass cx-glass-border rounded-2xl p-6 space-y-5">
+        <div className="pb-3 border-b border-[var(--cx-border)]">
+          <h2 className="cx-label">Profile</h2>
         </div>
 
         {/* Avatar */}
@@ -1636,12 +1636,12 @@ function ProfileTab({
             Display name
           </label>
           <div className="flex gap-2">
-            <input
+            <Input
               value={nameValue}
               onChange={(e) => { setNameValue(e.target.value); setNameSaved(false); setNameError(""); }}
               maxLength={100}
               placeholder={fullName || "Your name"}
-              className="flex-1 cx-input"
+              className="flex-1"
             />
             <PraxisButton
               type="submit"
@@ -1665,12 +1665,12 @@ function ProfileTab({
             Shown in the sidebar header. Leave blank to use your account name.
           </p>
           <div className="flex gap-2">
-            <input
+            <Input
               value={wsName}
               onChange={(e) => { setWsName(e.target.value); setWsNameSaved(false); setWsNameError(""); }}
               maxLength={80}
               placeholder="e.g. Acme AI Team"
-              className="flex-1 cx-input"
+              className="flex-1"
             />
             <PraxisButton
               type="submit"
@@ -1687,9 +1687,9 @@ function ProfileTab({
       </section>
 
       {/* ── Account card ── */}
-      <section className="cx-glass cx-glass-border rounded-xl p-6 space-y-5">
-        <div className="pb-4 border-b border-[var(--cx-border)]">
-          <h2 className="cx-heading-lg">Account</h2>
+      <section className="cx-glass cx-glass-border rounded-2xl p-6 space-y-5">
+        <div className="pb-3 border-b border-[var(--cx-border)]">
+          <h2 className="cx-label">Account</h2>
         </div>
         <div className="space-y-5">
           <div>
@@ -1703,17 +1703,18 @@ function ProfileTab({
             <div className="cx-label mb-2">
               Timezone
             </div>
-            <select
+            <Select
               value={tz}
               onChange={(e) => saveTz(e.target.value)}
-              className="w-full max-w-sm cx-select-sm"
+              size="sm"
+              className="max-w-sm"
             >
               {[...new Set([tz, ...COMMON_TIMEZONES])].map((z) => (
                 <option key={z} value={z}>
                   {z}
                 </option>
               ))}
-            </select>
+            </Select>
             <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)]">
               {tzSaving ? "Saving…" : tzSaved ? "Saved" : "Used so the team knows what time of day it is for you."}
             </p>
@@ -1745,9 +1746,9 @@ function ProfileTab({
       </section>
 
       {/* ── Security card ── */}
-      <section className="cx-glass cx-glass-border rounded-xl p-6 space-y-5">
-        <div className="pb-4 border-b border-[var(--cx-border)]">
-          <h2 className="cx-heading-lg">Security</h2>
+      <section className="cx-glass cx-glass-border rounded-2xl p-6 space-y-5">
+        <div className="pb-3 border-b border-[var(--cx-border)]">
+          <h2 className="cx-label">Security</h2>
         </div>
 
         {/* Update email */}
@@ -1761,14 +1762,13 @@ function ProfileTab({
             </p>
           ) : (
             <form onSubmit={submitEmailChange} className="space-y-3 max-w-sm">
-              <input
+              <Input
                 type="email"
                 placeholder="New email address"
                 value={newEmail}
                 onChange={(e) => { setNewEmail(e.target.value); setEmailError(""); }}
                 autoComplete="email"
                 required
-                className="w-full cx-input"
               />
               {emailError && (
                 <p className="cx-type-xs text-[var(--cx-danger)]">{emailError}</p>
@@ -1792,37 +1792,34 @@ function ProfileTab({
           </div>
           <form onSubmit={submitPasswordChange} className="space-y-3 max-w-sm">
             <div>
-              <input
+              <Input
                 type="password"
                 placeholder="Current password"
                 value={currentPw}
                 onChange={(e) => { setCurrentPw(e.target.value); setPwError(""); }}
                 autoComplete="current-password"
                 required
-                className="w-full cx-input"
               />
             </div>
             <div>
-              <input
+              <Input
                 type="password"
                 placeholder="New password"
                 value={newPw}
                 onChange={(e) => { setNewPw(e.target.value); setPwError(""); }}
                 autoComplete="new-password"
                 required
-                className="w-full cx-input"
               />
               <PwMeter pw={newPw} />
             </div>
             <div>
-              <input
+              <Input
                 type="password"
                 placeholder="Confirm new password"
                 value={confirmPw}
                 onChange={(e) => { setConfirmPw(e.target.value); setPwError(""); }}
                 autoComplete="new-password"
                 required
-                className="w-full cx-input"
               />
             </div>
             {pwError && (
@@ -1841,9 +1838,9 @@ function ProfileTab({
       </section>
 
       {/* ── Actions card ── */}
-      <section className="cx-glass cx-glass-border rounded-xl p-6 space-y-5">
-        <div className="pb-4 border-b border-[var(--cx-border)]">
-          <h2 className="cx-heading-lg">Account actions</h2>
+      <section className="cx-glass cx-glass-border rounded-2xl p-6 space-y-5">
+        <div className="pb-3 border-b border-[var(--cx-border)]">
+          <h2 className="cx-label">Account actions</h2>
         </div>
 
         {/* Guided Tour */}
@@ -1978,39 +1975,36 @@ function BusinessTab({ account }: { account: AccountData }) {
   return (
     <div className="space-y-6">
       {/* Business info card */}
-      <section className="cx-glass cx-glass-border rounded-xl p-6 space-y-5">
-        <div className="pb-4 border-b border-[var(--cx-border)]">
-          <h2 className="cx-heading-lg">Business info</h2>
+      <section className="cx-glass cx-glass-border rounded-2xl p-6 space-y-5">
+        <div className="pb-3 border-b border-[var(--cx-border)]">
+          <h2 className="cx-label">Business info</h2>
         </div>
         <div>
           <label className="cx-label block mb-2">
             Business name
           </label>
-          <input
+          <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full cx-input"
           />
         </div>
         <div>
           <label className="cx-label block mb-2">
             Business type
           </label>
-          <input
+          <Input
             value={businessType}
             onChange={(e) => setBusinessType(e.target.value)}
-            className="w-full cx-input"
           />
         </div>
         <div>
           <label className="cx-label block mb-2">
             What you&apos;re working on
           </label>
-          <textarea
+          <Textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
-            className="w-full cx-textarea"
           />
         </div>
         {error && <p className="cx-type-xs text-[var(--cx-danger)]">{error}</p>}
@@ -2024,9 +2018,9 @@ function BusinessTab({ account }: { account: AccountData }) {
       </section>
 
       {/* Company brief card */}
-      <section className="cx-glass cx-glass-border rounded-xl p-6 space-y-4">
-        <div className="pb-4 border-b border-[var(--cx-border)]">
-          <h2 className="cx-heading-lg mb-1">Company brief</h2>
+      <section className="cx-glass cx-glass-border rounded-2xl p-6 space-y-4">
+        <div className="pb-3 border-b border-[var(--cx-border)]">
+          <h2 className="cx-label mb-2">Company brief</h2>
           <p className="cx-type-xs text-[var(--cx-text-muted)]">
             A short context block Atlas shares with your whole team. All 9 specialists
             read this on every turn — no more repeating yourself.
@@ -2034,7 +2028,7 @@ function BusinessTab({ account }: { account: AccountData }) {
         </div>
         <form onSubmit={saveBrief} className="space-y-3">
           <div className="relative">
-            <textarea
+            <Textarea
               value={brief}
               onChange={(e) => {
                 setBrief(e.target.value.slice(0, COMPANY_BRIEF_MAX));
@@ -2043,7 +2037,6 @@ function BusinessTab({ account }: { account: AccountData }) {
               rows={4}
               maxLength={COMPANY_BRIEF_MAX}
               placeholder="e.g. Acme builds B2B SaaS for HR teams in the US mid-market. We're pre-revenue, 2 founders, focused on getting our first 10 design partners this quarter."
-              className="w-full cx-textarea"
             />
             <span
               className="absolute bottom-3 right-3 cx-type-xs tabular-nums"
@@ -3788,16 +3781,17 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               {/* Channel picker */}
               {slackChannels !== null && slackChannels.length > 0 && (
                 <div className="flex gap-2">
-                  <select
+                  <Select
                     value={selectedChannel}
                     onChange={(e) => setSelectedChannel(e.target.value)}
-                    className="flex-1 cx-select-sm"
+                    size="sm"
+                    className="flex-1"
                   >
                     <option value="">Pick a channel…</option>
                     {slackChannels.map((c) => (
                       <option key={c.id} value={c.id}>#{c.name}</option>
                     ))}
-                  </select>
+                  </Select>
                   <PraxisButton
                     type="button"
                     onClick={saveSlackChannel}
@@ -4001,13 +3995,14 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
               ) : (
                 <div className="flex flex-col gap-2">
                   <div className="flex gap-2">
-                    <input
+                    <Input
                       type="text"
                       value={driveSearchQuery}
                       onChange={(e) => setDriveSearchQuery(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") searchDriveFiles(); }}
                       placeholder="Search Docs & Sheets…"
-                      className="flex-1 cx-input-sm"
+                      size="sm"
+                      className="flex-1"
                     />
                     <PraxisButton
                       type="button"
@@ -4540,7 +4535,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="cx-heading-lg mb-1">API Keys</h2>
+          <h2 className="cx-heading-md mb-1">API Keys</h2>
           <p className="cx-type-sm text-[var(--cx-text-muted)]">
             Integrate Praxis into your own tools and workflows via REST API.
           </p>
@@ -4568,7 +4563,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="cx-heading-lg mb-1">API Keys</h2>
+        <h2 className="cx-heading-md mb-1">API Keys</h2>
         <p className="cx-type-sm text-[var(--cx-text-muted)]">
           Generate keys to access Praxis programmatically. Keys are shown once — store them securely.
         </p>
@@ -4603,14 +4598,14 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
 
       {/* Create form */}
       <form onSubmit={handleCreate} className="flex gap-3">
-        <input
+        <Input
           type="text"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           placeholder="Key name (e.g. CI/CD Pipeline)"
           maxLength={80}
           required
-          className="flex-1 cx-input"
+          className="flex-1"
         />
         <PraxisButton
           type="submit"
@@ -4768,7 +4763,7 @@ function ReferralsTab() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="cx-heading-lg mb-1">Refer &amp; Earn</h2>
+        <h2 className="cx-heading-md mb-1">Refer &amp; Earn</h2>
         <p className="cx-type-sm text-[var(--cx-text-muted)] max-w-xl">
           Share your personal link. When someone signs up and starts using Praxis,
           you both get bonus tokens.
@@ -4782,11 +4777,12 @@ function ReferralsTab() {
         </div>
         {referralUrl ? (
           <div className="flex items-center gap-2">
-            <input
+            <Input
               readOnly
               value={referralUrl}
               aria-label="Your referral link"
-              className="flex-1 cx-input-sm select-all cursor-text"
+              size="sm"
+              className="flex-1 select-all cursor-text"
               onFocus={(e) => e.currentTarget.select()}
             />
             <PraxisButton
@@ -4953,7 +4949,7 @@ function LabelsTab() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="cx-heading-lg mb-1">Labels</h2>
+        <h2 className="cx-heading-md mb-1">Labels</h2>
         <p className="cx-type-sm text-[var(--cx-text-muted)]">
           Color-coded labels to organize conversations by project, client, or status.
         </p>
@@ -4984,7 +4980,7 @@ function LabelsTab() {
                 className="cx-glass cx-glass-border rounded-xl p-3 flex flex-col gap-2"
               >
                 <div className="flex items-center gap-2">
-                  <input
+                  <Input
                     autoFocus
                     type="text"
                     value={editName}
@@ -4994,17 +4990,21 @@ function LabelsTab() {
                       if (e.key === "Escape") setEditingId(null);
                     }}
                     maxLength={32}
-                    className="flex-1 cx-input-sm"
+                    size="sm"
+                    className="flex-1"
                   />
-                  <button
+                  <PraxisButton
                     type="button"
                     onClick={() => void handleSave(label.id)}
-                    disabled={!editName.trim() || saving}
-                    className="px-3 py-1.5 rounded-lg cx-type-xs font-medium text-white disabled:opacity-50 transition-[opacity,transform] duration-[120ms] ease-[0.22,1,0.36,1] hover:opacity-90 active:scale-[0.96] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--cx-accent)] focus-visible:ring-offset-[var(--cx-canvas)]"
-                    style={{ background: editColor, minHeight: 32 }}
+                    isDisabled={!editName.trim() || saving}
+                    isLoading={saving}
+                    loadingText="Saving…"
+                    variant="primary"
+                    size="sm"
+                    style={{ background: editColor }}
                   >
-                    {saving ? "Saving…" : "Save"}
-                  </button>
+                    Save
+                  </PraxisButton>
                   <PraxisButton
                     type="button"
                     onClick={() => setEditingId(null)}
@@ -5079,14 +5079,15 @@ function LabelsTab() {
           {showCreate ? (
             <div className="cx-glass cx-glass-border rounded-xl p-3 space-y-2">
               <form onSubmit={(e) => void handleCreate(e)} className="flex items-center gap-2">
-                <input
+                <Input
                   autoFocus
                   type="text"
                   placeholder="Label name"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value.slice(0, 32))}
                   maxLength={32}
-                  className="flex-1 cx-input-sm"
+                  size="sm"
+                  className="flex-1"
                 />
                 <PraxisButton
                   type="submit"
