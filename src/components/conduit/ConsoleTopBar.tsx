@@ -336,7 +336,7 @@ export function ConsoleTopBar({
             exit={{ opacity: 0, x: prefersReduced ? 0 : -3, transition: { duration: CX_DUR_FAST, ease: [...CX_EASE] } }}
           >
             <Icon
-              size={14}
+              size={16}
               strokeWidth={1.75}
               aria-hidden="true"
               style={{ color: "var(--cx-text-muted)" }}
@@ -447,7 +447,7 @@ export function ConsoleTopBar({
             className="cx-icon-btn cx-focus-ring hidden md:inline-flex"
           >
             <Settings
-              size={15}
+              size={16}
               strokeWidth={1.75}
               aria-hidden="true"
             />

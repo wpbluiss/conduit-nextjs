@@ -56,3 +56,9 @@ export const ICON_SIZE_NAV = 20 as const;
 
 /** Size for secondary strip items, menu actions, and toolbar glyphs. */
 export const ICON_SIZE_INLINE = 16 as const;
+
+/** Size for inline text glyphs, badge row indicators, and small actions. */
+export const ICON_SIZE_SM = 14 as const;
+
+/** Size for chip icons and tiny metadata glyphs. */
+export const ICON_SIZE_XS = 12 as const;
