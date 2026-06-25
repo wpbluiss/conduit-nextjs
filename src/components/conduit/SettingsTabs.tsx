@@ -1212,7 +1212,7 @@ function WorkspaceTab({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="cx-type-2xl font-bold" style={{ color: "var(--cx-accent-bright)" }}>
+                  <span className="cx-heading-2xl" style={{ color: "var(--cx-accent-bright)" }}>
                     {(wsName || workspaceName || "P")[0]?.toUpperCase() ?? "P"}
                   </span>
                 )}
@@ -2970,7 +2970,7 @@ function BillingTab({
                 </div>
                 <div className="cx-heading-xl mt-1">{t.name}</div>
                 <div className="mt-1">
-                  <span className="cx-type-xl font-semibold">
+                  <span className="cx-type-xl cx-mono font-semibold">
                     ${t.monthlyPriceCents / 100}
                   </span>
                   <span className="cx-type-xs text-[var(--cx-text-muted)]">
@@ -3049,8 +3049,8 @@ function BillingTab({
               disabled={busy !== null}
               className="cx-glass cx-glass-border rounded-xl p-4 text-left hover:border-[var(--cx-accent)] transition-colors disabled:opacity-50"
             >
-              <div className="cx-heading-lg">${t.amountCents / 100}</div>
-              <div className="mt-1 cx-type-sm text-[var(--cx-text-muted)]">
+              <div className="cx-heading-lg cx-mono">${t.amountCents / 100}</div>
+              <div className="mt-1 cx-type-sm cx-mono text-[var(--cx-text-muted)]">
                 {(t.tokensGranted / 1000).toLocaleString()}k tokens
               </div>
               <span className="mt-3 inline-flex items-center gap-1 cx-type-xs text-[var(--cx-accent)]">
@@ -3258,7 +3258,7 @@ function Stat({
       <div className="cx-label">
         {label}
       </div>
-      <div className="cx-heading-xl mt-1">{value}</div>
+      <div className="cx-heading-xl cx-mono mt-1">{value}</div>
       {sub && (
         <div className="cx-type-xs text-[var(--cx-text-muted)] mt-0.5">
           {sub}

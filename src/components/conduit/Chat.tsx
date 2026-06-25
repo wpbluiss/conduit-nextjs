@@ -1712,7 +1712,7 @@ export function Chat({
                 className="flex-1 bg-transparent cx-body outline-none placeholder:text-[var(--cx-text-muted)]"
               />
               {searchQuery && (
-                <span className="cx-type-xs shrink-0" style={{ color: "var(--color-text-muted)" }}>
+                <span className="cx-type-xs cx-mono shrink-0" style={{ color: "var(--color-text-muted)" }}>
                   {searchMatchSet.size} match{searchMatchSet.size !== 1 ? "es" : ""}
                 </span>
               )}

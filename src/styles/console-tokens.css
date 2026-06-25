@@ -189,6 +189,20 @@
   /* Symmetric — used for exits, fades */
   --cx-ease-inout:  cubic-bezier(0.4, 0, 0.2, 1);
 
+  /* ---- Typography: console sans font (Geist Sans) ----
+   * Scoped to .praxis-root so marketing pages keep Inter/system-font.
+   * --font-geist-sans is bound in layout.tsx via GeistSans.variable
+   * (variable: "--font-geist-sans" per the geist/font/sans package).
+   * Overriding --font-sans here and setting font-family directly means:
+   *  (a) every explicit var(--font-sans) reference in the console
+   *      (heading utilities, form labels, btn-* classes) resolves to Geist Sans;
+   *  (b) inherited font-family (the default for body/paragraph text) also
+   *      gets Geist Sans — no per-component changes required.
+   * Fallback chain: ui-sans-serif → system-ui → sans-serif keeps text
+   * readable if the variable font fails to load. */
+  --cx-font-sans: var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif);
+  --font-sans:    var(--cx-font-sans);
+
   /* ---- Typography: console mono font (Geist Mono) ----
    * Scoped to .praxis-root so marketing pages keep JetBrains Mono.
    * --font-geist-mono is bound in layout.tsx via GeistMono.variable.
@@ -387,6 +401,17 @@
   /* -- Semantic signals -- */
   --reward-green: var(--cx-reward);
   --danger:       var(--cx-danger);
+}
+
+/* ---- Console body font — Geist Sans ----
+ * body { font-family: var(--font-sans) } is evaluated at the <body> element
+ * level and resolves to Inter (from :root in globals.css). Setting font-family
+ * directly on .praxis-root overrides the inherited value so all console text
+ * (body copy, labels, sidebar items, chat messages) renders in Geist Sans.
+ * The token override above ensures explicit var(--font-sans) references also
+ * resolve to Geist Sans inside .praxis-root. */
+.praxis-root {
+  font-family: var(--cx-font-sans, ui-sans-serif, system-ui, sans-serif);
 }
 
 /* ------------------------------------------------------------
