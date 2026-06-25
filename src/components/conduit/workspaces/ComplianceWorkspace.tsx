@@ -86,12 +86,12 @@ export default function ComplianceWorkspace() {
             >
               <div className="flex items-baseline justify-between gap-2">
                 <div>
-                  <div className="cx-type-xl font-semibold">{f.name}</div>
+                  <div className="cx-heading-xl font-semibold">{f.name}</div>
                   <p className="cx-type-xs text-[var(--color-text-muted)] mt-1">
                     {f.blurb}
                   </p>
                 </div>
-                <span className="cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
+                <span className="cx-mono cx-type-xs uppercase tracking-[0.15em] text-[var(--color-text-muted)]">
                   {f.done}/{f.total}
                 </span>
               </div>

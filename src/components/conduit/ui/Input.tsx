@@ -18,7 +18,7 @@
 import { type ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
-interface InputProps extends ComponentProps<"input"> {
+interface InputProps extends Omit<ComponentProps<"input">, "size"> {
   size?: "md" | "sm";
   error?: boolean | string;
 }
@@ -62,7 +62,7 @@ export function Textarea({ error, className, ...props }: TextareaProps) {
  * For complex dropdowns with search or multi-select, use a Radix Select or
  * the Popover + listbox pattern instead.
  */
-interface SelectProps extends ComponentProps<"select"> {
+interface SelectProps extends Omit<ComponentProps<"select">, "size"> {
   size?: "md" | "sm";
   error?: boolean | string;
 }

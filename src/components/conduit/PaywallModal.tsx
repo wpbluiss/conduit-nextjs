@@ -296,13 +296,13 @@ export function PaywallModal({
               </span>
               <span className="cx-type-base text-[var(--color-text-muted)] ml-1">/mo</span>
               {billing === "annual" && (
-                <span className="ml-2 cx-type-xs text-[var(--color-text-muted)] line-through">
+                <span className="ml-2 cx-type-xs cx-mono text-[var(--color-text-muted)] line-through">
                   ${monthlyPrice}/mo
                 </span>
               )}
             </div>
             {billing === "annual" && (
-              <span className="cx-type-xs text-[var(--cx-reward)]">
+              <span className="cx-type-xs cx-mono text-[var(--cx-reward)]">
                 Billed ${(monthlyPrice * 12 * 0.8).toFixed(2)}/yr
               </span>
             )}

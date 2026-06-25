@@ -65,10 +65,12 @@ export function TokenBudgetNudge({
         style={{ color: "var(--cx-accent)", flexShrink: 0 }}
       />
       <span style={{ color: "var(--color-text)" }}>
-        <span style={{ color: "var(--cx-text)", fontWeight: 500 }}>
+        <span className="cx-mono" style={{ color: "var(--cx-text)", fontWeight: 600 }}>
           {pctDisplay}%
         </span>{" "}
-        of your free tokens used — {remaining} remaining this month.
+        of your free tokens used —{" "}
+        <span className="cx-mono" style={{ fontWeight: 500 }}>{remaining}</span>{" "}
+        remaining this month.
       </span>
       <Link
         href="/app/settings"
