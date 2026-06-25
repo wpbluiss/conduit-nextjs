@@ -36,6 +36,7 @@ import {
   Monitor,
   X,
 } from "lucide-react";
+import { CxIcon } from "@/components/conduit/ui/Icon";
 import type { EmployeeKey } from "@/lib/ai/provider";
 import { DEPT_COLOR, employeeLabel } from "./EmployeeBadge";
 import { SpecialistAvatar } from "./SpecialistAvatar";
@@ -408,7 +409,7 @@ function SpecialistRow({
       whileHover={shouldReduceMotion ? undefined : { y: -1 }}
       whileTap={shouldReduceMotion ? undefined : { scale: 0.98, y: 0 }}
       transition={{ duration: CX_DUR_FAST, ease: [...CX_EASE] }}
-      className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[var(--cx-surface-raised)]" : ""}`}
+      className={`relative flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-150 ${!active ? "hover:bg-[var(--cx-glass-bg)]" : ""}`}
       style={{ background: active ? "var(--cx-accent-tint)" : undefined }}
       onContextMenu={(e) => onContextMenu(e, emp)}
       onTouchStart={(e) => onTouchStart(e, emp)}
@@ -839,7 +840,7 @@ export function Sidebar({
         role="dialog"
         aria-modal={open ? "true" : undefined}
         aria-label="Navigation"
-        animate={{ width: collapsed ? 52 : 256, minWidth: collapsed ? 52 : 256 }}
+        animate={{ width: collapsed ? 48 : 240, minWidth: collapsed ? 48 : 240 }}
         transition={skipTransition || shouldReduceMotion ? { duration: 0 } : { duration: 0.22, ease: [...CX_EASE] }}
         className={`cx-glass border-r border-[var(--cx-glass-border)] fixed md:static z-40 inset-y-0 left-0 flex flex-col overflow-hidden ${
           open ? "translate-x-0" : "-translate-x-full"
@@ -981,7 +982,7 @@ export function Sidebar({
         <nav className="flex-1 overflow-y-auto pb-3" aria-label="Main navigation">
           <NavLink
             href="/app/workspace"
-            icon={<LayoutGrid size={20} strokeWidth={1.75} />}
+            icon={<CxIcon icon={LayoutGrid} size="nav" />}
             label="Workspace"
             active={isActive("/app/workspace")}
             onClick={close}
@@ -990,7 +991,7 @@ export function Sidebar({
           <div data-tour-target="specialists">
           <NavLink
             href="/app/team"
-            icon={<Users2 size={20} strokeWidth={1.75} />}
+            icon={<CxIcon icon={Users2} size="nav" />}
             label="Team"
             active={pathname === "/app/team"}
             onClick={close}
@@ -1005,8 +1006,8 @@ export function Sidebar({
                 className="mx-3 mt-0 mb-2 pb-1 flex items-center gap-2"
                 style={{ borderBottom: "1px solid var(--cx-glass-border)" }}
               >
-                <Pin size={10} strokeWidth={1.75} aria-hidden style={{ color: "var(--cx-text-faint)" }} />
-                <span className="cx-label" style={{ color: "var(--cx-text-faint)" }}>
+                <Pin size={10} strokeWidth={1.75} aria-hidden style={{ color: "var(--cx-text-muted)" }} />
+                <span className="cx-label">
                   Pinned
                 </span>
               </div>
@@ -1038,10 +1039,10 @@ export function Sidebar({
               <button
                 type="button"
                 onClick={() => setTeamExpanded((v) => !v)}
-                className="w-full mx-0 flex items-center justify-between px-3 pt-1 pb-2 rounded-lg transition-colors duration-150 hover:bg-[var(--cx-surface-raised)]"
+                className="w-full mx-0 flex items-center justify-between px-3 pt-1 pb-2 rounded-lg transition-colors duration-150 hover:bg-[var(--cx-glass-bg)]"
                 style={{ borderBottom: "1px solid var(--cx-glass-border)", marginBottom: "4px" }}
               >
-                <span className="cx-label inline-flex items-center gap-2" style={{ color: "var(--cx-text-faint)" }}>
+                <span className="cx-label inline-flex items-center gap-2">
                   <Users2 size={10} strokeWidth={1.75} aria-hidden /> Specialists
                 </span>
                 <motion.span
@@ -1112,7 +1113,7 @@ export function Sidebar({
           <div className="mt-3 space-y-1">
             <NavLink
               href="/app/voice"
-              icon={<Mic size={20} strokeWidth={1.75} />}
+              icon={<CxIcon icon={Mic} size="nav" />}
               label="Voice Room"
               active={isActive("/app/voice")}
               onClick={close}
@@ -1121,7 +1122,7 @@ export function Sidebar({
             {allowedEmployees.includes("sales") && (
               <NavLink
                 href="/app/team/sales"
-                icon={<Sparkles size={20} strokeWidth={1.75} />}
+                icon={<CxIcon icon={Sparkles} size="nav" />}
                 label="Leads"
                 active={pathname === "/app/team/sales"}
                 onClick={close}
@@ -1131,7 +1132,7 @@ export function Sidebar({
             <div data-tour-target="memory">
             <NavLink
               href="/app/activity"
-              icon={<Activity size={20} strokeWidth={1.75} />}
+              icon={<CxIcon icon={Activity} size="nav" />}
               label="Activity"
               active={isActive("/app/activity")}
               onClick={close}
@@ -1139,7 +1140,7 @@ export function Sidebar({
             />
             <NavLink
               href="/app/memory"
-              icon={<Brain size={20} strokeWidth={1.75} />}
+              icon={<CxIcon icon={Brain} size="nav" />}
               label="Memory"
               active={isActive("/app/memory")}
               onClick={close}
@@ -1148,7 +1149,7 @@ export function Sidebar({
             </div>
             <NavLink
               href="/app/outputs"
-              icon={<Bookmark size={20} strokeWidth={1.75} />}
+              icon={<CxIcon icon={Bookmark} size="nav" />}
               label="Outputs"
               active={isActive("/app/outputs")}
               onClick={close}
@@ -1165,7 +1166,7 @@ export function Sidebar({
                     collapsed ? "justify-center mx-auto w-8 h-8" : "gap-2 px-3 py-2",
                     isActive("/app/builds")
                       ? "text-[var(--cx-text)]"
-                      : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[var(--cx-surface-raised)]",
+                      : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[var(--cx-glass-bg)]",
                   ].join(" ")}
                   style={{
                     background: isActive("/app/builds") ? "var(--cx-accent-tint)" : undefined,
@@ -1185,7 +1186,7 @@ export function Sidebar({
                     className="relative inline-flex shrink-0"
                     style={{ color: isActive("/app/builds") ? "var(--cx-accent)" : undefined }}
                   >
-                    <Hammer size={20} strokeWidth={1.75} />
+                    <CxIcon icon={Hammer} size="nav" />
                     <SidebarBuildPip
                       initial={inFlightBuildsInitial}
                       accountId={accountId}
@@ -1215,7 +1216,7 @@ export function Sidebar({
             })()}
             <NavLink
               href="/app/analytics"
-              icon={<BarChart3 size={20} strokeWidth={1.75} />}
+              icon={<CxIcon icon={BarChart3} size="nav" />}
               label="Analytics"
               active={isActive("/app/analytics")}
               onClick={close}
@@ -1269,7 +1270,7 @@ export function Sidebar({
                 className="mx-3 mt-3 mb-2 pb-2 flex items-center gap-2"
                 style={{ borderBottom: "1px solid var(--cx-glass-border)" }}
               >
-                <span className="cx-label" style={{ color: "var(--cx-text-faint)" }}>
+                <span className="cx-label">
                   Conversations
                 </span>
               </div>
@@ -1541,7 +1542,7 @@ export function Sidebar({
                                 <Link
                                   href={`/app?c=${c.id}`}
                                   onClick={close}
-                                  className={`relative flex items-start gap-2 pl-3 pr-9 py-2 rounded-lg transition-[background] duration-150 ${!active ? "hover:bg-[var(--cx-surface-raised)]" : ""}`}
+                                  className={`relative flex items-start gap-2 pl-3 pr-9 py-2 rounded-lg transition-[background] duration-150 ${!active ? "hover:bg-[var(--cx-glass-bg)]" : ""}`}
                                   style={{ background: active ? "var(--cx-accent-tint)" : undefined }}
                                   onMouseEnter={(e) => openPeek(c.id, e.currentTarget)}
                                   onMouseLeave={closePeek}
@@ -1766,7 +1767,7 @@ export function Sidebar({
               <div data-tour-target="settings">
               <NavLink
                 href="/app/settings"
-                icon={<Settings size={16} strokeWidth={1.75} />}
+                icon={<CxIcon icon={Settings} size="inline" />}
                 label="Settings"
                 active={
                   pathname === "/app/settings" ||
@@ -1779,7 +1780,7 @@ export function Sidebar({
               </div>
               <NavLink
                 href="/app/settings/billing"
-                icon={<CreditCard size={16} strokeWidth={1.75} />}
+                icon={<CxIcon icon={CreditCard} size="inline" />}
                 label="Billing"
                 active={isActive("/app/settings/billing")}
                 onClick={close}
@@ -1987,7 +1988,7 @@ function NavLink({
             ? "justify-center mx-auto w-8 h-8"
             : `gap-2 px-3 ${small ? "py-1" : "py-2"}`,
           !active
-            ? "hover:bg-[var(--cx-surface-raised)] hover:text-[var(--cx-text)]"
+            ? "hover:bg-[var(--cx-glass-bg)] hover:text-[var(--cx-text)]"
             : "",
         ].join(" ")}
         style={{
