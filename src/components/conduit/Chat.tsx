@@ -3573,7 +3573,7 @@ function ArtifactDrawer({
   return (
     <div className="fixed inset-0 z-40 flex">
       <div onClick={onClose} className="flex-1 bg-black/60" />
-      <div className="cx-glass w-full max-w-2xl border-l overflow-y-auto p-6 md:p-8" style={{ borderLeftColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>
+      <div className="cx-glass cx-glass-border-l w-full max-w-2xl overflow-y-auto p-6 md:p-8">
         {!data ? (
           <div className="space-y-4 pt-2" aria-busy aria-label="Loading artifact">
             <div className="cx-skeleton" style={{ height: 10, width: 120, borderRadius: 9999, opacity: 0.4 }} />

@@ -142,10 +142,8 @@ function UserMenuPopover({
         >
           {/* User identity row */}
           <div
-            style={{
-              padding: "12px 16px",
-              borderBottom: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))",
-            }}
+            className="cx-glass-border-b"
+            style={{ padding: "12px 16px" }}
           >
             <div className="flex items-center gap-3">
               <div
@@ -249,10 +247,8 @@ function UserMenuPopover({
 
           {/* Sign out */}
           <div
-            style={{
-              padding: "4px",
-              borderTop: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))",
-            }}
+            className="cx-glass-border-t"
+            style={{ padding: "4px" }}
           >
             <form action="/auth/sign-out" method="post">
               <PraxisButton
@@ -297,8 +293,7 @@ export function ConsoleTopBar({
 
   return (
     <motion.header
-      className="shrink-0 flex items-center h-14 px-3 gap-2 cx-glass-float sticky top-0 z-20"
-      style={{ borderBottom: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))" }}
+      className="shrink-0 flex items-center h-14 px-3 gap-2 cx-glass-float cx-glass-border-b sticky top-0 z-20"
       aria-label="Console navigation"
       initial={{ opacity: 0, y: prefersReduced ? 0 : -8 }}
       animate={{ opacity: 1, y: 0 }}

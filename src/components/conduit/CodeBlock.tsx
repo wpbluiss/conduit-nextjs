@@ -226,10 +226,9 @@ export function CodeBlock({
 
       {/* Header bar */}
       <div
-        className="flex items-center justify-between px-4"
+        className="flex items-center justify-between px-4 cx-glass-border-b"
         style={{
           height: "34px",
-          borderBottom: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))",
           background: "rgba(255,255,255,0.03)",
         }}
       >

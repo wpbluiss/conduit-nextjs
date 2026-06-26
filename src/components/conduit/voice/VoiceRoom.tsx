@@ -279,17 +279,14 @@ export default function VoiceRoom({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex flex-col"
+      className="fixed inset-0 z-[60] flex flex-col cx-voice-overlay-blur"
       style={{
         background: "color-mix(in srgb, var(--cx-canvas) 90%, transparent)",
-        backdropFilter: "var(--cx-glass-blur-overlay, blur(28px) saturate(160%))",
-        WebkitBackdropFilter: "var(--cx-glass-blur-overlay, blur(28px) saturate(160%))",
         color: "var(--cx-text)",
       }}
     >
       <div
-        className="px-4 md:px-6 py-3 flex items-center justify-between border-b"
-        style={{ borderColor: "var(--cx-glass-border)" }}
+        className="px-4 md:px-6 py-3 flex items-center justify-between cx-glass-border-b"
       >
         <div className="cx-type-xs uppercase tracking-[0.22em] text-white/60">
           Praxis Voice · {isRoundTable ? "Round-table" : employeeName}

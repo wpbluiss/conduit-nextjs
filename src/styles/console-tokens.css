@@ -1362,6 +1362,35 @@ html[data-praxis-theme="light"] {
   border: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08));
 }
 
+/* ---- Directional glass border utilities — single-side hairline using the glass token.
+ * Use instead of inline style={{ borderXxx: "1px solid var(--cx-glass-border)" }}.
+ * Defined globally (not scoped to .praxis-root) so they work in Radix portals. ---- */
+.cx-glass-border-t { border-top:    1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08)); }
+.cx-glass-border-b { border-bottom: 1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08)); }
+.cx-glass-border-l { border-left:   1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08)); }
+.cx-glass-border-r { border-right:  1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08)); }
+
+/* ---- Voice overlay blur — full-screen immersive voice-call surface.
+ * Applies backdrop-filter only; background is intentionally opaque (set via style prop)
+ * so we can't use .cx-glass-overlay (which sets a near-transparent fill).
+ * Includes proper @supports and reduced-transparency fallbacks. ---- */
+.cx-voice-overlay-blur {
+  backdrop-filter: var(--cx-glass-blur-overlay, blur(28px) saturate(160%));
+  -webkit-backdrop-filter: var(--cx-glass-blur-overlay, blur(28px) saturate(160%));
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .cx-voice-overlay-blur {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .cx-voice-overlay-blur {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
 /* ================================================================
  * Semantic modal / popover all-in-one utilities
  *
