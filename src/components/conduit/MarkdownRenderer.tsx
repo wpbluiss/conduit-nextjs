@@ -184,24 +184,21 @@ function HighlightedCodeBlock({
 
   return (
     <div
-      className="rounded-xl overflow-hidden my-3 group"
-      style={{
-        background: "var(--cx-surface-raised)",
-        border: "1px solid var(--cx-glass-border)",
-        borderTopColor: "var(--cx-accent-border, rgba(124,108,255,0.30))",
-        boxShadow: [
-          "var(--cx-glass-shadow, 0 1px 3px rgba(0,0,0,.40), 0 4px 16px rgba(0,0,0,.30))",
-          "var(--cx-glass-highlight, inset 0 1px 0 rgba(255,255,255,.10))",
-        ].join(", "),
-      }}
+      className="cx-glass cx-glass-border rounded-xl overflow-hidden my-3 group"
     >
+      {/* Accent top bar — 2px electric violet strip signals language/code */}
+      <div
+        aria-hidden
+        style={{ height: "2px", background: "var(--cx-accent, #7C6CFF)" }}
+      />
+
       {/* Header bar */}
       <div
         className="flex items-center justify-between px-4"
         style={{
-          height: "36px",
-          borderBottom: "1px solid var(--cx-glass-border)",
-          background: "var(--cx-glass-bg)",
+          height: "34px",
+          borderBottom: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))",
+          background: "rgba(255,255,255,0.03)",
         }}
       >
         <span

@@ -13,6 +13,110 @@ interface Props {
   className?: string;
 }
 
+// ---------------------------------------------------------------------------
+// Syntax highlighting — token-based, matches MarkdownRenderer's palette
+// ---------------------------------------------------------------------------
+
+type TokenKind = "keyword" | "string" | "comment" | "number" | "operator" | "plain";
+
+interface Token {
+  kind: TokenKind;
+  text: string;
+}
+
+const KEYWORDS = new Set([
+  "abstract","as","async","await","break","case","catch","class","const","continue",
+  "debugger","declare","default","delete","do","else","enum","export","extends",
+  "false","finally","for","from","function","get","if","implements","import","in",
+  "instanceof","interface","let","module","namespace","new","null","of","override",
+  "package","private","protected","public","readonly","require","return","set",
+  "static","super","switch","this","throw","true","try","type","typeof","undefined",
+  "var","void","while","with","yield",
+  "and","del","elif","except","exec","global","lambda","nonlocal","not","or","pass",
+  "print","raise",
+  "echo","fi","then","done","do","esac","select","until","elif","function",
+  "SELECT","FROM","WHERE","INSERT","UPDATE","DELETE","CREATE","DROP","TABLE",
+  "JOIN","LEFT","RIGHT","INNER","OUTER","ON","AND","OR","NOT","NULL","INTO",
+  "VALUES","SET","ORDER","BY","GROUP","HAVING","LIMIT","AS","DISTINCT","COUNT",
+  "SUM","AVG","MAX","MIN",
+]);
+
+const TOKEN_COLOR: Record<TokenKind, string> = {
+  keyword:  "var(--cx-accent-bright, #9B8CFF)",
+  string:   "var(--cx-reward, #34D399)",
+  comment:  "var(--cx-text-faint, #6B6B7B)",
+  number:   "var(--cx-warn, #FBBF24)",
+  operator: "var(--cx-text-muted, #A0A0B0)",
+  plain:    "var(--cx-text, #F4F4F7)",
+};
+
+function tokenizeLine(line: string): Token[] {
+  const tokens: Token[] = [];
+  let i = 0;
+
+  while (i < line.length) {
+    if (
+      (line[i] === "/" && line[i + 1] === "/") ||
+      (line[i] === "#" && line[i + 1] !== "{")
+    ) {
+      tokens.push({ kind: "comment", text: line.slice(i) });
+      break;
+    }
+
+    if (line[i] === '"' || line[i] === "'" || line[i] === "`") {
+      const q = line[i];
+      let j = i + 1;
+      while (j < line.length) {
+        if (line[j] === "\\" && j + 1 < line.length) { j += 2; continue; }
+        if (line[j] === q) { j++; break; }
+        j++;
+      }
+      tokens.push({ kind: "string", text: line.slice(i, j) });
+      i = j;
+      continue;
+    }
+
+    if (/[0-9]/.test(line[i]) && (i === 0 || /[^a-zA-Z_$]/.test(line[i - 1]))) {
+      let j = i;
+      while (j < line.length && /[0-9._xXa-fA-FbBoO]/.test(line[j])) j++;
+      tokens.push({ kind: "number", text: line.slice(i, j) });
+      i = j;
+      continue;
+    }
+
+    if (/[a-zA-Z_$]/.test(line[i])) {
+      let j = i;
+      while (j < line.length && /[a-zA-Z0-9_$]/.test(line[j])) j++;
+      const word = line.slice(i, j);
+      tokens.push({ kind: KEYWORDS.has(word) ? "keyword" : "plain", text: word });
+      i = j;
+      continue;
+    }
+
+    tokens.push({ kind: "operator", text: line[i] });
+    i++;
+  }
+
+  return tokens;
+}
+
+function SyntaxLine({ line }: { line: string }) {
+  const tokens = tokenizeLine(line);
+  return (
+    <>
+      {tokens.map((t, i) => (
+        <span key={i} style={{ color: TOKEN_COLOR[t.kind] }}>
+          {t.text}
+        </span>
+      ))}
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
+
 interface LineInfo {
   text: string;
   depth: number;
@@ -113,24 +217,20 @@ export function CodeBlock({
   const gutterWidth = String(lineCount).length;
 
   return (
-    <div
-      className={`group rounded-xl overflow-hidden ${className}`}
-      style={{
-        background: "var(--cx-surface-raised)",
-        border: "1px solid var(--cx-glass-border)",
-        boxShadow: [
-          "var(--cx-glass-shadow, 0 1px 3px rgba(0,0,0,.40), 0 4px 16px rgba(0,0,0,.30))",
-          "var(--cx-glass-highlight, inset 0 1px 0 rgba(255,255,255,.10))",
-        ].join(", "),
-      }}
-    >
+    <div className={`group cx-glass cx-glass-border rounded-xl overflow-hidden ${className}`}>
+      {/* Accent top bar — 2px electric violet strip */}
+      <div
+        aria-hidden
+        style={{ height: "2px", background: "var(--cx-accent, #7C6CFF)" }}
+      />
+
       {/* Header bar */}
       <div
         className="flex items-center justify-between px-4"
         style={{
-          height: "36px",
-          borderBottom: "1px solid var(--cx-glass-border)",
-          background: "var(--cx-glass-bg)",
+          height: "34px",
+          borderBottom: "1px solid var(--cx-glass-border, rgba(255,255,255,0.08))",
+          background: "rgba(255,255,255,0.03)",
         }}
       >
         <span
@@ -197,19 +297,20 @@ export function CodeBlock({
                   )}
                 </span>
 
-                <span
-                  className="code-block-text flex-1 whitespace-pre pl-1"
-                  style={{ color: "var(--cx-text)" }}
-                >
-                  {info.text}
-                  {showEllipsis && (
-                    <span
-                      className="ml-2 cx-type-xs select-none"
-                      style={{ color: "var(--cx-text-faint)", opacity: 0.7 }}
-                      aria-label={`${ellipsisCount} lines hidden`}
-                    >
-                      … {ellipsisCount} {ellipsisCount === 1 ? "line" : "lines"}
+                <span className="code-block-text flex-1 whitespace-pre pl-1">
+                  {showEllipsis ? (
+                    <span style={{ color: "var(--cx-text)" }}>
+                      <SyntaxLine line={info.text} />
+                      <span
+                        className="ml-2 cx-type-xs select-none"
+                        style={{ color: "var(--cx-text-faint)", opacity: 0.7 }}
+                        aria-label={`${ellipsisCount} lines hidden`}
+                      >
+                        … {ellipsisCount} {ellipsisCount === 1 ? "line" : "lines"}
+                      </span>
                     </span>
+                  ) : (
+                    <SyntaxLine line={info.text} />
                   )}
                 </span>
               </span>
