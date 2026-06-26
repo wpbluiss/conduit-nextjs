@@ -851,10 +851,9 @@ export function Sidebar({
       >
         {/* Header — workspace logo / Praxis wordmark + collapse toggle */}
         <div
-          className={`px-3 py-3 flex items-center border-b ${
+          className={`px-3 py-3 flex items-center cx-glass-border-b ${
             collapsed ? "justify-center" : "justify-between"
           }`}
-          style={{ borderColor: "var(--cx-glass-border)" }}
         >
           {!collapsed && (
             <Link
@@ -1003,8 +1002,7 @@ export function Sidebar({
           {!collapsed && pinned.length > 0 && (
             <div className="mt-3">
               <div
-                className="mx-3 mt-0 mb-2 pb-1 flex items-center gap-2"
-                style={{ borderBottom: "1px solid var(--cx-glass-border)" }}
+                className="mx-3 mt-0 mb-2 pb-1 flex items-center gap-2 cx-glass-border-b"
               >
                 <Pin size={10} strokeWidth={1.75} aria-hidden style={{ color: "var(--cx-text-muted)" }} />
                 <span className="cx-label">
@@ -1039,8 +1037,7 @@ export function Sidebar({
               <button
                 type="button"
                 onClick={() => setTeamExpanded((v) => !v)}
-                className="w-full mx-0 flex items-center justify-between px-3 pt-1 pb-2 rounded-lg transition-colors duration-150 hover:bg-[var(--cx-glass-bg)]"
-                style={{ borderBottom: "1px solid var(--cx-glass-border)", marginBottom: "4px" }}
+                className="w-full mx-0 flex items-center justify-between px-3 pt-1 pb-2 mb-1 rounded-lg transition-colors duration-150 hover:bg-[var(--cx-glass-bg)] cx-glass-border-b"
               >
                 <span className="cx-label inline-flex items-center gap-2">
                   <Users2 size={10} strokeWidth={1.75} aria-hidden /> Specialists
@@ -1267,8 +1264,7 @@ export function Sidebar({
           {!collapsed && conversations.length > 0 && (
             <div className="mt-3">
               <div
-                className="mx-3 mt-3 mb-2 pb-2 flex items-center gap-2"
-                style={{ borderBottom: "1px solid var(--cx-glass-border)" }}
+                className="mx-3 mt-3 mb-2 pb-2 flex items-center gap-2 cx-glass-border-b"
               >
                 <span className="cx-label">
                   Conversations
@@ -1669,9 +1665,8 @@ export function Sidebar({
 
         {/* Bottom — settings, billing, sign out, email, tier */}
         <div
-          className="pt-2 pb-3 space-y-1"
+          className="pt-2 space-y-1 cx-glass-border-t"
           style={{
-            borderTop: "1px solid var(--cx-glass-border)",
             paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0.75rem))",
           }}
         >
