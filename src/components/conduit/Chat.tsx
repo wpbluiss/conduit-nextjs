@@ -39,6 +39,7 @@ import {
   type PinnedMessage,
 } from "./PinnedMessagesBanner";
 import { useToast } from "@/context/ToastContext";
+import { useRewardMoment } from "@/context/RewardMomentContext";
 import { useNicknames } from "@/context/NicknameContext";
 import { SaveOutputButton } from "./SaveOutputButton";
 import { track } from "@/lib/analytics/track";
@@ -278,6 +279,7 @@ export function Chat({
   // decide whether auto-scroll should follow new content.
   const atBottomRef = useRef(true);
   const toast = useToast();
+  const { triggerReward } = useRewardMoment();
   const [drawerArtifactId, setDrawerArtifactId] = useState<string | null>(null);
   const [paywall, setPaywall] = useState<PaywallPayload | null>(null);
   // Message edit: id of the user message currently being edited inline.
@@ -1253,6 +1255,12 @@ export function Chat({
           if (rewardClearTimerRef.current) clearTimeout(rewardClearTimerRef.current);
           setRewardEmployee(employee);
           rewardClearTimerRef.current = setTimeout(() => setRewardEmployee(null), 750);
+          // Global confetti burst — fires from the composer area (bottom-center)
+          triggerReward(
+            typeof window !== "undefined"
+              ? { x: window.innerWidth / 2, y: window.innerHeight - 80 }
+              : undefined,
+          );
           // Auto-play the just-finished message if voice is on AND R13's
           // streaming TTS didn't already produce audio for this turn.
           const streamingPlayed = streamingAudioActiveRef.current;
