@@ -684,7 +684,7 @@ function SpecialistMetrics() {
                     </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-baseline justify-between gap-2 flex-wrap">
-                        <span className="font-medium text-[var(--cx-text)]">{label}</span>
+                        <span className="cx-type-sm font-medium text-[var(--cx-text)]">{label}</span>
                         <div className="flex items-center gap-3 cx-mono cx-type-xs text-[var(--cx-text-muted)] shrink-0">
                           <span title="Responses in period">
                             <span className="font-semibold text-[var(--cx-text)]">{m.totalMessages.toLocaleString()}</span>
@@ -3695,7 +3695,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             )}
           </div>
           <div>
-            <div className="font-medium text-[var(--cx-text)]">Google Calendar</div>
+            <div className="cx-type-sm font-medium text-[var(--cx-text)]">Google Calendar</div>
             <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)] leading-relaxed">
               Gives your Operations specialist awareness of upcoming meetings and
               blocked time when answering scheduling questions.
@@ -3770,7 +3770,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             )}
           </div>
           <div>
-            <div className="font-medium text-[var(--cx-text)]">Slack</div>
+            <div className="cx-type-sm font-medium text-[var(--cx-text)]">Slack</div>
             <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)] leading-relaxed">
               Surface recent channel messages as context for all specialists.
               Pick one channel — your team's activity becomes AI-accessible.
@@ -3881,7 +3881,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             )}
           </div>
           <div>
-            <div className="font-medium text-[var(--cx-text)]">HubSpot</div>
+            <div className="cx-type-sm font-medium text-[var(--cx-text)]">HubSpot</div>
             <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)] leading-relaxed">
               Gives your Sales specialist real-time awareness of recent contacts
               and open deals so every response reflects your live CRM.
@@ -3956,7 +3956,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
             )}
           </div>
           <div>
-            <div className="font-medium text-[var(--cx-text)]">Google Drive</div>
+            <div className="cx-type-sm font-medium text-[var(--cx-text)]">Google Drive</div>
             <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)] leading-relaxed">
               Select up to 5 Docs or Sheets — brand guides, product specs, customer
               lists — and every specialist references them automatically.
@@ -4169,7 +4169,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           )}
         </div>
         <div>
-          <div className="font-medium text-[var(--cx-text)]">GitHub</div>
+          <div className="cx-type-sm font-medium text-[var(--cx-text)]">GitHub</div>
           <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)] leading-relaxed">
             Gives your Engineering specialist live awareness of open PRs, issues,
             and CI status from your repos — no copy-pasting required.
@@ -4179,7 +4179,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
           <div className="space-y-3">
             {githubConnectedMeta && (
               <div className="cx-type-xs text-[var(--cx-text-muted)] space-y-1">
-                <p>Connected as <span className="font-medium text-[var(--cx-text)]">@{githubConnectedMeta.login}</span></p>
+                <p>Connected as <span className="cx-type-sm font-medium text-[var(--cx-text)]">@{githubConnectedMeta.login}</span></p>
                 {githubConnectedMeta.repos.length > 0 && (
                   <p>Repos: {githubConnectedMeta.repos.join(", ")}</p>
                 )}
@@ -4258,7 +4258,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                 </span>
               </div>
               <div>
-                <div className="font-medium text-[var(--cx-text)]">{name}</div>
+                <div className="cx-type-sm font-medium text-[var(--cx-text)]">{name}</div>
                 <p className="mt-1 cx-type-xs text-[var(--cx-text-muted)] leading-relaxed">
                   {description}
                 </p>
@@ -4698,7 +4698,7 @@ function ApiKeysTab({ isPro }: { isPro: boolean }) {
       )}
 
       <div className="cx-glass cx-glass-border rounded-xl p-4 cx-type-sm text-[var(--cx-text-muted)] space-y-1">
-        <p className="font-medium text-[var(--cx-text)]">Using API keys</p>
+        <p className="cx-type-sm font-medium text-[var(--cx-text)]">Using API keys</p>
         <p>Include your key in the <code className="cx-code-inline">Authorization</code> header:</p>
         <code className="block cx-type-xs cx-mono bg-[var(--cx-canvas)] rounded-lg px-3 py-2 mt-1">
           Authorization: Bearer prx_…
@@ -4832,7 +4832,7 @@ function ReferralsTab() {
         <div className="cx-label">
           How it works
         </div>
-        <ol className="space-y-2 text-[var(--cx-text-muted)]">
+        <ol className="space-y-2 cx-type-sm text-[var(--cx-text-muted)]">
           <li className="flex gap-3">
             <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center cx-type-xs font-bold" style={{ background: "color-mix(in srgb, var(--cx-accent) 15%, transparent)", color: "var(--cx-accent)" }}>1</span>
             Share your link with another founder or operator.
