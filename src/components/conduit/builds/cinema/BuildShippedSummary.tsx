@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, ExternalLink, Code2 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { PraxisButton } from "@/components/conduit/ui/Button";
+import { useRewardMoment } from "@/context/RewardMomentContext";
 import type { SessionRow, LogRow } from "@/hooks/useBuildSession";
 import {
   translateBuildError,
@@ -280,6 +281,7 @@ function BuildShippedSummaryInner({
   spendCents,
 }: InnerProps) {
   const [showDetails, setShowDetails] = useState(false);
+  const { triggerReward } = useRewardMoment();
 
   // Fire reward beat once on mount for successful builds
   const firedRef = useRef(false);
@@ -289,10 +291,18 @@ function BuildShippedSummaryInner({
     if (isSuccess && !firedRef.current) {
       firedRef.current = true;
       // Brief delay so the card enters before the burst fires
-      const id = setTimeout(() => setRewardFired(true), 180);
+      const id = setTimeout(() => {
+        setRewardFired(true);
+        // Also fire the global confetti burst from viewport center
+        triggerReward(
+          typeof window !== "undefined"
+            ? { x: window.innerWidth / 2, y: window.innerHeight * 0.4 }
+            : undefined,
+        );
+      }, 180);
       return () => clearTimeout(id);
     }
-  }, [isSuccess]);
+  }, [isSuccess, triggerReward]);
 
   return (
     <section
