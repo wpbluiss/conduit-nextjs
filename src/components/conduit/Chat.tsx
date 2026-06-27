@@ -2710,36 +2710,36 @@ function MessageFeedbackButtons({
 
   return (
     <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-150">
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="icon-sm"
         aria-label="Helpful"
         aria-pressed={rating === 1}
         onClick={() => void submit(1)}
-        disabled={busy}
-        className="min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center p-1 rounded transition-colors disabled:pointer-events-none"
-        style={{
-          color: rating === 1 ? "var(--color-accent)" : "var(--color-text-muted)",
-        }}
-        onMouseEnter={(e) => { if (rating !== 1) (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
-        onMouseLeave={(e) => { if (rating !== 1) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
+        isDisabled={busy}
+        className={
+          rating === 1
+            ? "text-[var(--cx-accent)]"
+            : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)]"
+        }
       >
         <ThumbsUp size={13} strokeWidth={1.75} fill={rating === 1 ? "currentColor" : "none"} />
-      </button>
-      <button
-        type="button"
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon-sm"
         aria-label="Not helpful"
         aria-pressed={rating === -1}
         onClick={() => void submit(-1)}
-        disabled={busy}
-        className="min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center p-1 rounded transition-colors disabled:pointer-events-none"
-        style={{
-          color: rating === -1 ? "var(--cx-danger)" : "var(--color-text-muted)",
-        }}
-        onMouseEnter={(e) => { if (rating !== -1) (e.currentTarget as HTMLElement).style.color = "var(--color-text)"; }}
-        onMouseLeave={(e) => { if (rating !== -1) (e.currentTarget as HTMLElement).style.color = "var(--color-text-muted)"; }}
+        isDisabled={busy}
+        className={
+          rating === -1
+            ? "text-[var(--cx-danger)]"
+            : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)]"
+        }
       >
         <ThumbsDown size={13} strokeWidth={1.75} fill={rating === -1 ? "currentColor" : "none"} />
-      </button>
+      </Button>
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Check, X } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/conduit/ui/Button";
 
 const LS_KEY = "praxis:ob_checklist_v1";
 
@@ -110,15 +111,15 @@ export function OnboardingChecklist({
               {doneCount} of {STEPS.length} complete
             </div>
           </div>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={dismiss}
             aria-label="Dismiss onboarding checklist"
-            className="transition-colors p-0.5 rounded hover:opacity-70"
-            style={{ color: "var(--color-text-muted)" }}
+            style={{ color: "var(--cx-text-muted)" }}
           >
             <X size={12} strokeWidth={1.75} />
-          </button>
+          </Button>
         </div>
 
         <div
