@@ -16,6 +16,17 @@
  * opacity overlap). Everything else exists to compose around it.
  * ============================================================ */
 
+/* Terminal-log color tokens — ANSI-inspired palette for the raw log panel.
+ * Distinct from console design tokens; these emulate a terminal emulator. */
+:root {
+  --eng-log-bg:      #08090b;  /* near-black terminal backdrop */
+  --eng-log-text:    #d2d6dc;  /* stdout / default text */
+  --eng-log-ts:      #586374;  /* timestamp (dim) */
+  --eng-log-stderr:  #ff9aa2;  /* stderr stream */
+  --eng-log-system:  #7ad8a8;  /* system messages */
+  --eng-log-info:    #9ec5ff;  /* info level */
+}
+
 /* ------------------------------------------------------------
  * .eng-cinema — top-level page container
  * ------------------------------------------------------------ */
@@ -480,8 +491,8 @@
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 11px;
   line-height: 1.6;
-  background: #08090b;
-  color: #d2d6dc;
+  background: var(--eng-log-bg);
+  color: var(--eng-log-text);
 }
 
 .praxis-root .eng-cinema-log-line {
@@ -490,15 +501,15 @@
 }
 
 .praxis-root .eng-cinema-log-ts {
-  color: #586374;
+  color: var(--eng-log-ts);
   margin-right: 8px;
   user-select: none;
 }
 
-.praxis-root .eng-cinema-log-level-stderr  { color: #ff9aa2; }
-.praxis-root .eng-cinema-log-level-system  { color: #7ad8a8; }
-.praxis-root .eng-cinema-log-level-info    { color: #9ec5ff; }
-.praxis-root .eng-cinema-log-level-stdout  { color: #d2d6dc; }
+.praxis-root .eng-cinema-log-level-stderr  { color: var(--eng-log-stderr); }
+.praxis-root .eng-cinema-log-level-system  { color: var(--eng-log-system); }
+.praxis-root .eng-cinema-log-level-info    { color: var(--eng-log-info); }
+.praxis-root .eng-cinema-log-level-stdout  { color: var(--eng-log-text); }
 
 /* ------------------------------------------------------------
  * .eng-cinema-summary — shipped / failed terminal-state block

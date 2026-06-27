@@ -496,13 +496,12 @@ html[data-praxis-theme="light"] .praxis-root .pdl-scrim {
 }
 
 .praxis-root .pdl-pill-tab[data-active="true"] {
-  color: var(--pdl-text);
   background: var(--pdl-accent);
-  color: #FFFFFF;
+  color: var(--cx-text);
 }
 
 html[data-praxis-theme="light"] .praxis-root .pdl-pill-tab[data-active="true"] {
-  color: #FFFFFF;
+  color: var(--cx-text);
 }
 
 /* ------------------------------------------------------------

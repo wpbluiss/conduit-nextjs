@@ -301,7 +301,7 @@ export function ConversationSearchBar() {
                 ) : (
                   <span
                     aria-hidden
-                    className="mt-0.5 inline-flex items-center justify-center shrink-0 w-4 h-4 rounded-[4px]"
+                    className="mt-0.5 inline-flex items-center justify-center shrink-0 w-4 h-4 rounded-lg"
                     style={{
                       background: `color-mix(in srgb, ${color} 18%, var(--color-surface-elevated))`,
                       color,

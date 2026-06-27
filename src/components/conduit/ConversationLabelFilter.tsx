@@ -34,7 +34,7 @@ export function ConversationLabelFilter({
               active
                 ? {
                     background: label.color,
-                    color: "#fff",
+                    color: "var(--cx-text)",
                     border: "1px solid transparent",
                   }
                 : {
@@ -46,7 +46,7 @@ export function ConversationLabelFilter({
           >
             <span
               className="w-1.5 h-1.5 rounded-full"
-              style={{ background: active ? "#fff" : label.color }}
+              style={{ background: active ? "var(--cx-text)" : label.color }}
               aria-hidden
             />
             {label.name}

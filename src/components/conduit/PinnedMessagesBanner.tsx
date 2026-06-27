@@ -61,7 +61,7 @@ export function PinnedMessagesBanner({ pins, onUnpin, onJumpTo }: Props) {
             className="inline-flex items-center justify-center w-4 h-4 rounded-full cx-type-xs font-bold"
             style={{
               background: "var(--color-accent)",
-              color: "#fff",
+              color: "var(--cx-text)",
             }}
           >
             {pins.length}

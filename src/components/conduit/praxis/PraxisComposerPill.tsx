@@ -583,7 +583,7 @@ export function PraxisComposerPill({
                 alignItems: "center",
                 justifyContent: "center",
                 background: "var(--cx-danger)",
-                color: "#fff",
+                color: "var(--cx-text)",
                 border: "none",
                 cursor: "pointer",
                 flexShrink: 0,
