@@ -417,16 +417,16 @@ export default function VoiceRoom({
         className="px-4 py-4 md:py-5 flex items-center justify-center gap-4 border-t"
         style={{ borderColor: "var(--cx-glass-border)" }}
       >
-        <button
-          type="button"
+        <PraxisButton
+          variant="ghost"
+          size="icon"
           onClick={toggleMute}
-          disabled={!connected}
-          className="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 transition-colors disabled:opacity-40"
+          isDisabled={!connected}
           aria-label={muted ? "Unmute" : "Mute"}
           title={muted ? "Unmute" : "Mute"}
         >
           {muted ? <MicOff size={20} strokeWidth={1.75} /> : <Mic size={20} strokeWidth={1.75} />}
-        </button>
+        </PraxisButton>
         <div
           className={`px-3 py-1 rounded-full cx-type-sm font-mono tabular-nums transition-colors ${
             inWarn ? "text-amber-300 bg-amber-300/10" : "text-white/70 bg-white/5"
