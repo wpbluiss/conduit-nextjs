@@ -215,8 +215,8 @@ function readCollapsed(): boolean {
   try {
     const stored = localStorage.getItem(COLLAPSED_KEY);
     if (stored !== null) return stored === "1";
-    // No explicit preference — auto-collapse on tablet (768–1023px)
-    return window.innerWidth >= 768 && window.innerWidth < 1024;
+    // No explicit preference — auto-collapse on mobile (<768px) and tablet (768–1023px)
+    return window.innerWidth < 1024;
   } catch {
     return false;
   }
@@ -585,7 +585,7 @@ export function Sidebar({
       try {
         if (localStorage.getItem(COLLAPSED_KEY) !== null) return;
       } catch { /* ignore */ }
-      setCollapsed(window.innerWidth >= 768 && window.innerWidth < 1024);
+      setCollapsed(window.innerWidth < 1024);
     };
     window.addEventListener("resize", onResize, { passive: true });
     requestAnimationFrame(() => {
@@ -617,7 +617,14 @@ export function Sidebar({
     });
   };
 
-  const close = () => setOpen(false);
+  const close = () => {
+    setOpen(false);
+    // On mobile (<768px), "close" means collapse back to the icon rail.
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setCollapsed(true);
+      try { localStorage.setItem(COLLAPSED_KEY, "1"); } catch { /* ignore */ }
+    }
+  };
 
   // ESC key: clear search if active, collapse mobile search if expanded, otherwise close sidebar on mobile
   useEffect(() => {
@@ -642,10 +649,10 @@ export function Sidebar({
     if (!open) setSearchExpanded(false);
   }, [open]);
 
-  // Focus trap + focus management: mobile only (when drawer is open as dialog)
+  // Focus trap + focus management: mobile only (when sidebar is expanded over content)
   useEffect(() => {
-    // Only trap on mobile viewports where the sidebar is a modal drawer
-    if (!open || typeof window === "undefined" || window.innerWidth >= 768) return;
+    // Only trap when sidebar is expanded as a full overlay on mobile
+    if (!open || collapsed || typeof window === "undefined" || window.innerWidth >= 768) return;
     if (!sidebarRef.current) return;
     const sidebar = sidebarRef.current;
     const focusable = sidebar.querySelectorAll<HTMLElement>(
@@ -680,9 +687,15 @@ export function Sidebar({
     return () => window.removeEventListener("praxis:sidebar:toggle", onToggle);
   }, []);
 
-  // ConsoleTopBar → open mobile drawer via event (avoids prop-drilling through layout)
+  // ConsoleTopBar → open mobile drawer or expand from rail via event.
   useEffect(() => {
-    const onOpen = () => setOpen(true);
+    const onOpen = () => {
+      if (typeof window !== "undefined" && window.innerWidth < 768) {
+        // Mobile: expand from icon rail to full sidebar with backdrop.
+        setCollapsed(false);
+      }
+      setOpen(true);
+    };
     window.addEventListener("praxis:sidebar:open", onOpen);
     return () => window.removeEventListener("praxis:sidebar:open", onOpen);
   }, []);
@@ -818,9 +831,9 @@ export function Sidebar({
 
   return (
     <>
-      {/* Mobile backdrop — framer-motion fade, closes on outside tap */}
+      {/* Mobile backdrop — framer-motion fade; tapping collapses back to rail */}
       <AnimatePresence>
-        {open && (
+        {open && !collapsed && (
           <motion.div
             key="sidebar-backdrop"
             initial={{ opacity: 0 }}
@@ -837,17 +850,12 @@ export function Sidebar({
       <motion.aside
         id="app-sidebar"
         ref={sidebarRef}
-        role="dialog"
-        aria-modal={open ? "true" : undefined}
+        role={open && !collapsed ? "dialog" : undefined}
+        aria-modal={open && !collapsed ? "true" : undefined}
         aria-label="Navigation"
         animate={{ width: collapsed ? 48 : 240, minWidth: collapsed ? 48 : 240 }}
         transition={skipTransition || shouldReduceMotion ? { duration: 0 } : { duration: 0.22, ease: [...CX_EASE] }}
-        className={`cx-glass border-r border-[var(--cx-glass-border)] fixed md:static z-40 inset-y-0 left-0 flex flex-col overflow-hidden ${
-          open ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0`}
-        style={{
-          transition: shouldReduceMotion ? "none" : "transform 180ms cubic-bezier(0.22,1,0.36,1)",
-        }}
+        className="cx-glass border-r border-[var(--cx-glass-border)] fixed md:static z-40 inset-y-0 left-0 flex flex-col overflow-hidden translate-x-0"
       >
         {/* Header — workspace logo / Praxis wordmark + collapse toggle */}
         <div
@@ -1252,7 +1260,7 @@ export function Sidebar({
               <Link
                 href="/app"
                 onClick={close}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg cx-type-xs font-medium hover:opacity-90 transition-opacity"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg cx-type-xs font-medium hover:opacity-90 transition-opacity"
                 style={{ background: "var(--cx-accent)", color: "var(--cx-canvas)" }}
               >
                 Start your first conversation →
@@ -1359,7 +1367,7 @@ export function Sidebar({
                 </PraxisButton>
                 {/* Full input: always on desktop; on mobile only when expanded */}
                 <div
-                  className={`${searchExpanded ? "flex" : "hidden md:flex"} items-center gap-2 px-2 py-1.5 rounded-lg transition-shadow duration-150 focus-within:[box-shadow:var(--cx-accent-glow)]`}
+                  className={`${searchExpanded ? "flex" : "hidden md:flex"} items-center gap-2 px-2 py-2 rounded-lg transition-shadow duration-150 focus-within:[box-shadow:var(--cx-accent-glow)]`}
                   style={{
                     background: "var(--cx-glass-bg)",
                     border: "1px solid var(--cx-glass-border)",
