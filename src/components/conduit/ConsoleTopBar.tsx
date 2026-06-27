@@ -334,13 +334,13 @@ export function ConsoleTopBar({
               size={16}
               strokeWidth={1.75}
               aria-hidden="true"
-              style={{ color: "var(--cx-text-muted)" }}
+              style={{ color: "var(--cx-accent)" }}
               className="shrink-0"
             />
             <span
               className="font-semibold"
               style={{
-                fontSize: "var(--cx-type-base)",
+                fontSize: "var(--cx-type-md)",
                 color: "var(--cx-text)",
                 letterSpacing: "var(--cx-ls-tight)",
                 whiteSpace: "nowrap",

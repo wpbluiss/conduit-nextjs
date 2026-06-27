@@ -5,6 +5,7 @@ import {
   useContext,
   useState,
   useCallback,
+  useEffect,
   type ReactNode,
 } from "react";
 
@@ -39,4 +40,23 @@ export function TopBarProvider({ children }: { children: ReactNode }) {
 
 export function useTopBar() {
   return useContext(TopBarContext);
+}
+
+/**
+ * Convenience hook for pages/components that need to push breadcrumb data into
+ * the top bar. Sets on mount/update and clears on unmount automatically.
+ *
+ * @param specialist - Display name of the active specialist (omit when not applicable)
+ * @param conversationTitle - Title of the open conversation (omit when not applicable)
+ */
+export function useSetBreadcrumb(specialist?: string, conversationTitle?: string) {
+  const { setBreadcrumb } = useTopBar();
+  useEffect(() => {
+    if (specialist || conversationTitle) {
+      setBreadcrumb({ specialist, conversationTitle });
+    } else {
+      setBreadcrumb(null);
+    }
+    return () => setBreadcrumb(null);
+  }, [specialist, conversationTitle, setBreadcrumb]);
 }

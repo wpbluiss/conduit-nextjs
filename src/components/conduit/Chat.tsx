@@ -41,6 +41,7 @@ import {
 import { useToast } from "@/context/ToastContext";
 import { useRewardMoment } from "@/context/RewardMomentContext";
 import { useNicknames } from "@/context/NicknameContext";
+import { useSetBreadcrumb } from "@/context/TopBarContext";
 import { SaveOutputButton } from "./SaveOutputButton";
 import { track } from "@/lib/analytics/track";
 import { ConversationLabelManager, type ConversationLabel } from "./ConversationLabels";
@@ -273,6 +274,13 @@ export function Chat({
   const { hasChosen, persist: persistSpecialistChoice } = useSpecialistChoice();
   const showSpecialistSelector =
     hasChosen === false && messages.length === 0 && !conversationId;
+
+  // Push specialist + conversation title into the top bar breadcrumb.
+  const breadcrumbSpecialist =
+    pin !== "auto" && pin !== "team" && pin in EMPLOYEES
+      ? labelFor(pin as EmployeeKey)
+      : undefined;
+  useSetBreadcrumb(breadcrumbSpecialist, currentTitle ?? undefined);
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   // True when the scroll container is within 150px of the bottom — used to
