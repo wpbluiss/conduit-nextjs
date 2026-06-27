@@ -41,6 +41,10 @@ import { BrandMarkNotion } from "./brand-marks/BrandMarkNotion";
 import { BrandMarkDrive } from "./brand-marks/BrandMarkDrive";
 import { AnimatedStat } from "@/components/conduit/ui/AnimatedStat";
 
+// Third-party brand colors — intentional, not console design tokens
+const BRAND_COLOR_GCAL    = "#4285F4"; // Google Calendar blue
+const BRAND_COLOR_HUBSPOT = "#FF7A59"; // HubSpot orange
+
 interface UsageData {
   totals: { input: number; output: number; cost: number };
   byEmployee: Record<string, { input: number; output: number; cost: number }>;
@@ -3668,7 +3672,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                 border: "1px solid var(--cx-border)",
               }}
             >
-              <Calendar size={20} strokeWidth={1.75} style={{ color: "#4285F4" }} />
+              <Calendar size={20} strokeWidth={1.75} style={{ color: BRAND_COLOR_GCAL }} />
             </div>
             {isConnected("google_calendar") ? (
               <span
@@ -3854,7 +3858,7 @@ function IntegrationsTab({ isFreeUser }: { isFreeUser: boolean }) {
                 border: "1px solid var(--cx-border)",
               }}
             >
-              <Database size={20} strokeWidth={1.75} style={{ color: "#FF7A59" }} />
+              <Database size={20} strokeWidth={1.75} style={{ color: BRAND_COLOR_HUBSPOT }} />
             </div>
             {isConnected("hubspot") ? (
               <span

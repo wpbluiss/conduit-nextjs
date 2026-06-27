@@ -108,7 +108,7 @@ export function ChangelogPopover() {
             className="absolute top-1 left-5 flex items-center justify-center w-3.5 h-3.5 rounded-full cx-type-xs font-bold leading-none"
             style={{
               background: "var(--color-accent)",
-              color: "#fff",
+              color: "var(--cx-text)",
             }}
           >
             {unseen > 9 ? "9+" : unseen}

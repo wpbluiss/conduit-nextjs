@@ -342,7 +342,7 @@
 
 .praxis-root .mem-composer-save {
   font-size: 12px;
-  color: #FFFFFF;
+  color: var(--cx-text);
   background: var(--pdl-accent);
   border: 0;
   padding: 8px 16px;

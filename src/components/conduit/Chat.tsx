@@ -2837,7 +2837,7 @@ function MessageHandoffButton({
             >
               <span
                 className="w-5 h-5 rounded-full shrink-0 flex items-center justify-center cx-type-xs font-bold uppercase"
-                style={{ background: DEPT_COLOR[emp], color: "#fff" }}
+                style={{ background: DEPT_COLOR[emp], color: "var(--cx-text)" }}
               >
                 {labelFor(emp).slice(0, 2)}
               </span>

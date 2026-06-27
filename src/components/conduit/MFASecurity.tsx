@@ -411,7 +411,7 @@ export function MFASecurity() {
           <div className="flex flex-col items-center gap-4">
             <div
               className="rounded-xl p-3"
-              style={{ background: "#fff", display: "inline-block" }}
+              style={{ background: "white", display: "inline-block" }}
             >
               <img
                 src={state.qrDataUrl}
