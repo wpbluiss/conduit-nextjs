@@ -428,7 +428,7 @@ function SpecialistRow({
         <span
           className="block truncate cx-type-sm"
           style={{
-            color: active ? "var(--cx-accent)" : "var(--cx-text-muted)",
+            color: active ? "var(--cx-text)" : "var(--cx-text-muted)",
             fontWeight: active ? 600 : 400,
           }}
         >
@@ -542,6 +542,10 @@ export function Sidebar({
   const shouldReduceMotion = useReducedMotion() ?? false;
   const { pinned, pin, unpin } = usePinnedSpecialists();
 
+  // Track whether we're on a mobile viewport so we can switch between
+  // translateX (off-screen drawer) and width (desktop collapse) animations.
+  const [isMobile, setIsMobile] = useState(false);
+
   // Specialist context menu (right-click / long-press to pin/unpin)
   const [ctxMenu, setCtxMenu] = useState<{ emp: EmployeeKey; x: number; y: number } | null>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -579,9 +583,12 @@ export function Sidebar({
   // Two rAF calls ensure the corrected layout is painted before re-enabling
   // the animated transition, preventing a visible collapse animation on load.
   useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
     setCollapsed(readCollapsed());
     // Responsive: auto-collapse/expand on resize when user has no stored preference.
     const onResize = () => {
+      checkMobile();
       try {
         if (localStorage.getItem(COLLAPSED_KEY) !== null) return;
       } catch { /* ignore */ }
@@ -619,10 +626,11 @@ export function Sidebar({
 
   const close = () => {
     setOpen(false);
-    // On mobile (<768px), "close" means collapse back to the icon rail.
+    // Mobile: restore collapsed=true so !collapsed content guards re-hide while
+    // the drawer is off-screen. Don't persist this to localStorage — the user's
+    // desktop collapsed preference is separate from mobile drawer visibility.
     if (typeof window !== "undefined" && window.innerWidth < 768) {
       setCollapsed(true);
-      try { localStorage.setItem(COLLAPSED_KEY, "1"); } catch { /* ignore */ }
     }
   };
 
@@ -651,8 +659,8 @@ export function Sidebar({
 
   // Focus trap + focus management: mobile only (when sidebar is expanded over content)
   useEffect(() => {
-    // Only trap when sidebar is expanded as a full overlay on mobile
-    if (!open || collapsed || typeof window === "undefined" || window.innerWidth >= 768) return;
+    // Only trap when sidebar is open as a full overlay on mobile
+    if (!open || typeof window === "undefined" || window.innerWidth >= 768) return;
     if (!sidebarRef.current) return;
     const sidebar = sidebarRef.current;
     const focusable = sidebar.querySelectorAll<HTMLElement>(
@@ -690,8 +698,8 @@ export function Sidebar({
   // ConsoleTopBar → open mobile drawer or expand from rail via event.
   useEffect(() => {
     const onOpen = () => {
+      // Mobile: slide in the drawer and ensure content sections (guarded by !collapsed) are visible.
       if (typeof window !== "undefined" && window.innerWidth < 768) {
-        // Mobile: expand from icon rail to full sidebar with backdrop.
         setCollapsed(false);
       }
       setOpen(true);
@@ -831,9 +839,9 @@ export function Sidebar({
 
   return (
     <>
-      {/* Mobile backdrop — framer-motion fade; tapping collapses back to rail */}
+      {/* Mobile backdrop — framer-motion fade; tapping closes the drawer */}
       <AnimatePresence>
-        {open && !collapsed && (
+        {isMobile && open && (
           <motion.div
             key="sidebar-backdrop"
             initial={{ opacity: 0 }}
@@ -850,12 +858,18 @@ export function Sidebar({
       <motion.aside
         id="app-sidebar"
         ref={sidebarRef}
-        role={open && !collapsed ? "dialog" : undefined}
-        aria-modal={open && !collapsed ? "true" : undefined}
+        role={isMobile && open ? "dialog" : undefined}
+        aria-modal={isMobile && open ? "true" : undefined}
         aria-label="Navigation"
-        animate={{ width: collapsed ? 48 : 240, minWidth: collapsed ? 48 : 240 }}
+        animate={
+          isMobile
+            // Mobile: off-screen slide-in drawer — always 220px wide, slides via x transform
+            ? { x: open ? 0 : -220, width: 220, minWidth: 220 }
+            // Desktop: width-based collapse between 48px icon rail and 220px expanded
+            : { x: 0, width: collapsed ? 48 : 220, minWidth: collapsed ? 48 : 220 }
+        }
         transition={skipTransition || shouldReduceMotion ? { duration: 0 } : { duration: 0.22, ease: [...CX_EASE] }}
-        className="cx-glass border-r border-[var(--cx-glass-border)] fixed md:static z-40 inset-y-0 left-0 flex flex-col overflow-hidden translate-x-0"
+        className="cx-glass border-r border-[var(--cx-glass-border)] fixed md:static z-40 inset-y-0 left-0 flex flex-col overflow-hidden"
       >
         {/* Header — workspace logo / Praxis wordmark + collapse toggle */}
         <div
@@ -1012,8 +1026,8 @@ export function Sidebar({
               <div
                 className="mx-3 mt-0 mb-2 pb-1 flex items-center gap-2 cx-glass-border-b"
               >
-                <Pin size={10} strokeWidth={1.75} aria-hidden style={{ color: "var(--cx-text-muted)" }} />
-                <span className="cx-label">
+                <Pin size={10} strokeWidth={1.75} aria-hidden style={{ color: "var(--cx-text-faint)" }} />
+                <span className="cx-label" style={{ color: "var(--cx-text-faint)" }}>
                   Pinned
                 </span>
               </div>
@@ -1047,7 +1061,7 @@ export function Sidebar({
                 onClick={() => setTeamExpanded((v) => !v)}
                 className="w-full mx-0 flex items-center justify-between px-3 pt-1 pb-2 mb-1 rounded-lg transition-colors duration-150 hover:bg-[var(--cx-glass-bg)] cx-glass-border-b"
               >
-                <span className="cx-label inline-flex items-center gap-2">
+                <span className="cx-label inline-flex items-center gap-2" style={{ color: "var(--cx-text-faint)" }}>
                   <Users2 size={10} strokeWidth={1.75} aria-hidden /> Specialists
                 </span>
                 <motion.span
@@ -1274,7 +1288,7 @@ export function Sidebar({
               <div
                 className="mx-3 mt-3 mb-2 pb-2 flex items-center justify-between gap-2 cx-glass-border-b"
               >
-                <span className="cx-label">
+                <span className="cx-label" style={{ color: "var(--cx-text-faint)" }}>
                   Conversations
                 </span>
                 <span className="cx-mono cx-type-xs" style={{ color: "var(--cx-text-faint)" }}>
