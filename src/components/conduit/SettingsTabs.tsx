@@ -5,19 +5,33 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion, MotionConfig } from "framer-motion";
 import {
   ArrowRight,
+  BarChart2,
+  Bell,
+  Bot,
+  Briefcase,
+  Building2,
   Calendar,
   Check,
+  CreditCard,
   Database,
   ExternalLink,
+  Gift,
   Info,
+  Key,
   Link,
   Link2Off,
   Lock,
+  Mic,
+  Palette,
   Pencil,
   Play,
+  Plug2,
   Plus,
+  Shield,
   Tag,
   Trash2,
+  User2,
+  Users,
   X,
 } from "lucide-react";
 import { Button as PraxisButton, SpinnerIcon } from "@/components/conduit/ui/Button";
@@ -117,45 +131,48 @@ export type SettingsTabKey =
   | "referrals"
   | "labels";
 
-const SETTINGS_NAV: { title: string | null; items: [SettingsTabKey, string][] }[] = [
+type NavIcon = ComponentType<{ size?: number; strokeWidth?: number; className?: string }>;
+
+const SETTINGS_NAV: { title: string | null; items: [SettingsTabKey, string, NavIcon][] }[] = [
   {
     title: null,
     items: [
-      ["profile", "Profile"],
-      ["appearance", "Appearance"],
-      ["security", "Security"],
+      ["profile", "Profile", User2],
+      ["appearance", "Appearance", Palette],
+      ["security", "Security", Shield],
     ],
   },
   {
     title: "Workspace",
     items: [
-      ["workspace", "Workspace"],
-      ["business", "Business"],
-      ["team", "Team"],
-      ["specialists", "Specialists"],
-      ["voice", "Voice"],
+      ["workspace", "Workspace", Building2],
+      ["business", "Business", Briefcase],
+      ["team", "Team", Users],
+      ["specialists", "Specialists", Bot],
+      ["voice", "Voice", Mic],
     ],
   },
   {
     title: "Platform",
     items: [
-      ["integrations", "Integrations"],
-      ["notifications", "Notifications"],
-      ["api", "API Keys"],
-      ["labels", "Labels"],
-      ["referrals", "Referrals"],
+      ["integrations", "Integrations", Plug2],
+      ["notifications", "Notifications", Bell],
+      ["api", "API Keys", Key],
+      ["labels", "Labels", Tag],
+      ["referrals", "Referrals", Gift],
     ],
   },
   {
     title: "Billing",
     items: [
-      ["usage", "Usage"],
-      ["billing", "Billing"],
+      ["usage", "Usage", BarChart2],
+      ["billing", "Billing", CreditCard],
     ],
   },
 ];
 
 const ALL_NAV_ITEMS = SETTINGS_NAV.flatMap((s) => s.items);
+
 
 export function SettingsTabs({
   email,
@@ -179,17 +196,18 @@ export function SettingsTabs({
       {/* ── Mobile: horizontal glass pill strip ──────────────────────────── */}
       <div className="md:hidden overflow-x-auto pb-4">
         <div className="cx-glass cx-glass-border rounded-xl p-1 flex gap-0.5" style={{ minWidth: "max-content" }}>
-          {ALL_NAV_ITEMS.map(([key, label]) => (
+          {ALL_NAV_ITEMS.map(([key, label, Icon]) => (
             <button
               key={key}
               type="button"
               onClick={() => setTab(key)}
-              className={`px-3 py-1.5 rounded-lg cx-type-xs whitespace-nowrap shrink-0 transition-all duration-[var(--cx-dur-fast)] ease-[var(--cx-ease)] ${
+              className={`px-3 py-1.5 rounded-lg cx-type-xs whitespace-nowrap shrink-0 transition-all duration-[var(--cx-dur-fast)] ease-[var(--cx-ease)] flex items-center gap-1.5 ${
                 tab === key
                   ? "bg-[var(--cx-accent-tint)] text-[var(--cx-accent-bright)] font-medium"
                   : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[var(--cx-surface-raised)]"
               }`}
             >
+              <Icon size={12} strokeWidth={1.75} />
               {label}
             </button>
           ))}
@@ -198,23 +216,23 @@ export function SettingsTabs({
 
       {/* ── Desktop: vertical sidebar nav ──────────────────────────── */}
       <nav
-        className="hidden md:flex flex-col w-48 shrink-0 sticky top-8 self-start cx-glass cx-glass-border rounded-xl p-3"
+        className="hidden md:flex flex-col w-52 shrink-0 sticky top-8 self-start cx-glass cx-glass-border rounded-xl p-3"
         aria-label="Settings navigation"
       >
         {SETTINGS_NAV.map((section, si) => (
           <div key={si} className={si > 0 ? "mt-5" : ""}>
             {section.title && (
-              <div className="cx-label text-[var(--cx-text-faint)] px-2 mb-1.5">
+              <div className="cx-label text-[var(--cx-text-faint)] px-2 mb-1.5 uppercase tracking-[0.14em] text-[10px]">
                 {section.title}
               </div>
             )}
             <div className="space-y-0.5">
-              {section.items.map(([key, label]) => (
+              {section.items.map(([key, label, Icon]) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => setTab(key)}
-                  className={`w-full text-left px-2 py-1.5 rounded-lg cx-type-sm transition-all duration-[var(--cx-dur-fast)] ease-[var(--cx-ease)] focus-visible:outline-none ${
+                  className={`w-full text-left px-2 py-1.5 rounded-lg cx-type-sm transition-all duration-[var(--cx-dur-fast)] ease-[var(--cx-ease)] focus-visible:outline-none flex items-center gap-2.5 ${
                     tab === key
                       ? "text-[var(--cx-accent-bright)] font-medium"
                       : "text-[var(--cx-text-muted)] hover:text-[var(--cx-text)] hover:bg-[var(--cx-surface-raised)]"
@@ -228,6 +246,11 @@ export function SettingsTabs({
                       : undefined
                   }
                 >
+                  <Icon
+                    size={14}
+                    strokeWidth={tab === key ? 2 : 1.75}
+                    className="shrink-0"
+                  />
                   {label}
                 </button>
               ))}
