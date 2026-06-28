@@ -206,19 +206,34 @@ export function NotificationCenter() {
               {/* List */}
               <div className="flex-1 overflow-y-auto">
                 {notifications.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-6">
-                    <Bell
-                      size={28}
-                      strokeWidth={1.75}
-                      style={{ color: "var(--cx-text-muted)", opacity: 0.4 }}
-                    />
-                    <p className="cx-type-base" style={{ color: "var(--cx-text-muted)" }}>
-                      No notifications yet
-                    </p>
-                    <p className="cx-type-xs" style={{ color: "var(--cx-text-faint)" }}>
-                      Build completions, artifact events, and billing updates will appear here.
-                    </p>
-                  </div>
+                  <motion.div
+                    className="flex flex-col items-center justify-center h-full gap-4 text-center px-6 py-10"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <span
+                      className="inline-flex items-center justify-center w-12 h-12 rounded-2xl"
+                      style={{
+                        background: "var(--cx-accent-tint, rgba(124,108,255,0.12))",
+                        border: "1px solid color-mix(in srgb, var(--cx-accent, #7C6CFF) 20%, transparent)",
+                        color: "var(--cx-accent, #7C6CFF)",
+                      }}
+                    >
+                      <Inbox size={22} strokeWidth={1.75} />
+                    </span>
+                    <div>
+                      <p className="cx-type-sm font-semibold" style={{ color: "var(--cx-text, #F4F4F7)" }}>
+                        No notifications yet
+                      </p>
+                      <p
+                        className="cx-type-xs mt-1 max-w-[16rem] mx-auto"
+                        style={{ color: "var(--cx-text-muted, #A0A0B0)", lineHeight: "var(--cx-lh-body, 1.6)" }}
+                      >
+                        Build completions, artifact events, and billing updates will appear here.
+                      </p>
+                    </div>
+                  </motion.div>
                 ) : (
                   <ul>
                     {notifications.map((n: Notification) => (

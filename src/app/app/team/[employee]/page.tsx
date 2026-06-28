@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowRight, FileText, Hammer, MessageSquare } from "lucide-react";
+import { ArrowRight, FileText, Hammer, MessageSquare, Sparkles } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentAccount } from "@/lib/conduit/account";
 import {
@@ -376,22 +376,33 @@ export default async function WorkspacePage({ params }: PageProps) {
           </div>
           {empty ? (
             <div
-              className="conduit-card p-6"
+              className="conduit-card rounded-xl p-6 flex flex-col sm:flex-row items-start gap-4"
               style={{
-                boxShadow: `inset 0 0 0 1px ${employee.colorSoft}`,
-                background: `linear-gradient(180deg, ${employee.colorSoft}, transparent 80%)`,
+                border: `1px solid ${employee.colorSoft}`,
+                background: `linear-gradient(135deg, ${employee.colorSoft}, transparent 70%)`,
               }}
             >
-              <p className="text-[var(--color-text)]">
-                {emptyState.headline}
-              </p>
-              <Link
-                href={`/app?pin=${employeeId}`}
-                className="mt-3 inline-flex items-center gap-1 cx-type-base"
-                style={{ color: dept }}
+              <span
+                className="inline-flex items-center justify-center w-10 h-10 rounded-xl shrink-0"
+                style={{
+                  background: employee.colorSoft,
+                  color: dept,
+                }}
               >
-                {emptyState.cta}
-              </Link>
+                <Sparkles size={18} strokeWidth={1.75} />
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="cx-type-sm font-medium" style={{ color: "var(--cx-text, #F4F4F7)" }}>
+                  {emptyState.headline}
+                </p>
+                <Link
+                  href={`/app?pin=${employeeId}`}
+                  className="mt-2 inline-flex items-center gap-1 cx-type-xs font-medium"
+                  style={{ color: dept }}
+                >
+                  {emptyState.cta} <ArrowRight size={12} strokeWidth={1.75} />
+                </Link>
+              </div>
             </div>
           ) : (
             <ul className="space-y-2">
