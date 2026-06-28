@@ -1622,11 +1622,23 @@ export function Sidebar({
                       })}
                     </div>
                     {(q || specialistFilter) && filtered.length === 0 && (
-                      <p className="px-3 py-2 cx-type-xs" style={{ color: "var(--cx-text-muted)" }}>
-                        {specialistFilter && !q
-                          ? `No conversations with ${labelFor(specialistFilter)} yet`
-                          : "No conversations match"}
-                      </p>
+                      <div className="mx-3 mt-4 mb-2 flex flex-col items-center text-center gap-2 px-2 py-4 rounded-xl cx-glass cx-glass-border">
+                        <p className="cx-type-xs font-medium" style={{ color: "var(--cx-text-muted)" }}>
+                          {specialistFilter && !q
+                            ? `No ${labelFor(specialistFilter)} conversations yet`
+                            : "No matches"}
+                        </p>
+                        {specialistFilter && (
+                          <button
+                            type="button"
+                            onClick={() => setSpecialistFilter(null)}
+                            className="cx-type-xs underline-offset-2 hover:underline"
+                            style={{ color: "var(--cx-accent)" }}
+                          >
+                            Show all
+                          </button>
+                        )}
+                      </div>
                     )}
                     {!q && !specialistFilter && conversations.length > 8 && (
                       <Link

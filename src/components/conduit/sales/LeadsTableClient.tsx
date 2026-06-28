@@ -228,22 +228,33 @@ export default function LeadsTableClient({
         {/* Leads list — card layout, mobile-first */}
         {filtered.length === 0 ? (
           <div
-            className="conduit-card p-8 text-center"
+            className="conduit-card rounded-xl p-8 flex flex-col items-center text-center gap-4"
             style={{
-              boxShadow: `inset 0 0 0 1px ${deptColorSoft}`,
+              border: `1px solid ${deptColorSoft}`,
               background: `linear-gradient(180deg, ${deptColorSoft}, transparent 80%)`,
             }}
           >
-            <p className="cx-type-sm" style={{ color: "var(--cx-text-muted)" }}>
-              No leads match these filters.
-            </p>
+            <span
+              className="inline-flex items-center justify-center w-11 h-11 rounded-xl"
+              style={{ background: deptColorSoft, color: deptColor }}
+            >
+              <Search size={20} strokeWidth={1.75} />
+            </span>
+            <div>
+              <p className="cx-type-sm font-medium" style={{ color: "var(--cx-text, #F4F4F7)" }}>
+                No leads match these filters
+              </p>
+              <p className="cx-type-xs mt-1" style={{ color: "var(--cx-text-muted, #A0A0B0)" }}>
+                Try adjusting your filters or run a new discovery.
+              </p>
+            </div>
             <Button
               type="button"
-              variant="ghost"
+              variant="primary"
               size="sm"
               onClick={() => setShowModal(true)}
             >
-              Run Discovery →
+              Run Discovery
             </Button>
           </div>
         ) : (
