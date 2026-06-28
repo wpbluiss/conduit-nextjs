@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, Mic } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getOrCreateAccount } from "@/lib/conduit/account";
 import { employeeById } from "@/lib/conduit/employees";
+import { VoiceHistoryList } from "./VoiceHistoryList";
 
 export const dynamic = "force-dynamic";
 
@@ -17,26 +18,6 @@ interface SessionRow {
   end_reason: string | null;
   transcript_summary: string | null;
   raw_transcript: Array<{ role: string; text: string; ts?: number }> | null;
-}
-
-function fmtDuration(s: number | null): string {
-  if (!s) return "—";
-  const m = Math.floor(s / 60);
-  const sec = s % 60;
-  return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
-}
-
-function fmtRelative(iso: string): string {
-  const t = new Date(iso).getTime();
-  const diff = Date.now() - t;
-  const m = Math.round(diff / 60000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
-  const h = Math.round(m / 60);
-  if (h < 24) return `${h}h ago`;
-  const d = Math.round(h / 24);
-  if (d < 7) return `${d}d ago`;
-  return new Date(iso).toLocaleDateString();
 }
 
 export default async function VoiceHistoryPage() {
@@ -57,93 +38,44 @@ export default async function VoiceHistoryPage() {
     .order("created_at", { ascending: false })
     .limit(50);
 
-  const sessions: SessionRow[] = error
+  const rawSessions: SessionRow[] = error
     ? []
     : ((data ?? []) as unknown as SessionRow[]);
+
+  const sessions = rawSessions.map((s) => {
+    const emp = employeeById(s.employee_id);
+    return {
+      id: s.id,
+      employee_id: s.employee_id,
+      started_at: s.started_at,
+      duration_seconds: s.duration_seconds,
+      end_reason: s.end_reason,
+      transcript_summary: s.transcript_summary,
+      raw_transcript: s.raw_transcript,
+      employee: { name: emp.name, color: emp.color },
+    };
+  });
 
   return (
     <div className="flex-1 overflow-y-auto">
       <div className="mx-auto max-w-3xl px-4 md:px-8 py-8 space-y-6">
+        {/* Breadcrumb + title */}
         <div>
           <Link
             href="/app/settings"
-            className="cx-type-xs text-[var(--cx-text-muted)] inline-flex items-center gap-1 hover:text-[var(--cx-text)] transition-colors duration-150"
+            className="cx-type-xs text-[var(--cx-text-muted)] inline-flex items-center gap-1.5 hover:text-[var(--cx-text)] transition-colors duration-150"
           >
-            <ArrowLeft size={12} strokeWidth={1.75} /> Settings
+            <ArrowLeft size={12} strokeWidth={1.75} />
+            Settings
           </Link>
-          <h1 className="cx-heading-2xl mt-2">Voice History</h1>
+          <h1 className="cx-heading-lg mt-3">Voice History</h1>
           <p className="cx-type-sm text-[var(--cx-text-muted)] mt-1">
-            Your past voice conversations. Transcripts stay private to your
-            account.
+            Your past voice conversations with Praxis specialists. Transcripts stay private to your account.
           </p>
         </div>
 
-        {sessions.length === 0 ? (
-          <div className="cx-glass cx-glass-border rounded-xl p-8 text-center">
-            <Mic size={20} strokeWidth={1.75} className="mx-auto mb-3 opacity-40" style={{ color: "var(--cx-accent)" }} />
-            <p className="cx-type-sm font-medium text-[var(--cx-text)]">No voice conversations yet</p>
-            <p className="cx-type-xs mt-1 text-[var(--cx-text-muted)]">
-              Click &ldquo;Voice Mode&rdquo; on any employee workspace to start one.
-            </p>
-          </div>
-        ) : (
-          <ul className="space-y-2">
-            {sessions.map((s) => {
-              const employee = employeeById(s.employee_id);
-              return (
-                <li
-                  key={s.id}
-                  className="cx-glass rounded-xl px-4 py-3"
-                  style={{
-                    border: "1px solid var(--cx-glass-border)",
-                    borderLeft: `3px solid ${employee.color}`,
-                  }}
-                >
-                  <div className="flex flex-wrap items-baseline gap-2">
-                    <span className="cx-type-sm font-medium text-[var(--cx-text)]">{employee.name}</span>
-                    <span className="cx-mono cx-type-xs uppercase tracking-[0.15em] text-[var(--cx-text-muted)] tabular-nums">
-                      {fmtRelative(s.started_at)} · {fmtDuration(s.duration_seconds)}
-                    </span>
-                    {s.end_reason && s.end_reason !== "user_left" && (
-                      <span className="cx-label">
-                        ended: {s.end_reason}
-                      </span>
-                    )}
-                  </div>
-                  {s.transcript_summary && (
-                    <p className="cx-type-sm text-[var(--cx-text-muted)] mt-1.5 leading-relaxed">
-                      {s.transcript_summary}
-                    </p>
-                  )}
-                  {s.raw_transcript && s.raw_transcript.length > 0 && (
-                    <details className="mt-2">
-                      <summary className="cx-type-xs text-[var(--cx-text-muted)] cursor-pointer hover:text-[var(--cx-text)] transition-colors duration-150">
-                        Show full transcript ({s.raw_transcript.length} turns)
-                      </summary>
-                      <div className="mt-2 space-y-1 cx-type-xs max-h-64 overflow-y-auto pl-2 border-l border-[var(--cx-border)]">
-                        {s.raw_transcript.map((entry, i) => (
-                          <div
-                            key={i}
-                            className={
-                              entry.role === "user"
-                                ? "text-[var(--cx-text-muted)]"
-                                : "text-[var(--cx-text)]"
-                            }
-                          >
-                            <span className="cx-label mr-2">
-                              {entry.role === "user" ? "You" : employee.name}
-                            </span>
-                            {entry.text}
-                          </div>
-                        ))}
-                      </div>
-                    </details>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        )}
+        {/* Session list — client component for animated cards */}
+        <VoiceHistoryList sessions={sessions} />
       </div>
     </div>
   );
