@@ -1272,10 +1272,13 @@ export function Sidebar({
           {!collapsed && conversations.length > 0 && (
             <div className="mt-3">
               <div
-                className="mx-3 mt-3 mb-2 pb-2 flex items-center gap-2 cx-glass-border-b"
+                className="mx-3 mt-3 mb-2 pb-2 flex items-center justify-between gap-2 cx-glass-border-b"
               >
                 <span className="cx-label">
                   Conversations
+                </span>
+                <span className="cx-mono cx-type-xs" style={{ color: "var(--cx-text-faint)" }}>
+                  {conversations.length}
                 </span>
               </div>
 
@@ -1561,7 +1564,7 @@ export function Sidebar({
                                     />
                                   )}
                                   {avatarEl}
-                                  {/* Content: title + date on one line, preview below */}
+                                  {/* Content: title + date on one line, preview + labels below */}
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-baseline gap-1">
                                       <span
@@ -1577,6 +1580,14 @@ export function Sidebar({
                                         {relativeDate(c.updated_at)}
                                       </span>
                                     </div>
+                                    {c.last_message && (
+                                      <p
+                                        className="truncate cx-type-xs mt-0.5"
+                                        style={{ color: "var(--cx-text-muted)", lineHeight: "1.4" }}
+                                      >
+                                        {c.last_message}
+                                      </p>
+                                    )}
                                     {c.labels && c.labels.length > 0 && (
                                       <span className="flex items-center gap-1 mt-1">
                                         {c.labels.slice(0, 3).map((l) => (
