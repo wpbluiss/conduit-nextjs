@@ -46,9 +46,13 @@ export function fmtMoney(n: number, opts?: { cents?: boolean }): string {
   }).format(isFinite(n) ? n : 0);
 }
 
+// Display label for a person_tag. Known seed tags keep their names; any other
+// tag is title-cased (so custom household members read correctly) and only an
+// empty/"shared" tag falls back to "Shared".
 export function personLabel(tag: string): string {
+  if (!tag || tag === "shared") return "Shared";
   if (tag === "luis") return "Luis";
   if (tag === "delia") return "Delia";
   if (tag === "daughter") return "Daughter";
-  return "Shared";
+  return tag.charAt(0).toUpperCase() + tag.slice(1);
 }

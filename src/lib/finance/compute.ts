@@ -361,18 +361,22 @@ export interface ActivityItem {
   id: string; date: string; person: string; text: string; amount: number; emoji: string;
 }
 
-function nameFor(tag: string): string {
-  if (tag === "luis") return "Luis";
-  if (tag === "delia") return "Delia";
-  return "Shared";
+// Resolve a person_tag to a display name using the household's actual members
+// (tags are the lowercased member name), so this works for any household — not
+// just Luis & Delia. Unknown tags are title-cased; empty/"shared" → "Shared".
+function nameFor(tag: string, people: { name: string }[]): string {
+  const match = people.find((p) => p.name.toLowerCase() === tag);
+  if (match) return match.name;
+  if (!tag || tag === "shared") return "Shared";
+  return tag.charAt(0).toUpperCase() + tag.slice(1);
 }
 
 export function recentActivity(s: Snapshot, limit = 8): ActivityItem[] {
   const items: ActivityItem[] = [];
   for (const p of s.paychecks)
-    items.push({ id: `pc-${p.id}`, date: p.pay_date, person: nameFor(p.person_tag), text: "logged a paycheck", amount: Number(p.take_home), emoji: "💵" });
+    items.push({ id: `pc-${p.id}`, date: p.pay_date, person: nameFor(p.person_tag, s.people), text: "logged a paycheck", amount: Number(p.take_home), emoji: "💵" });
   for (const i of s.inflows)
-    items.push({ id: `in-${i.id}`, date: i.date, person: nameFor(i.person_tag), text: i.source || "added money", amount: Number(i.amount), emoji: "🎁" });
+    items.push({ id: `in-${i.id}`, date: i.date, person: nameFor(i.person_tag, s.people), text: i.source || "added money", amount: Number(i.amount), emoji: "🎁" });
   for (const r of s.savingsLog)
     items.push({ id: `sv-${r.id}`, date: r.date, person: "Shared", text: "added to the goal", amount: Number(r.amount), emoji: "🏆" });
   for (const p of s.payments)

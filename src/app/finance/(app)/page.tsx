@@ -71,6 +71,11 @@ export default async function FinanceHome() {
     .map((d) => d.name);
   const today = new Date().toISOString().slice(0, 10);
   const checkedInToday = snap.household.last_checkin_date === today;
+  // Greet whoever's actually in this household (falls back to the household name).
+  const memberNames = snap.people.map((p) => p.name).filter(Boolean);
+  const householdGreeting = memberNames.length
+    ? memberNames.join(" & ")
+    : snap.household.name || "there";
 
   return (
     <div className="space-y-5">
@@ -79,7 +84,7 @@ export default async function FinanceHome() {
       {/* Greeting */}
       <div className="fin-rise flex items-center justify-between gap-3">
         <div>
-          <h1 className="fin-display text-2xl sm:text-3xl tracking-tight">Hey, Luis &amp; Delia</h1>
+          <h1 className="fin-display text-2xl sm:text-3xl tracking-tight">Hey, {householdGreeting}</h1>
           <p className="text-sm text-[var(--fin-muted)] mt-1">Level up. Unlock the good stuff.</p>
         </div>
       </div>
