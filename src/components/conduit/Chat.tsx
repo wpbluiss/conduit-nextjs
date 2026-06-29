@@ -29,6 +29,7 @@ import {
 import { composeChatEmptyCopy, timeOfDayBucket } from "@/lib/conduit/welcome-copy";
 import { EMPLOYEES, EMPLOYEE_ORDER, type EmployeeId } from "@/lib/conduit/employees";
 import { ThinkingBubble, THINKING_STATUS, ROUTING_TO_STATUS } from "./TypingIndicator";
+import { RoundTableBanner } from "./RoundTableBanner";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import {
   SpecialistSelectorModal,
@@ -308,6 +309,10 @@ export function Chat({
   // null = none active yet, or round-table just ended.
   const [roundTableActiveEmployee, setRoundTableActiveEmployee] =
     useState<EmployeeKey | null>(null);
+  // Round-table participants: ordered list of specialists who have joined this session.
+  const [roundTableParticipants, setRoundTableParticipants] = useState<EmployeeKey[]>([]);
+  // Round-table done set: specialists who have completed their response this session.
+  const [roundTableDoneSet, setRoundTableDoneSet] = useState<Set<EmployeeKey>>(new Set());
   const [sendError, setSendError] = useState<{
     text: string;
     retryText: string;
@@ -885,6 +890,8 @@ export function Chat({
     setMessages(initialMessages);
     setConversationId(initialId);
     setHasMore(initialHasMore);
+    setRoundTableParticipants([]);
+    setRoundTableDoneSet(new Set());
   }, [initialId, initialMessages, initialHasMore]);
 
   // Track whether the user has scrolled away from the bottom.
@@ -993,6 +1000,8 @@ export function Chat({
       if (!trimmed || loading) return;
       setSendError(null);
       setFollowUpSuggestions([]);
+      setRoundTableParticipants([]);
+      setRoundTableDoneSet(new Set());
       setLoading(true);
       setInput("");
       const wasNewConversation = !conversationId;
@@ -1332,6 +1341,10 @@ export function Chat({
         } else if (event === "round_table_thinking") {
           const emp = data.employee as EmployeeKey;
           setRoundTableActiveEmployee(emp);
+          // Track participants in order for the RoundTableBanner
+          setRoundTableParticipants((prev) =>
+            prev.includes(emp) ? prev : [...prev, emp],
+          );
           // Insert a placeholder pending bubble for this employee
           setMessages((prev) => [
             ...prev,
@@ -1347,6 +1360,8 @@ export function Chat({
           const emp = data.employee as EmployeeKey;
           // Mark this specialist as no longer active; next thinking event will set the new one.
           setRoundTableActiveEmployee((prev) => (prev === emp ? null : prev));
+          // Track completion in the banner
+          setRoundTableDoneSet((prev) => new Set([...prev, emp]));
           const content = (data.content as string) || "";
           // Resolve the matching pending bubble (last one for this employee)
           setMessages((prev) => {
@@ -1386,7 +1401,7 @@ export function Chat({
             {
               role: "system",
               content: "Synthesis from Atlas",
-              metadata: { round_table_banner: true },
+              metadata: { round_table_synthesis: true },
             },
             {
               role: "assistant",
@@ -1838,11 +1853,35 @@ export function Chat({
                   }
                 }
               }
+              // Find the last round_table_banner system message — only that one
+              // gets the rich RoundTableBanner panel; older ones fall back to a divider.
+              let lastRoundTableBannerIdx = -1;
+              for (let j = 0; j < messages.length; j++) {
+                const meta = (messages[j].metadata ?? {}) as Record<string, unknown>;
+                if (messages[j].role === "system" && meta.round_table_banner) {
+                  lastRoundTableBannerIdx = j;
+                }
+              }
+
               return messages.map((m, i) => {
                 // Stable key throughout the message lifecycle. The empty→streaming
                 // transition is handled by internal AnimatePresence inside MessageBubble
                 // so there's no layout jump when the first token arrives.
                 const msgKey = m.id ?? i;
+                const msgMeta = (m.metadata ?? {}) as Record<string, unknown>;
+
+                // Intercept the most recent round-table session banner → rich RoundTableBanner
+                if (m.role === "system" && msgMeta.round_table_banner && i === lastRoundTableBannerIdx) {
+                  return (
+                    <RoundTableBanner
+                      key={msgKey}
+                      participants={roundTableParticipants}
+                      activeEmployee={roundTableActiveEmployee}
+                      doneSet={roundTableDoneSet}
+                    />
+                  );
+                }
+
                 return (
                   <MessageBubble
                     key={msgKey}
@@ -3220,7 +3259,7 @@ const MessageBubble = memo(function MessageBubble({
 
   if (message.role === "system") {
     const meta = (message.metadata ?? {}) as Record<string, unknown>;
-    if (meta.round_table_banner || meta.round_table_rate_limited) {
+    if (meta.round_table_banner || meta.round_table_rate_limited || meta.round_table_synthesis) {
       return (
         <div className="handoff-card flex items-center gap-3 my-2">
           <div className="flex-1 h-px bg-[var(--color-border)]" />
