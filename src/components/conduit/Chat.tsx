@@ -287,7 +287,7 @@ export function Chat({
   // decide whether auto-scroll should follow new content.
   const atBottomRef = useRef(true);
   const toast = useToast();
-  const { triggerReward } = useRewardMoment();
+  const { triggerReward, triggerRewardEmployee } = useRewardMoment();
   const [drawerArtifactId, setDrawerArtifactId] = useState<string | null>(null);
   const [paywall, setPaywall] = useState<PaywallPayload | null>(null);
   // Message edit: id of the user message currently being edited inline.
@@ -1263,6 +1263,8 @@ export function Chat({
           if (rewardClearTimerRef.current) clearTimeout(rewardClearTimerRef.current);
           setRewardEmployee(employee);
           rewardClearTimerRef.current = setTimeout(() => setRewardEmployee(null), 750);
+          // Sidebar specialist avatar pulse — scoped beat, not full-page
+          triggerRewardEmployee(employee);
           // Global confetti burst — fires from the composer area (bottom-center)
           triggerReward(
             typeof window !== "undefined"

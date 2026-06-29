@@ -4,9 +4,10 @@
  * RewardMomentContext — global reward-moment animation layer for Praxis.
  *
  * API:
- *   const { triggerReward } = useRewardMoment()
+ *   const { triggerReward, triggerRewardEmployee, rewardEmployee } = useRewardMoment()
  *   triggerReward()                            // fires confetti at viewport center
  *   triggerReward({ x: 200, y: 300 })          // fires from a specific screen point
+ *   triggerRewardEmployee("engineering")       // sets rewardEmployee for 750ms (sidebar pulse)
  *
  * Trigger points wired externally:
  *   • specialist response complete (via SpecialistChip onComplete callback)
@@ -21,11 +22,13 @@ import {
   createContext,
   useCallback,
   useContext,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import { ConfettiBurst } from "@/components/conduit/ui/ConfettiBurst";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import type { EmployeeKey } from "@/lib/ai/provider";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -36,6 +39,10 @@ interface RewardOrigin {
 
 interface RewardMomentContextValue {
   triggerReward: (origin?: RewardOrigin) => void;
+  /** Pulse the specialist avatar in the sidebar for 750ms. */
+  triggerRewardEmployee: (employee: EmployeeKey) => void;
+  /** The specialist whose sidebar avatar should pulse right now, or null. */
+  rewardEmployee: EmployeeKey | null;
 }
 
 type Burst = { id: number } & RewardOrigin;
@@ -44,6 +51,8 @@ type Burst = { id: number } & RewardOrigin;
 
 const RewardMomentContext = createContext<RewardMomentContextValue>({
   triggerReward: () => {},
+  triggerRewardEmployee: () => {},
+  rewardEmployee: null,
 });
 
 export function useRewardMoment(): RewardMomentContextValue {
@@ -58,6 +67,8 @@ let _bid = 0;
 export function RewardMomentProvider({ children }: { children: ReactNode }) {
   const prefersReduced = useReducedMotion();
   const [bursts, setBursts] = useState<Burst[]>([]);
+  const [rewardEmployee, setRewardEmployee] = useState<EmployeeKey | null>(null);
+  const rewardEmpTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const triggerReward = useCallback(
     (origin?: RewardOrigin) => {
@@ -74,12 +85,18 @@ export function RewardMomentProvider({ children }: { children: ReactNode }) {
     [prefersReduced],
   );
 
+  const triggerRewardEmployee = useCallback((employee: EmployeeKey) => {
+    if (rewardEmpTimerRef.current) clearTimeout(rewardEmpTimerRef.current);
+    setRewardEmployee(employee);
+    rewardEmpTimerRef.current = setTimeout(() => setRewardEmployee(null), 750);
+  }, []);
+
   const removeBurst = useCallback((id: number) => {
     setBursts((prev) => prev.filter((b) => b.id !== id));
   }, []);
 
   return (
-    <RewardMomentContext.Provider value={{ triggerReward }}>
+    <RewardMomentContext.Provider value={{ triggerReward, triggerRewardEmployee, rewardEmployee }}>
       {children}
       {bursts.map((b) => (
         <ConfettiBurst
