@@ -54,6 +54,8 @@ import type { PaywallPayload } from "./PaywallModal";
 import { GettingStartedChecklist } from "./GettingStartedChecklist";
 import { OnboardingChecklist } from "./OnboardingChecklist";
 import { Tooltip } from "./pdl/Tooltip";
+import { useRewardMoment } from "@/context/RewardMomentContext";
+import { RewardBurst } from "@/components/ui/reward-burst";
 
 const BANNER_SESSION_KEY = "praxis:upgrade_banner_dismissed";
 const PINNED_SPECIALISTS_KEY = "praxis:pinned-specialists";
@@ -342,6 +344,8 @@ function SpecialistRow({
   const deptColor = DEPT_COLOR[emp];
   const empRole = EMPLOYEES[emp]?.role ?? "";
   const href = allowed ? `/app/team/${emp}` : "/app/settings";
+  const { rewardEmployee } = useRewardMoment();
+  const rewarded = rewardEmployee === emp;
 
   if (collapsed) {
     const btn = (
@@ -364,6 +368,7 @@ function SpecialistRow({
           />
         )}
         <SpecialistAvatar employee={emp} size={28} active={active} streaming={isStreaming} />
+        <RewardBurst rewarded={rewarded} significant size={28} />
         {!allowed && (
           <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 flex items-center justify-center z-10">
             <Lock size={8} strokeWidth={1.75} style={{ color: "var(--cx-text-muted)" }} />
@@ -423,7 +428,10 @@ function SpecialistRow({
           style={{ background: "var(--cx-accent)" }}
         />
       )}
-      <SpecialistAvatar employee={emp} size={20} active={active} streaming={isStreaming} />
+      <span className="relative shrink-0" style={{ width: 20, height: 20 }}>
+        <SpecialistAvatar employee={emp} size={20} active={active} streaming={isStreaming} />
+        <RewardBurst rewarded={rewarded} significant size={20} />
+      </span>
       <div className="min-w-0 flex-1">
         <span
           className="block truncate cx-type-sm"

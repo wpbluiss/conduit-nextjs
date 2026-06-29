@@ -79,8 +79,8 @@ export function PraxisButton({
       aria-busy={isLoading || undefined}
       /* Hover: CSS handles bg/border/shadow; framer-motion handles the lift transform */
       whileHover={isActuallyDisabled || prefersReduced ? undefined : { y: -1 }}
-      /* Press: scale 0.96 + return to baseline y; springy release on pointer-up */
-      whileTap={isActuallyDisabled || prefersReduced ? undefined : { scale: 0.96, y: 0 }}
+      /* Press: scale 0.97 + return to baseline y; springy release on pointer-up */
+      whileTap={isActuallyDisabled || prefersReduced ? undefined : { scale: 0.97, y: 0 }}
       /* Per-property: scale gets the spring (tactile snap+rebound); y gets a quick ease (hover lift) */
       transition={prefersReduced ? TX_FAST : { scale: CX_SPRING_SNAPPY, y: TX_FAST }}
       className={`${variantClass} ${sizeClass} disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
