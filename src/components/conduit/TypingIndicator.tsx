@@ -21,6 +21,19 @@ export const THINKING_STATUS: Record<EmployeeKey, string> = {
   legal:       "reviewing the brief…",
 };
 
+// Round-table specific copy — more collaborative framing for multi-specialist sessions.
+export const ROUND_TABLE_THINKING_STATUS: Record<EmployeeKey, string> = {
+  jarvis:      "synthesizing the discussion…",
+  marketing:   "crafting the brand perspective…",
+  engineering: "analyzing the technical angle…",
+  sales:       "building the sales approach…",
+  finance:     "running the numbers…",
+  compliance:  "reviewing compliance requirements…",
+  hr:          "reviewing the people angle…",
+  ops:         "mapping the operational approach…",
+  legal:       "reviewing the legal angle…",
+};
+
 // Per-dot framer-motion variants — stagger is applied via delay in transition.
 // Uses accent color (#7C6CFF) per spec: thinking animation is accent, not dept color.
 const dotVariants = {
@@ -84,11 +97,11 @@ export function ThinkingBubble({
   }, []);
 
   const statusText = !isActive
-    ? "waiting…"
+    ? "waiting to contribute…"
     : routingTarget && employee === "jarvis"
     ? (ROUTING_TO_STATUS[routingTarget] ?? `routing to ${employeeLabel(routingTarget)}…`)
     : roundTable
-    ? "contributing to the discussion…"
+    ? (ROUND_TABLE_THINKING_STATUS[employee] ?? "contributing to the discussion…")
     : (THINKING_STATUS[employee] ?? "thinking…");
 
   return (
