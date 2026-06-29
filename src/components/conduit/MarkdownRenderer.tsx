@@ -192,13 +192,10 @@ function HighlightedCodeBlock({
         style={{ height: "2px", background: "var(--cx-accent, #7C6CFF)" }}
       />
 
-      {/* Header bar */}
+      {/* Header bar — cx-glass-nested: tinted fill without extra backdrop-filter (already inside cx-glass) */}
       <div
-        className="flex items-center justify-between px-4 cx-glass-border-b"
-        style={{
-          height: "34px",
-          background: "rgba(255,255,255,0.03)",
-        }}
+        className="flex items-center justify-between px-4 cx-glass-border-b cx-glass-nested"
+        style={{ height: "34px" }}
       >
         <span
           className="cx-mono cx-type-xs uppercase tracking-[0.15em]"

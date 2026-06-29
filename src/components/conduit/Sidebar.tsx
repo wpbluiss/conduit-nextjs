@@ -1392,11 +1392,7 @@ export function Sidebar({
                 </PraxisButton>
                 {/* Full input: always on desktop; on mobile only when expanded */}
                 <div
-                  className={`${searchExpanded ? "flex" : "hidden md:flex"} items-center gap-2 px-2 py-2 rounded-lg transition-shadow duration-150 focus-within:[box-shadow:var(--cx-accent-glow)]`}
-                  style={{
-                    background: "var(--cx-glass-bg)",
-                    border: "1px solid var(--cx-glass-border)",
-                  }}
+                  className={`${searchExpanded ? "flex" : "hidden md:flex"} items-center gap-2 px-2 py-2 rounded-lg cx-glass-nested cx-glass-border transition-shadow duration-150 focus-within:[box-shadow:var(--cx-accent-glow)]`}
                 >
                   <Search
                     size={11}
