@@ -496,11 +496,11 @@ export function LiveChat({
   return (
     <>
     <div className="wm-rebrand flex h-[100dvh] w-full overflow-hidden text-foreground">
-      <aside className="cx-glass hidden w-72 shrink-0 border-r lg:block" style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>{Rail}</aside>
+      <aside className="cx-glass cx-glass-border-r hidden w-72 shrink-0 lg:block">{Rail}</aside>
       <AnimatePresence>
         {drawer && (<>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDrawer(false)} className="fixed inset-0 z-40 bg-black/60 lg:hidden" />
-          <motion.aside initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", stiffness: 320, damping: 34 }} className="cx-glass fixed inset-y-0 left-0 z-50 w-[82%] max-w-xs border-r lg:hidden" style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>{Rail}</motion.aside>
+          <motion.aside initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", stiffness: 320, damping: 34 }} className="cx-glass cx-glass-border-r fixed inset-y-0 left-0 z-50 w-[82%] max-w-xs lg:hidden">{Rail}</motion.aside>
         </>)}
       </AnimatePresence>
 
@@ -525,7 +525,7 @@ export function LiveChat({
         {openArtifact && (
           <div className="fixed inset-0 z-50 flex">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setOpenArtifact(null)} className="flex-1 bg-black/50" />
-            <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", stiffness: 300, damping: 32 }} className="cx-glass-float flex h-full w-full max-w-2xl flex-col border-l" style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>
+            <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", stiffness: 300, damping: 32 }} className="cx-glass-float cx-glass-border-l flex h-full w-full max-w-2xl flex-col">
               <div className="flex items-center gap-2 border-b border-white/8 px-5 py-4">
                 <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-secondary text-primary"><FileText className="size-5" /></span>
                 <div className="min-w-0 flex-1"><p className="wm-label">{openArtifact.type} · by {EMPLOYEES[openArtifact.by]?.name ?? "Praxis"}</p><h2 className="truncate cx-type-md font-semibold">{openArtifact.title}</h2></div>
@@ -551,7 +551,7 @@ export function LiveChat({
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="cx-glass flex items-center gap-3 border-b px-4 py-3" style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>
+        <header className="cx-glass cx-glass-border-b flex items-center gap-3 px-4 py-3">
           <Button size="icon-sm" variant="secondary" className="!rounded-lg bg-secondary lg:hidden" onClick={() => setDrawer(true)} aria-label="Open navigation"><Menu className="size-4" /></Button>
           <span className="grid size-9 place-items-center rounded-xl bg-secondary text-primary"><EmpIcon className="size-5" /></span>
           <div className="min-w-0"><p className="truncate font-semibold leading-tight">{emp.name}</p><p className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="size-1.5 rounded-full bg-primary" /> {emp.role}</p></div>
@@ -716,7 +716,7 @@ export function LiveChat({
           </div>
         </div>
 
-        <div className="cx-glass border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]" style={{ borderColor: "var(--cx-glass-border, rgba(255,255,255,0.08))" }}>
+        <div className="cx-glass cx-glass-border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="relative mx-auto w-full max-w-3xl">
             <AnimatePresence>
               {menu && (

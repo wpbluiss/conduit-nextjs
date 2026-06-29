@@ -33,11 +33,7 @@ export default function SettingsLoading() {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar nav skeleton (desktop only) — matches cx-glass glass panel */}
           <div
-            className="hidden md:flex flex-col gap-2 w-48 shrink-0 p-3 rounded-xl"
-            style={{
-              background: "var(--cx-glass-bg)",
-              border: "1px solid var(--cx-glass-border)",
-            }}
+            className="hidden md:flex flex-col gap-2 w-48 shrink-0 p-3 rounded-xl cx-glass cx-glass-border"
           >
             {[56, 72, 52, 64, 60].map((w, i) => (
               <div

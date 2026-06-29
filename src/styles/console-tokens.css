@@ -1370,6 +1370,16 @@ html[data-praxis-theme="light"] {
 .cx-glass-border-l { border-left:   1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08)); }
 .cx-glass-border-r { border-right:  1px solid var(--cx-glass-border, rgba(255, 255, 255, 0.08)); }
 
+/* ---- Nested glass — tinted surface without backdrop-filter ----
+ * Use for elements rendered INSIDE a glass panel (e.g. a sub-header inside a
+ * cx-glass card). Adding a second backdrop-filter would violate the 2-layer cap
+ * and cause GPU pressure; this class supplies only the fill + inset highlight.
+ * ----------------------------------------------------------------- */
+.cx-glass-nested {
+  background: var(--cx-glass-bg, rgba(255, 255, 255, 0.04));
+  box-shadow: var(--cx-glass-highlight, inset 0 1px 0 rgba(255, 255, 255, 0.10));
+}
+
 /* ---- Voice overlay blur — full-screen immersive voice-call surface.
  * Applies backdrop-filter only; background is intentionally opaque (set via style prop)
  * so we can't use .cx-glass-overlay (which sets a near-transparent fill).
