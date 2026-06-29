@@ -17,6 +17,38 @@ export const getUserHouseholdId = cache(async function (): Promise<string | null
   return data?.household_id ?? null;
 });
 
+type SupabaseServer = Awaited<ReturnType<typeof createSupabaseServerClient>>;
+
+// Cadence's money model is "one shared pool": income flows in, obligations flow
+// out. To keep "Pooled cash" honest, every logged money movement nudges the
+// household's primary cash account by `delta` (positive = money in, negative =
+// money out). Primary = the oldest checking account, else savings, else cash.
+// No-op when the delta is zero or the household has no cash account yet (there's
+// nothing to adjust — the user can add one on the Accounts page). Balances stay
+// hand-editable, so anyone can still true a balance up to their real bank.
+export async function adjustPooledCash(
+  supabase: SupabaseServer,
+  delta: number,
+): Promise<void> {
+  if (!delta || !Number.isFinite(delta)) return;
+  const { data: accounts } = await supabase
+    .from("fin_accounts")
+    .select("id, type, balance, created_at")
+    .in("type", ["checking", "savings", "cash"])
+    .order("created_at", { ascending: true });
+  if (!accounts || accounts.length === 0) return;
+  const rank = (t: string) => (t === "checking" ? 0 : t === "savings" ? 1 : 2);
+  // accounts is oldest-first, so reduce keeps the oldest within the best type.
+  const primary = accounts.reduce((best, a) => (rank(a.type) < rank(best.type) ? a : best));
+  await supabase
+    .from("fin_accounts")
+    .update({
+      balance: Number(primary.balance) + delta,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", primary.id);
+}
+
 function genJoinCode(): string {
   return Array.from({ length: 6 }, () =>
     "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)],

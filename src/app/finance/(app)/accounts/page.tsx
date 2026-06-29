@@ -59,7 +59,7 @@ export default async function AccountsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="fin-display text-2xl sm:text-3xl tracking-tight">Accounts &amp; balances</h1>
-          <p className="text-sm text-[var(--fin-muted)] mt-1">Manual &amp; editable. Everything pools.</p>
+          <p className="text-sm text-[var(--fin-muted)] mt-1">Auto-updates as you log income &amp; bills. Edit any balance to match your bank.</p>
         </div>
         {addModal}
       </div>

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient, getCurrentUser } from "@/lib/supabase/server";
-import { getUserHouseholdId, createHousehold, joinHouseholdByCode } from "./data";
+import { getUserHouseholdId, createHousehold, joinHouseholdByCode, adjustPooledCash } from "./data";
 
 type Result = { ok: boolean; error?: string; id?: string };
 
@@ -100,6 +100,11 @@ export async function addPaycheck(form: FormData): Promise<Result> {
     notes: str(form.get("notes")) || null,
   });
 
+  // Money in: a paycheck deposits take-home + mileage into the shared pool.
+  if (!error) {
+    await adjustPooledCash(supabase, num(form.get("take_home")) + num(form.get("mileage_reimbursement")));
+  }
+
   // Auto-stash a slice of take-home into the active Mystery Trip — the surprise
   // builds itself in the background.
   if (!error) {
@@ -129,6 +134,8 @@ export async function addInflow(form: FormData): Promise<Result> {
     source: str(form.get("source")) || null,
     notes: str(form.get("notes")) || null,
   });
+  // Money in: a one-off inflow lands in the shared pool.
+  if (!error) await adjustPooledCash(supabase, num(form.get("amount")));
   refresh();
   return { ok: !error, error: error?.message };
 }
@@ -156,17 +163,24 @@ export async function addExpense(form: FormData): Promise<Result> {
 
 export async function markExpensePaid(id: string, paidDate?: string): Promise<Result> {
   const supabase = await db();
+  // Read the row first so paying a bill only ever debits cash once.
+  const { data: exp } = await supabase.from("fin_expenses").select("amount, paid").eq("id", id).maybeSingle();
   const { error } = await supabase
     .from("fin_expenses")
     .update({ paid: true, paid_date: paidDate || new Date().toISOString().slice(0, 10) })
     .eq("id", id);
+  // Money out: paying a bill draws down the shared pool (skip if already paid).
+  if (!error && exp && !exp.paid) await adjustPooledCash(supabase, -Number(exp.amount));
   refresh();
   return { ok: !error, error: error?.message };
 }
 
 export async function deleteExpense(id: string): Promise<Result> {
   const supabase = await db();
+  // If a paid bill is removed, give its cash back so the pool stays accurate.
+  const { data: exp } = await supabase.from("fin_expenses").select("amount, paid").eq("id", id).maybeSingle();
   const { error } = await supabase.from("fin_expenses").delete().eq("id", id);
+  if (!error && exp?.paid) await adjustPooledCash(supabase, Number(exp.amount));
   refresh();
   return { ok: !error, error: error?.message };
 }
@@ -206,6 +220,8 @@ export async function logDebtPayment(
     label: name || debt.name, amount, on_time: onTime,
     date: new Date().toISOString().slice(0, 10),
   });
+  // Money out: a debt payment leaves the shared pool.
+  if (!error) await adjustPooledCash(supabase, -amount);
   refresh();
   return { ok: !error, error: error?.message };
 }
@@ -229,6 +245,8 @@ export async function logChildSupportPayment(amount: number, onTime = true): Pro
     label: "Child support", amount, on_time: onTime,
     date: new Date().toISOString().slice(0, 10),
   });
+  // Money out: child support leaves the shared pool.
+  if (!error) await adjustPooledCash(supabase, -amount);
   refresh();
   return { ok: !error, error: error?.message };
 }

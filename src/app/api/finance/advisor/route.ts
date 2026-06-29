@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createSupabaseServerClient, getCurrentUser } from "@/lib/supabase/server";
-import { getSnapshot, getUserHouseholdId } from "@/lib/finance/data";
+import { getSnapshot, getUserHouseholdId, adjustPooledCash } from "@/lib/finance/data";
 import { isPlus, FREE_AI_MONTHLY_LIMIT } from "@/lib/finance/plan";
 import {
   pooledCash, netWorth, projectIncome, payFrequencyMap, goalProgress, orderDebts,
@@ -108,10 +108,12 @@ async function runTool(sb: SB, hh: string, name: string, input: Record<string, u
         gross: n(input.gross), mileage_reimbursement: n(input.mileage), job: s(input.job) || null,
         pay_date: s(input.date) || today,
       });
+      await adjustPooledCash(sb, n(input.take_home) + n(input.mileage));
       return `Logged a ${input.take_home} take-home paycheck for ${input.person}.`;
     }
     case "log_inflow": {
       await sb.from("fin_inflows").insert({ household_id: hh, amount: n(input.amount), source: s(input.source) || null, person_tag: s(input.person, "shared"), date: s(input.date) || today });
+      await adjustPooledCash(sb, n(input.amount));
       return `Logged a ${input.amount} inflow.`;
     }
     case "log_expense": {
@@ -130,6 +132,7 @@ async function runTool(sb: SB, hh: string, name: string, input: Record<string, u
       const newBal = Math.max(0, Number(target.balance) - amt);
       await sb.from("fin_debts").update({ balance: newBal, status: newBal <= 0 ? "paid" : target.status === "past_due" ? "active" : target.status }).eq("id", target.id);
       await sb.from("fin_payments").insert({ household_id: hh, kind: "debt", ref_id: target.id, label: target.name, amount: amt, on_time: input.on_time !== false, date: today });
+      await adjustPooledCash(sb, -amt);
       return `Paid ${amt} to ${target.name}. New balance ${newBal}${newBal <= 0 ? " — PAID OFF! 🎉" : ""}.`;
     }
     case "log_child_support_payment": {
@@ -139,6 +142,7 @@ async function runTool(sb: SB, hh: string, name: string, input: Record<string, u
       const rem = Math.max(0, Number(cs.remaining_balance) - amt);
       await sb.from("fin_child_support").update({ remaining_balance: rem }).eq("id", cs.id);
       await sb.from("fin_payments").insert({ household_id: hh, kind: "child_support", ref_id: cs.id, label: "Child support", amount: amt, on_time: input.on_time !== false, date: today });
+      await adjustPooledCash(sb, -amt);
       return `Logged ${amt} child support. Remaining ${rem}.`;
     }
     case "log_investment_buy": {
