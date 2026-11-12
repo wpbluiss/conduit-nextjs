@@ -24,7 +24,7 @@ const work = [
 ];
 
 function Arrow() {
-  return <span aria-hidden="true">↗</span>;
+  return <svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ display: "inline-block", flexShrink: 0, verticalAlign: "middle" }}><path d="M3 13 13 3M3 3h10v10" stroke="currentColor" strokeWidth="1.4" /></svg>;
 }
 
 export default function Home() {
