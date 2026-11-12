@@ -1,22 +1,13 @@
-# Conduit homepage refresh
+# Conduit services homepage
 
-Proposed direction: a founder's engineering portfolio, with Conduit as the umbrella and Praxis as one of the products. Audience: a prospective development client, technical collaborator or employer following an email conversation. Primary outcome: understand the work, inspect public code, and contact Luis.
+Approved direction: custom software development, AI integrations and workflow automation. Luis explicitly retired Praxis, Conduit HQ and voice-agent positioning on November 11, 2026. They must not be presented as current products or portfolio features. Remove the old product sign-in navigation and all named-project cards, including the companion mobile project.
 
-Visual idea: a working project index. Large editorial typography, ink and warm paper, the existing cyan Conduit mark, ruled project rows and a technical capability rail. Reuse the installed Geist and Fraunces fonts. No stock photography or invented product screenshots. Original CSS and native HTML; no new dependencies.
+Audience: prospective clients, collaborators and employers following an email conversation. Primary action: discuss a business need with Luis before agreeing a scope. No fixed packages, prices, guarantees, invented customer evidence or product-adoption claims.
 
-Content hierarchy: founder introduction → selected work → engineering capabilities → contact. Public repositories demonstrate implementation; development status is not a claim of customer adoption, revenue, certification or production availability. Keep existing product, pricing and sign-in routes intact.
+Visual direction: retain the existing Conduit cyan logo, paper/ink palette and editorial typography. Three typographic service panels: Build, Connect, Simplify. These represent capabilities, not application screenshots. Content: founder introduction, services, approach, direct email and telephone contact.
 
-Source evidence: code in conduit-nextjs, conduit-mobile and conduit-hq-3d; Lunaro's jonathan-demo repository reviewed in the parent conversation. Do not publish private repository links, customer records, invented metrics or testimonials. Company mark sourced from wpbluiss/conduit-portal/public/icon.svg.
+Existing application routes remain intact but are not marketed from this homepage. Other legacy pages remain outside this change. Public GitHub is secondary development background, not an assertion that old projects are current products.
 
-Acceptance: semantic server-rendered homepage; working contact and public source links; existing sign-in path retained; no horizontal overflow at 375/768/1440; visible keyboard focus; content available without animation; relevant lint and production build checked. Browser screenshots must be visually inspected. Record any environment failures honestly.
+Acceptance: no retired project or voice-agent references on homepage or social image; Services, About and Contact anchors work; real mailto/tel links; server-rendered semantic content; desktop screenshot inspected; responsive rules checked with any visual-test limitations disclosed. Targeted ESLint and whitespace checks passed locally before publishing. Hosted build and browser verification follow deployment.
 
-Work-history synchronization: not performed. Automatic approval review rejected creating temporary API credentials; no alternate credential path was attempted.
-
-## Verification checkpoint
-
-- Production compilation, TypeScript and generation of 107 static routes passed. Local build temporarily disabled Sentry telemetry, source maps and its build integration; next.config.ts restored afterward.
-- ESLint passed for the homepage and social preview. git diff --check passed.
-- Local production server reached HTTP 200 using explicitly synthetic Supabase public configuration; no customer account or production data was used.
-- Automated local Chromium could not launch: sandbox disallowed its process-singleton socket. No OS restrictions were changed. Responsive and visual acceptance remains pending until a supported preview is inspected.
-- Code review found mobile navigation hidden at narrow widths. Corrected it to retain selected-work, about and product-sign-in links on mobile. Browser retest pending.
-- Existing application, billing, authentication and product routes are unchanged. Other legacy marketing pages are outside this homepage refresh and may still need a separate truthfulness review.
+Work-history synchronization remains unavailable after the earlier approval rejection; this note is an unsynced record of the user’s revised direction. No credential workaround attempted.
