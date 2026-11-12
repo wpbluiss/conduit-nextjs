@@ -1,13 +1,13 @@
-# Conduit services homepage
+# Conduit homepage direction
 
-Approved direction: custom software development, AI integrations and workflow automation. Luis explicitly retired Praxis, Conduit HQ and voice-agent positioning on November 11, 2026. They must not be presented as current products or portfolio features. Remove the old product sign-in navigation and all named-project cards, including the companion mobile project.
+Approved business focus: custom software development, AI integrations and automation. Praxis, HQ, voice agents and companion mobile project are retired and must not be marketed as current offerings.
 
-Audience: prospective clients, collaborators and employers following an email conversation. Primary action: discuss a business need with Luis before agreeing a scope. No fixed packages, prices, guarantees, invented customer evidence or product-adoption claims.
+User correction: remove all AI slop. This supersedes the previous editorial treatment. Delete slogans, decorative word panels, oversized italic typography, abstract process statements and repeated calls to action. Use a compact factual headline, first-person introduction, concrete service examples, a short founder section and direct email/phone contact. Retain the existing logo, simple rules and restrained cyan brand mark. No fabricated clients, project results, team size, testimonials or guarantees.
 
-Visual direction: retain the existing Conduit cyan logo, paper/ink palette and editorial typography. Three typographic service panels: Build, Connect, Simplify. These represent capabilities, not application screenshots. Content: founder introduction, services, approach, direct email and telephone contact.
+Hero: Software development & AI integrations. I build web applications, connect software systems and automate repetitive tasks.
 
-Existing application routes remain intact but are not marketed from this homepage. Other legacy pages remain outside this change. Public GitHub is secondary development background, not an assertion that old projects are current products.
+Service examples describe work that can be discussed, not completed customer projects or fixed scope commitments. Keep contact before scope. Existing application routes remain unchanged but unadvertised. Public GitHub is a secondary background link.
 
-Acceptance: no retired project or voice-agent references on homepage or social image; Services, About and Contact anchors work; real mailto/tel links; server-rendered semantic content; desktop screenshot inspected; responsive rules checked with any visual-test limitations disclosed. Targeted ESLint and whitespace checks passed locally before publishing. Hosted build and browser verification follow deployment.
+Acceptance: readable service information without decorative filler; retired products absent; Services/About/Contact navigation; real email and telephone links; keyboard focus; relevant lint and build checks; actual desktop screenshot inspected. Mobile visual QA limitations must be disclosed. No production promotion without approval.
 
-Work-history synchronization remains unavailable after the earlier approval rejection; this note is an unsynced record of the user’s revised direction. No credential workaround attempted.
+Work-history synchronization remains unavailable following the earlier approval rejection. This is the repository record of the updated direction; no credential workaround attempted.
